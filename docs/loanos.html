@@ -295,7 +295,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit
 </footer>
 <script>
 var moduleStatus = {};
-var taskChecks = {};
+var taskChecks = {'0-0':true,'0-1':true,'0-2':true,'0-3':true,'0-4':true,'0-5':true};
 var activeModule = null;
 var MODULES = [
   {id:"crm",icon:"&#9673;",label:"Smart CRM",color:"#c9a84c",tag:"Core",priority:1,
@@ -330,7 +330,7 @@ var MODULES = [
 var PHASES = [
   {number:"Phase 1",title:"Foundation",timeline:"4-6 weeks",color:"#c9a84c",
    output:"Working CRM with real data. Contacts, loan records, documents in Supabase.",
-   items:["Supabase project setup: auth, RLS policies, core schema","Next.js frontend scaffold with brand system","Contacts and loans CRUD: create, view, edit, delete records","PDF upload interface: contract/CD/pre-approval stored in Supabase Storage","Auth: magic link login","Basic dashboard with navigation","Arive to n8n webhook: loan status syncs to Supabase"]},
+   items:["Supabase project setup: auth, RLS policies, core schema","Next.js frontend scaffold with brand system","Contacts and loans CRUD: create, view, edit, delete records","PDF upload interface: contract/CD/pre-approval stored in Supabase Storage","Auth: email/password login","Basic dashboard with navigation","Arive to n8n webhook: loan status syncs to Supabase"]},
   {number:"Phase 2",title:"Automation Layer",timeline:"3-4 weeks",color:"#4c7ec9",
    output:"Full automation stack live. All Claude/Zapier skills rebuilt inside n8n and Supabase.",
    items:["n8n setup (self-hosted or cloud)","Contract intake: upload to Claude extract to loan record to Outlook draft to Arive checklist","Pre-approval: upload to Claude extract to borrower and agent email drafts","Final CD: upload to Claude extract 10 fields to email draft","New application: create contact, send intro email, set pipeline stage","Rate update publisher: Supabase to website page and Mailchimp teaser","Activity auto-log on every automation fired"]},
@@ -477,7 +477,8 @@ function renderRoadmap() {
     for (var ii = 0; ii < phase.items.length; ii++) {
       var key = pi + '-' + ii;
       var checked = !!taskChecks[key];
-      itemsHtml += '<div class="phase-item" onclick="toggleTask(\'' + key + '\')">'
+      var isStatic = checked;
+      itemsHtml += '<div class="phase-item"' + (isStatic ? ' style="cursor:default"' : ' onclick="toggleTask(\'' + key + '\')"') + '>'
         + '<div class="phase-check' + (checked ? ' checked' : '') + '">' + (checked ? '&#10003;' : '') + '</div>'
         + '<span style="' + (checked ? 'text-decoration:line-through;opacity:.4' : '') + '">' + phase.items[ii] + '</span>'
         + '</div>';

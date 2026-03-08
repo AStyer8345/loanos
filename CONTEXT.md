@@ -18,7 +18,7 @@ Deploy: Netlify (not Vercel)
 
 Phase 1 complete as of March 8, 2026.
 - Supabase connected
-- Auth: email/password (adam@thestyerteam.com) — switched from magic link
+- Auth: email/password — switched from magic link
 - 4 tables live: contacts, loans, documents, activity_log
 - Supabase Storage bucket: `documents` (must be lowercase — case-sensitive)
 - PDF upload end-to-end verified: Storage → documents row → activity_log
@@ -119,7 +119,7 @@ Phase 1 complete. Next: Phase 2 — Automation
 
 - Supabase schema: contacts, loans, documents, activity_log
 - Supabase Storage bucket: documents
-- Auth: email/password (switched from magic link — adam@thestyerteam.com)
+- Auth: email/password (switched from magic link)
 - /dashboard: live with table row counts + quick actions
 - /dashboard/upload: PDF upload form — end-to-end verified
   - Select doc type (7 options)
@@ -132,7 +132,7 @@ Phase 1 complete. Next: Phase 2 — Automation
 
 ## Skills
 
-User-defined Claude skills live at `/skills/user/`. Each subdirectory is one skill with a `SKILL.md` defining its behavior. Skills are sourced from the `AStyer8345/adam-styer-skills` GitHub repo.
+User-defined Claude skills live at `/skills/user/`. Each subdirectory is one skill with a `SKILL.md` defining its behavior.
 
 ## Docs
 

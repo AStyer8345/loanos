@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoanOS — Internal Build Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a84c;--blue:#4c7ec9;--green:#4cc98a;--red:#c94c4c;
+  --purple:#9b4cc9;--teal:#4cc9c9;--orange:#c9884c;
+  --bg:#0a0a0c;--bg2:#111115;--bg3:#18181e;
+  --border:#ffffff12;--text:#f0ede8;--muted:#888;
+  --font-display:"Syne",sans-serif;--font-mono:"DM Mono",monospace;--font-body:"DM Sans",sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-font-smoothing:antialiased;min-height:100vh}
+.bg-grid{pointer-events:none;z-index:0;background-image:linear-gradient(#c9a84c08 1px,transparent 1px),linear-gradient(90deg,#c9a84c08 1px,transparent 1px);background-size:48px 48px;position:fixed;inset:0}
+.header{z-index:100;backdrop-filter:blur(16px);border-bottom:1px solid var(--border);background:#0a0a0ceb;position:sticky;top:0}
+.header-inner{display:flex;justify-content:space-between;align-items:center;max-width:1280px;margin:0 auto;padding:14px 32px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{background:var(--gold);color:#0a0a0c;width:36px;height:36px;font-family:var(--font-display);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.brand-name{font-family:var(--font-display);font-size:18px;font-weight:700}
+.brand-sub{color:var(--muted);font-size:11px;font-family:var(--font-mono);letter-spacing:.05em}
+.header-right{display:flex;align-items:center;gap:10px}
+.badge{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid;padding:4px 10px}
+.badge-gold{color:var(--gold);border-color:#c9a84c4d}
+.badge-green{color:var(--green);border-color:#4cc98a4d}
+.badge-red{color:var(--red);border-color:#c94c4c4d}
+.hero{z-index:1;position:relative;text-align:center;padding:56px 32px 44px;overflow:hidden}
+.hero::before{content:"";pointer-events:none;background:radial-gradient(#c9a84c14 0%,transparent 70%);width:600px;height:400px;position:absolute;top:-100px;left:50%;transform:translate(-50%)}
+.hero-inner{max-width:900px;margin:0 auto}
+.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+.hero-title{font-family:var(--font-display);font-size:clamp(30px,4vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-bottom:14px;background:linear-gradient(135deg,#f0ede8 0%,#c9a84ccc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:32px}
+.progress-bar-wrap{background:var(--bg2);border:1px solid var(--border);max-width:560px;margin:0 auto 32px;padding:18px 24px}
+.progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-label-text{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.progress-pct{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--gold)}
+.progress-track{background:#ffffff0a;height:5px;width:100%}
+.progress-fill{background:linear-gradient(90deg,var(--gold),#e8c86a);height:100%;width:0%;transition:width .5s}
+.progress-note{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:6px}
+.hero-stats{display:inline-flex;flex-wrap:wrap;border:1px solid var(--border);overflow:hidden}
+.stat{text-align:center;padding:14px 24px}
+.stat-num{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--gold)}
+.stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.stat-divider{width:1px;background:var(--border);align-self:center;height:36px}
+.tabs-bar{z-index:90;position:sticky;top:65px;background:#0a0a0cf2;backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;padding:0 32px;overflow-x:auto}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font-display);font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:14px 20px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.content{z-index:1;position:relative;max-width:1280px;margin:0 auto;padding:36px 32px 80px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.section-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:4px}
+.section-sub{color:var(--muted);font-size:12px;margin-bottom:24px;font-family:var(--font-mono)}
+.modules-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.modules-layout{grid-template-columns:1fr}}
+.modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.module-card{background:var(--bg2);border:1px solid var(--border);padding:16px;cursor:pointer;text-align:left;width:100%;position:relative;overflow:hidden;transition:all .2s}
+.module-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--gold));transform:scaleX(0);transform-origin:0;transition:transform .2s}
+.module-card:hover::before,.module-card.active::before{transform:scaleX(1)}
+.module-card:hover,.module-card.active{background:var(--bg3);border-color:#ffffff26}
+.mc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.mc-icon{font-size:15px;color:var(--accent,var(--gold))}
+.mc-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,var(--gold));border:1px solid var(--accent,var(--gold));opacity:.7;padding:2px 5px}
+.mc-label{font-family:var(--font-display);font-size:13px;font-weight:700;margin-bottom:3px;line-height:1.3}
+.mc-priority{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.mc-status-row{display:flex;align-items:center;gap:5px;margin-top:8px}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-ns{background:#ffffff18}
+.dot-ip{background:var(--gold)}
+.dot-done{background:var(--green)}
+.mc-status-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.module-detail{background:var(--bg2);border:1px solid var(--border);padding:22px;position:sticky;top:115px}
+.detail-border-top{height:3px;margin:-22px -22px 18px -22px}
+.detail-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.detail-icon{font-size:22px;line-height:1;margin-top:2px}
+.detail-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:3px}
+.detail-tag{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.detail-desc{color:#f0ede8b3;font-size:13px;line-height:1.6;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px}
+.detail-section-title{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.detail-features{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.detail-features li{font-size:12px;line-height:1.5;color:#f0ede8cc;display:flex;align-items:flex-start;gap:7px}
+.detail-db{border:1px solid var(--border);background:#0000004d;padding:9px 13px;margin-bottom:14px}
+.db-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.db-value{font-family:var(--font-mono);font-size:11px;color:var(--gold)}
+.status-selector{display:flex;gap:7px;padding-top:14px;border-top:1px solid var(--border)}
+.status-btn{flex:1;font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 4px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .2s}
+.status-btn:hover{border-color:#ffffff30;color:var(--text)}
+.sbtn-ns.active{border-color:#ffffff30;color:var(--text);background:#ffffff08}
+.sbtn-ip.active{border-color:var(--gold);color:var(--gold);background:#c9a84c10}
+.sbtn-done.active{border-color:var(--green);color:var(--green);background:#4cc98a10}
+.module-prompt{background:var(--bg2);border:1px dashed #ffffff1a;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.mp-icon{font-size:26px;color:#c9a84c4d}
+.mp-text{color:var(--muted);font-size:13px;line-height:1.5;max-width:240px}
+.roadmap{display:flex;flex-direction:column;gap:14px}
+.phase-card{background:var(--bg2);border:1px solid var(--border);display:grid;grid-template-columns:240px 1fr;overflow:hidden}
+@media(max-width:768px){.phase-card{grid-template-columns:1fr}}
+.phase-left{background:#0003;border-right:1px solid var(--border);padding:22px}
+.phase-num{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.phase-title{font-family:var(--font-display);font-size:19px;font-weight:800;margin-bottom:5px}
+.phase-timeline{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:14px}
+.output-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.output-text{color:#f0ede8b3;font-size:12px;line-height:1.5;margin-bottom:14px}
+.phase-prog-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.phase-prog-track{background:#ffffff0a;height:4px}
+.phase-prog-fill{height:100%;transition:width .4s}
+.phase-prog-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px}
+.phase-right{padding:22px;display:flex;flex-direction:column}
+.phase-item{color:#f0ede8cc;font-size:13px;line-height:1.5;display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.phase-item:last-child{border-bottom:none}
+.phase-check{flex-shrink:0;width:17px;height:17px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;transition:all .2s}
+.phase-check.checked{border-color:var(--green);background:var(--green);color:#0a0a0c}
+.phase-item:hover .phase-check:not(.checked){border-color:#ffffff40}
+.roadmap-footer{background:#c9a84c0f;border:1px solid #c9a84c33;padding:16px 20px;margin-top:14px}
+.rf-note{font-family:var(--font-mono);font-size:12px;color:#c9a84ce6}
+.stack-table{border:1px solid var(--border);margin-bottom:32px;overflow:hidden}
+.stack-row{display:grid;grid-template-columns:120px 200px 1fr 140px;border-bottom:1px solid var(--border);transition:background .15s}
+.stack-row:last-child{border-bottom:none}
+.stack-row:hover{background:#ffffff05}
+.stack-layer{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:13px 16px;display:flex;align-items:center;border-right:1px solid var(--border)}
+.stack-tech{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--gold);padding:13px 16px;display:flex;align-items:center;border-right:1px solid var(--border)}
+.stack-why{color:#f0ede8b3;font-size:12px;padding:13px 16px;display:flex;align-items:center;border-right:1px solid var(--border)}
+.stack-status-cell{padding:13px 16px;display:flex;align-items:center}
+.stack-badge{font-family:var(--font-mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border:1px solid}
+.sb-confirmed{color:var(--green);border-color:#4cc98a4d}
+.sb-updated{color:var(--gold);border-color:#c9a84c4d}
+.sb-tbd{color:var(--muted);border-color:#ffffff20}
+.sn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+@media(max-width:768px){.sn-grid{grid-template-columns:1fr}}
+.sn-card{background:var(--bg2);border:1px solid var(--border);padding:18px}
+.sn-card-title{font-family:var(--font-display);color:var(--gold);font-weight:700;margin-bottom:7px;font-size:13px}
+.sn-card-body{color:#f0ede8b3;font-size:12px;line-height:1.6}
+.decisions{display:flex;flex-direction:column;gap:10px}
+.decision-card{background:var(--bg2);border:1px solid var(--border);padding:18px 22px;border-left:3px solid #c9a84c}
+.decision-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px}
+.decision-title{font-family:var(--font-display);font-size:14px;font-weight:700}
+.decision-date{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.decision-body{color:#f0ede8b3;font-size:12px;line-height:1.6;margin-bottom:9px}
+.decision-tags{display:flex;gap:5px;flex-wrap:wrap}
+.dtag{font-family:var(--font-mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--muted)}
+.dtag-replaced{color:var(--red);border-color:#c94c4c4d}
+.dtag-added{color:var(--green);border-color:#4cc98a4d}
+.dtag-planned{color:var(--gold);border-color:#c9a84c4d}
+.dtag-confirmed{color:var(--blue);border-color:#4c7ec94d}
+.pricing-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px}
+@media(max-width:900px){.pricing-cards{grid-template-columns:1fr}}
+.pricing-card{background:var(--bg2);border:1px solid var(--border);padding:24px 20px;position:relative;transition:transform .2s}
+.pricing-card:hover{transform:translateY(-2px)}
+.pricing-card.hl{background:#4c7ec90d;border-color:#4c7ec966}
+.hl-badge{position:absolute;top:-1px;left:50%;transform:translate(-50%);background:var(--blue);color:#fff;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;white-space:nowrap}
+.plan-name{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+.plan-price{font-family:var(--font-display);font-size:40px;font-weight:800;line-height:1;margin-bottom:5px}
+.plan-per{font-size:15px;font-weight:400;color:var(--muted)}
+.plan-desc{color:var(--muted);font-size:12px;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:16px}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:8px}
+.plan-features li{font-size:12px;color:#f0ede8cc;display:flex;gap:7px}
+.pm-box{background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:32px}
+.pm-title{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:14px}
+.pm-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:#f0ede8b3}
+.pm-row:last-child{border-bottom:none;color:var(--text);font-weight:600}
+.pm-val{font-family:var(--font-mono);color:var(--gold)}
+.footer{z-index:1;position:relative;border-top:1px solid var(--border);padding:18px 32px}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.footer-brand{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--gold)}
+.footer-note{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">LO</div>
+      <div>
+        <div class="brand-name">LoanOS</div>
+        <div class="brand-sub">Internal Build Tracker &middot; v2.0</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="badge badge-red">Internal Only</span>
+      <span class="badge badge-gold">Supabase + n8n</span>
+      <span class="badge badge-green" id="overall-badge">0% Complete</span>
+    </div>
+  </div>
+</header>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Adam Styer &middot; Mortgage Intelligence Platform</div>
+    <h1 class="hero-title">LoanOS Build Tracker</h1>
+    <p class="hero-sub">CRM &middot; Automation &middot; Mortgage Coach Replacement &middot; Marketing &middot; Calculators &middot; Market Intelligence<br>Built for yourself first. Licensed to LOs nationwide second.</p>
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span class="progress-label-text">Overall Build Progress</span>
+        <span class="progress-pct" id="overall-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="overall-bar"></div></div>
+      <div class="progress-note" id="progress-note">Click checkboxes in Roadmap to track progress</div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">7</div><div class="stat-label">Modules</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Phases</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label">Tasks Done</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><div class="stat-num">$140</div><div class="stat-label">AI/mo</div></div>
+    </div>
+  </div>
+</div>
+<div class="tabs-bar">
+  <button class="tab-btn active" id="tbtn-modules" onclick="switchTab('modules')">Modules</button>
+  <button class="tab-btn" id="tbtn-roadmap" onclick="switchTab('roadmap')">Roadmap</button>
+  <button class="tab-btn" id="tbtn-stack" onclick="switchTab('stack')">Stack</button>
+  <button class="tab-btn" id="tbtn-decisions" onclick="switchTab('decisions')">Decision Log</button>
+  <button class="tab-btn" id="tbtn-pricing" onclick="switchTab('pricing')">Pricing</button>
+</div>
+<div class="content">
+  <div id="tab-modules" class="tab-panel active">
+    <div class="section-title">Platform Modules</div>
+    <div class="section-sub">Click a module to see features and update build status</div>
+    <div class="modules-layout">
+      <div class="modules-grid" id="modules-grid"></div>
+      <div id="module-detail-wrap">
+        <div class="module-prompt">
+          <div class="mp-icon">&#9672;</div>
+          <div class="mp-text">Select a module to view features, database schema, and update build status</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-roadmap" class="tab-panel">
+    <div class="section-title">Build Roadmap</div>
+    <div class="section-sub">Check off tasks as you complete them</div>
+    <div class="roadmap" id="roadmap-container"></div>
+    <div class="roadmap-footer">
+      <div class="rf-note">&#9889; Stack updated: Zapier replaced by n8n &middot; 16-19 week timeline via Claude Code</div>
+    </div>
+  </div>
+  <div id="tab-stack" class="tab-panel">
+    <div class="section-title">Technology Stack</div>
+    <div class="section-sub">Decisions locked in as of March 2026</div>
+    <div class="stack-table">
+      <div class="stack-row" style="background:#ffffff03">
+        <div class="stack-layer">Layer</div>
+        <div class="stack-tech" style="color:var(--muted);font-size:10px">Tool</div>
+        <div class="stack-why" style="color:var(--muted);font-size:10px">Why</div>
+        <div class="stack-status-cell" style="color:var(--muted);font-size:9px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase">Status</div>
+      </div>
+      <div class="stack-row"><div class="stack-layer">Frontend</div><div class="stack-tech">Next.js 14</div><div class="stack-why">Server components, SEO, fast deploys to Netlify</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Auth</div><div class="stack-tech">Supabase Auth</div><div class="stack-why">Built-in magic link + OAuth, zero config</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Database</div><div class="stack-tech">Supabase Postgres</div><div class="stack-why">RLS for multi-tenancy, real-time, contacts + loans + docs</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">File Storage</div><div class="stack-tech">Supabase Storage</div><div class="stack-why">PDF uploads linked to loan records (contracts, CDs, pre-approvals)</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Automation</div><div class="stack-tech">n8n</div><div class="stack-why">Replaced Zapier. Self-hosted ~$15/mo. Native Supabase + Claude nodes.</div><div class="stack-status-cell"><span class="stack-badge sb-updated">Updated</span></div></div>
+      <div class="stack-row"><div class="stack-layer">AI</div><div class="stack-tech">Claude API</div><div class="stack-why">Email drafting, doc extraction, calculator narratives, market commentary</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Email</div><div class="stack-tech">Outlook via n8n</div><div class="stack-why">Drafts pushed to Outlook. Existing workflow migrated to n8n.</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Marketing</div><div class="stack-tech">Mailchimp</div><div class="stack-why">Weekly campaigns, rate updates exported from Supabase</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Billing</div><div class="stack-tech">Stripe</div><div class="stack-why">SaaS licensing subscriptions (Phase 4)</div><div class="stack-status-cell"><span class="stack-badge sb-tbd">Phase 4</span></div></div>
+      <div class="stack-row"><div class="stack-layer">Deploy</div><div class="stack-tech">Netlify + Supabase Cloud</div><div class="stack-why">Zero DevOps, auto-scaling</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
+      <div class="stack-row"><div class="stack-layer">LOS Bridge</div><div class="stack-tech">Arive + n8n webhook</div><div class="stack-why">Loan status syncs to Supabase. New apps push to Arive.</div><div class="stack-status-cell"><span class="stack-badge sb-tbd">Planned</span></div></div>
+      <div class="stack-row"><div class="stack-layer">AI Tools</div><div class="stack-tech">Claude $100 / Gemini $20 / ChatGPT $20</div><div class="stack-why">Claude primary + API. Gemini image/UI. ChatGPT under review.</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Active</span></div></div>
+    </div>
+    <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:12px">Key Decisions</div>
+    <div class="sn-grid">
+      <div class="sn-card"><div class="sn-card-title">Supabase = Memory Layer</div><div class="sn-card-body">Automations already fire (contract, CD, pre-approval). Supabase adds the record layer underneath every trigger &mdash; contact, loan, document, and activity log persist after each automation runs.</div></div>
+      <div class="sn-card"><div class="sn-card-title">n8n Replaces Zapier</div><div class="sn-card-body">Self-hosted n8n at ~$15/mo vs Zapier at $100-300/mo at automation volume. Native Supabase node + Claude API node = fewer moving parts, more control, no per-task billing.</div></div>
+      <div class="sn-card"><div class="sn-card-title">Mortgage Coach Replacement</div><div class="sn-card-body">6 calculators replace Mortgage Coach entirely. Differentiator: Claude writes plain-English narrative summary per scenario. Output is branded PDF or shareable link integrated with loan records.</div></div>
+      <div class="sn-card"><div class="sn-card-title">Build For Yourself First</div><div class="sn-card-body">Phase 1-2 = personal production tool replacing Jungo + Mortgage Coach. Phase 4 = license to LOs nationwide at $97-397/mo after personal build is proven and stable.</div></div>
+    </div>
+  </div>
+  <div id="tab-decisions" class="tab-panel">
+    <div class="section-title">Decision Log</div>
+    <div class="section-sub">Key decisions made &mdash; platform, tools, scope, strategy</div>
+    <div class="decisions" id="decisions-container"></div>
+  </div>
+  <div id="tab-pricing" class="tab-panel">
+    <div class="section-title">Licensing Model</div>
+    <div class="section-sub">Phase 4 SaaS tiers &mdash; after personal build is stable</div>
+    <div class="pricing-cards" id="pricing-cards"></div>
+    <div class="pm-box">
+      <div class="pm-title">Revenue Math</div>
+      <div class="pm-row"><span>10 LOs x Starter ($97)</span><span class="pm-val">$970/mo</span></div>
+      <div class="pm-row"><span>25 LOs x Pro ($197)</span><span class="pm-val">$4,925/mo</span></div>
+      <div class="pm-row"><span>10 Teams x Team ($397)</span><span class="pm-val">$3,970/mo</span></div>
+      <div class="pm-row"><span>Conservative 45-sub blended</span><span class="pm-val" style="font-size:16px">~$9,865/mo</span></div>
+    </div>
+  </div>
+</div>
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">LoanOS &middot; Built by Adam Styer</div>
+    <div class="footer-note">The Styer Mortgage Team &middot; NMLS #513013 &middot; Austin, TX &middot; Internal Use Only</div>
+  </div>
+</footer>
+<script>
+var moduleStatus = {};
+var taskChecks = {};
+var activeModule = null;
+var MODULES = [
+  {id:"crm",icon:"&#9673;",label:"Smart CRM",color:"#c9a84c",tag:"Core",priority:1,
+   desc:"Replaces Jungo. Contact records for borrowers, realtors, builders. Pipeline stages. Auto last-touch. Closed loan history for refi opportunities.",
+   features:["Contact records: borrowers, realtors, builders, past clients","Pipeline: Lead to Pre-App to Application to Processing to Closing to Closed","Auto last-touch tracking with timestamp and note summary","Contact tagging: credit issue, investor, move-up, first-time buyer","Duplicate detection before record creation","Activity timeline: calls, emails, texts, tasks in one feed","Referral source attribution per contact","Closed loan history searchable for refi opportunities","Bulk CSV import and Arive sync via n8n"],
+   supabase:"contacts, pipelines, activity_log, tags, closed_loans"},
+  {id:"marketing",icon:"&#11043;",label:"Marketing Command Center",color:"#4c7ec9",tag:"Revenue",priority:1,
+   desc:"Weekly cadence engine. Schedule, draft, and deploy content to every channel from one dashboard. Mailchimp and Outlook via n8n.",
+   features:["Weekly schedule: Mon=Realtors, Tue=Leads, Wed=LIP, Thu=Pre-Approvals, Fri=Blast","Email campaign builder with saved HTML templates","Mailchimp and Outlook sync via n8n","Rate update publisher: auto-generates web page and email teaser","Call list panels segmented by contact group","Campaign analytics: opens, clicks, replies per segment","AI draft generator via Claude API"],
+   supabase:"campaigns, templates, call_lists, deployments"},
+  {id:"calculator",icon:"&#9678;",label:"Mortgage Coach Replacement",color:"#c94c4c",tag:"Priority",priority:1,
+   desc:"6-calculator suite replacing Mortgage Coach. Claude writes plain-English narrative summaries. Branded PDF or shareable link output per scenario.",
+   features:["Loan Scenario Comparator: side-by-side rate/term/down, total interest, monthly savings","Refi Analyzer: current vs new loan, break-even month, lifetime savings, cash-out","Rent vs. Buy: PITI vs rent, opportunity cost, break-even timeline","Total Cost of Homeownership: payment + taxes + insurance + PMI + appreciation 5yr/10yr","Max Purchase Price: back into price from income, debt, target payment","Buy Now vs. Wait: cost of waiting 6-12mo if prices/rates move X%","Claude API generates plain-English narrative per scenario","Branded PDF output or shareable link integrated with Supabase loan records"],
+   supabase:"scenarios, calculations, rate_locks, shared_reports"},
+  {id:"automation",icon:"&#8635;",label:"Automation Engine",color:"#4cc98a",tag:"Scale",priority:1,
+   desc:"n8n workflows eliminating every repetitive LO task. Contract upload to extract to email drafts to Supabase record. Partially live already.",
+   features:["Contract: extract fields, create loan record, send ack email, build Arive checklist","Pre-approval: extract fields, draft borrower and agent emails, Outlook draft","Final CD: extract 10 fields, populate template, Outlook draft","New application: create CRM contact, send intro email, add to pipeline","Rate update: update website page and send Mailchimp teaser","Activity auto-log on every automation fired","Milestone alerts: LIP past 30 days, pre-approval expiring in 7 days"],
+   supabase:"automation_logs, webhook_events, triggers, documents"},
+  {id:"funnels",icon:"&#9661;",label:"Lead Funnels",color:"#9b4cc9",tag:"Growth",priority:2,
+   desc:"Embeddable landing pages and lead capture forms feeding directly into Supabase CRM.",
+   features:["Pre-approval landing page with form to CRM auto-creation","Rate alert signup: prospect enters info, gets weekly rate email","Realtor co-branded landing page generator","Mortgage calculator widget with embed code for realtors","UTM tracking on all form submissions","Lead scoring: auto-assign hot/warm/cold on engagement","Drip sequence triggers on form submission"],
+   supabase:"leads, form_submissions, drip_sequences, utm_data"},
+  {id:"research",icon:"&#9675;",label:"Market Intelligence",color:"#c9884c",tag:"Authority",priority:3,
+   desc:"Real-time market data and AI commentary. Fed calendar, rate tracking, local market data. One-click publish to website and email.",
+   features:["Live rate feed via FRED API","Fed meeting calendar with rate decision tracker","MBS and 10-year treasury chart","Weekly market summary auto-generated by Claude (editable before send)","Local market data: median price, inventory, DOM by zip","One-click publish to website and Mailchimp"],
+   supabase:"market_data, rate_history, market_updates"},
+  {id:"licensing",icon:"&#9672;",label:"Multi-Tenant Licensing",color:"#4cc9c9",tag:"SaaS",priority:4,
+   desc:"Infrastructure to license this platform to other LOs. White-label ready. Stripe billing. Phase 4 after personal build is stable.",
+   features:["Tenant isolation via Supabase Row Level Security","Admin dashboard: manage subscriptions, feature flags, usage","White-label: custom logo, colors, domain per tenant","Stripe billing: Starter $97/mo, Pro $197/mo, Team $397/mo","Onboarding wizard for new LO tenants","Usage analytics per tenant"],
+   supabase:"tenants, subscriptions, feature_flags, usage_events"},
+];
+var PHASES = [
+  {number:"Phase 1",title:"Foundation",timeline:"4-6 weeks",color:"#c9a84c",
+   output:"Working CRM with real data. Contacts, loan records, documents in Supabase.",
+   items:["Supabase project setup: auth, RLS policies, core schema","Next.js frontend scaffold with brand system","Contacts and loans CRUD: create, view, edit, delete records","PDF upload interface: contract/CD/pre-approval stored in Supabase Storage","Auth: magic link login","Basic dashboard with navigation","Arive to n8n webhook: loan status syncs to Supabase"]},
+  {number:"Phase 2",title:"Automation Layer",timeline:"3-4 weeks",color:"#4c7ec9",
+   output:"Full automation stack live. All Claude/Zapier skills rebuilt inside n8n and Supabase.",
+   items:["n8n setup (self-hosted or cloud)","Contract intake: upload to Claude extract to loan record to Outlook draft to Arive checklist","Pre-approval: upload to Claude extract to borrower and agent email drafts","Final CD: upload to Claude extract 10 fields to email draft","New application: create contact, send intro email, set pipeline stage","Rate update publisher: Supabase to website page and Mailchimp teaser","Activity auto-log on every automation fired"]},
+  {number:"Phase 3",title:"Calculator Suite + Funnels",timeline:"3-4 weeks",color:"#4cc98a",
+   output:"Mortgage Coach fully replaced. Lead funnels live. Market intelligence publishing.",
+   items:["Loan Scenario Comparator with Claude narrative output","Refi Analyzer with break-even timeline","Rent vs. Buy calculator","Total Cost of Homeownership (5yr and 10yr view)","Max Purchase Price from income and debt inputs","Buy Now vs. Wait scenario","Branded PDF output and shareable link per scenario","Pre-approval and rate alert landing pages feeding Supabase CRM","Market intelligence: FRED API and Claude weekly commentary"]},
+  {number:"Phase 4",title:"SaaS and Licensing",timeline:"4-5 weeks",color:"#9b4cc9",
+   output:"License-ready platform. Deploy, market, sell to LOs nationally at $97-397/mo.",
+   items:["Multi-tenant RLS architecture (full data isolation)","White-label theming engine (logo, colors, domain)","Stripe billing: Starter / Pro / Team subscriptions","Onboarding wizard for new LO tenants","Admin dashboard: manage subscribers, feature flags, usage","Go-to-market: beta with network LOs, LinkedIn build-in-public, LO forums"]},
+];
+var DECISIONS = [
+  {date:"Mar 2026",title:"Build For Yourself First",color:"#c9a84c",
+   body:"Scope confirmed: build LoanOS as a personal production tool first. Replace Jungo CRM, Mortgage Coach, and scattered Claude workflows. License to other LOs in Phase 4 after personal build is proven.",
+   tags:[{label:"Strategy",type:"confirmed"}]},
+  {date:"Mar 2026",title:"Zapier replaced by n8n",color:"#4cc98a",
+   body:"Replaced Zapier with n8n. No per-task billing. Self-hosted at approximately $15/mo vs $100-300/mo at scale. Native Supabase node and Claude API node. More powerful workflow logic. n8n Cloud at $20/mo also viable.",
+   tags:[{label:"Replaced: Zapier",type:"replaced"},{label:"Added: n8n",type:"added"}]},
+  {date:"Mar 2026",title:"Supabase as Memory Layer",color:"#4c7ec9",
+   body:"Every automation that fires (contract, CD, pre-approval) now also creates or updates a contact record, loan record, and stores the PDF. This was the missing piece - automations fired but nothing was saved anywhere.",
+   tags:[{label:"Confirmed",type:"confirmed"}]},
+  {date:"Mar 2026",title:"Mortgage Coach replaced by Calculator Suite",color:"#c94c4c",
+   body:"Goal: replace Mortgage Coach entirely with 6 built-in calculators. Key differentiator is Claude writing plain-English narrative per scenario. Output: branded PDF or shareable link integrated with Supabase loan records.",
+   tags:[{label:"Replaced: Mortgage Coach",type:"replaced"},{label:"Added: 6 Calculators",type:"added"},{label:"Claude Narrative",type:"added"}]},
+  {date:"Mar 2026",title:"AI Stack Defined",color:"#9b4cc9",
+   body:"Claude Max ($100/mo) is primary for everything including Claude Code builds and API. Gemini AI Pro ($20/mo) for image generation and frontend mockups. ChatGPT Plus ($20/mo) secondary and under review for cancellation. Total AI spend: $140/mo.",
+   tags:[{label:"Claude Max $100/mo",type:"confirmed"},{label:"Gemini $20/mo",type:"confirmed"},{label:"ChatGPT Under Review",type:"planned"}]},
+  {date:"Mar 2026",title:"Arive Integration via n8n",color:"#4cc9c9",
+   body:"Arive is the LOS. Integration via n8n webhook. When loan moves in Arive, status updates in Supabase. New applications push contact data into Arive from LoanOS. Replaces manual dual-entry.",
+   tags:[{label:"Planned: Phase 1-2",type:"planned"}]},
+  {date:"Mar 2026",title:"Jungo replaced by LoanOS CRM",color:"#c9884c",
+   body:"Jungo currently used for database tracking, closed loans, pipeline dashboard, and refi opportunity lookup. All rebuilt inside LoanOS CRM on Supabase. Jungo CSV export will seed initial contact and closed loan data.",
+   tags:[{label:"Replaced: Jungo",type:"replaced"},{label:"Migration: Jungo CSV export",type:"planned"}]},
+];
+var PRICING = [
+  {name:"Starter",price:"$97",desc:"Solo LO getting organized",hl:false,
+   features:["CRM up to 500 contacts","Marketing Command Center","All 6 Calculators","Email templates","1 automation workflow","Basic support"]},
+  {name:"Pro",price:"$197",desc:"Active LO building systems",hl:true,
+   features:["CRM unlimited contacts","Full automation engine","Lead funnels and widgets","Market intelligence","White-label embeds","Priority support"]},
+  {name:"Team",price:"$397",desc:"Branch or team deployment",hl:false,
+   features:["Everything in Pro","Up to 5 LO seats","Team admin dashboard","Custom domain and logo","Onboarding call","Dedicated support"]},
+];
+function switchTab(id) {
+  var panels = document.querySelectorAll('.tab-panel');
+  for (var i = 0; i < panels.length; i++) { panels[i].classList.remove('active'); }
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) { btns[i].classList.remove('active'); }
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('tbtn-' + id).classList.add('active');
+}
+function getStatusLabel(s) {
+  if (s === 'in-progress') return 'In Progress';
+  if (s === 'complete') return 'Complete';
+  return 'Not Started';
+}
+function getDotClass(s) {
+  if (s === 'in-progress') return 'dot-ip';
+  if (s === 'complete') return 'dot-done';
+  return 'dot-ns';
+}
+function renderModules() {
+  var grid = document.getElementById('modules-grid');
+  grid.innerHTML = '';
+  for (var i = 0; i < MODULES.length; i++) {
+    var m = MODULES[i];
+    var s = moduleStatus[m.id] || 'not-started';
+    var card = document.createElement('button');
+    card.className = 'module-card' + (activeModule === m.id ? ' active' : '');
+    card.style.setProperty('--accent', m.color);
+    card.setAttribute('data-id', m.id);
+    card.innerHTML = '<div class="mc-top"><span class="mc-icon">' + m.icon + '</span><span class="mc-tag">' + m.tag + '</span></div>'
+      + '<div class="mc-label">' + m.label + '</div>'
+      + '<div class="mc-priority">Priority ' + m.priority + '</div>'
+      + '<div class="mc-status-row"><span class="status-dot ' + getDotClass(s) + '"></span><span class="mc-status-label">' + getStatusLabel(s) + '</span></div>';
+    card.onclick = (function(mid){ return function(){ selectModule(mid); }; })(m.id);
+    grid.appendChild(card);
+  }
+}
+function selectModule(id) {
+  activeModule = id;
+  renderModules();
+  var m = null;
+  for (var i = 0; i < MODULES.length; i++) { if (MODULES[i].id === id) { m = MODULES[i]; break; } }
+  var s = moduleStatus[id] || 'not-started';
+  var featsHtml = '';
+  for (var i = 0; i < m.features.length; i++) {
+    featsHtml += '<li><span style="color:' + m.color + ';flex-shrink:0;margin-top:1px">&#9658;</span>' + m.features[i] + '</li>';
+  }
+  var wrap = document.getElementById('module-detail-wrap');
+  wrap.innerHTML = '<div class="module-detail">'
+    + '<div class="detail-border-top" style="background:' + m.color + '"></div>'
+    + '<div class="detail-header"><span class="detail-icon" style="color:' + m.color + '">' + m.icon + '</span>'
+    + '<div><div class="detail-title">' + m.label + '</div><div class="detail-tag">' + m.tag + ' &middot; Priority ' + m.priority + '</div></div></div>'
+    + '<p class="detail-desc">' + m.desc + '</p>'
+    + '<div class="detail-section-title">Features</div>'
+    + '<ul class="detail-features">' + featsHtml + '</ul>'
+    + '<div class="detail-db"><div class="db-label">Supabase Tables</div><div class="db-value">' + m.supabase + '</div></div>'
+    + '<div class="detail-section-title">Build Status</div>'
+    + '<div class="status-selector">'
+    + '<button class="status-btn sbtn-ns' + (s==='not-started'?' active':'') + '" onclick="setModuleStatus(\'' + id + '\',\'not-started\')">Not Started</button>'
+    + '<button class="status-btn sbtn-ip' + (s==='in-progress'?' active':'') + '" onclick="setModuleStatus(\'' + id + '\',\'in-progress\')">In Progress</button>'
+    + '<button class="status-btn sbtn-done' + (s==='complete'?' active':'') + '" onclick="setModuleStatus(\'' + id + '\',\'complete\')">Complete</button>'
+    + '</div></div>';
+}
+function setModuleStatus(id, s) {
+  moduleStatus[id] = s;
+  selectModule(id);
+  renderModules();
+}
+function countTasks() {
+  var total = 0, done = 0;
+  for (var pi = 0; pi < PHASES.length; pi++) {
+    total += PHASES[pi].items.length;
+    for (var ii = 0; ii < PHASES[pi].items.length; ii++) {
+      if (taskChecks[pi + '-' + ii]) done++;
+    }
+  }
+  return {total:total, done:done};
+}
+function updateProgress() {
+  var c = countTasks();
+  var pct = c.total > 0 ? Math.round(c.done / c.total * 100) : 0;
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('overall-bar').style.width = pct + '%';
+  document.getElementById('overall-badge').textContent = pct + '% Complete';
+  document.getElementById('progress-note').textContent = c.done + ' of ' + c.total + ' tasks complete';
+  document.getElementById('stat-done').textContent = c.done;
+}
+function toggleTask(key) {
+  taskChecks[key] = !taskChecks[key];
+  renderRoadmap();
+  updateProgress();
+}
+function renderRoadmap() {
+  var container = document.getElementById('roadmap-container');
+  container.innerHTML = '';
+  for (var pi = 0; pi < PHASES.length; pi++) {
+    var phase = PHASES[pi];
+    var done = 0;
+    for (var ii = 0; ii < phase.items.length; ii++) {
+      if (taskChecks[pi + '-' + ii]) done++;
+    }
+    var pct = Math.round(done / phase.items.length * 100);
+    var itemsHtml = '';
+    for (var ii = 0; ii < phase.items.length; ii++) {
+      var key = pi + '-' + ii;
+      var checked = !!taskChecks[key];
+      itemsHtml += '<div class="phase-item" onclick="toggleTask(\'' + key + '\')">'
+        + '<div class="phase-check' + (checked ? ' checked' : '') + '">' + (checked ? '&#10003;' : '') + '</div>'
+        + '<span style="' + (checked ? 'text-decoration:line-through;opacity:.4' : '') + '">' + phase.items[ii] + '</span>'
+        + '</div>';
+    }
+    var card = document.createElement('div');
+    card.className = 'phase-card';
+    card.style.borderLeftColor = phase.color;
+    card.innerHTML = '<div class="phase-left">'
+      + '<div class="phase-num" style="color:' + phase.color + '">' + phase.number + '</div>'
+      + '<div class="phase-title">' + phase.title + '</div>'
+      + '<div class="phase-timeline">' + phase.timeline + '</div>'
+      + '<div class="output-label">Output</div>'
+      + '<div class="output-text">' + phase.output + '</div>'
+      + '<div><div class="phase-prog-row"><span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase">Progress</span>'
+      + '<span style="font-family:var(--font-mono);font-size:10px;color:' + phase.color + '">' + pct + '%</span></div>'
+      + '<div class="phase-prog-track"><div class="phase-prog-fill" style="width:' + pct + '%;background:' + phase.color + '"></div></div>'
+      + '<div class="phase-prog-label">' + done + ' of ' + phase.items.length + ' tasks</div></div>'
+      + '</div>'
+      + '<div class="phase-right">' + itemsHtml + '</div>';
+    container.appendChild(card);
+  }
+}
+function renderDecisions() {
+  var container = document.getElementById('decisions-container');
+  container.innerHTML = '';
+  for (var i = 0; i < DECISIONS.length; i++) {
+    var d = DECISIONS[i];
+    var tagsHtml = '';
+    for (var j = 0; j < d.tags.length; j++) {
+      tagsHtml += '<span class="dtag dtag-' + d.tags[j].type + '">' + d.tags[j].label + '</span>';
+    }
+    var card = document.createElement('div');
+    card.className = 'decision-card';
+    card.style.borderLeftColor = d.color;
+    card.innerHTML = '<div class="decision-header"><div class="decision-title">' + d.title + '</div><div class="decision-date">' + d.date + '</div></div>'
+      + '<div class="decision-body">' + d.body + '</div>'
+      + '<div class="decision-tags">' + tagsHtml + '</div>';
+    container.appendChild(card);
+  }
+}
+function renderPricing() {
+  var container = document.getElementById('pricing-cards');
+  container.innerHTML = '';
+  for (var i = 0; i < PRICING.length; i++) {
+    var p = PRICING[i];
+    var feats = '';
+    for (var j = 0; j < p.features.length; j++) {
+      feats += '<li><span style="color:var(--gold);flex-shrink:0">&#10003;</span>' + p.features[j] + '</li>';
+    }
+    var card = document.createElement('div');
+    card.className = 'pricing-card' + (p.hl ? ' hl' : '');
+    card.innerHTML = (p.hl ? '<div class="hl-badge">Most Popular</div>' : '')
+      + '<div class="plan-name">' + p.name + '</div>'
+      + '<div class="plan-price">' + p.price + '<span class="plan-per">/mo</span></div>'
+      + '<div class="plan-desc">' + p.desc + '</div>'
+      + '<ul class="plan-features">' + feats + '</ul>';
+    container.appendChild(card);
+  }
+}
+renderModules();
+renderRoadmap();
+renderDecisions();
+renderPricing();
+updateProgress();
+</script>
+</body>
+</html>

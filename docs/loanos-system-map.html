@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoanOS — System Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060608;
+      --surface: #0d0d12;
+      --surface2: #13131a;
+      --border: #1c1c28;
+      --border2: #252535;
+      --gold: #d4a843;
+      --gold-dim: rgba(212,168,67,0.12);
+      --gold-glow: rgba(212,168,67,0.06);
+      --text: #e2e2ee;
+      --muted: #5a5a78;
+      --muted2: #8888aa;
+      --green: #4ec994;
+      --green-dim: rgba(78,201,148,0.12);
+      --blue: #4e9fc9;
+      --blue-dim: rgba(78,159,201,0.12);
+      --purple: #9b6ec9;
+      --purple-dim: rgba(155,110,201,0.12);
+      --red: #c96e6e;
+      --red-dim: rgba(201,110,110,0.12);
+      --orange: #c9944e;
+      --orange-dim: rgba(201,148,78,0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+    code, .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      padding: 32px 40px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+    }
+    .header-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: -0.5px;
+    }
+    .header-sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .header-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: var(--border);
+      border: 1px solid var(--border2);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── Sections ── */
+    .page-body { max-width: 1280px; margin: 0 auto; padding: 40px 40px 0; }
+
+    .section { margin-bottom: 48px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-label {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .section-count {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: var(--border);
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+    .section-divider {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .card-grid-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .card-grid-4 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--border2); }
+
+    .card-icon {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .card-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted2);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin-right: 4px;
+      margin-top: 4px;
+    }
+    .tag-live { background: var(--green-dim); color: var(--green); border: 1px solid rgba(78,201,148,0.2); }
+    .tag-progress { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(78,159,201,0.2); }
+    .tag-planned { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(155,110,201,0.2); }
+    .tag-auto { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(212,168,67,0.2); }
+    .tag-manual { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(201,148,78,0.2); }
+    .tag-api { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(78,159,201,0.2); }
+
+    /* ── Layer colors ── */
+    .layer-live .card { border-left: 2px solid var(--green); }
+    .layer-auto .card { border-left: 2px solid var(--gold); }
+    .layer-progress .card { border-left: 2px solid var(--blue); }
+    .layer-planned .card { border-left: 2px solid var(--purple); }
+
+    /* ── Connections ── */
+    .connections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .conn-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .conn-from {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      padding-top: 1px;
+    }
+    .conn-arrow { color: var(--muted); font-size: 12px; padding-top: 1px; }
+    .conn-to-wrap { flex: 1; }
+    .conn-to {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .conn-desc {
+      font-size: 11px;
+      color: var(--muted2);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .conn-method {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--blue);
+      background: var(--blue-dim);
+      padding: 1px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      margin-top: 2px;
+      display: inline-block;
+    }
+
+    /* ── Env Vars ── */
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 8px;
+    }
+    .env-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .env-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .env-desc {
+      font-size: 11px;
+      color: var(--muted2);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .env-scope {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .env-public { background: var(--green-dim); color: var(--green); }
+    .env-private { background: var(--red-dim); color: var(--red); }
+
+    /* ── Migration Plan ── */
+    .migration-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 10px;
+    }
+    .migration-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .migration-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .migration-topic {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .migration-phase {
+      margin-left: auto;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: var(--border);
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .migration-from {
+      font-size: 11px;
+      color: var(--red);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .migration-to {
+      font-size: 11px;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .migration-arrow { font-size: 14px; }
+
+    /* ── Architecture Diagram ── */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-diagram::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent 60%);
+    }
+    .arch-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: stretch;
+    }
+    .arch-layer-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      min-width: 20px;
+    }
+    .arch-layer-content {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .arch-node {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .arch-node.live { border-color: rgba(78,201,148,0.3); color: var(--green); }
+    .arch-node.progress { border-color: rgba(78,159,201,0.3); color: var(--blue); }
+    .arch-node.planned { border-color: rgba(155,110,201,0.3); color: var(--purple); }
+    .arch-node.core { border-color: rgba(212,168,67,0.4); color: var(--gold); background: var(--gold-glow); }
+    .arch-sep { width: 100%; height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 60px;
+      padding: 24px 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+    footer strong { color: var(--muted2); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="header-logo">LoanOS</span>
+      <span class="header-sub">/ system-map</span>
+      <span class="header-badge">v0.1 · internal · 2026</span>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- Architecture Overview -->
+    <div class="arch-diagram">
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Architecture Overview</div>
+
+      <div class="arch-row">
+        <div class="arch-layer-label" style="color:var(--green);">Live</div>
+        <div class="arch-layer-content">
+          <div class="arch-node live">Arive LOS</div>
+          <div class="arch-node live">Jungo CRM</div>
+          <div class="arch-node live">Zapier</div>
+          <div class="arch-node live">Mailchimp</div>
+          <div class="arch-node live">Mortgage Coach</div>
+          <div class="arch-node live">ShareFile</div>
+          <div class="arch-node live">Outlook 365</div>
+        </div>
+      </div>
+      <div class="arch-sep"></div>
+
+      <div class="arch-row">
+        <div class="arch-layer-label" style="color:var(--gold);">Automations</div>
+        <div class="arch-layer-content">
+          <div class="arch-node core">n8n (self-hosted)</div>
+          <div class="arch-node core">Claude API</div>
+          <div class="arch-node core">styer-mortgage-site</div>
+        </div>
+      </div>
+      <div class="arch-sep"></div>
+
+      <div class="arch-row">
+        <div class="arch-layer-label" style="color:var(--blue);">In Progress</div>
+        <div class="arch-layer-content">
+          <div class="arch-node progress">LoanOS Auth</div>
+          <div class="arch-node progress">Contacts Module</div>
+          <div class="arch-node progress">Document Intake</div>
+          <div class="arch-node progress">Pipeline View</div>
+        </div>
+      </div>
+      <div class="arch-sep"></div>
+
+      <div class="arch-row">
+        <div class="arch-layer-label" style="color:var(--purple);">Planned</div>
+        <div class="arch-layer-content">
+          <div class="arch-node planned">Rate Engine</div>
+          <div class="arch-node planned">Doc Generator</div>
+          <div class="arch-node planned">Pipeline Dashboard</div>
+          <div class="arch-node planned">Realtor Portal</div>
+          <div class="arch-node planned">Compliance Engine</div>
+          <div class="arch-node planned">Mobile App</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 1: Live Now -->
+    <div class="section layer-live">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--green);">Layer 1</span>
+        <span class="section-title">Live Now</span>
+        <span class="section-divider"></span>
+        <span class="section-count">7 tools</span>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🏦</div>
+          <div class="card-name">Arive</div>
+          <div class="card-desc">Loan origination system — pricing, disclosures, AUS submissions, rate locks</div>
+          <span class="card-tag tag-live">LOS</span>
+          <span class="card-tag tag-manual">Manual entry</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <div class="card-name">Jungo / Salesforce</div>
+          <div class="card-desc">CRM overlay — contacts, pipeline, referral tracking, drip campaigns</div>
+          <span class="card-tag tag-live">CRM</span>
+          <span class="card-tag tag-api">REST API</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-name">Zapier</div>
+          <div class="card-desc">Lightweight automation — Outlook → Salesforce sync, contact creation triggers</div>
+          <span class="card-tag tag-live">Automation</span>
+          <span class="card-tag tag-auto">No-code</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📧</div>
+          <div class="card-name">Mailchimp</div>
+          <div class="card-desc">Email marketing — rate updates, newsletters, drip sequences to 1,000+ contacts</div>
+          <span class="card-tag tag-live">Marketing</span>
+          <span class="card-tag tag-api">API</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📐</div>
+          <div class="card-name">Mortgage Coach</div>
+          <div class="card-desc">Total Cost Analysis presentations — side-by-side loan comparisons for borrowers</div>
+          <span class="card-tag tag-live">Presentations</span>
+          <span class="card-tag tag-manual">Manual</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📁</div>
+          <div class="card-name">ShareFile</div>
+          <div class="card-desc">Secure document collection — borrowers upload income docs, ID, bank statements</div>
+          <span class="card-tag tag-live">Docs</span>
+          <span class="card-tag tag-manual">Manual</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📬</div>
+          <div class="card-name">Outlook 365</div>
+          <div class="card-desc">Primary email + calendar — all borrower and realtor communication flows through here</div>
+          <span class="card-tag tag-live">Email</span>
+          <span class="card-tag tag-api">Graph API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 2: Document Automations -->
+    <div class="section layer-auto">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--gold);">Layer 2</span>
+        <span class="section-title">Document Automations</span>
+        <span class="section-divider"></span>
+        <span class="section-count">3 workflows</span>
+      </div>
+      <div class="card-grid card-grid-3">
+        <div class="card">
+          <div class="card-icon">✉️</div>
+          <div class="card-name">Pre-Approval Workflow</div>
+          <div class="card-desc">Trigger: "PA email" command → Claude generates personalized congratulations email → sends via Outlook with PA letter attached → logs to Salesforce</div>
+          <div style="margin-top:10px;">
+            <span class="card-tag tag-auto">n8n</span>
+            <span class="card-tag tag-auto">Claude API</span>
+            <span class="card-tag tag-live">Graph API</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <div class="card-name">CD Email Automation</div>
+          <div class="card-desc">Trigger: "CD email" command → generates closing disclosure explanation email → borrower-friendly breakdown of final costs → Outlook send + CRM log</div>
+          <div style="margin-top:10px;">
+            <span class="card-tag tag-auto">n8n</span>
+            <span class="card-tag tag-auto">Claude API</span>
+            <span class="card-tag tag-live">Graph API</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🆕</div>
+          <div class="card-name">New Application Processing</div>
+          <div class="card-desc">Trigger: "new app" → creates Salesforce contact with defaults → sends intro email to borrower + realtor → starts doc collection sequence in ShareFile</div>
+          <div style="margin-top:10px;">
+            <span class="card-tag tag-auto">n8n</span>
+            <span class="card-tag tag-live">Salesforce</span>
+            <span class="card-tag tag-live">ShareFile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3: In Progress -->
+    <div class="section layer-progress">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--blue);">Layer 3</span>
+        <span class="section-title">In Progress — LoanOS Build</span>
+        <span class="section-divider"></span>
+        <span class="section-count">4 items</span>
+      </div>
+      <div class="card-grid card-grid-4">
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <div class="card-name">Auth + Dashboard</div>
+          <div class="card-desc">Magic link auth via Supabase. Protected dashboard shell. Session management with middleware. Single-user (Adam) for now.</div>
+          <span class="card-tag tag-progress">Supabase Auth</span>
+          <span class="card-tag tag-progress">Next.js 14</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">👥</div>
+          <div class="card-name">Contacts Module</div>
+          <div class="card-desc">Unified contact database. Borrowers, realtors, vendors. Sync target for Salesforce and Outlook. RLS-enforced Postgres table.</div>
+          <span class="card-tag tag-progress">Postgres</span>
+          <span class="card-tag tag-progress">RLS</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📥</div>
+          <div class="card-name">Document Intake</div>
+          <div class="card-desc">Replace ShareFile manual uploads. Borrower-facing upload portal. Files stored in Supabase Storage with loan-scoped access control.</div>
+          <span class="card-tag tag-progress">Supabase Storage</span>
+          <span class="card-tag tag-progress">RLS</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <div class="card-name">Pipeline View</div>
+          <div class="card-desc">Active loan pipeline at a glance. Status tracking from application to funding. Replaces manual Salesforce pipeline view.</div>
+          <span class="card-tag tag-progress">Loans table</span>
+          <span class="card-tag tag-progress">React</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 4: Planned -->
+    <div class="section layer-planned">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--purple);">Layer 4</span>
+        <span class="section-title">Planned Modules</span>
+        <span class="section-divider"></span>
+        <span class="section-count">6 modules</span>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <div class="card-name">Rate Engine</div>
+          <div class="card-desc">Live pricing via Arive API or scrape. One-click rate sheet generation and publishing to website</div>
+          <span class="card-tag tag-planned">Phase 2</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📝</div>
+          <div class="card-name">Doc Generator</div>
+          <div class="card-desc">AI-assisted pre-approval letters, condition letters, approval emails from loan data</div>
+          <span class="card-tag tag-planned">Phase 2</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗂️</div>
+          <div class="card-name">Pipeline Dashboard</div>
+          <div class="card-desc">Full loan lifecycle management. Conditions tracker, milestone alerts, closing countdown</div>
+          <span class="card-tag tag-planned">Phase 3</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <div class="card-name">Realtor Portal</div>
+          <div class="card-desc">External-facing portal. Realtors check loan status, pull PA letters, submit referrals</div>
+          <span class="card-tag tag-planned">Phase 3</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚖️</div>
+          <div class="card-name">Compliance Engine</div>
+          <div class="card-desc">TRID timing alerts, disclosure deadline tracking, audit log for regulatory review</div>
+          <span class="card-tag tag-planned">Phase 4</span>
+        </div>
+        <div class="card">
+          <div class="card-icon">📱</div>
+          <div class="card-name">Mobile App</div>
+          <div class="card-desc">React Native or PWA. Borrower-facing. Status updates, doc uploads, e-sign. Deploys to Vercel</div>
+          <span class="card-tag tag-planned">Phase 4</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connections -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--gold);">Connections</span>
+        <span class="section-title">Service Integrations</span>
+        <span class="section-divider"></span>
+        <span class="section-count">10 connections</span>
+      </div>
+      <div class="connections-grid">
+        <div class="conn-card">
+          <div class="conn-from">LoanOS</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Supabase</div>
+            <div class="conn-desc">Auth, Postgres, Storage, Realtime</div>
+            <div class="conn-method">@supabase/ssr</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">LoanOS</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">n8n</div>
+            <div class="conn-desc">Webhook triggers for automations</div>
+            <div class="conn-method">HTTP POST</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">n8n</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Claude API</div>
+            <div class="conn-desc">Email drafting, content generation, doc parsing</div>
+            <div class="conn-method">claude-sonnet-4-6</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">n8n</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Outlook 365</div>
+            <div class="conn-desc">Send emails, read inbox, calendar events</div>
+            <div class="conn-method">MS Graph API</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">n8n</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Salesforce</div>
+            <div class="conn-desc">Create/update contacts, log activities, pipeline sync</div>
+            <div class="conn-method">REST API</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">n8n</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Mailchimp</div>
+            <div class="conn-desc">Add subscribers, trigger campaigns, rate blasts</div>
+            <div class="conn-method">REST API v3</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">n8n</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">ShareFile</div>
+            <div class="conn-desc">Request doc uploads, folder provisioning</div>
+            <div class="conn-method">REST API</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">styer-site</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">n8n</div>
+            <div class="conn-desc">Dispatch webhook → triggers workflows from site events</div>
+            <div class="conn-method">Netlify Fn</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">styer-site</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Netlify Blobs</div>
+            <div class="conn-desc">Rate data, newsletter drafts, content storage</div>
+            <div class="conn-method">@netlify/blobs</div>
+          </div>
+        </div>
+        <div class="conn-card">
+          <div class="conn-from">Zapier</div>
+          <div class="conn-arrow">→</div>
+          <div class="conn-to-wrap">
+            <div class="conn-to">Salesforce</div>
+            <div class="conn-desc">Legacy sync — Outlook contacts → Salesforce (pre-n8n)</div>
+            <div class="conn-method">Zapier zap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Env Vars -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--gold);">Config</span>
+        <span class="section-title">Environment Variables</span>
+        <span class="section-divider"></span>
+        <span class="section-count">16 vars</span>
+      </div>
+      <div class="env-grid">
+        <div class="env-row">
+          <div class="env-key">NEXT_PUBLIC_SUPABASE_URL</div>
+          <div class="env-desc">Project API URL</div>
+          <span class="env-scope env-public">public</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</div>
+          <div class="env-desc">Anon / client key</div>
+          <span class="env-scope env-public">public</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SUPABASE_SERVICE_ROLE_KEY</div>
+          <div class="env-desc">Server-only full access</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SUPABASE_JWT_SECRET</div>
+          <div class="env-desc">Token verification</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">ANTHROPIC_API_KEY</div>
+          <div class="env-desc">Claude API access</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">N8N_WEBHOOK_URL</div>
+          <div class="env-desc">Automation trigger endpoint</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">N8N_WEBHOOK_SECRET</div>
+          <div class="env-desc">HMAC signature verification</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">MICROSOFT_CLIENT_ID</div>
+          <div class="env-desc">Azure app registration</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">MICROSOFT_CLIENT_SECRET</div>
+          <div class="env-desc">Graph API OAuth secret</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">MICROSOFT_TENANT_ID</div>
+          <div class="env-desc">M365 tenant identifier</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SALESFORCE_CLIENT_ID</div>
+          <div class="env-desc">Connected app consumer key</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SALESFORCE_CLIENT_SECRET</div>
+          <div class="env-desc">Connected app secret</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SALESFORCE_USERNAME</div>
+          <div class="env-desc">API login username</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">MAILCHIMP_API_KEY</div>
+          <div class="env-desc">Mailchimp REST v3</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SHAREFILE_CLIENT_ID</div>
+          <div class="env-desc">ShareFile OAuth app</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+        <div class="env-row">
+          <div class="env-key">SHAREFILE_CLIENT_SECRET</div>
+          <div class="env-desc">ShareFile OAuth secret</div>
+          <span class="env-scope env-private">private</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Migration Plan -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--gold);">Migration</span>
+        <span class="section-title">From Current Stack → LoanOS</span>
+        <span class="section-divider"></span>
+      </div>
+      <div class="migration-grid">
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Contacts</div>
+            <div class="migration-phase">Phase 1</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> Jungo / Salesforce — siloed, manual entry, limited API</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> LoanOS Contacts — unified DB, syncs both ways, RLS-scoped</div>
+        </div>
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Documents</div>
+            <div class="migration-phase">Phase 1</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> ShareFile — manual request links, no automation, per-seat cost</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> Supabase Storage — loan-scoped, borrower portal, auto-organize</div>
+        </div>
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Automations</div>
+            <div class="migration-phase">Phase 1–2</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> Zapier — limited steps, per-task pricing, no AI</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> n8n + Claude — unlimited flows, self-hosted, AI-native</div>
+        </div>
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Pipeline Tracking</div>
+            <div class="migration-phase">Phase 2</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> Manual Salesforce — no mortgage-specific fields, fragmented</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> LoanOS Pipeline — built for mortgages, TRID-aware, one screen</div>
+        </div>
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Rate Publishing</div>
+            <div class="migration-phase">Phase 2</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> Manual — screenshot Arive, format in email, post to site</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> LoanOS Rate Engine — one click → website + Mailchimp + social</div>
+        </div>
+        <div class="migration-card">
+          <div class="migration-header">
+            <div class="migration-topic">Realtor Communication</div>
+            <div class="migration-phase">Phase 3</div>
+          </div>
+          <div class="migration-from"><span class="migration-arrow">✗</span> Email threads — no self-serve, all manual, no status visibility</div>
+          <div class="migration-to"><span class="migration-arrow">✓</span> Realtor Portal — login, live status, PA letter pulls, referrals</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- styer-mortgage-site Built -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label" style="color:var(--gold);">Website</span>
+        <span class="section-title">styer-mortgage-site — What's Built</span>
+        <span class="section-divider"></span>
+        <span class="section-count">8 features</span>
+      </div>
+      <div class="card-grid card-grid-4">
+        <div class="card">
+          <div class="card-name">MCC</div>
+          <div class="card-desc">Mortgage content creator — AI-generated blog posts, market updates, social captions</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">Claude API</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Content Dashboard</div>
+          <div class="card-desc">Internal admin for drafting and scheduling website content and social posts</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">Netlify Blobs</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Newsletter Generator</div>
+          <div class="card-desc">Weekly email content — AI drafts, teaser emails, sends via Mailchimp API</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">n8n</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Rate Publisher</div>
+          <div class="card-desc">Manual rate entry → auto-formats → publishes to rate page + email + social</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">Netlify Fn</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Social Poster</div>
+          <div class="card-desc">Caption + image generation for Instagram and Facebook. Queue-based publishing</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">Claude API</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Dispatch Webhook</div>
+          <div class="card-desc">Central n8n trigger endpoint — site events fire automations (form submit, rate update, etc.)</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-auto">Netlify Fn</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Netlify Functions</div>
+          <div class="card-desc">Serverless backend for site — handles form logic, API proxies, webhook dispatch</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-api">Edge Fn</span>
+        </div>
+        <div class="card">
+          <div class="card-name">Netlify Blobs</div>
+          <div class="card-desc">Key-value + blob storage — rate history, newsletter archive, draft content cache</div>
+          <span class="card-tag tag-live">Live</span>
+          <span class="card-tag tag-api">@netlify/blobs</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <strong>LoanOS System Map</strong> · Adam Styer · The Styer Mortgage Team · NMLS #513013 · Austin TX · Internal Use Only
+  </footer>
+
+</body>
+</html>

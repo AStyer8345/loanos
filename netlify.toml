@@ -1,5 +1,5 @@
 [build]
-  command   = "cp -r docs public/docs && npm run build"
+  command   = "mkdir -p public/docs && cp -r docs public/docs && npm run build"
   publish   = ".next"
 
 [build.environment]

@@ -7,7 +7,7 @@ export type Loan = {
   id: string
   loan_number: string | null
   property_address: string | null
-  contacts: { first_name: string; last_name: string } | null
+  contacts: { first_name: string; last_name: string }[] | null
 }
 
 export default async function UploadPage() {

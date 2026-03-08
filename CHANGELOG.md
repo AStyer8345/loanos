@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [0.4.0] — 2026-03-08
+
+### Changed
+- `src/app/page.tsx` — switched auth from magic link (`signInWithOtp`) to email/password (`signInWithPassword`)
+- `netlify.toml` — added `mkdir -p public/docs &&` prefix to prevent cp failure when directory missing
+
+### Fixed
+- `src/app/dashboard/upload/page.tsx` — `contacts` type corrected to array (`[]`) — Supabase joins always return arrays
+- `src/app/dashboard/upload/UploadForm.tsx` — `loanLabel()` now reads `loan.contacts?.[0]` instead of treating contacts as a single object (TypeScript build error on Netlify)
+- Supabase Storage bucket renamed from `DOCUMENTS` to `documents` (bucket names are case-sensitive)
+
+### Manual Steps Completed
+- Migration 002 applied in Supabase SQL Editor
+- Storage bucket `documents` created with RLS upload + read policies
+- Password set via `auth.users` SQL update (bypassed email rate limit)
+- Test loan seeded: `INSERT INTO loans (user_id, loan_number, property_address)`
+
+---
+
 ## [0.3.0] — 2026-03-08
 
 ### Added

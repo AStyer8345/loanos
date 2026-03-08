@@ -16,12 +16,13 @@ Deploy: Netlify (not Vercel)
 
 ## Current Status
 
-Foundation live as of March 8, 2026.
+Phase 1 complete as of March 8, 2026.
 - Supabase connected
-- Auth working via magic link (adam@thestyerteam.com)
+- Auth: email/password (adam@thestyerteam.com) — switched from magic link
 - 4 tables live: contacts, loans, documents, activity_log
-- Supabase Storage bucket: documents
-- Next.js 14 scaffolded and deploying to Netlify
+- Supabase Storage bucket: `documents` (must be lowercase — case-sensitive)
+- PDF upload end-to-end verified: Storage → documents row → activity_log
+- Next.js 14 deploying to Netlify (deploy fixes applied)
 - /docs folder: loanos.html (build tracker), loanos-system-map.html (system map)
 
 ## Tech Stack
@@ -29,7 +30,7 @@ Foundation live as of March 8, 2026.
 - Frontend: Next.js 14
 - Hosting: Netlify
 - Database: Supabase (Postgres)
-- Auth: Supabase magic link
+- Auth: Supabase email/password
 - File Storage: Supabase Storage (bucket: documents)
 - Automation: n8n (replacing Zapier)
 - AI: Claude API (Anthropic)
@@ -118,16 +119,16 @@ Phase 1 complete. Next: Phase 2 — Automation
 
 - Supabase schema: contacts, loans, documents, activity_log
 - Supabase Storage bucket: documents
-- Auth: magic link (adam@thestyerteam.com)
+- Auth: email/password (switched from magic link — adam@thestyerteam.com)
 - /dashboard: live with table row counts + quick actions
-- /dashboard/upload: PDF upload form
+- /dashboard/upload: PDF upload form — end-to-end verified
   - Select doc type (7 options)
   - Attach to existing loan OR create new contact+loan inline
   - Stores in Supabase Storage: {userId}/{loanId}/{timestamp}_{filename}
   - Inserts documents row + activity_log entry
 - Migration 002: added doc_type + uploaded_by columns to documents table
-- NOTE: Run migration 002 in Supabase SQL Editor before using upload
-- NOTE: Set Supabase Storage policy to allow auth uploads to {userId}/ prefix
+- Storage bucket `documents` must exist (lowercase) with RLS policies set
+- Netlify build fixes: mkdir -p public/docs, contacts type array fix, loanLabel array index fix
 
 ## Skills
 

@@ -131,6 +131,7 @@ User-defined Claude skills live at `/skills/user/`. Each subdirectory is one ski
 - Always read this file before starting
 - Always update this file when something significant changes
 - Always update CHANGELOG.md at end of session
+- At end of every session: update CONTEXT.md and push to main with everything changed that session
 - Never break styer-mortgage-site tools
 - Never use Vercel
 - Ask Adam before making architectural decisions not covered here

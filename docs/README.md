@@ -50,7 +50,7 @@ Not a SaaS. Not for public use. Built to eliminate the cost of an admin and free
 | Storage | Supabase Storage | `documents` bucket |
 | Realtime | Supabase Realtime | Pipeline status updates |
 | Automation | n8n (self-hosted) | Replaces Zapier |
-| AI | Anthropic Claude API | `claude-sonnet-4-6` |
+| AI | Anthropic Claude API | `claude-sonnet-4-5-20251022` |
 | Deploy | Netlify | `@netlify/plugin-nextjs` v5 |
 | Node | v20 | Set in `netlify.toml` |
 
@@ -167,7 +167,7 @@ Copy `.env.local.example` to `.env.local` and fill in all values before running 
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public | Supabase anon/client key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Private | Full database access — server only |
 | `SUPABASE_JWT_SECRET` | Private | Token verification |
-| `ANTHROPIC_API_KEY` | Private | Claude API (`claude-sonnet-4-6`) |
+| `ANTHROPIC_API_KEY` | Private | Claude API (`claude-sonnet-4-5-20251022`) |
 | `N8N_WEBHOOK_URL` | Private | n8n automation trigger endpoint |
 | `N8N_WEBHOOK_SECRET` | Private | HMAC signature verification |
 | `MICROSOFT_CLIENT_ID` | Private | Azure AD app registration |

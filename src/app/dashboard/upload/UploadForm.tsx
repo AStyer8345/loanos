@@ -15,7 +15,7 @@ const DOC_TYPES = [
 ]
 
 function loanLabel(loan: Loan): string {
-  const contact = loan.contacts
+  const contact = loan.contacts?.[0]
   const name = contact ? `${contact.first_name} ${contact.last_name}`.trim() : 'Unknown'
   const num = loan.loan_number ? ` — #${loan.loan_number}` : ''
   const addr = loan.property_address ? ` — ${loan.property_address}` : ''

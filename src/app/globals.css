@@ -1,27 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --bg:       #080a0c;
+  --surface:  #0c0e12;
+  --surface2: #111318;
+  --border:   #1c1f28;
+  --gold:     #c9a84c;
+  --text:     #dde0e8;
+  --muted:    #525870;
+  --green:    #3ed68a;
+  --red:      #e05c5c;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.action-btn:hover {
+  background: var(--gold);
+  color: var(--bg);
 }

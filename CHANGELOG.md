@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [0.5.0] — 2026-03-08
+
+### Added
+- `src/app/dashboard/layout.tsx` — fixed 220px sidebar shell (server component); wraps all dashboard routes
+- `src/app/dashboard/SidebarNav.tsx` — client component; active route highlighting via `usePathname`
+- `src/app/dashboard/build-tracker/page.tsx` — auth-gated iframe → `/docs/loanos.html`
+- `src/app/dashboard/system-map/page.tsx` — auth-gated iframe → `/docs/loanos-system-map.html`
+- `public/docs/loanos.html` — moved from `docs/`; Phase 1 all 7 items statically green (`'0-6':true`)
+- `public/docs/loanos-system-map.html` — moved from `docs/`
+
+### Changed
+- `src/app/globals.css` — Bloomberg design tokens (CSS vars: `--bg`, `--surface`, `--surface2`, `--border`, `--gold`, `--text`, `--muted`, `--green`, `--red`); Google Fonts (Bebas Neue + IBM Plex Mono + IBM Plex Sans); `.action-btn:hover` rule
+- `tailwind.config.ts` — extended with gold/surface color tokens + display/mono/sans font families
+- `src/app/dashboard/page.tsx` — Bloomberg redesign: 4 stat cards (large Bebas Neue numbers), green infra status bar, terminal-style action buttons; removed stale Session panel
+- `src/app/dashboard/upload/page.tsx` — Bloomberg aesthetic wrapper (visual only)
+- `src/app/dashboard/upload/UploadForm.tsx` — visual redesign (dark inputs, gold dropzone, monospaced labels); all Supabase upload logic preserved exactly
+
+---
+
 ## [0.4.0] — 2026-03-08
 
 ### Changed
@@ -59,7 +78,7 @@
 
 ### Added
 - Next.js 14 app shell (App Router, TypeScript, Tailwind CSS)
-- Supabase auth — magic link login (`adam@thestyerteam.com`)
+- Supabase auth — magic link login
 - Protected `/dashboard` route with session middleware
 - Supabase Postgres schema — 4 tables: `contacts`, `loans`, `documents`, `activity_log`
 - Supabase Storage bucket: `documents`

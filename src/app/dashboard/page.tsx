@@ -1,17 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import SignOutButton from './SignOutButton'
 
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
 
-  if (!user) {
-    redirect('/')
-  }
-
-  // Verify DB connectivity — count rows in each table
   const [contacts, loans, documents, activity] = await Promise.all([
     supabase.from('contacts').select('*', { count: 'exact', head: true }),
     supabase.from('loans').select('*', { count: 'exact', head: true }),
@@ -19,92 +14,95 @@ export default async function DashboardPage() {
     supabase.from('activity_log').select('*', { count: 'exact', head: true }),
   ])
 
-  const tables = [
-    { name: 'Contacts', count: contacts.count ?? 0, error: contacts.error },
-    { name: 'Loans', count: loans.count ?? 0, error: loans.error },
-    { name: 'Documents', count: documents.count ?? 0, error: documents.error },
-    { name: 'Activity log', count: activity.count ?? 0, error: activity.error },
+  const stats = [
+    { label: 'CONTACTS',  value: contacts.count  ?? 0, err: contacts.error },
+    { label: 'LOANS',     value: loans.count      ?? 0, err: loans.error },
+    { label: 'DOCUMENTS', value: documents.count  ?? 0, err: documents.error },
+    { label: 'ACTIVITY',  value: activity.count   ?? 0, err: activity.error },
   ]
 
   return (
-    <main className="min-h-screen bg-gray-950 p-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="p-8 min-h-full" style={{ background: 'var(--bg)' }}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">LoanOS</h1>
-            <p className="text-gray-400 text-sm mt-0.5">{user.email}</p>
-          </div>
-          <SignOutButton />
-        </div>
-
-        {/* Status banner */}
-        <div className="bg-green-950 border border-green-800 rounded-lg p-4 mb-6 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
-          <p className="text-green-300 text-sm font-medium">
-            Infrastructure connected — auth, database, and storage are live
-          </p>
-        </div>
-
-        {/* Table connectivity check */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden mb-6">
-          <div className="px-4 py-3 border-b border-gray-800">
-            <h2 className="text-sm font-medium text-gray-300">Database tables</h2>
-          </div>
-          <div className="divide-y divide-gray-800">
-            {tables.map((table) => (
-              <div key={table.name} className="flex items-center justify-between px-4 py-3">
-                <span className="text-white text-sm">{table.name}</span>
-                {table.error ? (
-                  <span className="text-red-400 text-xs font-mono">{table.error.message}</span>
-                ) : (
-                  <span className="text-gray-400 text-sm">{table.count} rows</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden mb-6">
-          <div className="px-4 py-3 border-b border-gray-800">
-            <h2 className="text-sm font-medium text-gray-300">Actions</h2>
-          </div>
-          <div className="p-4 flex flex-wrap gap-3">
-            <Link
-              href="/dashboard/upload"
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Upload Document
-            </Link>
-          </div>
-        </div>
-
-        {/* Auth info */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-800">
-            <h2 className="text-sm font-medium text-gray-300">Session</h2>
-          </div>
-          <div className="divide-y divide-gray-800">
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-gray-400 text-sm">User ID</span>
-              <span className="text-white text-xs font-mono">{user.id}</span>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-gray-400 text-sm">Auth provider</span>
-              <span className="text-white text-sm">Magic link (email OTP)</span>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-gray-400 text-sm">Last sign in</span>
-              <span className="text-white text-sm">
-                {new Date(user.last_sign_in_at ?? '').toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-
+      {/* ── Header ───────────────────────────────────────── */}
+      <div className="mb-8">
+        <h1
+          className="font-display text-4xl tracking-widest leading-none"
+          style={{ color: 'var(--text)' }}
+        >
+          COMMAND CENTER
+        </h1>
+        <p className="font-mono text-xs mt-2" style={{ color: 'var(--muted)' }}>
+          {user.email} · LoanOS v0.5
+        </p>
       </div>
-    </main>
+
+      {/* ── Infra status bar ─────────────────────────────── */}
+      <div
+        className="flex items-center gap-3 px-4 py-3 rounded border mb-8"
+        style={{ background: 'var(--surface2)', borderColor: 'var(--green)', borderLeftWidth: '3px' }}
+      >
+        <span
+          className="inline-block w-2 h-2 rounded-full shrink-0"
+          style={{ background: 'var(--green)' }}
+        />
+        <span className="font-mono text-xs tracking-wide" style={{ color: 'var(--green)' }}>
+          SYSTEMS NOMINAL — AUTH · DATABASE · STORAGE
+        </span>
+      </div>
+
+      {/* ── Stat cards ───────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
+        {stats.map(({ label, value, err }) => (
+          <div
+            key={label}
+            className="rounded border p-5"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)', borderLeftWidth: '3px', borderLeftColor: 'var(--gold)' }}
+          >
+            <div
+              className="font-mono text-[10px] tracking-widest mb-3"
+              style={{ color: 'var(--muted)' }}
+            >
+              {label}
+            </div>
+            {err ? (
+              <div className="font-mono text-xs" style={{ color: 'var(--red)' }}>
+                ERR
+              </div>
+            ) : (
+              <div
+                className="font-display text-5xl leading-none"
+                style={{ color: 'var(--text)' }}
+              >
+                {value}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Quick actions ─────────────────────────────────── */}
+      <div
+        className="rounded border p-5"
+        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+      >
+        <div
+          className="font-mono text-[10px] tracking-widest mb-4"
+          style={{ color: 'var(--muted)' }}
+        >
+          ACTIONS
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/dashboard/upload"
+            className="action-btn font-mono text-xs tracking-wider px-4 py-2.5 rounded border transition-colors"
+            style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}
+          >
+            &gt;_ UPLOAD DOCUMENT
+          </Link>
+        </div>
+      </div>
+
+    </div>
   )
 }

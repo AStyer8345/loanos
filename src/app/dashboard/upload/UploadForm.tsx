@@ -144,19 +144,24 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
   const canSubmit = !!file && !!docType &&
     (loanMode === 'existing' ? !!selectedLoanId : !!firstName.trim())
 
+  // ── Shared input class ───────────────────────────────────
+  const inputCls = 'w-full rounded border px-3 py-2.5 font-mono text-sm outline-none transition-colors'
+  const inputStyle = { background: 'var(--surface2)', borderColor: 'var(--border)', color: 'var(--text)' }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
 
       {/* ── Doc type ─────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Document type
+        <label className="block font-mono text-[10px] tracking-widest mb-2" style={{ color: 'var(--muted)' }}>
+          DOCUMENT TYPE
         </label>
         <select
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
           required
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
+          className={inputCls}
+          style={inputStyle}
         >
           <option value="">Select type…</option>
           {DOC_TYPES.map((t) => (
@@ -167,8 +172,8 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
 
       {/* ── Loan ─────────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Loan record
+        <label className="block font-mono text-[10px] tracking-widest mb-2" style={{ color: 'var(--muted)' }}>
+          LOAN RECORD
         </label>
 
         {loans.length > 0 && (
@@ -178,13 +183,13 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
                 key={mode}
                 type="button"
                 onClick={() => setLoanMode(mode)}
-                className={`text-sm px-3 py-1.5 rounded-md border transition-colors ${
-                  loanMode === mode
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
-                }`}
+                className="font-mono text-[10px] tracking-widest px-3 py-1.5 rounded border transition-colors"
+                style={loanMode === mode
+                  ? { background: 'var(--gold)', borderColor: 'var(--gold)', color: 'var(--bg)' }
+                  : { background: 'transparent', borderColor: 'var(--border)', color: 'var(--muted)' }
+                }
               >
-                {mode === 'existing' ? 'Existing loan' : 'New loan'}
+                {mode === 'existing' ? 'EXISTING' : 'NEW LOAN'}
               </button>
             ))}
           </div>
@@ -195,7 +200,8 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
             value={selectedLoanId}
             onChange={(e) => setSelectedLoanId(e.target.value)}
             required
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
+            className={inputCls}
+            style={inputStyle}
           >
             <option value="">Select loan…</option>
             {loans.map((loan) => (
@@ -213,14 +219,16 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required={loanMode === 'new'}
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                className={inputCls}
+                style={{ ...inputStyle, width: undefined }}
               />
               <input
                 type="text"
                 placeholder="Last name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                className={inputCls}
+                style={{ ...inputStyle, width: undefined }}
               />
             </div>
             <input
@@ -228,7 +236,8 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
               placeholder="Loan number (optional)"
               value={loanNumber}
               onChange={(e) => setLoanNumber(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              className={inputCls}
+              style={inputStyle}
             />
           </div>
         )}
@@ -236,25 +245,25 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
 
       {/* ── File ─────────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          PDF file
+        <label className="block font-mono text-[10px] tracking-widest mb-2" style={{ color: 'var(--muted)' }}>
+          PDF FILE
         </label>
         <label
           htmlFor="pdf-input"
-          className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-700 rounded-lg p-8 cursor-pointer hover:border-gray-500 transition-colors"
+          className="flex flex-col items-center justify-center w-full rounded border-2 border-dashed p-8 cursor-pointer transition-colors"
+          style={{ borderColor: file ? 'var(--gold)' : 'var(--border)', background: 'var(--surface2)' }}
         >
           {file ? (
             <div className="text-center">
-              <p className="text-white text-sm font-medium">{file.name}</p>
-              <p className="text-gray-400 text-xs mt-1">
+              <p className="font-mono text-sm font-medium" style={{ color: 'var(--text)' }}>{file.name}</p>
+              <p className="font-mono text-xs mt-1" style={{ color: 'var(--muted)' }}>
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </p>
-              <p className="text-blue-400 text-xs mt-2">Click to change</p>
+              <p className="font-mono text-xs mt-2" style={{ color: 'var(--gold)' }}>Click to change</p>
             </div>
           ) : (
             <div className="text-center">
-              <p className="text-gray-400 text-sm">Click to select a PDF</p>
-              <p className="text-gray-600 text-xs mt-1">PDF files only</p>
+              <p className="font-mono text-xs tracking-widest" style={{ color: 'var(--muted)' }}>CLICK TO SELECT PDF</p>
             </div>
           )}
           <input
@@ -271,13 +280,13 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
       {/* ── Result banner ─────────────────────────────────────── */}
       {result && (
         <div
-          className={`rounded-lg p-4 text-sm ${
-            result.ok
-              ? 'bg-green-950 border border-green-800 text-green-300'
-              : 'bg-red-950 border border-red-800 text-red-300'
-          }`}
+          className="rounded border px-4 py-3 font-mono text-xs"
+          style={result.ok
+            ? { borderColor: 'var(--green)', color: 'var(--green)', background: 'rgba(62,214,138,0.05)' }
+            : { borderColor: 'var(--red)',   color: 'var(--red)',   background: 'rgba(224,92,92,0.05)' }
+          }
         >
-          {result.msg}
+          {result.ok ? '✓ ' : '✗ '}{result.msg}
         </div>
       )}
 
@@ -285,9 +294,13 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
       <button
         type="submit"
         disabled={!canSubmit || uploading}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors"
+        className="w-full font-mono text-xs tracking-widest py-3 px-4 rounded border transition-colors"
+        style={canSubmit && !uploading
+          ? { borderColor: 'var(--gold)', color: 'var(--bg)', background: 'var(--gold)' }
+          : { borderColor: 'var(--border)', color: 'var(--muted)', background: 'transparent' }
+        }
       >
-        {uploading ? 'Uploading…' : 'Upload document'}
+        {uploading ? 'UPLOADING…' : 'UPLOAD DOCUMENT'}
       </button>
 
     </form>

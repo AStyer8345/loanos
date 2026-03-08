@@ -23,7 +23,10 @@ Phase 1 complete as of March 8, 2026.
 - Supabase Storage bucket: `documents` (must be lowercase — case-sensitive)
 - PDF upload end-to-end verified: Storage → documents row → activity_log
 - Next.js 14 deploying to Netlify (deploy fixes applied)
-- /docs folder: loanos.html (build tracker), loanos-system-map.html (system map)
+- HTML docs moved to `public/docs/` — served by Next.js at `/docs/*.html`
+- /dashboard/build-tracker: auth-gated iframe → /docs/loanos.html
+- /dashboard/system-map: auth-gated iframe → /docs/loanos-system-map.html
+- Bloomberg terminal × modern SaaS redesign: Bebas Neue + IBM Plex Mono/Sans, gold accent (#c9a84c), dark surface palette
 
 ## Tech Stack
 
@@ -129,6 +132,7 @@ Phase 1 complete. Next: Phase 2 — Automation
 - Migration 002: added doc_type + uploaded_by columns to documents table
 - Storage bucket `documents` must exist (lowercase) with RLS policies set
 - Netlify build fixes: mkdir -p public/docs, contacts type array fix, loanLabel array index fix
+- Phase 1 build tracker (loanos.html): all 7 items statically green (taskChecks '0-6' added)
 
 ## Skills
 
@@ -136,8 +140,8 @@ User-defined Claude skills live at `/skills/user/`. Each subdirectory is one ski
 
 ## Docs
 
-- Build tracker: /docs/loanos.html
-- System map: /docs/loanos-system-map.html
+- Build tracker: /public/docs/loanos.html (served at /docs/loanos.html)
+- System map: /public/docs/loanos-system-map.html (served at /docs/loanos-system-map.html)
 - This file: /CONTEXT.md
 - Changelog: /CHANGELOG.md
 

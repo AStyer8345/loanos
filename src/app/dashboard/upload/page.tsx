@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import UploadForm from './UploadForm'
 
@@ -21,28 +20,27 @@ export default async function UploadPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen bg-gray-950 p-6">
-      <div className="max-w-xl mx-auto">
+    <div className="p-8 min-h-full" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-xl">
 
-        <div className="flex items-center gap-3 mb-8">
-          <Link
-            href="/dashboard"
-            className="text-gray-400 hover:text-white text-sm transition-colors"
-          >
-            ← Dashboard
-          </Link>
-        </div>
-
-        <h1 className="text-2xl font-bold text-white mb-1">Upload Document</h1>
-        <p className="text-gray-400 text-sm mb-8">
+        <h1
+          className="font-display text-4xl tracking-widest leading-none mb-1"
+          style={{ color: 'var(--text)' }}
+        >
+          UPLOAD DOCUMENT
+        </h1>
+        <p className="font-mono text-xs mb-8" style={{ color: 'var(--muted)' }}>
           Attach a PDF to a loan record — stored in Supabase, logged automatically.
         </p>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div
+          className="rounded border p-6"
+          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+        >
           <UploadForm loans={(loans ?? []) as Loan[]} userId={user.id} />
         </div>
 
       </div>
-    </main>
+    </div>
   )
 }

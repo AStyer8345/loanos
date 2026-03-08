@@ -110,7 +110,7 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
           file_size:   file.size,
           mime_type:   'application/pdf',
           doc_type:    docType,
-          uploaded_by: 'adam',
+          uploaded_by: userId,
         })
         .select('id')
         .single()

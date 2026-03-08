@@ -5,4 +5,4 @@
 
 ALTER TABLE documents
   ADD COLUMN IF NOT EXISTS doc_type     TEXT,
-  ADD COLUMN IF NOT EXISTS uploaded_by  TEXT DEFAULT 'adam';
+  ADD COLUMN IF NOT EXISTS uploaded_by  UUID REFERENCES auth.users(id);

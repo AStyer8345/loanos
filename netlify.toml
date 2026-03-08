@@ -1,0 +1,11 @@
+[build]
+  command   = "npm run build"
+  publish   = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # NODE_ENV is intentionally NOT set here — Netlify sets it to production during build
+  # Setting it manually caused npm to skip devDependencies
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

@@ -1,0 +1,315 @@
+{
+  "name": "LoanOS — Contract Received",
+  "nodes": [
+    {
+      "id": "node-0001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "path": "loanos-contract-received",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseData": "noData"
+      },
+      "webhookId": "loanos-contract-received"
+    },
+    {
+      "id": "node-0002",
+      "name": "Is Contract?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "check-doc-type",
+              "leftValue": "={{ $json.doc_type }}",
+              "rightValue": "contract",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "node-0003",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 220],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/documents/' + $('Webhook').item.json.file_path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": { "responseFormat": "file" }
+          }
+        }
+      }
+    },
+    {
+      "id": "node-0004",
+      "name": "Build Claude Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 220],
+      "parameters": {
+        "jsCode": "// Get base64 PDF from binary download\nconst binaryKey = Object.keys($input.item.binary)[0];\nconst base64PDF = $input.item.binary[binaryKey].data;\n\nif (!base64PDF) {\n  throw new Error('No PDF binary data received from Supabase Storage');\n}\n\n// Load extraction prompt from environment or use inline\nconst systemPrompt = `You are a mortgage document parser specializing in Texas TREC One to Four Family Residential Contract (Resale) forms. Extract all fields from the attached contract PDF.\n\nRULES:\n- Return ONLY a valid JSON object. No markdown, no code blocks, no explanation.\n- If a field cannot be found, use null — do not guess or fabricate values.\n- Calculate option_expiration as effective_date + option_period_days if not explicitly stated.\n- All dates must be formatted as YYYY-MM-DD.\n- All monetary values must be numbers (no dollar signs, no commas).\n- buyer_names and buyer_emails must be arrays even if only one buyer.`;\n\nconst userPrompt = `Extract all contract fields and return as a single JSON object with these exact keys. Use null for missing fields. Return raw JSON only — no markdown.\n\n{\n  \"buyer_names\": [],\n  \"buyer_emails\": [],\n  \"seller_names\": [],\n  \"seller_emails\": [],\n  \"buyer_agent_name\": null,\n  \"buyer_agent_email\": null,\n  \"buyer_agent_phone\": null,\n  \"buyer_agent_brokerage\": null,\n  \"listing_agent_name\": null,\n  \"listing_agent_email\": null,\n  \"listing_agent_phone\": null,\n  \"listing_agent_brokerage\": null,\n  \"property_address\": null,\n  \"city\": null,\n  \"state\": \"TX\",\n  \"zip\": null,\n  \"county\": null,\n  \"legal_description\": null,\n  \"sales_price\": null,\n  \"cash_at_closing\": null,\n  \"loan_amount\": null,\n  \"earnest_money\": null,\n  \"option_fee\": null,\n  \"option_period_days\": null,\n  \"effective_date\": null,\n  \"closing_date\": null,\n  \"option_expiration\": null,\n  \"title_company_name\": null,\n  \"title_company_address\": null,\n  \"title_contact_name\": null,\n  \"title_contact_email\": null,\n  \"title_contact_phone\": null,\n  \"seller_concessions\": null,\n  \"hoa\": null,\n  \"home_warranty_amount\": null,\n  \"property_condition\": null,\n  \"survey_provided\": null,\n  \"special_provisions\": null,\n  \"loan_type\": null,\n  \"down_payment_pct\": null,\n  \"estimated_ltv\": null,\n  \"missing_fields\": []\n}`;\n\nconst claudeBody = {\n  model: 'claude-opus-4-6',\n  max_tokens: 4096,\n  system: systemPrompt,\n  messages: [\n    {\n      role: 'user',\n      content: [\n        {\n          type: 'document',\n          source: {\n            type: 'base64',\n            media_type: 'application/pdf',\n            data: base64PDF\n          }\n        },\n        {\n          type: 'text',\n          text: userPrompt\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{ json: { claudeBody } }];"
+      }
+    },
+    {
+      "id": "node-0005",
+      "name": "Call Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 220],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.claudeBody) }}"
+      }
+    },
+    {
+      "id": "node-0006",
+      "name": "Parse Contract Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 220],
+      "parameters": {
+        "jsCode": "// Extract text from Claude response\nconst content = $json.content;\nif (!content || !content[0] || content[0].type !== 'text') {\n  throw new Error('Unexpected Claude API response format: ' + JSON.stringify($json).substring(0, 300));\n}\n\nlet rawText = content[0].text.trim();\n\n// Strip markdown code fences if Claude added them despite instructions\nif (rawText.startsWith('```')) {\n  rawText = rawText.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n}\n\nlet fields;\ntry {\n  fields = JSON.parse(rawText);\n} catch (e) {\n  throw new Error('JSON parse failed. Claude returned: ' + rawText.substring(0, 500));\n}\n\n// Calculate down_payment_pct if missing\nif (fields.cash_at_closing && fields.sales_price && !fields.down_payment_pct) {\n  fields.down_payment_pct = parseFloat(((fields.cash_at_closing / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate estimated_ltv if missing\nif (fields.loan_amount && fields.sales_price && !fields.estimated_ltv) {\n  fields.estimated_ltv = parseFloat(((fields.loan_amount / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate option_expiration if missing\nif (fields.effective_date && fields.option_period_days && !fields.option_expiration) {\n  const d = new Date(fields.effective_date + 'T00:00:00');\n  d.setDate(d.getDate() + parseInt(fields.option_period_days));\n  fields.option_expiration = d.toISOString().split('T')[0];\n}\n\n// Carry forward webhook metadata\nconst webhook = $('Webhook').first().json;\nfields._document_id = webhook.document_id;\nfields._loan_id = webhook.loan_id;\nfields._user_id = webhook.user_id;\nfields._file_name = webhook.file_name;\n\nreturn [{ json: fields }];"
+      }
+    },
+    {
+      "id": "node-0007",
+      "name": "Update Loan Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 220],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/loans?id=eq.' + $json._loan_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  status: 'under_contract',\n  sales_price: $json.sales_price,\n  loan_amount: $json.loan_amount,\n  loan_type: $json.loan_type,\n  property_address: [$json.property_address, $json.city, $json.state, $json.zip].filter(Boolean).join(', '),\n  closing_date: $json.closing_date,\n  effective_date: $json.effective_date,\n  option_expiration: $json.option_expiration,\n  earnest_money: $json.earnest_money,\n  option_fee: $json.option_fee,\n  seller_concessions: $json.seller_concessions,\n  down_payment_pct: $json.down_payment_pct,\n  estimated_ltv: $json.estimated_ltv,\n  county: $json.county,\n  title_company: $json.title_company_name,\n  buyer_agent_name: $json.buyer_agent_name,\n  buyer_agent_email: $json.buyer_agent_email,\n  buyer_agent_brokerage: $json.buyer_agent_brokerage,\n  listing_agent_name: $json.listing_agent_name,\n  listing_agent_email: $json.listing_agent_email,\n  listing_agent_brokerage: $json.listing_agent_brokerage,\n  contract_data: $json\n}) }}"
+      }
+    },
+    {
+      "id": "node-0008",
+      "name": "Log Contract Received",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1780, 220],
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/activity_log",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  action: 'contract.received',\n  entity_type: 'loan',\n  entity_id: $('Parse Contract Fields').first().json._loan_id,\n  metadata: {\n    document_id: $('Parse Contract Fields').first().json._document_id,\n    file_name: $('Parse Contract Fields').first().json._file_name,\n    buyer_names: $('Parse Contract Fields').first().json.buyer_names,\n    property_address: $('Parse Contract Fields').first().json.property_address,\n    sales_price: $('Parse Contract Fields').first().json.sales_price,\n    loan_amount: $('Parse Contract Fields').first().json.loan_amount,\n    closing_date: $('Parse Contract Fields').first().json.closing_date,\n    option_expiration: $('Parse Contract Fields').first().json.option_expiration,\n    buyer_agent_name: $('Parse Contract Fields').first().json.buyer_agent_name,\n    missing_fields: $('Parse Contract Fields').first().json.missing_fields\n  },\n  user_id: $('Parse Contract Fields').first().json._user_id\n}) }}"
+      }
+    },
+    {
+      "id": "node-0009",
+      "name": "Build Party Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 420],
+      "parameters": {
+        "jsCode": "const f = $('Parse Contract Fields').first().json;\n\nconst val = (v) => (v !== null && v !== undefined && v !== '') ? v : '[MISSING]';\nconst fmt$ = (n) => n ? '$' + Number(n).toLocaleString('en-US') : '[MISSING]';\nconst fmtDate = (d) => {\n  if (!d) return '[MISSING]';\n  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n};\n\nconst buyerNames = Array.isArray(f.buyer_names) && f.buyer_names.length ? f.buyer_names.join(' & ') : '[MISSING]';\nconst sellerNames = Array.isArray(f.seller_names) && f.seller_names.length ? f.seller_names.join(' & ') : '[MISSING]';\n\nconst subject = `Under Contract \\u2013 ${val(f.property_address)} | ${buyerNames}`;\n\nconst html = `<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;\">\n<p>Hey team,</p>\n<p>Thanks for getting this over \\u2014 excited to work on this one together. I've reviewed the contract and wanted to confirm the key details on my end and lay out next steps from the lending side.</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">DEAL SUMMARY</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p>\nProperty: <strong>${val(f.property_address)}</strong><br>\nBuyer(s): <strong>${buyerNames}</strong><br>\nSales Price: <strong>${fmt$(f.sales_price)}</strong><br>\nLoan Amount: <strong>${fmt$(f.loan_amount)}</strong><br>\nDown Payment: <strong>~${val(f.down_payment_pct)}%</strong><br>\nEarnest Money: <strong>${fmt$(f.earnest_money)}</strong><br>\nOption Fee: <strong>${fmt$(f.option_fee)}</strong><br>\nOption Period Expires: <strong>${fmtDate(f.option_expiration)}</strong><br>\nClosing Date: <strong>${fmtDate(f.closing_date)}</strong><br>\nSeller Concessions: <strong>${fmt$(f.seller_concessions)}</strong><br>\nTitle Company: <strong>${val(f.title_company_name)}</strong>\n</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">NEXT STEPS FROM LENDING</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<ol style=\"padding-left: 20px;\">\n<li>Loan registered and disclosures issued</li>\n<li>Rate locked</li>\n<li>File submitted to processing and underwriting</li>\n<li>Appraisal ordered once we have initial approval</li>\n<li>Clear to close targeted ahead of ${fmtDate(f.closing_date)}</li>\n</ol>\n<p>I'll keep everyone in the loop on milestone updates as we move through the process. If anything changes on the contract side, please let me know right away so we can stay aligned.</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">TRANSACTION PARTIES</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p>\nBuyer(s): ${buyerNames}<br>\nSeller(s): ${sellerNames}<br>\nBuyer's Agent: ${val(f.buyer_agent_name)} \\u2014 ${val(f.buyer_agent_brokerage)}<br>\nListing Agent: ${val(f.listing_agent_name)} \\u2014 ${val(f.listing_agent_brokerage)}<br>\nTitle: ${val(f.title_company_name)} \\u2014 ${val(f.title_contact_name)}<br>\nLender: Adam Styer \\u2014 Mortgage Solutions LP\n</p>\n<p>Let me know if I'm missing anyone or if any of the above needs correcting. Let's get this closed.</p>\n<p>\nAdam Styer<br>\nSenior Loan Officer | Mortgage Solutions LP<br>\nNMLS# 513013<br>\n(512) 956-6010<br>\nadam@thestyerteam.com\n</p>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    subject,\n    html,\n    to: 'adam@thestyerteam.com',\n    original_to: val(f.buyer_agent_email),\n    original_cc: [f.listing_agent_email, f.title_contact_email].filter(Boolean).join(', ')\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-0010",
+      "name": "Draft Party Reply",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [1780, 420],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Microsoft Outlook — Adam Styer"
+        }
+      },
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ $json.subject }}",
+        "bodyContent": "={{ $json.html }}",
+        "bodyContentType": "html",
+        "toRecipients": "={{ $json.to }}",
+        "additionalFields": {}
+      }
+    },
+    {
+      "id": "node-0011",
+      "name": "Build Borrower Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 620],
+      "parameters": {
+        "jsCode": "const f = $('Parse Contract Fields').first().json;\n\nconst val = (v) => (v !== null && v !== undefined && v !== '') ? v : '[MISSING]';\nconst fmt$ = (n) => n ? '$' + Number(n).toLocaleString('en-US') : '[MISSING]';\nconst fmtDate = (d) => {\n  if (!d) return '[MISSING]';\n  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n};\n\nconst buyerNames = Array.isArray(f.buyer_names) && f.buyer_names.length ? f.buyer_names.join(' & ') : '[MISSING]';\nconst buyerFirstNames = Array.isArray(f.buyer_names) && f.buyer_names.length\n  ? f.buyer_names.map(n => n.split(' ')[0]).join(' & ')\n  : '[MISSING]';\nconst buyerEmails = Array.isArray(f.buyer_emails) && f.buyer_emails.length ? f.buyer_emails.join(', ') : null;\n\nconst subject = `Welcome \\u2013 Your Loan for ${val(f.property_address)} | Adam Styer`;\n\nconst html = `<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;\">\n<p>Hi ${buyerFirstNames},</p>\n<p>Congratulations on getting under contract on ${val(f.property_address)} \\u2014 that's a big deal and I'm glad to be working with you on the financing side.</p>\n<p>I wanted to reach out personally to introduce myself and walk you through what happens next so there are no surprises.</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">WHAT HAPPENS FROM HERE</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<ol style=\"padding-left: 20px;\">\n<li><strong>Document Collection</strong> \\u2014 If we need any additional documents from you, you can upload them directly through your loan portal below. The faster we get everything in, the faster we move.</li>\n<li><strong>Processing &amp; Underwriting</strong> \\u2014 Once everything is submitted, our team reviews and works toward an initial approval.</li>\n<li><strong>Appraisal</strong> \\u2014 We'll order the appraisal once we have approval. This confirms the home's value for the lender.</li>\n<li><strong>Clear to Close</strong> \\u2014 Once all conditions are met, we issue the clear to close and you'll receive your final closing numbers.</li>\n<li><strong>Closing Day</strong> \\u2014 Currently scheduled for <strong>${fmtDate(f.closing_date)}</strong>. You sign, you fund, you get the keys.</li>\n</ol>\n<p><a href=\"https://mslp.my1003app.com/513013/register?time=1767737197980\" style=\"display: inline-block; background-color: #1a73e8; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;\">Loan Portal \\u2014 Upload Documents</a></p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">IMPORTANT \\u2014 PROTECT YOUR APPROVAL</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p>From now until you have your keys in hand, please avoid the following:</p>\n<ul style=\"padding-left: 20px;\">\n<li>Do not open any new credit accounts or make large purchases</li>\n<li>Do not move or transfer large sums of money between accounts</li>\n<li>Do not change jobs or employment status</li>\n<li>Do not co-sign on anything</li>\n<li>Do not miss any payments on existing accounts</li>\n</ul>\n<p>Any of these can delay or jeopardize your closing. When in doubt, call me first.</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">YOUR DEAL AT A GLANCE</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p>\nProperty: <strong>${val(f.property_address)}</strong><br>\nSales Price: <strong>${fmt$(f.sales_price)}</strong><br>\nTarget Closing: <strong>${fmtDate(f.closing_date)}</strong><br>\nYour Agent: <strong>${val(f.buyer_agent_name)}</strong>\n</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p style=\"font-weight: bold; font-size: 15px;\">HOW TO REACH ME</p>\n<hr style=\"border: 1px solid #cccccc;\">\n<p>I'm available by call, text, or email. If something comes up or you have a question at any point in this process \\u2014 reach out. That's what I'm here for.</p>\n<p><strong>Call or text:</strong> <a href=\"tel:5129566010\">(512) 956-6010</a><br>\n<strong>Email:</strong> adam@thestyerteam.com<br>\n<strong>Schedule a call:</strong> <a href=\"https://calendly.com/adamstyer/15minutes\">Book Time on My Calendar</a>\n</p>\n<p>Looking forward to getting this done for you.</p>\n<p>\nAdam Styer<br>\nSenior Loan Officer | Mortgage Solutions LP<br>\nNMLS# 513013<br>\n(512) 956-6010<br>\nadam@thestyerteam.com\n</p>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    subject,\n    html,\n    to: 'adam@thestyerteam.com',\n    original_to: buyerEmails\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-0012",
+      "name": "Draft Borrower Welcome",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [1780, 620],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Microsoft Outlook — Adam Styer"
+        }
+      },
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ $json.subject }}",
+        "bodyContent": "={{ $json.html }}",
+        "bodyContentType": "html",
+        "toRecipients": "={{ $json.to }}",
+        "additionalFields": {}
+      }
+    },
+    {
+      "id": "node-0013",
+      "name": "Log Emails Drafted",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2000, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/activity_log",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  action: 'emails.drafted',\n  entity_type: 'loan',\n  entity_id: $('Parse Contract Fields').first().json._loan_id,\n  metadata: {\n    drafts_created: 2,\n    party_reply_subject: $('Build Party Email').first().json.subject,\n    borrower_welcome_subject: $('Build Borrower Email').first().json.subject,\n    review_note: 'Saved to Outlook Drafts — adam@thestyerteam.com. Swap recipients before sending.'\n  },\n  user_id: $('Parse Contract Fields').first().json._user_id\n}) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Is Contract?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Contract?": {
+      "main": [
+        [{ "node": "Download PDF", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [{ "node": "Build Claude Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Claude Request": {
+      "main": [
+        [{ "node": "Call Claude API", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call Claude API": {
+      "main": [
+        [{ "node": "Parse Contract Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Contract Fields": {
+      "main": [
+        [
+          { "node": "Update Loan Record", "type": "main", "index": 0 },
+          { "node": "Build Party Email", "type": "main", "index": 0 },
+          { "node": "Build Borrower Email", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Update Loan Record": {
+      "main": [
+        [{ "node": "Log Contract Received", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Party Email": {
+      "main": [
+        [{ "node": "Draft Party Reply", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Borrower Email": {
+      "main": [
+        [{ "node": "Draft Borrower Welcome", "type": "main", "index": 0 }]
+      ]
+    },
+    "Draft Party Reply": {
+      "main": [
+        [{ "node": "Log Emails Drafted", "type": "main", "index": 0 }]
+      ]
+    },
+    "Draft Borrower Welcome": {
+      "main": [
+        [{ "node": "Log Emails Drafted", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "pinData": {},
+  "tags": [{ "name": "LoanOS" }, { "name": "Phase 2" }]
+}

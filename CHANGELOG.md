@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [0.6.0] — 2026-03-08 — Phase 2: Contract Automation
+
+### Added
+- `supabase/migrations/003_contract_fields.sql` — adds 14 contract-extracted columns to `loans` table (`sales_price`, `closing_date`, `effective_date`, `option_expiration`, `earnest_money`, `option_fee`, `seller_concessions`, `down_payment_pct`, `estimated_ltv`, `county`, `title_company`, agent/brokerage fields, `contract_data JSONB`); enables `pg_net`; creates `on_contract_document_inserted` trigger that fires n8n webhook only on `doc_type = 'contract'` inserts
+- `n8n/prompts/contract-extraction.txt` — Claude system prompt for Texas TREC contract PDF extraction; returns strict JSON schema with 35 fields; field-by-field location guide by page/paragraph
+- `n8n/contract-received.workflow.json` — 13-node importable n8n workflow:
+  - Webhook trigger → IF filter → Download PDF from Supabase Storage
+  - Build + Call Claude API (`claude-opus-4-6`, document content type)
+  - Parse Contract Fields (strips markdown fences, calculates derived fields)
+  - Update loan record + Log contract.received in parallel
+  - Build + Draft party reply email (Outlook draft to adam@thestyerteam.com)
+  - Build + Draft borrower welcome email (Outlook draft to adam@thestyerteam.com)
+  - Log emails.drafted
+- `docs/contract-automation-setup.md` — step-by-step setup guide (migration, n8n import, credential config, placeholder replacements, test instructions, troubleshooting)
+
+---
+
 ## [0.5.0] — 2026-03-08
 
 ### Added

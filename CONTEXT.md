@@ -16,7 +16,9 @@ Deploy: Netlify (not Vercel)
 
 ## Current Status
 
-Phase 1 complete as of March 8, 2026.
+Phase 1 complete. Phase 2 (Automation) started — contract pipeline complete as of March 8, 2026.
+
+### Phase 1 (complete)
 - Supabase connected
 - Auth: email/password — switched from magic link
 - 4 tables live: contacts, loans, documents, activity_log
@@ -27,6 +29,14 @@ Phase 1 complete as of March 8, 2026.
 - /dashboard/build-tracker: auth-gated iframe → /docs/loanos.html
 - /dashboard/system-map: auth-gated iframe → /docs/loanos-system-map.html
 - Bloomberg terminal × modern SaaS redesign: Bebas Neue + IBM Plex Mono/Sans, gold accent (#c9a84c), dark surface palette
+
+### Phase 2 (in progress)
+- **Contract automation pipeline built** — see `n8n/contract-received.workflow.json`
+  - Supabase pg_net trigger → n8n webhook → Claude API PDF extraction → loan update → Outlook drafts
+  - Migration 003 adds 14 contract columns + contract_data JSONB to loans table
+  - Two email drafts: party reply (BA + LA + title) and borrower welcome
+  - Setup guide: `docs/contract-automation-setup.md`
+- Still needed: run migration 003 in Supabase, import workflow to n8n, configure credentials
 
 ## Tech Stack
 
@@ -113,9 +123,10 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 
 ## What To Build Next
 
-Phase 1 complete. Next: Phase 2 — Automation
-- n8n workflow: extract data from contract / CD / pre-approval PDFs
-- Auto-draft Outlook emails on key events
+Phase 2 — Automation (in progress)
+- ✅ Contract automation: n8n pipeline for contract extraction + Outlook drafts
+- CD extraction workflow (similar pattern to contract)
+- Pre-approval extraction workflow
 - Arive webhook integration (planned)
 
 ## Phase 1 Complete (as of 2026-03-08)

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import SignOutButton from './SignOutButton'
 
@@ -62,6 +63,21 @@ export default async function DashboardPage() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Quick actions */}
+        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-gray-800">
+            <h2 className="text-sm font-medium text-gray-300">Actions</h2>
+          </div>
+          <div className="p-4 flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/upload"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              Upload Document
+            </Link>
           </div>
         </div>
 

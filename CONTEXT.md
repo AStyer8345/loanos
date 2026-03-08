@@ -109,11 +109,25 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 
 ## What To Build Next
 
-PDF upload interface:
-- Upload contract / CD / pre-approval PDF
-- Store in Supabase Storage linked to loan record
-- Log upload in activity_log
-- This is the next Phase 1 task
+Phase 1 complete. Next: Phase 2 — Automation
+- n8n workflow: extract data from contract / CD / pre-approval PDFs
+- Auto-draft Outlook emails on key events
+- Arive webhook integration (planned)
+
+## Phase 1 Complete (as of 2026-03-08)
+
+- Supabase schema: contacts, loans, documents, activity_log
+- Supabase Storage bucket: documents
+- Auth: magic link (adam@thestyerteam.com)
+- /dashboard: live with table row counts + quick actions
+- /dashboard/upload: PDF upload form
+  - Select doc type (7 options)
+  - Attach to existing loan OR create new contact+loan inline
+  - Stores in Supabase Storage: {userId}/{loanId}/{timestamp}_{filename}
+  - Inserts documents row + activity_log entry
+- Migration 002: added doc_type + uploaded_by columns to documents table
+- NOTE: Run migration 002 in Supabase SQL Editor before using upload
+- NOTE: Set Supabase Storage policy to allow auth uploads to {userId}/ prefix
 
 ## Skills
 

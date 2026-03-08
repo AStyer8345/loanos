@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [0.3.0] — 2026-03-08
+
+### Added
+- `supabase/migrations/002_documents_metadata.sql` — adds `doc_type` and `uploaded_by` columns to `documents` table
+- `src/app/dashboard/upload/page.tsx` — server component: auth-gated, fetches loans, renders UploadForm
+- `src/app/dashboard/upload/UploadForm.tsx` — client component: full PDF upload flow
+  - Doc type select (Purchase Contract, CD, Pre-Approval Letter, Income, Bank Statements, ID, Other)
+  - Existing loan dropdown OR new contact+loan inline creation (first name, last name, loan number)
+  - Dashed PDF file picker with name + size preview
+  - Uploads to Supabase Storage at `{userId}/{loanId}/{timestamp}_{safeFilename}`
+  - Inserts `documents` row + `activity_log` entry
+  - Green/red result banner, form resets on success
+- Dashboard "Actions" section with Upload Document link
+
+### Manual Steps Required
+- Run `002_documents_metadata.sql` in Supabase SQL Editor
+- Add Supabase Storage policy: allow authenticated uploads to `{userId}/` prefix in `documents` bucket
+
+---
+
 ## [0.2.0] — 2026-03-08
 
 ### Added

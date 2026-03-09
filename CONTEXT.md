@@ -16,7 +16,7 @@ Deploy: Netlify (not Vercel)
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) started — contract pipeline complete as of March 8, 2026.
+Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built and debugged as of March 8, 2026.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -31,12 +31,32 @@ Phase 1 complete. Phase 2 (Automation) started — contract pipeline complete as
 - Bloomberg terminal × modern SaaS redesign: Bebas Neue + IBM Plex Mono/Sans, gold accent (#c9a84c), dark surface palette
 
 ### Phase 2 (in progress)
-- **Contract automation pipeline built** — see `n8n/contract-received.workflow.json`
+- **Contract automation pipeline built and debugged** — `n8n/contract-received.workflow.json`
   - Supabase pg_net trigger → n8n webhook → Claude API PDF extraction → loan update → Outlook drafts
   - Migration 003 adds 14 contract columns + contract_data JSONB to loans table
   - Two email drafts: party reply (BA + LA + title) and borrower welcome
   - Setup guide: `docs/contract-automation-setup.md`
-- Still needed: run migration 003 in Supabase, import workflow to n8n, configure credentials
+- **Supabase trigger fixed** — dropped old broken trigger, created `contract_uploaded_trigger` using `net.http_post` with dynamic JSON body (document_id, loan_id, file_path, doc_type)
+- **Workflow expressions fixed** — all `$json.body.*` references corrected, placeholder credential headers removed, auth flows through n8n credentials
+- **Workflow imported to n8n** — archived old version, imported fixed JSON
+- **Credentials assigned** — "Header Auth account" (Supabase service role) → 4 Supabase nodes; "Header Auth account 2" (Anthropic API key) → Call Claude API
+- Still needed: publish workflow, test end-to-end with real contract PDF, run migration 003 in Supabase
+
+### n8n Key Facts
+- Webhook POST body is nested under `$json.body.xxx` — not `$json.xxx` directly
+- Production webhook URL: `https://styer.app.n8n.cloud/webhook/loanos-contract-received`
+- Header Auth credential name must have no spaces (e.g. `apikey` not `Supabase Service Role`)
+- `net.http_post()` body param must be `::jsonb` not `::text`
+
+## Contacts Import (complete — 2026-03-08)
+- 2,441 contacts imported from Salesforce export (XLS/HTML format)
+- Source: report1773019847271.xls (Salesforce export)
+- 30 of 32 columns mapped to Supabase contacts schema
+- 2 columns skipped (no matching schema): Mailing Country, Contact ID
+- Type conversions handled: dates (MM/DD/YYYY → YYYY-MM-DD), booleans, empty strings → null
+- Contact types mapped: Client → borrower, Business Contact → other
+- Phone fallback: Mobile used if Phone empty
+- user_id set to adam@thestyerteam.com
 
 ## Tech Stack
 
@@ -95,8 +115,8 @@ These tools are working and must NOT be broken during LoanOS build:
 
 ## Phase Roadmap
 
-- Phase 1 (NOW): Foundation — Supabase schema, auth, PDF upload, basic dashboard
-- Phase 2: Automation — n8n workflows, contract/CD/pre-approval extraction, Outlook drafts
+- Phase 1 (COMPLETE): Foundation — Supabase schema, auth, PDF upload, basic dashboard
+- Phase 2 (IN PROGRESS): Automation — n8n workflows, contract/CD/pre-approval extraction, Outlook drafts
 - Phase 3: Calculator Suite — 6 calculators replacing Mortgage Coach, Claude narratives
 - Phase 4: SaaS — multi-tenant RLS, Stripe billing, white-label, license to LOs
 
@@ -123,11 +143,17 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 
 ## What To Build Next
 
-Phase 2 — Automation (in progress)
+### Phase 2 — Automation (in progress)
 - ✅ Contract automation: n8n pipeline for contract extraction + Outlook drafts
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)
+
+### Phase 2 — Contacts Module (complete — 2026-03-08)
+- `/dashboard/contacts` — paginated table (50/page), real-time search, type/stage/lead_source filters
+- Slide-out panel: view all fields, edit mode, saves to Supabase in-place
+- CONTACTS added to sidebar nav
+- Next: list/tag segmentation for automation targeting
 
 ## Phase 1 Complete (as of 2026-03-08)
 

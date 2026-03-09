@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [0.7.0] — 2026-03-08 — Contacts Module
+
+### Added
+- `src/app/dashboard/contacts/page.tsx` — full Contacts module (Client Component)
+  - Paginated table: 50/page, ordered by last_name, total count displayed
+  - Real-time search (300ms debounce): searches first_name, last_name, email, phone via Supabase `.or()` ilike
+  - Filters: contact_type (borrower/realtor/other), stage, lead_source (options auto-populated from live data)
+  - Clear filters button appears when any filter is active
+  - Table columns: Name, Type (color-coded badge), Phone, Email, Stage, Lead Source, Referred By, Created
+  - Click row → 400px fixed slide-out panel with all contact fields (priority fields first, then alphabetical)
+  - Edit mode in slide-out: inline inputs/selects/textarea per field type, readonly for created_at/updated_at
+  - Save updates Supabase and refreshes row in-place (no full reload), cancel discards changes
+  - Bloomberg terminal UI: Bebas Neue header, IBM Plex Mono labels + data, gold #c9a84c accents
+  - Row hover and selected states; main content shifts right (paddingRight: 400px) when panel open
+- `src/app/dashboard/SidebarNav.tsx` — added CONTACTS nav link (after DASHBOARD, before UPLOAD DOC)
+
+---
+
 ## [0.6.0] — 2026-03-08 — Phase 2: Contract Automation
 
 ### Added

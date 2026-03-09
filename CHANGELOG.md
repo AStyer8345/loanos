@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## [1.0.2] — 2026-03-09 — Contract Automation Live
+
+### Completed
+- n8n workflow `loanos-contract-received` published and tested end-to-end with real contract PDF
+- Migration 003 (`003_contract_fields.sql`) applied — 14 contract columns + `contract_data JSONB` live in `loans` table
+- Full pipeline confirmed: PDF upload → Supabase trigger → n8n webhook → Claude extraction → loan update → two Outlook drafts
+
+---
+
 ## [1.0.1] — 2026-03-09 — MCC Migration Applied + Dev Server Fixed
 
 ### Fixed

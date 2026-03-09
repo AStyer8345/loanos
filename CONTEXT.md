@@ -31,16 +31,12 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 - Bloomberg terminal × modern SaaS redesign: Bebas Neue + IBM Plex Mono/Sans, gold accent (#c9a84c), dark surface palette
 
 ### Phase 2 (in progress)
-- **Contract automation pipeline built and debugged** — `n8n/contract-received.workflow.json`
+- **Contract automation pipeline — LIVE ✅** — `n8n/contract-received.workflow.json`
   - Supabase pg_net trigger → n8n webhook → Claude API PDF extraction → loan update → Outlook drafts
-  - Migration 003 adds 14 contract columns + contract_data JSONB to loans table
+  - Migration 003 applied — 14 contract columns + contract_data JSONB live in loans table
   - Two email drafts: party reply (BA + LA + title) and borrower welcome
+  - Workflow published, tested end-to-end with real contract PDF — confirmed working (2026-03-09)
   - Setup guide: `docs/contract-automation-setup.md`
-- **Supabase trigger fixed** — dropped old broken trigger, created `contract_uploaded_trigger` using `net.http_post` with dynamic JSON body (document_id, loan_id, file_path, doc_type)
-- **Workflow expressions fixed** — all `$json.body.*` references corrected, placeholder credential headers removed, auth flows through n8n credentials
-- **Workflow imported to n8n** — archived old version, imported fixed JSON
-- **Credentials assigned** — "Header Auth account" (Supabase service role) → 4 Supabase nodes; "Header Auth account 2" (Anthropic API key) → Call Claude API
-- Still needed: publish workflow, test end-to-end with real contract PDF, run migration 003 in Supabase
 
 ### n8n Key Facts
 - Webhook POST body is nested under `$json.body.xxx` — not `$json.xxx` directly

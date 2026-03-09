@@ -145,7 +145,8 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)
 
-### Phase 2 — Marketing Command Center (2026-03-09) ✅ COMPLETE
+### Phase 2 — Marketing Command Center (2026-03-09) ✅ LIVE
+- **Netlify build fix (2026-03-09)**: ESLint was blocking deploy — root cause was missing `export default function MarketingPage()`. Added main component + fixed unused `s` param in TodayTab + eslint-disable on `applySmartList` in contacts. Deployed as commit b8d1d57.
 - `/dashboard/marketing` — full MCC port from styer-mortgage-site → LoanOS native page
 - **Migration 004 applied** — `mcc_state` table live in Supabase with RLS
 - **State storage**: `mcc_state` Supabase table (migration 004) — single JSONB blob per user, key = `'mcc'`

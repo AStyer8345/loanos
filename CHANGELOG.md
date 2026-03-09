@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [1.0.3] — 2026-03-09 — MCC Live (Netlify Build Fixed)
+
+### Fixed
+- `marketing/page.tsx`: missing `export default function MarketingPage()` was blocking Netlify build and causing 12 cascading ESLint `no-unused-vars` errors — all tab components, hooks, and constants were defined but unreachable
+- `marketing/page.tsx`: removed unused `s` prop from `TodayTab` signature
+- `contacts/page.tsx`: added `eslint-disable-next-line` for `no-explicit-any` on `applySmartList`
+
+### Added
+- `MarketingPage` component: tab nav (TODAY → BRAIN DUMP), Supabase load on mount, `save()` + `toggle()` wired to all 8 tab sub-components
+
+---
+
 ## [1.0.2] — 2026-03-09 — Contract Automation Live
 
 ### Completed

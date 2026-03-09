@@ -149,11 +149,20 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)
 
-### Phase 2 — Contacts Module (complete — 2026-03-08)
-- `/dashboard/contacts` — paginated table (50/page), real-time search, type/stage/lead_source filters
-- Slide-out panel: view all fields, edit mode, saves to Supabase in-place
-- CONTACTS added to sidebar nav
-- Next: list/tag segmentation for automation targeting
+### Phase 2 — Contacts Module (rebuilt — 2026-03-09, Smart Lists)
+- `/dashboard/contacts` — full Smart List sidebar rebuild (557 lines, TypeScript clean)
+- **Smart List sidebar** (w-56): 7 lists — All Contacts, New Applications, Active Borrowers, Closed Borrowers, All Realtors, Top / Target, Everyone Else
+- Live count badges: 7 parallel Supabase `{ count: 'exact', head: true }` queries via `Promise.all()`
+- `applySmartList(query, listId)` — switch-based filter chaining (`.eq()`, `.in()`, `.or()`)
+- Switching active list resets page, search, filters, selected contact, and edit state
+- Gold `#c9a84c` active list highlight; section headers (BORROWERS, REALTORS, OTHER) in `var(--muted)`
+- Main content: dynamic header (active list label + count), 300ms debounced search, stage + lead_source selects, CLEAR button
+- Table: 6 columns (Name, Type badge, Email, Phone, Stage, Lead Source), sticky header, 50/page pagination
+- `useMemo(() => createClient(), [])` — stabilized Supabase client reference (prevents infinite fetch loop)
+- Slide-out panel (400px fixed right): contact name in Bebas Neue, type badge, EDIT/CANCEL/SAVE
+- Edit mode: `orderedFields()` — priority fields first, then alpha, skips id/timestamps
+- Save patches Supabase in-place and updates local state; cancel discards
+- CONTACTS added to sidebar nav (carried over from initial build)
 
 ## Phase 1 Complete (as of 2026-03-08)
 

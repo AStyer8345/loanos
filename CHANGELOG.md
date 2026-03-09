@@ -1,5 +1,27 @@
 # LoanOS Changelog
 
+## [0.8.0] — 2026-03-09 — Smart List Contacts Rebuild
+
+### Changed
+- `src/app/dashboard/contacts/page.tsx` — full rewrite with Smart List sidebar (557 lines, TypeScript clean)
+  - **Smart List sidebar** (w-56): 7 lists — All Contacts, New Applications, Active Borrowers, Closed Borrowers, All Realtors, Top/Target Realtors, Everyone Else
+  - Live count badges: 7 parallel Supabase `{ count: 'exact', head: true }` queries via `Promise.all()`
+  - `applySmartList(query, listId)` — switch-based Supabase filter chaining (`.eq()`, `.in()`, `.or()`)
+  - Switching active list resets page, search, filters, selected contact, and edit state
+  - Gold `#c9a84c` active list highlight; section headers (BORROWERS, REALTORS, OTHER) in muted text
+  - Main content: dynamic header shows active list label + contact count
+  - Filters: 300ms debounced search (name/email/phone), stage select, lead_source select, CLEAR button
+  - Table: 6 columns (Name, Type badge, Email, Phone, Stage, Lead Source), sticky header, 50/page pagination
+  - `useMemo(() => createClient(), [])` — stabilized Supabase client to prevent infinite fetch loops
+  - Row hover + selected state via direct `.style.background` mutation (no re-render cost)
+  - Main content shifts right (`paddingRight: 400px`, `transition: 0.2s`) when slide-out panel is open
+  - Slide-out panel (400px fixed, `top: 56px`): contact name in Bebas Neue, type badge, EDIT/CANCEL/SAVE
+  - Edit mode: `orderedFields()` — priority fields first, then alpha, skips id/timestamps
+  - Save patches Supabase in-place, updates local state; cancel discards; saving spinner state
+  - Bloomberg terminal UI: `var(--muted)` for secondary text, `var(--font-mono)`, gold `#c9a84c` accents
+
+---
+
 ## [0.7.0] — 2026-03-08 — Contacts Module
 
 ### Added

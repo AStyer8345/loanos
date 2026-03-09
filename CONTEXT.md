@@ -158,6 +158,15 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Supabase client stabilized with `useMemo(() => createClient(), [])`
 - Bloomberg terminal UI matches rest of LoanOS — same CSS vars, Bebas Neue, IBM Plex Mono
 
+### Phase 2 — Closed Clients Section (2026-03-09)
+- `/dashboard/closed-clients` — new page, contacts WHERE stage = 'Closed Client' joined with loans (PostgREST nested select)
+- Columns: Name, Loan Amount, Close Date, Loan Type, Referring Agent
+- Client-side search by name + sort by closing_date (default desc) — PostgREST can't sort by nested fields
+- Bloomberg terminal UI — matches rest of LoanOS
+- SidebarNav: CLOSED CLIENTS link added after CONTACTS
+- dashboard/page.tsx: 5th stat card (CLOSED CLIENTS count) + grid expanded to `lg:grid-cols-5`
+- contacts/page.tsx: `viewMode` state (`'active'|'all'`); default `'active'` excludes `stage = 'Closed Client'` from All Contacts fetch + count; Active/All toggle in filter bar
+
 ### Phase 2 — Contacts Module (rebuilt × 2 — 2026-03-09, Smart Lists + Columns + Create)
 - `/dashboard/contacts` — full rewrite (544 lines, TypeScript clean)
 - **Smart List sidebar** (220px): 8 lists — All Contacts, New Apps, Active Borrowers, **In Process** (new), Closed Borrowers, All Realtors, Top/Target, Everyone Else

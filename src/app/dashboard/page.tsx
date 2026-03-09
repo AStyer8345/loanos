@@ -7,18 +7,20 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const [contacts, loans, documents, activity] = await Promise.all([
+  const [contacts, loans, documents, activity, closedClients] = await Promise.all([
     supabase.from('contacts').select('*', { count: 'exact', head: true }),
     supabase.from('loans').select('*', { count: 'exact', head: true }),
     supabase.from('documents').select('*', { count: 'exact', head: true }),
     supabase.from('activity_log').select('*', { count: 'exact', head: true }),
+    supabase.from('contacts').select('*', { count: 'exact', head: true }).eq('stage', 'Closed Client'),
   ])
 
   const stats = [
-    { label: 'CONTACTS',  value: contacts.count  ?? 0, err: contacts.error },
-    { label: 'LOANS',     value: loans.count      ?? 0, err: loans.error },
-    { label: 'DOCUMENTS', value: documents.count  ?? 0, err: documents.error },
-    { label: 'ACTIVITY',  value: activity.count   ?? 0, err: activity.error },
+    { label: 'CONTACTS',       value: contacts.count      ?? 0, err: contacts.error },
+    { label: 'LOANS',          value: loans.count          ?? 0, err: loans.error },
+    { label: 'DOCUMENTS',      value: documents.count      ?? 0, err: documents.error },
+    { label: 'ACTIVITY',       value: activity.count       ?? 0, err: activity.error },
+    { label: 'CLOSED CLIENTS', value: closedClients.count  ?? 0, err: closedClients.error },
   ]
 
   return (
@@ -52,7 +54,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Stat cards ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-5">
         {stats.map(({ label, value, err }) => (
           <div
             key={label}

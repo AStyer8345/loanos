@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## [1.0.4] — 2026-03-09 — Closed Clients Section
+
+### Added
+- `/dashboard/closed-clients/page.tsx` — new page querying `contacts WHERE stage = 'Closed Client'` joined with `loans` via PostgREST nested select. Columns: Name, Loan Amount, Close Date, Loan Type, Referring Agent. Client-side search by name + sort by close date (default: most recent first). Bloomberg terminal UI.
+- `SidebarNav.tsx` — added CLOSED CLIENTS nav link after CONTACTS
+- `dashboard/page.tsx` — added 5th parallel HEAD count for Closed Clients; added CLOSED CLIENTS stat card; changed grid to `lg:grid-cols-5`
+- `contacts/page.tsx` — added `viewMode` state (`'active' | 'all'`). Default `'active'` excludes `stage = 'Closed Client'` from All Contacts list + count. Active/All toggle buttons in filter bar.
+
+---
+
 ## [1.0.3] — 2026-03-09 — MCC Live (Netlify Build Fixed)
 
 ### Fixed

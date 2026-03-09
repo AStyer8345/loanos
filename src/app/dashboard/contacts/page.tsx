@@ -128,6 +128,9 @@ export default function ContactsPage() {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
   const [showColPicker, setShowColPicker]   = useState(false)
 
+  // view mode: 'active' excludes Closed Client contacts (they have their own page)
+  const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
+
   // init columns from localStorage (after hydration)
   useEffect(() => {
     try {
@@ -140,7 +143,9 @@ export default function ContactsPage() {
   const fetchCounts = useCallback(async () => {
     const h = { count: 'exact', head: true } as const
     const [all, newApps, active, inProc, closed, allR, topR, everyoneElse] = await Promise.all([
-      supabase.from('contacts').select('*', h),
+      viewMode === 'active'
+        ? supabase.from('contacts').select('*', h).neq('stage', 'Closed Client')
+        : supabase.from('contacts').select('*', h),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'New', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved', 'Pre-Approval', 'Approved']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Processing', 'Submitted', 'Conditional Approval', 'Clear to Close']),
@@ -159,13 +164,16 @@ export default function ContactsPage() {
       'top-realtors':  topR.count           ?? 0,
       'everyone-else': everyoneElse.count   ?? 0,
     })
-  }, [supabase])
+  }, [supabase, viewMode])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
   const fetchContacts = useCallback(async () => {
     setLoading(true)
     let q = supabase.from('contacts').select('*')
     q = applySmartList(q, activeList)
+    if (activeList === 'all' && viewMode === 'active') {
+      q = q.neq('stage', 'Closed Client')
+    }
     if (search.trim()) {
       const s = `%${search.trim()}%`
       q = q.or(`first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},phone.ilike.${s}`)
@@ -174,7 +182,7 @@ export default function ContactsPage() {
     const { data, error } = await q
     if (!error) { setContacts(data ?? []); setTotal(data?.length ?? 0) }
     setLoading(false)
-  }, [supabase, activeList, search, sort])
+  }, [supabase, activeList, search, sort, viewMode])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
@@ -299,6 +307,18 @@ export default function ContactsPage() {
                 outline: 'none',
               }}
             />
+            <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+              {(['active', 'all'] as const).map(mode => (
+                <button key={mode} onClick={() => setViewMode(mode)} style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
+                  padding: '6px 12px', cursor: 'pointer', border: 'none',
+                  background: viewMode === mode ? '#c9a84c' : 'transparent',
+                  color: viewMode === mode ? '#000' : 'var(--muted)',
+                }}>
+                  {mode === 'active' ? 'ACTIVE' : 'ALL'}
+                </button>
+              ))}
+            </div>
             <div style={{ position: 'relative' }}>
               <button onClick={() => setShowColPicker(p => !p)} style={{
                 fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',

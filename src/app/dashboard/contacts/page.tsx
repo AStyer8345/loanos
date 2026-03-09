@@ -66,6 +66,7 @@ const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by
 const LS_COLUMNS_KEY  = 'loanos_contacts_columns_v1'
 
 // ── Stage filter helper ───────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function applySmartList(query: any, listId: string): any {
   switch (listId) {
     case 'new-apps':

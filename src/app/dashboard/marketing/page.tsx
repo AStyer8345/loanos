@@ -199,9 +199,8 @@ function Btn({ onClick, children, variant = 'default' }: {
 // ── TODAY tab ─────────────────────────────────────────────────────────────────
 
 function TodayTab({
-  s, todayDow, todayTasks, toggle,
+  todayDow, todayTasks, toggle,
 }: {
-  s: MCCState
   todayDow: number
   todayTasks: Record<string, boolean>
   toggle: (taskId: string, tracker?: string) => void
@@ -824,6 +823,86 @@ function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function MarketingPage() {
+  const supabase = useSupabase()
+  const [s, setState] = useState<MCCState>(BLANK_STATE)
+  const [tab, setTab] = useState<Tab>('TODAY')
+  const [loading, setLoading] = useState(true)
+
+  const todayKey = isoDate()
+  const todayDow = new Date().getDay()
+  const todayTasks = s.tasks[todayKey] ?? {}
+
+  useEffect(() => {
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('key', 'mcc')
+      .single()
+      .then(({ data }) => {
+        if (data) setState(data.value as MCCState)
+        setLoading(false)
+      })
+  }, [supabase])
+
+  function save(next: MCCState) {
+    setState(next)
+    supabase
+      .from('mcc_state')
+      .upsert({ key: 'mcc', value: next }, { onConflict: 'user_id,key' })
+  }
+
+  function toggle(taskId: string, tracker?: string) {
+    const dayTasks = { ...todayTasks, [taskId]: !todayTasks[taskId] }
+    const next: MCCState = {
+      ...s,
+      tasks: { ...s.tasks, [todayKey]: dayTasks },
+      last: tracker ? { ...s.last, [tracker]: isoDate() } : s.last,
+    }
+    save(next)
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64 font-mono text-xs" style={{ color: 'var(--muted)' }}>
+      LOADING…
+    </div>
+  )
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Tab nav */}
+      <div className="flex flex-wrap gap-1">
+        {TABS.map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="font-mono text-[10px] tracking-widest px-3 py-1.5 rounded-sm transition-colors"
+            style={{
+              background: tab === t ? 'var(--gold)' : 'var(--bg)',
+              color: tab === t ? 'var(--bg-deep)' : 'var(--muted)',
+              border: `1px solid ${tab === t ? 'var(--gold)' : 'var(--border)'}`,
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {tab === 'TODAY'       && <TodayTab todayDow={todayDow} todayTasks={todayTasks} toggle={toggle} />}
+      {tab === 'WEEK'        && <WeekTab s={s} todayKey={todayKey} />}
+      {tab === 'CONTACTS'    && <ContactsTab s={s} save={save} />}
+      {tab === 'SOCIAL'      && <SocialTab s={s} save={save} />}
+      {tab === 'NEWSLETTERS' && <NewslettersTab s={s} save={save} />}
+      {tab === 'TRACKER'     && <TrackerTab s={s} />}
+      {tab === 'LOG'         && <LogTab s={s} save={save} />}
+      {tab === 'BRAIN DUMP'  && <BrainDumpTab s={s} save={save} />}
     </div>
   )
 }

@@ -149,20 +149,17 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)
 
-### Phase 2 — Contacts Module (rebuilt — 2026-03-09, Smart Lists)
-- `/dashboard/contacts` — full Smart List sidebar rebuild (557 lines, TypeScript clean)
-- **Smart List sidebar** (w-56): 7 lists — All Contacts, New Applications, Active Borrowers, Closed Borrowers, All Realtors, Top / Target, Everyone Else
-- Live count badges: 7 parallel Supabase `{ count: 'exact', head: true }` queries via `Promise.all()`
-- `applySmartList(query, listId)` — switch-based filter chaining (`.eq()`, `.in()`, `.or()`)
-- Switching active list resets page, search, filters, selected contact, and edit state
-- Gold `#c9a84c` active list highlight; section headers (BORROWERS, REALTORS, OTHER) in `var(--muted)`
-- Main content: dynamic header (active list label + count), 300ms debounced search, stage + lead_source selects, CLEAR button
-- Table: 6 columns (Name, Type badge, Email, Phone, Stage, Lead Source), sticky header, 50/page pagination
-- `useMemo(() => createClient(), [])` — stabilized Supabase client reference (prevents infinite fetch loop)
-- Slide-out panel (400px fixed right): contact name in Bebas Neue, type badge, EDIT/CANCEL/SAVE
-- Edit mode: `orderedFields()` — priority fields first, then alpha, skips id/timestamps
-- Save patches Supabase in-place and updates local state; cancel discards
-- CONTACTS added to sidebar nav (carried over from initial build)
+### Phase 2 — Contacts Module (rebuilt × 2 — 2026-03-09, Smart Lists + Columns + Create)
+- `/dashboard/contacts` — full rewrite (544 lines, TypeScript clean)
+- **Smart List sidebar** (220px): 8 lists — All Contacts, New Apps, Active Borrowers, **In Process** (new), Closed Borrowers, All Realtors, Top/Target, Everyone Else
+- Smart List filters use `.in('stage', [...])` to cover all Salesforce-imported stage variants (e.g. 'Lead'/'New'/'Application', 'Pre-Approved'/'Approved', 'In Process'/'Processing'/'Submitted'/'Conditional Approval'/'Clear to Close', 'Closed'/'Funded'/'Closed/Funded')
+- "Everyone Else" filter: `.neq('contact_type','borrower').neq('contact_type','realtor')` — catches null + any future types
+- 8 parallel HEAD count queries via `Promise.all()`; `applySmartList(query, listId)` switch-based filter
+- **+ NEW CONTACT button** → modal form (First Name, Last Name, Email, Phone, Mobile, Type, Stage, Lead Source, Referred By, Company, Notes). Inserts to Supabase, refreshes list + counts. `BLANK_CONTACT` const outside component for stable useState initializer.
+- **Customizable columns** — COLUMNS ▾ dropdown, 15 available columns, persisted to `localStorage` key `loanos_contacts_columns_v1`. Default: Name, Type, Phone, Email, Stage, Referred By. `ColumnDef[] = { id, label, render }` pattern outside component.
+- **Slide-out edit** — EDIT button → inline inputs for all writable fields, SAVE CHANGES patches Supabase + updates local state + refreshes counts, CANCEL discards. Stage change moves contact to correct Smart List on next fetch.
+- `useMemo(() => createClient(), [])` — stabilized Supabase client (prevents infinite fetch loop)
+- Bloomberg terminal UI: gold `#c9a84c`, `var(--muted)`, `var(--font-mono)`, `var(--font-display)`, `var(--surface)`, `var(--border)`
 
 ## Phase 1 Complete (as of 2026-03-08)
 

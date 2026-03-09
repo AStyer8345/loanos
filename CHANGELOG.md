@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [0.9.0] — 2026-03-09 — Contacts: Smart List Fixes + Create Contact + Customizable Columns
+
+### Changed
+- `src/app/dashboard/contacts/page.tsx` — full rewrite (544 lines, TypeScript clean)
+  - **In Process smart list** — new 8th list: `contact_type = 'borrower'` AND `stage IN ['In Process','Processing','Submitted','Conditional Approval','Clear to Close']`
+  - **All stage filters** updated to `.in('stage', [...])` arrays covering all Salesforce-imported variants (was single `.eq()`)
+  - **Everyone Else** fixed: now `.neq('contact_type','borrower').neq('contact_type','realtor')` — catches null + 'other' + any future types (was `.eq('contact_type','other')`)
+  - **+ NEW CONTACT modal** — gold button in header → form (First/Last Name, Email, Phone, Mobile, Type, Stage, Lead Source, Referred By, Company, Notes) → Supabase insert → list + count refresh
+  - **Customizable columns** — COLUMNS ▾ dropdown checklist (15 columns available), persisted to `localStorage` key `loanos_contacts_columns_v1`, default: Name, Type, Phone, Email, Stage, Referred By
+  - **Slide-out edit** — EDIT → inline inputs → SAVE patches Supabase + updates local state; stage change moves contact to correct Smart List on next fetch
+  - `ColumnDef[] = { id, label, render }` config array outside component; `BLANK_CONTACT` const outside component
+  - `Promise.all()` expanded to 8 parallel HEAD count queries (added in-process)
+
+---
+
 ## [0.8.0] — 2026-03-09 — Smart List Contacts Rebuild
 
 ### Changed

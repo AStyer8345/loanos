@@ -27,7 +27,7 @@
           "conditions": [
             {
               "id": "check-doc-type",
-              "leftValue": "={{ $json.doc_type }}",
+              "leftValue": "={{ $json.body.doc_type }}",
               "rightValue": "contract",
               "operator": { "type": "string", "operation": "equals" }
             }
@@ -44,16 +44,9 @@
       "position": [680, 220],
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/documents/' + $('Webhook').item.json.file_path }}",
+        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/storage/v1/object/documents/' + $('Webhook').first().json.body.file_path }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
-            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" }
-          ]
-        },
         "options": {
           "response": {
             "response": { "responseFormat": "file" }
@@ -80,10 +73,11 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-api-key", "value": "YOUR_ANTHROPIC_API_KEY" },
             { "name": "anthropic-version", "value": "2023-06-01" },
             { "name": "content-type", "value": "application/json" }
           ]
@@ -101,7 +95,7 @@
       "typeVersion": 2,
       "position": [1340, 220],
       "parameters": {
-        "jsCode": "// Extract text from Claude response\nconst content = $json.content;\nif (!content || !content[0] || content[0].type !== 'text') {\n  throw new Error('Unexpected Claude API response format: ' + JSON.stringify($json).substring(0, 300));\n}\n\nlet rawText = content[0].text.trim();\n\n// Strip markdown code fences if Claude added them despite instructions\nif (rawText.startsWith('```')) {\n  rawText = rawText.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n}\n\nlet fields;\ntry {\n  fields = JSON.parse(rawText);\n} catch (e) {\n  throw new Error('JSON parse failed. Claude returned: ' + rawText.substring(0, 500));\n}\n\n// Calculate down_payment_pct if missing\nif (fields.cash_at_closing && fields.sales_price && !fields.down_payment_pct) {\n  fields.down_payment_pct = parseFloat(((fields.cash_at_closing / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate estimated_ltv if missing\nif (fields.loan_amount && fields.sales_price && !fields.estimated_ltv) {\n  fields.estimated_ltv = parseFloat(((fields.loan_amount / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate option_expiration if missing\nif (fields.effective_date && fields.option_period_days && !fields.option_expiration) {\n  const d = new Date(fields.effective_date + 'T00:00:00');\n  d.setDate(d.getDate() + parseInt(fields.option_period_days));\n  fields.option_expiration = d.toISOString().split('T')[0];\n}\n\n// Carry forward webhook metadata\nconst webhook = $('Webhook').first().json;\nfields._document_id = webhook.document_id;\nfields._loan_id = webhook.loan_id;\nfields._user_id = webhook.user_id;\nfields._file_name = webhook.file_name;\n\nreturn [{ json: fields }];"
+        "jsCode": "// Extract text from Claude response\nconst content = $json.content;\nif (!content || !content[0] || content[0].type !== 'text') {\n  throw new Error('Unexpected Claude API response format: ' + JSON.stringify($json).substring(0, 300));\n}\n\nlet rawText = content[0].text.trim();\n\n// Strip markdown code fences if Claude added them despite instructions\nif (rawText.startsWith('```')) {\n  rawText = rawText.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n}\n\nlet fields;\ntry {\n  fields = JSON.parse(rawText);\n} catch (e) {\n  throw new Error('JSON parse failed. Claude returned: ' + rawText.substring(0, 500));\n}\n\n// Calculate down_payment_pct if missing\nif (fields.cash_at_closing && fields.sales_price && !fields.down_payment_pct) {\n  fields.down_payment_pct = parseFloat(((fields.cash_at_closing / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate estimated_ltv if missing\nif (fields.loan_amount && fields.sales_price && !fields.estimated_ltv) {\n  fields.estimated_ltv = parseFloat(((fields.loan_amount / fields.sales_price) * 100).toFixed(1));\n}\n\n// Calculate option_expiration if missing\nif (fields.effective_date && fields.option_period_days && !fields.option_expiration) {\n  const d = new Date(fields.effective_date + 'T00:00:00');\n  d.setDate(d.getDate() + parseInt(fields.option_period_days));\n  fields.option_expiration = d.toISOString().split('T')[0];\n}\n\n// Carry forward webhook metadata\nconst webhook = $('Webhook').first().json.body;\nfields._document_id = webhook.document_id;\nfields._loan_id = webhook.loan_id;\nfields._user_id = webhook.user_id;\nfields._file_name = webhook.file_name;\n\nreturn [{ json: fields }];"
       }
     },
     {
@@ -112,12 +106,12 @@
       "position": [1560, 220],
       "parameters": {
         "method": "PATCH",
-        "url": "={{ 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/loans?id=eq.' + $json._loan_id }}",
+        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?id=eq.' + $json._loan_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
-            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
             { "name": "Content-Type", "value": "application/json" },
             { "name": "Prefer", "value": "return=minimal" }
           ]
@@ -136,12 +130,12 @@
       "position": [1780, 220],
       "parameters": {
         "method": "POST",
-        "url": "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/activity_log",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
-            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
             { "name": "Content-Type", "value": "application/json" },
             { "name": "Prefer", "value": "return=minimal" }
           ]
@@ -224,12 +218,12 @@
       "position": [2000, 420],
       "parameters": {
         "method": "POST",
-        "url": "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/activity_log",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
-            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
             { "name": "Content-Type", "value": "application/json" },
             { "name": "Prefer", "value": "return=minimal" }
           ]

@@ -437,7 +437,7 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
                     {(['first', 'last', 'company', 'phone', 'email', 'note'] as const).map(f => (
                       <div key={f} className={f === 'note' ? 'col-span-2' : ''}>
                         <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>{f.toUpperCase()}</div>
-                        <Input value={(c as Record<string, string>)[f] ?? ''} onChange={v => updateContact(c.id, { [f]: v })} />
+                        <Input value={String(c[f] ?? '')} onChange={v => updateContact(c.id, { [f]: v })} />
                       </div>
                     ))}
                   </div>

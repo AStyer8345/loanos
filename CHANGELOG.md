@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## [1.0.1] — 2026-03-09 — MCC Migration Applied + Dev Server Fixed
+
+### Fixed
+- `supabase/migrations/004_mcc_state.sql` — migration applied in Supabase; `mcc_state` table + RLS now live
+- `.claude/launch.json` (project-level, not in repo) — corrected `runtimeArgs` from `loanos` → `loanos-clone`; ran `npm install` in `loanos-clone` to restore `node_modules`
+
+---
+
 ## [1.0.0] — 2026-03-09 — Marketing Command Center (MCC) Native Integration
 
 ### Added
@@ -18,8 +26,8 @@
   - Bloomberg terminal UI: CSS vars, Bebas Neue, IBM Plex Mono, gold `#c9a84c`
 - `src/app/dashboard/SidebarNav.tsx` — added MARKETING nav link (before BUILD TRACKER)
 
-### Manual Steps Required (Supabase)
-- Run migration `004_mcc_state.sql` in Supabase SQL Editor
+### Manual Steps Completed (Supabase)
+- ✅ Migration `004_mcc_state.sql` applied — `mcc_state` table + RLS live
 
 ---
 

@@ -1,5 +1,28 @@
 # LoanOS Changelog
 
+## [1.0.0] — 2026-03-09 — Marketing Command Center (MCC) Native Integration
+
+### Added
+- `supabase/migrations/004_mcc_state.sql` — new `mcc_state` table: `(user_id UUID, key TEXT, value JSONB, updated_at TIMESTAMPTZ)`, PRIMARY KEY `(user_id, key)`, RLS (SELECT/INSERT/UPDATE per user)
+- `src/app/dashboard/marketing/page.tsx` — full MCC port as native LoanOS dashboard page (`'use client'`)
+  - **8 tabs**: TODAY, WEEK, CONTACTS, SOCIAL, NEWSLETTERS, TRACKER, LOG, BRAIN DUMP
+  - **State pattern**: single JSONB blob (`mcc_state` table, key = `'mcc'`) — mirrors Netlify Blobs shape
+  - **DAYS**: Mon–Fri × task arrays (type: email/call/social/text/video/admin, optional tracker ref)
+  - **TRACKERS**: 9 trackers (Realtor Email, Borrower Email, LinkedIn, Facebook, Rate Update, Newsletter, DB Call, Lender Email, Agent Social) — shows days-since-last + traffic-light color
+  - **CONTACTS**: 4 call lists (Realtors, Pre-Approvals, Active Files, Hot Leads) — add/edit/delete, log calls with history + last touch, call notes
+  - **calledToday**: ephemeral — reset to false on page load, never persisted
+  - Tracker auto-update: checking a task with `tracker` property writes `s.last[trackerId]` = now
+  - `upsert` with `onConflict: 'user_id,key'` for both first-save and update paths
+  - `useMemo(() => createClient(), [])` — stable Supabase client
+  - Shared UI atoms: `Card`, `SectionLabel`, `Input`, `Btn` (default/gold/danger variants)
+  - Bloomberg terminal UI: CSS vars, Bebas Neue, IBM Plex Mono, gold `#c9a84c`
+- `src/app/dashboard/SidebarNav.tsx` — added MARKETING nav link (before BUILD TRACKER)
+
+### Manual Steps Required (Supabase)
+- Run migration `004_mcc_state.sql` in Supabase SQL Editor
+
+---
+
 ## [0.9.0] — 2026-03-09 — Contacts: Smart List Fixes + Create Contact + Customizable Columns
 
 ### Changed

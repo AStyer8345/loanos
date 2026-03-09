@@ -149,6 +149,17 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)
 
+### Phase 2 — Marketing Command Center (2026-03-09)
+- `/dashboard/marketing` — full MCC port from styer-mortgage-site → LoanOS native page
+- **State storage**: `mcc_state` Supabase table (migration 004) — single JSONB blob per user, key = `'mcc'`
+- **8 tabs**: TODAY (daily task checklist), WEEK (Mon–Fri progress), CONTACTS (4 call lists), SOCIAL (log posts), NEWSLETTERS (log campaigns), TRACKER (9 last-deployed trackers), LOG (activity log), BRAIN DUMP (todo list)
+- **DAYS constant**: 5 weekdays × task arrays with type, emoji, optional tracker ref
+- **TRACKERS constant**: 9 entries (Realtor Email, Borrower Email, LinkedIn, Facebook, Rate Update, Newsletter, DB Call, Lender Email, Agent Social) with freq (days) and channel
+- **`calledToday`** flag on contacts is ephemeral — reset to `false` on page load, not persisted
+- **Tracker auto-update**: checking a task with `tracker` property sets `s.last[trackerId]` = now ISO string
+- Supabase client stabilized with `useMemo(() => createClient(), [])`
+- Bloomberg terminal UI matches rest of LoanOS — same CSS vars, Bebas Neue, IBM Plex Mono
+
 ### Phase 2 — Contacts Module (rebuilt × 2 — 2026-03-09, Smart Lists + Columns + Create)
 - `/dashboard/contacts` — full rewrite (544 lines, TypeScript clean)
 - **Smart List sidebar** (220px): 8 lists — All Contacts, New Apps, Active Borrowers, **In Process** (new), Closed Borrowers, All Realtors, Top/Target, Everyone Else

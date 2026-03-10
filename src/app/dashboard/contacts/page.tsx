@@ -91,6 +91,25 @@ function PhoneCell({ value }: { value: string | null }) {
   return <>{value}</>
 }
 
+/** mailto: link only if non-empty and contains @ */
+function mailtoHref(email: string | null): string | null {
+  if (!email || !email.trim() || !email.includes('@')) return null
+  return `mailto:${email.trim()}`
+}
+
+function EmailCell({ value }: { value: string | null }) {
+  const href = mailtoHref(value)
+  if (!value?.trim()) return <>—</>
+  if (href) {
+    return (
+      <a href={href} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
+        {value}
+      </a>
+    )
+  }
+  return <>{value}</>
+}
+
 function isClosedLoan(status: string | null) {
   if (!status) return false
   const s = status.toLowerCase()
@@ -115,6 +134,42 @@ const SMART_LISTS: SmartListDef[] = [
   { id: 'unassigned',   label: 'Unassigned / Other', section: 'OTHER' },
 ]
 
+// ── Custom lists (filter builder) ─────────────────────────────────────────────
+type CustomListRule = { field: string; operator: string; value: string }
+type CustomList = { id: string; name: string; page: 'contacts' | 'loans'; rules: CustomListRule[] }
+const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
+
+const CONTACT_FILTER_FIELDS = [
+  { id: 'contact_type', label: 'Type' },
+  { id: 'stage', label: 'Stage' },
+  { id: 'lead_source', label: 'Lead Source' },
+  { id: 'referred_by', label: 'Referred By' },
+  { id: 'company_name', label: 'Company' },
+] as const
+
+const FILTER_OPERATORS = [
+  { id: 'is', label: 'is' },
+  { id: 'is_not', label: 'is not' },
+  { id: 'contains', label: 'contains' },
+  { id: 'before', label: 'before' },
+  { id: 'after', label: 'after' },
+] as const
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyCustomListRulesContact(query: any, rules: CustomListRule[]): any {
+  let q = query
+  for (const r of rules) {
+    if (!r.value?.trim()) continue
+    const val = r.value.trim()
+    if (r.operator === 'is') q = q.eq(r.field, val)
+    else if (r.operator === 'is_not') q = q.neq(r.field, val)
+    else if (r.operator === 'contains') q = q.ilike(r.field, `%${val}%`)
+    else if (r.operator === 'before') q = q.lt(r.field, val)
+    else if (r.operator === 'after') q = q.gt(r.field, val)
+  }
+  return q
+}
+
 
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
@@ -126,7 +181,7 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'type',         label: 'Type',             render: c => c.contact_type ?? '—' },
   { id: 'phone',        label: 'Phone',            render: c => <PhoneCell value={c.phone} /> },
   { id: 'mobile',       label: 'Mobile',           render: c => <PhoneCell value={c.mobile_phone} /> },
-  { id: 'email',        label: 'Email',            render: c => c.email ?? '—' },
+  { id: 'email',        label: 'Email',            render: c => <EmailCell value={c.email} /> },
   { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
   { id: 'referred_by',  label: 'Referred By',      render: c => c.referred_by
@@ -239,6 +294,13 @@ export default function ContactsPage() {
   const [bulkProcessing, setBulkProcessing] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
+  // ── Custom lists ────────────────────────────────────────────────────────
+  const [customLists, setCustomLists] = useState<CustomList[]>([])
+  const [showNewListModal, setShowNewListModal] = useState(false)
+  const [newListName, setNewListName] = useState('')
+  const [newListRules, setNewListRules] = useState<CustomListRule[]>([{ field: 'stage', operator: 'is', value: '' }])
+  const [deleteListId, setDeleteListId] = useState<string | null>(null)
+
   // sidebar collapse: default collapsed when viewport < 1280px; toggle overrides
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
@@ -255,6 +317,17 @@ export default function ContactsPage() {
     try {
       const stored = localStorage.getItem(LS_COLUMNS_KEY)
       if (stored) setVisibleColumns(JSON.parse(stored))
+    } catch {}
+  }, [])
+
+  // load custom lists from localStorage (contacts only)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LS_CUSTOM_LISTS_KEY)
+      if (stored) {
+        const all: CustomList[] = JSON.parse(stored)
+        setCustomLists(all.filter(l => l.page === 'contacts'))
+      }
     } catch {}
   }, [])
 
@@ -277,7 +350,7 @@ export default function ContactsPage() {
   // ── fetchCounts ─────────────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
     const h = { count: 'exact', head: true } as const
-    const [all, newApps, active, inProc, closed, allR, topR, unassigned] = await Promise.all([
+    const base = [
       supabase.from('contacts').select('*', h),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
@@ -286,24 +359,30 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'),
-    ])
-    setCounts({
-      all:           all.count       ?? 0,
-      'new-apps':    newApps.count   ?? 0,
-      active:        active.count    ?? 0,
-      'in-process':  inProc.count    ?? 0,
-      closed:        closed.count    ?? 0,
-      'all-realtors':allR.count      ?? 0,
-      'top-realtors':topR.count      ?? 0,
-      unassigned:    unassigned.count ?? 0,
-    })
-  }, [supabase])
+    ]
+    const builtInIds = ['all', 'new-apps', 'active', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned']
+    const results = await Promise.all(base)
+    const next: Record<string, number> = {}
+    builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })
+    for (const list of customLists) {
+      let q = supabase.from('contacts').select('*', h)
+      if (list.rules?.length) q = applyCustomListRulesContact(q, list.rules)
+      const { count } = await q
+      next[list.id] = count ?? 0
+    }
+    setCounts(next)
+  }, [supabase, customLists])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
   const fetchContacts = useCallback(async () => {
     setLoading(true)
     let q = supabase.from('contacts').select('*')
-    q = applySmartList(q, activeList)
+    if (activeList.startsWith('custom-')) {
+      const custom = customLists.find(l => l.id === activeList)
+      if (custom?.rules?.length) q = applyCustomListRulesContact(q, custom.rules)
+    } else {
+      q = applySmartList(q, activeList)
+    }
     if (search.trim()) {
       const s = `%${search.trim()}%`
       q = q.or(`first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},phone.ilike.${s}`)
@@ -313,7 +392,7 @@ export default function ContactsPage() {
     if (!error) { setContacts(data ?? []); setTotal(data?.length ?? 0) }
     setLoading(false)
     setSelectedIds(new Set())
-  }, [supabase, activeList, search, sort])
+  }, [supabase, activeList, search, sort, customLists])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
@@ -422,8 +501,48 @@ export default function ContactsPage() {
     setCreating(false)
   }
 
+  function persistCustomLists(lists: CustomList[]) {
+    try {
+      const existing = localStorage.getItem(LS_CUSTOM_LISTS_KEY)
+      const all: CustomList[] = existing ? JSON.parse(existing) : []
+      const others = all.filter(l => l.page !== 'contacts')
+      localStorage.setItem(LS_CUSTOM_LISTS_KEY, JSON.stringify([...others, ...lists]))
+    } catch {}
+  }
+
+  function handleSaveNewList() {
+    const name = newListName.trim()
+    if (!name) return
+    const list: CustomList = {
+      id: `custom-${crypto.randomUUID()}`,
+      name,
+      page: 'contacts',
+      rules: newListRules.filter(r => r.value?.trim()),
+    }
+    const next = [...customLists, list]
+    setCustomLists(next)
+    persistCustomLists(next.filter(l => l.page === 'contacts'))
+    setShowNewListModal(false)
+    setActiveList(list.id)
+    fetchCounts()
+    fetchContacts()
+  }
+
+  function handleDeleteList() {
+    if (!deleteListId) return
+    const next = customLists.filter(l => l.id !== deleteListId)
+    setCustomLists(next)
+    persistCustomLists(next)
+    if (activeList === deleteListId) setActiveList('all')
+    setDeleteListId(null)
+    fetchCounts()
+    fetchContacts()
+  }
+
   // ── Derived ───────────────────────────────────────────────────────────────
-  const activeListLabel = SMART_LISTS.find(l => l.id === activeList)?.label ?? 'All Contacts'
+  const activeListLabel = activeList.startsWith('custom-')
+    ? (customLists.find(l => l.id === activeList)?.name ?? 'Custom List')
+    : (SMART_LISTS.find(l => l.id === activeList)?.label ?? 'All Contacts')
   const colDefs         = ALL_COLUMNS.filter(c => visibleColumns.includes(c.id))
   const allSelected     = contacts.length > 0 && selectedIds.size === contacts.length
   const someSelected    = selectedIds.size > 0
@@ -496,6 +615,56 @@ export default function ContactsPage() {
               </div>
             )
           })}
+          {/* Custom lists */}
+          {customLists.map(cl => {
+            const isActive = activeList === cl.id
+            const initial = cl.name.charAt(0)
+            return (
+              <div key={cl.id} className="flex items-center gap-1" style={{ marginBottom: 2 }}>
+                <button
+                  type="button"
+                  onClick={() => { setActiveList(cl.id); setSelectedContact(null); setSelectedIds(new Set()) }}
+                  className="w-full text-left rounded flex items-center justify-between flex-1 min-w-0"
+                  style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
+                    background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
+                    color: isActive ? '#c9a84c' : 'var(--fg)',
+                    border: isActive ? '1px solid rgba(201,168,76,0.25)' : '1px solid transparent',
+                  }}
+                  title={sidebarCollapsed ? cl.name : undefined}
+                >
+                  {sidebarCollapsed ? (
+                    <span style={{ fontWeight: 600, fontSize: 12 }}>{initial}</span>
+                  ) : (
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cl.name}</span>
+                  )}
+                  <span style={{ opacity: 0.7, fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{counts[cl.id] ?? 0}</span>
+                </button>
+                {!sidebarCollapsed && (
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
+                    style={{ padding: '2px 6px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12 }}
+                    title="Delete list"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            )
+          })}
+          <button
+            type="button"
+            onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]) }}
+            style={{
+              fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c9a84c', background: 'transparent',
+              border: '1px dashed rgba(201,168,76,0.5)', padding: '6px 8px', borderRadius: 4, cursor: 'pointer',
+              marginTop: 8, width: '100%',
+            }}
+          >
+            + New List
+          </button>
         </div>
       </aside>
 
@@ -757,7 +926,9 @@ export default function ContactsPage() {
                         ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(val)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
                         : isPhone && telHref(val)
                           ? <a href={telHref(val)!} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{val}</a>
-                          : val}
+                          : label === 'Email' && mailtoHref(val)
+                            ? <a href={mailtoHref(val)!} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{val}</a>
+                            : val}
                     </div>
                   </div>
                 ) : null)}
@@ -1008,6 +1179,102 @@ export default function ContactsPage() {
                 style={{ background: 'var(--accent)', border: 'none', color: '#000',
                          borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                 CREATE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── New List (custom filter) modal ── */}
+      {showNewListModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} onClick={() => setShowNewListModal(false)}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+            padding: 24, width: 420, maxHeight: '85vh', overflowY: 'auto', fontFamily: 'var(--font-mono)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              New Smart List
+            </div>
+            <input
+              placeholder="List name"
+              value={newListName}
+              onChange={e => setNewListName(e.target.value)}
+              style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--fg)',
+                borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box', fontFamily: 'var(--font-mono)', fontSize: 12, marginBottom: 16 }}
+            />
+            <div style={{ fontSize: 10, color: 'var(--muted)', marginBottom: 8, letterSpacing: '0.06em' }}>FILTER RULES (AND)</div>
+            {newListRules.map((rule, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <select
+                  value={rule.field}
+                  onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, field: e.target.value } : r))}
+                  style={{ minWidth: 120, background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--fg)', borderRadius: 4, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                >
+                  {CONTACT_FILTER_FIELDS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                </select>
+                <select
+                  value={rule.operator}
+                  onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, operator: e.target.value } : r))}
+                  style={{ minWidth: 90, background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--fg)', borderRadius: 4, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                >
+                  {FILTER_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
+                </select>
+                <input
+                  placeholder="Value"
+                  value={rule.value}
+                  onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
+                  style={{ flex: 1, minWidth: 80, background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--fg)',
+                    borderRadius: 4, padding: '6px 8px', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                />
+                {newListRules.length > 1 && (
+                  <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>×</button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setNewListRules(prev => [...prev, { field: 'stage', operator: 'is', value: '' }])}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c9a84c', background: 'transparent', border: '1px dashed rgba(201,168,76,0.5)', padding: '6px 10px', borderRadius: 4, cursor: 'pointer', marginBottom: 16 }}
+            >
+              + Add Filter
+            </button>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowNewListModal(false)}
+                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                CANCEL
+              </button>
+              <button onClick={handleSaveNewList} disabled={!newListName.trim()}
+                style={{ background: '#c9a84c', border: 'none', color: '#000', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
+                Save List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete custom list confirmation ── */}
+      {deleteListId && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} onClick={() => setDeleteListId(null)}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+            padding: 24, width: 320, fontFamily: 'var(--font-mono)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 12, color: 'var(--fg)', marginBottom: 8 }}>Delete this list?</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16 }}>This cannot be undone.</div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteListId(null)}
+                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                CANCEL
+              </button>
+              <button onClick={handleDeleteList}
+                style={{ background: 'rgba(255,80,80,0.9)', border: 'none', color: '#fff', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                DELETE
               </button>
             </div>
           </div>

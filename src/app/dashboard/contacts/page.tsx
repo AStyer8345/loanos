@@ -905,9 +905,9 @@ export default function ContactsPage() {
             <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               New Contact
             </div>
-            {(['first_name', 'last_name', 'email', 'phone'] as (keyof Contact)[]).map(field => (
+            {(['first_name', 'last_name', 'email', 'phone'] as const).map(field => (
               <input key={field} placeholder={field.replace('_', ' ')}
-                value={(newContact as typeof BLANK_CONTACT)[field] ?? ''}
+                value={newContact[field] ?? ''}
                 onChange={e => setNewContact(prev => ({ ...prev, [field]: e.target.value }))}
                 style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
                          color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',

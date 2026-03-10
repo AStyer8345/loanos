@@ -203,7 +203,7 @@ export default function ContactsPage() {
   const [showColPicker, setShowColPicker]   = useState(false)
 
   // import modal
-  const [showImport, setShowImportModal] = useState(false)
+  const [showImport, setShowImport] = useState(false)
 
   // ── Feature 1: inline stage editing ─────────────────────────────────────
   const [editingStageId, setEditingStageId] = useState<string | null>(null)
@@ -452,7 +452,7 @@ export default function ContactsPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setShowImportModal(true)} style={{
+            <button onClick={() => setShowImport(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
               background: 'transparent', color: '#c9a84c', padding: '8px 16px', borderRadius: 4,
               border: '1px solid rgba(201,168,76,0.4)', cursor: 'pointer', fontWeight: 600,

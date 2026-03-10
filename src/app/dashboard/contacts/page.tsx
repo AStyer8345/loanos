@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import ImportModal from './ImportModal'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -24,6 +25,10 @@ type Contact = {
   last_touch: string | null
   top_realtor: boolean | null
   target_realtor: boolean | null
+  salesforce_id: string | null
+  closing_date: string | null
+  realtor_email: string | null
+  realtor_phone: string | null
   created_at: string | null
 }
 
@@ -58,8 +63,10 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'co_name',     label: 'Co-Borrower Name', render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
   { id: 'co_bday',     label: 'Co-Bday',          render: c => c.coborrower_birthday ?? '—' },
   { id: 'notes',       label: 'Notes',            render: c => c.notes ?? '—' },
-  { id: 'last_touch',  label: 'Last Touch',       render: c => c.last_touch ?? '—' },
-  { id: 'created',     label: 'Created Date',     render: c => c.created_at ? new Date(c.created_at).toLocaleDateString() : '—' },
+  { id: 'last_touch',    label: 'Last Touch',       render: c => c.last_touch ?? '—' },
+  { id: 'closing_date', label: 'Closing Date',     render: c => c.closing_date ?? '—' },
+  { id: 'realtor_email',label: 'Realtor Email',    render: c => c.realtor_email ?? '—' },
+  { id: 'created',      label: 'Created Date',     render: c => c.created_at ? new Date(c.created_at).toLocaleDateString() : '—' },
 ]
 
 const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by']
@@ -80,7 +87,7 @@ function applySmartList(query: any, listId: string): any {
                   .in('stage', ['In Process', 'Processing', 'Submitted', 'Conditional Approval', 'Clear to Close'])
     case 'closed':
       return query.eq('contact_type', 'borrower')
-                  .in('stage', ['Closed', 'Funded', 'Closed/Funded'])
+                  .in('stage', ['Closed', 'Funded', 'Closed/Funded', 'Closed Client'])
     case 'all-realtors':
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
@@ -128,8 +135,8 @@ export default function ContactsPage() {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
   const [showColPicker, setShowColPicker]   = useState(false)
 
-  // view mode: 'active' excludes Closed Client contacts (they have their own page)
-  const [viewMode, setViewMode] = useState<'active' | 'all'>('active')
+  // import modal
+  const [showImportModal, setShowImportModal] = useState(false)
 
   // init columns from localStorage (after hydration)
   useEffect(() => {
@@ -143,13 +150,11 @@ export default function ContactsPage() {
   const fetchCounts = useCallback(async () => {
     const h = { count: 'exact', head: true } as const
     const [all, newApps, active, inProc, closed, allR, topR, everyoneElse] = await Promise.all([
-      viewMode === 'active'
-        ? supabase.from('contacts').select('*', h).neq('stage', 'Closed Client')
-        : supabase.from('contacts').select('*', h),
+      supabase.from('contacts').select('*', h),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'New', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved', 'Pre-Approval', 'Approved']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Processing', 'Submitted', 'Conditional Approval', 'Clear to Close']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed', 'Funded', 'Closed/Funded']),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed', 'Funded', 'Closed/Funded', 'Closed Client']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).neq('contact_type', 'borrower').neq('contact_type', 'realtor'),
@@ -164,16 +169,13 @@ export default function ContactsPage() {
       'top-realtors':  topR.count           ?? 0,
       'everyone-else': everyoneElse.count   ?? 0,
     })
-  }, [supabase, viewMode])
+  }, [supabase])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
   const fetchContacts = useCallback(async () => {
     setLoading(true)
     let q = supabase.from('contacts').select('*')
     q = applySmartList(q, activeList)
-    if (activeList === 'all' && viewMode === 'active') {
-      q = q.neq('stage', 'Closed Client')
-    }
     if (search.trim()) {
       const s = `%${search.trim()}%`
       q = q.or(`first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},phone.ilike.${s}`)
@@ -182,7 +184,7 @@ export default function ContactsPage() {
     const { data, error } = await q
     if (!error) { setContacts(data ?? []); setTotal(data?.length ?? 0) }
     setLoading(false)
-  }, [supabase, activeList, search, sort, viewMode])
+  }, [supabase, activeList, search, sort])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
@@ -286,13 +288,22 @@ export default function ContactsPage() {
                 {total.toLocaleString()} {total === 1 ? 'contact' : 'contacts'}
               </div>
             </div>
-            <button onClick={() => setShowNewModal(true)} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: '#c9a84c', color: '#000', padding: '8px 16px', borderRadius: 4,
-              border: 'none', cursor: 'pointer', fontWeight: 600,
-            }}>
-              + NEW CONTACT
-            </button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setShowImportModal(true)} style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
+                background: 'transparent', color: '#c9a84c', padding: '8px 16px', borderRadius: 4,
+                border: '1px solid rgba(201,168,76,0.4)', cursor: 'pointer', fontWeight: 600,
+              }}>
+                ↑ IMPORT
+              </button>
+              <button onClick={() => setShowNewModal(true)} style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
+                background: '#c9a84c', color: '#000', padding: '8px 16px', borderRadius: 4,
+                border: 'none', cursor: 'pointer', fontWeight: 600,
+              }}>
+                + NEW CONTACT
+              </button>
+            </div>
           </div>
 
           {/* Filter bar */}
@@ -307,18 +318,6 @@ export default function ContactsPage() {
                 outline: 'none',
               }}
             />
-            <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
-              {(['active', 'all'] as const).map(mode => (
-                <button key={mode} onClick={() => setViewMode(mode)} style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-                  padding: '6px 12px', cursor: 'pointer', border: 'none',
-                  background: viewMode === mode ? '#c9a84c' : 'transparent',
-                  color: viewMode === mode ? '#000' : 'var(--muted)',
-                }}>
-                  {mode === 'active' ? 'ACTIVE' : 'ALL'}
-                </button>
-              ))}
-            </div>
             <div style={{ position: 'relative' }}>
               <button onClick={() => setShowColPicker(p => !p)} style={{
                 fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
@@ -490,6 +489,11 @@ export default function ContactsPage() {
             </div>
           </aside>
         )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <ImportModal onClose={() => setShowImportModal(false)} onImportComplete={() => { fetchContacts(); fetchCounts() }} />
+      )}
 
       {/* New Contact Modal */}
       {showNewModal && (

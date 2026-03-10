@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## [1.0.7] — 2026-03-09 — Closed Clients + Import Feature
+
+### Added
+- `supabase/migrations/005_closed_clients_columns.sql` — idempotent migration: adds `salesforce_id TEXT UNIQUE`, `closing_date DATE`, `realtor_email TEXT`, `realtor_phone TEXT` to contacts; adds `interest_rate NUMERIC(6,4)`, `borrower_name TEXT` to loans; creates `idx_contacts_salesforce_id` and `idx_contacts_email_lower` indexes. Run manually in Supabase SQL editor.
+- `scripts/import-closed-clients.py` — one-time import script for 868 Closed Client records from Salesforce XLS export. Reads HTML-formatted XLS via pandas + lxml, applies three-tier dedup, POSTs to Supabase REST. Idempotent.
+- `src/app/api/import/parse/route.ts` — POST endpoint, accepts `multipart/form-data` file. Auto-detects CSV vs Salesforce HTML-XLS. Returns `{ columns, rows (5 preview), count, fileType }`. `full=true` form field returns all rows.
+- `src/app/api/import/contacts/route.ts` — POST endpoint accepts `{ rows }` JSON. Three-tier dedup: salesforce_id → email (case-insensitive) → first_name+last_name. Never overwrites. Row-level error handling. Returns `{ imported, skipped, errors }`.
+- `src/app/api/import/loans/route.ts` — POST endpoint accepts `{ rows }` JSON. Requires authenticated session (user_id NOT NULL). Two-tier dedup: loan_number → borrower_name+closing_date. Row-level error handling. Returns `{ imported, skipped, errors }`.
+- `src/app/dashboard/contacts/ImportModal.tsx` — two-tab modal (Contacts / Loans). Drag-drop or browse file upload. Calls parse route for preview (5 rows + count). Confirm re-parses with `full=true` and POSTs to appropriate import route. Shows imported/skipped/error results.
+- Import button (gold outline) added to Contacts page header next to `+ NEW CONTACT`.
+
+### Changed
+- `contacts/page.tsx` — removed `viewMode` state and Active/All toggle. Removed standalone `viewMode` conditional in `fetchContacts`. Fixed `fetchCounts` for all/closed. Fixed `applySmartList` closed case to include `'Closed Client'`. Added `salesforce_id`, `closing_date`, `realtor_email`, `realtor_phone` to `Contact` type and `ALL_COLUMNS`. Wired `ImportModal`.
+- `src/app/api/import/parse/route.ts` — added `full` form field support to return all rows for import confirmation step.
+
+### Removed
+- `src/app/dashboard/closed-clients/` — entire directory deleted. Replaced by "Closed Borrowers" Smart List filter in `/dashboard/contacts`.
+- `SidebarNav.tsx` — removed CLOSED CLIENTS nav entry.
+
+---
+
 ## [1.0.6] — 2026-03-09 — Automations Trigger Buttons Live
 
 ### Changed

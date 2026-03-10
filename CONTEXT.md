@@ -178,14 +178,21 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Supabase client stabilized with `useMemo(() => createClient(), [])`
 - Bloomberg terminal UI matches rest of LoanOS — same CSS vars, Bebas Neue, IBM Plex Mono
 
-### Phase 2 — Closed Clients Section (2026-03-09)
-- `/dashboard/closed-clients` — new page, contacts WHERE stage = 'Closed Client' joined with loans (PostgREST nested select)
-- Columns: Name, Loan Amount, Close Date, Loan Type, Referring Agent
-- Client-side search by name + sort by closing_date (default desc) — PostgREST can't sort by nested fields
-- Bloomberg terminal UI — matches rest of LoanOS
-- SidebarNav: CLOSED CLIENTS link added after CONTACTS
-- dashboard/page.tsx: 5th stat card (CLOSED CLIENTS count) + grid expanded to `lg:grid-cols-5`
-- contacts/page.tsx: `viewMode` state (`'active'|'all'`); default `'active'` excludes `stage = 'Closed Client'` from All Contacts fetch + count; Active/All toggle in filter bar
+### Phase 2 — Closed Clients + Import Feature (2026-03-09 — revised session)
+- **Standalone `/dashboard/closed-clients` page REMOVED** — replaced by "Closed Borrowers" Smart List in contacts page
+- SidebarNav: CLOSED CLIENTS link removed
+- contacts/page.tsx: removed `viewMode` toggle (was `'active'|'all'`). "Closed Borrowers" Smart List filter (`stage = 'Closed Client'`) replaces it. `fetchCounts` fixed for all/closed counts.
+- **Migration 005** (`005_closed_clients_columns.sql`) — idempotent, run in Supabase SQL editor:
+  - contacts: `salesforce_id TEXT UNIQUE`, `closing_date DATE`, `realtor_email TEXT`, `realtor_phone TEXT`
+  - loans: `interest_rate NUMERIC(6,4)`, `borrower_name TEXT` (closing_date already in migration 003)
+  - Indexes: `idx_contacts_salesforce_id`, `idx_contacts_email_lower ON contacts(LOWER(email))`
+- **Import script** (`scripts/import-closed-clients.py`) — one-time, idempotent, reads Salesforce XLS (HTML format) via pandas + lxml, filters to Stage='Closed Client', three-tier dedup, POSTs to Supabase REST
+- **Import feature — UI + API:**
+  - IMPORT button (gold outline) on Contacts page header, opens `ImportModal`
+  - `ImportModal.tsx` — two tabs (Contacts / Loans), drag-drop or browse file upload, parse preview (first 5 rows + count + fileType), Confirm button → imports all rows → results (imported/skipped/errors)
+  - `POST /api/import/parse` — detects CSV vs HTML-XLS, returns preview + count. `full=true` param returns all rows (used on confirm).
+  - `POST /api/import/contacts` — three-tier dedup (salesforce_id → email → first_name+last_name), never overwrites, row-level error handling, intra-batch dedup
+  - `POST /api/import/loans` — two-tier dedup (loan_number → borrower_name+closing_date), requires auth session for user_id, row-level error handling
 
 ### Phase 2 — Contacts Module (rebuilt × 2 — 2026-03-09, Smart Lists + Columns + Create)
 - `/dashboard/contacts` — full rewrite (544 lines, TypeScript clean)

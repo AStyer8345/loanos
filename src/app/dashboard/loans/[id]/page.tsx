@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download,
-  ExternalLink, ChevronRight, AlertCircle, Check
+  ChevronRight, AlertCircle, Check
 } from 'lucide-react'
 
 const supabase = (() => {
@@ -152,7 +152,6 @@ export default function LoanDetailPage() {
   const [activity, setActivity] = useState<ActivityRow[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'automations' | 'activity'>('overview')
-  const [triggerWorkflow, setTriggerWorkflow] = useState<typeof WORKFLOWS[0] | null>(null)
 
   // ── Fetch ────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
@@ -338,7 +337,7 @@ function OverviewTab({ loan, contact }: { loan: Loan; contact: ContactRow | null
 
 // ── Documents tab ─────────────────────────────────────────────────────────────
 
-function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+function DocumentsTab({ loanId: _loanId, docs, onRefresh: _onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const [signingId, setSigningId] = useState<string | null>(null)
 
   const handleDownload = async (doc: DocRow) => {
@@ -414,7 +413,7 @@ function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCre
   return (
     <div>
       <p className="text-sm text-slate-500 mb-4">
-        Run automations pre-filled with this loan's details. Output will be an Outlook draft.
+        Run automations pre-filled with this loan&apos;s details. Output will be an Outlook draft.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {WORKFLOWS.map(wf => (

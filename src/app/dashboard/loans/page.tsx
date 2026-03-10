@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import { Search, ChevronDown, ChevronUp, FileText, AlertCircle } from 'lucide-react'
+import { Search, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
 
 const supabase = (() => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import ImportModal from './ImportModal'
 import Link from 'next/link'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -194,17 +193,17 @@ export default function ContactsPage() {
   const [contactLoansLoading, setContactLoansLoading] = useState(false)
 
   // new contact modal
-  const [showNewModal, setShowNewModal] = useState(false)
+  const [, setShowNewModal] = useState(false)
   const [newContact, setNewContact]     = useState({ ...BLANK_CONTACT })
-  const [creating, setCreating]         = useState(false)
-  const [createError, setCreateError]   = useState<string | null>(null)
+  const [, setCreating]         = useState(false)
+  const [, setCreateError]   = useState<string | null>(null)
 
   // column picker
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
   const [showColPicker, setShowColPicker]   = useState(false)
 
   // import modal
-  const [showImportModal, setShowImportModal] = useState(false)
+  const [, setShowImportModal] = useState(false)
 
   // ── Feature 1: inline stage editing ─────────────────────────────────────
   const [editingStageId, setEditingStageId] = useState<string | null>(null)
@@ -238,7 +237,7 @@ export default function ContactsPage() {
         setContactLoans(data || [])
         setContactLoansLoading(false)
       })
-  }, [selectedContact?.id])
+  }, [selectedContact?.id, supabase])
 
   // ── fetchCounts ─────────────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
@@ -325,7 +324,7 @@ export default function ContactsPage() {
     e.stopPropagation()
     setSelectedIds(prev => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) { next.delete(id) } else { next.add(id) }
       return next
     })
   }
@@ -908,7 +907,7 @@ export default function ContactsPage() {
             </div>
             {(['first_name', 'last_name', 'email', 'phone'] as (keyof Contact)[]).map(field => (
               <input key={field} placeholder={field.replace('_', ' ')}
-                value={(newContact as any)[field] ?? ''}
+                value={(newContact as typeof BLANK_CONTACT)[field] ?? ''}
                 onChange={e => setNewContact(prev => ({ ...prev, [field]: e.target.value }))}
                 style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
                          color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',

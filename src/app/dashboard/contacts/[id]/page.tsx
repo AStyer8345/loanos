@@ -267,7 +267,14 @@ export default function ContactRecordPage() {
   ]
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>
+    <div
+      style={{
+        background: 'var(--bg)',
+        minHeight: '100%',
+        color: 'var(--fg)',
+        fontFamily: 'var(--font-mono)',
+      }}
+    >
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '28px 32px' }}>
         {/* Back */}
         <Link

@@ -1,5 +1,54 @@
 # LoanOS Changelog
 
+## [1.6.0] — 2026-03-10 — Outlook Email Integration
+
+### Added
+
+**Netlify Functions**
+- `netlify/functions/outlook-auth.js` — initiates Microsoft OAuth2 flow; generates CSRF state, redirects to Azure authorize endpoint
+- `netlify/functions/outlook-callback.js` — handles OAuth callback; exchanges code for tokens, stores in `outlook_tokens` table
+- `netlify/functions/outlook-refresh.js` — exports `getValidAccessToken(email)` with 5-minute buffer refresh logic; standalone HTTP handler for status checks
+- `netlify/functions/outlook-sync.js` — fetches inbox + sent items from Graph API (`@odata.nextLink` pagination), matches emails to contacts by address, deduplicates via `external_id`, logs to `activity_log`
+
+**Supabase Migration**
+- `supabase/migrations/008_outlook_integration.sql` — creates `outlook_tokens` table; extends `activity_log` with `type`, `summary`, `raw_payload`, `external_id` columns; adds `external_id` unique index for deduplication
+
+**UI**
+- `src/components/ActivityTimeline.tsx` — dual-schema normalize (legacy `action`/`metadata` + new `type`/`summary`/`raw_payload`); icon by type (email/doc/call/note/activity); relative timestamps; expandable JSON detail; 20/page pagination
+- `src/app/dashboard/settings/page.tsx` — Outlook integration card: Connect, manual Sync Now, Disconnect; shows token status + expiry
+- `src/app/dashboard/SidebarNav.tsx` — added Settings nav entry with Settings icon
+
+**API Routes**
+- `src/app/api/outlook-status/route.ts` — GET; queries `outlook_tokens`; returns `{connected, email, expires_at, token_valid}`
+- `src/app/api/outlook-disconnect/route.ts` — POST; deletes all rows from `outlook_tokens`
+
+**n8n**
+- `n8n/outlook-sync-workflow.json` — 15-minute schedule → POST to `outlook-sync` Netlify function with `x-sync-secret` header → IF node → log stats or log error
+
+**Docs & Scripts**
+- `docs/outlook-azure-setup.md` — step-by-step Azure app registration guide
+- `scripts/test-outlook-sync.js` — CLI test runner: env check, token status, refresh check, sync trigger, recent activity query; supports `--status`, `--sync`, `--refresh` flags
+
+### Changed
+
+- `src/app/dashboard/contacts/[id]/ContactRecordView.tsx` — imports `ActivityTimeline`; extended `ActivityEntry` type with new columns; replaced inline activity rendering with `<ActivityTimeline rows={activity} />`
+- `src/app/dashboard/contacts/[id]/page.tsx` — `fetchActivity` selects new columns (`type`, `summary`, `raw_payload`, `external_id`); limit increased 100→200
+- `.env.local` — added Microsoft/Outlook env var placeholder block (7 vars)
+
+### Architecture
+
+```
+Outlook 365 inbox + sent
+        ↓ Graph API (15-min poll)
+netlify/functions/outlook-sync.js
+        ↓ match contact by email address
+supabase: activity_log (external_id deduplication)
+        ↓ render
+ActivityTimeline component (contact profile → Activity tab)
+```
+
+---
+
 ## [1.5.0] — 2026-03-10 — Arive Direct Webhook (Netlify Function + n8n Orchestrator)
 
 ### Added

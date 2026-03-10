@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [1.0.5] — 2026-03-09 — Automations Dashboard
+
+### Added
+- `/dashboard/automations/page.tsx` — visual dashboard for all 4 active n8n workflows
+  - Cards for: Final CD Email, Pre-Approval Email, Referral Intro Email, New Application Received
+  - Each card: workflow icon, trigger label, description, Active status badge, animated pipeline flow (Trigger → Claude AI → Outlook → Review), hover meta-reveal showing n8n ID + webhook path, disabled Trigger button with tooltip
+  - Animated flow dot traveling along connector lines between pipeline steps (staggered per connector)
+  - Staggered card entrance animation on page load (cardIn keyframe, 0.12s delay per card)
+  - Stat row: 4 Active / 0 Errors / Last Updated: 2026-03-09 / Engine: n8n + Claude API
+  - Infra status bar with pulsing green dot
+- `SidebarNav.tsx` — added ⚡ AUTOMATIONS link after UPLOAD DOC
+- `CONTEXT.md` — added `## Active Automations` table as living document for all workflows
+
+---
+
 ## [1.0.4] — 2026-03-09 — Closed Clients Section
 
 ### Added

@@ -137,10 +137,30 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Vercel → NOT used, Netlify only
 - Build for yourself first, license to LOs in Phase 4
 
+## Active Automations
+
+> Living document — every new workflow deployed must be added here, to the automations page, and to CHANGELOG.md.
+
+| Workflow | n8n ID | Webhook Path | Trigger |
+|---|---|---|---|
+| Final CD Email | SkzrWeR0bHZs8kWX | loanos-final-cd | Upload CD PDF |
+| Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
+| Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
+| New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
+
+- All 4 trigger via Supabase pg_net or manual webhook POST
+- All output to Outlook drafts via n8n
+- Trigger buttons in UI are present but disabled (Phase 2 sprint)
+
 ## What To Build Next
 
 ### Phase 2 — Automation (in progress)
 - ✅ Contract automation: n8n pipeline for contract extraction + Outlook drafts
+- ✅ **Automations dashboard page** — `/dashboard/automations` live as of 2026-03-09
+  - Visual cards for all 4 active workflows: Final CD, Pre-Approval, Referral Intro, New Application
+  - Pipeline flow diagram per card: Trigger → Claude AI → Outlook → Review
+  - Animated flow dot, status badges, hover meta-reveal (n8n ID + webhook path)
+  - Trigger buttons present but disabled — Phase 2 sprint wires them
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)

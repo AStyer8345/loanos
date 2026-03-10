@@ -8,6 +8,7 @@ const NAV = [
   { label: 'CONTACTS',      href: '/dashboard/contacts' },
   { label: 'CLOSED CLIENTS', href: '/dashboard/closed-clients' },
   { label: 'UPLOAD DOC',    href: '/dashboard/upload' },
+  { label: '⚡ AUTOMATIONS', href: '/dashboard/automations' },
   { label: 'MARKETING',     href: '/dashboard/marketing' },
   { label: 'BUILD TRACKER', href: '/dashboard/build-tracker' },
   { label: 'SYSTEM MAP',    href: '/dashboard/system-map' },

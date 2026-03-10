@@ -1,0 +1,209 @@
+{
+  "name": "Weekly Testimonial Social Post",
+  "nodes": [
+    {
+      "id": "sch-002",
+      "name": "Monday 9am CT",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 9 * * 1" }]
+        }
+      }
+    },
+    {
+      "id": "sheets-001",
+      "name": "Get All Testimonials",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [480, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets"
+        }
+      },
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "value": "={{ $env.TESTIMONIALS_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Sheet1", "mode": "name" },
+        "options": {}
+      }
+    },
+    {
+      "id": "code-003",
+      "name": "Random Select Unused Testimonial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows = $input.all();\nconst unused = rows.filter(item => {\n  const val = String(item.json.used || '').trim().toUpperCase();\n  return val !== 'TRUE';\n});\nif (!unused.length) throw new Error('No unused testimonials in sheet. Mark some rows used=FALSE or add more rows.');\nconst selected = unused[Math.floor(Math.random() * unused.length)];\nreturn [{ json: selected.json }];"
+      }
+    },
+    {
+      "id": "http-002",
+      "name": "Gemini: Generate Caption",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={{ $env.GEMINI_API_KEY }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ contents: [{ parts: [{ text: `You are a social media copywriter for Adam Styer, a mortgage broker in Austin, TX.\\n\\nA client left this testimonial:\\n\"${$json.testimonial_text}\" — ${$json.borrower_name}\\n\\nWrite an Instagram caption that:\\n1. Opens with the full testimonial quote in quotation marks (do not shorten or alter it)\\n2. Adds 1-2 warm, human sentences from Adam's point of view (first person) — vulnerable and real, not corporate\\n3. Ends with: DM me HOME to get started\\n4. Last line: #austinmortgage #mortgagebroker #homepurchase #austinrealestate #firsttimehomebuyer\\n\\nRules: Under 2,200 characters. No hashtags except the provided ones. Write the final caption only — no commentary, no options, no labels.` }] }] }) }}"
+      }
+    },
+    {
+      "id": "code-004",
+      "name": "Extract Caption + Build Image Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const geminiResp = $json;\nconst caption = geminiResp.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';\nif (!caption) throw new Error('Gemini returned no caption text.');\nconst firstName = ($json.borrower_name || '').split(' ')[0];\nconst shortQuote = ($json.testimonial_text || '').substring(0, 120);\nconst imagePrompt = `Professional social media quote card. Dark background (#1a1a1a). Gold accent bar at top (#c9a84c). White serif text in center: \"${shortQuote}\" — ${firstName}. Bottom text in small gold font: Adam Styer | Mortgage Solutions LP. Clean, minimal, premium mortgage brand aesthetic. No people, no faces. Portrait/square format.`;\nreturn [{ json: { ...$json, instagram_caption: caption, image_prompt: imagePrompt } }];"
+      }
+    },
+    {
+      "id": "http-003",
+      "name": "Gemini: Generate Quote Card Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={{ $env.GEMINI_API_KEY }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ instances: [{ prompt: $json.image_prompt }], parameters: { sampleCount: 1, aspectRatio: '1:1', safetyFilterLevel: 'block_few' } }) }}"
+      }
+    },
+    {
+      "id": "code-005",
+      "name": "Upload Image to Supabase Storage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 300],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const predictions = $json.predictions;\nif (!predictions || !predictions.length) throw new Error('Gemini imagen returned no predictions.');\nconst base64Image = predictions[0].bytesBase64Encoded;\nif (!base64Image) throw new Error('No base64 image data in Gemini response.');\nconst imageBuffer = Buffer.from(base64Image, 'base64');\nconst supabaseUrl = $env.SUPABASE_URL;\nconst supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;\nconst bucket = $env.SUPABASE_STORAGE_BUCKET || 'social-assets';\nconst fileName = `testimonial-${Date.now()}.jpg`;\nconst uploadResp = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${fileName}`, {\n  method: 'POST',\n  headers: {\n    'Authorization': `Bearer ${supabaseKey}`,\n    'Content-Type': 'image/jpeg'\n  },\n  body: imageBuffer\n});\nif (!uploadResp.ok) {\n  const err = await uploadResp.text();\n  throw new Error(`Supabase Storage upload failed: ${err}`);\n}\nconst publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${fileName}`;\nconst prevData = $('Random Select Unused Testimonial').first().json;\nreturn [{ json: { ...prevData, image_public_url: publicUrl, instagram_caption: $('Extract Caption + Build Image Prompt').first().json.instagram_caption } }];"
+      }
+    },
+    {
+      "id": "http-publer",
+      "name": "Publer: Post to All Platforms",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://app.publer.io/api/v1/post",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.PUBLER_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ text: $json.instagram_caption, accounts: $env.PUBLER_ACCOUNT_IDS.split(','), media: [{ path: $json.image_public_url }], is_draft: false }) }}"
+      }
+    },
+    {
+      "id": "sheets-002",
+      "name": "Google Sheets: Mark Used = TRUE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2160, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets"
+        }
+      },
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $env.TESTIMONIALS_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Sheet1", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Random Select Unused Testimonial').first().json.id }}",
+            "used": "TRUE"
+          },
+          "matchingColumns": ["id"]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "http-008",
+      "name": "Log to automation_logs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/automation_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ type: 'testimonial_post', platform: 'instagram,linkedin,facebook', testimonial_id: $('Random Select Unused Testimonial').first().json.id, posted_at: new Date().toISOString() }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Monday 9am CT": {
+      "main": [[{ "node": "Get All Testimonials", "type": "main", "index": 0 }]]
+    },
+    "Get All Testimonials": {
+      "main": [[{ "node": "Random Select Unused Testimonial", "type": "main", "index": 0 }]]
+    },
+    "Random Select Unused Testimonial": {
+      "main": [[{ "node": "Gemini: Generate Caption", "type": "main", "index": 0 }]]
+    },
+    "Gemini: Generate Caption": {
+      "main": [[{ "node": "Extract Caption + Build Image Prompt", "type": "main", "index": 0 }]]
+    },
+    "Extract Caption + Build Image Prompt": {
+      "main": [[{ "node": "Gemini: Generate Quote Card Image", "type": "main", "index": 0 }]]
+    },
+    "Gemini: Generate Quote Card Image": {
+      "main": [[{ "node": "Upload Image to Supabase Storage", "type": "main", "index": 0 }]]
+    },
+    "Upload Image to Supabase Storage": {
+      "main": [[{ "node": "Publer: Post to All Platforms", "type": "main", "index": 0 }]]
+    },
+    "Publer: Post to All Platforms": {
+      "main": [[{ "node": "Google Sheets: Mark Used = TRUE", "type": "main", "index": 0 }]]
+    },
+    "Google Sheets: Mark Used = TRUE": {
+      "main": [[{ "node": "Log to automation_logs", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "America/Chicago" },
+  "id": "weekly-testimonial-post-v1",
+  "meta": { "templateCredsSetupCompleted": false }
+}

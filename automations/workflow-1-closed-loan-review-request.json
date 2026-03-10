@@ -1,0 +1,100 @@
+{
+  "name": "Closed Loan — Review Request Email",
+  "nodes": [
+    {
+      "id": "sch-001",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 30 }]
+        }
+      }
+    },
+    {
+      "id": "code-001",
+      "name": "Fetch Eligible Loans + Contacts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const supabaseUrl = $env.SUPABASE_URL;\nconst supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;\nconst headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` };\nconst twoDaysAgo = new Date(Date.now() - 2*24*60*60*1000).toISOString().split('T')[0];\nconst loansResp = await fetch(`${supabaseUrl}/rest/v1/loans?status=eq.Closed&close_date=lte.${twoDaysAgo}&select=id,contact_id,close_date`, { headers });\nconst loans = await loansResp.json();\nif (!Array.isArray(loans) || !loans.length) return [];\nconst logsResp = await fetch(`${supabaseUrl}/rest/v1/automation_logs?type=eq.review_request&select=loan_id`, { headers });\nconst logs = await logsResp.json();\nconst loggedIds = new Set((logs || []).map(l => l.loan_id));\nconst newLoans = loans.filter(l => !loggedIds.has(l.id));\nif (!newLoans.length) return [];\nconst results = [];\nfor (const loan of newLoans) {\n  const contactResp = await fetch(`${supabaseUrl}/rest/v1/contacts?id=eq.${loan.contact_id}&select=first_name,last_name,email`, { headers });\n  const contacts = await contactResp.json();\n  if (Array.isArray(contacts) && contacts.length) {\n    results.push({ json: { loan_id: loan.id, close_date: loan.close_date, first_name: contacts[0].first_name, last_name: contacts[0].last_name, email: contacts[0].email } });\n  }\n}\nreturn results;"
+      }
+    },
+    {
+      "id": "code-002",
+      "name": "Build Email HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const firstName = $json.first_name;\nconst googleUrl = $env.GOOGLE_REVIEW_URL;\nconst zillowUrl = $env.ZILLOW_REVIEW_URL;\nconst html = `<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"></head><body style=\"margin:0;padding:0;background:#f9f9f9;font-family:Georgia,serif\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f9f9f9;padding:40px 0\"><tr><td align=\"center\"><table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden\"><tr><td style=\"background:#1a1a1a;padding:28px 40px\"><p style=\"margin:0;color:#c9a84c;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase\">Adam Styer | Mortgage Solutions LP</p></td></tr><tr><td style=\"padding:40px\"><p style=\"font-size:18px;color:#333;margin:0 0 20px\">Hey ${firstName},</p><p style=\"font-size:16px;line-height:1.7;color:#555;margin:0 0 16px\">Congrats again on closing! It was a genuine privilege walking alongside you through one of the biggest moments of your life.</p><p style=\"font-size:16px;line-height:1.7;color:#555;margin:0 0 24px\">If you have two minutes, I'd be so grateful if you left a quick review. It helps other families find trusted mortgage help.</p><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 16px\"><tr><td style=\"background:#c9a84c;border-radius:6px;padding:14px 28px\"><a href=\"${googleUrl}\" style=\"color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none\">&#11088; Leave a Google Review</a></td></tr></table><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 32px\"><tr><td style=\"background:#006aff;border-radius:6px;padding:14px 28px\"><a href=\"${zillowUrl}\" style=\"color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none\">&#127968; Leave a Zillow Review</a></td></tr></table><p style=\"font-size:15px;line-height:1.7;color:#555;margin:0 0 32px\">Two minutes. Your own words. That's all it takes.</p><p style=\"font-size:15px;line-height:1.7;color:#555;margin:0 0 32px\">Praying for you and your family in the new home.</p><p style=\"font-size:15px;color:#333;margin:0\">— Adam<br><strong>Adam Styer | Mortgage Solutions LP</strong><br>NMLS #513013</p></td></tr><tr><td style=\"background:#f4f4f4;padding:20px 40px;border-top:1px solid #eee\"><p style=\"margin:0;font-family:Arial,sans-serif;font-size:12px;color:#999\">Adam Styer | Mortgage Solutions LP · NMLS #513013 · Austin, TX</p></td></tr></table></td></tr></table></body></html>`;\nreturn [{ json: { ...$json, email_html: html } }];"
+      }
+    },
+    {
+      "id": "email-001",
+      "name": "Send Review Request Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [960, 300],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CRED_ID",
+          "name": "SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "A quick favor — can you leave a review?",
+        "emailFormat": "html",
+        "html": "={{ $json.email_html }}"
+      }
+    },
+    {
+      "id": "http-001",
+      "name": "Log to automation_logs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/automation_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ loan_id: $json.loan_id, type: 'review_request', sent_at: new Date().toISOString() }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [[{ "node": "Fetch Eligible Loans + Contacts", "type": "main", "index": 0 }]]
+    },
+    "Fetch Eligible Loans + Contacts": {
+      "main": [[{ "node": "Build Email HTML", "type": "main", "index": 0 }]]
+    },
+    "Build Email HTML": {
+      "main": [[{ "node": "Send Review Request Email", "type": "main", "index": 0 }]]
+    },
+    "Send Review Request Email": {
+      "main": [[{ "node": "Log to automation_logs", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "America/Chicago" },
+  "id": "closed-loan-review-request-v1",
+  "meta": { "templateCredsSetupCompleted": false }
+}

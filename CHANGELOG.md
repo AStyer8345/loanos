@@ -1,5 +1,11 @@
 # LoanOS Changelog
 
+## [1.0.8] — 2026-03-09 — Build Tracker Update + Session Rules
+
+### Changed
+- `public/docs/loanos.html` — Phase 2 roadmap updated: added 5 new completed items (Referral Intro Email, Automations Dashboard, Marketing Command Center, Contacts Module rewrite, Salesforce Import). `taskChecks` marks items 1-0 through 1-9 done. Items 1-10 (Rate update publisher) and 1-11 (Activity auto-log) remain unchecked.
+- `CONTEXT.md` — added rule: always update build tracker at end of every session (mark completed tasks + add new items not on roadmap).
+
 ## [1.0.7] — 2026-03-09 — Closed Clients + Import Feature
 
 ### Added

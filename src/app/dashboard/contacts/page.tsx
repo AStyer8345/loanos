@@ -152,7 +152,7 @@ function applySmartList(query: any, listId: string): any {
     case 'in-process':
       return query.eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing'])
     case 'closed':
-      return query.eq('contact_type', 'borrower').in('stage', ['Closed'])
+      return query.eq('contact_type', 'borrower').in('stage', ['Closed Client'])
     case 'all-realtors':
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
@@ -247,7 +247,7 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed Client']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'),

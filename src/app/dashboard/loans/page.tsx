@@ -224,7 +224,8 @@ export default function LoansPage() {
       const flattened: Loan[] = data.map((row: Record<string, unknown>) => {
         const raw = row.contacts
         const contact = Array.isArray(raw) ? raw[0] : raw
-        const { contacts: _, ...rest } = row
+        const rest = { ...row }
+        delete rest.contacts
         return {
           ...rest,
           contact_email: (contact as { email?: string } | null)?.email ?? null,

@@ -193,7 +193,7 @@ export default function ContactsPage() {
   const [contactLoansLoading, setContactLoansLoading] = useState(false)
 
   // new contact modal
-  const [, setShowNewModal] = useState(false)
+  const [showNewContact, setShowNewContact] = useState(false)
   const [newContact, setNewContact]     = useState({ ...BLANK_CONTACT })
   const [, setCreating]         = useState(false)
   const [, setCreateError]   = useState<string | null>(null)
@@ -380,7 +380,7 @@ export default function ContactsPage() {
     if (error) {
       setCreateError(error.message)
     } else {
-      setShowNewModal(false)
+      setShowNewContact(false)
       setNewContact({ ...BLANK_CONTACT })
       await Promise.all([fetchContacts(), fetchCounts()])
     }
@@ -457,7 +457,7 @@ export default function ContactsPage() {
               background: 'transparent', color: '#c9a84c', padding: '8px 16px', borderRadius: 4,
               border: '1px solid rgba(201,168,76,0.4)', cursor: 'pointer', fontWeight: 600,
             }}>↑ IMPORT</button>
-            <button onClick={() => setShowNewModal(true)} style={{
+            <button onClick={() => setShowNewContact(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
               background: '#c9a84c', color: '#000', padding: '8px 16px', borderRadius: 4,
               border: 'none', cursor: 'pointer', fontWeight: 600,

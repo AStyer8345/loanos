@@ -148,8 +148,8 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
 | Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
-| Arive → New Loan | (import to get ID) | arive-new-loan | Arive POST on new loan |
-| Arive → Status Update | (import to get ID) | arive-status-update | Arive POST on status change |
+| Arive → New Loan | 1tagvoU0UXtdDiMY | arive-new-loan | Arive POST on new loan |
+| Arive → Status Update | 9JyzzwKac8v3uQ7d | arive-status-update | Arive POST on status change |
 
 - All 4 trigger via Supabase pg_net or manual webhook POST
 - All output to Outlook drafts via n8n

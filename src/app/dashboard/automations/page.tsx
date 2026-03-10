@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useRef, type ChangeEvent } from 'react'
+
 // ─── Workflow data ────────────────────────────────────────────────────────────
 
 const WORKFLOWS = [
@@ -8,6 +10,7 @@ const WORKFLOWS = [
     name: 'FINAL CD EMAIL',
     description: 'Upload a Closing Disclosure PDF — Claude extracts 10 fields and generates a personalized closing email draft in Outlook.',
     triggerLabel: 'Upload CD PDF',
+    triggerType: 'pdf' as const,
     n8nId: 'SkzrWeR0bHZs8kWX',
     webhookPath: 'loanos-final-cd',
     icon: 'cd',
@@ -17,6 +20,7 @@ const WORKFLOWS = [
     name: 'PRE-APPROVAL EMAIL',
     description: 'Upload a Pre-Approval letter — Claude extracts borrower details and drafts a congratulations email ready to review.',
     triggerLabel: 'Upload PA Letter PDF',
+    triggerType: 'pdf' as const,
     n8nId: 'utMvZpkdRwIRZ51u',
     webhookPath: 'loanos-pre-approval',
     icon: 'pa',
@@ -26,6 +30,7 @@ const WORKFLOWS = [
     name: 'REFERRAL INTRO EMAIL',
     description: 'Paste referral details — Claude writes a personalized introduction email to the new lead in seconds.',
     triggerLabel: 'Paste Referral Details',
+    triggerType: 'form' as const,
     n8nId: 'YbgDnTpPdefcazKy',
     webhookPath: 'loanos-referral-intro',
     icon: 'referral',
@@ -35,11 +40,14 @@ const WORKFLOWS = [
     name: 'NEW APPLICATION RECEIVED',
     description: '1003 PDF lands in Supabase storage — Claude extracts borrower info, creates contacts, and drafts a welcome email.',
     triggerLabel: '1003 PDF in Storage',
+    triggerType: 'pdf' as const,
     n8nId: 'cWESnXXy9UOLB13q',
     webhookPath: 'loanos-new-application',
     icon: 'app',
   },
 ]
+
+type Workflow = typeof WORKFLOWS[0]
 
 // ─── Pipeline steps ───────────────────────────────────────────────────────────
 
@@ -111,9 +119,264 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
+// ─── TriggerModal ─────────────────────────────────────────────────────────────
+
+function TriggerModal({ wf, onClose }: { wf: Workflow; onClose: () => void }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [msg, setMsg] = useState('')
+  const [leadName, setLeadName] = useState('')
+  const [agent, setAgent] = useState('')
+  const [details, setDetails] = useState('')
+  const [drag, setDrag] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const mono = 'var(--font-mono, "IBM Plex Mono", monospace)'
+  const display = 'var(--font-display, "Bebas Neue", sans-serif)'
+
+  function pickFile(f: File) {
+    if (!f.type.includes('pdf') && !f.name.endsWith('.pdf')) {
+      setStatus('error')
+      setMsg('PDF files only')
+      return
+    }
+    setFile(f)
+    setStatus('idle')
+    setMsg('')
+  }
+
+  async function handleSubmit() {
+    setStatus('loading')
+    setMsg('')
+    try {
+      let res: Response
+      if (wf.triggerType === 'pdf') {
+        if (!file) {
+          setStatus('error')
+          setMsg('Select a PDF first')
+          return
+        }
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('triggered_by', 'loanos_ui')
+        fd.append('workflow_id', wf.id)
+        res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+          method: 'POST',
+          body: fd,
+        })
+      } else {
+        if (!leadName.trim()) {
+          setStatus('error')
+          setMsg('Lead name is required')
+          return
+        }
+        res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lead_name: leadName.trim(),
+            agent: agent.trim(),
+            details: details.trim(),
+          }),
+        })
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setStatus('success')
+      setMsg('Workflow triggered — check Outlook for the draft.')
+    } catch (e: unknown) {
+      setStatus('error')
+      setMsg(e instanceof Error ? e.message : 'Webhook call failed')
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.78)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderLeft: '3px solid var(--gold)',
+        borderRadius: 8,
+        padding: '28px 28px 24px',
+        width: '100%',
+        maxWidth: 480,
+        position: 'relative',
+      }}>
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 12, right: 14,
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontFamily: mono, fontSize: 11, color: 'var(--muted)',
+            letterSpacing: '0.08em',
+          }}
+        >
+          [ESC]
+        </button>
+
+        {/* Title */}
+        <div style={{ fontFamily: display, fontSize: 22, letterSpacing: '0.06em', color: 'var(--text)', marginBottom: 3, lineHeight: 1 }}>
+          {wf.name}
+        </div>
+        <div style={{ fontFamily: mono, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 22 }}>
+          TRIGGER: {wf.triggerLabel.toUpperCase()}
+        </div>
+
+        {/* PDF drop zone */}
+        {wf.triggerType === 'pdf' && (
+          <>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDrag(false)
+                const f = e.dataTransfer.files[0]
+                if (f) pickFile(f)
+              }}
+              onClick={() => fileRef.current?.click()}
+              style={{
+                border: `1px dashed ${drag ? 'var(--gold)' : file ? 'rgba(62,214,138,0.5)' : 'var(--border)'}`,
+                borderRadius: 6,
+                padding: '28px 20px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                background: drag ? 'rgba(201,168,76,0.04)' : file ? 'rgba(62,214,138,0.04)' : 'var(--surface2)',
+                transition: 'all 0.15s',
+                marginBottom: 16,
+              }}
+            >
+              <div style={{
+                fontFamily: mono, fontSize: 10, letterSpacing: '0.08em',
+                color: file ? 'var(--green)' : 'var(--muted)',
+                marginBottom: file ? 5 : 0,
+              }}>
+                {file ? `✓  ${file.name}` : 'DROP PDF HERE  OR  CLICK TO SELECT'}
+              </div>
+              {file && (
+                <div style={{ fontFamily: mono, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.06em' }}>
+                  {(file.size / 1024).toFixed(0)} KB
+                </div>
+              )}
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              style={{ display: 'none' }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const f = e.target.files?.[0]
+                if (f) pickFile(f)
+              }}
+            />
+          </>
+        )}
+
+        {/* Form fields for referral */}
+        {wf.triggerType === 'form' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+            {([
+              { label: 'LEAD NAME *', value: leadName, set: setLeadName, placeholder: 'John Smith' },
+              { label: 'REFERRING AGENT', value: agent, set: setAgent, placeholder: 'Sarah Johnson' },
+            ] as { label: string; value: string; set: (v: string) => void; placeholder: string }[]).map(({ label, value, set, placeholder }) => (
+              <div key={label}>
+                <div style={{ fontFamily: mono, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 5 }}>
+                  {label}
+                </div>
+                <input
+                  value={value}
+                  onChange={(e) => set(e.target.value)}
+                  placeholder={placeholder}
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 4,
+                    padding: '7px 10px', fontFamily: mono, fontSize: 11, color: 'var(--text)',
+                    outline: 'none', letterSpacing: '0.04em',
+                  }}
+                />
+              </div>
+            ))}
+            <div>
+              <div style={{ fontFamily: mono, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 5 }}>
+                DETAILS
+              </div>
+              <textarea
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Buying in Austin, pre-approved $450k, relocating from Dallas..."
+                rows={3}
+                style={{
+                  width: '100%', boxSizing: 'border-box', resize: 'vertical',
+                  background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 4,
+                  padding: '7px 10px', fontFamily: mono, fontSize: 11, color: 'var(--text)',
+                  outline: 'none', letterSpacing: '0.04em', lineHeight: 1.5,
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Status message */}
+        {msg && (
+          <div style={{
+            fontFamily: mono, fontSize: 10, letterSpacing: '0.06em',
+            color: status === 'success' ? 'var(--green)' : status === 'error' ? '#e05555' : 'var(--muted)',
+            marginBottom: 14, padding: '6px 10px',
+            background: status === 'success' ? 'rgba(62,214,138,0.06)' : status === 'error' ? 'rgba(224,85,85,0.06)' : 'transparent',
+            border: `1px solid ${status === 'success' ? 'rgba(62,214,138,0.2)' : status === 'error' ? 'rgba(224,85,85,0.2)' : 'transparent'}`,
+            borderRadius: 4,
+          }}>
+            {status === 'success' ? '✓  ' : status === 'error' ? '✗  ' : ''}{msg}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          {status !== 'success' && (
+            <button
+              onClick={handleSubmit}
+              disabled={status === 'loading'}
+              style={{
+                fontFamily: mono, fontSize: 10, letterSpacing: '0.1em',
+                background: status === 'loading' ? 'transparent' : 'rgba(201,168,76,0.1)',
+                color: status === 'loading' ? 'var(--muted)' : 'var(--gold)',
+                border: `1px solid ${status === 'loading' ? 'var(--border)' : 'rgba(201,168,76,0.4)'}`,
+                borderRadius: 4, padding: '7px 16px',
+                cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              {status === 'loading' ? '>_ RUNNING...' : '>_ TRIGGER NOW'}
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            style={{
+              fontFamily: mono, fontSize: 10, letterSpacing: '0.1em',
+              background: 'transparent', color: 'var(--muted)',
+              border: '1px solid var(--border)', borderRadius: 4,
+              padding: '7px 14px', cursor: 'pointer',
+            }}
+          >
+            {status === 'success' ? 'CLOSE' : 'CANCEL'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── AutoCard component ───────────────────────────────────────────────────────
 
-function AutoCard({ wf, index }: { wf: typeof WORKFLOWS[0]; index: number }) {
+function AutoCard({ wf, index, onTrigger }: { wf: Workflow; index: number; onTrigger: () => void }) {
   return (
     <div
       className="auto-card"
@@ -211,7 +474,7 @@ function AutoCard({ wf, index }: { wf: typeof WORKFLOWS[0]; index: number }) {
                 background: 'var(--border)',
                 position: 'relative',
                 overflow: 'visible',
-                marginBottom: 13, // offset label height
+                marginBottom: 13,
               }}>
                 <div
                   className="flow-dot"
@@ -235,31 +498,20 @@ function AutoCard({ wf, index }: { wf: typeof WORKFLOWS[0]; index: number }) {
       </div>
 
       {/* Trigger button */}
-      <div className="trigger-wrap" style={{ position: 'relative', display: 'inline-block' }}>
-        <button
-          disabled
-          style={{
-            fontFamily: 'var(--font-mono, "IBM Plex Mono", monospace)',
-            fontSize: 10, letterSpacing: '0.1em',
-            background: 'transparent', color: 'var(--border)',
-            border: '1px solid var(--border)', borderRadius: 4,
-            padding: '6px 14px', cursor: 'not-allowed',
-          }}
-        >
-          &gt;_ TRIGGER
-        </button>
-        <div className="trigger-tooltip" style={{
-          position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
+      <button
+        onClick={onTrigger}
+        className="trigger-btn"
+        style={{
           fontFamily: 'var(--font-mono, "IBM Plex Mono", monospace)',
-          fontSize: 9, letterSpacing: '0.06em',
-          background: 'var(--surface2)', border: '1px solid var(--border)',
-          color: 'var(--muted)', borderRadius: 4, padding: '5px 10px',
-          whiteSpace: 'nowrap', pointerEvents: 'none',
-          opacity: 0, transition: 'opacity 0.15s',
-        }}>
-          Coming soon — trigger from LoanOS
-        </div>
-      </div>
+          fontSize: 10, letterSpacing: '0.1em',
+          background: 'transparent', color: 'var(--gold)',
+          border: '1px solid rgba(201,168,76,0.4)', borderRadius: 4,
+          padding: '6px 14px', cursor: 'pointer',
+          transition: 'all 0.15s',
+        }}
+      >
+        &gt;_ TRIGGER
+      </button>
     </div>
   )
 }
@@ -267,6 +519,8 @@ function AutoCard({ wf, index }: { wf: typeof WORKFLOWS[0]; index: number }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AutomationsPage() {
+  const [activeWf, setActiveWf] = useState<Workflow | null>(null)
+
   return (
     <>
       <style>{`
@@ -315,14 +569,18 @@ export default function AutomationsPage() {
           opacity: 1;
         }
 
-        .trigger-wrap:hover .trigger-tooltip {
-          opacity: 1 !important;
+        .trigger-btn:hover {
+          background: rgba(201,168,76,0.08) !important;
         }
 
         .status-pulse {
           animation: pulse 2.5s ease-in-out infinite;
         }
       `}</style>
+
+      {activeWf && (
+        <TriggerModal wf={activeWf} onClose={() => setActiveWf(null)} />
+      )}
 
       <div style={{ padding: '32px 32px 48px', background: 'var(--bg)', minHeight: '100%' }}>
 
@@ -401,7 +659,7 @@ export default function AutomationsPage() {
           gap: 16,
         }}>
           {WORKFLOWS.map((wf, i) => (
-            <AutoCard key={wf.id} wf={wf} index={i} />
+            <AutoCard key={wf.id} wf={wf} index={i} onTrigger={() => setActiveWf(wf)} />
           ))}
         </div>
 
@@ -412,10 +670,7 @@ export default function AutomationsPage() {
           fontFamily: 'var(--font-mono, "IBM Plex Mono", monospace)',
           fontSize: 10, color: 'var(--muted)', lineHeight: 1.6, letterSpacing: '0.05em',
         }}>
-          INSTANCE: styer.app.n8n.cloud · TRIGGER: Supabase pg_net or manual · DRAFTS: Outlook via n8n ·{' '}
-          <span style={{ color: 'rgba(201,168,76,0.5)' }}>
-            Trigger buttons wired in Phase 2 sprint.
-          </span>
+          INSTANCE: styer.app.n8n.cloud · TRIGGER: manual via LoanOS or Supabase pg_net · DRAFTS: Outlook via n8n
         </div>
 
       </div>

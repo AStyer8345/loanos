@@ -150,7 +150,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 
 - All 4 trigger via Supabase pg_net or manual webhook POST
 - All output to Outlook drafts via n8n
-- Trigger buttons in UI are present but disabled (Phase 2 sprint)
+- Trigger buttons LIVE — clicking opens TriggerModal (PDF drop zone or form fields)
 
 ## What To Build Next
 
@@ -160,7 +160,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
   - Visual cards for all 4 active workflows: Final CD, Pre-Approval, Referral Intro, New Application
   - Pipeline flow diagram per card: Trigger → Claude AI → Outlook → Review
   - Animated flow dot, status badges, hover meta-reveal (n8n ID + webhook path)
-  - Trigger buttons present but disabled — Phase 2 sprint wires them
+  - **Trigger buttons LIVE ✅** (2026-03-09) — `TriggerModal` component added; PDF workflows use FormData POST, Referral uses JSON POST; all POST to `https://styer.app.n8n.cloud/webhook/{webhookPath}`
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)

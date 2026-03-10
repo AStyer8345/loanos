@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [1.0.6] — 2026-03-09 — Automations Trigger Buttons Live
+
+### Changed
+- `/dashboard/automations/page.tsx` — full rewrite to wire up trigger buttons
+  - Added `TriggerModal` component: Bloomberg-styled overlay with drag/drop PDF zone (3 workflows) or form fields (Referral Intro)
+  - PDF workflows (`final-cd`, `pre-approval`, `new-application`): FormData POST with `file`, `triggered_by`, `workflow_id`
+  - Form workflow (`referral-intro`): JSON POST with `lead_name`, `agent`, `details`
+  - All POST to `https://styer.app.n8n.cloud/webhook/{webhookPath}`
+  - Loading/success/error states in modal; success message: "Workflow triggered — check Outlook for the draft."
+  - Modal opens from `AutomationsPage` state (`activeWf`) — avoids z-index stacking issues
+  - `AutoCard` now accepts `onTrigger: () => void`; TRIGGER button is gold + active (was disabled gray)
+  - Removed "Coming soon" tooltip; footer note updated to reflect live infra
+  - `'use client'` with `useState`, `useRef`, `ChangeEvent` imports added
+
+---
+
 ## [1.0.5] — 2026-03-09 — Automations Dashboard
 
 ### Added

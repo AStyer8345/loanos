@@ -1,5 +1,46 @@
 # LoanOS Changelog
 
+## [1.4.0] — 2026-03-10 — Two New n8n Automations: Review Request + Social Post
+
+### Added
+
+**Workflow 1 — Closed Loan Review Request Email** (`automations/workflow-1-closed-loan-review-request.json`)
+- n8n ID: `AK1fBcaX1cPcdlGx`
+- Trigger: every 30 minutes (scheduled)
+- Logic: fetches loans where `closing_date <= now() - 2 days` and no prior `review_request` log entry; sends branded HTML email with Google + Zillow review links; logs to `automation_logs`
+- 5 nodes: scheduleTrigger → code (fetch loans + contacts) → code (build HTML email) → emailSend → httpRequest (log)
+- Hardcoded: `supabaseUrl`, `fromEmail: adam@styermortgage.com`
+- Remaining placeholders: `YOUR_SUPABASE_SERVICE_ROLE_KEY`, `YOUR_GOOGLE_REVIEW_URL`, `YOUR_ZILLOW_REVIEW_URL`, `REPLACE_WITH_SMTP_CRED_ID`
+
+**Workflow 2 — Weekly Testimonial Social Post** (`automations/workflow-2-weekly-testimonial-post.json`)
+- n8n ID: `eJG4wckrj6SmSpm1`
+- Trigger: Mondays at 9am CT (cron: `0 9 * * 1`, timezone: `America/Chicago`)
+- Logic: reads random unused testimonial from Google Sheet → Gemini 1.5 Flash generates caption → Imagen 3 generates quote card image (base64) → uploads to Supabase Storage `social-assets` bucket → Publer posts to Instagram + LinkedIn + Facebook → marks sheet row used → logs to `automation_logs`
+- 10 nodes: scheduleTrigger → googleSheets (read) → code (random select) → httpRequest (Gemini caption) → code (extract + build prompt) → httpRequest (Imagen) → code (upload to Supabase Storage) → httpRequest (Publer post) → googleSheets (mark used) → httpRequest (log)
+- Hardcoded: Sheet ID `1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk`, `supabaseUrl`, `supabaseStorageBucket: social-assets`, Publer API key + 3 account IDs (Instagram, LinkedIn, Facebook)
+- Remaining placeholders: `YOUR_GEMINI_API_KEY`, `YOUR_SUPABASE_SERVICE_ROLE_KEY`, `REPLACE_WITH_GOOGLE_SHEETS_CRED_ID` (both sheets nodes)
+
+**Supabase Infrastructure**
+- `automation_logs` table created (SQL Editor): `id uuid PK`, `type text`, `loan_id uuid`, `testimonial_id text`, `platform text`, `sent_at timestamptz`, `posted_at timestamptz`, `created_at timestamptz`. RLS disabled. Indexes on `type` and `loan_id`.
+- `social-assets` Supabase Storage bucket created as **PUBLIC** — images must be publicly accessible for Publer to fetch them
+
+### Notes
+- n8n Variables feature NOT available on Adam's plan (403 `feat:variables`) — all credentials hardcoded directly in workflow JSON
+- Both JSONs validated with `node -e "JSON.parse(...)"` — no `$env` refs remain
+- Both workflows imported to n8n via `POST /api/v1/workflows` API
+- Both workflows are **inactive** until credentials are filled in and Adam activates them
+
+### Pending Manual Steps to Activate
+1. Get `SUPABASE_SERVICE_ROLE_KEY` from Supabase → Settings → API → service_role
+2. Get `GEMINI_API_KEY` from aistudio.google.com
+3. Get Google Review URL + Zillow Review URL
+4. Set up SMTP credential in n8n (for workflow 1 emailSend node)
+5. Set up Google Sheets OAuth2 credential in n8n (for workflow 2 both sheets nodes)
+6. Update both workflow JSONs with real values, re-import via PUT `/api/v1/workflows/{id}`
+7. Activate both workflows in n8n dashboard
+
+---
+
 ## [1.3.0] — 2026-03-10 — 816 Arive Loans Imported + Backfilled
 
 ### Added

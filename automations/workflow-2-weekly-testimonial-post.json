@@ -27,7 +27,7 @@
       },
       "parameters": {
         "operation": "read",
-        "documentId": { "__rl": true, "value": "={{ $env.TESTIMONIALS_SHEET_ID }}", "mode": "id" },
+        "documentId": { "__rl": true, "value": "1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk", "mode": "id" },
         "sheetName": { "__rl": true, "value": "Sheet1", "mode": "name" },
         "options": {}
       }
@@ -51,7 +51,7 @@
       "position": [960, 300],
       "parameters": {
         "method": "POST",
-        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={{ $env.GEMINI_API_KEY }}",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_GEMINI_API_KEY",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [{ "name": "Content-Type", "value": "application/json" }]
@@ -80,7 +80,7 @@
       "position": [1440, 300],
       "parameters": {
         "method": "POST",
-        "url": "=https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={{ $env.GEMINI_API_KEY }}",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=YOUR_GEMINI_API_KEY",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [{ "name": "Content-Type", "value": "application/json" }]
@@ -98,7 +98,7 @@
       "position": [1680, 300],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const predictions = $json.predictions;\nif (!predictions || !predictions.length) throw new Error('Gemini imagen returned no predictions.');\nconst base64Image = predictions[0].bytesBase64Encoded;\nif (!base64Image) throw new Error('No base64 image data in Gemini response.');\nconst imageBuffer = Buffer.from(base64Image, 'base64');\nconst supabaseUrl = $env.SUPABASE_URL;\nconst supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;\nconst bucket = $env.SUPABASE_STORAGE_BUCKET || 'social-assets';\nconst fileName = `testimonial-${Date.now()}.jpg`;\nconst uploadResp = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${fileName}`, {\n  method: 'POST',\n  headers: {\n    'Authorization': `Bearer ${supabaseKey}`,\n    'Content-Type': 'image/jpeg'\n  },\n  body: imageBuffer\n});\nif (!uploadResp.ok) {\n  const err = await uploadResp.text();\n  throw new Error(`Supabase Storage upload failed: ${err}`);\n}\nconst publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${fileName}`;\nconst prevData = $('Random Select Unused Testimonial').first().json;\nreturn [{ json: { ...prevData, image_public_url: publicUrl, instagram_caption: $('Extract Caption + Build Image Prompt').first().json.instagram_caption } }];"
+        "jsCode": "const predictions = $json.predictions;\nif (!predictions || !predictions.length) throw new Error('Gemini imagen returned no predictions.');\nconst base64Image = predictions[0].bytesBase64Encoded;\nif (!base64Image) throw new Error('No base64 image data in Gemini response.');\nconst imageBuffer = Buffer.from(base64Image, 'base64');\nconst supabaseUrl = 'https://uuqedsvjlkeszrbwzizl.supabase.co';\nconst supabaseKey = 'YOUR_SUPABASE_SERVICE_ROLE_KEY';\nconst bucket = 'social-assets';\nconst fileName = `testimonial-${Date.now()}.jpg`;\nconst uploadResp = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${fileName}`, {\n  method: 'POST',\n  headers: {\n    'Authorization': `Bearer ${supabaseKey}`,\n    'Content-Type': 'image/jpeg'\n  },\n  body: imageBuffer\n});\nif (!uploadResp.ok) {\n  const err = await uploadResp.text();\n  throw new Error(`Supabase Storage upload failed: ${err}`);\n}\nconst publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${fileName}`;\nconst prevData = $('Random Select Unused Testimonial').first().json;\nreturn [{ json: { ...prevData, image_public_url: publicUrl, instagram_caption: $('Extract Caption + Build Image Prompt').first().json.instagram_caption } }];"
       }
     },
     {
@@ -113,13 +113,13 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.PUBLER_API_KEY }}" },
+            { "name": "Authorization", "value": "Bearer a1adab72251a3fc861f7dfa0c97439955d28da23c423ec88" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "specifyBody": "string",
-        "body": "={{ JSON.stringify({ text: $json.instagram_caption, accounts: $env.PUBLER_ACCOUNT_IDS.split(','), media: [{ path: $json.image_public_url }], is_draft: false }) }}"
+        "body": "={{ JSON.stringify({ text: $json.instagram_caption, accounts: ['69b05329de86f5e15b7c0722','69b0536404b824ffb2c05426','69b0530110a77a0ed895847d'], media: [{ path: $json.image_public_url }], is_draft: false }) }}"
       }
     },
     {
@@ -136,7 +136,7 @@
       },
       "parameters": {
         "operation": "update",
-        "documentId": { "__rl": true, "value": "={{ $env.TESTIMONIALS_SHEET_ID }}", "mode": "id" },
+        "documentId": { "__rl": true, "value": "1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk", "mode": "id" },
         "sheetName": { "__rl": true, "value": "Sheet1", "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
@@ -157,12 +157,12 @@
       "position": [2400, 300],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SUPABASE_URL }}/rest/v1/automation_logs",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/automation_logs",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "apikey", "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY" },
+            { "name": "Authorization", "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY" },
             { "name": "Content-Type", "value": "application/json" },
             { "name": "Prefer", "value": "return=minimal" }
           ]

@@ -83,7 +83,7 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 - Hosting: Netlify
 - Database: Supabase (Postgres)
 - Auth: Supabase email/password
-- File Storage: Supabase Storage (bucket: documents)
+- File Storage: Supabase Storage (buckets: `documents` [private], `social-assets` [public])
 - Automation: n8n (replacing Zapier)
 - AI: Claude API (Anthropic)
 - Email: Outlook via n8n
@@ -172,10 +172,13 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
 | Arive → New Loan | 1tagvoU0UXtdDiMY | arive-new-loan | Arive POST on new loan |
 | Arive → Status Update | 9JyzzwKac8v3uQ7d | arive-status-update | Arive POST on status change |
+| Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
+| Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
 
-- All 4 trigger via Supabase pg_net or manual webhook POST
-- All output to Outlook drafts via n8n
+- First 6 trigger via Supabase pg_net or manual webhook POST; output Outlook drafts via n8n
 - Trigger buttons LIVE — clicking opens TriggerModal (PDF drop zone or form fields)
+- **Closed Loan Review Request** — scheduled every 30 min. Fetches loans with `closing_date <= now() - 2 days` that haven't had a review email sent. Sends branded HTML email with Google + Zillow review links. Logs to `automation_logs`. ⚠️ Needs: SUPABASE_SERVICE_ROLE_KEY, SMTP credential, Google/Zillow review URLs.
+- **Weekly Testimonial Social Post** — Monday 9am CT. Reads random unused testimonial from Google Sheet (tab: Sheet1, ID: 1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk). Gemini 1.5 Flash generates caption. Imagen 3 generates quote card image (base64 → Supabase Storage `social-assets` bucket). Publer posts to Instagram + LinkedIn + Facebook. Marks sheet row used. Logs to `automation_logs`. ⚠️ Needs: GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY, Google Sheets OAuth2 credential.
 
 ## What To Build Next
 

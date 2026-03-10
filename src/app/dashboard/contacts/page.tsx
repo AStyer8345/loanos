@@ -167,7 +167,7 @@ function applySmartList(query: any, listId: string): any {
 // ── Blank new-contact form ────────────────────────────────────────────────────
 const BLANK_CONTACT = {
   first_name: '', last_name: '', email: '', phone: '', mobile_phone: '',
-  contact_type: 'borrower', stage: 'Lead',
+  contact_type: 'borrower' as string | null, stage: 'Lead',
   lead_source: '', referred_by: '', company_name: '', notes: '',
 }
 

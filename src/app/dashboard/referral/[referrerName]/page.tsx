@@ -87,12 +87,27 @@ export default function ReferralPage() {
 
   const [contacts, setContacts] = useState<ReferralContact[]>([])
   const [loans, setLoans] = useState<ReferralLoan[]>([])
+  const [referrerContactId, setReferrerContactId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'borrowers' | 'loans'>('borrowers')
 
   useEffect(() => {
     async function load() {
       setLoading(true)
+
+      // Resolve referrer name to contact id (for link to contact record)
+      const parts = referrerName.trim().split(/\s+/)
+      const firstName = parts[0] ?? ''
+      const lastName = parts.slice(1).join(' ') || ''
+      let q = supabase.from('contacts').select('id, first_name, last_name')
+      if (firstName) q = q.ilike('first_name', firstName)
+      if (lastName) q = q.ilike('last_name', lastName)
+      const { data: referrerList } = await q.limit(50)
+      const match = (referrerList ?? []).find(
+        (c: { first_name: string | null; last_name: string | null }) =>
+          `${(c.first_name ?? '').trim()} ${(c.last_name ?? '').trim()}`.trim() === referrerName.trim()
+      )
+      setReferrerContactId(match ? (match as { id: string }).id : null)
 
       // Step 1: fetch contacts referred by this person
       const { data: contactData } = await supabase
@@ -176,8 +191,14 @@ export default function ReferralPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: '#c9a84c', margin: 0, letterSpacing: '-0.02em' }}>
-          {referrerName}
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+          {referrerContactId ? (
+            <Link href={`/dashboard/contacts/${referrerContactId}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
+              {referrerName}
+            </Link>
+          ) : (
+            <span style={{ color: '#c9a84c' }}>{referrerName}</span>
+          )}
         </h1>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, letterSpacing: '0.08em' }}>
           REFERRAL SUMMARY
@@ -268,9 +289,11 @@ export default function ReferralPage() {
                 </thead>
                 <tbody>
                   {contacts.map(c => (
-                    <tr key={c.id} style={{ cursor: 'default' }}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#c9a84c' }}>
-                        {fullName(c)}
+                    <tr key={c.id} style={{ cursor: 'pointer' }}>
+                      <td style={{ ...tdStyle, fontWeight: 600 }}>
+                        <Link href={`/dashboard/contacts/${c.id}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                          {fullName(c)}
+                        </Link>
                       </td>
                       <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.email || '—'}</td>
                       <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.phone || '—'}</td>

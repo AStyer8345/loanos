@@ -98,7 +98,11 @@ const SMART_LISTS: SmartListDef[] = [
 
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
-  { id: 'name',         label: 'Name',             render: c => `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—' },
+  { id: 'name',         label: 'Name',             render: c => (
+      <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none', fontWeight: 600 }}>
+        {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—'}
+      </Link>
+    ) },
   { id: 'type',         label: 'Type',             render: c => c.contact_type ?? '—' },
   { id: 'phone',        label: 'Phone',            render: c => c.phone ?? '—' },
   { id: 'mobile',       label: 'Mobile',           render: c => c.mobile_phone ?? '—' },
@@ -106,7 +110,7 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
   { id: 'referred_by',  label: 'Referred By',      render: c => c.referred_by
-      ? <Link href={`/dashboard/referral/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
+      ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
       : '—' },
   { id: 'company',      label: 'Company',          render: c => c.company_name ?? '—' },
   { id: 'birthday',     label: 'Birthday',         render: c => c.birthday ?? '—' },
@@ -681,7 +685,7 @@ export default function ContactsPage() {
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
                     <div style={{ fontSize: 13, color: 'var(--fg)', wordBreak: 'break-word' }}>
                       {label === 'Referred By'
-                        ? <Link href={`/dashboard/referral/${encodeURIComponent(val)}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
+                        ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(val)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
                         : val}
                     </div>
                   </div>

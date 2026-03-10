@@ -946,7 +946,7 @@ export default function ContactsPage() {
              onClick={() => setShowColPicker(false)} />
       )}
 
-    </div> {/* end outer flex */}
+    </div>
   )
 }
 

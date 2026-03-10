@@ -914,7 +914,7 @@ export default function ContactsPage() {
                          fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 10 }} />
             ))}
             <select value={newContact.contact_type ?? ''}
-              onChange={e => setNewContact(prev => ({ ...prev, contact_type: e.target.value || null }))}
+              onChange={e => setNewContact(prev => ({ ...prev, contact_type: e.target.value }))}
               style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
                        color: 'var(--text)', borderRadius: 4, padding: '8px 10px',
                        fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 16 }}>

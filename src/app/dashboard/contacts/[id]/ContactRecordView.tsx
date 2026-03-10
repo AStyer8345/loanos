@@ -8,6 +8,7 @@ import {
   MessageSquare,
   AlertCircle,
 } from 'lucide-react'
+import ActivityTimeline from '@/components/ActivityTimeline'
 
 export type Contact = {
   id: string
@@ -48,9 +49,15 @@ export type ContactLoan = {
 export type ActivityEntry = {
   id: string
   created_at: string
+  // Legacy columns
   action: string
   entity_type: string | null
   metadata: Record<string, unknown> | null
+  // New columns added in migration 008
+  type?: string | null
+  summary?: string | null
+  raw_payload?: Record<string, unknown> | null
+  external_id?: string | null
 }
 
 function fmtCurrency(n: number | null) {
@@ -452,44 +459,7 @@ export function ContactRecordView(props: Props) {
         {activeTab === 'activity' && (
           <div style={cardStyle}>
             <div style={labelStyle}>ACTIVITY TIMELINE</div>
-            {activity.length === 0 && !contact.created_at ? (
-              <div style={{ color: 'var(--muted)', fontSize: 13, padding: '16px 0' }}>No activity yet.</div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {contact.created_at && (
-                  <div style={{
-                    display: 'flex',
-                    gap: 12,
-                    padding: '12px 0',
-                    borderBottom: '1px solid var(--border)',
-                    fontSize: 12,
-                  }}>
-                    <div style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>{fmtDateTime(contact.created_at)}</div>
-                    <div style={{ color: 'var(--fg)' }}>Contact created</div>
-                  </div>
-                )}
-                {activity.map(entry => (
-                  <div
-                    key={entry.id}
-                    style={{
-                      display: 'flex',
-                      gap: 12,
-                      padding: '12px 0',
-                      borderBottom: '1px solid var(--border)',
-                      fontSize: 12,
-                    }}
-                  >
-                    <div style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>{fmtDateTime(entry.created_at)}</div>
-                    <div style={{ color: 'var(--fg)' }}>
-                      {entry.action.replace(/\./g, ' ')}
-                      {entry.metadata?.preview != null && (
-                        <span style={{ color: 'var(--muted)', marginLeft: 6 }}>- {String(entry.metadata.preview).slice(0, 60)}...</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <ActivityTimeline rows={activity} />
           </div>
         )}
 

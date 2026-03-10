@@ -44,10 +44,10 @@ export default function ContactRecordPage() {
   const fetchActivity = useCallback(async () => {
     const { data } = await supabase
       .from('activity_log')
-      .select('id, created_at, action, entity_type, metadata')
+      .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id')
       .eq('contact_id', id)
       .order('created_at', { ascending: false })
-      .limit(100)
+      .limit(200)
     setActivity((data as ActivityEntry[]) ?? [])
   }, [id, supabase])
 

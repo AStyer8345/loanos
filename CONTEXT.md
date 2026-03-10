@@ -196,6 +196,13 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
   - `POST /api/import/contacts` — three-tier dedup (salesforce_id → email → first_name+last_name), never overwrites, row-level error handling, intra-batch dedup
   - `POST /api/import/loans` — two-tier dedup (loan_number → borrower_name+closing_date), requires auth session for user_id, row-level error handling
 
+### Phase 2 — Contacts Module (rebuilt × 3 — 2026-03-10, Inline Stage Edit + Smart Lists v2 + Bulk Actions)
+
+**Session 2026-03-10 additions (full rewrite, 879 lines):**
+- **Feature 1 — Inline Stage Editing**: Every Stage cell is clickable. Click → `<select>` dropdown with 8 canonical stages (Lead, Pre-App, Application, Pre-Approved, In Process, Closing, Closed, Other). Selection immediately updates Supabase. Optimistic UI: if new stage maps to a different Smart List, contact is removed from current list + counts refresh. `stageToList()` is single source of truth.
+- **Feature 2 — Smart List Restructure**: Canonical STAGES constant + STAGE_TO_LIST mapping. New lists: Lead/Pre-App/Application → "New Applications", Pre-Approved → "Active Borrowers", In Process/Closing → "In Process", Closed → "Closed Borrowers". **"Everyone Else" replaced by "Unassigned / Other"** — catches contact_type=other, null type, or borrower with null stage via `.or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)')`. Stage dropdown in slide-out edit panel now uses canonical STAGES list.
+- **Feature 3 — Bulk Actions**: Checkbox column left of every row + Select All in table header. When 1+ selected → position:fixed floating action bar at bottom with: UPDATE STAGE, UPDATE TYPE, ASSIGN REFERRED BY, DELETE. Bulk update uses Supabase `.in('id', [...ids])` for single round-trip. Delete shows confirmation modal. Selection cleared on list refresh. `Set<string>` for O(1) checkbox management. `e.stopPropagation()` on checkbox + stage cells prevents row-click opening slide-out.
+
 ### Phase 2 — Contacts Module (rebuilt × 2 — 2026-03-09, Smart Lists + Columns + Create)
 - `/dashboard/contacts` — full rewrite (544 lines, TypeScript clean)
 - **Smart List sidebar** (220px): 8 lists — All Contacts, New Apps, Active Borrowers, **In Process** (new), Closed Borrowers, All Realtors, Top/Target, Everyone Else

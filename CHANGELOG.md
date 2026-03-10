@@ -1,5 +1,36 @@
 # LoanOS Changelog
 
+## [1.1.0] — 2026-03-10 — Contacts: Inline Stage Edit + Smart Lists v2 + Bulk Actions
+
+### Changed
+- `src/app/dashboard/contacts/page.tsx` — full rewrite (879 lines). Three major feature additions:
+
+**Feature 1 — Inline Stage Editing**
+- Every Stage cell is now clickable → opens `<select>` dropdown with 8 canonical stages in-place
+- `handleStageChange()` — optimistic UI: removes contact from current list if new stage maps to a different Smart List, otherwise updates local state immediately. Supabase write + count refresh follow.
+- `autoFocus` + `onBlur` pattern on select — no extra editing state needed beyond `editingStageId`
+- `e.stopPropagation()` on stage badge click + select prevents row-click from opening slide-out panel
+- Stage dropdown in slide-out edit panel updated to use same canonical STAGES list
+
+**Feature 2 — Smart List Restructure**
+- `STAGES` canonical array: Lead, Pre-App, Application, Pre-Approved, In Process, Closing, Closed, Other
+- `STAGE_TO_LIST` record + `stageToList(stage, contactType)` as single source of truth
+- Smart List mapping: Lead/Pre-App/Application → new-apps, Pre-Approved → active, In Process/Closing → in-process, Closed → closed, Other → unassigned
+- "Everyone Else" replaced by **"Unassigned / Other"** — query: `.or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)')` — catches type=other, null type, and borrowers with null stage without including realtors
+- `fetchCounts` updated to use same Supabase OR pattern for unassigned count; all keys updated to match new list IDs
+- `setSelectedIds(new Set())` called on list switch + every `fetchContacts()` to clear stale selection
+
+**Feature 3 — Bulk Actions**
+- Checkbox `<th>` + `<td>` added as first column in table. Select All in header toggles all visible contacts.
+- `selectedIds: Set<string>` state for O(1) membership checks
+- `toggleSelect(id, e)` + `toggleSelectAll()` handlers
+- Floating action bar (position:fixed, bottom:24px) renders when `someSelected` — buttons: UPDATE STAGE, UPDATE TYPE, ASSIGN REFERRED BY, DELETE, ✕ (clear)
+- Bulk action modal: stage dropdown / type dropdown / referred_by text input; `handleBulkUpdate()` patches all selected IDs in one Supabase `.in()` call
+- Delete confirmation modal with irreversibility warning; `handleBulkDelete()` deletes + refreshes
+- Row background highlighted when selected
+
+---
+
 ## [1.0.9] — 2026-03-09 — UI Redesign: Bloomberg Dark → Linear/Attio Light Mode
 
 ### Changed

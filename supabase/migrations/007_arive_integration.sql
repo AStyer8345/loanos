@@ -2,54 +2,20 @@
 -- LoanOS — Migration 007: Arive Integration Schema
 -- Adds columns needed for Arive → n8n → Supabase webhook pipeline.
 -- Runs in parallel with existing Zapier/Salesforce flows — no conflicts.
--- Safe to run on existing project — all changes use IF NOT EXISTS guards.
+-- Safe to run on existing project — all ADD COLUMN use IF NOT EXISTS.
 -- Run in: Supabase Dashboard → SQL Editor
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
 -- CONTACTS — Arive-mapped address + CRM fields
 -- ─────────────────────────────────────────────────────────────
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'mailing_street') THEN
-    ALTER TABLE contacts ADD COLUMN mailing_street TEXT;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'mailing_city') THEN
-    ALTER TABLE contacts ADD COLUMN mailing_city TEXT;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'mailing_state') THEN
-    ALTER TABLE contacts ADD COLUMN mailing_state TEXT;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'mailing_zip') THEN
-    ALTER TABLE contacts ADD COLUMN mailing_zip TEXT;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'group_tag') THEN
-    ALTER TABLE contacts ADD COLUMN group_tag TEXT DEFAULT 'Client';
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'stage') THEN
-    ALTER TABLE contacts ADD COLUMN stage TEXT DEFAULT 'Lead';
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'source') THEN
-    ALTER TABLE contacts ADD COLUMN source TEXT;
-  END IF;
-END $$;
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS mailing_street TEXT;
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS mailing_city  TEXT;
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS mailing_state TEXT;
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS mailing_zip   TEXT;
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS group_tag     TEXT DEFAULT 'Client';
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS stage         TEXT DEFAULT 'Lead';
+ALTER TABLE contacts ADD COLUMN IF NOT EXISTS source        TEXT;
 
 -- UNIQUE CONSTRAINT on contacts.email — required for upsert-on-conflict in n8n.
 -- NOTE: If this fails, you have duplicate emails in contacts.
@@ -72,11 +38,14 @@ END $$;
 -- ─────────────────────────────────────────────────────────────
 
 -- arive_loan_id: the Arive system identifier — used as upsert key
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'arive_loan_id') THEN
-    ALTER TABLE loans ADD COLUMN arive_loan_id TEXT;
-  END IF;
-END $$;
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS arive_loan_id       TEXT;
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS first_payment_date  DATE;
+-- est_closing_date: from keyDates_closingContingencyDate (distinct from closing_date in migration 003)
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS est_closing_date    DATE;
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS funding_date        DATE;
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS sales_contract_date DATE;
+-- raw_payload: full Arive webhook body for debugging / future field expansion
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS raw_payload         JSONB;
 
 -- UNIQUE CONSTRAINT on arive_loan_id — safe because all existing loans have NULL
 DO $$
@@ -87,45 +56,12 @@ BEGIN
   END IF;
 END $$;
 
--- Arive key dates
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'first_payment_date') THEN
-    ALTER TABLE loans ADD COLUMN first_payment_date DATE;
-  END IF;
-END $$;
-
--- est_closing_date: from keyDates_closingContingencyDate (distinct from closing_date from migration 003)
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'est_closing_date') THEN
-    ALTER TABLE loans ADD COLUMN est_closing_date DATE;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'funding_date') THEN
-    ALTER TABLE loans ADD COLUMN funding_date DATE;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'sales_contract_date') THEN
-    ALTER TABLE loans ADD COLUMN sales_contract_date DATE;
-  END IF;
-END $$;
-
--- raw_payload: full Arive webhook body for debugging / future field expansion
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'loans' AND column_name = 'raw_payload') THEN
-    ALTER TABLE loans ADD COLUMN raw_payload JSONB;
-  END IF;
-END $$;
-
 -- ─────────────────────────────────────────────────────────────
 -- INDEXES
 -- ─────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_loans_arive_loan_id ON loans(arive_loan_id);
-CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(email) WHERE email IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_contacts_source ON contacts(source);
+CREATE INDEX IF NOT EXISTS idx_contacts_email      ON contacts(email) WHERE email IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_contacts_source     ON contacts(source);
 
 -- ─────────────────────────────────────────────────────────────
 -- NOTE ON RLS + SERVICE ROLE

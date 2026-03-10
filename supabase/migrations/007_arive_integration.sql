@@ -79,7 +79,13 @@ DO $$ BEGIN
 END $$;
 
 -- UNIQUE CONSTRAINT on arive_loan_id — safe because all existing loans have NULL
-ALTER TABLE loans ADD CONSTRAINT IF NOT EXISTS loans_arive_loan_id_unique UNIQUE (arive_loan_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'loans_arive_loan_id_unique') THEN
+    ALTER TABLE loans ADD CONSTRAINT loans_arive_loan_id_unique UNIQUE (arive_loan_id);
+    RAISE NOTICE 'SUCCESS: loans_arive_loan_id_unique constraint added.';
+  END IF;
+END $$;
 
 -- Arive key dates
 DO $$ BEGIN

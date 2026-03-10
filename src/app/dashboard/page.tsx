@@ -16,40 +16,31 @@ export default async function DashboardPage() {
   ])
 
   const stats = [
-    { label: 'CONTACTS',       value: contacts.count      ?? 0, err: contacts.error },
-    { label: 'LOANS',          value: loans.count          ?? 0, err: loans.error },
-    { label: 'DOCUMENTS',      value: documents.count      ?? 0, err: documents.error },
-    { label: 'ACTIVITY',       value: activity.count       ?? 0, err: activity.error },
-    { label: 'CLOSED CLIENTS', value: closedClients.count  ?? 0, err: closedClients.error },
+    { label: 'Contacts',       value: contacts.count      ?? 0, err: contacts.error },
+    { label: 'Loans',          value: loans.count          ?? 0, err: loans.error },
+    { label: 'Documents',      value: documents.count      ?? 0, err: documents.error },
+    { label: 'Activity',       value: activity.count       ?? 0, err: activity.error },
+    { label: 'Closed Clients', value: closedClients.count  ?? 0, err: closedClients.error },
   ]
 
   return (
-    <div className="p-8 min-h-full" style={{ background: 'var(--bg)' }}>
+    <div className="p-8 min-h-full bg-slate-50">
 
       {/* ── Header ───────────────────────────────────────── */}
       <div className="mb-8">
-        <h1
-          className="font-display text-4xl tracking-widest leading-none"
-          style={{ color: 'var(--text)' }}
-        >
-          COMMAND CENTER
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Command Center
         </h1>
-        <p className="font-mono text-xs mt-2" style={{ color: 'var(--muted)' }}>
+        <p className="text-sm text-slate-500 mt-1">
           {user.email} · LoanOS v0.5
         </p>
       </div>
 
-      {/* ── Infra status bar ─────────────────────────────── */}
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded border mb-8"
-        style={{ background: 'var(--surface2)', borderColor: 'var(--green)', borderLeftWidth: '3px' }}
-      >
-        <span
-          className="inline-block w-2 h-2 rounded-full shrink-0"
-          style={{ background: 'var(--green)' }}
-        />
-        <span className="font-mono text-xs tracking-wide" style={{ color: 'var(--green)' }}>
-          SYSTEMS NOMINAL — AUTH · DATABASE · STORAGE
+      {/* ── Status bar ───────────────────────────────────── */}
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 mb-8">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-xs font-medium text-emerald-700">
+          Systems Nominal — Auth · Database · Storage
         </span>
       </div>
 
@@ -58,24 +49,15 @@ export default async function DashboardPage() {
         {stats.map(({ label, value, err }) => (
           <div
             key={label}
-            className="rounded border p-5"
-            style={{ background: 'var(--surface)', borderColor: 'var(--border)', borderLeftWidth: '3px', borderLeftColor: 'var(--gold)' }}
+            className="bg-white rounded-lg border border-slate-200 shadow-sm p-5"
           >
-            <div
-              className="font-mono text-[10px] tracking-widest mb-3"
-              style={{ color: 'var(--muted)' }}
-            >
+            <div className="text-xs font-medium text-slate-500 mb-3">
               {label}
             </div>
             {err ? (
-              <div className="font-mono text-xs" style={{ color: 'var(--red)' }}>
-                ERR
-              </div>
+              <div className="text-sm text-red-500 font-medium">Error</div>
             ) : (
-              <div
-                className="font-display text-5xl leading-none"
-                style={{ color: 'var(--text)' }}
-              >
+              <div className="text-4xl font-bold text-slate-900 leading-none">
                 {value}
               </div>
             )}
@@ -84,23 +66,16 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Quick actions ─────────────────────────────────── */}
-      <div
-        className="rounded border p-5"
-        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
-      >
-        <div
-          className="font-mono text-[10px] tracking-widest mb-4"
-          style={{ color: 'var(--muted)' }}
-        >
-          ACTIONS
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+        <div className="text-xs font-medium text-slate-500 mb-4">
+          Quick Actions
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/dashboard/upload"
-            className="action-btn font-mono text-xs tracking-wider px-4 py-2.5 rounded border transition-colors"
-            style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
           >
-            &gt;_ UPLOAD DOCUMENT
+            Upload Document
           </Link>
         </div>
       </div>

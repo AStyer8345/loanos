@@ -2,23 +2,32 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  LayoutDashboard,
+  Users,
+  Upload,
+  Zap,
+  BarChart2,
+  CheckSquare,
+  GitBranch,
+} from 'lucide-react'
 
 const NAV = [
-  { label: 'DASHBOARD',     href: '/dashboard' },
-  { label: 'CONTACTS',      href: '/dashboard/contacts' },
-  { label: 'UPLOAD DOC',    href: '/dashboard/upload' },
-  { label: '⚡ AUTOMATIONS', href: '/dashboard/automations' },
-  { label: 'MARKETING',     href: '/dashboard/marketing' },
-  { label: 'BUILD TRACKER', href: '/dashboard/build-tracker' },
-  { label: 'SYSTEM MAP',    href: '/dashboard/system-map' },
+  { label: 'Dashboard',     href: '/dashboard',             icon: LayoutDashboard },
+  { label: 'Contacts',      href: '/dashboard/contacts',    icon: Users },
+  { label: 'Upload Doc',    href: '/dashboard/upload',      icon: Upload },
+  { label: 'Automations',   href: '/dashboard/automations', icon: Zap },
+  { label: 'Marketing',     href: '/dashboard/marketing',   icon: BarChart2 },
+  { label: 'Build Tracker', href: '/dashboard/build-tracker', icon: CheckSquare },
+  { label: 'System Map',    href: '/dashboard/system-map',  icon: GitBranch },
 ]
 
 export default function SidebarNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-col gap-0.5 flex-1">
-      {NAV.map(({ label, href }) => {
+    <nav className="flex flex-col gap-0.5 px-2">
+      {NAV.map(({ label, href, icon: Icon }) => {
         const active = href === '/dashboard'
           ? pathname === '/dashboard'
           : pathname.startsWith(href)
@@ -27,18 +36,20 @@ export default function SidebarNav() {
             key={href}
             href={href}
             className={`
-              font-mono text-xs tracking-widest px-4 py-2.5 transition-colors
-              border-l-2
+              flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
+              border-l-2 -ml-2 pl-[10px]
               ${active
-                ? 'border-[var(--gold)] text-[var(--gold)] bg-[var(--surface2)]'
-                : 'border-transparent text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--border)]'
+                ? 'border-emerald-600 text-emerald-600 bg-emerald-50'
+                : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               }
             `}
           >
+            <Icon size={15} strokeWidth={active ? 2.2 : 1.8} />
             {label}
           </Link>
         )
-      })}
+      })
+      }
     </nav>
   )
 }

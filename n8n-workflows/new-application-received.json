@@ -1,0 +1,373 @@
+{
+  "name": "LoanOS \u2014 New Application Received",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "loanos-new-application",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "new-application-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-new-app",
+              "leftValue": "={{ $json.body.doc_type }}",
+              "rightValue": "new_application",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-new-app",
+      "name": "Is New Application?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/storage/v1/object/{{ $json.body.file_path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-pdf",
+      "name": "Download Application PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst binaryData = $input.first().binary;\nconst binaryKey = Object.keys(binaryData)[0];\nconst fileData = binaryData[binaryKey];\nconst base64Pdf = fileData.data;\n\nconst webhookData = $('Webhook').first().json.body;\n\nconst systemPrompt = \"You are extracting borrower information from a Uniform Residential Loan Application (Form 1003). Extract the following fields and return ONLY valid JSON, no markdown formatting:\\n\\n{\\n  \\\"borrower_names\\\": [\\\"First Last\\\"],\\n  \\\"borrower_emails\\\": [\\\"email@example.com\\\"],\\n  \\\"borrower_phones\\\": [\\\"(555) 123-4567\\\"],\\n  \\\"property_address\\\": \\\"123 Main St, City, ST 12345\\\",\\n  \\\"purchase_price\\\": \\\"$350,000\\\",\\n  \\\"loan_amount\\\": \\\"$280,000\\\"\\n}\\n\\nIf there are two borrowers (co-borrower), include both in the arrays. If a field is not found, use null.\";\n\nconst userPrompt = \"Extract borrower details from this loan application PDF.\";\n\nconst claudeBody = {\n  model: \"claude-sonnet-4-5-20251022\",\n  max_tokens: 1024,\n  system: systemPrompt,\n  messages: [\n    {\n      role: \"user\",\n      content: [\n        {\n          type: \"document\",\n          source: {\n            type: \"base64\",\n            media_type: \"application/pdf\",\n            data: base64Pdf\n          }\n        },\n        {\n          type: \"text\",\n          text: userPrompt\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{\n  json: {\n    claudeBody,\n    webhookData\n  }\n}];\n"
+      },
+      "id": "build-claude-request",
+      "name": "Build Claude Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claudeBody) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "call-claude",
+      "name": "Call Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SlNsEedAOCoo6NwH",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst claudeResponse = $input.first().json;\nconst webhookData = $('Build Claude Request').first().json.webhookData;\n\nlet extractedText = '';\nif (claudeResponse.content && claudeResponse.content.length > 0) {\n  extractedText = claudeResponse.content[0].text;\n}\n\n// Parse JSON from Claude response - strip markdown code fences if present\nlet cleanText = extractedText.trim();\nif (cleanText.startsWith('```')) {\n  cleanText = cleanText.replace(/^```(?:json)?\\n?/, '').replace(/\\n?```$/, '').trim();\n}\n\nlet extracted;\ntry {\n  extracted = JSON.parse(cleanText);\n} catch (e) {\n  extracted = {\n    borrower_names: [webhookData.borrower_first_name || 'there'],\n    borrower_emails: [webhookData.borrower_email || ''],\n    borrower_phones: [],\n    property_address: null,\n    purchase_price: null,\n    loan_amount: null\n  };\n}\n\n// Build display names\nconst borrowerNames = extracted.borrower_names || [];\nconst firstNames = borrowerNames.map(n => n.split(' ')[0]);\nconst greeting = firstNames.length > 1 ? firstNames.join(' and ') : (firstNames[0] || 'there');\nconst personalizedClosing = firstNames.length > 1 ? ' with you both' : '';\n\n// Use extracted email or fall back to webhook\nconst borrowerEmail = (extracted.borrower_emails && extracted.borrower_emails[0]) || webhookData.borrower_email || '';\n\n// Agent info from webhook\nconst agentFirst = webhookData.agent_first_name || '[Agent]';\nconst pronoun = webhookData.pronoun || 'them';\nconst pronounContraction = pronoun === 'them' ? \"they're\" : (pronoun === 'her' ? \"she's\" : \"he's\");\nconst timeframeContext = webhookData.timeframe_context || 'recently';\nconst loanId = webhookData.loan_id || '';\n\nreturn [{\n  json: {\n    greeting,\n    personalizedClosing,\n    borrowerEmail,\n    borrowerNames,\n    agentFirst,\n    pronoun,\n    pronounContraction,\n    timeframeContext,\n    loanId,\n    extracted\n  }\n}];\n"
+      },
+      "id": "parse-fields",
+      "name": "Parse Application Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\n\nconst emailHtml = '<p>Hi ' + d.greeting + ',</p>' +\n  '<p>My name is Adam Styer \\u2014 ' + d.agentFirst + ' shared your information with me ' + d.timeframeContext + ' and mentioned you\\'d be reaching out. I just saw your application come through, so I wanted to connect and introduce myself.</p>' +\n  '<p>First off \\u2014 you\\'re in great hands with ' + d.agentFirst + '. I\\'ve known ' + d.pronoun + ' for a while now and ' + d.pronounContraction + ' a great agent and a great person.</p>' +\n  '<p>I\\'m going to start reviewing your application and pulling together your options. Before we get too far down the road, I\\'d love to hop on a quick call to walk you through how we work, answer any questions, and make sure we\\'re locked in on the right strategy for your purchase.</p>' +\n  '<p>Feel free to call me directly at <a href=\"tel:5129566010\">512-956-6010</a>, or grab a time on my calendar here: <a href=\"https://calendly.com/adamstyer/15minutes\">Schedule a Call</a></p>' +\n  '<p>Looking forward to connecting' + d.personalizedClosing + '.</p>' +\n  '<p>Adam Styer<br>Senior Loan Officer | Mortgage Solutions LP<br>NMLS# 513013<br>(512) 956-6010<br>adam@thestyerteam.com</p>';\n\nconst subject = 'Got Your Application \\u2013 Adam Styer | Mortgage Solutions LP';\n\nreturn [{\n  json: {\n    emailHtml,\n    subject,\n    borrowerEmail: d.borrowerEmail,\n    greeting: d.greeting,\n    agentFirst: d.agentFirst,\n    loanId: d.loanId,\n    extracted: d.extracted\n  }\n}];\n"
+      },
+      "id": "build-email",
+      "name": "Build Application Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "additionalFields": {
+          "bodyContent": "={{ $json.emailHtml }}",
+          "bodyContentType": "html",
+          "subject": "={{ $json.subject }}",
+          "toRecipients": "={{ $json.borrowerEmail }}"
+        }
+      },
+      "id": "draft-email",
+      "name": "Draft Application Email",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        200
+      ],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "RkXvebinnei87gz4",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?id=eq.{{ $('Build Application Email').item.json.loanId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"application_received\", \"application_received_date\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "update-loan",
+      "name": "Update Loan Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loan_activity",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"loan_id\": \"{{ $(\"Build Application Email\").item.json.loanId }}\", \"action\": \"application_email_drafted\", \"details\": \"Application received email drafted for {{ $(\"Build Application Email\").item.json.greeting }}, referred by {{ $(\"Build Application Email\").item.json.agentFirst }}. Extracted: {{ JSON.stringify($(\"Build Application Email\").item.json.extracted) }}\", \"created_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "log-activity",
+      "name": "Log Application Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is New Application?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Application?": {
+      "main": [
+        [
+          {
+            "node": "Download Application PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Download Application PDF": {
+      "main": [
+        [
+          {
+            "node": "Build Claude Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Claude Request": {
+      "main": [
+        [
+          {
+            "node": "Call Claude API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Claude API": {
+      "main": [
+        [
+          {
+            "node": "Parse Application Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Application Fields": {
+      "main": [
+        [
+          {
+            "node": "Build Application Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Application Email": {
+      "main": [
+        [
+          {
+            "node": "Draft Application Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Loan Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Application Email": {
+      "main": [
+        [
+          {
+            "node": "Log Application Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

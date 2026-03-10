@@ -1,0 +1,263 @@
+{
+  "name": "LoanOS — Pre-Approval Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "loanos-pre-approval",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "pre-approval-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "pa-check",
+              "leftValue": "={{ $json.body.doc_type }}",
+              "rightValue": "pre_approval",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "is-pa",
+      "name": "Is Pre-Approval?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/storage/v1/object/{{ $json.body.file_path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-pdf",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryKey = Object.keys($input.item.binary)[0];\nconst pdfBuffer = await this.helpers.getBinaryDataBuffer(0, binaryKey);\nconst base64PDF = pdfBuffer.toString('base64');\n\nconst systemPrompt = `You are extracting fields from a Pre-Approval Letter PDF for a mortgage loan. Extract EXACTLY these fields and return valid JSON only — no markdown, no explanation.\n\nRequired fields:\n- first_name (borrower first name only)\n- full_name (borrower full legal name)\n- borrower_email (if present in the letter, otherwise null)\n- purchase_price (maximum approved purchase price — dollar amount, numbers only)\n- loan_amount (maximum approved loan amount — dollar amount, numbers only)\n- loan_type (Conventional, FHA, VA, USDA, etc.)\n- expiration_date (letter expiration date — YYYY-MM-DD format)\n- property_type (Single Family, Condo, Townhome, etc. — null if not specified)\n\nReturn JSON like:\n{\"first_name\":\"Maria\",\"full_name\":\"Maria Johnson\",\"borrower_email\":null,\"purchase_price\":\"450000\",\"loan_amount\":\"360000\",\"loan_type\":\"Conventional\",\"expiration_date\":\"2026-03-31\",\"property_type\":\"Single Family\"}`;\n\nconst userPrompt = 'Extract the pre-approval letter fields from this PDF. Return ONLY the JSON object, nothing else.';\n\nconst claudeBody = {\n  model: 'claude-sonnet-4-5-20251022',\n  max_tokens: 2048,\n  system: systemPrompt,\n  messages: [{\n    role: 'user',\n    content: [\n      { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64PDF } },\n      { type: 'text', text: userPrompt }\n    ]\n  }]\n};\n\nreturn [{ json: { claudeBody, webhookBody: $('Webhook').item.json.body } }];"
+      },
+      "id": "build-claude-req",
+      "name": "Build Claude Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claudeBody) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "call-claude",
+      "name": "Call Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SlNsEedAOCoo6NwH",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content[0].text;\nlet pa;\ntry {\n  const jsonMatch = raw.match(/\\{[\\s\\S]*\\}/);\n  pa = JSON.parse(jsonMatch ? jsonMatch[0] : raw);\n} catch (e) {\n  throw new Error('Failed to parse Claude response as JSON: ' + raw.substring(0, 200));\n}\n\nconst val = (v) => (v !== null && v !== undefined && v !== '') ? v : '[MISSING]';\nconst fmt$ = (n) => {\n  if (!n) return '[MISSING]';\n  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });\n};\nconst fmtDate = (d) => {\n  if (!d) return '[MISSING]';\n  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });\n};\n\nreturn [{ json: {\n  first_name: val(pa.first_name),\n  full_name: val(pa.full_name),\n  borrower_email: pa.borrower_email || '[BORROWER_EMAIL]',\n  purchase_price: fmt$(pa.purchase_price),\n  loan_amount: fmt$(pa.loan_amount),\n  loan_type: val(pa.loan_type),\n  expiration_date: fmtDate(pa.expiration_date),\n  property_type: pa.property_type || null,\n  webhookBody: $('Build Claude Request').item.json.webhookBody\n}}];"
+      },
+      "id": "parse-pa",
+      "name": "Parse PA Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const f = $json;\n\nconst subject = `\\ud83c\\udf89 You're Pre-Approved, ${f.first_name}! Here's What Happens Next`;\n\nconst html = `<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body style=\"margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f4f4;padding:30px 0;\"><tr><td align=\"center\"><table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);\"><tr><td style=\"background-color:#003366;padding:30px 40px;text-align:center;\"><h1 style=\"color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;\">The Styer Mortgage Team</h1><p style=\"color:#a8c4e0;margin:6px 0 0 0;font-size:14px;\">Senior Loan Officer | NMLS# 513013</p></td></tr><tr><td style=\"padding:40px 40px 20px 40px;\"><h2 style=\"color:#003366;margin:0 0 20px 0;font-size:22px;\">\\ud83c\\udf89 Congratulations, ${f.first_name}!</h2><p style=\"color:#333333;font-size:16px;line-height:1.7;margin:0 0 16px 0;\">You\\u2019re officially pre-approved \\u2014 and that\\u2019s a big deal. Here are your approval details:</p><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f0f5ff;border-left:4px solid #003366;border-radius:4px;margin:0 0 24px 0;\"><tr><td style=\"padding:20px 24px;\"><p style=\"margin:0 0 8px 0;color:#333333;font-size:15px;\"><strong>Borrower:</strong> ${f.full_name}</p><p style=\"margin:0 0 8px 0;color:#333333;font-size:15px;\"><strong>Purchase Price:</strong> Up to ${f.purchase_price}</p><p style=\"margin:0 0 8px 0;color:#333333;font-size:15px;\"><strong>Loan Amount:</strong> Up to ${f.loan_amount}</p><p style=\"margin:0 0 8px 0;color:#333333;font-size:15px;\"><strong>Loan Type:</strong> ${f.loan_type}</p><p style=\"margin:0;color:#333333;font-size:15px;\"><strong>Letter Expires:</strong> ${f.expiration_date}</p></td></tr></table><p style=\"color:#333333;font-size:16px;line-height:1.7;margin:0 0 16px 0;\"><strong>A quick note about this letter:</strong> The pre-approval I\\u2019ve attached is a general starter letter based on your financial profile. It reflects the maximum purchase price you qualify for.</p><p style=\"color:#333333;font-size:16px;line-height:1.7;margin:0 0 16px 0;\">When you\\u2019re ready to make an offer on a specific property, I\\u2019ll send you and your real estate agent a <strong>customized pre-approval letter</strong> that matches the exact offer price. That letter will be tailored to strengthen your offer and protect your privacy \\u2014 it won\\u2019t show a higher approval than you need.</p><p style=\"color:#333333;font-size:16px;line-height:1.7;margin:0 0 24px 0;\">In the meantime, here\\u2019s what to keep in mind as you shop:</p><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#fff8e1;border-left:4px solid #f5a623;border-radius:4px;margin:0 0 28px 0;\"><tr><td style=\"padding:20px 24px;\"><p style=\"margin:0 0 10px 0;color:#333333;font-size:15px;font-weight:700;\">Keep Your Approval Strong:</p><ul style=\"margin:0;padding-left:20px;color:#333333;font-size:15px;line-height:1.8;\"><li>Don\\u2019t open new credit cards or take on new debt</li><li>Don\\u2019t make large cash deposits without documenting the source</li><li>Avoid switching jobs before closing</li><li>Run any big purchases by me before you make them</li></ul></td></tr></table><p style=\"color:#333333;font-size:16px;line-height:1.7;margin:0 0 16px 0;\">Have questions or found a house you want to make an offer on? Reach out any time \\u2014 I\\u2019m here to move fast when you need me.</p><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:24px 0;\"><tr><td align=\"center\"><a href=\"https://calendly.com/adamstyer/15minutes\" style=\"display:inline-block;background-color:#003366;color:#ffffff;padding:14px 32px;border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;\">Schedule a Quick Call</a></td></tr></table></td></tr><tr><td style=\"padding:0 40px 40px 40px;border-top:1px solid #eeeeee;\"><table cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:24px;\"><tr><td style=\"padding-right:16px;vertical-align:top;\"><div style=\"width:50px;height:50px;background-color:#003366;border-radius:50%;display:flex;align-items:center;justify-content:center;\"><span style=\"color:#ffffff;font-size:20px;font-weight:700;\">AS</span></div></td><td style=\"vertical-align:top;\"><p style=\"margin:0;font-size:16px;font-weight:700;color:#003366;\">Adam Styer</p><p style=\"margin:2px 0;font-size:13px;color:#666666;\">Senior Loan Officer | Mortgage Solutions LP</p><p style=\"margin:2px 0;font-size:13px;color:#666666;\">NMLS# 513013</p><p style=\"margin:2px 0;font-size:13px;color:#003366;\"><a href=\"tel:5129566010\" style=\"color:#003366;text-decoration:none;\">(512) 956-6010</a></p><p style=\"margin:2px 0;font-size:13px;color:#003366;\"><a href=\"mailto:adam@thestyerteam.com\" style=\"color:#003366;text-decoration:none;\">adam@thestyerteam.com</a></p></td></tr></table><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:20px;padding-top:16px;border-top:1px solid #eeeeee;\"><tr><td align=\"center\"><p style=\"margin:0 0 8px 0;font-size:13px;color:#888888;\">Happy with your experience? A review means the world:</p><a href=\"https://share.google/ddpwv31jI2oqzN5Ia\" style=\"display:inline-block;margin:0 8px;font-size:13px;color:#003366;text-decoration:none;font-weight:600;\">\\u2b50 Google Review</a><span style=\"color:#cccccc;\">|</span><a href=\"https://www.zillow.com/lender-profile/adamstyer/\" style=\"display:inline-block;margin:0 8px;font-size:13px;color:#003366;text-decoration:none;font-weight:600;\">\\ud83c\\udfe1 Zillow Review</a></td></tr></table></td></tr></table></td></tr></table></body></html>`;\n\nreturn [{ json: { subject, html, to: 'adam@thestyerteam.com', fields: f } }];"
+      },
+      "id": "build-email",
+      "name": "Build PA Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 300]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject }}",
+        "bodyContent": "={{ $json.html }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "id": "draft-email",
+      "name": "Draft PA Email",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [1760, 300],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "RkXvebinnei87gz4",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?id=eq.{{ $('Parse PA Fields').item.json.webhookBody.loan_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"status\": \"pre_approved\", \"pre_approval_date\": \"{{ new Date().toISOString().split('T')[0] }}\"}"
+      },
+      "id": "update-loan",
+      "name": "Update Loan Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 520],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"loan_id\": \"{{ $('Parse PA Fields').item.json.webhookBody.loan_id }}\", \"action\": \"pre_approval_email_drafted\", \"details\": \"Pre-approval email drafted in Outlook. Borrower: {{ $('Parse PA Fields').item.json.full_name }}. Purchase price: {{ $('Parse PA Fields').item.json.purchase_price }}. Loan type: {{ $('Parse PA Fields').item.json.loan_type }}.\"}"
+      },
+      "id": "log-activity",
+      "name": "Log PA Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1980, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Is Pre-Approval?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Pre-Approval?": {
+      "main": [
+        [{ "node": "Download PDF", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [{ "node": "Build Claude Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Claude Request": {
+      "main": [
+        [{ "node": "Call Claude API", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call Claude API": {
+      "main": [
+        [{ "node": "Parse PA Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse PA Fields": {
+      "main": [
+        [
+          { "node": "Build PA Email", "type": "main", "index": 0 },
+          { "node": "Update Loan Record", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build PA Email": {
+      "main": [
+        [{ "node": "Draft PA Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Draft PA Email": {
+      "main": [
+        [{ "node": "Log PA Email", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

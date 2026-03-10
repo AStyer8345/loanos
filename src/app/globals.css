@@ -1,28 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg:       #080a0c;
-  --surface:  #0c0e12;
-  --surface2: #111318;
-  --border:   #1c1f28;
-  --gold:     #c9a84c;
-  --text:     #dde0e8;
-  --muted:    #525870;
-  --green:    #3ed68a;
-  --red:      #e05c5c;
+  /* Canvas & surfaces */
+  --bg:       #F9FAFB;  /* slate-50 */
+  --surface:  #FFFFFF;  /* white cards */
+  --surface2: #F3F4F6;  /* slate-100 — inputs, hover bg */
+
+  /* Borders */
+  --border:   #E2E8F0;  /* slate-200 */
+
+  /* Text */
+  --text:     #0F172A;  /* slate-900 */
+  --muted:    #64748B;  /* slate-500 */
+
+  /* Accent — emerald-600 */
+  --accent:        #059669;
+  --accent-light:  rgba(5, 150, 105, 0.08);
+  --accent-border: rgba(5, 150, 105, 0.3);
+
+  /* Semantic aliases (legacy compat — components that still ref --gold, --green) */
+  --gold:   #059669;  /* remapped to emerald */
+  --green:  #059669;
+  --red:    #DC2626;  /* red-600 */
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Legacy action-btn — updated for light mode */
 .action-btn:hover {
-  background: var(--gold);
-  color: var(--bg);
+  background: var(--accent);
+  color: #fff;
 }

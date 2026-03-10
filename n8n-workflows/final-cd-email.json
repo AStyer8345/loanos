@@ -1,0 +1,263 @@
+{
+  "name": "LoanOS — Final CD Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "loanos-final-cd",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "final-cd-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "" },
+          "conditions": [
+            {
+              "id": "cd-check",
+              "leftValue": "={{ $json.body.doc_type }}",
+              "rightValue": "closing_disclosure",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "is-cd",
+      "name": "Is CD?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/storage/v1/object/{{ $json.body.file_path }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-pdf",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryKey = Object.keys($input.item.binary)[0];\nconst pdfBuffer = await this.helpers.getBinaryDataBuffer(0, binaryKey);\nconst base64PDF = pdfBuffer.toString('base64');\n\nconst systemPrompt = `You are extracting fields from a Closing Disclosure (CD) PDF for a mortgage loan. Extract EXACTLY these fields and return valid JSON only — no markdown, no explanation.\n\nRequired fields:\n- borrower_first_name (Page 1 Borrower section)\n- cash_to_close (Page 1 Costs at Closing — dollar amount)\n- closing_date (Page 1 Closing Information — YYYY-MM-DD format)\n- monthly_payment (Page 1 Loan Terms P&I — dollar amount, numbers only)\n- property_address (Page 1 Property — full address)\n- title_company_name (Page 1 Settlement Agent)\n- title_contact_name (Page 5 Contact Information)\n- title_phone (Page 5 Contact Information)\n- title_email (Page 5 Contact Information)\n\nReturn JSON like:\n{\"borrower_first_name\":\"John\",\"cash_to_close\":\"12345.67\",\"closing_date\":\"2026-03-15\",\"monthly_payment\":\"1234.56\",\"property_address\":\"123 Main St, Austin, TX 78701\",\"title_company_name\":\"ABC Title\",\"title_contact_name\":\"Jane Smith\",\"title_phone\":\"512-555-1234\",\"title_email\":\"jane@abctitle.com\"}`;\n\nconst userPrompt = 'Extract the closing disclosure fields from this PDF. Return ONLY the JSON object, nothing else.';\n\nconst claudeBody = {\n  model: 'claude-sonnet-4-5-20251022',\n  max_tokens: 2048,\n  system: systemPrompt,\n  messages: [{\n    role: 'user',\n    content: [\n      { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64PDF } },\n      { type: 'text', text: userPrompt }\n    ]\n  }]\n};\n\nreturn [{ json: { claudeBody, webhookBody: $('Webhook').item.json.body } }];"
+      },
+      "id": "build-claude-req",
+      "name": "Build Claude Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.claudeBody) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "call-claude",
+      "name": "Call Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SlNsEedAOCoo6NwH",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content[0].text;\nlet cd;\ntry {\n  const jsonMatch = raw.match(/\\{[\\s\\S]*\\}/);\n  cd = JSON.parse(jsonMatch ? jsonMatch[0] : raw);\n} catch (e) {\n  throw new Error('Failed to parse Claude response as JSON: ' + raw.substring(0, 200));\n}\n\n// Calculate first payment date: closing month + 2\nlet firstPaymentDate = '[MISSING]';\nif (cd.closing_date) {\n  const d = new Date(cd.closing_date + 'T00:00:00');\n  d.setMonth(d.getMonth() + 2);\n  d.setDate(1);\n  firstPaymentDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });\n}\n\nconst val = (v) => (v !== null && v !== undefined && v !== '') ? v : '[MISSING]';\nconst fmt$ = (n) => n ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '[MISSING]';\nconst fmtDate = (d) => {\n  if (!d) return '[MISSING]';\n  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n};\n\nreturn [{ json: {\n  borrower_first_name: val(cd.borrower_first_name),\n  cash_to_close: fmt$(cd.cash_to_close),\n  closing_date: fmtDate(cd.closing_date),\n  closing_date_raw: cd.closing_date || '',\n  monthly_payment: fmt$(cd.monthly_payment),\n  first_payment_date: firstPaymentDate,\n  property_address: val(cd.property_address),\n  title_company_name: val(cd.title_company_name),\n  title_contact_name: val(cd.title_contact_name),\n  title_phone: val(cd.title_phone),\n  title_email: val(cd.title_email),\n  webhookBody: $('Build Claude Request').item.json.webhookBody\n}}];"
+      },
+      "id": "parse-cd",
+      "name": "Parse CD Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const f = $json;\n\nconst subject = `Your Final Closing Numbers \\u2013 Action Required Before ${f.closing_date}`;\n\nconst html = `<!DOCTYPE html><html><body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;\"><p>Hi ${f.borrower_first_name},</p><p>Great news \\u2014 your Closing Disclosure is finalized. Here\\u2019s everything you need to know before your closing on ${f.closing_date}.</p><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">FINAL NUMBERS</p><hr style=\"border: 1px solid #cccccc;\"><p>Cash to Close: <strong>$${f.cash_to_close}</strong><br>Closing Date: <strong>${f.closing_date}</strong><br>First Payment Due: <strong>${f.first_payment_date}</strong><br>Monthly Payment (P&amp;I): <strong>$${f.monthly_payment}</strong></p><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">WIRE INSTRUCTIONS \\u2014 READ THIS</p><hr style=\"border: 1px solid #cccccc;\"><p>Funds must be sent via wire transfer. Wire is strongly preferred by the title company and ensures same-day funding. If wire is not possible, a cashier\\u2019s check made payable to the title company is acceptable \\u2014 contact us first before going that route.</p><p style=\"background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;\">\\u26a0\\ufe0f <strong>WIRE FRAUD WARNING:</strong> Wire fraud is common in real estate transactions. Before sending any wire, call the title company directly using the number below to verbally confirm the instructions. Do not rely solely on emailed wire instructions \\u2014 even if they appear to come from us or the title company.</p><p>Title Company: <strong>${f.title_company_name}</strong><br>Contact: <strong>${f.title_contact_name}</strong><br>Phone: <strong>${f.title_phone}</strong><br>Email: <strong>${f.title_email}</strong></p><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">CLOSING DETAILS</p><hr style=\"border: 1px solid #cccccc;\"><p>Date: <strong>${f.closing_date}</strong><br>Location: <strong>${f.title_company_name}</strong><br><em>Please confirm signing location with your realtor.</em></p><p><strong>What to bring:</strong></p><ul><li>Government-issued photo ID</li><li>Proof of wire confirmation (or cashier\\u2019s check if applicable)</li><li>Any documents we\\u2019ve requested</li></ul><p>Plan for approximately <strong>45\\u201360 minutes</strong>.</p><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">WHAT HAPPENS AFTER SIGNING</p><hr style=\"border: 1px solid #cccccc;\"><ul><li>Keys are released after funding \\u2014 not immediately after signing</li><li>Funding typically occurs same day or next business day</li><li>Your first mortgage payment is due <strong>${f.first_payment_date}</strong></li><li>Property: <strong>${f.property_address}</strong></li></ul><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">BEFORE YOU CLOSE \\u2014 CRITICAL</p><hr style=\"border: 1px solid #cccccc;\"><p>You\\u2019re in the final stretch. Please avoid the following until after you have your keys:</p><ul><li>\\u274c Do not open any new credit accounts or make large purchases</li><li>\\u274c Do not move or transfer large sums of money between accounts</li><li>\\u274c Do not change jobs or employment status</li><li>\\u274c Do not miss any payments on existing accounts</li></ul><p>Any one of these can delay or derail your closing. We\\u2019re too close.</p><hr style=\"border: 1px solid #cccccc;\"><p style=\"font-weight: bold; font-size: 15px;\">ONE LAST THING</p><hr style=\"border: 1px solid #cccccc;\"><p>It has been a pleasure working with you on this. If you feel we earned it, a quick review goes a long way for a small business like ours:</p><ul><li><a href=\"https://share.google/ddpwv31jI2oqzN5Ia\">Leave a Google Review</a></li><li><a href=\"https://www.zillow.com/lender-profile/adamstyer/\">Leave a Zillow Review</a></li></ul><p>And if anyone in your life is buying, selling, or refinancing, I\\u2019d love the opportunity to help them the same way.</p><p>Any questions before closing, call or text me directly.</p><p>Adam Styer<br>Mortgage Banker | The Styer Team<br>(512) 956-6010<br>adam@thestyerteam.com<br>NMLS# 513013</p></body></html>`;\n\nreturn [{ json: { subject, html, to: 'adam@thestyerteam.com', fields: f } }];"
+      },
+      "id": "build-email",
+      "name": "Build CD Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 300]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject }}",
+        "bodyContent": "={{ $json.html }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "id": "draft-email",
+      "name": "Draft CD Email",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [1760, 300],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "RkXvebinnei87gz4",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?id=eq.{{ $('Parse CD Fields').item.json.webhookBody.loan_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"status\": \"cd_issued\", \"closing_date\": \"{{ $('Parse CD Fields').item.json.closing_date_raw }}\"}"
+      },
+      "id": "update-loan",
+      "name": "Update Loan Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 520],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"loan_id\": \"{{ $('Parse CD Fields').item.json.webhookBody.loan_id }}\", \"action\": \"cd_email_drafted\", \"details\": \"Final CD email drafted in Outlook. Closing date: {{ $('Parse CD Fields').item.json.closing_date }}. Cash to close: ${{ $('Parse CD Fields').item.json.cash_to_close }}.\"}"
+      },
+      "id": "log-activity",
+      "name": "Log CD Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1980, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Is CD?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is CD?": {
+      "main": [
+        [{ "node": "Download PDF", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [{ "node": "Build Claude Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Claude Request": {
+      "main": [
+        [{ "node": "Call Claude API", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call Claude API": {
+      "main": [
+        [{ "node": "Parse CD Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse CD Fields": {
+      "main": [
+        [
+          { "node": "Build CD Email", "type": "main", "index": 0 },
+          { "node": "Update Loan Record", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build CD Email": {
+      "main": [
+        [{ "node": "Draft CD Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Draft CD Email": {
+      "main": [
+        [{ "node": "Log CD Email", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

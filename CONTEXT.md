@@ -29,6 +29,7 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 - /dashboard/build-tracker: auth-gated iframe → /docs/loanos.html
 - /dashboard/system-map: auth-gated iframe → /docs/loanos-system-map.html
 - Bloomberg terminal × modern SaaS redesign: Bebas Neue + IBM Plex Mono/Sans, gold accent (#c9a84c), dark surface palette
+- **UI redesign (2026-03-09)**: Bloomberg dark → Linear/Attio light mode — emerald-600 accent (#059669), Inter font, slate palette, lucide-react icons, card-on-canvas stats
 
 ### Phase 2 (in progress)
 - **Contract automation pipeline — LIVE ✅** — `n8n/contract-received.workflow.json`
@@ -177,6 +178,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - **Tracker auto-update**: checking a task with `tracker` property sets `s.last[trackerId]` = now ISO string
 - Supabase client stabilized with `useMemo(() => createClient(), [])`
 - Bloomberg terminal UI matches rest of LoanOS — same CSS vars, Bebas Neue, IBM Plex Mono
+- ⚠️ Marketing page still uses Bloomberg/gold CSS vars — not yet migrated to light mode
 
 ### Phase 2 — Closed Clients + Import Feature (2026-03-09 — revised session)
 - **Standalone `/dashboard/closed-clients` page REMOVED** — replaced by "Closed Borrowers" Smart List in contacts page

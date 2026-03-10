@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [1.0.9] — 2026-03-09 — UI Redesign: Bloomberg Dark → Linear/Attio Light Mode
+
+### Changed
+- `src/app/globals.css` — full palette swap: `--bg: #F9FAFB`, `--surface: #FFFFFF`, `--border: #E2E8F0`, `--text: #0F172A`, `--muted: #64748B`, `--accent: #059669`. Legacy `--gold` and `--green` remapped to `#059669` for backward compat. Google Fonts changed from Bebas Neue + IBM Plex Mono/Sans to Inter only.
+- `src/app/dashboard/layout.tsx` — sidebar: `bg-white border-r border-slate-200`, `"OS"` logo accent `text-emerald-600`, clean `text-slate-900` wordmark.
+- `src/app/dashboard/SidebarNav.tsx` — full rewrite: lucide-react icons per nav item (LayoutDashboard, Users, Upload, Zap, BarChart2, CheckSquare, GitBranch); active state `bg-emerald-50 text-emerald-600 border-l-2 border-emerald-600`; sentence-case labels; no uppercase/monospace.
+- `src/app/dashboard/SignOutButton.tsx` — light-mode styles: `text-slate-500 hover:text-slate-900 border-slate-200 hover:border-slate-300`; `w-full` to fill sidebar footer.
+- `src/app/dashboard/page.tsx` — full rewrite: white card-on-canvas stat grid (`bg-white rounded-lg border border-slate-200 shadow-sm`), `text-4xl font-bold text-slate-900` numbers, pill status bar (`bg-emerald-50 border-emerald-200` with `animate-pulse` dot), emerald primary CTA button.
+- `src/app/dashboard/automations/page.tsx` — full rewrite: all `rgba(201,168,76,...)` gold replaced with emerald equivalents; `TriggerModal` converted to Tailwind (`bg-black/50` overlay, `border-l-4 border-l-emerald-500`); `AutoCard` left accent `bg-emerald-500`, status badge `bg-emerald-50 border-emerald-200 text-emerald-700`; pipeline step nodes `border-emerald-300 bg-emerald-50 text-emerald-600`; `flow-dot` keyframe `background: #059669`; card hover `hover:shadow-md hover:border-slate-300` (no gold glow); Bebas Neue headers replaced with `text-2xl font-semibold tracking-tight`.
+
+### Added
+- `lucide-react@^0.577.0` — installed as dependency for sidebar icons
+
+---
+
 ## [1.0.8] — 2026-03-09 — Build Tracker Update + Session Rules
 
 ### Changed

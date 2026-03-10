@@ -1,0 +1,224 @@
+{
+  "name": "LoanOS \u2014 Referral Intro Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "loanos-referral-intro",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "referral-intro-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-referral",
+              "leftValue": "={{ $json.body.doc_type }}",
+              "rightValue": "referral_intro",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-referral-intro",
+      "name": "Is Referral Intro?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst body = $input.first().json.body;\n\nconst borrowerFirst = body.borrower_first_name || '[Name]';\nconst borrowerEmail = body.borrower_email || '';\nconst agentFirst = body.agent_first_name || '[Agent]';\nconst targetArea = body.target_area || 'the area you\\'re targeting';\nconst timeline = body.timeline || 'in the coming months';\nconst pronoun = body.pronoun || 'them';\nconst loanId = body.loan_id || '';\n\nconst emailHtml = '<p>Hi ' + borrowerFirst + ',</p>' +\n  '<p>My name is Adam Styer and ' + agentFirst + ' shared your information with me and said you were wanting to get pre-approved for a purchase ' + timeline + ' in ' + targetArea + '. I\\'ve known ' + agentFirst + ' for a good while now \\u2014 great agent and great person. You\\'re in good hands with ' + pronoun + '.</p>' +\n  '<p>I\\'d be happy to walk you through the pre-approval process and give you an overview of how we work. Feel free to call me directly at <a href=\"tel:5129566010\">512-956-6010</a>, or grab time directly on my calendar here: <a href=\"https://calendly.com/adamstyer/15minutes\">Schedule a Call</a></p>' +\n  '<p>I\\'ll also include a link to the loan application below. You\\'re welcome to wait until after we talk to complete it, but if you\\'d like to get started now, it can help make that first conversation more productive by dialing in your purchasing power and next steps. Completely up to you.</p>' +\n  '<p><a href=\"https://mslp.my1003app.com/513013/register?time=1767737197980\">Loan Application</a></p>' +\n  '<p>Looking forward to connecting.</p>' +\n  '<p>Adam Styer<br>Senior Loan Officer | Mortgage Solutions LP<br>NMLS# 513013<br>(512) 956-6010<br>adam@thestyerteam.com</p>';\n\nconst subject = 'Connecting with You \\u2013 Adam Styer | Mortgage Solutions LP';\n\nreturn [{\n  json: {\n    emailHtml,\n    subject,\n    borrowerEmail,\n    borrowerFirst,\n    agentFirst,\n    loanId\n  }\n}];\n"
+      },
+      "id": "build-email",
+      "name": "Build Referral Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "additionalFields": {
+          "bodyContent": "={{ $json.emailHtml }}",
+          "bodyContentType": "html",
+          "subject": "={{ $json.subject }}",
+          "toRecipients": "={{ $json.borrowerEmail }}"
+        }
+      },
+      "id": "draft-email",
+      "name": "Draft Referral Email",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        880,
+        200
+      ],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "RkXvebinnei87gz4",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?id=eq.{{ $('Build Referral Email').item.json.loanId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"status\": \"referral_intro_sent\", \"referral_intro_date\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "update-loan",
+      "name": "Update Loan Record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loan_activity",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"loan_id\": \"{{ $(\"Build Referral Email\").item.json.loanId }}\", \"action\": \"referral_intro_email_drafted\", \"details\": \"Referral intro email drafted for {{ $(\"Build Referral Email\").item.json.borrowerFirst }}, referred by {{ $(\"Build Referral Email\").item.json.agentFirst }}\", \"created_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "log-activity",
+      "name": "Log Referral Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Referral Intro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Referral Intro?": {
+      "main": [
+        [
+          {
+            "node": "Build Referral Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Build Referral Email": {
+      "main": [
+        [
+          {
+            "node": "Draft Referral Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Loan Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Referral Email": {
+      "main": [
+        [
+          {
+            "node": "Log Referral Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

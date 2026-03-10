@@ -55,6 +55,20 @@ function fmtDate(s: string | null) {
 type SortKey = 'borrower_name' | 'loan_amount' | 'closing_date' | 'status'
 type SortDir = 'asc' | 'desc'
 
+// ── Column definitions (toggleable) ───────────────────────────────────────────
+const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
+  { id: 'borrower_name', label: 'Borrower', key: 'borrower_name' },
+  { id: 'loan_amount',   label: 'Amount',   key: 'loan_amount' },
+  { id: 'status',        label: 'Status',   key: 'status' },
+  { id: 'loan_purpose',  label: 'Purpose',  key: null },
+  { id: 'closing_date',  label: 'Closing',  key: 'closing_date' },
+  { id: 'location',      label: 'Location', key: null },
+  { id: 'loan_program',  label: 'Program',  key: null },
+]
+
+const DEFAULT_LOAN_COLUMNS = LOAN_COLUMNS.map(c => c.id)
+const LS_LOAN_COLUMNS_KEY = 'loanos_loans_columns_v1'
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function LoansPage() {
@@ -66,6 +80,41 @@ export default function LoansPage() {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('closing_date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_LOAN_COLUMNS)
+  const [showColPicker, setShowColPicker] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
+
+  // Restore column visibility from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LS_LOAN_COLUMNS_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as string[]
+        if (Array.isArray(parsed) && parsed.length > 0)
+          setVisibleColumns(parsed.filter(id => LOAN_COLUMNS.some(c => c.id === id)))
+      }
+    } catch {}
+  }, [])
+
+  // Sidebar collapse: under 1280px default collapsed; toggle overrides
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1279px)')
+    const sync = () => setSidebarCollapsed(sidebarCollapsedUser ?? mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [sidebarCollapsedUser])
+
+  const toggleColumn = (id: string) => {
+    setVisibleColumns(prev => {
+      const next = prev.includes(id)
+        ? prev.filter(c => c !== id)
+        : [...prev, id]
+      try { localStorage.setItem(LS_LOAN_COLUMNS_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }
 
   // ── Fetch counts ───────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
@@ -161,29 +210,58 @@ export default function LoansPage() {
     return parts.length ? parts.join(', ') : l.property_address || '—'
   }
 
+  const colDefs = LOAN_COLUMNS.filter(c => visibleColumns.includes(c.id))
+
   return (
     <div className="flex h-full">
-      {/* Sidebar */}
-      <aside className="w-52 shrink-0 border-r border-slate-200 flex flex-col py-4">
-        <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Views</p>
-        {SMART_LISTS.map(list => (
+      {/* Sidebar — collapses to icon rail under 1280px or via toggle */}
+      <aside
+        className="shrink-0 border-r border-slate-200 flex flex-col transition-[width] duration-200"
+        style={{ width: sidebarCollapsed ? 52 : 200 }}
+      >
+        <div className="flex items-center justify-between px-2 py-3 min-h-[40px]">
+          {!sidebarCollapsed && (
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Views</p>
+          )}
           <button
-            key={list.id}
-            onClick={() => handleListChange(list.id)}
-            className={`flex items-center justify-between px-4 py-1.5 text-sm transition-colors ${
-              activeList === list.id
-                ? 'text-emerald-700 font-semibold bg-emerald-50 border-r-2 border-emerald-600'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
+            type="button"
+            onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
+            className="text-slate-400 text-xs p-1 hover:text-slate-600"
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <span>{list.label}</span>
-            <span className={`text-xs rounded-full px-1.5 py-0.5 ${
-              activeList === list.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-            }`}>
-              {counts[list.id] ?? '…'}
-            </span>
+            {sidebarCollapsed ? '›' : '‹'}
           </button>
-        ))}
+        </div>
+        <div className="px-2 pb-4">
+          {SMART_LISTS.map(list => {
+            const initial = list.label.charAt(0)
+            return (
+              <button
+                key={list.id}
+                onClick={() => handleListChange(list.id)}
+                className={`w-full flex items-center justify-between rounded text-left transition-colors ${
+                  sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
+                } text-[11px] ${
+                  activeList === list.id
+                    ? 'text-emerald-700 font-semibold bg-emerald-50 border-r-2 border-emerald-600'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+                title={sidebarCollapsed ? list.label : undefined}
+              >
+                {sidebarCollapsed ? (
+                  <span className="font-semibold text-xs">{initial}</span>
+                ) : (
+                  <span className="truncate">{list.label}</span>
+                )}
+                <span className={`text-[10px] rounded-full px-1 py-0 shrink-0 ml-1 ${
+                  activeList === list.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {counts[list.id] ?? '…'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </aside>
 
       {/* Main */}
@@ -198,6 +276,38 @@ export default function LoansPage() {
               {filtered.length} {filtered.length === 1 ? 'loan' : 'loans'}
               {search && ` matching "${search}"`}
             </p>
+          </div>
+          {/* Column picker */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowColPicker(p => !p)}
+              className="text-xs font-medium text-slate-500 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50"
+            >
+              COLUMNS ▾
+            </button>
+            {showColPicker && (
+              <div
+                role="listbox"
+                className="absolute right-0 top-full mt-1 z-[100] min-w-[180px] py-2 bg-white border border-slate-200 rounded-lg shadow-lg"
+              >
+                {LOAN_COLUMNS.map(col => (
+                  <label
+                    key={col.id}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 cursor-pointer hover:bg-slate-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={visibleColumns.includes(col.id)}
+                      onChange={() => toggleColumn(col.id)}
+                      onClick={e => e.stopPropagation()}
+                      className="rounded accent-emerald-600 cursor-pointer"
+                    />
+                    {col.label}
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
           {/* Search */}
           <div className="relative w-64">
@@ -225,17 +335,9 @@ export default function LoansPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
-                  {([
-                    { key: 'borrower_name', label: 'Borrower' },
-                    { key: 'loan_amount',   label: 'Amount' },
-                    { key: 'status',        label: 'Status' },
-                    { key: null,            label: 'Purpose' },
-                    { key: 'closing_date',  label: 'Closing' },
-                    { key: null,            label: 'Location' },
-                    { key: null,            label: 'Program' },
-                  ] as { key: SortKey | null; label: string }[]).map(col => (
+                  {colDefs.map(col => (
                     <th
-                      key={col.label}
+                      key={col.id}
                       onClick={() => col.key && handleSort(col.key)}
                       className={`text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide select-none ${
                         col.key ? 'cursor-pointer hover:text-slate-700' : ''
@@ -252,27 +354,27 @@ export default function LoansPage() {
               <tbody>
                 {filtered.map(loan => (
                   <tr key={loan.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-medium">
-                      <Link
-                        href={`/dashboard/loans/${loan.id}`}
-                        className="text-slate-900 hover:text-emerald-700 hover:underline"
-                      >
-                        {loan.borrower_name || loan.loan_name || '(unnamed)'}
-                      </Link>
-                      {loan.loan_name && loan.borrower_name && (
-                        <p className="text-xs text-slate-400 mt-0.5">{loan.loan_name}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
-                      {fmtCurrency(loan.loan_amount)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={loan.status} />
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{loan.loan_purpose || '—'}</td>
-                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{fmtDate(loan.closing_date)}</td>
-                    <td className="px-4 py-3 text-slate-600">{loanLocation(loan)}</td>
-                    <td className="px-4 py-3 text-slate-600">{loan.loan_program || '—'}</td>
+                    {colDefs.map(col => {
+                      if (col.id === 'borrower_name') {
+                        return (
+                          <td key={col.id} className="px-4 py-3 font-medium">
+                            <Link href={`/dashboard/loans/${loan.id}`} className="text-slate-900 hover:text-emerald-700 hover:underline">
+                              {loan.borrower_name || loan.loan_name || '(unnamed)'}
+                            </Link>
+                            {loan.loan_name && loan.borrower_name && (
+                              <p className="text-xs text-slate-400 mt-0.5">{loan.loan_name}</p>
+                            )}
+                          </td>
+                        )
+                      }
+                      if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 text-slate-700 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
+                      if (col.id === 'status') return <td key={col.id} className="px-4 py-3"><StatusBadge status={loan.status} /></td>
+                      if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 text-slate-600">{loan.loan_purpose || '—'}</td>
+                      if (col.id === 'closing_date') return <td key={col.id} className="px-4 py-3 text-slate-600 whitespace-nowrap">{fmtDate(loan.closing_date)}</td>
+                      if (col.id === 'location') return <td key={col.id} className="px-4 py-3 text-slate-600">{loanLocation(loan)}</td>
+                      if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 text-slate-600">{loan.loan_program || '—'}</td>
+                      return null
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -280,6 +382,15 @@ export default function LoansPage() {
           )}
         </div>
       </div>
+
+      {/* Column picker backdrop — click outside to close */}
+      {showColPicker && (
+        <div
+          className="fixed inset-0 z-[50]"
+          onClick={() => setShowColPicker(false)}
+          aria-hidden
+        />
+      )}
     </div>
   )
 }

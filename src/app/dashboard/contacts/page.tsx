@@ -71,6 +71,26 @@ function fmtDate(s: string | null) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+/** Normalize for tel: href (digits and + only) */
+function telHref(phone: string | null): string | null {
+  if (!phone || !phone.trim()) return null
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 10 ? `tel:${phone.trim()}` : null
+}
+
+function PhoneCell({ value }: { value: string | null }) {
+  const href = telHref(value)
+  if (!value?.trim()) return <>—</>
+  if (href) {
+    return (
+      <a href={href} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
+        {value}
+      </a>
+    )
+  }
+  return <>{value}</>
+}
+
 function isClosedLoan(status: string | null) {
   if (!status) return false
   const s = status.toLowerCase()
@@ -104,8 +124,8 @@ const ALL_COLUMNS: ColumnDef[] = [
       </Link>
     ) },
   { id: 'type',         label: 'Type',             render: c => c.contact_type ?? '—' },
-  { id: 'phone',        label: 'Phone',            render: c => c.phone ?? '—' },
-  { id: 'mobile',       label: 'Mobile',           render: c => c.mobile_phone ?? '—' },
+  { id: 'phone',        label: 'Phone',            render: c => <PhoneCell value={c.phone} /> },
+  { id: 'mobile',       label: 'Mobile',           render: c => <PhoneCell value={c.mobile_phone} /> },
   { id: 'email',        label: 'Email',            render: c => c.email ?? '—' },
   { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
@@ -218,6 +238,17 @@ export default function ContactsPage() {
   const [bulkValue, setBulkValue]           = useState('')
   const [bulkProcessing, setBulkProcessing] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+
+  // sidebar collapse: default collapsed when viewport < 1280px; toggle overrides
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1279px)')
+    const sync = () => setSidebarCollapsed(sidebarCollapsedUser ?? mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [sidebarCollapsedUser])
 
   // init columns from localStorage
   useEffect(() => {
@@ -402,37 +433,65 @@ export default function ContactsPage() {
   return (
     <div className="flex h-full" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
 
-      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside className="flex-shrink-0 border-r overflow-y-auto"
-             style={{ width: 220, borderColor: 'var(--border)', background: 'var(--surface)' }}>
-        <div className="px-4 py-5">
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)',
-                        letterSpacing: '0.12em', marginBottom: 12 }}>
-            SMART LISTS
-          </div>
+      {/* ── Sidebar (collapses to icon rail under 1280px or via toggle) ───── */}
+      <aside
+        className="flex-shrink-0 border-r overflow-y-auto flex flex-col"
+        style={{
+          width: sidebarCollapsed ? 52 : 200,
+          borderColor: 'var(--border)',
+          background: 'var(--surface)',
+          transition: 'width 0.2s ease',
+        }}
+      >
+        <div className="px-2 py-3 flex items-center justify-between" style={{ minHeight: 40 }}>
+          {!sidebarCollapsed && (
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.12em' }}>
+              SMART LISTS
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
+            style={{
+              padding: 4, background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 10,
+            }}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed ? '›' : '‹'}
+          </button>
+        </div>
+        <div className="px-2 pb-4">
           {SMART_LISTS.map(list => {
             const isActive = activeList === list.id
+            const initial = list.label.charAt(0)
             return (
               <div key={list.id}>
-                {list.section && (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)',
-                                letterSpacing: '0.15em', marginTop: 16, marginBottom: 6,
-                                paddingLeft: 8, opacity: 0.6 }}>
+                {list.section && !sidebarCollapsed && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--muted)', letterSpacing: '0.15em', marginTop: 10, marginBottom: 4, paddingLeft: 6, opacity: 0.6 }}>
                     {list.section}
                   </div>
                 )}
                 <button
+                  type="button"
                   onClick={() => { setActiveList(list.id); setSelectedContact(null); setSelectedIds(new Set()) }}
-                  className="w-full text-left px-3 py-2 rounded flex items-center justify-between"
+                  className="w-full text-left rounded flex items-center justify-between"
                   style={{
                     fontFamily: 'var(--font-mono)', fontSize: 11,
+                    padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
                     background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
                     color: isActive ? '#c9a84c' : 'var(--fg)',
                     border: isActive ? '1px solid rgba(201,168,76,0.25)' : '1px solid transparent',
                     marginBottom: 2,
-                  }}>
-                  <span>{list.label}</span>
-                  <span style={{ opacity: 0.5, fontSize: 10 }}>{counts[list.id] ?? 0}</span>
+                  }}
+                  title={sidebarCollapsed ? list.label : undefined}
+                >
+                  {sidebarCollapsed ? (
+                    <span style={{ fontWeight: 600, fontSize: 12 }}>{initial}</span>
+                  ) : (
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{list.label}</span>
+                  )}
+                  <span style={{ opacity: 0.7, fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{counts[list.id] ?? 0}</span>
                 </button>
               </div>
             )
@@ -487,18 +546,26 @@ export default function ContactsPage() {
               border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
             }}>COLUMNS ▾</button>
             {showColPicker && (
-              <div style={{
-                position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 50,
-                background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6,
-                padding: '8px 0', minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-              }}>
+              <div
+                role="listbox"
+                style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 100,
+                  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6,
+                  padding: '8px 0', minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                }}
+              >
                 {ALL_COLUMNS.map(col => (
                   <label key={col.id} style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '5px 14px', cursor: 'pointer',
                     fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)',
                   }}>
-                    <input type="checkbox" checked={visibleColumns.includes(col.id)}
-                           onChange={() => toggleColumn(col.id)} style={{ accentColor: '#c9a84c' }} />
+                    <input
+                      type="checkbox"
+                      checked={visibleColumns.includes(col.id)}
+                      onChange={() => toggleColumn(col.id)}
+                      onClick={e => e.stopPropagation()}
+                      style={{ accentColor: '#c9a84c', cursor: 'pointer' }}
+                    />
                     {col.label}
                   </label>
                 ))}
@@ -672,21 +739,25 @@ export default function ContactsPage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {([
-                  ['Email', selectedContact.email], ['Phone', selectedContact.phone],
-                  ['Mobile', selectedContact.mobile_phone], ['Stage', selectedContact.stage],
+                  ['Email', selectedContact.email],
+                  ['Phone', selectedContact.phone, true],
+                  ['Mobile', selectedContact.mobile_phone, true],
+                  ['Stage', selectedContact.stage],
                   ['Lead Source', selectedContact.lead_source], ['Referred By', selectedContact.referred_by],
                   ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthday],
                   ['Last Touch', selectedContact.last_touch], ['Notes', selectedContact.notes],
                   ['Co-Borrower', selectedContact.coborrower_first_name
                     ? `${selectedContact.coborrower_first_name} ${selectedContact.coborrower_last_name ?? ''}`.trim()
                     : null],
-                ] as [string, string | null][]).map(([label, val]) => val ? (
+                ] as [string, string | null, boolean?][]).map(([label, val, isPhone]) => val ? (
                   <div key={label}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
                     <div style={{ fontSize: 13, color: 'var(--fg)', wordBreak: 'break-word' }}>
                       {label === 'Referred By'
                         ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(val)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
-                        : val}
+                        : isPhone && telHref(val)
+                          ? <a href={telHref(val)!} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{val}</a>
+                          : val}
                     </div>
                   </div>
                 ) : null)}
@@ -943,10 +1014,13 @@ export default function ContactsPage() {
         </div>
       )}
 
-      {/* ── Column picker backdrop ── */}
+      {/* ── Column picker backdrop (click outside to close) ── */}
       {showColPicker && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 99 }}
-             onClick={() => setShowColPicker(false)} />
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+          onClick={() => setShowColPicker(false)}
+          aria-hidden
+        />
       )}
 
     </div>

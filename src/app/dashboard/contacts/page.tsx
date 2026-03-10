@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import ImportModal from './ImportModal'
+import Link from 'next/link'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -37,6 +38,15 @@ type ColumnDef    = { id: string; label: string; render: (c: Contact) => React.R
 type SortConfig   = { key: keyof Contact; dir: 'asc' | 'desc' }
 type BulkAction   = 'stage' | 'type' | 'referred_by' | null
 
+interface ContactLoan {
+  id: string
+  loan_name: string | null
+  borrower_name: string | null
+  status: string | null
+  loan_amount: number | null
+  closing_date: string | null
+}
+
 // ── Canonical Stages ──────────────────────────────────────────────────────────
 const STAGES = ['Lead', 'Pre-App', 'Application', 'Pre-Approved', 'In Process', 'Closing', 'Closed', 'Other']
 
@@ -49,6 +59,23 @@ const STAGE_TO_LIST: Record<string, string> = {
   'Closing':      'in-process',
   'Closed':       'closed',
   'Other':        'unassigned',
+}
+
+function fmtCurrency(n: number | null) {
+  if (n == null) return '—'
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+}
+
+function fmtDate(s: string | null) {
+  if (!s) return '—'
+  const d = new Date(s + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function isClosedLoan(status: string | null) {
+  if (!status) return false
+  const s = status.toLowerCase()
+  return ['closed', 'funded', 'closed/funded'].some(v => s.includes(v))
 }
 
 function stageToList(stage: string | null, contactType: string | null): string {
@@ -79,7 +106,9 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'email',        label: 'Email',            render: c => c.email ?? '—' },
   { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
-  { id: 'referred_by',  label: 'Referred By',      render: c => c.referred_by ?? '—' },
+  { id: 'referred_by',  label: 'Referred By',      render: c => c.referred_by
+      ? <Link href={`/dashboard/referral/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
+      : '—' },
   { id: 'company',      label: 'Company',          render: c => c.company_name ?? '—' },
   { id: 'birthday',     label: 'Birthday',         render: c => c.birthday ?? '—' },
   { id: 'co_name',      label: 'Co-Borrower Name', render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
@@ -161,6 +190,8 @@ export default function ContactsPage() {
   const [editMode, setEditMode]               = useState(false)
   const [editData, setEditData]               = useState<Partial<Contact>>({})
   const [saving, setSaving]                   = useState(false)
+  const [contactLoans, setContactLoans]       = useState<ContactLoan[]>([])
+  const [contactLoansLoading, setContactLoansLoading] = useState(false)
 
   // new contact modal
   const [showNewModal, setShowNewModal] = useState(false)
@@ -192,6 +223,22 @@ export default function ContactsPage() {
       if (stored) setVisibleColumns(JSON.parse(stored))
     } catch {}
   }, [])
+
+  // fetch loans for selected contact
+  useEffect(() => {
+    const id = selectedContact?.id
+    if (!id) { setContactLoans([]); return }
+    setContactLoansLoading(true)
+    supabase
+      .from('loans')
+      .select('id, loan_name, borrower_name, status, loan_amount, closing_date')
+      .eq('contact_id', id)
+      .order('closing_date', { ascending: false, nullsFirst: false })
+      .then(({ data }) => {
+        setContactLoans(data || [])
+        setContactLoansLoading(false)
+      })
+  }, [selectedContact?.id])
 
   // ── fetchCounts ─────────────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
@@ -633,9 +680,34 @@ export default function ContactsPage() {
                 ] as [string, string | null][]).map(([label, val]) => val ? (
                   <div key={label}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
-                    <div style={{ fontSize: 13, color: 'var(--fg)', wordBreak: 'break-word' }}>{val}</div>
+                    <div style={{ fontSize: 13, color: 'var(--fg)', wordBreak: 'break-word' }}>
+                      {label === 'Referred By'
+                        ? <Link href={`/dashboard/referral/${encodeURIComponent(val)}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
+                        : val}
+                    </div>
                   </div>
                 ) : null)}
+                {/* ── Loan History ── */}
+                {contactLoansLoading ? (
+                  <div style={{ fontSize: 11, color: 'var(--muted)', paddingTop: 8 }}>Loading loans…</div>
+                ) : contactLoans.length > 0 ? (
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, marginTop: 2 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 10 }}>LOAN HISTORY</div>
+                    {contactLoans.map(l => (
+                      <div key={l.id} style={{ marginBottom: 10 }}>
+                        <Link
+                          href={`/dashboard/loans/${l.id}`}
+                          style={{ color: '#c9a84c', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                        >
+                          {l.borrower_name || l.loan_name || '(unnamed)'}
+                        </Link>
+                        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>
+                          {[fmtCurrency(l.loan_amount), isClosedLoan(l.status) ? 'Closed' : l.status, fmtDate(l.closing_date)].filter(Boolean).join(' · ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -877,3 +949,4 @@ export default function ContactsPage() {
     </div> {/* end outer flex */}
   )
 }
+

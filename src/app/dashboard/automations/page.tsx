@@ -1,6 +1,9 @@
 'use client'
 
-import { useState, useRef, type ChangeEvent } from 'react'
+import { useState, useRef, useEffect, type ChangeEvent } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
 
 // ─── Workflow data ────────────────────────────────────────────────────────────
 
@@ -48,6 +51,8 @@ const WORKFLOWS = [
 ]
 
 type Workflow = typeof WORKFLOWS[0]
+
+interface LoanOption { id: string; label: string }
 
 // ─── Pipeline steps ───────────────────────────────────────────────────────────
 
@@ -121,7 +126,7 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
 
 // ─── TriggerModal ─────────────────────────────────────────────────────────────
 
-function TriggerModal({ wf, onClose }: { wf: Workflow; onClose: () => void }) {
+function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | null; onClose: () => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [msg, setMsg] = useState('')
@@ -157,6 +162,7 @@ function TriggerModal({ wf, onClose }: { wf: Workflow; onClose: () => void }) {
         fd.append('file', file)
         fd.append('triggered_by', 'loanos_ui')
         fd.append('workflow_id', wf.id)
+        if (loanId) fd.append('loan_id', loanId)
         res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
           method: 'POST',
           body: fd,
@@ -174,6 +180,7 @@ function TriggerModal({ wf, onClose }: { wf: Workflow; onClose: () => void }) {
             lead_name: leadName.trim(),
             agent: agent.trim(),
             details: details.trim(),
+            ...(loanId ? { loan_id: loanId } : {}),
           }),
         })
       }
@@ -312,7 +319,9 @@ function TriggerModal({ wf, onClose }: { wf: Workflow; onClose: () => void }) {
 
 // ─── AutoCard component ───────────────────────────────────────────────────────
 
-function AutoCard({ wf, index, onTrigger }: { wf: Workflow; index: number; onTrigger: () => void }) {
+function AutoCard({ wf, index, loans, onTrigger }: { wf: Workflow; index: number; loans: LoanOption[]; onTrigger: (loanId: string | null) => void }) {
+  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null)
+
   return (
     <div
       className="auto-card bg-white border border-slate-200 rounded-lg p-6 relative overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all"
@@ -388,13 +397,25 @@ function AutoCard({ wf, index, onTrigger }: { wf: Workflow; index: number; onTri
         <span>last run: <span>—</span></span>
       </div>
 
-      {/* Trigger button */}
-      <button
-        onClick={onTrigger}
-        className="px-4 py-1.5 text-xs font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-md transition-colors"
-      >
-        Trigger
-      </button>
+      {/* Loan selector + Trigger */}
+      <div className="flex items-center gap-2">
+        <select
+          value={selectedLoanId ?? ''}
+          onChange={e => setSelectedLoanId(e.target.value || null)}
+          className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-slate-600 focus:outline-none focus:border-emerald-400"
+        >
+          <option value="">Run for loan… (optional)</option>
+          {loans.map(l => (
+            <option key={l.id} value={l.id}>{l.label}</option>
+          ))}
+        </select>
+        <button
+          onClick={() => onTrigger(selectedLoanId)}
+          className="shrink-0 px-4 py-1.5 text-xs font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 rounded-md transition-colors"
+        >
+          Trigger
+        </button>
+      </div>
     </div>
   )
 }
@@ -403,6 +424,21 @@ function AutoCard({ wf, index, onTrigger }: { wf: Workflow; index: number; onTri
 
 export default function AutomationsPage() {
   const [activeWf, setActiveWf] = useState<Workflow | null>(null)
+  const [activeLoanId, setActiveLoanId] = useState<string | null>(null)
+  const [loans, setLoans] = useState<LoanOption[]>([])
+
+  useEffect(() => {
+    supabase.from('loans')
+      .select('id, borrower_name, loan_name')
+      .order('closing_date', { ascending: false, nullsFirst: false })
+      .limit(200)
+      .then(({ data }) => {
+        setLoans((data || []).map(l => ({
+          id: l.id,
+          label: l.borrower_name || l.loan_name || '(unnamed)',
+        })))
+      })
+  }, [])
 
   return (
     <>
@@ -445,7 +481,7 @@ export default function AutomationsPage() {
       `}</style>
 
       {activeWf && (
-        <TriggerModal wf={activeWf} onClose={() => setActiveWf(null)} />
+        <TriggerModal wf={activeWf} loanId={activeLoanId} onClose={() => { setActiveWf(null); setActiveLoanId(null) }} />
       )}
 
       <div className="p-8 pb-12 bg-slate-50 min-h-full">
@@ -493,7 +529,7 @@ export default function AutomationsPage() {
           style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))' }}
         >
           {WORKFLOWS.map((wf, i) => (
-            <AutoCard key={wf.id} wf={wf} index={i} onTrigger={() => setActiveWf(wf)} />
+            <AutoCard key={wf.id} wf={wf} index={i} loans={loans} onTrigger={(loanId) => { setActiveLoanId(loanId); setActiveWf(wf) }} />
           ))}
         </div>
 

@@ -162,6 +162,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
   - Pipeline flow diagram per card: Trigger → Claude AI → Outlook → Review
   - Animated flow dot, status badges, hover meta-reveal (n8n ID + webhook path)
   - **Trigger buttons LIVE ✅** (2026-03-09) — `TriggerModal` component added; PDF workflows use FormData POST, Referral uses JSON POST; all POST to `https://styer.app.n8n.cloud/webhook/{webhookPath}`
+- ✅ **Automations loan-picker** (2026-03-09) — each AutoCard has a "Run for loan…" `<select>` dropdown populated from top 200 Supabase loans; selected `loanId` passed through `TriggerModal` to n8n webhook payload (PDF: `FormData.append('loan_id', loanId)`, JSON: `...(loanId ? { loan_id: loanId } : {})`)
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
 - Arive webhook integration (planned)

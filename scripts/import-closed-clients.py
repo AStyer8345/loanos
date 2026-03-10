@@ -209,9 +209,53 @@ for i, (_, row) in enumerate(df.iterrows(), 1):
         if name_key and name_key.strip() and name_key in existing_by_name:
             skip_reason = f"name match: {fn} {ln}"
 
+    # ── Existing match → UPDATE closed-client fields only ────────────────────
     if skip_reason:
-        print(f"  SKIP [{i:4d}] {name_display} — {skip_reason}")
-        skipped += 1
+        # Determine which existing contact ID matched
+        existing_id = None
+        sfid = rec.get('salesforce_id')
+        if sfid and sfid in existing_by_sfid:
+            existing_id = existing_by_sfid[sfid]
+        if not existing_id:
+            email = (rec.get('email') or '').strip().lower()
+            if email and email in existing_by_email:
+                existing_id = existing_by_email[email]
+        if not existing_id:
+            fn = rec.get('first_name') or ''
+            ln = rec.get('last_name') or ''
+            name_key = normalize_name(fn + ' ' + ln)
+            if name_key.strip() and name_key in existing_by_name:
+                existing_id = existing_by_name[name_key]
+
+        if existing_id and existing_id != "__new__":
+            # Only patch fields that matter for closed clients
+            patch = {k: v for k, v in {
+                "stage":         "Closed Client",
+                "salesforce_id": rec.get('salesforce_id'),
+                "closing_date":  rec.get('closing_date'),
+                "realtor_email": rec.get('realtor_email'),
+                "realtor_phone": rec.get('realtor_phone'),
+                "last_touch":    rec.get('last_touch'),
+            }.items() if v is not None}
+
+            patch_resp = requests.patch(
+                f"{SUPABASE_URL}/rest/v1/contacts",
+                headers=HEADERS,
+                params={"id": f"eq.{existing_id}"},
+                data=json.dumps(patch),
+            )
+            if patch_resp.status_code in (200, 201, 204):
+                print(f"  UPD  [{i:4d}] {name_display} — updated stage+closed fields")
+                imported += 1
+                if sfid:
+                    existing_by_sfid[sfid] = "__new__"
+            else:
+                msg = f"HTTP {patch_resp.status_code}: {patch_resp.text[:120]}"
+                print(f"  ERR  [{i:4d}] {name_display} — patch failed: {msg}")
+                errors.append({"row": i, "name": name_display, "error": msg})
+        else:
+            print(f"  SKIP [{i:4d}] {name_display} — already processed this run")
+            skipped += 1
         continue
 
     # ── Remove None values to avoid sending null for non-nullable cols ────────
@@ -225,7 +269,7 @@ for i, (_, row) in enumerate(df.iterrows(), 1):
     )
 
     if resp.status_code in (200, 201):
-        print(f"  OK   [{i:4d}] {name_display}")
+        print(f"  INS  [{i:4d}] {name_display}")
         imported += 1
         # Add to local lookup so subsequent rows don't re-insert same contact
         if sfid:
@@ -245,8 +289,8 @@ for i, (_, row) in enumerate(df.iterrows(), 1):
 
 print(f"\n{'='*60}")
 print(f"Import complete")
-print(f"  Imported: {imported}")
-print(f"  Skipped:  {skipped}")
+print(f"  Updated/Inserted: {imported}")
+print(f"  Skipped:          {skipped}")
 print(f"  Errors:   {len(errors)}")
 print(f"{'='*60}\n")
 

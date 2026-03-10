@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [1.1.1] — 2026-03-09 — Automations: Loan-picker + webhook loan_id passthrough
+
+### Changed
+- `src/app/dashboard/automations/page.tsx` — five-edit update:
+  - **Edit 1**: Added `useEffect` to imports; `supabase = createClient()` module-level singleton
+  - **Edit 2**: Added `LoanOption` interface (`{ id: string; label: string }`)
+  - **Edit 3**: `TriggerModal` — accepts `loanId: string | null`; appends to PDF `FormData` and JSON body before n8n POST
+  - **Edit 4**: `AutoCard` — added `loans: LoanOption[]` + `onTrigger: (loanId: string | null) => void` props; renders "Run for loan…" `<select>` dropdown above Trigger button
+  - **Edit 5**: `AutomationsPage` — added `activeLoanId` + `loans` state; `useEffect` fetches top 200 loans on mount (ordered by `closing_date desc`); plumbed `loans` + `onTrigger` into `AutoCard`, `loanId` + reset into `TriggerModal`
+
+---
+
 ## [1.1.0] — 2026-03-10 — Contacts: Inline Stage Edit + Smart Lists v2 + Bulk Actions
 
 ### Changed

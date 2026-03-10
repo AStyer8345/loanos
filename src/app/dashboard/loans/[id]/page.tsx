@@ -337,7 +337,7 @@ function OverviewTab({ loan, contact }: { loan: Loan; contact: ContactRow | null
 
 // ── Documents tab ─────────────────────────────────────────────────────────────
 
-function DocumentsTab({ loanId: _loanId, docs, onRefresh: _onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+function DocumentsTab({ docs }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const [signingId, setSigningId] = useState<string | null>(null)
 
   const handleDownload = async (doc: DocRow) => {

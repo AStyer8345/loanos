@@ -17,6 +17,7 @@ Deploy: Netlify (not Vercel)
 ## Current Status
 
 Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built and debugged as of March 8, 2026.
+816 Arive loans imported and backfilled as of March 10, 2026.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -44,6 +45,27 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 - Production webhook URL: `https://styer.app.n8n.cloud/webhook/loanos-contract-received`
 - Header Auth credential name must have no spaces (e.g. `apikey` not `Supabase Service Role`)
 - `net.http_post()` body param must be `::jsonb` not `::text`
+
+## Loans Import (complete — 2026-03-10)
+- 816 loans imported from full Arive CSV export (`report1773124619094.csv`, 31 columns)
+- Source: Arive LOS export via CSV download
+- Import script: `/tmp/import_loans_v4.py` — Python, Supabase REST API with service_role_key
+- Contact matching: 98% match rate (806/816) — matched by borrower name to contacts.first_name + last_name
+- Raw payload stored in `raw_payload` JSONB column (double-encoded: JSON string inside JSONB)
+- **Backfill script** (`/tmp/backfill_loans.py`): parsed double-encoded raw_payload → typed columns
+  - 24 columns backfilled: status, loan_name, property_city, property_state, loan_program, occupancy, lender, investor, term_months, ltv, monthly_payment, purchase_price, property_type, property_zip, lock_date, commissions, hazard_insurance, mortgage_insurance, property_tax, escrow_agent, closing_date, title_company, buyer_agent_name, listing_agent_name
+  - Status restored to original Arive case (was normalized to lowercase during initial import)
+  - 816/816 updated, 0 errors
+- **Migrations 003 + 006 applied** (combined SQL: `/tmp/apply_migrations_003_006.sql`)
+  - Migration 006: loan_name, property_city, property_state, loan_program, occupancy
+  - Migration 003: 14 contract columns + contract_data JSONB
+  - Additional Arive columns: lender, investor, term_months, ltv, monthly_payment, purchase_price, property_type, property_zip, lock_date, commissions, hazard_insurance, mortgage_insurance, property_tax, escrow_agent
+  - Activity log FK columns: loan_id, contact_id
+  - 7 indexes created
+- **Auth client fix**: Both `loans/page.tsx` and `loans/[id]/page.tsx` were using bare `createClient` from `@supabase/supabase-js` (no auth cookies → RLS blocked all rows). Fixed to use `createClient` from `@/lib/supabase/client` (SSR-aware `createBrowserClient` from `@supabase/ssr`).
+- **Status distribution** (817 total: 816 imported + 1 pre-existing):
+  - Closed: 740, Started: 31, Cancelled: 19, processing: 14, Loan in Process: 5, QUALIFICATION: 2, APPLICATION_INTAKE: 1, Approved: 1, DISCLOSURE_SENT: 1, lead: 1, Pre-Approved: 1, Suspended: 1
+- **Smart list coverage**: All Arive status values added to SMART_LISTS and StatusBadge color mapping in `loans/page.tsx`
 
 ## Contacts Import (complete — 2026-03-08)
 - 2,441 contacts imported from Salesforce export (XLS/HTML format)

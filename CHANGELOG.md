@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [1.3.0] — 2026-03-10 — 816 Arive Loans Imported + Backfilled
+
+### Added
+- 816 loans imported from full Arive CSV export (`report1773124619094.csv`, 31 columns) via Python import script
+- Contact matching: 98% match rate (806/816 loans linked to existing contacts by borrower name)
+- Raw payload stored in `raw_payload` JSONB for future re-extraction
+- Backfill script parsed double-encoded raw_payload → 24 typed columns: status, loan_name, property_city, property_state, loan_program, occupancy, lender, investor, term_months, ltv, monthly_payment, purchase_price, property_type, property_zip, lock_date, commissions, hazard_insurance, mortgage_insurance, property_tax, escrow_agent, closing_date, title_company, buyer_agent_name, listing_agent_name
+
+### Fixed
+- **Auth client bug** in `loans/page.tsx` and `loans/[id]/page.tsx` — was using bare `createClient` from `@supabase/supabase-js` (no auth session → RLS blocked all rows). Switched to `createClient` from `@/lib/supabase/client` (SSR-aware `createBrowserClient` from `@supabase/ssr`)
+- **Smart list status coverage** — added all Arive status values to `SMART_LISTS` constant: `Loan in Process`, `processing`, `Pre-Approved`, `QUALIFICATION`, `DISCLOSURE_SENT` → In Process; `lead`, `APPLICATION_INTAKE` → Started; `Suspended` → Cancelled
+- **StatusBadge color mapping** — added Arive-specific status values to color matching: `pre-approved`, `qualification`, `disclosure_sent` → blue; `lead`, `application_intake` → amber; `suspended` → red
+- Removed unused imports (`FileText`, `Activity`, `StickyNote`) from `ContactRecordView.tsx` (lint auto-fix)
+
+### Manual Steps Completed (Supabase)
+- ✅ Combined migration 003 + 006 applied — adds 30+ columns to loans table, activity_log FK columns, 7 indexes
+- ✅ 816 loans backfilled from raw_payload via REST API with service_role_key
+
+---
+
 ## [1.2.0] — 2026-03-09 — Arive → Supabase n8n Integration
 
 ### Added

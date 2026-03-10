@@ -1,19 +1,13 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download,
   ChevronRight, AlertCircle, Check
 } from 'lucide-react'
-
-const supabase = (() => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  return createClient(url, key)
-})()
 
 const N8N_BASE = 'https://styer.app.n8n.cloud/webhook'
 
@@ -143,6 +137,7 @@ function fmtRelative(iso: string) {
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function LoanDetailPage() {
+  const supabase = createClient()
   const params = useParams()
   const loanId = params.id as string
 
@@ -338,6 +333,7 @@ function OverviewTab({ loan, contact }: { loan: Loan; contact: ContactRow | null
 // ── Documents tab ─────────────────────────────────────────────────────────────
 
 function DocumentsTab({ docs }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+  const supabase = createClient()
   const [signingId, setSigningId] = useState<string | null>(null)
 
   const handleDownload = async (doc: DocRow) => {

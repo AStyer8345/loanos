@@ -1,15 +1,9 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Search, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
-
-const supabase = (() => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  return createClient(url, key)
-})()
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,9 +34,9 @@ interface SmartList {
 const SMART_LISTS: SmartList[] = [
   { id: 'all',        label: 'All Loans',  statuses: null },
   { id: 'closed',     label: 'Closed',     statuses: ['Closed', 'Funded', 'Closed/Funded'] },
-  { id: 'inprocess',  label: 'In Process', statuses: ['In Process', 'Processing', 'Submitted', 'Conditional Approval', 'Clear to Close', 'Approved'] },
-  { id: 'started',    label: 'Started',    statuses: ['Started', 'Started App'] },
-  { id: 'cancelled',  label: 'Cancelled',  statuses: ['Cancelled', 'Denied', 'Withdrawn'] },
+  { id: 'inprocess',  label: 'In Process', statuses: ['In Process', 'Loan in Process', 'Processing', 'processing', 'Submitted', 'Conditional Approval', 'Clear to Close', 'Approved', 'Pre-Approved', 'QUALIFICATION', 'DISCLOSURE_SENT'] },
+  { id: 'started',    label: 'Started',    statuses: ['Started', 'Started App', 'lead', 'APPLICATION_INTAKE'] },
+  { id: 'cancelled',  label: 'Cancelled',  statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended'] },
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -64,6 +58,7 @@ type SortDir = 'asc' | 'desc'
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function LoansPage() {
+  const supabase = createClient()
   const [loans, setLoans] = useState<Loan[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -298,11 +293,11 @@ function StatusBadge({ status }: { status: string | null }) {
   let cls = 'bg-slate-100 text-slate-600'
   if (['closed', 'funded', 'closed/funded'].some(v => s.includes(v))) {
     cls = 'bg-emerald-100 text-emerald-700'
-  } else if (['in process', 'processing', 'submitted', 'conditional', 'clear to close', 'approved'].some(v => s.includes(v))) {
+  } else if (['in process', 'processing', 'submitted', 'conditional', 'clear to close', 'approved', 'pre-approved', 'qualification', 'disclosure_sent'].some(v => s.includes(v))) {
     cls = 'bg-blue-100 text-blue-700'
-  } else if (['started'].some(v => s.includes(v))) {
+  } else if (['started', 'lead', 'application_intake'].some(v => s.includes(v))) {
     cls = 'bg-amber-100 text-amber-700'
-  } else if (['cancelled', 'denied', 'withdrawn'].some(v => s.includes(v))) {
+  } else if (['cancelled', 'denied', 'withdrawn', 'suspended'].some(v => s.includes(v))) {
     cls = 'bg-red-100 text-red-600'
   }
 

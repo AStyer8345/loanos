@@ -107,6 +107,13 @@ These tools are working and must NOT be broken during LoanOS build:
 ### loanos repo (Netlify — add as you build)
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_URL (server-side, Netlify functions)
+- SUPABASE_SERVICE_ROLE_KEY (Netlify functions — bypasses RLS)
+- ARIVE_WEBHOOK_SECRET (shared secret, generate with `openssl rand -hex 32`)
+- LOANOS_SYSTEM_USER_ID (UUID of `system@loanos.internal` auth user)
+- ZAPIER_OUTLOOK_WEBHOOK_URL (Zapier → Outlook webhook for failure alerts)
+- LOANOS_ALERT_EMAIL (recipient for webhook failure alerts)
+- LOANOS_NETLIFY_URL (production URL, no trailing slash — used by n8n)
 
 ### styer-mortgage-site repo (Netlify — already set)
 - ANTHROPIC_API_KEY
@@ -170,8 +177,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
 | Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
-| Arive → New Loan | 1tagvoU0UXtdDiMY | arive-new-loan | Arive POST on new loan |
-| Arive → Status Update | 9JyzzwKac8v3uQ7d | arive-status-update | Arive POST on status change |
+| Arive → Supabase (direct) | — (Netlify fn) | arive-sync (n8n) | Arive POST → n8n orchestrator → Netlify function → Supabase |
 | Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
 | Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
 
@@ -192,17 +198,18 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - ✅ **Automations loan-picker** (2026-03-09) — each AutoCard has a "Run for loan…" `<select>` dropdown populated from top 200 Supabase loans; selected `loanId` passed through `TriggerModal` to n8n webhook payload (PDF: `FormData.append('loan_id', loanId)`, JSON: `...(loanId ? { loan_id: loanId } : {})`)
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
-- **Arive webhook integration — BUILT ✅** (2026-03-09)
-  - Migration 007 (`007_arive_integration.sql`) — adds arive_loan_id + date fields to loans, address/stage/source fields to contacts
-  - `n8n/workflows/workflow-1-new-loan.json` — Webhook → upsert contact → upsert loan → log activity
-  - `n8n/workflows/workflow-2-status-update.json` — Webhook → find loan by arive_loan_id → update status → 404 if not found
-  - `n8n/README.md` — 9-step setup guide, field mapping table, troubleshooting
-  - `scripts/test-webhooks.js` — Node.js test runner, no external deps, reads from env vars
-  - `.env.example` — documents all required env vars including LOANOS_SYSTEM_USER_ID
-  - **Runs parallel to Zapier/Salesforce** — does NOT touch existing flows
-  - Webhook paths: `arive-new-loan`, `arive-status-update`
-  - Requires n8n env var `LOANOS_SYSTEM_USER_ID` = UUID of auth user (all tables require user_id NOT NULL)
-  - contacts.email may have duplicates from 2,441 imported contacts — migration warns if UNIQUE constraint fails; see README troubleshooting
+- **Arive webhook integration — REBUILT ✅** (2026-03-10) — Arive → n8n orchestrator → Netlify Function → Supabase (eliminates Salesforce middleman)
+  - **Architecture**: Arive POST → n8n `arive-sync` path → `/.netlify/functions/arive-webhook` → Supabase REST upsert
+  - `netlify/functions/arive-webhook.js` — validates `X-Webhook-Secret`, upserts contact (on email), upserts loan (on arive_loan_id), inserts activity_log; uses raw fetch to Supabase REST (no SDK); returns `{success, contact_id, loan_id}`
+  - `n8n/workflows/arive-to-supabase.json` — thin orchestrator (7 nodes): receive → forward to Netlify fn → IF 200 → respond OK / (else) Build Error Context → Send Outlook Alert (Zapier) → respond 500 (triggers Arive retry)
+  - `netlify.toml` — `[functions]` block added: `directory = "netlify/functions"`, `node_bundler = "nft"`
+  - `scripts/test-webhooks.js` — rewritten with real Arive field names; supports `--netlify` (direct) and `--n8n` flags
+  - `.env.local.example` — fully documented (7 vars with explanations)
+  - `README.md` — replaced Next.js boilerplate with project README + 6-step Arive Webhook Setup guide
+  - Migration 007 (`007_arive_integration.sql`) — arive_loan_id + date fields on loans, address/stage/source on contacts
+  - Legacy n8n workflows (`workflow-1-new-loan.json`, `workflow-2-status-update.json`) kept for reference but superseded
+  - n8n env vars required: `ARIVE_WEBHOOK_SECRET`, `LOANOS_NETLIFY_URL`, `LOANOS_ALERT_EMAIL`, `ZAPIER_OUTLOOK_WEBHOOK_URL`
+  - Migration strategy: run old Zapier pipeline in parallel for 2–3 loans, verify, then disable Zapier
 
 ### Phase 2 — Marketing Command Center (2026-03-09) ✅ LIVE
 - **Netlify build fix (2026-03-09)**: ESLint was blocking deploy — root cause was missing `export default function MarketingPage()`. Added main component + fixed unused `s` param in TodayTab + eslint-disable on `applySmartList` in contacts. Deployed as commit b8d1d57.

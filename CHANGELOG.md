@@ -1,5 +1,44 @@
 # LoanOS Changelog
 
+## [1.5.0] — 2026-03-10 — Arive Direct Webhook (Netlify Function + n8n Orchestrator)
+
+### Added
+
+**Netlify Function: `netlify/functions/arive-webhook.js`**
+- Receives Arive loan events, validates `X-Webhook-Secret` header
+- Upserts contact (on `email`) and loan (on `arive_loan_id`) via Supabase REST API
+- Inserts `activity_log` row per event
+- Returns `{ success, contact_id, loan_id, arive_loan_id }` on 200
+- No SDK dependency — raw `fetch` only
+
+**n8n Workflow: `n8n/workflows/arive-to-supabase.json`**
+- 7-node orchestrator: Arive Webhook → Forward to Netlify Function → IF 200 → Respond OK / (else) Build Error Context → Send Outlook Alert (Zapier) → Respond 500
+- `neverError: true` on HTTP node enables proper branching on non-2xx
+- Error branch sends Outlook alert via Zapier webhook and responds 500 so Arive retries
+- Webhook path: `arive-sync`
+
+### Changed
+
+- `netlify.toml` — added `[functions]` block: `directory = "netlify/functions"`, `node_bundler = "nft"`
+- `scripts/test-webhooks.js` — full rewrite with real Arive field names (`ariveLoanId`, `loanBorrower1_emailAddressText`, `keyDates_*`, etc.); supports `--netlify` and `--n8n` flags
+- `.env.local.example` — fully documented (7 required vars with explanations)
+- `README.md` — replaced Next.js boilerplate with project README including 6-step Arive Webhook Setup guide, env vars table, n8n workflow table, Netlify function table, migration table
+
+### Architecture
+
+```
+Arive (loan event)
+  └─► n8n: arive-to-supabase workflow (path: arive-sync)
+        └─► POST /.netlify/functions/arive-webhook
+              ├─► upsert contacts (on email)
+              ├─► upsert loans (on arive_loan_id)
+              ├─► insert activity_log
+              └─► 200 { success, contact_id, loan_id }
+        └─► IF not 200 → Outlook alert via Zapier + respond 500 (Arive retries)
+```
+
+---
+
 ## [1.4.0] — 2026-03-10 — Two New n8n Automations: Review Request + Social Post
 
 ### Added

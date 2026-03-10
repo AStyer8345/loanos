@@ -11,6 +11,7 @@ import {
   BarChart2,
   CheckSquare,
   GitBranch,
+  Settings,
 } from 'lucide-react'
 
 const NAV = [
@@ -22,6 +23,7 @@ const NAV = [
   { label: 'Marketing',     href: '/dashboard/marketing',   icon: BarChart2 },
   { label: 'Build Tracker', href: '/dashboard/build-tracker', icon: CheckSquare },
   { label: 'System Map',    href: '/dashboard/system-map',  icon: GitBranch },
+  { label: 'Settings',      href: '/dashboard/settings',    icon: Settings },
 ]
 
 export default function SidebarNav() {

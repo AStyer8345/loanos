@@ -1,66 +1,83 @@
 #!/usr/bin/env node
 /**
  * test-webhooks.js
- * Tests both Arive n8n webhooks with realistic fake payloads.
+ * Tests Arive webhook integration using real Arive field names.
+ *
+ * Supports two targets:
+ *   --netlify   POST directly to Netlify function (fastest, tests DB writes)
+ *   --n8n       POST to n8n orchestrator (tests full pipeline including error alerting)
  *
  * Usage:
+ *   # Test Netlify function directly (requires local or deployed URL)
+ *   NETLIFY_URL=https://your-site.netlify.app \
+ *   ARIVE_WEBHOOK_SECRET=your-secret \
+ *   node scripts/test-webhooks.js --netlify
+ *
+ *   # Test n8n orchestrator
  *   N8N_WEBHOOK_BASE_URL=https://styer.app.n8n.cloud/webhook \
- *   ARIVE_WEBHOOK_SECRET=your-secret-here \
- *   node scripts/test-webhooks.js
+ *   ARIVE_WEBHOOK_SECRET=your-secret \
+ *   node scripts/test-webhooks.js --n8n
+ *
+ *   # Default: Netlify
+ *   NETLIFY_URL=... ARIVE_WEBHOOK_SECRET=... node scripts/test-webhooks.js
  */
 
-const BASE_URL = process.env.N8N_WEBHOOK_BASE_URL?.replace(/\/$/, '');
-const SECRET   = process.env.ARIVE_WEBHOOK_SECRET;
+const SECRET  = process.env.ARIVE_WEBHOOK_SECRET;
+const TARGET  = process.argv.includes('--n8n') ? 'n8n' : 'netlify';
 
-if (!BASE_URL || !SECRET) {
-  console.error('Error: N8N_WEBHOOK_BASE_URL and ARIVE_WEBHOOK_SECRET must be set.');
+const NETLIFY_URL = process.env.NETLIFY_URL?.replace(/\/$/, '')
+                 || 'http://localhost:8888';
+const N8N_BASE    = process.env.N8N_WEBHOOK_BASE_URL?.replace(/\/$/, '');
+
+if (!SECRET) {
+  console.error('Error: ARIVE_WEBHOOK_SECRET must be set.');
+  process.exit(1);
+}
+if (TARGET === 'n8n' && !N8N_BASE) {
+  console.error('Error: N8N_WEBHOOK_BASE_URL must be set when using --n8n.');
   process.exit(1);
 }
 
-// ─── Fake Payloads ────────────────────────────────────────────────────────────
+// ─── Real Arive Field Names ────────────────────────────────────────────────────
+// These match the actual Arive webhook payload structure (camelCase with underscores).
+// Do NOT use simplified names like loanId, borrowerEmail — Arive sends these exact keys.
 
 const FAKE_ARIVE_LOAN_ID = `TEST-${Date.now()}`;
 
 const newLoanPayload = {
-  loanId:           FAKE_ARIVE_LOAN_ID,
-  borrowerFirstName:'Jane',
-  borrowerLastName: 'Testborrower',
-  borrowerEmail:    `jane.test+${Date.now()}@example.com`,
-  borrowerPhone:    '512-555-0101',
-  mailingStreet:    '123 Test Lane',
-  mailingCity:      'Austin',
-  mailingState:     'TX',
-  mailingZip:       '78701',
-  loanAmount:       450000,
-  loanPurpose:      'Purchase',
-  propertyType:     'Single Family',
-  propertyAddress:  '456 Property St, Austin TX 78702',
-  interestRate:     6.875,
-  loanProgram:      'Conventional',
-  ltv:              80,
-  loanStatus:       'Application',
-  realtorName:      'Test Realtor',
-  realtorEmail:     'realtor@test.com',
-  realtorPhone:     '512-555-0202',
-  source:           'Arive',
-  salesContractDate: '2026-03-01',
-  estClosingDate:   '2026-04-15',
-  firstPaymentDate: '2026-06-01',
+  // Required
+  ariveLoanId:                        FAKE_ARIVE_LOAN_ID,
+  loanBorrower1_emailAddressText:     `jane.test+${Date.now()}@example.com`,
+  // Borrower
+  loanBorrower1_firstName:            'Jane',
+  loanBorrower1_lastName:             'Testborrower',
+  loanBorrower1_mobilePhoneText:      '512-555-0101',
+  // Property (used for contact mailing address)
+  loanProperty_streetAddressText:     '456 Property St',
+  loanProperty_cityText:              'Austin',
+  loanProperty_stateText:             'TX',
+  loanProperty_postalCodeText:        '78702',
+  // Loan status
+  currentLoanStatus_status:           'Application',
+  // Key dates (ISO date strings or null)
+  keyDates_salesContractDate:         '2026-03-01',
+  keyDates_closingContingencyDate:    '2026-04-15',
+  keyDates_estimatedFundingDate:      '2026-04-20',
+  keyDates_firstPaymentDate:          '2026-06-01',
 };
 
 const statusUpdatePayload = {
-  loanId:    FAKE_ARIVE_LOAN_ID,
-  newStatus: 'Processing',
-  updatedAt: new Date().toISOString(),
-  estClosingDate:  '2026-04-15',
-  firstPaymentDate:'2026-06-01',
-  fundingDate:     null,
+  // Required — must reference a loan already in DB (created by newLoan test)
+  ariveLoanId:                        FAKE_ARIVE_LOAN_ID,
+  currentLoanStatus_status:           'Processing',
+  keyDates_closingContingencyDate:    '2026-04-15',
+  keyDates_estimatedFundingDate:      '2026-04-22',
+  keyDates_firstPaymentDate:          '2026-06-01',
 };
 
 // ─── HTTP helper ──────────────────────────────────────────────────────────────
 
-async function postWebhook(path, payload) {
-  const url = `${BASE_URL}/${path}`;
+async function postWebhook(url, payload) {
   console.log(`\nPOST ${url}`);
 
   const res = await fetch(url, {
@@ -83,49 +100,64 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function getUrls() {
+  if (TARGET === 'n8n') {
+    return {
+      newLoan:      `${N8N_BASE}/arive-sync`,
+      statusUpdate: `${N8N_BASE}/arive-sync`,   // same orchestrator, Arive sends all events here
+    };
+  }
+  return {
+    newLoan:      `${NETLIFY_URL}/.netlify/functions/arive-webhook`,
+    statusUpdate: `${NETLIFY_URL}/.netlify/functions/arive-webhook`,
+  };
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 const results = [];
 
 async function run() {
+  const urls = getUrls();
+
   console.log('='.repeat(60));
   console.log('LoanOS — Arive Webhook Tests');
-  console.log(`Base URL : ${BASE_URL}`);
+  console.log(`Target   : ${TARGET === 'n8n' ? 'n8n orchestrator' : 'Netlify function (direct)'}`);
   console.log(`Loan ID  : ${FAKE_ARIVE_LOAN_ID}`);
   console.log('='.repeat(60));
 
-  // ── Test 1: Workflow 1 — New Loan ─────────────────────────────────────────
-  console.log('\n[1/2] Workflow 1 — New Loan');
+  // ── Test 1: New Loan ──────────────────────────────────────────────────────
+  console.log('\n[1/2] New Loan (upsert contact + loan + activity_log)');
   console.log('Payload:', JSON.stringify(newLoanPayload, null, 2));
 
   try {
-    const r1 = await postWebhook('arive-new-loan', newLoanPayload);
+    const r1 = await postWebhook(urls.newLoan, newLoanPayload);
     console.log(`Response ${r1.status}:`, JSON.stringify(r1.body, null, 2));
     const pass1 = r1.status === 200;
-    results.push({ test: 'Workflow 1 — New Loan', pass: pass1, status: r1.status });
+    results.push({ test: 'New Loan', pass: pass1, status: r1.status });
     console.log(pass1 ? '✓ PASS' : '✗ FAIL');
   } catch (err) {
     console.error('Request failed:', err.message);
-    results.push({ test: 'Workflow 1 — New Loan', pass: false, status: 'ERROR', error: err.message });
+    results.push({ test: 'New Loan', pass: false, status: 'ERROR', error: err.message });
   }
 
-  // Brief pause so n8n finishes writing records before we query them
-  console.log('\nWaiting 2s before status update test...');
+  // Give Supabase a moment before status update test
+  console.log('\nWaiting 2s before status update...');
   await sleep(2000);
 
-  // ── Test 2: Workflow 2 — Status Update ───────────────────────────────────
-  console.log('\n[2/2] Workflow 2 — Status Update');
+  // ── Test 2: Status Update ─────────────────────────────────────────────────
+  console.log('\n[2/2] Status Update (re-upsert with new status + dates)');
   console.log('Payload:', JSON.stringify(statusUpdatePayload, null, 2));
 
   try {
-    const r2 = await postWebhook('arive-status-update', statusUpdatePayload);
+    const r2 = await postWebhook(urls.statusUpdate, statusUpdatePayload);
     console.log(`Response ${r2.status}:`, JSON.stringify(r2.body, null, 2));
     const pass2 = r2.status === 200;
-    results.push({ test: 'Workflow 2 — Status Update', pass: pass2, status: r2.status });
+    results.push({ test: 'Status Update', pass: pass2, status: r2.status });
     console.log(pass2 ? '✓ PASS' : '✗ FAIL');
   } catch (err) {
     console.error('Request failed:', err.message);
-    results.push({ test: 'Workflow 2 — Status Update', pass: false, status: 'ERROR', error: err.message });
+    results.push({ test: 'Status Update', pass: false, status: 'ERROR', error: err.message });
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
@@ -140,7 +172,13 @@ async function run() {
     if (!r.pass) allPass = false;
   }
 
-  console.log('\n' + (allPass ? '✓ All tests passed.' : '✗ Some tests failed — check n8n execution logs.'));
+  const hint = allPass
+    ? '✓ All tests passed.'
+    : TARGET === 'n8n'
+      ? '✗ Some tests failed — check n8n execution logs + Netlify function logs.'
+      : '✗ Some tests failed — check Netlify function logs (netlify dev or Netlify dashboard).';
+
+  console.log('\n' + hint);
   process.exit(allPass ? 0 : 1);
 }
 

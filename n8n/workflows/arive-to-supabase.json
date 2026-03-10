@@ -1,0 +1,158 @@
+{
+  "name": "LoanOS — Arive → Netlify → Supabase",
+  "nodes": [
+    {
+      "id": "ats-001",
+      "name": "Arive Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "path": "arive-sync",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "authentication": "headerAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Arive Webhook Secret"
+        }
+      },
+      "webhookId": "arive-sync"
+    },
+    {
+      "id": "ats-002",
+      "name": "Forward to Netlify Function",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [480, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LOANOS_NETLIFY_URL }}/api/webhooks/arive",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "X-Webhook-Secret", "value": "={{ $env.ARIVE_WEBHOOK_SECRET }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.body || $json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "ats-003",
+      "name": "Check Response Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "status-check",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": { "type": "number", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "ats-004",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 200],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Forward to Netlify Function').item.json.body }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "ats-005",
+      "name": "Build Error Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 420],
+      "parameters": {
+        "jsCode": "const netlifyResponse = $('Forward to Netlify Function').item.json;\nconst statusCode = netlifyResponse.statusCode ?? 'unknown';\nconst body = netlifyResponse.body ?? '{}';\n\nlet errorMessage;\ntry {\n  const parsed = typeof body === 'string' ? JSON.parse(body) : body;\n  errorMessage = parsed.error || JSON.stringify(parsed);\n} catch {\n  errorMessage = String(body);\n}\n\nconst originalPayload = $('Arive Webhook').item.json.body || $('Arive Webhook').item.json;\nconst loanId = originalPayload.ariveLoanId ?? 'unknown';\nconst borrowerEmail = originalPayload.loanBorrower1_emailAddressText ?? 'unknown';\nconst timestamp = new Date().toISOString();\n\nreturn [{\n  json: {\n    subject: `[LoanOS] Arive webhook failed — Loan ${loanId}`,\n    body: [\n      `Arive webhook sync failed at ${timestamp}.`,\n      ``,\n      `Loan ID: ${loanId}`,\n      `Borrower email: ${borrowerEmail}`,\n      `HTTP status: ${statusCode}`,\n      `Error: ${errorMessage}`,\n      ``,\n      `Check Netlify function logs for details.`\n    ].join('\\n'),\n    statusCode,\n    loanId,\n    borrowerEmail\n  }\n}];"
+      }
+    },
+    {
+      "id": "ats-006",
+      "name": "Send Outlook Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1200, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAPIER_OUTLOOK_WEBHOOK_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ to: $env.LOANOS_ALERT_EMAIL, subject: $json.subject, body: $json.body }) }}"
+      }
+    },
+    {
+      "id": "ats-007",
+      "name": "Respond 500 Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1440, 420],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: $('Build Error Context').item.json.body }) }}",
+        "options": { "responseCode": 500 }
+      }
+    }
+  ],
+  "connections": {
+    "Arive Webhook": {
+      "main": [[{ "node": "Forward to Netlify Function", "type": "main", "index": 0 }]]
+    },
+    "Forward to Netlify Function": {
+      "main": [[{ "node": "Check Response Status", "type": "main", "index": 0 }]]
+    },
+    "Check Response Status": {
+      "main": [
+        [{ "node": "Respond 200 OK", "type": "main", "index": 0 }],
+        [{ "node": "Build Error Context", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Error Context": {
+      "main": [[{ "node": "Send Outlook Alert", "type": "main", "index": 0 }]]
+    },
+    "Send Outlook Alert": {
+      "main": [[{ "node": "Respond 500 Error", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "notes": "Orchestrator workflow: Arive webhook → Netlify function → Supabase. Thin forwarding layer — all field mapping and DB logic lives in netlify/functions/arive-webhook.js. Error branch sends Outlook alert via Zapier webhook and responds 500 to Arive so it retries."
+  }
+}

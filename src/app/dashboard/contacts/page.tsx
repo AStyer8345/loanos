@@ -203,7 +203,7 @@ export default function ContactsPage() {
   const [showColPicker, setShowColPicker]   = useState(false)
 
   // import modal
-  const [, setShowImportModal] = useState(false)
+  const [showImport, setShowImportModal] = useState(false)
 
   // ── Feature 1: inline stage editing ─────────────────────────────────────
   const [editingStageId, setEditingStageId] = useState<string | null>(null)

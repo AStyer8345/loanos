@@ -258,7 +258,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit
       <div class="stack-row"><div class="stack-layer">Marketing</div><div class="stack-tech">Mailchimp</div><div class="stack-why">Weekly campaigns, rate updates exported from Supabase</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
       <div class="stack-row"><div class="stack-layer">Billing</div><div class="stack-tech">Stripe</div><div class="stack-why">SaaS licensing subscriptions (Phase 4)</div><div class="stack-status-cell"><span class="stack-badge sb-tbd">Phase 4</span></div></div>
       <div class="stack-row"><div class="stack-layer">Deploy</div><div class="stack-tech">Netlify + Supabase Cloud</div><div class="stack-why">Zero DevOps, auto-scaling</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Confirmed</span></div></div>
-      <div class="stack-row"><div class="stack-layer">LOS Bridge</div><div class="stack-tech">Arive + n8n webhook</div><div class="stack-why">Loan status syncs to Supabase. New apps push to Arive.</div><div class="stack-status-cell"><span class="stack-badge sb-tbd">Planned</span></div></div>
+      <div class="stack-row"><div class="stack-layer">LOS Bridge</div><div class="stack-tech">Arive + n8n webhook</div><div class="stack-why">Loan status syncs to Supabase. New loans upsert contact + loan records via webhook.</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Live</span></div></div>
       <div class="stack-row"><div class="stack-layer">AI Tools</div><div class="stack-tech">Claude $100 / Gemini $20 / ChatGPT $20</div><div class="stack-why">Claude primary + API. Gemini image/UI. ChatGPT under review.</div><div class="stack-status-cell"><span class="stack-badge sb-confirmed">Active</span></div></div>
     </div>
     <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:12px">Key Decisions</div>
@@ -297,7 +297,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit
 var moduleStatus = {};
 var taskChecks = {
   '0-0':true,'0-1':true,'0-2':true,'0-3':true,'0-4':true,'0-5':true,'0-6':true,
-  '1-0':true,'1-1':true,'1-2':true,'1-3':true,'1-4':true,'1-5':true,'1-6':true,'1-7':true,'1-8':true,'1-9':true
+  '1-0':true,'1-1':true,'1-2':true,'1-3':true,'1-4':true,'1-5':true,'1-6':true,'1-7':true,'1-8':true,'1-9':true,'1-12':true
 };
 var activeModule = null;
 var MODULES = [
@@ -336,7 +336,7 @@ var PHASES = [
    items:["Supabase project setup: auth, RLS policies, core schema","Next.js frontend scaffold with brand system","Contacts and loans CRUD: create, view, edit, delete records","PDF upload interface: contract/CD/pre-approval stored in Supabase Storage","Auth: email/password login","Basic dashboard with navigation","Arive to n8n webhook: loan status syncs to Supabase"]},
   {number:"Phase 2",title:"Automation Layer",timeline:"3-4 weeks",color:"#4c7ec9",
    output:"Full automation stack live. All Claude/Zapier skills rebuilt inside n8n and Supabase.",
-   items:["n8n setup (self-hosted or cloud)","Contract intake: upload to Claude extract to loan record to Outlook draft to Arive checklist","Pre-approval: upload to Claude extract to borrower and agent email drafts","Final CD: upload to Claude extract 10 fields to email draft","New application: create contact, send intro email, set pipeline stage","Referral intro email: paste lead details to n8n to Outlook draft","Automations dashboard: visual pipeline cards with trigger buttons and TriggerModal","Marketing Command Center: full MCC ported to /dashboard/marketing with Supabase state","Contacts module: Smart Lists, customizable columns, create/edit modal, slide-out edit","Salesforce import: 2,441 contacts imported — ImportModal with CSV/XLS parse preview","Rate update publisher: Supabase to website page and Mailchimp teaser","Activity auto-log on every automation fired"]},
+   items:["n8n setup (self-hosted or cloud)","Contract intake: upload to Claude extract to loan record to Outlook draft to Arive checklist","Pre-approval: upload to Claude extract to borrower and agent email drafts","Final CD: upload to Claude extract 10 fields to email draft","New application: create contact, send intro email, set pipeline stage","Referral intro email: paste lead details to n8n to Outlook draft","Automations dashboard: visual pipeline cards with trigger buttons and TriggerModal","Marketing Command Center: full MCC ported to /dashboard/marketing with Supabase state","Contacts module: Smart Lists, customizable columns, create/edit modal, slide-out edit","Salesforce import: 2,441 contacts imported — ImportModal with CSV/XLS parse preview","Rate update publisher: Supabase to website page and Mailchimp teaser","Activity auto-log on every automation fired","Arive webhook integration: new-loan and status-update workflows, migration 007, test script"]},
   {number:"Phase 3",title:"Calculator Suite + Funnels",timeline:"3-4 weeks",color:"#4cc98a",
    output:"Mortgage Coach fully replaced. Lead funnels live. Market intelligence publishing.",
    items:["Loan Scenario Comparator with Claude narrative output","Refi Analyzer with break-even timeline","Rent vs. Buy calculator","Total Cost of Homeownership (5yr and 10yr view)","Max Purchase Price from income and debt inputs","Buy Now vs. Wait scenario","Branded PDF output and shareable link per scenario","Pre-approval and rate alert landing pages feeding Supabase CRM","Market intelligence: FRED API and Claude weekly commentary"]},
@@ -361,8 +361,8 @@ var DECISIONS = [
    body:"Claude Max ($100/mo) is primary for everything including Claude Code builds and API. Gemini AI Pro ($20/mo) for image generation and frontend mockups. ChatGPT Plus ($20/mo) secondary and under review for cancellation. Total AI spend: $140/mo.",
    tags:[{label:"Claude Max $100/mo",type:"confirmed"},{label:"Gemini $20/mo",type:"confirmed"},{label:"ChatGPT Under Review",type:"planned"}]},
   {date:"Mar 2026",title:"Arive Integration via n8n",color:"#4cc9c9",
-   body:"Arive is the LOS. Integration via n8n webhook. When loan moves in Arive, status updates in Supabase. New applications push contact data into Arive from LoanOS. Replaces manual dual-entry.",
-   tags:[{label:"Planned: Phase 1-2",type:"planned"}]},
+   body:"Arive is the LOS. Integration via n8n webhook — two workflows live. New loan: upserts contact + loan record in Supabase. Status update: PATCHes loan status. Runs parallel to Zapier/Salesforce. Migration 007 applied.",
+   tags:[{label:"Live: Phase 2",type:"confirmed"}]},
   {date:"Mar 2026",title:"Jungo replaced by LoanOS CRM",color:"#c9884c",
    body:"Jungo currently used for database tracking, closed loans, pipeline dashboard, and refi opportunity lookup. All rebuilt inside LoanOS CRM on Supabase. Jungo CSV export will seed initial contact and closed loan data.",
    tags:[{label:"Replaced: Jungo",type:"replaced"},{label:"Migration: Jungo CSV export",type:"planned"}]},

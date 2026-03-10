@@ -148,6 +148,8 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
 | Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
+| Arive → New Loan | (import to get ID) | arive-new-loan | Arive POST on new loan |
+| Arive → Status Update | (import to get ID) | arive-status-update | Arive POST on status change |
 
 - All 4 trigger via Supabase pg_net or manual webhook POST
 - All output to Outlook drafts via n8n
@@ -165,7 +167,17 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - ✅ **Automations loan-picker** (2026-03-09) — each AutoCard has a "Run for loan…" `<select>` dropdown populated from top 200 Supabase loans; selected `loanId` passed through `TriggerModal` to n8n webhook payload (PDF: `FormData.append('loan_id', loanId)`, JSON: `...(loanId ? { loan_id: loanId } : {})`)
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
-- Arive webhook integration (planned)
+- **Arive webhook integration — BUILT ✅** (2026-03-09)
+  - Migration 007 (`007_arive_integration.sql`) — adds arive_loan_id + date fields to loans, address/stage/source fields to contacts
+  - `n8n/workflows/workflow-1-new-loan.json` — Webhook → upsert contact → upsert loan → log activity
+  - `n8n/workflows/workflow-2-status-update.json` — Webhook → find loan by arive_loan_id → update status → 404 if not found
+  - `n8n/README.md` — 9-step setup guide, field mapping table, troubleshooting
+  - `scripts/test-webhooks.js` — Node.js test runner, no external deps, reads from env vars
+  - `.env.example` — documents all required env vars including LOANOS_SYSTEM_USER_ID
+  - **Runs parallel to Zapier/Salesforce** — does NOT touch existing flows
+  - Webhook paths: `arive-new-loan`, `arive-status-update`
+  - Requires n8n env var `LOANOS_SYSTEM_USER_ID` = UUID of auth user (all tables require user_id NOT NULL)
+  - contacts.email may have duplicates from 2,441 imported contacts — migration warns if UNIQUE constraint fails; see README troubleshooting
 
 ### Phase 2 — Marketing Command Center (2026-03-09) ✅ LIVE
 - **Netlify build fix (2026-03-09)**: ESLint was blocking deploy — root cause was missing `export default function MarketingPage()`. Added main component + fixed unused `s` param in TodayTab + eslint-disable on `applySmartList` in contacts. Deployed as commit b8d1d57.

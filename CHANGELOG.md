@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [1.2.0] — 2026-03-09 — Arive → Supabase n8n Integration
+
+### Added
+- `supabase/migrations/007_arive_integration.sql` — idempotent migration. Adds to contacts: `mailing_street`, `mailing_city`, `mailing_state`, `mailing_zip`, `group_tag`, `stage` (idempotent — already exists), `source`. Attempts `contacts_email_unique` UNIQUE CONSTRAINT (warns but doesn't fail if duplicate emails block it). Adds to loans: `arive_loan_id TEXT UNIQUE`, `first_payment_date DATE`, `est_closing_date DATE`, `funding_date DATE`, `sales_contract_date DATE`, `raw_payload JSONB`. Creates indexes: `idx_loans_arive_loan_id`, `idx_contacts_email`, `idx_contacts_source`.
+- `n8n/workflows/workflow-1-new-loan.json` — importable n8n workflow (10 nodes). Receives Arive POST on new loan creation. Upserts contact by email, upserts loan by `arive_loan_id`, logs `action: 'loan_created'` to activity_log. Returns 200. Error Trigger catches failures and logs `action: 'arive.webhook.error'`.
+- `n8n/workflows/workflow-2-status-update.json` — importable n8n workflow (12 nodes). Receives Arive POST on loan status change. Finds loan by `arive_loan_id`. If found: PATCHes status + date fields, logs `action: 'loan_status_updated'`, returns 200. If not found: logs `action: 'error_loan_not_found'`, returns 404.
+- `n8n/README.md` — 9-step setup guide: run migration, find system user UUID, configure n8n credentials (Header Auth for Arive secret, Header Auth for Supabase service key), set `LOANOS_SYSTEM_USER_ID` env var, import both workflows, configure Error Trigger workflow ID, get webhook URLs, configure Arive, test with script. Includes Arive field mapping table and troubleshooting section for 5 failure modes.
+- `scripts/test-webhooks.js` — Node.js test runner (no external dependencies, uses native fetch). Sends POST to `arive-new-loan` with realistic fake payload, waits 2s, sends POST to `arive-status-update` using same `arive_loan_id`. Logs responses. Prints pass/fail summary. Exits 0 on all-pass, 1 on any failure. Reads `N8N_WEBHOOK_BASE_URL` + `ARIVE_WEBHOOK_SECRET` from env.
+- `.env.example` — documents all required env vars: `SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, `N8N_WEBHOOK_BASE_URL`, `ARIVE_WEBHOOK_SECRET`, `LOANOS_SYSTEM_USER_ID` (n8n internal), `NEXT_PUBLIC_SUPABASE_URL`.
+
+### Notes
+- Runs **parallel to existing Zapier/Salesforce flows** — zero overlap
+- All existing n8n workflows untouched
+- Pattern matches established codebase convention: `httpRequest` nodes (not `n8n-nodes-base.supabase`), `apikey` Header Auth credential name, `action` column in activity_log, Supabase URL `https://uuqedsvjlkeszrbwzizl.supabase.co`
+- Migration 007 is next after existing 006 — migrations 001-006 were already live
+- `loans_arive_loan_id_unique` UNIQUE constraint is safe to add — all existing loans have NULL `arive_loan_id` (PostgreSQL UNIQUE allows multiple NULLs)
+- Manual step required: run migration 007 in Supabase SQL editor before importing workflows
+
+---
+
 ## [1.1.1] — 2026-03-09 — Automations: Loan-picker + webhook loan_id passthrough
 
 ### Changed

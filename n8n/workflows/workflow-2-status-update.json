@@ -1,0 +1,304 @@
+{
+  "name": "LoanOS — Arive Status Update → Supabase",
+  "nodes": [
+    {
+      "id": "arl-w2-001",
+      "name": "Arive Status Update Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "path": "arive-status-update",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "authentication": "headerAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "Arive Webhook Secret"
+        }
+      },
+      "webhookId": "arive-status-update"
+    },
+    {
+      "id": "arl-w2-002",
+      "name": "Extract Status Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "jsCode": "const systemUserId = process.env.LOANOS_SYSTEM_USER_ID;\nif (!systemUserId) {\n  throw new Error('LOANOS_SYSTEM_USER_ID not set in n8n environment variables.');\n}\n\nconst body = $json.body || $json;\n\nconst n = (val) => {\n  if (val === null || val === undefined || val === '') return null;\n  return val;\n};\n\nconst ariveLoanId = String(body.ariveLoanId ?? '');\nif (!ariveLoanId) {\n  throw new Error('Missing required field: ariveLoanId');\n}\n\nreturn [{\n  json: {\n    ariveLoanId,\n    status: n(body.currentLoanStatus_status),\n    firstPaymentDate: n(body.keyDates_firstPaymentDate),\n    fundingDate: n(body.keyDates_estimatedFundingDate),\n    estClosingDate: n(body.keyDates_closingContingencyDate),\n    systemUserId\n  }\n}];"
+      }
+    },
+    {
+      "id": "arl-w2-003",
+      "name": "Find Loan by Arive ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [720, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?arive_loan_id=eq.' + encodeURIComponent($json.ariveLoanId) + '&limit=1&select=id,contact_id,arive_loan_id,status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "arl-w2-004",
+      "name": "Check Loan Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300],
+      "parameters": {
+        "jsCode": "// Parse the GET response and determine if the loan exists\nconst response = $input.item.json;\nconst loans = Array.isArray(response) ? response : [];\nconst loan = loans[0] || null;\n\nconst fields = $('Extract Status Fields').item.json;\n\nreturn [{\n  json: {\n    loanFound: !!loan,\n    loanId: loan ? loan.id : null,\n    contactId: loan ? loan.contact_id : null,\n    ariveLoanId: fields.ariveLoanId,\n    status: fields.status,\n    firstPaymentDate: fields.firstPaymentDate,\n    fundingDate: fields.fundingDate,\n    estClosingDate: fields.estClosingDate,\n    systemUserId: fields.systemUserId\n  }\n}];"
+      }
+    },
+    {
+      "id": "arl-w2-005",
+      "name": "Loan Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "check-loan-found",
+              "leftValue": "={{ $json.loanFound }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "arl-w2-006",
+      "name": "Update Loan Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1440, 180],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?arive_loan_id=eq.' + encodeURIComponent($json.ariveLoanId) }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  status: $json.status,\n  first_payment_date: $json.firstPaymentDate,\n  funding_date: $json.fundingDate,\n  est_closing_date: $json.estClosingDate,\n  updated_at: new Date().toISOString()\n}) }}"
+      }
+    },
+    {
+      "id": "arl-w2-007",
+      "name": "Log Status Updated",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1680, 180],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  action: 'status_updated',\n  entity_type: 'loan',\n  entity_id: $('Check Loan Found').item.json.loanId,\n  loan_id: $('Check Loan Found').item.json.loanId,\n  contact_id: $('Check Loan Found').item.json.contactId,\n  metadata: {\n    new_status: $('Check Loan Found').item.json.status,\n    arive_loan_id: $('Check Loan Found').item.json.ariveLoanId,\n    source: 'arive_webhook'\n  },\n  user_id: $('Check Loan Found').item.json.systemUserId\n}) }}"
+      }
+    },
+    {
+      "id": "arl-w2-008",
+      "name": "Respond 200 Updated",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1920, 180],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, loan_id: $('Check Loan Found').item.json.loanId, new_status: $('Check Loan Found').item.json.status }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "arl-w2-009",
+      "name": "Log Loan Not Found",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1440, 420],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  action: 'error_loan_not_found',\n  entity_type: 'loan',\n  entity_id: null,\n  metadata: {\n    arive_loan_id: $json.ariveLoanId,\n    attempted_status: $json.status,\n    source: 'arive_status_update_webhook'\n  },\n  user_id: $json.systemUserId\n}) }}"
+      }
+    },
+    {
+      "id": "arl-w2-010",
+      "name": "Respond 404 Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1680, 420],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, message: 'Loan not found for arive_loan_id: ' + $('Check Loan Found').item.json.ariveLoanId }) }}",
+        "options": {
+          "responseCode": 404
+        }
+      }
+    },
+    {
+      "id": "arl-w2-011",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [240, 560],
+      "parameters": {}
+    },
+    {
+      "id": "arl-w2-012",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [480, 560],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({\n  action: 'arive.webhook.error',\n  entity_type: 'loan',\n  entity_id: null,\n  metadata: {\n    error_message: $json.execution.error.message,\n    node_name: $json.execution.error.node ? $json.execution.error.node.name : 'unknown',\n    workflow_id: $json.workflow.id,\n    execution_id: $json.execution.id,\n    source: 'arive_status_update_webhook'\n  },\n  user_id: process.env.LOANOS_SYSTEM_USER_ID\n}) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Arive Status Update Webhook": {
+      "main": [
+        [{ "node": "Extract Status Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract Status Fields": {
+      "main": [
+        [{ "node": "Find Loan by Arive ID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Find Loan by Arive ID": {
+      "main": [
+        [{ "node": "Check Loan Found", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Loan Found": {
+      "main": [
+        [{ "node": "Loan Exists?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Loan Exists?": {
+      "main": [
+        [{ "node": "Update Loan Status", "type": "main", "index": 0 }],
+        [{ "node": "Log Loan Not Found", "type": "main", "index": 0 }]
+      ]
+    },
+    "Update Loan Status": {
+      "main": [
+        [{ "node": "Log Status Updated", "type": "main", "index": 0 }]
+      ]
+    },
+    "Log Status Updated": {
+      "main": [
+        [{ "node": "Respond 200 Updated", "type": "main", "index": 0 }]
+      ]
+    },
+    "Log Loan Not Found": {
+      "main": [
+        [{ "node": "Respond 404 Not Found", "type": "main", "index": 0 }]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [{ "node": "Log Error", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "pinData": {},
+  "tags": [{ "name": "LoanOS" }, { "name": "Arive" }, { "name": "Phase 2" }]
+}

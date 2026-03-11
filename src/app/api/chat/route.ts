@@ -20,22 +20,28 @@ async function buildSystemPrompt(
     "You are LoanOS Assistant — an AI built into the LoanOS CRM for loan officer Adam Styer (NMLS #513013, Adam Styer | Mortgage Solutions LP, Austin TX). Be direct, specific, and use the contact data. Never be generic."
 
   if (recordType === 'contact') {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('contacts')
       .select(`
         first_name, last_name, email, phone, mobile_phone,
         contact_type, stage, lead_source, referred_by,
         company_name, notes, last_touch, closing_date,
-        top_realtor, target_realtor,
-        loans (loan_amount, property_address, status, loan_type, loan_program)
+        top_realtor, target_realtor
       `)
       .eq('id', recordId)
       .maybeSingle()
 
+    if (error) console.error('[chat/route] contact fetch error:', error)
     if (!data) return base
 
+    const { data: loanRows } = await supabase
+      .from('loans')
+      .select('loan_amount, property_address, status, loan_type, loan_program')
+      .eq('contact_id', recordId)
+      .limit(1)
+
     const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
-    const loan = Array.isArray(data.loans) ? data.loans[0] : data.loans
+    const loan = loanRows?.[0] ?? null
 
     return `${base}
 
@@ -63,20 +69,29 @@ ${loan ? `
   }
 
   // recordType === 'loan'
-  const { data } = await supabase
+  const { data, error: loanError } = await supabase
     .from('loans')
     .select(`
       loan_name, loan_number, loan_amount, loan_type, loan_program,
       property_address, property_city, property_state,
-      loan_purpose, occupancy, status,
-      contacts (first_name, last_name, email, phone)
+      loan_purpose, occupancy, status, contact_id
     `)
     .eq('id', recordId)
     .maybeSingle()
 
+  if (loanError) console.error('[chat/route] loan fetch error:', loanError)
   if (!data) return base
 
-  const contact = Array.isArray(data.contacts) ? data.contacts[0] : data.contacts
+  let contact: { first_name: string; last_name: string; email: string; phone: string } | null = null
+  if (data.contact_id) {
+    const { data: contactRow } = await supabase
+      .from('contacts')
+      .select('first_name, last_name, email, phone')
+      .eq('id', data.contact_id)
+      .maybeSingle()
+    contact = contactRow ?? null
+  }
+
   const borrowerName = contact
     ? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
     : 'N/A'

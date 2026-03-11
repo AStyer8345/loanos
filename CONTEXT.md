@@ -16,8 +16,9 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built and debugged as of March 8, 2026.
+Phase 1 complete. Phase 2 (Automation) ~80% complete — all major features built, several pending go-live steps.
 816 Arive loans imported and backfilled as of March 10, 2026.
+AI Chat + Outlook Email integration built as of March 11, 2026 — both need manual deploy steps to go live.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -80,7 +81,7 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 ## Tech Stack
 
 - Frontend: Next.js 14
-- Hosting: Netlify
+- Hosting: Vercel
 - Database: Supabase (Postgres)
 - Auth: Supabase email/password
 - File Storage: Supabase Storage (buckets: `documents` [private], `social-assets` [public])
@@ -104,17 +105,23 @@ These tools are working and must NOT be broken during LoanOS build:
 
 ## Environment Variables
 
-### loanos repo (Netlify — add as you build)
+### loanos repo (Vercel — add as you build)
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
-- SUPABASE_URL (server-side, Netlify functions)
-- SUPABASE_SERVICE_ROLE_KEY (Netlify functions — bypasses RLS)
+- SUPABASE_URL (server-side, API routes)
+- SUPABASE_SERVICE_ROLE_KEY (server-side — bypasses RLS)
 - ARIVE_WEBHOOK_SECRET (shared secret, generate with `openssl rand -hex 32`)
 - LOANOS_SYSTEM_USER_ID (UUID of `system@loanos.internal` auth user)
-- ZAPIER_OUTLOOK_WEBHOOK_URL (Zapier → Outlook webhook for failure alerts)
-- LOANOS_ALERT_EMAIL (recipient for webhook failure alerts)
-- LOANOS_NETLIFY_URL (production URL, no trailing slash — used by n8n)
+- ZAPIER_OUTLOOK_WEBHOOK_URL (Zapier → Outlook webhook for failure alerts — optional)
+- LOANOS_ALERT_EMAIL (recipient for webhook failure alerts — optional)
 - ANTHROPIC_API_KEY (Claude API — used by /api/chat for AI chat integration)
+- MICROSOFT_CLIENT_ID (Outlook OAuth2 — from Azure app registration)
+- MICROSOFT_CLIENT_SECRET (Outlook OAuth2)
+- MICROSOFT_TENANT_ID (Outlook OAuth2)
+- MICROSOFT_REDIRECT_URI (Outlook OAuth2 — must be Vercel production URL + /api/outlook-callback)
+- OUTLOOK_EMAIL (adam@thestyerteam.com)
+- OUTLOOK_SYNC_SECRET (shared secret for n8n → /api/outlook-sync)
+- OUTLOOK_SYNC_WINDOW_MINUTES (default: 30)
 
 ### styer-mortgage-site repo (Netlify — already set)
 - ANTHROPIC_API_KEY
@@ -142,22 +149,81 @@ These tools are working and must NOT be broken during LoanOS build:
 
 ## Phase Roadmap
 
-- Phase 1 (COMPLETE): Foundation — Supabase schema, auth, PDF upload, basic dashboard
-- Phase 2 (IN PROGRESS): Automation — n8n workflows, contract/CD/pre-approval extraction, Outlook drafts
-- Phase 3: Calculator Suite — 6 calculators replacing Mortgage Coach, Claude narratives
-- Phase 4: SaaS — multi-tenant RLS, Stripe billing, white-label, license to LOs
+### Phase 1 — Foundation ✅ COMPLETE
+- ✅ Supabase schema (contacts, loans, documents, activity_log)
+- ✅ Auth (email/password)
+- ✅ PDF upload end-to-end
+- ✅ Dashboard with stat cards
+- ✅ Bloomberg terminal UI → Linear/Attio light mode redesign
 
-## Calculator Suite (Phase 3 — replaces Mortgage Coach)
+### Phase 2 — Automation (~80% complete)
 
-1. Loan Scenario Comparator
-2. Refi Analyzer
-3. Rent vs. Buy
-4. Total Cost of Homeownership
-5. Max Purchase Price
-6. Buy Now vs. Wait
+**Built & Live ✅**
+- ✅ Contract automation pipeline (n8n → Claude extraction → Outlook drafts)
+- ✅ Automations dashboard with trigger buttons + loan picker
+- ✅ Marketing Command Center (8-tab MCC port)
+- ✅ Contacts module (Smart Lists, bulk actions, inline stage edit, import)
+- ✅ Loans module (816 Arive imports, backfilled 24 columns)
+- ✅ Arive direct webhook (n8n orchestrator → Netlify function → Supabase)
+- ✅ Settings page
+
+**Built — Needs Go-Live Steps 🔧**
+- 🔧 **Outlook Email Integration** — code complete, 5 manual steps remain:
+  - [ ] Run `008_outlook_integration.sql` in Supabase SQL Editor
+  - [ ] Azure App Registration (follow `docs/outlook-azure-setup.md`)
+  - [ ] Add 7 env vars to Vercel (MICROSOFT_CLIENT_ID, etc.)
+  - [ ] n8n setup: NETLIFY_SITE_URL variable + HTTP Header Auth credential + activate workflow `JMmstRl2C5ylmuIY`
+  - [ ] Connect Outlook at /dashboard/settings
+- 🔧 **AI Chat Integration** — code complete, 2 manual steps remain:
+  - [ ] Add `ANTHROPIC_API_KEY` to Vercel env vars
+  - [ ] Run `009_chat_sessions.sql` in Supabase SQL Editor
+
+**Built — Needs Credentials to Activate 🔑**
+- 🔑 **Closed Loan Review Request** (n8n ID: `AK1fBcaX1cPcdlGx`) — workflow imported, needs:
+  - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to workflow
+  - [ ] Set up SMTP credential in n8n
+  - [ ] Get Google Review URL + Zillow Review URL
+  - [ ] Activate workflow
+- 🔑 **Weekly Testimonial Social Post** (n8n ID: `eJG4wckrj6SmSpm1`) — workflow imported, needs:
+  - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to workflow
+  - [ ] Get `GEMINI_API_KEY` from aistudio.google.com
+  - [ ] Set up Google Sheets OAuth2 credential in n8n
+  - [ ] Activate workflow
+
+**Remaining Go-Live Steps 🔧**
+- 🔧 **Migrate Arive webhook to Vercel API route** — `netlify/functions/arive-webhook.js` has no Next.js API route equivalent; n8n workflow still points to `/.netlify/functions/arive-webhook` which won't work on Vercel → need `/api/arive-webhook/route.ts`
+- 🔧 **Outlook go-live** — Azure app registration + Vercel env vars + migration 008 + update n8n workflow URL
+- 🔧 **AI Chat go-live** — add `ANTHROPIC_API_KEY` to Vercel + run migration 009
+- 🔧 **Activate Review Request workflow** — add SUPABASE_SERVICE_ROLE_KEY, SMTP credential, Google/Zillow review URLs to n8n
+- 🔧 **Activate Social Post workflow** — add Gemini API key, Google Sheets OAuth2 credential to n8n
+
+**Not Yet Built 🚧**
+- 🚧 **CD extraction workflow** — same n8n pattern as contract pipeline, Claude extracts Closing Disclosure fields
+- 🚧 **Pre-approval extraction workflow** — same pattern, Claude extracts PA letter fields
+- 🚧 **Rate update publisher migration** — move from styer-mortgage-site Netlify to LoanOS native
+- 🚧 **Activity auto-log** — automatic activity_log entries from key CRM actions (stage changes, notes, calls)
+- 🚧 **Marketing page light mode** — still using Bloomberg/gold CSS vars, needs migration to emerald/Inter theme
+
+### Phase 3 — Calculator Suite (replaces Mortgage Coach)
 
 Key differentiator: Claude API generates plain-English narrative per scenario.
 Output: branded PDF or shareable link integrated with Supabase loan records.
+
+- [ ] Loan Scenario Comparator
+- [ ] Refi Analyzer
+- [ ] Rent vs. Buy
+- [ ] Total Cost of Homeownership
+- [ ] Max Purchase Price
+- [ ] Buy Now vs. Wait
+
+### Phase 4 — SaaS (multi-tenant)
+
+- [ ] Multi-tenant RLS (row-level security per LO)
+- [ ] Stripe billing integration
+- [ ] White-label theming
+- [ ] Onboarding flow for new LOs
+- [ ] License/subscription management
+- [ ] Admin dashboard (usage metrics, LO management)
 
 ## Key Decisions Made
 
@@ -194,7 +260,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - **Architecture**: Floating `LoanOSChat` component per CRM record → `POST /api/chat` → Claude API with full record context injected → `chat_sessions` Supabase table for persistence
 - **Supabase**: `009_chat_sessions.sql` — `chat_sessions` table (`id`, `record_id`, `record_type`, `messages jsonb`, `created_at`, `updated_at`); index on `(record_id, record_type)`; auto-update trigger on `updated_at`
 - **API routes** (`src/app/api/chat/route.ts`):
-  - `POST /api/chat` — builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls `claude-sonnet-4-20250514`, upserts `chat_sessions`
+  - `POST /api/chat` — builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls `claude-sonnet-4-5`, upserts `chat_sessions`
   - `GET /api/chat?recordId=&recordType=` — returns most recent session (`.order('updated_at', desc).limit(1).maybeSingle()`)
   - System prompt identity: "You are LoanOS Assistant — an AI built into the LoanOS CRM for loan officer Adam Styer (NMLS #513013, Adam Styer | Mortgage Solutions LP, Austin TX). Be direct, specific, and use the contact data. Never be generic."
   - Service role client inline (`getServiceClient()`) — bypasses RLS, server-only
@@ -334,5 +400,5 @@ User-defined Claude skills live at `/skills/user/`. Each subdirectory is one ski
 - **Always update the build tracker** (`/public/docs/loanos.html`) at end of every session — mark completed tasks and add any new items not already on the roadmap
 - At end of every session: update CONTEXT.md and push to main with everything changed that session
 - Never break styer-mortgage-site tools
-- Never use Vercel
+- Deployed on Vercel (switched from Netlify 2026-03-11)
 - Ask Adam before making architectural decisions not covered here

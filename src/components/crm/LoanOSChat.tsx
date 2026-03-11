@@ -85,7 +85,12 @@ export default function LoanOSChat({ recordId, recordType, recordName }: Props) 
         body: JSON.stringify({ messages: next, recordId, recordType, sessionId }),
       })
       const data = await res.json()
-      if (data.message) {
+      if (!res.ok || data.error) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Error: assistant unavailable. Try again.' },
+        ])
+      } else if (data.message) {
         setMessages((prev) => [...prev, data.message])
         if (data.sessionId) setSessionId(data.sessionId)
       }

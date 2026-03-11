@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## [1.7.1] — 2026-03-11 — AI Chat Bug Fixes
+
+### Fixed
+- `src/app/api/chat/route.ts` — corrected model ID from `claude-sonnet-4-20250514` to `claude-sonnet-4-5` (date suffix was causing API failures)
+- `src/components/crm/LoanOSChat.tsx` — fixed silent failure: API error responses (non-2xx or `data.error`) now show "Error: assistant unavailable. Try again." in chat instead of silently dropping; previously `if (data.message)` would pass when API returned `{error: '...'}` with no visible feedback
+- `src/components/crm/LoanOSChat.tsx` — updated quick action text to match spec (contact: check-in email, next action, text message, summarize; loan: what needs attention, realtor update email, days until close, borrower status update)
+- `src/components/crm/LoanOSChat.tsx` — header now shows both `recordName` and `recordType` (was showing one or the other)
+
 ## [1.7.0] — 2026-03-11 — AI Chat Integration
 
 ### Added
@@ -9,7 +17,7 @@
 
 **API Route**
 - `src/app/api/chat/route.ts` — POST + GET handlers for AI chat assistant
-  - POST: builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls Claude API (`claude-sonnet-4-20250514`, `max_tokens: 1024`), upserts `chat_sessions` (update if sessionId exists, insert otherwise)
+  - POST: builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls Claude API (`claude-sonnet-4-5`, `max_tokens: 1024`), upserts `chat_sessions` (update if sessionId exists, insert otherwise)
   - GET: returns most recent `chat_sessions` row for a given record (`recordId` + `recordType` query params)
   - Uses inline service role client (`getServiceClient()`) — bypasses RLS, never exposed to browser
   - System prompt identity: LoanOS Assistant for Adam Styer, direct and record-specific

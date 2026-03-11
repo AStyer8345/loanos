@@ -20,11 +20,11 @@ export type ActivityLogRow = {
   // Legacy schema
   action?: string
   entity_type?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   // New schema
   type?: string
   summary?: string
-  raw_payload?: Record<string, any>
+  raw_payload?: Record<string, unknown>
   external_id?: string
 }
 
@@ -33,7 +33,7 @@ type NormalizedEntry = {
   created_at: string
   type: string
   summary: string
-  detail: Record<string, any> | null
+  detail: Record<string, unknown> | null
 }
 
 // ── Normalize legacy + new rows ──────────────────────────────────────────────

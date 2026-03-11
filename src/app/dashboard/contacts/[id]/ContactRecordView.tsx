@@ -71,11 +71,6 @@ function fmtDate(s: string | null) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function fmtDateTime(s: string) {
-  const d = new Date(s)
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
-}
-
 function fullName(c: Contact) {
   return `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '-'
 }

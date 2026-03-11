@@ -52,12 +52,12 @@ function normalize(row: ActivityLogRow): NormalizedEntry {
 
   // Fall back to legacy schema
   const action = row.action ?? 'unknown'
-  const meta = row.metadata ?? {}
+  const meta = (row.metadata ?? {}) as Record<string, unknown>
 
   let summary = action.replace(/_/g, ' ')
-  if (meta.subject) summary = meta.subject
-  else if (meta.note) summary = meta.note
-  else if (meta.description) summary = meta.description
+  if (typeof meta.subject === 'string') summary = meta.subject
+  else if (typeof meta.note === 'string') summary = meta.note
+  else if (typeof meta.description === 'string') summary = meta.description
 
   return {
     id: row.id,

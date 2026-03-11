@@ -25,8 +25,19 @@
 ### Dependencies
 - `@anthropic-ai/sdk ^0.78.0` — added to package.json
 
+### Wired Into Record Views
+- `src/app/dashboard/contacts/[id]/ContactRecordView.tsx` — `LoanOSChat` imported and rendered with `recordId={contact.id}`, `recordType="contact"`, `recordName={fullName(contact)}`
+- `src/app/dashboard/loans/[id]/page.tsx` — `LoanOSChat` imported and rendered with `recordId={loanId}`, `recordType="loan"`, `recordName={displayName}`
+
 ### Environment Variables
-- `ANTHROPIC_API_KEY` — add to Netlify env vars for loanos repo
+- `ANTHROPIC_API_KEY` — add to Vercel env vars for loanos repo
+
+---
+
+## [1.6.1] — 2026-03-11 — Deploy Platform Switch
+
+### Changed
+- Deployment moved from Netlify to Vercel
 
 ---
 

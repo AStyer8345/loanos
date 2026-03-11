@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import ActivityTimeline from '@/components/ActivityTimeline'
+import LoanOSChat from '@/components/crm/LoanOSChat'
 
 export type Contact = {
   id: string
@@ -507,6 +508,7 @@ export function ContactRecordView(props: Props) {
           </div>
         )}
       </div>
+      <LoanOSChat recordId={contact.id} recordType="contact" recordName={fullName(contact)} />
     </div>
   )
 }

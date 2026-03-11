@@ -8,6 +8,7 @@ import {
   ArrowLeft, FileText, Zap, Activity, Download,
   ChevronRight, AlertCircle, Check
 } from 'lucide-react'
+import LoanOSChat from '@/components/crm/LoanOSChat'
 
 const N8N_BASE = 'https://styer.app.n8n.cloud/webhook'
 
@@ -256,6 +257,7 @@ export default function LoanDetailPage() {
           <ActivityTab activity={activity} />
         )}
       </div>
+      <LoanOSChat recordId={loanId} recordType="loan" recordName={displayName} />
     </div>
   )
 }

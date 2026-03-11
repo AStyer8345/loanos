@@ -12,7 +12,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 https://github.com/AStyer8345/loanos
 Branch: main
-Deploy: Netlify (not Vercel)
+Deploy: Vercel
 
 ## Current Status
 
@@ -25,7 +25,7 @@ Phase 1 complete. Phase 2 (Automation) in progress — contract pipeline built a
 - 4 tables live: contacts, loans, documents, activity_log
 - Supabase Storage bucket: `documents` (must be lowercase — case-sensitive)
 - PDF upload end-to-end verified: Storage → documents row → activity_log
-- Next.js 14 deploying to Netlify (deploy fixes applied)
+- Next.js 14 deploying to Vercel
 - HTML docs moved to `public/docs/` — served by Next.js at `/docs/*.html`
 - /dashboard/build-tracker: auth-gated iframe → /docs/loanos.html
 - /dashboard/system-map: auth-gated iframe → /docs/loanos-system-map.html
@@ -165,7 +165,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - Jungo → replaced by LoanOS CRM
 - Mortgage Coach → replaced by calculator suite
 - Netlify Blobs → migrating to Supabase
-- Vercel → NOT used, Netlify only
+- Vercel → NOW USED for deployment (switched from Netlify 2026-03-11)
 - Build for yourself first, license to LOs in Phase 4
 
 ## Active Automations
@@ -207,7 +207,8 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
   - Usage: `<LoanOSChat recordId={record.id} recordType="contact" recordName={fullName} />`
 - **SDK**: `@anthropic-ai/sdk ^0.78.0` installed
 - **Env var to add in Netlify (loanos repo)**: `ANTHROPIC_API_KEY`
-- ⚠️ **To go live**: (1) Add `ANTHROPIC_API_KEY` to Netlify env vars, (2) run `009_chat_sessions.sql` in Supabase SQL Editor, (3) import `LoanOSChat` in contact/loan record views
+- ⚠️ **To go live**: (1) Add `ANTHROPIC_API_KEY` to Vercel env vars, (2) run `009_chat_sessions.sql` in Supabase SQL Editor
+- ✅ **Wired up**: `LoanOSChat` added to `ContactRecordView.tsx` and `src/app/dashboard/loans/[id]/page.tsx` (2026-03-11)
 
 ### Phase 2 — Outlook Email Integration (2026-03-10) ✅ BUILT
 

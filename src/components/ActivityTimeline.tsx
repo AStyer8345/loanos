@@ -17,15 +17,15 @@ import {
 export type ActivityLogRow = {
   id: string
   created_at: string
-  // Legacy schema
+  // Legacy schema (null from DB is allowed)
   action?: string
-  entity_type?: string
-  metadata?: Record<string, unknown>
+  entity_type?: string | null
+  metadata?: Record<string, unknown> | null
   // New schema
-  type?: string
-  summary?: string
-  raw_payload?: Record<string, unknown>
-  external_id?: string
+  type?: string | null
+  summary?: string | null
+  raw_payload?: Record<string, unknown> | null
+  external_id?: string | null
 }
 
 type NormalizedEntry = {

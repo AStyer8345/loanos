@@ -51,7 +51,7 @@ export default function SettingsPage() {
     setSyncing(true)
     setSyncResult(null)
     try {
-      const res = await fetch('/.netlify/functions/outlook-sync', {
+      const res = await fetch('/api/outlook-sync', {
         method: 'POST',
         headers: { 'x-sync-secret': '' }, // secret not needed for manual trigger from browser
       })
@@ -193,7 +193,7 @@ export default function SettingsPage() {
               Sync runs every 15 minutes — inbox and sent items.
             </p>
             <a
-              href="/.netlify/functions/outlook-auth"
+              href="/api/outlook-auth"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
             >
               <Mail size={14} />

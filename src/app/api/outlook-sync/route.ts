@@ -76,8 +76,7 @@ async function findContactByEmail(emailAddress: string) {
 async function logEmailActivity(
   contact: Record<string, unknown>,
   message: Record<string, unknown>,
-  direction: string,
-  _myEmail: string
+  direction: string
 ) {
   const from = (message.from as Record<string, Record<string, string>>)?.emailAddress?.address || '';
   const toList = ((message.toRecipients as Record<string, Record<string, string>>[]) || [])
@@ -159,8 +158,8 @@ async function runSync() {
     const contact = await findContactByEmail(senderEmail);
     if (!contact) { stats.unmatched++; continue; }
 
-    const inserted = await logEmailActivity(contact, msg, 'email_inbound', myEmail);
-    inserted ? stats.inserted++ : stats.skipped++;
+    const inserted = await logEmailActivity(contact, msg, 'email_inbound');
+    if (inserted) { stats.inserted++; } else { stats.skipped++; }
   }
 
   for (const msg of sentMessages) {
@@ -181,8 +180,8 @@ async function runSync() {
         internetMessageId: `${msg.internetMessageId}::${recipientEmail}`,
       };
 
-      const inserted = await logEmailActivity(contact, compositeMsg, 'email_outbound', myEmail);
-      inserted ? stats.inserted++ : stats.skipped++;
+      const inserted = await logEmailActivity(contact, compositeMsg, 'email_outbound');
+      if (inserted) { stats.inserted++; } else { stats.skipped++; }
     }
 
     if (!matched) stats.unmatched++;

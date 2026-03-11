@@ -62,7 +62,7 @@ export default function SettingsPage() {
       } else {
         setSyncResult(`Sync failed: ${data.error}`)
       }
-    } catch (_err) {
+    } catch {
       setSyncResult('Sync error — check console.')
     } finally {
       setSyncing(false)

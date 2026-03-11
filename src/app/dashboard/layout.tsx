@@ -1,6 +1,8 @@
 import SidebarNav from './SidebarNav'
 import SignOutButton from './SignOutButton'
 
+export const dynamic = 'force-dynamic'
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">

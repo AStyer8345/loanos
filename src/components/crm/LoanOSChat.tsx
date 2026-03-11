@@ -15,16 +15,16 @@ type Props = {
 
 const QUICK_ACTIONS: Record<string, string[]> = {
   contact: [
+    'Draft a check-in email',
+    'What should my next action be?',
+    'Write a text message',
     'Summarize this contact',
-    'Draft a follow-up email',
-    'What stage is this lead?',
-    'Suggest next action',
   ],
   loan: [
-    'Summarize this loan',
-    'What conditions are outstanding?',
-    'Draft a status update',
-    'Check rate lock timeline',
+    'What needs attention on this file?',
+    'Draft an update email to the realtor',
+    'How many days until close?',
+    'Write a borrower status update',
   ],
 }
 
@@ -173,7 +173,8 @@ export default function LoanOSChat({ recordId, recordType, recordName }: Props) 
                 LOANOSIS AI
               </div>
               <div style={{ color: '#666', fontSize: 11, marginTop: 2 }}>
-                {recordName || recordType}
+                {recordName && <span>{recordName} · </span>}
+                <span style={{ textTransform: 'capitalize' }}>{recordType}</span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>

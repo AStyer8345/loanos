@@ -26,7 +26,10 @@ async function buildSystemPrompt(
         first_name, last_name, email, phone, mobile_phone,
         contact_type, stage, lead_source, referred_by,
         company_name, notes, last_touch, closing_date,
-        top_realtor, target_realtor
+        top_realtor, target_realtor,
+        realtor_email, realtor_phone,
+        mailing_street, mailing_city, mailing_state, mailing_zip,
+        group_tag, source
       `)
       .eq('id', recordId)
       .maybeSingle()
@@ -36,12 +39,14 @@ async function buildSystemPrompt(
 
     const { data: loanRows } = await supabase
       .from('loans')
-      .select('loan_amount, property_address, status, loan_type, loan_program')
+      .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, est_closing_date, sales_price, buyer_agent_name')
       .eq('contact_id', recordId)
       .limit(1)
 
     const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
     const loan = loanRows?.[0] ?? null
+    const mailingParts = [data.mailing_street, data.mailing_city, data.mailing_state, data.mailing_zip].filter(Boolean)
+    const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
 
     return `${base}
 
@@ -51,21 +56,29 @@ async function buildSystemPrompt(
 - Phone: ${data.phone || data.mobile_phone || 'N/A'}
 - Type: ${data.contact_type || 'N/A'}
 - Stage: ${data.stage || 'N/A'}
-- Lead Source: ${data.lead_source || 'N/A'}
+- Group: ${data.group_tag || 'N/A'}
+- Source: ${data.source || data.lead_source || 'N/A'}
 - Referred By: ${data.referred_by || 'N/A'}
 - Company: ${data.company_name || 'N/A'}
+- Mailing Address: ${mailingAddress || 'N/A'}
 - Last Touch: ${data.last_touch || 'N/A'}
 - Closing Date: ${data.closing_date || 'N/A'}
 - Top Realtor: ${data.top_realtor ? 'Yes' : 'No'}
 - Target Realtor: ${data.target_realtor ? 'Yes' : 'No'}
+- Realtor Email: ${data.realtor_email || 'N/A'}
+- Realtor Phone: ${data.realtor_phone || 'N/A'}
 - Notes: ${data.notes || 'None'}
 ${loan ? `
 ## Associated Loan
 - Amount: ${loan.loan_amount ? `$${Number(loan.loan_amount).toLocaleString()}` : 'N/A'}
-- Property: ${loan.property_address || 'N/A'}
+- Purchase Price: ${loan.sales_price ? `$${Number(loan.sales_price).toLocaleString()}` : 'N/A'}
+- Interest Rate: ${loan.interest_rate ? `${loan.interest_rate}%` : 'N/A'}
+- Property: ${[loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || 'N/A'}
 - Type: ${loan.loan_type || 'N/A'}
 - Program: ${loan.loan_program || 'N/A'}
-- Status: ${loan.status || 'N/A'}` : ''}`
+- Status: ${loan.status || 'N/A'}
+- Close Date: ${loan.closing_date || loan.est_closing_date || 'N/A'}
+- Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}` : ''}`
   }
 
   // recordType === 'loan'
@@ -74,7 +87,12 @@ ${loan ? `
     .select(`
       loan_name, loan_number, loan_amount, loan_type, loan_program,
       property_address, property_city, property_state,
-      loan_purpose, occupancy, status, contact_id
+      loan_purpose, occupancy, status, contact_id,
+      sales_price, interest_rate, closing_date, est_closing_date,
+      buyer_agent_name, buyer_agent_email, buyer_agent_brokerage,
+      listing_agent_name, listing_agent_email,
+      title_company, county, seller_concessions,
+      down_payment_pct, estimated_ltv, effective_date, borrower_name
     `)
     .eq('id', recordId)
     .maybeSingle()
@@ -92,12 +110,12 @@ ${loan ? `
     contact = contactRow ?? null
   }
 
-  const borrowerName = contact
-    ? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
-    : 'N/A'
+  const borrowerName = data.borrower_name
+    || (contact ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') : 'N/A')
   const propertyFull = [data.property_address, data.property_city, data.property_state]
     .filter(Boolean)
     .join(', ')
+  const closeDate = data.closing_date || data.est_closing_date
 
   return `${base}
 
@@ -107,13 +125,24 @@ ${loan ? `
 - Borrower: ${borrowerName}
 - Borrower Email: ${contact?.email || 'N/A'}
 - Borrower Phone: ${contact?.phone || 'N/A'}
-- Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}
+- Loan Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}
+- Purchase Price: ${data.sales_price ? `$${Number(data.sales_price).toLocaleString()}` : 'N/A'}
+- Interest Rate: ${data.interest_rate ? `${data.interest_rate}%` : 'N/A'}
+- Down Payment: ${data.down_payment_pct ? `${data.down_payment_pct}%` : 'N/A'}
+- LTV: ${data.estimated_ltv ? `${data.estimated_ltv}%` : 'N/A'}
+- Seller Concessions: ${data.seller_concessions ? `$${Number(data.seller_concessions).toLocaleString()}` : 'N/A'}
 - Type: ${data.loan_type || 'N/A'}
 - Program: ${data.loan_program || 'N/A'}
 - Purpose: ${data.loan_purpose || 'N/A'}
 - Occupancy: ${data.occupancy || 'N/A'}
 - Property: ${propertyFull || 'N/A'}
-- Status: ${data.status || 'N/A'}`
+- County: ${data.county || 'N/A'}
+- Status: ${data.status || 'N/A'}
+- Close Date: ${closeDate || 'N/A'}
+- Effective Date: ${data.effective_date || 'N/A'}
+- Title Company: ${data.title_company || 'N/A'}
+- Buyer's Agent: ${data.buyer_agent_name || 'N/A'}${data.buyer_agent_email ? ` (${data.buyer_agent_email})` : ''}${data.buyer_agent_brokerage ? ` — ${data.buyer_agent_brokerage}` : ''}
+- Listing Agent: ${data.listing_agent_name || 'N/A'}${data.listing_agent_email ? ` (${data.listing_agent_email})` : ''}`
 }
 
 // POST /api/chat — send a message

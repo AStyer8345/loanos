@@ -1,5 +1,16 @@
 # LoanOS Changelog
 
+## [1.7.2] — 2026-03-11 — AI Chat System Prompt Schema Expansion
+
+### Changed
+- `src/app/api/chat/route.ts` — `buildSystemPrompt` expanded for both record types to include all available schema columns
+
+**Contact prompt** — added 6 fields: `realtor_email`, `realtor_phone`, `mailing_street/city/state/zip` (assembled into mailing address), `group_tag`, `source`; associated loan block now also fetches `interest_rate`, `closing_date`, `est_closing_date`, `sales_price`, `buyer_agent_name`
+
+**Loan prompt** — added 14 fields: `sales_price` (purchase price), `interest_rate`, `down_payment_pct`, `estimated_ltv`, `seller_concessions`, `county`, `closing_date`, `est_closing_date` (fallback), `effective_date`, `title_company`, `buyer_agent_name/email/brokerage`, `listing_agent_name/email`; `borrowerName` now prefers `data.borrower_name` (loans table) over contact join
+
+**Omitted (confirmed not in schema)**: `processor`, `days_in_stage`, `last_activity`, `notes` (spec desired but no migration added these columns)
+
 ## [1.7.1] — 2026-03-11 — AI Chat Bug Fixes
 
 ### Fixed

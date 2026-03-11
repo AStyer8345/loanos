@@ -275,6 +275,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - **Env var to add in Netlify (loanos repo)**: `ANTHROPIC_API_KEY`
 - ⚠️ **To go live**: (1) Add `ANTHROPIC_API_KEY` to Vercel env vars, (2) run `009_chat_sessions.sql` in Supabase SQL Editor
 - ✅ **Wired up**: `LoanOSChat` added to `ContactRecordView.tsx` and `src/app/dashboard/loans/[id]/page.tsx` (2026-03-11)
+- ✅ **Schema expansion (2026-03-11)**: `buildSystemPrompt` in `route.ts` now includes all available DB columns. Contact prompt: +6 fields (realtor_email/phone, mailing address, group_tag, source). Loan prompt: +14 fields (purchase price, interest rate, down payment %, LTV, seller concessions, county, close date, effective date, title company, buyer agent full details, listing agent). TypeScript verified clean (exit 0).
 
 ### Phase 2 — Outlook Email Integration (2026-03-10) ✅ BUILT
 

@@ -114,6 +114,7 @@ These tools are working and must NOT be broken during LoanOS build:
 - ZAPIER_OUTLOOK_WEBHOOK_URL (Zapier → Outlook webhook for failure alerts)
 - LOANOS_ALERT_EMAIL (recipient for webhook failure alerts)
 - LOANOS_NETLIFY_URL (production URL, no trailing slash — used by n8n)
+- ANTHROPIC_API_KEY (Claude API — used by /api/chat for AI chat integration)
 
 ### styer-mortgage-site repo (Netlify — already set)
 - ANTHROPIC_API_KEY
@@ -187,6 +188,43 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - **Weekly Testimonial Social Post** — Monday 9am CT. Reads random unused testimonial from Google Sheet (tab: Sheet1, ID: 1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk). Gemini 1.5 Flash generates caption. Imagen 3 generates quote card image (base64 → Supabase Storage `social-assets` bucket). Publer posts to Instagram + LinkedIn + Facebook. Marks sheet row used. Logs to `automation_logs`. ⚠️ Needs: GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY, Google Sheets OAuth2 credential.
 
 ## What To Build Next
+
+### Phase 2 — AI Chat Integration (2026-03-11) ✅ BUILT
+
+- **Architecture**: Floating `LoanOSChat` component per CRM record → `POST /api/chat` → Claude API with full record context injected → `chat_sessions` Supabase table for persistence
+- **Supabase**: `009_chat_sessions.sql` — `chat_sessions` table (`id`, `record_id`, `record_type`, `messages jsonb`, `created_at`, `updated_at`); index on `(record_id, record_type)`; auto-update trigger on `updated_at`
+- **API routes** (`src/app/api/chat/route.ts`):
+  - `POST /api/chat` — builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls `claude-sonnet-4-20250514`, upserts `chat_sessions`
+  - `GET /api/chat?recordId=&recordType=` — returns most recent session (`.order('updated_at', desc).limit(1).maybeSingle()`)
+  - System prompt identity: "You are LoanOS Assistant — an AI built into the LoanOS CRM for loan officer Adam Styer (NMLS #513013, Adam Styer | Mortgage Solutions LP, Austin TX). Be direct, specific, and use the contact data. Never be generic."
+  - Service role client inline (`getServiceClient()`) — bypasses RLS, server-only
+- **Component** (`src/components/crm/LoanOSChat.tsx`):
+  - Props: `{ recordId, recordType: 'contact'|'loan', recordName }`
+  - Floating 52×52 gold `◈` trigger button (fixed, bottom-right)
+  - 380×560px dark panel (IBM Plex Mono, gold `#C9A84C` accent)
+  - Quick actions per record type (4 per type), history auto-loads on open, clear button, Enter to send, auto-resize textarea
+  - `historyLoaded` flag prevents duplicate GET calls on re-render
+  - Usage: `<LoanOSChat recordId={record.id} recordType="contact" recordName={fullName} />`
+- **SDK**: `@anthropic-ai/sdk ^0.78.0` installed
+- **Env var to add in Netlify (loanos repo)**: `ANTHROPIC_API_KEY`
+- ⚠️ **To go live**: (1) Add `ANTHROPIC_API_KEY` to Netlify env vars, (2) run `009_chat_sessions.sql` in Supabase SQL Editor, (3) import `LoanOSChat` in contact/loan record views
+
+### Phase 2 — Outlook Email Integration (2026-03-10) ✅ BUILT
+
+- **Architecture**: OAuth2 flow → token stored in `outlook_tokens` → n8n scheduled sync every 15 min → Microsoft Graph API → `activity_log`
+- **Supabase**: `008_outlook_integration.sql` — `outlook_tokens` table, `oauth_state` table; new columns on `activity_log` (`type`, `summary`, `raw_payload`, `external_id`); partial unique index for deduplication
+- **Netlify Functions** (CommonJS, match `arive-webhook.js` pattern):
+  - `outlook-auth.js` — OAuth start, generates CSRF state, redirects to Microsoft
+  - `outlook-callback.js` — validates state, exchanges code, upserts token, redirects to `/dashboard/settings?outlook=connected`
+  - `outlook-refresh.js` — exports `getValidAccessToken()` (5-min buffer refresh); also has GET handler for manual status check
+  - `outlook-sync.js` — fetches inbox + sent from Graph API, matches contacts by email, deduplicates via `external_id`, logs to `activity_log` with both legacy + new columns
+- **n8n**: `n8n/outlook-sync-workflow.json` — 15-min schedule, POST to `/.netlify/functions/outlook-sync` via `httpHeaderAuth` credential "LoanOS Sync Secret"
+- **Settings page**: `/dashboard/settings` — Outlook card with connect/sync/disconnect; Status via `/api/outlook-status`; Next.js API routes: `/api/outlook-status` (GET), `/api/outlook-disconnect` (POST)
+- **ActivityTimeline**: `/src/components/ActivityTimeline.tsx` — normalizes legacy + new schema, icon by type, relative timestamps, expandable JSON detail, pagination (20/page)
+- **Contact profile**: `ContactRecordView.tsx` uses `<ActivityTimeline>` instead of inline rendering; `page.tsx` fetches new columns + limit 200
+- **Test script**: `scripts/test-outlook-sync.js` — env check, token status, refresh, manual sync trigger, recent activity
+- **Env vars to add in Netlify**: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID`, `MICROSOFT_REDIRECT_URI`, `OUTLOOK_EMAIL`, `OUTLOOK_SYNC_SECRET`, `OUTLOOK_SYNC_WINDOW_MINUTES`
+- ⚠️ **To go live**: (1) Azure app registration, (2) Netlify env vars, (3) run migration 008, (4) import n8n workflow + set env var `NETLIFY_SITE_URL`, (5) visit `/dashboard/settings` → Connect Outlook
 
 ### Phase 2 — Automation (in progress)
 - ✅ Contract automation: n8n pipeline for contract extraction + Outlook drafts

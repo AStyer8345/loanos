@@ -1,5 +1,35 @@
 # LoanOS Changelog
 
+## [1.7.0] — 2026-03-11 — AI Chat Integration
+
+### Added
+
+**Supabase Migration**
+- `supabase/migrations/009_chat_sessions.sql` — creates `chat_sessions` table (`id uuid`, `record_id text`, `record_type text check in ('contact','loan')`, `messages jsonb`, `created_at`, `updated_at`); index on `(record_id, record_type)`; RLS enabled; auto-update trigger on `updated_at`
+
+**API Route**
+- `src/app/api/chat/route.ts` — POST + GET handlers for AI chat assistant
+  - POST: builds system prompt from live Supabase record (contact joins loans, loan joins contacts), calls Claude API (`claude-sonnet-4-20250514`, `max_tokens: 1024`), upserts `chat_sessions` (update if sessionId exists, insert otherwise)
+  - GET: returns most recent `chat_sessions` row for a given record (`recordId` + `recordType` query params)
+  - Uses inline service role client (`getServiceClient()`) — bypasses RLS, never exposed to browser
+  - System prompt identity: LoanOS Assistant for Adam Styer, direct and record-specific
+
+**Component**
+- `src/components/crm/LoanOSChat.tsx` — self-contained floating chat UI
+  - Props: `{ recordId, recordType: 'contact'|'loan', recordName }`
+  - Fixed 52×52 gold `◈` trigger button (bottom-right corner)
+  - 380×560px dark panel (IBM Plex Mono, `#C9A84C` accent, `#0f0f0f`/`#1a1a1a` surface)
+  - Quick actions per record type (4 each), history loads on first open, clear chat button
+  - Enter sends / Shift+Enter newline, auto-resize textarea, `historyLoaded` guard prevents duplicate fetches
+
+### Dependencies
+- `@anthropic-ai/sdk ^0.78.0` — added to package.json
+
+### Environment Variables
+- `ANTHROPIC_API_KEY` — add to Netlify env vars for loanos repo
+
+---
+
 ## [1.6.0] — 2026-03-10 — Outlook Email Integration
 
 ### Added

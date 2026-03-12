@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
+import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 
 // ── Supabase service client (bypasses RLS) ────────────────────────────────────
 function getServiceClient() {
@@ -162,6 +163,16 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
           .eq('id', borrowerComm.id)
       }
 
+      // Log to email_drafts for dashboard preview
+      await logEmailDraft({
+        automation_name: 'milestone',
+        recipient_name: borrower_name ?? undefined,
+        recipient_email: borrower_email,
+        subject: borrowerSubject,
+        body_html: borrowerBody,
+        loan_id: loan_id ?? undefined,
+      })
+
       results.borrower = { subject: borrowerSubject, pushed }
     }
 
@@ -223,6 +234,16 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
           .update({ draft_pushed: true, draft_pushed_at: new Date().toISOString() })
           .eq('id', realtorComm.id)
       }
+
+      // Log to email_drafts for dashboard preview
+      await logEmailDraft({
+        automation_name: 'milestone',
+        recipient_name: realtor_name ?? undefined,
+        recipient_email: realtor_email,
+        subject: realtorSubject,
+        body_html: realtorBody,
+        loan_id: loan_id ?? undefined,
+      })
 
       results.realtor = { subject: realtorSubject, pushed }
     }

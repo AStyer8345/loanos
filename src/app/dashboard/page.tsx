@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import EmailDraftPreview from '@/components/EmailDraftPreview'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -65,18 +66,25 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* ── Quick actions ─────────────────────────────────── */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-        <div className="text-xs font-medium text-slate-500 mb-4">
-          Quick Actions
+      {/* ── Quick actions + Email Drafts ────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <div className="text-xs font-medium text-slate-500 mb-4">
+              Quick Actions
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/dashboard/upload"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+              >
+                Upload Document
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/dashboard/upload"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
-          >
-            Upload Document
-          </Link>
+        <div className="lg:col-span-1">
+          <EmailDraftPreview />
         </div>
       </div>
 

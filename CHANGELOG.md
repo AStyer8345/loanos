@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [1.9.2] — 2026-03-12 — Salesforce CSV → Supabase Loan Backfill
+
+### Data
+
+- **Salesforce backfill script** (`/tmp/backfill_salesforce_loans.py`) — UPDATE-only, Python stdlib, no pip installs
+  - Source CSV: `/Users/adamstyer/Downloads/report1773324509305.csv` (817 rows, Salesforce export)
+  - Match strategy: (1) `arive_loan_id` = "Loan # (1st TD)"; (2) fallback: `borrower_name` + `closing_date`
+  - 31 CSV columns mapped; schema discovery via `select=*&limit=1` preflight (handles missing columns gracefully)
+  - Only fills NULL/empty Supabase fields — never overwrites existing values
+  - **Results**: 817 rows → 532 loans updated, 9 errors (all `409 Conflict` on `arive_loan_id` unique constraint)
+    - 8 errors: Salesforce/Excel exported large loan numbers as `2E+11` scientific notation
+    - 1 error: true duplicate `arive_loan_id = 13013` already in DB
+  - Primary impact: `arive_loan_id` now populated on ~532 previously-null loan records
+
 ## [1.9.1] — 2026-03-12 — Arive Webhook Next.js Route + Email Draft Logging
 
 ### Added

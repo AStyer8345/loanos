@@ -17,7 +17,7 @@ Deploy: Vercel
 ## Current Status
 
 Phase 1 complete. Phase 2 (Automation) ~90% complete — all major features built, several pending go-live steps.
-816 Arive loans imported and backfilled as of March 10, 2026.
+816 Arive loans imported and backfilled as of March 10, 2026. Salesforce CSV backfill complete (2026-03-12) — 532 loans updated with `arive_loan_id` + additional fields from Salesforce export.
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
 ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify/Vercel webhook endpoints need ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
@@ -70,6 +70,15 @@ v1.9.0 deployed to Vercel (2026-03-12).
 - **Status distribution** (817 total: 816 imported + 1 pre-existing):
   - Closed: 740, Started: 31, Cancelled: 19, processing: 14, Loan in Process: 5, QUALIFICATION: 2, APPLICATION_INTAKE: 1, Approved: 1, DISCLOSURE_SENT: 1, lead: 1, Pre-Approved: 1, Suspended: 1
 - **Smart list coverage**: All Arive status values added to SMART_LISTS and StatusBadge color mapping in `loans/page.tsx`
+- **Salesforce CSV backfill (2026-03-12)**: Script `/tmp/backfill_salesforce_loans.py` (UPDATE-only, Python stdlib only)
+  - Source: `/Users/adamstyer/Downloads/report1773324509305.csv` (817 rows, Salesforce export)
+  - Match strategy: (1) `arive_loan_id` = "Loan # (1st TD)"; (2) fallback: `borrower_name` + `closing_date`
+  - Only fills NULL/empty Supabase fields — never overwrites existing values
+  - 31 CSV columns mapped to Supabase fields; schema discovery via `select=*&limit=1` preflight
+  - Results: 817 rows → 628 matched by name+date → 532 updated, 9 errors (all `409 Conflict` on `arive_loan_id`)
+    - 8 errors: scientific notation `2E+11` from Salesforce/Excel export on large loan numbers
+    - 1 error: true duplicate `arive_loan_id = 13013` already in DB
+  - Primary field populated: `arive_loan_id` (was NULL on all imported loans prior to this run)
 
 ## Contacts Import (complete — 2026-03-08)
 - 2,441 contacts imported from Salesforce export (XLS/HTML format)

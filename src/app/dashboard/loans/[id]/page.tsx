@@ -16,24 +16,104 @@ const N8N_BASE = 'https://styer.app.n8n.cloud/webhook'
 
 interface Loan {
   id: string
+  // Identity
   loan_name: string | null
-  borrower_name: string | null
+  loan_number: string | null
+  arive_loan_id: string | null
   status: string | null
+  milestone: string | null
+  // Borrower (legacy)
+  borrower_name: string | null
+  // Borrower (expanded)
+  borrower_first_name: string | null
+  borrower_last_name: string | null
+  borrower_email: string | null
+  borrower_phone: string | null
+  co_borrower_name: string | null
+  co_borrower_email: string | null
+  co_borrower_phone: string | null
+  // Loan terms
   loan_amount: number | null
   loan_purpose: string | null
   loan_program: string | null
   loan_type: string | null
-  occupancy: string | null
-  closing_date: string | null
+  loan_term: number | null
+  interest_rate: number | null
+  apr: number | null
+  points: number | null
+  down_payment: number | null
+  down_payment_pct: number | null
+  ltv: number | null
+  cltv: number | null
+  // Property
   property_address: string | null
   property_city: string | null
   property_state: string | null
-  interest_rate: number | null
-  contact_id: string | null
+  property_zip: string | null
+  property_county: string | null
+  property_type: string | null
+  occupancy: string | null
+  occupancy_type: string | null
+  purchase_price: number | null
+  appraised_value: number | null
+  // Key dates
+  application_date: string | null
+  submission_date: string | null
+  approval_date: string | null
+  closing_date: string | null
+  funding_date: string | null
+  rate_lock_expiration: string | null
+  estimated_closing_date: string | null
+  loan_created_date: string | null
+  // Financials
+  monthly_payment: number | null
+  piti: number | null
+  cash_to_close: number | null
+  seller_credits: number | null
+  lender_credits: number | null
+  loan_costs: number | null
+  total_closing_costs: number | null
+  prepaid_items: number | null
+  escrow_impounds: number | null
+  mi_monthly: number | null
+  mi_upfront: number | null
+  // Qualifying
+  credit_score: number | null
+  middle_score: number | null
+  monthly_income: number | null
+  monthly_debts: number | null
+  front_end_dti: number | null
+  back_end_dti: number | null
+  // Parties
+  referring_agent_name: string | null
+  referring_agent_email: string | null
+  referring_agent_phone: string | null
+  listing_agent_name: string | null
+  listing_agent_email: string | null
+  buyers_agent_name: string | null
+  buyers_agent_email: string | null
   buyer_agent_name: string | null
   buyer_agent_email: string | null
   title_company: string | null
-  loan_number: string | null
+  title_contact: string | null
+  title_email: string | null
+  escrow_officer: string | null
+  processor_name: string | null
+  underwriter_name: string | null
+  lender_name: string | null
+  investor_name: string | null
+  channel: string | null
+  // Attribution
+  lead_source: string | null
+  referral_source: string | null
+  marketing_campaign: string | null
+  // Notes
+  notes: string | null
+  // System
+  contact_id: string | null
+  arive_created_at: string | null
+  arive_updated_at: string | null
+  synced_at: string | null
 }
 
 interface DocRow {
@@ -135,6 +215,11 @@ function fmtRelative(iso: string) {
   return fmtDate(iso.split('T')[0])
 }
 
+function fmtPct(n: number | null) {
+  if (n == null) return '—'
+  return `${parseFloat(n.toFixed(3))}%`
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function LoanDetailPage() {
@@ -188,7 +273,7 @@ export default function LoanDetailPage() {
     </div>
   )
 
-  const displayName = loan.borrower_name || loan.loan_name || '(unnamed)'
+  const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
   const location = [loan.property_city, loan.property_state].filter(Boolean).join(', ')
     || loan.property_address || ''
 
@@ -245,7 +330,7 @@ export default function LoanDetailPage() {
       {/* Tab content */}
       <div className="flex-1 overflow-auto p-6">
         {activeTab === 'overview' && (
-          <OverviewTab loan={loan} contact={contact} />
+          <OverviewTab loan={loan} contact={contact} loanId={loanId} />
         )}
         {activeTab === 'documents' && (
           <DocumentsTab loanId={loanId} docs={docs} onRefresh={fetchAll} />
@@ -264,69 +349,189 @@ export default function LoanDetailPage() {
 
 // ── Overview tab ─────────────────────────────────────────────────────────────
 
-function OverviewTab({ loan, contact }: { loan: Loan; contact: ContactRow | null }) {
-  const fields: { label: string; value: React.ReactNode }[] = [
-    { label: 'Loan Name',      value: loan.loan_name || '—' },
-    { label: 'Loan Number',    value: loan.loan_number || '—' },
-    { label: 'Status',         value: <StatusBadge status={loan.status} /> },
-    { label: 'Loan Amount',    value: fmtCurrency(loan.loan_amount) },
-    { label: 'Interest Rate',  value: loan.interest_rate ? `${loan.interest_rate}%` : '—' },
-    { label: 'Loan Program',   value: loan.loan_program || '—' },
-    { label: 'Loan Purpose',   value: loan.loan_purpose || '—' },
-    { label: 'Loan Type',      value: loan.loan_type || '—' },
-    { label: 'Occupancy',      value: loan.occupancy || '—' },
-    { label: 'Closing Date',   value: fmtDate(loan.closing_date) },
-    { label: 'Property',       value: [loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || '—' },
-    { label: "Buyer's Agent",  value: loan.buyer_agent_name ? `${loan.buyer_agent_name}${loan.buyer_agent_email ? ` — ${loan.buyer_agent_email}` : ''}` : '—' },
-    { label: 'Title Company',  value: loan.title_company || '—' },
-  ]
+function SectionCard({ title, fields }: {
+  title: string
+  fields: { label: string; value: React.ReactNode }[]
+}) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{title}</h2>
+      </div>
+      {fields.map((f, i) => (
+        <div key={f.label} className={`flex items-start px-4 py-2 text-sm ${i > 0 ? 'border-t border-slate-100' : ''}`}>
+          <span className="w-40 shrink-0 text-slate-500 text-xs leading-5">{f.label}</span>
+          <span className="text-slate-900">{f.value ?? '—'}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function OverviewTab({ loan, contact, loanId }: {
+  loan: Loan
+  contact: ContactRow | null
+  loanId: string
+}) {
+  const supabase = createClient()
+  const [notesVal, setNotesVal] = useState(loan.notes ?? '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleNotesBlur = async () => {
+    if (notesVal === (loan.notes ?? '')) return
+    setSaving(true)
+    await supabase.from('loans').update({ notes: notesVal }).eq('id', loanId)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Loan fields */}
-      <div className="lg:col-span-2">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Loan Details</h2>
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          {fields.map((f, i) => (
-            <div key={f.label} className={`flex items-start px-4 py-2.5 text-sm ${i !== 0 ? 'border-t border-slate-100' : ''}`}>
-              <span className="w-36 shrink-0 text-slate-500">{f.label}</span>
-              <span className="text-slate-900">{f.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 1 — Loan Terms */}
+        <SectionCard title="Loan Terms" fields={[
+          { label: 'Loan Number',   value: loan.loan_number },
+          { label: 'Status',        value: <StatusBadge status={loan.status} /> },
+          { label: 'Milestone',     value: loan.milestone },
+          { label: 'Loan Amount',   value: fmtCurrency(loan.loan_amount) },
+          { label: 'Loan Purpose',  value: loan.loan_purpose },
+          { label: 'Loan Type',     value: loan.loan_type },
+          { label: 'Loan Program',  value: loan.loan_program },
+          { label: 'Loan Term',     value: loan.loan_term ? `${loan.loan_term} months` : null },
+          { label: 'Interest Rate', value: fmtPct(loan.interest_rate) },
+          { label: 'APR',           value: fmtPct(loan.apr) },
+          { label: 'Points',        value: loan.points != null ? String(loan.points) : null },
+          { label: 'Down Payment',  value: loan.down_payment != null ? fmtCurrency(loan.down_payment) : null },
+          { label: 'Down Pmt %',    value: fmtPct(loan.down_payment_pct) },
+          { label: 'LTV',           value: fmtPct(loan.ltv) },
+          { label: 'CLTV',          value: fmtPct(loan.cltv) },
+        ]} />
 
-      {/* Borrower card */}
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Borrower</h2>
-        {contact ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <Link
-              href={`/dashboard/contacts?id=${contact.id}`}
-              className="font-semibold text-slate-900 hover:text-emerald-700 hover:underline"
-            >
-              {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-            </Link>
-            {contact.email && <p className="text-sm text-slate-600 mt-1">{contact.email}</p>}
-            {contact.phone && <p className="text-sm text-slate-600">{contact.phone}</p>}
-            {contact.referred_by && (
-              <div className="mt-3 pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-400">Referred by</p>
-                <Link
-                  href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
-                  className="text-sm text-emerald-700 hover:underline flex items-center gap-1 mt-0.5"
-                >
-                  {contact.referred_by}
-                  <ChevronRight size={12} />
-                </Link>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-400">
-            No linked contact
+        {/* 2 — Property */}
+        <SectionCard title="Property" fields={[
+          { label: 'Address',        value: [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ') || null },
+          { label: 'County',         value: loan.property_county },
+          { label: 'Property Type',  value: loan.property_type },
+          { label: 'Occupancy',      value: loan.occupancy_type || loan.occupancy },
+          { label: 'Purchase Price', value: loan.purchase_price != null ? fmtCurrency(loan.purchase_price) : null },
+          { label: 'Appraised Value',value: loan.appraised_value != null ? fmtCurrency(loan.appraised_value) : null },
+        ]} />
+
+        {/* 3 — Borrower */}
+        <SectionCard title="Borrower" fields={[
+          { label: 'Borrower',       value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
+          { label: 'Email',          value: loan.borrower_email },
+          { label: 'Phone',          value: loan.borrower_phone },
+          { label: 'Co-Borrower',    value: loan.co_borrower_name },
+          { label: 'Co-Borr Email',  value: loan.co_borrower_email },
+          { label: 'Co-Borr Phone',  value: loan.co_borrower_phone },
+          { label: 'Credit Score',   value: loan.credit_score },
+          { label: 'Middle Score',   value: loan.middle_score },
+          { label: 'Monthly Income', value: loan.monthly_income != null ? fmtCurrency(loan.monthly_income) : null },
+          { label: 'Monthly Debts',  value: loan.monthly_debts != null ? fmtCurrency(loan.monthly_debts) : null },
+          { label: 'Front DTI',      value: fmtPct(loan.front_end_dti) },
+          { label: 'Back DTI',       value: fmtPct(loan.back_end_dti) },
+        ]} />
+
+        {/* 4 — Key Dates */}
+        <SectionCard title="Key Dates" fields={[
+          { label: 'Application',  value: fmtDate(loan.application_date) },
+          { label: 'Submission',   value: fmtDate(loan.submission_date) },
+          { label: 'Approval',     value: fmtDate(loan.approval_date) },
+          { label: 'Est. Closing', value: fmtDate(loan.estimated_closing_date) },
+          { label: 'Closing',      value: fmtDate(loan.closing_date) },
+          { label: 'Funding',      value: fmtDate(loan.funding_date) },
+          { label: 'Rate Lock Exp',value: fmtDate(loan.rate_lock_expiration) },
+          { label: 'Loan Created', value: fmtDate(loan.loan_created_date) },
+        ]} />
+
+        {/* 5 — Financials */}
+        <SectionCard title="Financials" fields={[
+          { label: 'Monthly Payment',  value: loan.monthly_payment != null ? fmtCurrency(loan.monthly_payment) : null },
+          { label: 'PITI',             value: loan.piti != null ? fmtCurrency(loan.piti) : null },
+          { label: 'Cash to Close',    value: loan.cash_to_close != null ? fmtCurrency(loan.cash_to_close) : null },
+          { label: 'Seller Credits',   value: loan.seller_credits != null ? fmtCurrency(loan.seller_credits) : null },
+          { label: 'Lender Credits',   value: loan.lender_credits != null ? fmtCurrency(loan.lender_credits) : null },
+          { label: 'Loan Costs',       value: loan.loan_costs != null ? fmtCurrency(loan.loan_costs) : null },
+          { label: 'Total Closing',    value: loan.total_closing_costs != null ? fmtCurrency(loan.total_closing_costs) : null },
+          { label: 'Prepaid Items',    value: loan.prepaid_items != null ? fmtCurrency(loan.prepaid_items) : null },
+          { label: 'Escrow Impounds',  value: loan.escrow_impounds != null ? fmtCurrency(loan.escrow_impounds) : null },
+          { label: 'MI Monthly',       value: loan.mi_monthly != null ? fmtCurrency(loan.mi_monthly) : null },
+          { label: 'MI Upfront',       value: loan.mi_upfront != null ? fmtCurrency(loan.mi_upfront) : null },
+        ]} />
+
+        {/* 6 — Parties */}
+        <SectionCard title="Parties" fields={[
+          { label: 'Referring Agent',  value: [loan.referring_agent_name, loan.referring_agent_email].filter(Boolean).join(' · ') || null },
+          { label: 'Ref Agent Phone',  value: loan.referring_agent_phone },
+          { label: 'Listing Agent',    value: [loan.listing_agent_name, loan.listing_agent_email].filter(Boolean).join(' · ') || null },
+          { label: "Buyer's Agent",    value: [loan.buyers_agent_name || loan.buyer_agent_name, loan.buyers_agent_email || loan.buyer_agent_email].filter(Boolean).join(' · ') || null },
+          { label: 'Title Company',    value: loan.title_company },
+          { label: 'Title Contact',    value: [loan.title_contact, loan.title_email].filter(Boolean).join(' · ') || null },
+          { label: 'Escrow Officer',   value: loan.escrow_officer },
+          { label: 'Processor',        value: loan.processor_name },
+          { label: 'Underwriter',      value: loan.underwriter_name },
+          { label: 'Lender',           value: loan.lender_name },
+          { label: 'Investor',         value: loan.investor_name },
+          { label: 'Channel',          value: loan.channel },
+        ]} />
+
+        {/* 7 — Attribution */}
+        <SectionCard title="Attribution" fields={[
+          { label: 'Lead Source',        value: loan.lead_source },
+          { label: 'Referral Source',    value: loan.referral_source },
+          { label: 'Marketing Campaign', value: loan.marketing_campaign },
+        ]} />
+
+        {/* Linked Contact */}
+        {contact && (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Linked Contact</h2>
+            </div>
+            <div className="p-4">
+              <Link
+                href={`/dashboard/contacts?id=${contact.id}`}
+                className="font-semibold text-slate-900 hover:text-emerald-700 hover:underline"
+              >
+                {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
+              </Link>
+              {contact.email && <p className="text-sm text-slate-600 mt-1">{contact.email}</p>}
+              {contact.phone && <p className="text-sm text-slate-600">{contact.phone}</p>}
+              {contact.referred_by && (
+                <div className="mt-3 pt-3 border-t border-slate-100">
+                  <p className="text-xs text-slate-400">Referred by</p>
+                  <Link
+                    href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
+                    className="text-sm text-emerald-700 hover:underline flex items-center gap-1 mt-0.5"
+                  >
+                    {contact.referred_by}
+                    <ChevronRight size={12} />
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         )}
+      </div>
+
+      {/* 8 — Notes */}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Notes</h2>
+          {saving && <span className="text-xs text-slate-400">Saving…</span>}
+          {!saving && saved && <span className="text-xs text-emerald-600">Saved ✓</span>}
+        </div>
+        <textarea
+          value={notesVal}
+          onChange={e => setNotesVal(e.target.value)}
+          onBlur={handleNotesBlur}
+          rows={6}
+          placeholder="Add notes about this loan…"
+          className="w-full p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none resize-y"
+        />
       </div>
     </div>
   )

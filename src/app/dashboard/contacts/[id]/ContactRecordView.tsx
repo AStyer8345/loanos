@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -30,6 +31,11 @@ export type Contact = {
   mailing_city: string | null
   mailing_state: string | null
   mailing_zip: string | null
+  mailing_country: string | null
+  phone_mobile: string | null
+  title: string | null
+  created_date: string | null
+  last_activity_date: string | null
 }
 
 export type ContactLoan = {
@@ -135,6 +141,7 @@ type Props = {
   setNewNote: (s: string) => void
   savingNote: boolean
   onAddNote: () => void
+  onSaveNotes?: (notes: string) => Promise<void>
 }
 
 export function ContactRecordView(props: Props) {
@@ -149,7 +156,22 @@ export function ContactRecordView(props: Props) {
     setNewNote,
     savingNote,
     onAddNote,
+    onSaveNotes,
   } = props
+
+  const [notesVal, setNotesVal] = useState(contact.notes ?? '')
+  const [notesSaving, setNotesSaving] = useState(false)
+  const [notesSaved, setNotesSaved] = useState(false)
+
+  const handleNotesBlur = async () => {
+    if (!onSaveNotes) return
+    if (notesVal === (contact.notes ?? '')) return
+    setNotesSaving(true)
+    await onSaveNotes(notesVal)
+    setNotesSaving(false)
+    setNotesSaved(true)
+    setTimeout(() => setNotesSaved(false), 2000)
+  }
 
   const phone = contact.phone || contact.mobile_phone || null
   const cityState = [contact.mailing_city, contact.mailing_state].filter(Boolean).join(', ')
@@ -349,6 +371,15 @@ export function ContactRecordView(props: Props) {
                     <a href={`sms:${phone.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c' }}>Text</a>
                   </div>
                 )}
+                {contact.phone_mobile && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <Phone size={14} style={{ color: 'var(--muted)' }} />
+                    <span style={{ color: 'var(--muted)', fontSize: 11 }}>Mobile</span>
+                    <span>{contact.phone_mobile}</span>
+                    <a href={`tel:${contact.phone_mobile.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c', marginLeft: 4 }}>Call</a>
+                    <a href={`sms:${contact.phone_mobile.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c' }}>Text</a>
+                  </div>
+                )}
                 {mailingAddress && (
                   <div style={{ fontSize: 13, color: 'var(--fg)' }}>{mailingAddress}</div>
                 )}
@@ -386,28 +417,32 @@ export function ContactRecordView(props: Props) {
 
             <div style={cardStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={labelStyle}>NOTES PREVIEW</div>
-                <button
-                  onClick={() => setActiveTab('notes')}
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    letterSpacing: '0.08em',
-                    background: 'transparent',
-                    color: '#c9a84c',
-                    border: '1px solid rgba(201,168,76,0.4)',
-                    padding: '4px 10px',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                  }}
-                >
-                  + Add Note
-                </button>
+                <div style={labelStyle}>NOTES</div>
+                {(notesSaving || notesSaved) && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: notesSaved ? '#80c080' : 'var(--muted)' }}>
+                    {notesSaving ? 'Saving…' : 'Saved'}
+                  </span>
+                )}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--fg)', whiteSpace: 'pre-wrap', maxHeight: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {contact.notes?.slice(0, 200) ?? 'No notes yet.'}
-                {(contact.notes?.length ?? 0) > 200 && '...'}
-              </div>
+              <textarea
+                value={notesVal}
+                onChange={e => setNotesVal(e.target.value)}
+                onBlur={handleNotesBlur}
+                placeholder="Add notes…"
+                rows={4}
+                style={{
+                  width: '100%',
+                  background: 'var(--bg)',
+                  color: 'var(--fg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 4,
+                  padding: '10px 12px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
         )}

@@ -1,5 +1,31 @@
 # LoanOS Changelog
 
+## [1.9.0] — 2026-03-11 — ARIVE Webhook Integration + DB Expansion + Contact Detail Improvements
+
+### Added
+
+**Supabase DB Migrations**
+- `supabase/migrations/011_loans_expansion.sql` — expands `loans` table with ~50 ARIVE fields: borrower/co-borrower, loan terms (rate, APR, points, LTV/CLTV, down payment), property details, milestone dates (application/submission/approval/closing/funding/rate-lock/estimated-closing), financials (PITI, cash-to-close, closing costs, MI), qualifying (credit score, DTI, monthly income), parties (referring agent, listing/buyer agent, title, escrow, processor, UW, lender), lead source, notes, ARIVE timestamps; adds UNIQUE constraint on `arive_loan_id`
+- `supabase/migrations/012_contacts_expansion.sql` — adds to `contacts`: `created_date`, `last_activity_date`, `notes`, `phone_mobile`, `mailing_street`, `mailing_city`, `mailing_state`, `mailing_zip`, `mailing_country`, `title`
+
+**Arive Webhook**
+- `netlify/functions/arive-webhook.js` — Netlify serverless function; validates `X-Webhook-Secret`; upserts contact (on `email`) with borrower name/phone/group/stage/source/type; upserts loan (on `arive_loan_id` or `loan_number`) with full camelCase ARIVE payload mapped to all expansion columns; inserts `activity_log` row with `action: 'arive_sync'`; raw fetch to Supabase REST (no SDK)
+
+**Jungo CSV Backfill Script**
+- `scripts/backfill-jungo-contacts.js` — one-time Node.js script; reads Jungo/Salesforce CSV export; matches contacts by email (case-insensitive); only fills NULL/empty DB fields — never overwrites existing data; supports `--headers` flag to inspect CSV columns before running; env vars from `.env.local`
+
+**Contact Detail View**
+- `ContactRecordView.tsx` — extended `Contact` type with 5 new fields (`mailing_country`, `phone_mobile`, `title`, `created_date`, `last_activity_date`); added `phone_mobile` display row in CONTACT INFO card labeled "Mobile"; added `onSaveNotes` prop; replaced static notes preview card with inline editable textarea — save-on-blur, shows "Saving…"/"Saved" status, no button
+- `contacts/[id]/page.tsx` — added `handleSaveNotes` function (updates DB + local state); wired `onSaveNotes={handleSaveNotes}` into `<ContactRecordView />`
+
+### Go-Live Steps
+- [ ] Run `011_loans_expansion.sql` in Supabase SQL Editor
+- [ ] Run `012_contacts_expansion.sql` in Supabase SQL Editor
+- [ ] Set Netlify env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ARIVE_WEBHOOK_SECRET`, `LOANOS_SYSTEM_USER_ID`
+- [ ] Configure ARIVE webhook to POST to `https://<site>.netlify.app/.netlify/functions/arive-webhook` with `X-Webhook-Secret` header
+
+---
+
 ## [1.8.0] — 2026-03-11 — Loan Milestone Agent + Daily Briefing Agent
 
 ### Added

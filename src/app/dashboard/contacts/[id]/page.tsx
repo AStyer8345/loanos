@@ -110,6 +110,17 @@ export default function ContactRecordPage() {
     setSavingNote(false)
   }
 
+  const handleSaveNotes = async (notes: string) => {
+    if (!contact) return
+    const { error } = await supabase
+      .from('contacts')
+      .update({ notes })
+      .eq('id', contact.id)
+    if (!error) {
+      setContact(prev => prev ? { ...prev, notes } : null)
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
@@ -145,6 +156,7 @@ export default function ContactRecordPage() {
       setNewNote={setNewNote}
       savingNote={savingNote}
       onAddNote={handleAddNote}
+      onSaveNotes={handleSaveNotes}
     />
   )
 }

@@ -22,6 +22,7 @@ AI Chat fully live as of March 11, 2026 — contact context working, clear butto
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
 ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify/Vercel webhook endpoints need ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
 v1.9.0 deployed to Vercel (2026-03-12).
+**Arive → LoanOS live sync via Zapier (2026-03-12)**: Zapier Zap published — Arive New Loan (native OAuth trigger) → POST all loan fields as JSON to n8n webhook `arive-new-loan`. n8n workflow `1tagvoU0UXtdDiMY` upserts contact + loan in Supabase. `contacts.email` UNIQUE constraint added (required for PostgREST upsert ON CONFLICT). Duplicate contacts cleaned up before constraint applied. n8n webhook auth set to None. End-to-end confirmed working — curl test returns 200. Full live-loan test pending.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -269,7 +270,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
 | Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
-| Arive → Supabase (direct) | Next API (`/api/arive-webhook`) | arive-sync (n8n) | Arive POST → n8n orchestrator → `/api/arive-webhook` → Supabase |
+| Arive → Supabase (Zapier bridge) | `1tagvoU0UXtdDiMY` | `arive-new-loan` | Arive New Loan (Zapier OAuth) → POST to n8n → upsert contact + loan in Supabase |
 | Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
 | Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
 | Loan Milestone Communication | 1hjOmS7inZcxEJQr | /api/agents/milestone | Arive milestone event → LoanOS Claude → Zapier → Outlook drafts (borrower + realtor) |

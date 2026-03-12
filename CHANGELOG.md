@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [1.9.3] — 2026-03-12 — Arive → LoanOS Live Sync via Zapier
+
+### Fixed
+
+- **`contacts.email` UNIQUE constraint added** — required for PostgREST upsert `ON CONFLICT (email)`. Previously missing, causing all Arive → n8n → Supabase upserts to fail with `there is no unique or exclusion constraint matching the ON CONFLICT specification`.
+  - Duplicate contacts cleaned up first (`DELETE ... WHERE id NOT IN (SELECT DISTINCT ON (email) id ...)`)
+  - Constraint applied: `ALTER TABLE contacts ADD CONSTRAINT contacts_email_unique UNIQUE (email)`
+
+### Added
+
+- **Zapier Zap 1 — Arive New Loan → LoanOS**: Arive native OAuth trigger (New Loan) → Webhooks by Zapier POST → `https://styer.app.n8n.cloud/webhook/arive-new-loan`. Posts all Arive loan fields as JSON. Published and live.
+- **n8n webhook auth removed**: Webhook node on workflow `1tagvoU0UXtdDiMY` changed from "Arive Webhook Secret" to None — required for Zapier to POST without auth header. Curl test confirms 200 response.
+
+### Notes
+
+- Direct Arive Hooks API registration was not viable — Arive's API subdomains all returned 403/404 for auth endpoints; API Integrations page is Zapier-OAuth-only. Zapier bridge is the correct long-term approach.
+- Zap 2 (Arive Milestone Updated → update loan record) not yet built — needs new n8n workflow at path `arive-milestone-update`.
+
+---
+
 ## [1.9.2] — 2026-03-12 — Salesforce CSV → Supabase Loan Backfill
 
 ### Data

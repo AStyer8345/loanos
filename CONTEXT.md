@@ -19,7 +19,7 @@ Deploy: Vercel
 Phase 1 complete. Phase 2 (Automation) ~85% complete — all major features built, several pending go-live steps.
 816 Arive loans imported and backfilled as of March 10, 2026.
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
-Agent 5 (Loan Milestone Communication Agent) + Agent 1 (Daily Command Center / Daily Briefing) built as of March 11, 2026 — need env vars + migration applied to go live.
+Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -171,14 +171,17 @@ These tools are working and must NOT be broken during LoanOS build:
 - ✅ Settings page
 
 **Built — Needs Go-Live Steps 🔧**
-- 🔧 **Agent 5 — Loan Milestone Communication Agent** — code complete, needs:
+- 🔧 **Agent 5 — Loan Milestone Communication Agent** — code + n8n wired, needs:
+  - ✅ n8n workflow live: ID `1hjOmS7inZcxEJQr` — triggers on Arive milestone events → `POST /api/agents/milestone`
+  - ✅ Zapier Zap published: Catch Hook → Microsoft Outlook "Create Draft Email"
+  - ✅ Auth middleware fixed: `/api/agents/*` excluded from Supabase auth matcher (commit alongside Agent 5 build)
   - [ ] Run `010_milestone_agents.sql` in Supabase SQL Editor
   - [ ] Add `ZAPIER_DISPATCH_WEBHOOK_URL` + `MILESTONE_WEBHOOK_SECRET` to Vercel env vars
-  - [ ] Configure n8n webhook → `POST /api/agents/milestone` on Arive milestone events
-- 🔧 **Agent 1 — Daily Command Center** — code complete, needs:
-  - [ ] `ANTHROPIC_API_KEY` already needed for AI Chat — same var
-  - [ ] Run `010_milestone_agents.sql` (same migration as Agent 5)
-  - [ ] Daily Briefing page live at `/dashboard/briefing` — visible in sidebar
+- 🔧 **Agent 1 — Daily Command Center** — code + ESLint fixed, deploying, needs:
+  - ✅ ESLint build errors fixed (commit `34d4c81`): ternary-as-statement, unescaped apostrophe, unescaped quotes
+  - ✅ Sidebar nav entry confirmed: `Brain` icon + "Daily Briefing" as first item in SidebarNav
+  - [ ] Run `010_milestone_agents.sql` in Supabase SQL Editor (same migration as Agent 5)
+  - [ ] Add `ANTHROPIC_API_KEY` to Vercel env vars (same var as AI Chat)
 - 🔧 **Outlook Email Integration** — code complete, 5 manual steps remain:
   - [ ] Run `008_outlook_integration.sql` in Supabase SQL Editor
   - [ ] Azure App Registration (follow `docs/outlook-azure-setup.md`)
@@ -258,6 +261,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Arive → Supabase (direct) | — (Netlify fn) | arive-sync (n8n) | Arive POST → n8n orchestrator → Netlify function → Supabase |
 | Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
 | Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
+| Loan Milestone Communication | 1hjOmS7inZcxEJQr | /api/agents/milestone | Arive milestone event → LoanOS Claude → Zapier → Outlook drafts (borrower + realtor) |
 
 - First 6 trigger via Supabase pg_net or manual webhook POST; output Outlook drafts via n8n
 - Trigger buttons LIVE — clicking opens TriggerModal (PDF drop zone or form fields)

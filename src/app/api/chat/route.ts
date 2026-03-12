@@ -23,13 +23,12 @@ async function buildSystemPrompt(
     const { data, error } = await supabase
       .from('contacts')
       .select(`
-        first_name, last_name, email, phone, mobile_phone,
-        contact_type, stage, lead_source, referred_by,
-        company_name, notes, last_touch, closing_date,
-        top_realtor, target_realtor,
+        first_name, last_name, email, phone,
+        contact_type, stage, source,
+        notes, closing_date,
         realtor_email, realtor_phone,
         mailing_street, mailing_city, mailing_state, mailing_zip,
-        group_tag, source
+        group_tag
       `)
       .eq('id', recordId)
       .maybeSingle()
@@ -53,18 +52,13 @@ async function buildSystemPrompt(
 ## Current Contact Record
 - Name: ${fullName || 'N/A'}
 - Email: ${data.email || 'N/A'}
-- Phone: ${data.phone || data.mobile_phone || 'N/A'}
+- Phone: ${data.phone || 'N/A'}
 - Type: ${data.contact_type || 'N/A'}
 - Stage: ${data.stage || 'N/A'}
 - Group: ${data.group_tag || 'N/A'}
-- Source: ${data.source || data.lead_source || 'N/A'}
-- Referred By: ${data.referred_by || 'N/A'}
-- Company: ${data.company_name || 'N/A'}
+- Source: ${data.source || 'N/A'}
 - Mailing Address: ${mailingAddress || 'N/A'}
-- Last Touch: ${data.last_touch || 'N/A'}
 - Closing Date: ${data.closing_date || 'N/A'}
-- Top Realtor: ${data.top_realtor ? 'Yes' : 'No'}
-- Target Realtor: ${data.target_realtor ? 'Yes' : 'No'}
 - Realtor Email: ${data.realtor_email || 'N/A'}
 - Realtor Phone: ${data.realtor_phone || 'N/A'}
 - Notes: ${data.notes || 'None'}

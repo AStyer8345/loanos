@@ -188,7 +188,6 @@ export default function LoanOSChat({ recordId, recordType, recordName }: Props) 
                   onClick={() => {
                     setMessages([])
                     setSessionId(null)
-                    setHistoryLoaded(false)
                   }}
                   title="Clear chat"
                   style={{

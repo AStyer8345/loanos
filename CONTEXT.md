@@ -18,7 +18,7 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~80% complete — all major features built, several pending go-live steps.
 816 Arive loans imported and backfilled as of March 10, 2026.
-AI Chat + Outlook Email integration built as of March 11, 2026 — both need manual deploy steps to go live.
+AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
 
 ### Phase 1 (complete)
 - Supabase connected

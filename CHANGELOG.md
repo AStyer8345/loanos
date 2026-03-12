@@ -1,5 +1,11 @@
 # LoanOS Changelog
 
+## [1.7.3] — 2026-03-11 — AI Chat Contact Context + Clear Button Fixes
+
+### Fixed
+- `src/app/api/chat/route.ts` — contact SELECT was querying 7 non-existent columns (`mobile_phone`, `lead_source`, `referred_by`, `company_name`, `last_touch`, `top_realtor`, `target_realtor`), causing Supabase to return an error and the system prompt to fall back to generic with no contact data. Removed all 7 columns and cleaned up the prompt template to match actual schema.
+- `src/components/crm/LoanOSChat.tsx` — clear button called `setHistoryLoaded(false)`, which recreated the `loadHistory` useCallback (it's in its dependency array), triggering the `useEffect([isOpen, loadHistory])` to re-fetch from Supabase. Removed the call — `setSessionId(null)` is sufficient to ensure the next message creates a fresh session.
+
 ## [1.7.2] — 2026-03-11 — AI Chat System Prompt Schema Expansion
 
 ### Changed

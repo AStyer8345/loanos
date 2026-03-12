@@ -69,7 +69,7 @@ export default function DailyBriefingPage() {
   function toggleCheck(rank: number) {
     setChecked(prev => {
       const next = new Set(prev)
-      next.has(rank) ? next.delete(rank) : next.add(rank)
+      if (next.has(rank)) { next.delete(rank) } else { next.add(rank) }
       return next
     })
   }
@@ -159,7 +159,7 @@ export default function DailyBriefingPage() {
 
             {/* Progress */}
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-slate-700">Today's Actions</h2>
+              <h2 className="text-sm font-semibold text-slate-700">Today&apos;s Actions</h2>
               <span className="text-xs text-slate-500">{checkedCount}/{totalItems} done</span>
             </div>
 
@@ -211,7 +211,7 @@ export default function DailyBriefingPage() {
                         <p className="text-xs text-slate-400 mt-1">{item.reason}</p>
                         {item.snippet && !done && (
                           <p className="text-xs text-emerald-600 mt-1.5 italic">
-                            "{item.snippet}"
+                            &quot;{item.snippet}&quot;
                           </p>
                         )}
                       </div>

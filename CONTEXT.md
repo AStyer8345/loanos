@@ -21,6 +21,7 @@ Phase 1 complete. Phase 2 (Automation) ~90% complete — all major features buil
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
 ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify webhook needs ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
+v1.9.0 deployed to Vercel (2026-03-12).
 
 ### Phase 1 (complete)
 - Supabase connected

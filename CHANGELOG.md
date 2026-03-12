@@ -1,6 +1,6 @@
 # LoanOS Changelog
 
-## [1.9.0] — 2026-03-11 — ARIVE Webhook Integration + DB Expansion + Contact Detail Improvements
+## [1.9.0] — 2026-03-12 — ARIVE Webhook Integration + DB Expansion + Contact Detail Improvements
 
 ### Added
 

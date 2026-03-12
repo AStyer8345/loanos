@@ -12,10 +12,12 @@ import {
   CheckSquare,
   GitBranch,
   Settings,
+  Brain,
 } from 'lucide-react'
 
 const NAV = [
-  { label: 'Dashboard',     href: '/dashboard',             icon: LayoutDashboard },
+  { label: 'Daily Briefing', href: '/dashboard/briefing',    icon: Brain },
+  { label: 'Dashboard',      href: '/dashboard',             icon: LayoutDashboard },
   { label: 'Contacts',      href: '/dashboard/contacts',    icon: Users },
   { label: 'Loans',         href: '/dashboard/loans',       icon: FileText },
   { label: 'Upload Doc',    href: '/dashboard/upload',      icon: Upload },

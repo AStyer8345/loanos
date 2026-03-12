@@ -1,5 +1,30 @@
 # LoanOS Changelog
 
+## [1.8.0] — 2026-03-11 — Loan Milestone Agent + Daily Briefing Agent
+
+### Added
+
+**Agent 5 — Loan Milestone Communication Agent**
+- `supabase/migrations/010_milestone_agents.sql` — `loan_milestone_events` table (id, loan_id, milestone, triggered_at, raw_payload), `milestone_communications` table (id, event_id FK, recipient_type, draft_pushed, pushed_at, subject, body_preview), `last_touch TIMESTAMPTZ` on contacts; CHECK constraint on 7 milestone values; partial index on `draft_pushed = false`
+- `src/app/api/agents/milestone/route.ts` — POST handler; validates loan_id + milestone; two Claude calls (`claude-sonnet-4-5`, max_tokens: 512) — borrower warm tone + realtor professional, both return `{subject, body}` JSON; pushes Outlook drafts via `ZAPIER_DISPATCH_WEBHOOK_URL`; logs to both new tables
+- `docs/agents-n8n-setup.md` — full setup guide for both agents; required env vars table; DB table reference
+
+**Agent 1 — Daily Command Center**
+- `src/app/api/agents/daily-briefing/route.ts` — GET handler; 5 parallel Supabase queries via `Promise.allSettled` (overdue_leads, closing_this_week, recently_uploaded_docs, recent_milestones, unread_messages); single Claude call (`claude-sonnet-4-5`, max_tokens: 1024) → `top7` prioritized actions + `summary`; strips markdown fences before JSON.parse
+- `src/app/dashboard/briefing/page.tsx` — `'use client'` checklist page; stat row (4 cards), progress bar, priority checklist with toggle, loading skeleton; light theme (slate-50, emerald-600 accent)
+- `src/app/dashboard/SidebarNav.tsx` — added `Brain` import from lucide-react; added Daily Briefing as first nav entry
+
+### Environment Variables to Add (Vercel — loanos repo)
+- `ZAPIER_DISPATCH_WEBHOOK_URL` — Zapier → Outlook draft creation webhook (Agent 5)
+- `MILESTONE_WEBHOOK_SECRET` — shared secret validating n8n → /api/agents/milestone calls
+
+### Go-Live Steps
+- [ ] Run `010_milestone_agents.sql` in Supabase SQL Editor
+- [ ] Add `ZAPIER_DISPATCH_WEBHOOK_URL` + `MILESTONE_WEBHOOK_SECRET` to Vercel env vars
+- [ ] Configure n8n webhook to POST to `/api/agents/milestone` on Arive milestone events
+
+---
+
 ## [1.7.3] — 2026-03-11 — AI Chat Contact Context + Clear Button Fixes
 
 ### Fixed

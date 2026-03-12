@@ -16,9 +16,10 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~80% complete — all major features built, several pending go-live steps.
+Phase 1 complete. Phase 2 (Automation) ~85% complete — all major features built, several pending go-live steps.
 816 Arive loans imported and backfilled as of March 10, 2026.
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
+Agent 5 (Loan Milestone Communication Agent) + Agent 1 (Daily Command Center / Daily Briefing) built as of March 11, 2026 — need env vars + migration applied to go live.
 
 ### Phase 1 (complete)
 - Supabase connected
@@ -114,7 +115,9 @@ These tools are working and must NOT be broken during LoanOS build:
 - LOANOS_SYSTEM_USER_ID (UUID of `system@loanos.internal` auth user)
 - ZAPIER_OUTLOOK_WEBHOOK_URL (Zapier → Outlook webhook for failure alerts — optional)
 - LOANOS_ALERT_EMAIL (recipient for webhook failure alerts — optional)
-- ANTHROPIC_API_KEY (Claude API — used by /api/chat for AI chat integration)
+- ANTHROPIC_API_KEY (Claude API — used by /api/chat and /api/agents/*)
+- ZAPIER_DISPATCH_WEBHOOK_URL (Zapier → Outlook draft creation webhook — used by /api/agents/milestone)
+- MILESTONE_WEBHOOK_SECRET (shared secret validating n8n → /api/agents/milestone calls — `openssl rand -hex 32`)
 - MICROSOFT_CLIENT_ID (Outlook OAuth2 — from Azure app registration)
 - MICROSOFT_CLIENT_SECRET (Outlook OAuth2)
 - MICROSOFT_TENANT_ID (Outlook OAuth2)
@@ -168,6 +171,14 @@ These tools are working and must NOT be broken during LoanOS build:
 - ✅ Settings page
 
 **Built — Needs Go-Live Steps 🔧**
+- 🔧 **Agent 5 — Loan Milestone Communication Agent** — code complete, needs:
+  - [ ] Run `010_milestone_agents.sql` in Supabase SQL Editor
+  - [ ] Add `ZAPIER_DISPATCH_WEBHOOK_URL` + `MILESTONE_WEBHOOK_SECRET` to Vercel env vars
+  - [ ] Configure n8n webhook → `POST /api/agents/milestone` on Arive milestone events
+- 🔧 **Agent 1 — Daily Command Center** — code complete, needs:
+  - [ ] `ANTHROPIC_API_KEY` already needed for AI Chat — same var
+  - [ ] Run `010_milestone_agents.sql` (same migration as Agent 5)
+  - [ ] Daily Briefing page live at `/dashboard/briefing` — visible in sidebar
 - 🔧 **Outlook Email Integration** — code complete, 5 manual steps remain:
   - [ ] Run `008_outlook_integration.sql` in Supabase SQL Editor
   - [ ] Azure App Registration (follow `docs/outlook-azure-setup.md`)
@@ -254,6 +265,31 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - **Weekly Testimonial Social Post** — Monday 9am CT. Reads random unused testimonial from Google Sheet (tab: Sheet1, ID: 1W9NRB2H8u0cjctCueXh7VYgL27m5vLLFJfONepNWixk). Gemini 1.5 Flash generates caption. Imagen 3 generates quote card image (base64 → Supabase Storage `social-assets` bucket). Publer posts to Instagram + LinkedIn + Facebook. Marks sheet row used. Logs to `automation_logs`. ⚠️ Needs: GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY, Google Sheets OAuth2 credential.
 
 ## What To Build Next
+
+### Phase 2 — Agents: Milestone Communication + Daily Briefing (2026-03-11) ✅ BUILT
+
+**Agent 5 — Loan Milestone Communication Agent** (`src/app/api/agents/milestone/route.ts`, 247 lines)
+- POST handler for n8n webhook on Arive loan milestone events
+- Validates `loan_id` and `milestone` (7 values: application_received, pre_approved, in_process, conditional_approval, clear_to_close, closing_disclosure_sent, closed)
+- Two Claude calls (model: `claude-sonnet-4-5`, max_tokens: 512): borrower warm tone + realtor professional — both return `{subject, body}` JSON
+- Pushes Outlook drafts via `ZAPIER_DISPATCH_WEBHOOK_URL`; logs to `loan_milestone_events` + `milestone_communications` Supabase tables
+- Supabase migration: `supabase/migrations/010_milestone_agents.sql`
+  - `loan_milestone_events` table (id, loan_id, milestone, triggered_at, raw_payload)
+  - `milestone_communications` table (id, event_id FK, recipient_type, draft_pushed, pushed_at, subject, body_preview)
+  - `last_touch TIMESTAMPTZ` column added to contacts
+  - CHECK constraint on 7 milestone values; partial index on `draft_pushed = false`
+- Setup guide: `docs/agents-n8n-setup.md`
+- ⚠️ **To go live**: run migration 010, add `ZAPIER_DISPATCH_WEBHOOK_URL` + `MILESTONE_WEBHOOK_SECRET` to Vercel, configure n8n trigger
+
+**Agent 1 — Daily Command Center** (`src/app/api/agents/daily-briefing/route.ts`, 158 lines)
+- GET handler — 5 parallel Supabase queries via `Promise.allSettled`: overdue_leads, closing_this_week, recently_uploaded_docs, recent_milestones, unread_messages
+- Single Claude call (model: `claude-sonnet-4-5`, max_tokens: 1024) → returns `top7` prioritized action items + `summary`
+- Strips markdown fences before `JSON.parse`; returns raw data arrays alongside AI output
+- Frontend: `/dashboard/briefing/page.tsx` (237 lines, `'use client'`)
+  - Stat row (4 cards), progress bar, checklist with toggle, loading skeleton
+  - Light theme: slate-50 bg, emerald-600 accent, white cards
+- SidebarNav updated: `Brain` icon + `{ label: 'Daily Briefing', href: '/dashboard/briefing' }` as first entry
+- ⚠️ **To go live**: same migration 010; `ANTHROPIC_API_KEY` already required for AI Chat
 
 ### Phase 2 — AI Chat Integration (2026-03-11) ✅ BUILT
 

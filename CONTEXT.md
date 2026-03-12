@@ -20,7 +20,7 @@ Phase 1 complete. Phase 2 (Automation) ~90% complete — all major features buil
 816 Arive loans imported and backfilled as of March 10, 2026.
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live.
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
-ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify webhook needs ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
+ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify/Vercel webhook endpoints need ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
 v1.9.0 deployed to Vercel (2026-03-12).
 
 ### Phase 1 (complete)
@@ -207,7 +207,7 @@ These tools are working and must NOT be broken during LoanOS build:
   - [ ] Activate workflow
 
 **Remaining Go-Live Steps 🔧**
-- 🔧 **Migrate Arive webhook to Vercel API route** — `netlify/functions/arive-webhook.js` has no Next.js API route equivalent; n8n workflow still points to `/.netlify/functions/arive-webhook` which won't work on Vercel → need `/api/arive-webhook/route.ts`
+- ✅ **Migrate Arive webhook to Vercel API route** — `src/app/api/arive-webhook/route.ts` ports `netlify/functions/arive-webhook.js` to a Next.js App Router handler; n8n `arive-to-supabase` workflow can POST directly to `/api/arive-webhook` instead of the Netlify function
 - 🔧 **Outlook go-live** — Azure app registration + Vercel env vars + migration 008 + update n8n workflow URL
 - 🔧 **AI Chat go-live** — add `ANTHROPIC_API_KEY` to Vercel + run migration 009
 - 🔧 **Activate Review Request workflow** — add SUPABASE_SERVICE_ROLE_KEY, SMTP credential, Google/Zillow review URLs to n8n
@@ -260,7 +260,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Pre-Approval Email | utMvZpkdRwIRZ51u | loanos-pre-approval | Upload PA letter PDF |
 | Referral Intro Email | YbgDnTpPdefcazKy | loanos-referral-intro | Paste referral details |
 | New Application Received | cWESnXXy9UOLB13q | loanos-new-application | 1003 PDF in Supabase storage |
-| Arive → Supabase (direct) | — (Netlify fn) | arive-sync (n8n) | Arive POST → n8n orchestrator → Netlify function → Supabase |
+| Arive → Supabase (direct) | Next API (`/api/arive-webhook`) | arive-sync (n8n) | Arive POST → n8n orchestrator → `/api/arive-webhook` → Supabase |
 | Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
 | Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
 | Loan Milestone Communication | 1hjOmS7inZcxEJQr | /api/agents/milestone | Arive milestone event → LoanOS Claude → Zapier → Outlook drafts (borrower + realtor) |
@@ -330,8 +330,9 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
   - `outlook-sync.js` — fetches inbox + sent from Graph API, matches contacts by email, deduplicates via `external_id`, logs to `activity_log` with both legacy + new columns
 - **n8n**: `n8n/outlook-sync-workflow.json` — 15-min schedule, POST to `/.netlify/functions/outlook-sync` via `httpHeaderAuth` credential "LoanOS Sync Secret"
 - **Settings page**: `/dashboard/settings` — Outlook card with connect/sync/disconnect; Status via `/api/outlook-status`; Next.js API routes: `/api/outlook-status` (GET), `/api/outlook-disconnect` (POST)
-- **ActivityTimeline**: `/src/components/ActivityTimeline.tsx` — normalizes legacy + new schema, icon by type, relative timestamps, expandable JSON detail, pagination (20/page)
+- **ActivityTimeline**: `/src/components/ActivityTimeline.tsx` — normalizes legacy + new schema, icon by type, relative timestamps, expandable JSON detail, pagination (20/page); TypeScript + ESLint clean (nullable fields + metadata narrowing)
 - **Contact profile**: `ContactRecordView.tsx` uses `<ActivityTimeline>` instead of inline rendering; `page.tsx` fetches new columns + limit 200
+- **Email drafts logging**: `supabase/migrations/013_email_drafts.sql` creates `email_drafts` table; `src/lib/supabase/logEmailDraft.ts` helper + `src/app/api/email-drafts/route.ts` API + `EmailDraftPreview` component provide a single place to log and review automation-created Outlook drafts (pending full UI wiring)
 - **Test script**: `scripts/test-outlook-sync.js` — env check, token status, refresh, manual sync trigger, recent activity
 - **Env vars to add in Netlify**: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID`, `MICROSOFT_REDIRECT_URI`, `OUTLOOK_EMAIL`, `OUTLOOK_SYNC_SECRET`, `OUTLOOK_SYNC_WINDOW_MINUTES`
 - ⚠️ **To go live**: (1) Azure app registration, (2) Netlify env vars, (3) run migration 008, (4) import n8n workflow + set env var `NETLIFY_SITE_URL`, (5) visit `/dashboard/settings` → Connect Outlook
@@ -346,8 +347,8 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 - ✅ **Automations loan-picker** (2026-03-09) — each AutoCard has a "Run for loan…" `<select>` dropdown populated from top 200 Supabase loans; selected `loanId` passed through `TriggerModal` to n8n webhook payload (PDF: `FormData.append('loan_id', loanId)`, JSON: `...(loanId ? { loan_id: loanId } : {})`)
 - CD extraction workflow (similar pattern to contract)
 - Pre-approval extraction workflow
-- **Arive webhook integration — REBUILT ✅** (2026-03-10) — Arive → n8n orchestrator → Netlify Function → Supabase (eliminates Salesforce middleman)
-  - **Architecture**: Arive POST → n8n `arive-sync` path → `/.netlify/functions/arive-webhook` → Supabase REST upsert
+- **Arive webhook integration — REBUILT ✅** (2026-03-10) — Arive → n8n orchestrator → Netlify Function → Supabase (eliminates Salesforce middleman). 2026-03-12: ported the same logic to `src/app/api/arive-webhook/route.ts` for Vercel; n8n target can be switched from Netlify to the Next.js route when ready.
+  - **Architecture**: Arive POST → n8n `arive-sync` path → `/.netlify/functions/arive-webhook` (Netlify) or `/api/arive-webhook` (Vercel) → Supabase REST upsert
   - `netlify/functions/arive-webhook.js` — validates `X-Webhook-Secret`, upserts contact (on email), upserts loan (on arive_loan_id), inserts activity_log; uses raw fetch to Supabase REST (no SDK); returns `{success, contact_id, loan_id}`
   - `n8n/workflows/arive-to-supabase.json` — thin orchestrator (7 nodes): receive → forward to Netlify fn → IF 200 → respond OK / (else) Build Error Context → Send Outlook Alert (Zapier) → respond 500 (triggers Arive retry)
   - `netlify.toml` — `[functions]` block added: `directory = "netlify/functions"`, `node_bundler = "nft"`

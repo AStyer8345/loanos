@@ -14,14 +14,19 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const SUPABASE_URL = process.env.SUPABASE_URL
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_URL = process.env.SUPABASE_URL!
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const ARIVE_WEBHOOK_SECRET = process.env.ARIVE_WEBHOOK_SECRET
 const SYSTEM_USER_ID = process.env.LOANOS_SYSTEM_USER_ID
 
 // ─── Supabase helpers ─────────────────────────────────────────────────────────
 
-function sbHeaders() {
+function sbHeaders(): Record<string, string> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      'Supabase environment variables are not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your environment.'
+    )
+  }
   return {
     apikey: SUPABASE_SERVICE_ROLE_KEY,
     Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

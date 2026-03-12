@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [1.9.1] — 2026-03-12 — Arive Webhook Next.js Route + Email Draft Logging
+
+### Added
+
+- `src/app/api/arive-webhook/route.ts` — Next.js App Router port of `netlify/functions/arive-webhook.js`; validates `X-Webhook-Secret`, upserts contact (on email) and loan (on `arive_loan_id`/`loan_number`) via Supabase REST, inserts `activity_log`, returns `{ success, contact_id, loan_id, arive_loan_id, loan_number }`. n8n `arive-to-supabase` workflow can now target `/api/arive-webhook` instead of the Netlify function.
+- Email drafts infrastructure:
+  - `supabase/migrations/013_email_drafts.sql` — creates `email_drafts` table (`automation_name`, recipient fields, subject, `body_html`, `body_preview`, `status` enum pending/sent/discarded, optional `contact_id`/`loan_id`/`outlook_draft_id`, timestamps + trigger, indexes, RLS service-role only).
+  - `src/lib/supabase/logEmailDraft.ts` — helper to log an automation-created Outlook draft to `email_drafts` (plain-text preview derived from HTML).
+  - `src/app/api/email-drafts/route.ts` — GET (recent drafts by status) + PATCH (update status) API for dashboard/preview UI.
+- Supabase client hardening:
+  - `src/lib/supabase/client.ts` and `src/lib/supabase/server.ts` — both now read `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` into locals and throw a clear error if either is missing; avoids opaque runtime failures during build/prerender.
+
+### Fixed
+
+- `src/components/ActivityTimeline.tsx` — TypeScript clean-up: `ActivityLogRow` allows nullable DB-backed fields (`entity_type`, `metadata`, `type`, `summary`, `raw_payload`, `external_id`); `metadata` narrowed to `Record<string, unknown>` and `meta.subject`/`note`/`description` only used when `typeof === 'string'`; resolves Netlify TS errors while preserving normalize logic.
+- Outlook/Settings lint issues: `src/app/api/outlook-disconnect/route.ts` and `src/app/dashboard/settings/page.tsx` now use typed, parameterless `catch` branches (no `any`, no unused vars); `ContactRecordView.tsx` removed unused `fmtDateTime` helper. ESLint passes cleanly in CI.
+
+---
+
 ## [1.9.0] — 2026-03-12 — ARIVE Webhook Integration + DB Expansion + Contact Detail Improvements
 
 ### Added

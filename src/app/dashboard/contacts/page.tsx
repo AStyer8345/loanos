@@ -51,9 +51,6 @@ interface ContactLoan {
   closing_date: string | null
 }
 
-// ── Canonical Stages ──────────────────────────────────────────────────────────
-const STAGES = ['Lead', 'Pre-App', 'Application', 'Pre-Approved', 'In Process', 'Closing', 'Closed', 'Other']
-
 const STAGE_TO_LIST: Record<string, string> = {
   'Lead':         'new-apps',
   'Pre-App':      'new-apps',

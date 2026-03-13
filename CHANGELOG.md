@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [1.12.0] — 2026-03-13 — Arive Full Field Expansion + n8n Pipeline Rebuild
+
+### Added
+
+- **Migration 015** (`supabase/migrations/015_arive_full_field_expansion.sql`) — ~55 new columns across 8 sections + `loan_status_history` table. Sections: financial fields (hcltv, base_loan_amount, broker_fee, financed_fees, pi_payment, flood_insurance_monthly, hoa_dues, buydown, impound_waiver, prepay_penalty), loan product/structure (amortization_type, mortgage_type, refinance_type, cashout_purpose, documentation_type, lien_position, lock_status, compensation_type, interest_only, interest_only_term_months, arm_adjustment_period, arm_initial_fixed_months), admin/pipeline (status_date, adverse_reason, lender_nmls, lender_loan_number, crm_reference_id, deep_link_url, archive_indicator, processor_email, tbd_address), borrower extended (borrower_home_phone, borrower_work_phone, borrower_mailing_address, borrower_marital_status, borrower_preferred_language, first_time_homebuyer, borrower_applicant_type), property extended (property_units, property_unit_number, property_attachment_type), key dates TRID + appraisal + credit + HOI + title + timeline/closing (22 DATE columns), milestone dates+statuses (14 columns), agent FK references (buyer_agent_contact_id + listing_agent_contact_id → contacts.id). **NOT YET APPLIED to production Supabase — apply via SQL Editor.**
+- **`loan_status_history` table** — `(id UUID PK, loan_id UUID FK→loans, arive_loan_id TEXT, old_status TEXT, new_status TEXT NOT NULL, changed_at TIMESTAMPTZ DEFAULT now(), source TEXT DEFAULT 'arive')`. Three indexes (loan_id, arive_loan_id, changed_at DESC). RLS enabled: authenticated users SELECT their own rows; service_role bypasses (no explicit INSERT policy needed for n8n).
+- **`zapier_webhook_fields.md`** — 295-line canonical reference mapping every Arive webhook payload field to its Supabase `loans` column. Covers all sections of the payload. SSN exclusion rule documented. `_(not stored)_` fields documented with reasons.
+- **WF1 rebuilt** (`1tagvoU0UXtdDiMY` — Arive New Loan → Supabase) — `specifyBody: "string"` bug fixed; migrated to `contentType: "raw"` + `rawContentType: "application/json"`. All ~90 Arive payload fields now mapped in the loan upsert body including all 55 new columns from migration 015.
+- **WF2 rebuilt** (`9JyzzwKac8v3uQ7d` — Arive Status Update → Supabase) — All fields included. New `Log Status History` node: POSTs `{ loan_id, arive_loan_id, old_status, new_status }` to `loan_status_history` table after every status update. Node deduplication: 15→13 nodes (removed 2 duplicate `arl-w2-013` copies from prior test runs).
+
+### Notes
+
+- **Migration 015 NOT applied** — all new columns missing from production until applied. WF1 upserts will HTTP 400 on any new-loan webhook until then.
+- E2E test sequence: (1) Apply migration 015 in Supabase SQL Editor, (2) trigger WF1 test → verify new fields in `loans`, (3) trigger WF2 test → verify `loan_status_history` row inserted.
+
+---
+
 ## [1.11.0] — 2026-03-13 — Sprint 4+5: Global Search + Activity Feed + Kanban + Smart List Actions
 
 ### Added

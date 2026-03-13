@@ -297,6 +297,7 @@ Output: branded PDF or shareable link integrated with Supabase loan records.
 | Closed Loan Review Request | AK1fBcaX1cPcdlGx | — (scheduled) | Every 30 min — polls Supabase for loans closed 2+ days ago |
 | Weekly Testimonial Social Post | eJG4wckrj6SmSpm1 | — (scheduled) | Mondays 9am CT — reads Google Sheet, Gemini caption + image, posts via Publer |
 | Loan Milestone Communication | 1hjOmS7inZcxEJQr | /api/agents/milestone | Arive milestone event → LoanOS Claude → Zapier → Outlook drafts (borrower + realtor) |
+| Refi Intake Email | yCTydQ7RfZK4DyUg | loanos-refi-intake | Upload IFW PDF → Claude extracts fields → n8n builds email → Outlook draft |
 
 - First 6 trigger via Supabase pg_net or manual webhook POST; output Outlook drafts via n8n
 - Trigger buttons LIVE — clicking opens TriggerModal (PDF drop zone or form fields)

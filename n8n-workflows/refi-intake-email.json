@@ -1,0 +1,128 @@
+{
+  "name": "LoanOS \u2014 Refi Intake Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "loanos-refi-intake",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "refi-intake-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\n\nconst borrowerFirst = body.borrower_first_name || '[Borrower]';\nconst borrowerLast = body.borrower_last_name || '';\nconst coBorrowerFirst = body.co_borrower_first_name || '';\nconst borrowerEmail = body.email || '';\nconst loanId = body.loan_id || '';\nconst loanAmount = Number(body.loan_amount) || 0;\nconst rate = Number(body.rate) || 0;\nconst piPayment = Number(body.pi_payment) || 0;\nconst totalMonthly = Number(body.total_monthly_payment) || 0;\nconst cashToClose = Number(body.cash_to_close) || 0;\nconst lockPeriod = body.lock_period || '30 days';\nconst escrow = body.escrow || 'Active';\n\nconst coBorrowerSalutation = coBorrowerFirst ? ' and ' + coBorrowerFirst : '';\n\nconst fmt = (n) => Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });\nconst loanAmountFmt = '$' + fmt(loanAmount);\nconst piPaymentFmt = '$' + fmt(piPayment) + '/mo';\nconst totalMonthlyFmt = '$' + fmt(totalMonthly) + '/mo';\nconst cashAmt = '$' + fmt(cashToClose);\nconst cashLabel = cashToClose < 0 ? 'Cash Back at Closing' : 'Cash to Close';\n\nconst escrowRow = escrow === 'Waived'\n  ? '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Escrow</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">Waived \u2014 taxes &amp; insurance paid directly</td></tr>'\n  : '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Escrow</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">Active</td></tr>';\n\nconst subject = 'Your Refinance is Underway \u2013 Adam Styer | Mortgage Solutions LP';\n\nconst html =\n  '<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#111827;max-width:600px;margin:0 auto;\">' +\n  '<p>Hi ' + borrowerFirst + coBorrowerSalutation + ',</p>' +\n  '<p>Your refinance is underway. Below is a summary of your loan terms from the initial fees worksheet.</p>' +\n  '<table style=\"width:100%;border-collapse:collapse;margin:20px 0;border:1px solid #e5e7eb;\">' +\n  '<thead><tr style=\"background:#f9fafb;\"><th colspan=\"2\" style=\"padding:12px;text-align:left;font-size:14px;color:#374151;font-weight:600;border-bottom:1px solid #e5e7eb;\">Loan Summary</th></tr></thead>' +\n  '<tbody>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Loan Amount</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;font-weight:600;color:#111827;\">' + loanAmountFmt + '</td></tr>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Interest Rate</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;font-weight:600;color:#111827;\">' + rate + '%</td></tr>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Principal &amp; Interest</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">' + piPaymentFmt + '</td></tr>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Est. Total Monthly Payment</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">' + totalMonthlyFmt + '</td></tr>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">' + cashLabel + '</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">' + cashAmt + '</td></tr>' +\n  '<tr style=\"border-bottom:1px solid #f3f4f6;\"><td style=\"padding:8px 12px;color:#6b7280;font-size:14px;\">Rate Lock</td><td style=\"padding:8px 12px;text-align:right;font-size:14px;color:#111827;\">' + lockPeriod + '</td></tr>' +\n  escrowRow +\n  '</tbody></table>' +\n  '<p>Janie, our processor, will reach out shortly to collect the documents needed to get your file to underwriting. In the meantime, if you have any questions, call or text me at <a href=\"tel:5129566010\">512-956-6010</a> or reply to this email.</p>' +\n  '<p>Adam Styer<br>Senior Loan Officer | Mortgage Solutions LP<br>NMLS# 513013<br>(512) 956-6010<br><a href=\"mailto:adam@thestyerteam.com\">adam@thestyerteam.com</a></p>' +\n  '</div>';\n\nreturn [{\n  json: {\n    subject,\n    html,\n    borrowerEmail,\n    loanId,\n    borrowerFirst,\n    borrowerLast,\n    loanAmountFmt,\n    rate\n  }\n}];"
+      },
+      "id": "build-refi-email",
+      "name": "Build Refi Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "additionalFields": {
+          "bodyContent": "={{ $json.html }}",
+          "bodyContentType": "html",
+          "subject": "={{ $json.subject }}",
+          "toRecipients": "={{ $json.borrowerEmail }}"
+        }
+      },
+      "id": "draft-refi-email",
+      "name": "Draft Refi Email",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [660, 300],
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "RkXvebinnei87gz4",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"loan_id\": \"{{ $('Build Refi Email').item.json.loanId }}\", \"action\": \"refi_intake_email_drafted\", \"details\": \"Refi intake email drafted for {{ $('Build Refi Email').item.json.borrowerFirst }} {{ $('Build Refi Email').item.json.borrowerLast }}, {{ $('Build Refi Email').item.json.loanAmountFmt }} at {{ $('Build Refi Email').item.json.rate }}%\", \"created_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": {}
+      },
+      "id": "log-refi-email",
+      "name": "Log Refi Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tnWBtdOV586zDRRP",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Refi Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Refi Email": {
+      "main": [
+        [
+          {
+            "node": "Draft Refi Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Refi Email": {
+      "main": [
+        [
+          {
+            "node": "Log Refi Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

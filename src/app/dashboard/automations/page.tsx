@@ -48,6 +48,16 @@ const WORKFLOWS = [
     webhookPath: 'loanos-new-application',
     icon: 'app',
   },
+  {
+    id: 'refi-intake',
+    name: 'Refi Intake Email',
+    description: 'Upload an Initial Fees Worksheet — Claude extracts loan details and drafts the refinance kickoff email with disclosures breakdown.',
+    triggerLabel: 'Upload IFW PDF',
+    triggerType: 'refi' as const,
+    n8nId: '',
+    webhookPath: 'loanos-refi-intake',
+    icon: 'refi',
+  },
 ]
 
 type Workflow = typeof WORKFLOWS[0]
@@ -95,6 +105,13 @@ const WORKFLOW_ICONS: Record<string, React.ReactNode> = {
       <line x1="12" y1="17" x2="12" y2="21"/>
     </svg>
   ),
+  refi: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 4 23 10 17 10"/>
+      <polyline points="1 20 1 14 7 14"/>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+    </svg>
+  ),
 }
 
 const STEP_ICONS: Record<string, React.ReactNode> = {
@@ -122,6 +139,289 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
       <circle cx="12" cy="12" r="3"/>
     </svg>
   ),
+}
+
+// ─── RefiIntakeModal ──────────────────────────────────────────────────────────
+
+interface RefiFields {
+  borrower_first_name: string
+  borrower_last_name: string
+  loan_amount: string
+  rate: string
+  pi_payment: string
+  total_monthly_payment: string
+  cash_to_close: string
+  lock_period: string
+  escrow: string
+}
+
+function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | null; onClose: () => void }) {
+  const [phase, setPhase] = useState<'upload' | 'extracting' | 'review' | 'sending' | 'success'>('upload')
+  const [file, setFile] = useState<File | null>(null)
+  const [drag, setDrag] = useState(false)
+  const [extractErr, setExtractErr] = useState('')
+  const [sendErr, setSendErr] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // Extracted + manual fields
+  const [fields, setFields] = useState<RefiFields>({
+    borrower_first_name: '',
+    borrower_last_name: '',
+    loan_amount: '',
+    rate: '',
+    pi_payment: '',
+    total_monthly_payment: '',
+    cash_to_close: '',
+    lock_period: '',
+    escrow: '',
+  })
+  const [coBorrowerFirst, setCoBorrowerFirst] = useState('')
+  const [borrowerEmail, setBorrowerEmail] = useState('')
+  const [rateLockStatus, setRateLockStatus] = useState('not locked yet')
+
+  function pickFile(f: File) {
+    if (!f.type.includes('pdf') && !f.name.endsWith('.pdf')) {
+      setExtractErr('PDF files only')
+      return
+    }
+    setFile(f)
+    setExtractErr('')
+  }
+
+  async function handleExtract() {
+    if (!file) { setExtractErr('Select a PDF first'); return }
+    setPhase('extracting')
+    setExtractErr('')
+    try {
+      const fd = new FormData()
+      fd.append('pdf', file)
+      const res = await fetch('/api/automations/refi-intake', { method: 'POST', body: fd })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+      const data = await res.json()
+      const f = data.fields ?? {}
+      setFields({
+        borrower_first_name:    String(f.borrower_first_name    ?? ''),
+        borrower_last_name:     String(f.borrower_last_name     ?? ''),
+        loan_amount:            String(f.loan_amount            ?? ''),
+        rate:                   String(f.rate                   ?? ''),
+        pi_payment:             String(f.pi_payment             ?? ''),
+        total_monthly_payment:  String(f.total_monthly_payment  ?? ''),
+        cash_to_close:          String(f.cash_to_close          ?? ''),
+        lock_period:            String(f.lock_period            ?? ''),
+        escrow:                 String(f.escrow                 ?? ''),
+      })
+      setPhase('review')
+    } catch (e: unknown) {
+      setExtractErr(e instanceof Error ? e.message : 'Extraction failed')
+      setPhase('upload')
+    }
+  }
+
+  async function handleSend() {
+    if (!borrowerEmail.trim()) { setSendErr('Borrower email is required'); return }
+    setPhase('sending')
+    setSendErr('')
+    try {
+      const payload = {
+        ...fields,
+        co_borrower_first_name: coBorrowerFirst.trim(),
+        borrower_email: borrowerEmail.trim(),
+        rate_lock_status: rateLockStatus,
+        ...(loanId ? { loan_id: loanId } : {}),
+      }
+      const res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setPhase('success')
+    } catch (e: unknown) {
+      setSendErr(e instanceof Error ? e.message : 'Webhook call failed')
+      setPhase('review')
+    }
+  }
+
+  const REVIEW_LABELS: { key: keyof RefiFields; label: string }[] = [
+    { key: 'borrower_first_name',   label: 'First Name'           },
+    { key: 'borrower_last_name',    label: 'Last Name'            },
+    { key: 'loan_amount',           label: 'Loan Amount'          },
+    { key: 'rate',                  label: 'Rate (%)'             },
+    { key: 'pi_payment',            label: 'P&I Payment'          },
+    { key: 'total_monthly_payment', label: 'Total Monthly Pmt'    },
+    { key: 'cash_to_close',         label: 'Cash to Close'        },
+    { key: 'lock_period',           label: 'Lock Period'          },
+    { key: 'escrow',                label: 'Escrow'               },
+  ]
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-6"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white border border-slate-200 border-l-4 border-l-emerald-500 rounded-lg p-7 w-full max-w-lg relative shadow-xl max-h-[90vh] overflow-y-auto">
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-3 right-4 text-xs text-slate-400 hover:text-slate-600 font-mono">
+          [ESC]
+        </button>
+
+        {/* Title */}
+        <div className="text-lg font-semibold text-slate-900 mb-0.5">{wf.name}</div>
+        <div className="text-xs text-slate-400 font-mono mb-5">
+          {phase === 'upload'     && 'Step 1 of 3 — Upload IFW PDF'}
+          {phase === 'extracting' && 'Extracting fields…'}
+          {phase === 'review'     && 'Step 2 of 3 — Review & confirm'}
+          {phase === 'sending'    && 'Creating Outlook draft…'}
+          {phase === 'success'    && 'Draft created in Outlook'}
+        </div>
+
+        {/* ── UPLOAD phase ── */}
+        {(phase === 'upload' || phase === 'extracting') && (
+          <>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDrag(true) }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) pickFile(f) }}
+              onClick={() => fileRef.current?.click()}
+              className={`
+                border border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-4
+                ${drag ? 'border-emerald-400 bg-emerald-50' : file ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'}
+              `}
+            >
+              <div className={`text-sm font-medium ${file ? 'text-emerald-600' : 'text-slate-500'}`}>
+                {file ? `✓  ${file.name}` : 'Drop IFW PDF here or click to select'}
+              </div>
+              {file && <div className="text-xs text-slate-400 mt-1 font-mono">{(file.size / 1024).toFixed(0)} KB</div>}
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              className="hidden"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) pickFile(f) }}
+            />
+            {extractErr && (
+              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-50 border border-red-200 text-red-600">
+                {extractErr}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleExtract}
+                disabled={phase === 'extracting' || !file}
+                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+              >
+                {phase === 'extracting' ? 'Extracting…' : 'Extract Fields'}
+              </button>
+              <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-md transition-colors">
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── REVIEW phase ── */}
+        {phase === 'review' && (
+          <>
+            {/* Extracted fields grid */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {REVIEW_LABELS.map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
+                  <input
+                    value={fields[key]}
+                    onChange={(e) => setFields(prev => ({ ...prev, [key]: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-100 my-4" />
+
+            {/* Manual fields */}
+            <div className="flex flex-col gap-3 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Co-Borrower First Name <span className="text-slate-300">(optional)</span></label>
+                <input
+                  value={coBorrowerFirst}
+                  onChange={(e) => setCoBorrowerFirst(e.target.value)}
+                  placeholder="Jane"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Borrower Email *</label>
+                <input
+                  value={borrowerEmail}
+                  onChange={(e) => setBorrowerEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  type="email"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Rate Lock Status</label>
+                <select
+                  value={rateLockStatus}
+                  onChange={(e) => setRateLockStatus(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                >
+                  <option value="not locked yet">Not locked yet</option>
+                  <option value="locked">Locked</option>
+                </select>
+              </div>
+            </div>
+
+            {sendErr && (
+              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-50 border border-red-200 text-red-600">
+                {sendErr}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleSend}
+                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors"
+              >
+                Send Draft to Outlook
+              </button>
+              <button
+                onClick={() => setPhase('upload')}
+                className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-md transition-colors"
+              >
+                Back
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── SENDING phase ── */}
+        {phase === 'sending' && (
+          <div className="flex items-center gap-3 py-4 text-sm text-slate-500">
+            <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin shrink-0" />
+            Creating Outlook draft…
+          </div>
+        )}
+
+        {/* ── SUCCESS phase ── */}
+        {phase === 'success' && (
+          <div className="py-4">
+            <div className="text-sm rounded-md px-3 py-2 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700">
+              Draft created — check Outlook to review and send.
+            </div>
+            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors">
+              Done
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ─── TriggerModal ─────────────────────────────────────────────────────────────
@@ -392,7 +692,7 @@ function AutoCard({ wf, index, loans, onTrigger }: { wf: Workflow; index: number
 
       {/* Meta row (hover reveal) */}
       <div className="meta-reveal text-[10px] text-slate-400 font-mono flex gap-4 mb-4">
-        <span>n8n: <span className="text-slate-300">{wf.n8nId}</span></span>
+        <span>n8n: <span className="text-slate-300">{wf.n8nId || '—'}</span></span>
         <span>webhook: <span className="text-slate-300">/webhook/{wf.webhookPath}</span></span>
         <span>last run: <span>—</span></span>
       </div>
@@ -440,6 +740,8 @@ export default function AutomationsPage() {
       })
   }, [])
 
+  function handleClose() { setActiveWf(null); setActiveLoanId(null) }
+
   return (
     <>
       <style>{`
@@ -480,8 +782,11 @@ export default function AutomationsPage() {
         }
       `}</style>
 
-      {activeWf && (
-        <TriggerModal wf={activeWf} loanId={activeLoanId} onClose={() => { setActiveWf(null); setActiveLoanId(null) }} />
+      {activeWf && activeWf.triggerType === 'refi' && (
+        <RefiIntakeModal wf={activeWf} loanId={activeLoanId} onClose={handleClose} />
+      )}
+      {activeWf && activeWf.triggerType !== 'refi' && (
+        <TriggerModal wf={activeWf} loanId={activeLoanId} onClose={handleClose} />
       )}
 
       <div className="p-8 pb-12 bg-slate-50 min-h-full">
@@ -492,16 +797,16 @@ export default function AutomationsPage() {
             Automations
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            4 active workflows — Claude extracts, n8n routes, Outlook drafts. You review and send.
+            5 active workflows — Claude extracts, n8n routes, Outlook drafts. You review and send.
           </p>
         </div>
 
         {/* ── Stat row ────────────────────────────────────────────────── */}
         <div className="flex border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mb-6">
           {[
-            { label: 'Active Workflows', value: '4',             color: 'text-emerald-600' },
+            { label: 'Active Workflows', value: '5',             color: 'text-emerald-600' },
             { label: 'Errors',           value: '0',             color: 'text-slate-900'   },
-            { label: 'Last Updated',     value: '2026-03-09',    color: 'text-slate-500'   },
+            { label: 'Last Updated',     value: '2026-03-13',    color: 'text-slate-500'   },
             { label: 'Engine',           value: 'n8n + Claude',  color: 'text-emerald-600' },
           ].map((stat, i) => (
             <div key={stat.label} className={`flex-1 px-5 py-4 ${i < 3 ? 'border-r border-slate-200' : ''}`}>

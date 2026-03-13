@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## [1.13.0] — 2026-03-13 — Refi Intake Email Automation
+
+### Added
+
+- **Refi Intake Email automation** — full 4-phase pipeline: (1) Next.js API route `/api/automations/refi-intake/route.ts` accepts IFW PDF via multipart/form-data, base64-encodes, calls Claude API with `anthropic-beta: pdfs-2024-09-25` to extract 9 fields; (2) `RefiIntakeModal` in `automations/page.tsx` — 5-phase state machine (upload → extracting → review → sending → success); (3) n8n workflow `n8n-workflows/refi-intake-email.json` — Webhook → Build Email (Code) → Outlook Draft → Supabase Log; (4) Workflow imported to n8n ID `yCTydQ7RfZK4DyUg`, webhook path `loanos-refi-intake`.
+- **`/api/automations/refi-intake`** API route — PDF extraction via Claude. Returns `{ fields }` JSON with borrower name, loan amount, rate, P&I, total monthly, cash to close, lock period, escrow.
+- **n8n workflow `yCTydQ7RfZK4DyUg`** — 4 nodes: Webhook (loanos-refi-intake) → Code (HTML email builder with 7-row loan summary table, cash back/cash to close logic, escrow waived/active row) → Outlook Draft (credential RkXvebinnei87gz4) → Supabase activity_log POST.
+
+---
+
 ## [1.12.0] — 2026-03-13 — Arive Full Field Expansion + n8n Pipeline Rebuild
 
 ### Added

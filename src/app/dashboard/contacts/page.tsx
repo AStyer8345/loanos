@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 import Papa from 'papaparse'
 import { normalizeStage } from '@/lib/stageNormalization'
+import { Trash2, Pencil } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -141,6 +143,7 @@ const SMART_LISTS: SmartListDef[] = [
 type CustomListRule = { field: string; operator: string; value: string }
 type CustomList = { id: string; name: string; page: 'contacts' | 'loans'; rules: CustomListRule[] }
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
+const STAGES = ['Lead', 'Pre-App', 'Application', 'Pre-Approved', 'In Process', 'Closing', 'Closed', 'Other'] as const
 
 const CONTACT_FILTER_FIELDS = [
   { id: 'contact_type', label: 'Type' },
@@ -314,6 +317,10 @@ export default function ContactsPage() {
   const [newListName, setNewListName] = useState('')
   const [newListRules, setNewListRules] = useState<CustomListRule[]>([{ field: 'stage', operator: 'is', value: '' }])
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
+  const [editingListId, setEditingListId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
+  const [kanbanContacts, setKanbanContacts] = useState<Record<string, Contact[]>>({})
+  const [kanbanLoading, setKanbanLoading] = useState(false)
 
   // sidebar collapse: default collapsed when viewport < 1280px; toggle overrides
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -438,9 +445,57 @@ export default function ContactsPage() {
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
 
+  const fetchKanbanContacts = useCallback(async () => {
+    setKanbanLoading(true)
+    const grouped: Record<string, Contact[]> = {}
+    STAGES.forEach(s => { grouped[s] = [] })
+    await Promise.all(
+      STAGES.map(async stage => {
+        let q = buildContactQuery(supabase.from('contacts').select('*'))
+        q = q.eq('stage', stage).order('updated_at', { ascending: false }).limit(50)
+        const { data } = await q
+        grouped[stage] = data ?? []
+      })
+    )
+    setKanbanContacts(grouped)
+    setKanbanLoading(false)
+  }, [supabase, buildContactQuery])
+
+  useEffect(() => {
+    if (viewMode === 'kanban') fetchKanbanContacts()
+  }, [viewMode, fetchKanbanContacts])
+
   // ── Sort ─────────────────────────────────────────────────────────────────
   function handleSort(key: keyof Contact) {
     setSort(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }))
+  }
+
+  // ── Kanban drag ───────────────────────────────────────────────────────────
+  async function handleDragEnd(result: DropResult) {
+    if (!result.destination) return
+    const { draggableId: contactId, source, destination } = result
+    if (source.droppableId === destination.droppableId) return
+    const fromStage = source.droppableId
+    const toStage = destination.droppableId
+    // Optimistic update — move card immediately in local state
+    setKanbanContacts(prev => {
+      const fromList = [...(prev[fromStage] ?? [])]
+      const idx = fromList.findIndex(c => c.id === contactId)
+      if (idx === -1) return prev
+      const [moved] = fromList.splice(idx, 1)
+      const toList = [...(prev[toStage] ?? [])]
+      toList.splice(destination.index, 0, { ...moved, stage: toStage })
+      return { ...prev, [fromStage]: fromList, [toStage]: toList }
+    })
+    // Persist to Supabase
+    const { error } = await supabase
+      .from('contacts')
+      .update({ stage: normalizeStage(toStage), updated_at: new Date().toISOString() })
+      .eq('id', contactId)
+    if (error) {
+      console.error('Stage update failed:', error)
+      fetchKanbanContacts() // revert on error
+    }
   }
 
   // ── Column picker ─────────────────────────────────────────────────────────
@@ -555,19 +610,37 @@ export default function ContactsPage() {
   function handleSaveNewList() {
     const name = newListName.trim()
     if (!name) return
-    const list: CustomList = {
-      id: `custom-${crypto.randomUUID()}`,
-      name,
-      page: 'contacts',
-      rules: newListRules.filter(r => r.value?.trim()),
+    const rules = newListRules.filter(r => r.value?.trim())
+    let next: CustomList[]
+    if (editingListId) {
+      // Edit mode: overwrite matching list by id
+      next = customLists.map(l =>
+        l.id === editingListId ? { ...l, name, rules } : l
+      )
+    } else {
+      // Create mode: new list with fresh UUID
+      const list: CustomList = {
+        id: `custom-${crypto.randomUUID()}`,
+        name,
+        page: 'contacts',
+        rules,
+      }
+      next = [...customLists, list]
+      setActiveList(list.id)
     }
-    const next = [...customLists, list]
     setCustomLists(next)
     persistCustomLists(next.filter(l => l.page === 'contacts'))
     setShowNewListModal(false)
-    setActiveList(list.id)
+    setEditingListId(null)
     fetchCounts()
     fetchContacts()
+  }
+
+  function openEditModal(cl: CustomList) {
+    setNewListName(cl.name)
+    setNewListRules(cl.rules?.length ? cl.rules : [{ field: 'stage', operator: 'is', value: '' }])
+    setEditingListId(cl.id)
+    setShowNewListModal(true)
   }
 
   function handleDeleteList() {
@@ -684,21 +757,31 @@ export default function ContactsPage() {
                   <span style={{ opacity: 0.7, fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{counts[cl.id] ?? 0}</span>
                 </button>
                 {!sidebarCollapsed && (
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
-                    style={{ padding: '2px 6px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12 }}
-                    title="Delete list"
-                  >
-                    ×
-                  </button>
+                  <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={e => { e.stopPropagation(); openEditModal(cl) }}
+                      style={{ padding: '3px 4px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      title="Edit list"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
+                      style={{ padding: '3px 4px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      title="Delete list"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
                 )}
               </div>
             )
           })}
           <button
             type="button"
-            onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]) }}
+            onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
             style={{
               fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c9a84c', background: 'transparent',
               border: '1px dashed rgba(201,168,76,0.5)', padding: '6px 8px', borderRadius: 4, cursor: 'pointer',
@@ -783,10 +866,114 @@ export default function ContactsPage() {
               </div>
             )}
           </div>
+
+          {/* View mode toggle */}
+          <div style={{ display: 'flex', borderRadius: 4, border: '1px solid var(--border)', overflow: 'hidden', flexShrink: 0 }}>
+            <button
+              onClick={() => setViewMode('table')}
+              style={{
+                padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
+                cursor: 'pointer', border: 'none',
+                background: viewMode === 'table' ? '#c9a84c' : 'transparent',
+                color: viewMode === 'table' ? '#000' : 'var(--muted)', fontWeight: 600,
+              }}>
+              TABLE
+            </button>
+            <button
+              onClick={() => setViewMode('kanban')}
+              style={{
+                padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
+                cursor: 'pointer', border: 'none',
+                background: viewMode === 'kanban' ? '#c9a84c' : 'transparent',
+                color: viewMode === 'kanban' ? '#000' : 'var(--muted)', fontWeight: 600,
+              }}>
+              KANBAN
+            </button>
+          </div>
         </div>
 
+        {/* Kanban board */}
+        {viewMode === 'kanban' && (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div style={{
+              flex: 1, overflowX: 'auto', overflowY: 'hidden', display: 'flex', gap: 14,
+              padding: '16px 24px', minHeight: 0, alignItems: 'flex-start',
+            }}>
+              {kanbanLoading ? (
+                <div style={{ padding: 48, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>LOADING…</div>
+              ) : (
+                STAGES.map(stage => (
+                  <div key={stage} style={{ display: 'flex', flexDirection: 'column', flex: '0 0 230px', maxHeight: '100%' }}>
+                    {/* Column header */}
+                    <div style={{
+                      padding: '7px 10px', marginBottom: 8, borderRadius: 4,
+                      background: 'var(--surface)', border: '1px solid var(--border)',
+                      fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
+                      color: 'var(--muted)', display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'center', flexShrink: 0,
+                    }}>
+                      <span>{stage.toUpperCase()}</span>
+                      <span style={{ color: '#c9a84c' }}>{(kanbanContacts[stage] ?? []).length}</span>
+                    </div>
+                    {/* Droppable column */}
+                    <Droppable droppableId={stage}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          style={{
+                            flex: 1, overflowY: 'auto', borderRadius: 4, padding: 4, minHeight: 80,
+                            background: snapshot.isDraggingOver ? 'rgba(201,168,76,0.06)' : 'transparent',
+                            border: snapshot.isDraggingOver ? '1px dashed rgba(201,168,76,0.35)' : '1px solid transparent',
+                            transition: 'background 0.15s, border 0.15s',
+                          }}
+                        >
+                          {(kanbanContacts[stage] ?? []).map((contact, index) => (
+                            <Draggable key={contact.id} draggableId={contact.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  onClick={() => { setSelectedContact(contact); setEditMode(false); setEditData({}) }}
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    padding: '9px 11px', marginBottom: 5, borderRadius: 4,
+                                    background: snapshot.isDragging ? 'rgba(201,168,76,0.12)' : 'var(--surface)',
+                                    border: snapshot.isDragging ? '1px solid rgba(201,168,76,0.6)' : '1px solid var(--border)',
+                                    cursor: 'grab', fontFamily: 'var(--font-mono)',
+                                    boxShadow: snapshot.isDragging ? '0 6px 20px rgba(0,0,0,0.5)' : 'none',
+                                    transition: snapshot.isDragging ? 'none' : 'border 0.15s, background 0.15s',
+                                  }}
+                                >
+                                  <div style={{ fontSize: 12, color: 'var(--fg)', fontWeight: 600, marginBottom: 2 }}>
+                                    {[contact.first_name, contact.last_name].filter(Boolean).join(' ') || '(No Name)'}
+                                  </div>
+                                  {contact.email && (
+                                    <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {contact.email}
+                                    </div>
+                                  )}
+                                  {contact.phone && (
+                                    <div style={{ fontSize: 10, color: 'var(--muted)' }}>{contact.phone}</div>
+                                  )}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                ))
+              )}
+            </div>
+          </DragDropContext>
+        )}
+
         {/* Table */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto" style={{ display: viewMode === 'kanban' ? 'none' : undefined }}>
           {loading ? (
             <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>LOADING…</div>
           ) : contacts.length === 0 ? (
@@ -1391,13 +1578,13 @@ export default function ContactsPage() {
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }} onClick={() => setShowNewListModal(false)}>
+        }} onClick={() => { setShowNewListModal(false); setEditingListId(null) }}>
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
             padding: 24, width: 420, maxHeight: '85vh', overflowY: 'auto', fontFamily: 'var(--font-mono)',
           }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              New Smart List
+              {editingListId ? 'Edit Smart List' : 'New Smart List'}
             </div>
             <input
               placeholder="List name"
@@ -1443,13 +1630,13 @@ export default function ContactsPage() {
               + Add Filter
             </button>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowNewListModal(false)}
+              <button onClick={() => { setShowNewListModal(false); setEditingListId(null) }}
                 style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                 CANCEL
               </button>
               <button onClick={handleSaveNewList} disabled={!newListName.trim()}
                 style={{ background: '#c9a84c', border: 'none', color: '#000', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
-                Save List
+                {editingListId ? 'Update List' : 'Save List'}
               </button>
             </div>
           </div>

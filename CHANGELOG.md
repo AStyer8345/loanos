@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [1.11.0] — 2026-03-13 — Sprint 4+5: Global Search + Activity Feed + Kanban + Smart List Actions
+
+### Added
+
+- **GlobalSearch palette** (`src/components/GlobalSearch.tsx`) — ⌘K / Ctrl+K command palette. Fixed-position overlay (z-index 1000). 300ms debounced search with parallel Supabase `ilike` queries across `contacts` (name, email, phone) and `loans` (loan_name, borrower_name, status). Flat `allResults` array for unified ↑↓ keyboard navigation. Enter navigates to record. Esc closes. Empty state + "No results" state.
+- **⌘K hint button** (`src/components/TopNav.tsx`) — Small ⌘K label in nav bar fires `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))` to reuse GlobalSearch's existing listener — no duplicated open/close logic.
+- **ActivityFeed bell** (`src/components/ActivityFeed.tsx`, `src/components/TopNav.tsx`) — 🔔 bell button inline in nav bar (position: relative). Gold unread badge shows count vs. `localStorage` key `loanos_activity_last_read`. Fetches last 50 `activity_log` rows on mount (badge populates immediately). Click opens 380px fixed slide-out panel from right edge. Panel open marks all read (updates localStorage timestamp). Backdrop click closes. `lastRead` initialized to `new Date(0).toISOString()` in state — real value loaded in `useEffect` (SSR safe).
+- **Kanban pipeline view** (`src/app/dashboard/contacts/page.tsx`) — LIST | KANBAN toggle in contacts toolbar. `@hello-pangea/dnd` drag-and-drop board with 5 columns: Lead, Pre-App, Pre-Approved, In Process, Closed. Column headers show live contact counts. Drag fires Supabase PATCH to update contact `stage`. Board reads from same filtered/sorted contacts state as list view.
+- **Smart list delete** (`src/app/dashboard/contacts/page.tsx`) — Trash2 icon visible on row hover. Confirmation modal ("Delete [Name]? This cannot be undone."). Confirmed delete removes from Supabase and local state.
+- **Smart list edit** (`src/app/dashboard/contacts/page.tsx`) — Pencil icon visible on row hover. Opens slide-out edit panel pre-populated with contact fields. Save PATCHes Supabase and updates local state in-place.
+
+### Notes
+
+- No new Supabase migrations required.
+- No new n8n workflow changes.
+- `@hello-pangea/dnd` added as dependency for kanban board.
+
+---
+
 ## [1.10.2] — 2026-03-13 — Sprint 3: Activity Log Data Integrity
 
 ### Improved

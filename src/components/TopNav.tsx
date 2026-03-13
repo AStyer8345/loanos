@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { NavItem } from './NavItem'
 import { NavDropdown } from './NavDropdown'
 import SignOutButton from '@/app/dashboard/SignOutButton'
+import GlobalSearch from './GlobalSearch'
+import ActivityFeed from './ActivityFeed'
 
 type Section = 'briefing' | 'pipeline' | 'marketing' | 'admin' | 'settings'
 
@@ -48,6 +50,7 @@ export default function TopNav() {
 
   return (
     <>
+      <GlobalSearch />
       <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-800 text-white shadow flex items-center px-3 md:px-6">
         {/* Logo */}
         <button
@@ -140,6 +143,22 @@ export default function TopNav() {
 
         {/* Spacer */}
         <div className="flex-1" />
+
+        {/* ⌘K search hint */}
+        <button
+          type="button"
+          onClick={() => {
+            const evt = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+            document.dispatchEvent(evt)
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/20 text-white/50 hover:text-white/80 hover:border-white/40 transition-colors mr-2"
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.05em' }}
+        >
+          <span>⌘K</span>
+          <span className="text-white/30">search</span>
+        </button>
+
+        <ActivityFeed />
 
         {/* Right side: profile + sign out */}
         <div className="flex items-center gap-3">

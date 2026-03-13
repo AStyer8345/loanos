@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## [1.10.1] — 2026-03-13 — Sprint 1 Audit Fixes (Bugs + UX)
+
+### Fixed
+
+- **Bug #1 — Closed Borrowers filter** (`contacts/page.tsx`) — Smart List filter changed from `'Closed Client'` to `'Closed'` to match actual DB stage values after Arive import.
+- **Bug #2 — Last Touch timestamps** (`contacts/page.tsx`) — Raw ISO timestamps now formatted with `toLocaleDateString` for human-readable display.
+- **Bug #3 — Lead status color** (`loans/page.tsx`) — Replaced Bloomberg gold `#C9A84C` styling with slate (`bg-slate-100 text-slate-700`) to match light theme.
+- **Bug #4 — Duplicate phone columns** — Migration `014_consolidate_phone_columns.sql` copies `mobile_phone` → `phone_mobile` where null, then drops `mobile_phone`. Updated `contacts/page.tsx` and `ContactRecordView.tsx` to use only `phone_mobile`. Fixed resulting TS2300 duplicate identifier in Contact type.
+
+### Added
+
+- **UX #5 — Bulk actions bar** (`loans/page.tsx`) — Checkbox selection column, select-all toggle, floating emerald action bar with UPDATE STATUS dropdown and DELETE button. Matches contacts page pattern.
+- **UX #6 — Inline file upload** (`loans/[id]/page.tsx`) — DocumentsTab now has inline upload button (hidden `<input type="file">` + `useRef`). Uploads to Supabase Storage `documents` bucket at `loans/{loanId}/{filename}` with `upsert: true`, inserts `documents` row, and calls `onRefresh`.
+
+### Notes
+
+- TypeScript compiles clean (`npx tsc --noEmit` — 0 errors).
+- Migration 014 must be run in Supabase SQL Editor before deploying.
+
+---
+
 ## [1.10.0] — 2026-03-13 — AI Outreach & Contact Management System
 
 ### Added

@@ -18,7 +18,6 @@ export type Contact = {
   last_name: string | null
   email: string | null
   phone: string | null
-  mobile_phone: string | null
   contact_type: string | null
   stage: string | null
   referred_by: string | null
@@ -173,7 +172,7 @@ export function ContactRecordView(props: Props) {
     setTimeout(() => setNotesSaved(false), 2000)
   }
 
-  const phone = contact.phone || contact.mobile_phone || null
+  const phone = contact.phone || contact.phone_mobile || null
   const cityState = [contact.mailing_city, contact.mailing_state].filter(Boolean).join(', ')
   const mailingParts = [contact.mailing_street, cityState, contact.mailing_zip].filter(Boolean)
   const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null

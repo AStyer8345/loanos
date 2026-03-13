@@ -12,7 +12,7 @@ type Contact = {
   last_name: string | null
   email: string | null
   phone: string | null
-  mobile_phone: string | null
+  phone_mobile: string | null
   contact_type: string | null
   stage: string | null
   lead_source: string | null
@@ -181,7 +181,7 @@ const ALL_COLUMNS: ColumnDef[] = [
     ) },
   { id: 'type',         label: 'Type',             render: c => c.contact_type ?? '—' },
   { id: 'phone',        label: 'Phone',            render: c => <PhoneCell value={c.phone} /> },
-  { id: 'mobile',       label: 'Mobile',           render: c => <PhoneCell value={c.mobile_phone} /> },
+  { id: 'mobile',       label: 'Mobile',           render: c => <PhoneCell value={c.phone_mobile} /> },
   { id: 'email',        label: 'Email',            render: c => <EmailCell value={c.email} /> },
   { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
@@ -193,7 +193,7 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'co_name',      label: 'Co-Borrower Name', render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
   { id: 'co_bday',      label: 'Co-Bday',          render: c => c.coborrower_birthday ?? '—' },
   { id: 'notes',        label: 'Notes',            render: c => c.notes ?? '—' },
-  { id: 'last_touch',   label: 'Last Touch',       render: c => c.last_touch ?? '—' },
+  { id: 'last_touch',   label: 'Last Touch',       render: c => c.last_touch ? new Date(c.last_touch).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
   { id: 'closing_date', label: 'Closing Date',     render: c => c.closing_date ?? '—' },
   { id: 'realtor_email',label: 'Realtor Email',    render: c => c.realtor_email ?? '—' },
   { id: 'created',      label: 'Created Date',     render: c => c.created_at ? new Date(c.created_at).toLocaleDateString() : '—' },
@@ -232,7 +232,7 @@ function applySmartList(query: any, listId: string): any {
     case 'in-process':
       return query.eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing'])
     case 'closed':
-      return query.eq('contact_type', 'borrower').in('stage', ['Closed Client'])
+      return query.eq('contact_type', 'borrower').in('stage', ['Closed'])
     case 'all-realtors':
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
@@ -246,7 +246,7 @@ function applySmartList(query: any, listId: string): any {
 
 // ── Blank new-contact form ────────────────────────────────────────────────────
 const BLANK_CONTACT = {
-  first_name: '', last_name: '', email: '', phone: '', mobile_phone: '',
+  first_name: '', last_name: '', email: '', phone: '', phone_mobile: '',
   contact_type: 'borrower' as string | null, stage: 'Lead',
   lead_source: '', referred_by: '', company_name: '', notes: '',
 }
@@ -359,7 +359,7 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed Client']),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'),
@@ -873,7 +873,7 @@ export default function ContactsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {([
                   ['First Name', 'first_name'], ['Last Name', 'last_name'], ['Email', 'email'],
-                  ['Phone', 'phone'], ['Mobile', 'mobile_phone'], ['Stage', 'stage'],
+                  ['Phone', 'phone'], ['Mobile', 'phone_mobile'], ['Stage', 'stage'],
                   ['Lead Source', 'lead_source'], ['Referred By', 'referred_by'],
                   ['Company', 'company_name'], ['Notes', 'notes'],
                 ] as [string, keyof Contact][]).map(([label, field]) => (
@@ -914,7 +914,7 @@ export default function ContactsPage() {
                 {([
                   ['Email', selectedContact.email],
                   ['Phone', selectedContact.phone, true],
-                  ['Mobile', selectedContact.mobile_phone, true],
+                  ['Mobile', selectedContact.phone_mobile, true],
                   ['Stage', selectedContact.stage],
                   ['Lead Source', selectedContact.lead_source], ['Referred By', selectedContact.referred_by],
                   ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthday],

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Search, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
+import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2 } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -142,6 +142,8 @@ export default function LoansPage() {
   const [newListName, setNewListName] = useState('')
   const [newListRules, setNewListRules] = useState<CustomListRule[]>([{ field: 'status', operator: 'is', value: '' }])
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkStatus, setBulkStatus] = useState('')
 
   // Restore column visibility from localStorage
   useEffect(() => {
@@ -248,6 +250,7 @@ export default function LoansPage() {
     setActiveList(listId)
     setSearch('')
     setEditingStatusId(null)
+    setSelected(new Set())
     fetchLoans(listId)
   }
 
@@ -261,6 +264,41 @@ export default function LoansPage() {
       if (!activeList.startsWith('custom-')) fetchLoans(activeList)
     }
   }, [supabase, activeList, fetchCounts, fetchLoans])
+
+  // ── Bulk actions ──────────────────────────────────────────────────────
+  const toggleSelect = (id: string) => setSelected(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
+  })
+
+  const toggleSelectAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set())
+    else setSelected(new Set(filtered.map(l => l.id)))
+  }
+
+  const handleBulkStatusUpdate = useCallback(async (newStatus: string) => {
+    if (!selected.size) return
+    const ids = [...selected]
+    const { error } = await supabase.from('loans').update({ status: newStatus }).in('id', ids)
+    if (!error) {
+      setLoans(prev => prev.map(l => ids.includes(l.id) ? { ...l, status: newStatus } : l))
+      setSelected(new Set())
+      setBulkStatus('')
+      await fetchCounts()
+    }
+  }, [selected, supabase, fetchCounts])
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!selected.size || !confirm(`Delete ${selected.size} loan(s)? This cannot be undone.`)) return
+    const ids = [...selected]
+    const { error } = await supabase.from('loans').delete().in('id', ids)
+    if (!error) {
+      setLoans(prev => prev.filter(l => !ids.includes(l.id)))
+      setSelected(new Set())
+      await fetchCounts()
+    }
+  }, [selected, supabase, fetchCounts])
 
   // ── Sort + search ──────────────────────────────────────────────────────
   const handleSort = (key: SortKey) => {
@@ -514,6 +552,36 @@ export default function LoansPage() {
           </div>
         </div>
 
+        {/* Bulk actions bar */}
+        {selected.size > 0 && (
+          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-lg mx-4 mb-2">
+            <span className="text-sm font-medium text-emerald-800">{selected.size} selected</span>
+            <div className="flex items-center gap-2 ml-auto">
+              <select
+                value={bulkStatus}
+                onChange={e => { setBulkStatus(e.target.value); if (e.target.value) handleBulkStatusUpdate(e.target.value) }}
+                className="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-800"
+              >
+                <option value="">Update Status…</option>
+                {LOAN_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <button
+                onClick={handleBulkDelete}
+                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors"
+              >
+                <Trash2 size={12} />
+                Delete
+              </button>
+              <button
+                onClick={() => setSelected(new Set())}
+                className="text-xs text-slate-500 hover:text-slate-700 px-2 py-1.5"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Table */}
         <div className="flex-1 overflow-auto">
           {loading ? (
@@ -527,6 +595,14 @@ export default function LoansPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="w-8 px-2 py-2.5">
+                    <input
+                      type="checkbox"
+                      checked={filtered.length > 0 && selected.size === filtered.length}
+                      onChange={toggleSelectAll}
+                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                  </th>
                   {colDefs.map(col => (
                     <th
                       key={col.id}
@@ -545,7 +621,15 @@ export default function LoansPage() {
               </thead>
               <tbody>
                 {filtered.map(loan => (
-                  <tr key={loan.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr key={loan.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${selected.has(loan.id) ? 'bg-emerald-50/50' : ''}`}>
+                    <td className="w-8 px-2 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(loan.id)}
+                        onChange={() => toggleSelect(loan.id)}
+                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                    </td>
                     {colDefs.map(col => {
                       if (col.id === 'borrower_name') {
                         return (
@@ -702,7 +786,7 @@ export default function LoansPage() {
 // ── Status badge (color map per spec) ───────────────────────────────────────
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  'Lead':           { bg: 'rgba(201,168,76,0.2)',  text: '#C9A84C' },
+  'Lead':           { bg: '#f1f5f9',  text: '#475569' },
   'Pre-App':        { bg: 'rgba(76,126,201,0.2)',  text: '#4C7EC9' },
   'Application':    { bg: 'rgba(123,76,201,0.2)',  text: '#7B4CC9' },
   'In Process':     { bg: 'rgba(76,201,138,0.2)',  text: '#4CC98A' },

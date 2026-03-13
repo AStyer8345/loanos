@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
-  ArrowLeft, FileText, Zap, Activity, Download,
+  ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
@@ -539,9 +539,35 @@ function OverviewTab({ loan, contact, loanId }: {
 
 // ── Documents tab ─────────────────────────────────────────────────────────────
 
-function DocumentsTab({ docs }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const supabase = createClient()
   const [signingId, setSigningId] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const storagePath = `loans/${loanId}/${file.name}`
+    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
+    if (uploadError) {
+      alert('Upload failed: ' + uploadError.message)
+      setUploading(false)
+      return
+    }
+    // Insert document record
+    await supabase.from('documents').insert({
+      loan_id: loanId,
+      file_name: file.name,
+      file_path: storagePath,
+      file_size: file.size,
+      doc_type: file.type || null,
+    })
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    onRefresh()
+  }
 
   const handleDownload = async (doc: DocRow) => {
     setSigningId(doc.id)
@@ -561,7 +587,15 @@ function DocumentsTab({ docs }: { loanId: string; docs: DocRow[]; onRefresh: () 
       <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-400">
         <FileText size={24} />
         <p className="text-sm">No documents attached to this loan</p>
-        <Link href="/dashboard/upload" className="text-emerald-600 hover:underline text-sm">Upload a document →</Link>
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+        >
+          <Upload size={14} />
+          {uploading ? 'Uploading…' : 'Upload a document'}
+        </button>
       </div>
     )
   }
@@ -570,7 +604,15 @@ function DocumentsTab({ docs }: { loanId: string; docs: DocRow[]; onRefresh: () 
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-slate-700">{docs.length} document{docs.length !== 1 ? 's' : ''}</h2>
-        <Link href="/dashboard/upload" className="text-xs text-emerald-600 hover:underline">+ Upload Document</Link>
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+        >
+          <Upload size={12} />
+          {uploading ? 'Uploading…' : '+ Upload Document'}
+        </button>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <table className="w-full text-sm">

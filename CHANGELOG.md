@@ -1,5 +1,30 @@
 # LoanOS Changelog
 
+## [1.10.0] — 2026-03-13 — AI Outreach & Contact Management System
+
+### Added
+
+- **Floating Outreach Chat Widget** (`src/components/outreach/OutreachChat.tsx`) — bottom-left chat panel on every page, dark theme with gold (#C9A84C) accent. Handles 5 command types: Quick Add, Bulk Email, Bulk Text, Bulk Admin, General Chat.
+- **Chat Command Parser** (`src/lib/chat-command-parser.ts`) — regex-based classifier routes natural language into `CommandType` enum. Extracts contact fields (name, email, phone, stage, contact_type, referred_by, company, source) from freeform text.
+- **Quick Add Contact API** (`src/app/api/contacts/quick-add/route.ts`) — creates contacts in Supabase with confirmation flow, duplicate detection by email/phone, referrer lookup, and activity logging. Uses Adam's Salesforce defaults.
+- **Bulk Action API** (`src/app/api/contacts/bulk-action/route.ts`) — handles `update_stage`, `update_type`, and `delete` for selected contacts with activity logging.
+- **Outreach API** (`src/app/api/outreach/route.ts`) — Claude-powered (`claude-sonnet-4-5`) general chat + email/text content generation with Adam's business context as system prompt.
+- **Outreach Chat Context** (`src/components/outreach/OutreachChatContext.tsx`) — React context sharing selected contacts between contacts page and chat widget via `openWithContacts()`.
+- **Native App Links** (`src/lib/native-app-links.ts`) — deep link helpers for iMessage (`sms:`) and Outlook (`mailto:`).
+- **OUTREACH button** on contacts page bulk action bar — maps selected contacts to lean `SelectedContact` type and opens chat widget.
+- **Root layout wired** — `OutreachChatProvider` + `<OutreachChat />` added to `src/app/layout.tsx`.
+
+### Fixed
+
+- **TopNav.tsx** — removed unused `Link` import from `next/link` (pre-existing lint error).
+
+### Notes
+
+- Requires `ANTHROPIC_API_KEY` in Vercel env vars before outreach API will work in production.
+- Build passes clean. All ESLint errors resolved.
+
+---
+
 ## [1.9.3] — 2026-03-12 — Arive → LoanOS Live Sync via Zapier
 
 ### Fixed

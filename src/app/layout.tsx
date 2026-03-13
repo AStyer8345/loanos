@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { OutreachChatProvider } from '@/components/outreach/OutreachChatContext'
+import OutreachChat from '@/components/outreach/OutreachChat'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-950 antialiased`}>
-        {children}
+        <OutreachChatProvider>
+          {children}
+          <OutreachChat />
+        </OutreachChatProvider>
       </body>
     </html>
   )

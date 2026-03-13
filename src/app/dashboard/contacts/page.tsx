@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -293,6 +294,9 @@ export default function ContactsPage() {
   const [bulkValue, setBulkValue]           = useState('')
   const [bulkProcessing, setBulkProcessing] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+
+  // ── Outreach chat integration ─────────────────────────────────────────
+  const { openWithContacts } = useOutreachChat()
 
   // ── Custom lists ────────────────────────────────────────────────────────
   const [customLists, setCustomLists] = useState<CustomList[]>([])
@@ -993,6 +997,25 @@ export default function ContactsPage() {
             style={{ background: 'var(--bg)', border: '1px solid #ff5050', color: '#ff5050',
                      borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
             DELETE
+          </button>
+          <button
+            onClick={() => {
+              const mapped: SelectedContact[] = contacts
+                .filter(c => selectedIds.has(c.id))
+                .map(c => ({
+                  id: c.id,
+                  first_name: c.first_name,
+                  last_name: c.last_name,
+                  email: c.email,
+                  phone: c.phone,
+                  stage: c.stage,
+                  contact_type: c.contact_type,
+                }))
+              openWithContacts(mapped)
+            }}
+            style={{ background: 'var(--bg)', border: '1px solid #C9A84C', color: '#C9A84C',
+                     borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+            OUTREACH
           </button>
           <button
             onClick={() => setSelectedIds(new Set())}

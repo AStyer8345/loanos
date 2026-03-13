@@ -223,6 +223,19 @@ These tools are working and must NOT be broken during LoanOS build:
 - 🔧 **Activate Review Request workflow** — add SUPABASE_SERVICE_ROLE_KEY, SMTP credential, Google/Zillow review URLs to n8n
 - 🔧 **Activate Social Post workflow** — add Gemini API key, Google Sheets OAuth2 credential to n8n
 
+**Built — Needs Testing 🧪**
+- 🧪 **AI Outreach & Contact Management System** — floating chat widget + bulk actions, needs:
+  - ✅ Command parser: `src/lib/chat-command-parser.ts` — classifies QUICK_ADD / BULK_EMAIL / BULK_TEXT / BULK_ADMIN / GENERAL_CHAT
+  - ✅ Quick Add API: `src/app/api/contacts/quick-add/route.ts` — NL contact creation, dedup by email/phone, referrer lookup
+  - ✅ Bulk Action API: `src/app/api/contacts/bulk-action/route.ts` — update_stage, update_type, delete with activity logging
+  - ✅ Outreach API: `src/app/api/outreach/route.ts` — Claude-powered email/text generation + general chat
+  - ✅ Chat widget: `src/components/outreach/OutreachChat.tsx` — floating bottom-left panel, all 5 command types
+  - ✅ Context: `src/components/outreach/OutreachChatContext.tsx` — shares selected contacts between contacts page and chat
+  - ✅ OUTREACH button wired into contacts page bulk action bar
+  - ✅ Layout: `OutreachChatProvider` + `<OutreachChat />` in root `layout.tsx`
+  - [ ] Add `ANTHROPIC_API_KEY` to Vercel env vars (same as AI Chat)
+  - [ ] End-to-end testing: quick add flow, bulk email/text generation, bulk admin actions
+
 **Not Yet Built 🚧**
 - 🚧 **CD extraction workflow** — same n8n pattern as contract pipeline, Claude extracts Closing Disclosure fields
 - 🚧 **Pre-approval extraction workflow** — same pattern, Claude extracts PA letter fields

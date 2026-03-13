@@ -201,7 +201,7 @@ export default function LoansPage() {
       map[list.id] = count ?? 0
     }
     setCounts(map)
-  }, [customLists])
+  }, [customLists, supabase])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
   const fetchLoans = useCallback(async (listId: string) => {
@@ -237,7 +237,7 @@ export default function LoansPage() {
       setLoans([])
     }
     setLoading(false)
-  }, [customLists])
+  }, [customLists, supabase])
 
   useEffect(() => {
     fetchCounts()

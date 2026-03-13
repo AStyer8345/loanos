@@ -258,7 +258,7 @@ export default function LoanDetailPage() {
     setDocs(docsRes.data || [])
     setActivity(actRes.data || [])
     setLoading(false)
-  }, [loanId])
+  }, [loanId, supabase])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 

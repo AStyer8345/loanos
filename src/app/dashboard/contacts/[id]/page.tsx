@@ -42,13 +42,46 @@ export default function ContactRecordPage() {
   }, [id, supabase])
 
   const fetchActivity = useCallback(async () => {
-    const { data } = await supabase
+    // 1. Activity directly linked to this contact
+    const { data: contactRows } = await supabase
       .from('activity_log')
-      .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id')
+      .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id, loan_id')
       .eq('contact_id', id)
       .order('created_at', { ascending: false })
       .limit(200)
-    setActivity((data as ActivityEntry[]) ?? [])
+
+    const merged: ActivityEntry[] = (contactRows ?? []) as ActivityEntry[]
+    const seen = new Set(merged.map(r => r.id))
+
+    // 2. Activity from loans linked to this contact
+    const { data: linkedLoans } = await supabase
+      .from('loans')
+      .select('id, loan_name')
+      .eq('contact_id', id)
+
+    if (linkedLoans && linkedLoans.length > 0) {
+      const loanIds = linkedLoans.map((l: { id: string }) => l.id)
+      const { data: loanRows } = await supabase
+        .from('activity_log')
+        .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id, loan_id')
+        .in('loan_id', loanIds)
+        .order('created_at', { ascending: false })
+        .limit(200)
+
+      for (const row of (loanRows ?? []) as ActivityEntry[]) {
+        if (seen.has(row.id)) continue          // already in contact activity
+        const loan = linkedLoans.find((l: { id: string }) => l.id === row.loan_id)
+        const label = (loan as { loan_name?: string | null } | undefined)?.loan_name
+          ? `Loan: ${(loan as { loan_name: string }).loan_name}`
+          : 'Linked Loan'
+        merged.push({ ...row, _source: label })
+        seen.add(row.id)
+      }
+    }
+
+    // 3. Sort merged list chronologically
+    merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    setActivity(merged)
   }, [id, supabase])
 
   const resolveReferrer = useCallback(async (referredBy: string | null) => {

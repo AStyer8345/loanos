@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { normalizeStage } from '@/lib/stageNormalization'
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
       const { error } = await supabase
         .from('contacts')
-        .update({ stage: value })
+        .update({ stage: normalizeStage(value) })
         .in('id', contactIds)
 
       if (error) {

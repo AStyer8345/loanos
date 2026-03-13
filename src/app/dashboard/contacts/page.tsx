@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
+import Papa from 'papaparse'
+import { normalizeStage } from '@/lib/stageNormalization'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -251,6 +253,8 @@ const BLANK_CONTACT = {
   lead_source: '', referred_by: '', company_name: '', notes: '',
 }
 
+const CONTACTS_PAGE_SIZE = 100
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ContactsPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -263,6 +267,9 @@ export default function ContactsPage() {
   const [sort, setSort]             = useState<SortConfig>({ key: 'last_name', dir: 'asc' })
   const [total, setTotal]           = useState(0)
   const [counts, setCounts]         = useState<Record<string, number>>({})
+  const [hasMore, setHasMore]       = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const offsetRef                   = useRef(0)
 
   // slide-out
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -283,7 +290,10 @@ export default function ContactsPage() {
   const [showColPicker, setShowColPicker]   = useState(false)
 
   // import modal
-  const [showImport, setShowImport] = useState(false)
+  const [showImport, setShowImport]     = useState(false)
+  const [csvRows, setCsvRows]           = useState<Record<string, string>[]>([])
+  const [csvImporting, setCsvImporting] = useState(false)
+  const [importBanner, setImportBanner] = useState<string | null>(null)
 
   // ── Feature 1: inline stage editing ─────────────────────────────────────
   const [editingStageId, setEditingStageId] = useState<string | null>(null)
@@ -378,9 +388,8 @@ export default function ContactsPage() {
   }, [supabase, customLists])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
-  const fetchContacts = useCallback(async () => {
-    setLoading(true)
-    let q = supabase.from('contacts').select('*')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildContactQuery = useCallback((q: any) => {
     if (activeList.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === activeList)
       if (custom?.rules?.length) q = applyCustomListRulesContact(q, custom.rules)
@@ -391,12 +400,40 @@ export default function ContactsPage() {
       const s = `%${search.trim()}%`
       q = q.or(`first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},phone.ilike.${s}`)
     }
-    q = q.order(sort.key as string, { ascending: sort.dir === 'asc' }).limit(500)
+    return q
+  }, [supabase, activeList, search, customLists])
+
+  const fetchContacts = useCallback(async () => {
+    setLoading(true)
+    offsetRef.current = 0
+    let q = buildContactQuery(supabase.from('contacts').select('*'))
+    q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
+         .range(0, CONTACTS_PAGE_SIZE - 1)
     const { data, error } = await q
-    if (!error) { setContacts(data ?? []); setTotal(data?.length ?? 0) }
+    if (!error) {
+      setContacts(data ?? [])
+      setTotal(data?.length ?? 0)
+      setHasMore((data?.length ?? 0) === CONTACTS_PAGE_SIZE)
+    }
     setLoading(false)
     setSelectedIds(new Set())
-  }, [supabase, activeList, search, sort, customLists])
+  }, [supabase, buildContactQuery, sort])
+
+  const loadMoreContacts = useCallback(async () => {
+    setLoadingMore(true)
+    const nextOffset = offsetRef.current + CONTACTS_PAGE_SIZE
+    let q = buildContactQuery(supabase.from('contacts').select('*'))
+    q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
+         .range(nextOffset, nextOffset + CONTACTS_PAGE_SIZE - 1)
+    const { data, error } = await q
+    if (!error && data) {
+      offsetRef.current = nextOffset
+      setContacts(prev => [...prev, ...data])
+      setTotal(prev => prev + data.length)
+      setHasMore(data.length === CONTACTS_PAGE_SIZE)
+    }
+    setLoadingMore(false)
+  }, [supabase, buildContactQuery, sort])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
@@ -433,7 +470,7 @@ export default function ContactsPage() {
       if (selectedContact?.id === contactId)
         setSelectedContact(prev => prev ? { ...prev, stage: stageValue } : null)
     }
-    await supabase.from('contacts').update({ stage: stageValue }).eq('id', contactId)
+    await supabase.from('contacts').update({ stage: normalizeStage(stageValue) }).eq('id', contactId)
     fetchCounts()
   }
 
@@ -461,7 +498,8 @@ export default function ContactsPage() {
     setBulkProcessing(true)
     const ids = Array.from(selectedIds)
     const field = bulkAction === 'stage' ? 'stage' : bulkAction === 'type' ? 'contact_type' : 'referred_by'
-    await supabase.from('contacts').update({ [field]: bulkValue }).in('id', ids)
+    const writeValue = field === 'stage' ? normalizeStage(bulkValue) : bulkValue
+    await supabase.from('contacts').update({ [field]: writeValue }).in('id', ids)
     setBulkAction(null)
     setBulkValue('')
     await Promise.all([fetchContacts(), fetchCounts()])
@@ -494,7 +532,7 @@ export default function ContactsPage() {
 
   async function handleCreate() {
     setCreating(true); setCreateError(null)
-    const { error } = await supabase.from('contacts').insert([newContact])
+    const { error } = await supabase.from('contacts').insert([{ ...newContact, stage: normalizeStage(newContact.stage) }])
     if (error) {
       setCreateError(error.message)
     } else {
@@ -834,6 +872,18 @@ export default function ContactsPage() {
               </tbody>
             </table>
           )}
+          {/* Load More */}
+          {hasMore && !loading && (
+            <div className="flex justify-center py-4 border-t border-slate-100">
+              <button
+                onClick={loadMoreContacts}
+                disabled={loadingMore}
+                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-slate-200 rounded text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length})`}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1127,35 +1177,163 @@ export default function ContactsPage() {
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }} onClick={() => setShowImport(false)}>
+        }} onClick={() => { if (!csvImporting) { setShowImport(false); setCsvRows([]) } }}>
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-            padding: 24, width: 400, fontFamily: 'var(--font-mono)',
+            padding: 24, width: 540, maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+            fontFamily: 'var(--font-mono)',
           }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Import Contacts (CSV)
             </div>
             <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16, lineHeight: 1.6 }}>
-              CSV must include columns: <code style={{ color: 'var(--accent)' }}>first_name</code>,{' '}
-              <code style={{ color: 'var(--accent)' }}>last_name</code>,{' '}
-              <code style={{ color: 'var(--accent)' }}>email</code>,{' '}
+              Required: <code style={{ color: 'var(--accent)' }}>last_name</code> and{' '}
+              <code style={{ color: 'var(--accent)' }}>email</code>. Optional:{' '}
+              <code style={{ color: 'var(--accent)' }}>first_name</code>,{' '}
+              <code style={{ color: 'var(--accent)' }}>phone</code>,{' '}
               <code style={{ color: 'var(--accent)' }}>contact_type</code>
             </div>
-            <input type="file" accept=".csv"
-              style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
-                       color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',
-                       fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 16 }} />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowImport(false)}
-                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)',
-                         borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+
+            {csvRows.length === 0 ? (
+              <input
+                type="file"
+                accept=".csv"
+                disabled={csvImporting}
+                onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  Papa.parse<Record<string, string>>(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => setCsvRows(results.data),
+                  })
+                }}
+                style={{
+                  width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
+                  color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',
+                  fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 16,
+                }}
+              />
+            ) : (
+              <>
+                {(() => {
+                  const valid   = csvRows.filter(r => r.last_name?.trim() && r.email?.trim())
+                  const skipped = csvRows.length - valid.length
+                  return (
+                    <div style={{ fontSize: 11, marginBottom: 10, color: 'var(--text)', flexShrink: 0 }}>
+                      <span style={{ color: 'var(--accent)' }}>{valid.length}</span> to import
+                      {skipped > 0 && (
+                        <span style={{ color: 'var(--muted)' }}>
+                          {' '}· {skipped} skipped (missing last_name or email)
+                        </span>
+                      )}
+                    </div>
+                  )
+                })()}
+                <div style={{ overflowY: 'auto', flex: 1, border: '1px solid var(--border)', borderRadius: 4, marginBottom: 16 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg)' }}>
+                        {['first_name', 'last_name', 'email', 'phone', 'contact_type'].map(col => (
+                          <th key={col} style={{
+                            padding: '6px 8px', textAlign: 'left', color: 'var(--muted)',
+                            fontWeight: 600, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap',
+                          }}>
+                            {col}
+                          </th>
+                        ))}
+                        <th style={{ padding: '6px 8px', color: 'var(--muted)', borderBottom: '1px solid var(--border)' }}>✓</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvRows.slice(0, 10).map((row, i) => {
+                        const ok = !!row.last_name?.trim() && !!row.email?.trim()
+                        return (
+                          <tr key={i} style={{ opacity: ok ? 1 : 0.4 }}>
+                            {['first_name', 'last_name', 'email', 'phone', 'contact_type'].map(col => (
+                              <td key={col} style={{
+                                padding: '5px 8px', color: 'var(--text)',
+                                borderBottom: '1px solid var(--border)',
+                                maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>
+                                {row[col] || '—'}
+                              </td>
+                            ))}
+                            <td style={{
+                              padding: '5px 8px', textAlign: 'center',
+                              borderBottom: '1px solid var(--border)',
+                              color: ok ? 'var(--accent)' : '#ff5050',
+                            }}>
+                              {ok ? '✓' : '✗'}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                      {csvRows.length > 10 && (
+                        <tr>
+                          <td colSpan={6} style={{
+                            padding: '6px 8px', color: 'var(--muted)', fontSize: 10, textAlign: 'center',
+                          }}>
+                            + {csvRows.length - 10} more rows
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
+              <button
+                onClick={() => { setShowImport(false); setCsvRows([]) }}
+                disabled={csvImporting}
+                style={{
+                  background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)',
+                  borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11,
+                }}>
                 CANCEL
               </button>
-              <button
-                style={{ background: 'var(--accent)', border: 'none', color: '#000',
-                         borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                IMPORT
-              </button>
+              {csvRows.length > 0 && (
+                <button
+                  disabled={csvImporting}
+                  onClick={async () => {
+                    const valid = csvRows.filter(r => r.last_name?.trim() && r.email?.trim())
+                    if (!valid.length) return
+                    setCsvImporting(true)
+                    const BATCH = 50
+                    let inserted = 0
+                    let failed   = 0
+                    for (let i = 0; i < valid.length; i += BATCH) {
+                      const batch = valid.slice(i, i + BATCH).map(r => ({
+                        first_name:   r.first_name?.trim()   || null,
+                        last_name:    r.last_name.trim(),
+                        email:        r.email.trim().toLowerCase(),
+                        phone:        r.phone?.trim()         || null,
+                        contact_type: r.contact_type?.trim() || null,
+                      }))
+                      const { error } = await supabase.from('contacts').insert(batch)
+                      if (error) failed += batch.length
+                      else       inserted += batch.length
+                    }
+                    setCsvImporting(false)
+                    setShowImport(false)
+                    setCsvRows([])
+                    const msg = failed > 0
+                      ? `Imported ${inserted} · ${failed} failed`
+                      : `${inserted} contact${inserted !== 1 ? 's' : ''} imported`
+                    setImportBanner(msg)
+                    setTimeout(() => setImportBanner(null), 5000)
+                    fetchContacts()
+                  }}
+                  style={{
+                    background: 'var(--accent)', border: 'none', color: '#000',
+                    borderRadius: 4, padding: '6px 14px', fontFamily: 'var(--font-mono)', fontSize: 11,
+                    cursor: csvImporting ? 'not-allowed' : 'pointer', opacity: csvImporting ? 0.5 : 1,
+                  }}>
+                  {csvImporting ? 'IMPORTING…' : 'IMPORT'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1301,6 +1479,19 @@ export default function ContactsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Import result banner ── */}
+      {importBanner && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--surface)', border: '1px solid var(--accent)', borderRadius: 6,
+          padding: '10px 20px', fontSize: 11, fontFamily: 'var(--font-mono)',
+          color: 'var(--text)', zIndex: 400, boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          whiteSpace: 'nowrap',
+        }}>
+          {importBanner}
         </div>
       )}
 

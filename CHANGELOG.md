@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [1.10.2] — 2026-03-13 — Sprint 3: Activity Log Data Integrity
+
+### Improved
+
+- **ActivityTab filter — Loans** (`src/app/dashboard/loans/[id]/page.tsx`) — Replaced static activity list with interactive All / System / Manual pill filter. System entries = actions containing a `.` (n8n dot-notation); manual = everything else. Live counts shown on each pill. Color-coded timeline dots: emerald for system, blue for manual. Empty state rendered when filter returns no results.
+- **Metadata display — Loans ActivityTab** — Removed `.slice(0, 3)` hard cap; all metadata fields now shown. Expanded `INTERNAL_KEYS` Set to exclude `id` and `created_at` in addition to existing FK fields. Metadata displayed as `flex-wrap` tag row.
+- **Cross-entity activity merge — Contacts** (`src/app/dashboard/contacts/[id]/page.tsx`) — `fetchActivity` now runs 3 Supabase queries: (1) activity rows where `contact_id = id`; (2) loans linked to this contact; (3) activity rows where `loan_id IN (linked loan IDs)`. Deduplicates by `row.id` via `Set<string>`. Net-new loan rows tagged with `_source: 'Loan: {loan_name}'`. Final array sorted by `created_at` descending.
+- **Source badge — ActivityTimeline** (`src/components/ActivityTimeline.tsx`) — `ActivityLogRow` and `NormalizedEntry` types extended with `loan_id?` and `_source?`. `normalize()` passes `_source` through as `source` on `NormalizedEntry`. `TimelineEntry` renders `entry.source` as a slate-100 pill badge between the type label and the details toggle.
+- **Type extension — ContactRecordView** (`src/app/dashboard/contacts/[id]/ContactRecordView.tsx`) — `ActivityEntry` type extended with `loan_id?: string | null` and `_source?: string`. Zero DB schema changes — both fields are client-side synthetic.
+
+### Notes
+
+- No new Supabase migrations required.
+- No new build errors introduced (pre-existing errors in unrelated files remain unchanged).
+
+---
+
 ## [1.10.1] — 2026-03-13 — Sprint 1 Audit Fixes (Bugs + UX)
 
 ### Fixed

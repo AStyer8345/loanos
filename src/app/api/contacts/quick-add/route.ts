@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-parser'
+import { normalizeStage } from '@/lib/stageNormalization'
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
       last_name: extracted.last_name,
       email: extracted.email,
       phone: extracted.phone,
-      stage: extracted.stage || 'Lead',
+      stage: normalizeStage(extracted.stage),
       contact_type: extracted.contact_type || 'borrower',
       referred_by: referredByResolved,
       lead_source: extracted.source || (referredByResolved ? 'Realtor Referral' : null),

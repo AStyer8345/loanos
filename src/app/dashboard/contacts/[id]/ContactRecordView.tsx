@@ -64,6 +64,9 @@ export type ActivityEntry = {
   summary?: string | null
   raw_payload?: Record<string, unknown> | null
   external_id?: string | null
+  // Cross-entity fields
+  loan_id?: string | null
+  _source?: string        // e.g. 'Contact' | 'Loan: 123 Main St' — set client-side when merging
 }
 
 function fmtCurrency(n: number | null) {

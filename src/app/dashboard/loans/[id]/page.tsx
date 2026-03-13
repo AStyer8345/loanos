@@ -823,6 +823,19 @@ function LoanTriggerModal({
 // ── Activity tab ──────────────────────────────────────────────────────────────
 
 function ActivityTab({ activity }: { activity: ActivityRow[] }) {
+  const [filter, setFilter] = useState<'all' | 'system' | 'manual'>('all')
+
+  const INTERNAL_KEYS = new Set(['loan_id', 'contact_id', 'user_id', 'id', 'created_at'])
+  const isSystem = (item: ActivityRow) => item.action.includes('.')
+
+  const systemCount = activity.filter(isSystem).length
+  const manualCount = activity.filter(i => !isSystem(i)).length
+  const visible = filter === 'all'
+    ? activity
+    : filter === 'system'
+      ? activity.filter(isSystem)
+      : activity.filter(i => !isSystem(i))
+
   if (activity.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-400">
@@ -834,30 +847,61 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
 
   return (
     <div className="max-w-2xl">
-      <div className="space-y-0">
-        {activity.map((item, i) => (
-          <div key={item.id} className="flex gap-3">
-            {/* Timeline dot */}
-            <div className="flex flex-col items-center">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-              {i !== activity.length - 1 && <div className="w-px flex-1 bg-slate-200 mt-1" />}
-            </div>
-            <div className="pb-4">
-              <p className="text-sm text-slate-900">{item.action}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{fmtRelative(item.created_at)}</p>
-              {item.metadata && Object.keys(item.metadata).length > 0 && (
-                <div className="mt-1 bg-slate-50 rounded px-2 py-1 text-xs text-slate-500">
-                  {Object.entries(item.metadata)
-                    .filter(([k]) => !['loan_id', 'contact_id', 'user_id'].includes(k))
-                    .slice(0, 3)
-                    .map(([k, v]) => <span key={k} className="mr-3"><span className="font-medium">{k}:</span> {String(v)}</span>)
-                  }
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      {/* Filter bar */}
+      <div className="flex gap-1 mb-4">
+        {(['all', 'system', 'manual'] as const).map(f => {
+          const label = f === 'all'
+            ? `All (${activity.length})`
+            : f === 'system'
+              ? `System (${systemCount})`
+              : `Manual (${manualCount})`
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                filter === f
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              }`}
+            >
+              {label}
+            </button>
+          )
+        })}
       </div>
+
+      {visible.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-32 gap-2 text-slate-400">
+          <p className="text-sm">No {filter} activity</p>
+        </div>
+      ) : (
+        <div className="space-y-0">
+          {visible.map((item, i) => (
+            <div key={item.id} className="flex gap-3">
+              {/* Timeline dot */}
+              <div className="flex flex-col items-center">
+                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isSystem(item) ? 'bg-emerald-500' : 'bg-blue-400'}`} />
+                {i !== visible.length - 1 && <div className="w-px flex-1 bg-slate-200 mt-1" />}
+              </div>
+              <div className="pb-4">
+                <p className="text-sm text-slate-900">{item.action}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{fmtRelative(item.created_at)}</p>
+                {item.metadata && Object.keys(item.metadata).length > 0 && (
+                  <div className="mt-1 bg-slate-50 rounded px-2 py-1 text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+                    {Object.entries(item.metadata)
+                      .filter(([k]) => !INTERNAL_KEYS.has(k))
+                      .map(([k, v]) => (
+                        <span key={k}><span className="font-medium">{k}:</span> {String(v)}</span>
+                      ))
+                    }
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

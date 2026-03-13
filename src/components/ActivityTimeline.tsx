@@ -26,6 +26,9 @@ export type ActivityLogRow = {
   summary?: string | null
   raw_payload?: Record<string, unknown> | null
   external_id?: string | null
+  // Cross-entity fields
+  loan_id?: string | null
+  _source?: string        // Set client-side when merging contact + loan activity
 }
 
 type NormalizedEntry = {
@@ -34,6 +37,7 @@ type NormalizedEntry = {
   type: string
   summary: string
   detail: Record<string, unknown> | null
+  source?: string
 }
 
 // ── Normalize legacy + new rows ──────────────────────────────────────────────
@@ -47,6 +51,7 @@ function normalize(row: ActivityLogRow): NormalizedEntry {
       type: row.type,
       summary: row.summary,
       detail: row.raw_payload ?? row.metadata ?? null,
+      source: row._source,
     }
   }
 
@@ -65,6 +70,7 @@ function normalize(row: ActivityLogRow): NormalizedEntry {
     type: action,
     summary,
     detail: meta,
+    source: row._source,
   }
 }
 
@@ -156,6 +162,12 @@ function TimelineEntry({ entry }: { entry: NormalizedEntry }) {
           <span className="text-xs text-slate-400 capitalize">
             {entry.type.replace(/_/g, ' ')}
           </span>
+
+          {entry.source && (
+            <span className="text-xs text-slate-400 bg-slate-100 rounded px-1.5 py-0.5 leading-none">
+              {entry.source}
+            </span>
+          )}
 
           {hasDetail && (
             <button

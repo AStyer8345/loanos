@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2 } from 'lucide-react'
@@ -121,6 +121,23 @@ function applyCustomListRulesLoan(query: any, rules: CustomListRule[]): any {
   return q
 }
 
+// ── Pagination + helpers (module-level to avoid re-creation) ─────────────────
+const LOANS_PAGE_SIZE = 100
+
+function flattenLoans(data: Record<string, unknown>[]): Loan[] {
+  return data.map((row) => {
+    const raw = row.contacts
+    const contact = Array.isArray(raw) ? raw[0] : raw
+    const rest = { ...row }
+    delete rest.contacts
+    return {
+      ...rest,
+      contact_email: (contact as { email?: string } | null)?.email ?? null,
+      contact_phone: (contact as { phone?: string } | null)?.phone ?? null,
+    } as Loan
+  })
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function LoansPage() {
@@ -144,6 +161,9 @@ export default function LoansPage() {
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkStatus, setBulkStatus] = useState('')
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const loansOffsetRef = useRef(0)
 
   // Restore column visibility from localStorage
   useEffect(() => {
@@ -206,13 +226,11 @@ export default function LoansPage() {
   }, [customLists, supabase])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
-  const fetchLoans = useCallback(async (listId: string) => {
-    setLoading(true)
+  const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
       .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_address, property_city, property_state, contact_id, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
-
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
       if (custom?.rules?.length) q = applyCustomListRulesLoan(q, custom.rules)
@@ -220,26 +238,34 @@ export default function LoansPage() {
       const list = SMART_LISTS.find(l => l.id === listId)
       if (list?.statuses) q = q.in('status', list.statuses)
     }
+    return q
+  }, [customLists, supabase])
 
-    const { data, error } = await q.limit(500)
+  const fetchLoans = useCallback(async (listId: string) => {
+    setLoading(true)
+    loansOffsetRef.current = 0
+    const { data, error } = await buildLoansQuery(listId).range(0, LOANS_PAGE_SIZE - 1)
     if (!error && data) {
-      const flattened: Loan[] = data.map((row: Record<string, unknown>) => {
-        const raw = row.contacts
-        const contact = Array.isArray(raw) ? raw[0] : raw
-        const rest = { ...row }
-        delete rest.contacts
-        return {
-          ...rest,
-          contact_email: (contact as { email?: string } | null)?.email ?? null,
-          contact_phone: (contact as { phone?: string } | null)?.phone ?? null,
-        } as Loan
-      })
-      setLoans(flattened)
+      setLoans(flattenLoans(data as Record<string, unknown>[]))
+      setHasMore(data.length === LOANS_PAGE_SIZE)
     } else if (!error) {
       setLoans([])
+      setHasMore(false)
     }
     setLoading(false)
-  }, [customLists, supabase])
+  }, [buildLoansQuery])
+
+  const loadMoreLoans = useCallback(async () => {
+    setLoadingMore(true)
+    const nextOffset = loansOffsetRef.current + LOANS_PAGE_SIZE
+    const { data, error } = await buildLoansQuery(activeList).range(nextOffset, nextOffset + LOANS_PAGE_SIZE - 1)
+    if (!error && data) {
+      loansOffsetRef.current = nextOffset
+      setLoans(prev => [...prev, ...flattenLoans(data as Record<string, unknown>[])])
+      setHasMore(data.length === LOANS_PAGE_SIZE)
+    }
+    setLoadingMore(false)
+  }, [buildLoansQuery, activeList])
 
   useEffect(() => {
     fetchCounts()
@@ -695,6 +721,18 @@ export default function LoansPage() {
                 ))}
               </tbody>
             </table>
+          )}
+          {/* Load More */}
+          {hasMore && !loading && (
+            <div className="flex justify-center py-4 border-t border-slate-100">
+              <button
+                onClick={loadMoreLoans}
+                disabled={loadingMore}
+                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-slate-200 rounded text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loadingMore ? 'Loading…' : `Load more (showing ${loans.length})`}
+              </button>
+            </div>
           )}
         </div>
       </div>

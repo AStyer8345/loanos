@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [1.18.0] — 2026-03-14 — Marketing: Newsletter Generator + Testimonials + Nav Deep Links
+
+### Added
+- **Newsletter Generator panel** in NEWSLETTERS tab — AI drafts via `/api/marketing/generate-newsletter` (Claude). Inputs: audience + optional rate context. Outputs: teaser email HTML + full web page HTML + slug. Actions: SEND MAILCHIMP (creates + sends campaign), PUBLISH TO WEBSITE (dispatch webhook), LOG THIS (saves to mcc_state).
+- **Testimonials Automation card** in SOCIAL tab — RUN NOW triggers n8n Weekly Social Post workflow (`eJG4wckrj6SmSpm1`) via n8n REST API. Requires `N8N_API_KEY` env var on Vercel.
+- **4 new API routes:** `/api/marketing/generate-newsletter`, `/api/marketing/send-mailchimp`, `/api/marketing/publish-newsletter`, `/api/marketing/run-testimonials`
+
+### Changed
+- **TopNav** — Marketing dropdown deep links: Newsletter Generator → `?tab=NEWSLETTERS`, Social → `?tab=SOCIAL`, Rate Updates → `?tab=TRACKER`
+- **MarketingPage** — reads `?tab` URL param via `useSearchParams` to set initial tab
+
+### Config required
+- Vercel: `N8N_API_KEY` env var (testimonials trigger)
+- Settings → Integrations: Mailchimp API key + server prefix + list IDs
+- Settings → Website: Dispatch webhook URL + secret
+
+---
+
 ## [1.17.0] — 2026-03-14 — Dashboard + Search + CRM Overhaul
 
 ### Fixed

@@ -13,6 +13,7 @@ import {
   GitBranch,
   Settings,
   Brain,
+  TrendingUp,
 } from 'lucide-react'
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { label: 'Dashboard',      href: '/dashboard',             icon: LayoutDashboard },
   { label: 'Contacts',      href: '/dashboard/contacts',    icon: Users },
   { label: 'Loans',         href: '/dashboard/loans',       icon: FileText },
+  { label: 'Performance',   href: '/dashboard/performance', icon: TrendingUp },
   { label: 'Upload Doc',    href: '/dashboard/upload',      icon: Upload },
   { label: 'Automations',   href: '/dashboard/automations', icon: Zap },
   { label: 'Marketing',     href: '/dashboard/marketing',   icon: BarChart2 },

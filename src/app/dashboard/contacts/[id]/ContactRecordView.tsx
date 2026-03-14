@@ -163,6 +163,75 @@ type Props = {
   savingNote: boolean
   onAddNote: () => void
   onSaveNotes?: (notes: string) => Promise<void>
+  onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
+}
+
+// Inline-editable text field — click to edit, blur/Enter to save
+function EditableContactField({ label, value, field, onSave }: {
+  label: string
+  value: string | null
+  field: keyof Contact
+  onSave: (field: keyof Contact, value: string | null) => Promise<void>
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const [saved, setSaved] = useState(false)
+
+  async function commit() {
+    setEditing(false)
+    const next = draft.trim() || null
+    await onSave(field, next)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+
+  if (editing) {
+    return (
+      <div>
+        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>{label.toUpperCase()}</div>
+        <input
+          autoFocus
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false) }}
+          style={{
+            ...baseStyle,
+            color: 'var(--fg)',
+            background: 'var(--bg)',
+            border: '1px solid rgba(201,168,76,0.6)',
+            borderRadius: 3,
+            padding: '3px 8px',
+            outline: 'none',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div
+      onClick={() => { setDraft(value ?? ''); setEditing(true) }}
+      title="Click to edit"
+      style={{ cursor: 'text' }}
+    >
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
+      <div style={{
+        ...baseStyle,
+        color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
+        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        paddingBottom: 1,
+        display: 'inline-block',
+        minWidth: 80,
+      }}>
+        {saved ? '✓ Saved' : (value || '—')}
+      </div>
+    </div>
+  )
 }
 
 export function ContactRecordView(props: Props) {
@@ -179,6 +248,7 @@ export function ContactRecordView(props: Props) {
     savingNote,
     onAddNote,
     onSaveNotes,
+    onSaveField,
   } = props
 
   const [notesVal, setNotesVal] = useState(contact.notes ?? '')
@@ -376,39 +446,53 @@ export function ContactRecordView(props: Props) {
 
         {activeTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Editable contact fields */}
             <div style={cardStyle}>
               <div style={labelStyle}>CONTACT INFO</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {contact.email && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Mail size={14} style={{ color: 'var(--muted)' }} />
-                    <a href={`mailto:${contact.email}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>{contact.email}</a>
-                  </div>
-                )}
-                {phone && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Phone size={14} style={{ color: 'var(--muted)' }} />
-                    <span>{phone}</span>
-                    <a href={`tel:${phone.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c', marginLeft: 4 }}>Call</a>
-                    <a href={`sms:${phone.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c' }}>Text</a>
-                  </div>
-                )}
-                {contact.phone_mobile && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Phone size={14} style={{ color: 'var(--muted)' }} />
-                    <span style={{ color: 'var(--muted)', fontSize: 11 }}>Mobile</span>
-                    <span>{contact.phone_mobile}</span>
-                    <a href={`tel:${contact.phone_mobile.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c', marginLeft: 4 }}>Call</a>
-                    <a href={`sms:${contact.phone_mobile.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c' }}>Text</a>
-                  </div>
-                )}
-                {mailingAddress && (
-                  <div style={{ fontSize: 13, color: 'var(--fg)' }}>{mailingAddress}</div>
-                )}
-                {!contact.email && !phone && !mailingAddress && (
-                  <span style={{ color: 'var(--muted)' }}>No contact info</span>
-                )}
-              </div>
+              {onSaveField ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12 }}>
+                  <EditableContactField label="First Name"  value={contact.first_name}  field="first_name"  onSave={onSaveField} />
+                  <EditableContactField label="Last Name"   value={contact.last_name}   field="last_name"   onSave={onSaveField} />
+                  <EditableContactField label="Email"       value={contact.email}        field="email"       onSave={onSaveField} />
+                  <EditableContactField label="Phone"       value={contact.phone}        field="phone"       onSave={onSaveField} />
+                  <EditableContactField label="Stage"       value={contact.stage}        field="stage"       onSave={onSaveField} />
+                  <EditableContactField label="Type"        value={contact.contact_type} field="contact_type" onSave={onSaveField} />
+                  <EditableContactField label="Referred By" value={contact.referred_by}  field="referred_by"  onSave={onSaveField} />
+                  <EditableContactField label="Closing Date" value={contact.closing_date} field="closing_date" onSave={onSaveField} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {contact.email && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Mail size={14} style={{ color: 'var(--muted)' }} />
+                      <a href={`mailto:${contact.email}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>{contact.email}</a>
+                    </div>
+                  )}
+                  {phone && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Phone size={14} style={{ color: 'var(--muted)' }} /><span>{phone}</span></div>}
+                </div>
+              )}
+              {/* Quick-action links */}
+              {(contact.email || phone) && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingTop: onSaveField ? 8 : 0, borderTop: onSaveField ? '1px solid var(--border)' : 'none' }}>
+                  {phone && <a href={`tel:${phone.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c', fontFamily: 'var(--font-mono)' }}>Call</a>}
+                  {phone && <a href={`sms:${phone.replace(/\D/g, '')}`} style={{ fontSize: 11, color: '#c9a84c', fontFamily: 'var(--font-mono)' }}>Text</a>}
+                  {contact.email && <a href={`mailto:${contact.email}`} style={{ fontSize: 11, color: '#c9a84c', fontFamily: 'var(--font-mono)' }}>Email</a>}
+                </div>
+              )}
+            </div>
+
+            <div style={cardStyle}>
+              <div style={labelStyle}>ADDRESS</div>
+              {onSaveField ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <EditableContactField label="Street"  value={contact.mailing_street}  field="mailing_street"  onSave={onSaveField} />
+                  <EditableContactField label="City"    value={contact.mailing_city}    field="mailing_city"    onSave={onSaveField} />
+                  <EditableContactField label="State"   value={contact.mailing_state}   field="mailing_state"   onSave={onSaveField} />
+                  <EditableContactField label="Zip"     value={contact.mailing_zip}     field="mailing_zip"     onSave={onSaveField} />
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--fg)' }}>{mailingAddress || <span style={{ color: 'var(--muted)' }}>No address</span>}</div>
+              )}
             </div>
 
             <div style={cardStyle}>
@@ -418,10 +502,7 @@ export function ContactRecordView(props: Props) {
                   <div>
                     <span style={{ color: 'var(--muted)', marginRight: 6 }}>Referred by</span>
                     {referrerContactId ? (
-                      <Link
-                        href={`/dashboard/contacts/${referrerContactId}`}
-                        style={{ color: '#c9a84c', textDecoration: 'none', fontWeight: 600 }}
-                      >
+                      <Link href={`/dashboard/contacts/${referrerContactId}`} style={{ color: '#c9a84c', textDecoration: 'none', fontWeight: 600 }}>
                         {contact.referred_by}
                       </Link>
                     ) : (

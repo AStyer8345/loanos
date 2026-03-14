@@ -153,13 +153,14 @@ export default function ContactRecordPage() {
 
   const handleSaveNotes = async (notes: string) => {
     if (!contact) return
-    const { error } = await supabase
-      .from('contacts')
-      .update({ notes })
-      .eq('id', contact.id)
-    if (!error) {
-      setContact(prev => prev ? { ...prev, notes } : null)
-    }
+    const { error } = await supabase.from('contacts').update({ notes }).eq('id', contact.id)
+    if (!error) setContact(prev => prev ? { ...prev, notes } : null)
+  }
+
+  const handleSaveField = async (field: keyof Contact, value: string | null) => {
+    if (!contact) return
+    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
+    if (!error) setContact(prev => prev ? { ...prev, [field]: value } : null)
   }
 
   if (loading) {
@@ -199,6 +200,7 @@ export default function ContactRecordPage() {
       savingNote={savingNote}
       onAddNote={handleAddNote}
       onSaveNotes={handleSaveNotes}
+      onSaveField={handleSaveField}
     />
   )
 }

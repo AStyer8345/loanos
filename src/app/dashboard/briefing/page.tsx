@@ -31,13 +31,13 @@ function StatCard({ label, count, icon: Icon, color }: {
   color: string
 }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-4 flex items-center gap-3">
+    <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 flex items-center gap-3">
       <div className={`p-2 rounded-md ${color}`}>
         <Icon size={16} className="text-white" />
       </div>
       <div>
-        <div className="text-2xl font-semibold text-slate-900">{count}</div>
-        <div className="text-xs text-slate-500">{label}</div>
+        <div className="text-2xl font-mono font-bold text-zinc-100">{count}</div>
+        <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">{label}</div>
       </div>
     </div>
   )
@@ -78,19 +78,19 @@ export default function DailyBriefingPage() {
   const totalItems   = data?.top7.length ?? 0
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#050505]">
       <div className="max-w-4xl mx-auto px-6 py-8">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-600 rounded-lg">
-              <Brain size={20} className="text-white" />
+            <div className="p-2 bg-amber-500/20 border border-amber-500/50 rounded-lg">
+              <Brain size={20} className="text-amber-400" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-900">Daily Briefing</h1>
+              <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider">Daily Briefing</h1>
               {data && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs font-mono text-zinc-500">
                   Generated {new Date(data.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               )}
@@ -99,7 +99,7 @@ export default function DailyBriefingPage() {
           <button
             onClick={fetchBriefing}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-amber-500/50 text-amber-400 rounded font-mono text-sm hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             {loading ? 'Generating…' : data ? 'Refresh' : 'Run Briefing'}
@@ -108,7 +108,7 @@ export default function DailyBriefingPage() {
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mb-6">
+          <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm font-mono mb-6">
             <AlertCircle size={15} />
             {error}
           </div>
@@ -116,9 +116,9 @@ export default function DailyBriefingPage() {
 
         {/* Empty state */}
         {!data && !loading && !error && (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-            <Brain size={40} strokeWidth={1.2} className="mb-3" />
-            <p className="text-sm">Click <strong className="text-slate-600">Run Briefing</strong> to generate your morning action list.</p>
+          <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
+            <Brain size={40} strokeWidth={1.2} className="mb-3 text-zinc-600" />
+            <p className="text-sm font-mono">Click <strong className="text-zinc-400">Run Briefing</strong> to generate your morning action list.</p>
           </div>
         )}
 
@@ -126,12 +126,12 @@ export default function DailyBriefingPage() {
         {loading && (
           <div className="space-y-3">
             {[...Array(7)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg border border-slate-200 p-4 animate-pulse">
+              <div key={i} className="bg-zinc-900 border border-zinc-700 rounded-r-lg border-l-[3px] border-l-amber-500 p-4 animate-pulse">
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-slate-200 mt-0.5 flex-shrink-0" />
+                  <div className="w-5 h-5 rounded-full bg-zinc-700 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-4 bg-zinc-700 rounded w-3/4" />
+                    <div className="h-3 bg-zinc-800 rounded w-1/2" />
                   </div>
                 </div>
               </div>
@@ -144,29 +144,29 @@ export default function DailyBriefingPage() {
           <>
             {/* Stats row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <StatCard label="Stale Leads"    count={data.staleLeads.length}    icon={Users}     color="bg-amber-500" />
-              <StatCard label="Active Loans"   count={data.activeLoans.length}   icon={FileText}  color="bg-emerald-600" />
-              <StatCard label="Realtor Touches" count={data.realtorTouches.length} icon={Clock}   color="bg-blue-500" />
-              <StatCard label="Pending Drafts" count={data.pendingDrafts.length} icon={Bell}      color="bg-rose-500" />
+              <StatCard label="Stale Leads"    count={data.staleLeads.length}    icon={Users}     color="bg-amber-500/30" />
+              <StatCard label="Active Loans"   count={data.activeLoans.length}   icon={FileText}  color="bg-amber-500/30" />
+              <StatCard label="Realtor Touches" count={data.realtorTouches.length} icon={Clock}   color="bg-amber-500/30" />
+              <StatCard label="Pending Drafts" count={data.pendingDrafts.length} icon={Bell}      color="bg-amber-500/30" />
             </div>
 
             {/* AI Summary */}
             {data.summary && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-emerald-900 leading-relaxed">{data.summary}</p>
+              <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 mb-6">
+                <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
               </div>
             )}
 
             {/* Progress */}
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-slate-700">Today&apos;s Actions</h2>
-              <span className="text-xs text-slate-500">{checkedCount}/{totalItems} done</span>
+              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Today&apos;s Actions</h2>
+              <span className="text-xs font-mono text-zinc-500">{checkedCount}/{totalItems} done</span>
             </div>
 
             {/* Progress bar */}
-            <div className="h-1.5 bg-slate-200 rounded-full mb-4 overflow-hidden">
+            <div className="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden border border-zinc-700">
               <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                className="h-full bg-[#4ADE80] rounded-full transition-all duration-300"
                 style={{ width: totalItems > 0 ? `${(checkedCount / totalItems) * 100}%` : '0%' }}
               />
             </div>
@@ -180,10 +180,10 @@ export default function DailyBriefingPage() {
                     key={item.rank}
                     onClick={() => toggleCheck(item.rank)}
                     className={`
-                      bg-white rounded-lg border px-4 py-3 cursor-pointer transition-all
+                      bg-zinc-900 border rounded-r-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all
                       ${done
-                        ? 'border-emerald-200 bg-emerald-50 opacity-60'
-                        : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+                        ? 'border-zinc-700 border-l-zinc-600 opacity-60'
+                        : 'border-zinc-700 border-l-amber-500 hover:border-amber-500/70'
                       }
                     `}
                   >
@@ -191,26 +191,26 @@ export default function DailyBriefingPage() {
                       {/* Rank + check */}
                       <div className="flex-shrink-0 mt-0.5">
                         {done
-                          ? <CheckCircle2 size={18} className="text-emerald-500" />
-                          : <Circle size={18} className="text-slate-300" />
+                          ? <CheckCircle2 size={18} className="text-[#4ADE80]" />
+                          : <Circle size={18} className="text-zinc-500" />
                         }
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+                          <span className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-wide">
                             #{item.rank}
                           </span>
-                          <span className={`text-sm font-semibold ${done ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                          <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
                             {item.contact}
                           </span>
                         </div>
-                        <p className={`text-sm ${done ? 'text-slate-400' : 'text-slate-700'}`}>
+                        <p className={`text-sm font-mono ${done ? 'text-zinc-500' : 'text-zinc-400'}`}>
                           {item.action}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">{item.reason}</p>
+                        <p className="text-xs font-mono text-zinc-500 mt-1">{item.reason}</p>
                         {item.snippet && !done && (
-                          <p className="text-xs text-emerald-600 mt-1.5 italic">
+                          <p className="text-xs text-amber-400 font-mono mt-1.5 italic">
                             &quot;{item.snippet}&quot;
                           </p>
                         )}
@@ -223,9 +223,9 @@ export default function DailyBriefingPage() {
 
             {/* All done */}
             {checkedCount === totalItems && totalItems > 0 && (
-              <div className="mt-6 flex flex-col items-center py-8 text-slate-500">
-                <CheckCircle2 size={36} className="text-emerald-500 mb-2" />
-                <p className="text-sm font-medium">All done for today.</p>
+              <div className="mt-6 flex flex-col items-center py-8 text-zinc-500">
+                <CheckCircle2 size={36} className="text-[#4ADE80] mb-2" />
+                <p className="text-sm font-mono">All done for today.</p>
               </div>
             )}
           </>

@@ -1058,7 +1058,7 @@ export default function ContactsPage() {
           )}
           {/* Load More */}
           {hasMore && !loading && (
-            <div className="flex justify-center py-4 border-t border-slate-100">
+            <div className="flex justify-center py-4 border-t border-zinc-700">
               <button
                 onClick={loadMoreContacts}
                 disabled={loadingMore}

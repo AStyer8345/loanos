@@ -5,27 +5,28 @@
 @tailwind utilities;
 
 :root {
-  /* Canvas & surfaces */
-  --bg:       #F9FAFB;  /* slate-50 */
-  --surface:  #FFFFFF;  /* white cards */
-  --surface2: #F3F4F6;  /* slate-100 — inputs, hover bg */
+  /* Canvas & surfaces — LoanOS dark tactical */
+  --bg:       #050505;
+  --surface:  #0a0a0a;
+  --surface2: #171717;
 
-  /* Borders */
-  --border:   #E2E8F0;  /* slate-200 */
+  /* Borders — hard 1px */
+  --border:   #262626;
 
   /* Text */
-  --text:     #0F172A;  /* slate-900 */
-  --muted:    #64748B;  /* slate-500 */
+  --text:     #e5e5e5;
+  --muted:    #737373;
+  --fg:       #e5e5e5;
 
-  /* Accent — emerald-600 */
-  --accent:        #059669;
-  --accent-light:  rgba(5, 150, 105, 0.08);
-  --accent-border: rgba(5, 150, 105, 0.3);
+  /* Accents */
+  --gold:     #D4AF37;
+  --green:    #4ADE80;
+  --red:      #DC2626;
 
-  /* Semantic aliases (legacy compat — components that still ref --gold, --green) */
-  --gold:   #059669;  /* remapped to emerald */
-  --green:  #059669;
-  --red:    #DC2626;  /* red-600 */
+  /* Legacy aliases */
+  --accent:        var(--gold);
+  --accent-light:  rgba(212, 175, 55, 0.12);
+  --accent-border: rgba(212, 175, 55, 0.5);
 }
 
 body {
@@ -35,8 +36,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Legacy action-btn — updated for light mode */
+/* Command center / tactical action button */
 .action-btn:hover {
-  background: var(--accent);
-  color: #fff;
+  background: var(--gold);
+  color: #050505;
 }

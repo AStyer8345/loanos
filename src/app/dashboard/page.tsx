@@ -7,6 +7,7 @@ import UrgentFlags from '@/components/dashboard/UrgentFlags'
 import DailyBriefingPanel from '@/components/dashboard/DailyBriefingPanel'
 import TodoList from '@/components/dashboard/TodoList'
 import RecentActivity from '@/components/dashboard/RecentActivity'
+import EmailDraftPreview from '@/components/EmailDraftPreview'
 
 export const dynamic = 'force-dynamic'
 
@@ -187,6 +188,9 @@ export default async function DashboardPage() {
 
       {/* ── Activity Log ── */}
       <RecentActivity entries={activityEntries ?? []} />
+
+      {/* ── Email Draft Preview ── */}
+      <EmailDraftPreview />
     </div>
   )
 }

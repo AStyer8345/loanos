@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [1.14.1] — 2026-03-14 — Email Draft Preview Wired to Dashboard
+
+### Added
+- **Morning audit system** — `tasks/todo.md` and `tasks/lessons.md` created with full backlog and pattern library.
+
+### Fixed
+- **`src/app/dashboard/page.tsx`** — imported and rendered `<EmailDraftPreview />` at bottom of dashboard (after RecentActivity). Component was fully built in v1.13.0 but never added to the dashboard page. Now visible on every dashboard load.
+
+### Notes
+- `email_drafts` table (migration 013) must be applied in Supabase for EmailDraftPreview to show data (not error).
+- `todo_items` table (migration 0016) must be applied for TodoList to persist tasks.
+- Migration 015 (Arive full field expansion) must be applied before WF1 can upsert new-loan webhooks.
+
+---
+
 ## [1.14.0] — 2026-03-13 — Pipeline Dashboard Redesign
 
 ### Added

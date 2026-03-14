@@ -1,5 +1,32 @@
 # LoanOS Changelog
 
+## [1.16.0] — 2026-03-14 — Marketing Command Center — Full HTML Parity
+
+### Changed
+- **`src/app/dashboard/marketing/page.tsx`** — Full upgrade to match `marketing-command-center.html` (styermortgage.com). File grew from ~920 → 1,592 lines. All Supabase persistence (`mcc_state` table) preserved intact.
+
+### Added components (new in this session)
+- **`StatRow`** — Always-visible 4-KPI strip above tabs: Today's Focus, Tasks Complete, Loans in Process, Overdue Items
+- **`OverdueBanner`** — Red alert strip with clickable tracker chips. Only renders when ≥1 tracker is overdue (days > freq × 1.5). Clicking a chip opens `LogModal`.
+- **`LogModal`** — Shared modal for logging tracker activities. Accepts `trackerId`, writes `LogEntry` to `s.log` and updates `s.last[trackerId]`. Triggered from: Overdue Banner chips, Tracker LOG NOW button, Today quick-Log ↗ buttons.
+- **`overdueTrackers()`** — Helper; returns TRACKERS array filtered to entries where `daysSince(s.last[id])` is null or > `freq × 1.5`.
+- **Brain Dump sidebar in TodayTab** — 2-column layout: tasks on left, Brain Dump todos on right (first 12 inline, overflow count). Mirrors HTML `renderTodos()` sidebar.
+- **Log ↗ quick buttons on TodayTab tasks** — Each task with a `tracker` prop shows a small gold "Log ↗" button to open LogModal directly from the TODAY view.
+
+### Enhanced tabs
+- **TrackerTab**: 2-col card grid, progress bars (green/amber/red fill based on `days/freq`), LOG NOW button (triggers page-level `openLogModal()`).
+- **ContactsTab**: Search input + CSV import modal (Salesforce column parsing) + 2-column contact card grid + Mark Called button (green, disabled if already called today).
+- **SocialTab**: Platform filter buttons (All / LinkedIn / Facebook / Instagram) above post grid.
+- **NewslettersTab**: Audience filter buttons (ALL / REALTORS / BORROWERS / BOTH) + table layout (`DATE | SUBJECT | AUDIENCE | OPEN % | ACTIONS`).
+- **LogTab**: Calendar / List view toggle (`📅 Calendar / 📋 List`) with ← PREV / NEXT → week navigation.
+
+### Page-level changes
+- `logModal` state: `{ open: boolean; trackerId: string | null }` lifted to page level.
+- `openLogModal(trackerId)` + `handleLogSave(activity, channel, notes, date)` — unified log handler.
+- `StatRow`, `OverdueBanner`, `LogModal` all rendered at page level (outside tab content area).
+
+---
+
 ## [1.15.1] — 2026-03-14 — Daily Audit: 5 Bug Fixes
 
 ### Fixed

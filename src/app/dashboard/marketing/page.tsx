@@ -180,7 +180,7 @@ function Card({ children, className = '', style }: {
   return (
     <div
       className={`border rounded-sm p-4 ${className}`}
-      style={{ background: 'var(--surface)', borderColor: 'var(--border)', ...style }}
+      style={{ background: '#18181b', borderColor: '#3f3f46', ...style }}
     >
       {children}
     </div>
@@ -189,7 +189,7 @@ function Card({ children, className = '', style }: {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="font-mono text-[10px] tracking-widest mb-3" style={{ color: 'var(--muted)' }}>
+    <div className="font-mono text-[10px] tracking-widest mb-3" style={{ color: '#71717a' }}>
       {children}
     </div>
   )
@@ -205,7 +205,7 @@ function Input({ value, onChange, placeholder, type = 'text', className = '' }: 
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       className={`bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full ${className}`}
-      style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+      style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
     />
   )
 }
@@ -216,8 +216,8 @@ function Btn({ onClick, children, variant = 'default', disabled = false, classNa
   disabled?: boolean; className?: string
 }) {
   const colors = {
-    default: { color: 'var(--muted)', border: 'var(--border)' },
-    gold:    { color: 'var(--gold)',  border: 'var(--gold)' },
+    default: { color: '#71717a', border: '#3f3f46' },
+    gold:    { color: '#C9A84C',  border: '#C9A84C' },
     danger:  { color: '#E05252',      border: '#E05252' },
     green:   { color: '#4CAF82',      border: '#4CAF82' },
   }[variant]
@@ -247,11 +247,11 @@ function Modal({ open, onClose, title, children }: {
     >
       <div
         className="w-full max-w-md rounded-sm border p-6 flex flex-col gap-4"
-        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+        style={{ background: '#18181b', borderColor: '#3f3f46' }}
       >
         <div className="flex items-center justify-between">
-          <div className="font-mono text-sm tracking-widest" style={{ color: 'var(--gold)' }}>{title}</div>
-          <button onClick={onClose} className="font-mono text-[10px] hover:opacity-70" style={{ color: 'var(--muted)' }}>ESC</button>
+          <div className="font-mono text-sm tracking-widest" style={{ color: '#C9A84C' }}>{title}</div>
+          <button onClick={onClose} className="font-mono text-[10px] hover:opacity-70" style={{ color: '#71717a' }}>ESC</button>
         </div>
         {children}
       </div>
@@ -285,28 +285,28 @@ function LogModal({ open, trackerId, onSave, onClose }: {
     <Modal open={open} onClose={onClose} title={tracker ? `LOG — ${tracker.name.toUpperCase()}` : 'LOG ACTIVITY'}>
       <div className="flex flex-col gap-3">
         <div>
-          <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>ACTIVITY</div>
+          <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>ACTIVITY</div>
           <Input value={activity} onChange={setActivity} placeholder="What did you do?" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>CHANNEL</div>
+            <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>CHANNEL</div>
             <select
               value={channel}
               onChange={e => setChannel(e.target.value)}
               className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
-              style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+              style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
             >
               {LOG_CHANNELS.map(c => <option key={c} value={c} style={{ background: '#1a1a1a' }}>{c}</option>)}
             </select>
           </div>
           <div>
-            <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>DATE</div>
+            <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>DATE</div>
             <Input type="date" value={date} onChange={setDate} />
           </div>
         </div>
         <div>
-          <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>NOTES (optional)</div>
+          <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>NOTES (optional)</div>
           <Input value={notes} onChange={setNotes} placeholder="Any context…" />
         </div>
         <div className="flex gap-2">
@@ -341,19 +341,19 @@ function StatRow({ todayDow, todayTasks, s, isWeekend }: {
       label: "TODAY'S FOCUS",
       value: isWeekend ? 'Weekend' : day.focus,
       sub:   isWeekend ? 'Recharge' : day.sub,
-      color: 'var(--gold)',
+      color: '#C9A84C',
     },
     {
       label: 'TASKS COMPLETE',
       value: `${done}/${total}`,
       sub:   done === total && total > 0 ? 'All done ✓' : `${total - done} remaining`,
-      color: done === total && total > 0 ? '#4CAF82' : 'var(--text)',
+      color: done === total && total > 0 ? '#4CAF82' : '#f4f4f5',
     },
     {
       label: 'LOANS IN PROCESS',
       value: loans || '—',
       sub:   loans ? 'active files' : 'add in Contacts',
-      color: 'var(--text)',
+      color: '#f4f4f5',
     },
     {
       label: 'OVERDUE ITEMS',
@@ -369,15 +369,15 @@ function StatRow({ todayDow, todayTasks, s, isWeekend }: {
         <div
           key={i}
           className="border rounded-sm px-4 py-3"
-          style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+          style={{ background: '#18181b', borderColor: '#3f3f46' }}
         >
-          <div className="font-mono text-[9px] tracking-widest mb-1" style={{ color: 'var(--muted)' }}>
+          <div className="font-mono text-[9px] tracking-widest mb-1" style={{ color: '#71717a' }}>
             {st.label}
           </div>
           <div className="font-mono text-2xl font-semibold leading-none" style={{ color: st.color as string }}>
             {st.value}
           </div>
-          <div className="font-mono text-[10px] mt-1 leading-snug" style={{ color: 'var(--muted)' }}>{st.sub}</div>
+          <div className="font-mono text-[10px] mt-1 leading-snug" style={{ color: '#71717a' }}>{st.sub}</div>
         </div>
       ))}
     </div>
@@ -461,24 +461,24 @@ function TodayTab({
               <div className="flex items-center gap-2 mb-1.5">
                 <span
                   className="font-mono text-[9px] tracking-widest px-2 py-0.5 rounded-sm"
-                  style={{ background: 'rgba(201,168,76,0.15)', color: 'var(--gold)' }}
+                  style={{ background: 'rgba(201,168,76,0.15)', color: '#C9A84C' }}
                 >
                   {day.name.toUpperCase()}
                 </span>
               </div>
-              <div className="font-display tracking-widest text-base" style={{ color: 'var(--gold)' }}>
+              <div className="font-display tracking-widest text-base" style={{ color: '#C9A84C' }}>
                 {day.focus} Day
               </div>
-              <div className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--muted)' }}>{day.sub}</div>
+              <div className="font-mono text-[10px] mt-0.5" style={{ color: '#71717a' }}>{day.sub}</div>
             </div>
             <div className="text-right">
               <div
                 className="font-mono text-2xl font-semibold"
-                style={{ color: done === day.tasks.length ? '#4CAF82' : 'var(--gold)' }}
+                style={{ color: done === day.tasks.length ? '#4CAF82' : '#C9A84C' }}
               >
                 {done}/{day.tasks.length}
               </div>
-              <div className="font-mono text-[9px] tracking-widest" style={{ color: 'var(--muted)' }}>COMPLETE</div>
+              <div className="font-mono text-[9px] tracking-widest" style={{ color: '#71717a' }}>COMPLETE</div>
             </div>
           </div>
 
@@ -491,20 +491,20 @@ function TodayTab({
                   onClick={() => toggle(task.id, task.tracker)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-sm cursor-pointer transition-colors"
                   style={{
-                    background: checked ? 'rgba(201,168,76,0.08)' : 'var(--bg)',
-                    border: `1px solid ${checked ? 'rgba(201,168,76,0.3)' : 'var(--border)'}`,
+                    background: checked ? 'rgba(201,168,76,0.08)' : '#09090b',
+                    border: `1px solid ${checked ? 'rgba(201,168,76,0.3)' : '#3f3f46'}`,
                   }}
                 >
                   <div
                     className="w-4 h-4 border flex-shrink-0 flex items-center justify-center"
-                    style={{ borderColor: checked ? 'var(--gold)' : 'var(--border)' }}
+                    style={{ borderColor: checked ? '#C9A84C' : '#3f3f46' }}
                   >
-                    {checked && <div className="w-2 h-2" style={{ background: 'var(--gold)' }} />}
+                    {checked && <div className="w-2 h-2" style={{ background: '#C9A84C' }} />}
                   </div>
                   <span className="text-sm">{task.e}</span>
                   <span
                     className="font-mono text-xs flex-1 leading-snug"
-                    style={{ color: checked ? 'var(--muted)' : 'var(--text)', textDecoration: checked ? 'line-through' : 'none' }}
+                    style={{ color: checked ? '#71717a' : '#f4f4f5', textDecoration: checked ? 'line-through' : 'none' }}
                   >
                     {task.label}
                   </span>
@@ -512,7 +512,7 @@ function TodayTab({
                     <button
                       onClick={e => { e.stopPropagation(); onLogTracker(task.tracker!) }}
                       className="font-mono text-[9px] px-1.5 py-0.5 border rounded-sm hover:opacity-70 transition-opacity flex-shrink-0"
-                      style={{ color: 'var(--gold)', borderColor: 'rgba(201,168,76,0.4)', background: 'rgba(201,168,76,0.08)' }}
+                      style={{ color: '#C9A84C', borderColor: 'rgba(201,168,76,0.4)', background: 'rgba(201,168,76,0.08)' }}
                     >
                       Log ↗
                     </button>
@@ -541,26 +541,26 @@ function TodayTab({
               onKeyDown={e => e.key === 'Enter' && addTodo()}
               placeholder="Capture anything…"
               className="flex-1 bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none"
-              style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+              style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
             />
             <Btn onClick={addTodo} variant="gold">ADD</Btn>
           </div>
           <div className="flex flex-col gap-1.5">
             {s.todos.length === 0 && (
-              <div className="font-mono text-[10px]" style={{ color: 'var(--muted)' }}>Nothing here. You&apos;re clear.</div>
+              <div className="font-mono text-[10px]" style={{ color: '#71717a' }}>Nothing here. You&apos;re clear.</div>
             )}
             {s.todos.slice(0, 12).map(t => (
-              <div key={t.id} className="flex items-center gap-2 py-1.5 border-b" style={{ borderColor: 'var(--border)' }}>
+              <div key={t.id} className="flex items-center gap-2 py-1.5 border-b" style={{ borderColor: '#3f3f46' }}>
                 <button
                   onClick={() => completeTodo(t.id)}
                   className="w-3.5 h-3.5 border flex-shrink-0 hover:opacity-70 transition-opacity"
-                  style={{ borderColor: 'var(--border)' }}
+                  style={{ borderColor: '#3f3f46' }}
                 />
-                <span className="font-mono text-[10px] flex-1 leading-snug" style={{ color: 'var(--text)' }}>{t.text}</span>
+                <span className="font-mono text-[10px] flex-1 leading-snug" style={{ color: '#f4f4f5' }}>{t.text}</span>
               </div>
             ))}
             {s.todos.length > 12 && (
-              <div className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>
+              <div className="font-mono text-[9px]" style={{ color: '#71717a' }}>
                 +{s.todos.length - 12} more — see Brain Dump tab
               </div>
             )}
@@ -600,19 +600,19 @@ function WeekTab({ s, todayKey }: { s: MCCState; todayKey: string }) {
             <Card key={d} style={{ outline: isToday ? '1px solid rgba(201,168,76,0.4)' : 'none' }}>
               <div
                 className="font-display tracking-widest text-xs mb-0.5"
-                style={{ color: isToday ? 'var(--gold)' : 'var(--text)' }}
+                style={{ color: isToday ? '#C9A84C' : '#f4f4f5' }}
               >
                 {day.name.slice(0, 3).toUpperCase()}
                 {isToday && <span className="ml-1 text-[8px]">· TODAY</span>}
               </div>
-              <div className="font-mono text-[9px] mb-2" style={{ color: 'var(--muted)' }}>
+              <div className="font-mono text-[9px] mb-2" style={{ color: '#71717a' }}>
                 {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
-              <div className="font-mono text-[10px] mb-2 leading-snug" style={{ color: 'var(--muted)' }}>{day.focus}</div>
-              <div className="h-1 rounded-full mb-1" style={{ background: 'var(--border)' }}>
-                <div className="h-1 rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 100 ? '#4CAF82' : 'var(--gold)' }} />
+              <div className="font-mono text-[10px] mb-2 leading-snug" style={{ color: '#71717a' }}>{day.focus}</div>
+              <div className="h-1 rounded-full mb-1" style={{ background: '#3f3f46' }}>
+                <div className="h-1 rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 100 ? '#4CAF82' : '#C9A84C' }} />
               </div>
-              <div className="font-mono text-[10px] text-right" style={{ color: done === day.tasks.length ? '#4CAF82' : 'var(--muted)' }}>
+              <div className="font-mono text-[10px] text-right" style={{ color: done === day.tasks.length ? '#4CAF82' : '#71717a' }}>
                 {done}/{day.tasks.length}
               </div>
             </Card>
@@ -625,14 +625,14 @@ function WeekTab({ s, todayKey }: { s: MCCState; todayKey: string }) {
           const isToday = key === todayKey
           return (
             <Card key={d}>
-              <div className="font-mono text-[10px] font-semibold mb-2" style={{ color: isToday ? 'var(--gold)' : 'var(--text)' }}>
+              <div className="font-mono text-[10px] font-semibold mb-2" style={{ color: isToday ? '#C9A84C' : '#f4f4f5' }}>
                 {day.name} — {day.focus}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
                 {day.tasks.map(t => (
                   <div key={t.id} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: TCOLS[t.type] }} />
-                    <span className="font-mono text-[10px]" style={{ color: 'var(--muted)' }}>{t.label}</span>
+                    <span className="font-mono text-[10px]" style={{ color: '#71717a' }}>{t.label}</span>
                   </div>
                 ))}
               </div>
@@ -738,8 +738,8 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
             onClick={() => { setList(k); setSearch('') }}
             className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors"
             style={{
-              borderColor: list === k ? 'var(--gold)' : 'var(--border)',
-              color:       list === k ? 'var(--gold)' : 'var(--muted)',
+              borderColor: list === k ? '#C9A84C' : '#3f3f46',
+              color:       list === k ? '#C9A84C' : '#71717a',
               background:  list === k ? 'rgba(201,168,76,0.08)' : 'transparent',
             }}
           >
@@ -755,11 +755,11 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
           onChange={e => setSearch(e.target.value)}
           placeholder="Search contacts…"
           className="flex-1 min-w-40 bg-transparent border rounded-sm font-mono text-xs px-3 py-1.5 outline-none"
-          style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+          style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
         />
         <Btn onClick={() => setShowAdd(v => !v)} variant="gold">+ ADD</Btn>
         <Btn onClick={() => setShowImport(true)}>CSV IMPORT</Btn>
-        <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>
+        <span className="font-mono text-[9px]" style={{ color: '#71717a' }}>
           {filtered.length} contact{filtered.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -771,7 +771,7 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
           <div className="grid grid-cols-2 gap-3">
             {(['first', 'last', 'company', 'phone', 'email', 'note'] as const).map(f => (
               <div key={f} className={f === 'note' ? 'col-span-2' : ''}>
-                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>{f.toUpperCase()}</div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>{f.toUpperCase()}</div>
                 <Input value={(form as Record<string, string>)[f] ?? ''} onChange={v => setForm(p => ({ ...p, [f]: v }))} />
               </div>
             ))}
@@ -786,15 +786,15 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
       {/* CSV Import modal */}
       <Modal open={showImport} onClose={() => setShowImport(false)} title="IMPORT FROM SALESFORCE CSV">
         <div>
-          <div className="font-mono text-[9px] mb-2" style={{ color: 'var(--muted)' }}>
-            Columns: <span style={{ color: 'var(--gold)' }}>FirstName, LastName, Company, Phone, Email, LastTouch</span>
+          <div className="font-mono text-[9px] mb-2" style={{ color: '#71717a' }}>
+            Columns: <span style={{ color: '#C9A84C' }}>FirstName, LastName, Company, Phone, Email, LastTouch</span>
           </div>
           <textarea
             value={csvText}
             onChange={e => setCsvText(e.target.value)}
             placeholder={`FirstName,LastName,Company,Phone,Email,LastTouch\nJohn,Smith,Realty One,512-555-1234,john@email.com,2025-02-15`}
             className="w-full bg-transparent border rounded-sm font-mono text-xs p-2 outline-none resize-none"
-            style={{ borderColor: 'var(--border)', color: 'var(--text)', minHeight: 110 }}
+            style={{ borderColor: '#3f3f46', color: '#f4f4f5', minHeight: 110 }}
           />
         </div>
         <div className="flex gap-2">
@@ -805,7 +805,7 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
 
       {/* Contact grid */}
       {filtered.length === 0 && (
-        <div className="font-mono text-xs mt-2" style={{ color: 'var(--muted)' }}>
+        <div className="font-mono text-xs mt-2" style={{ color: '#71717a' }}>
           {search ? 'No contacts match that search.' : 'No contacts yet — add manually or import CSV.'}
         </div>
       )}
@@ -820,43 +820,43 @@ function ContactsTab({ s, save }: { s: MCCState; save: (next: MCCState) => void 
                   {c.calledToday && (
                     <span className="font-mono text-[8px] px-1.5 py-0.5 rounded-sm mr-1" style={{ background: '#4CAF8222', color: '#4CAF82' }}>✓ CALLED</span>
                   )}
-                  <div className="font-mono text-xs font-semibold" style={{ color: 'var(--text)' }}>
+                  <div className="font-mono text-xs font-semibold" style={{ color: '#f4f4f5' }}>
                     {c.first} {c.last}
                   </div>
-                  {c.company && <div className="font-mono text-[10px]" style={{ color: 'var(--muted)' }}>{c.company}</div>}
+                  {c.company && <div className="font-mono text-[10px]" style={{ color: '#71717a' }}>{c.company}</div>}
                 </div>
-                <span className="font-mono text-[8px] px-1.5 py-0.5 rounded-sm" style={{ background: 'rgba(201,168,76,0.1)', color: 'var(--gold)' }}>
+                <span className="font-mono text-[8px] px-1.5 py-0.5 rounded-sm" style={{ background: 'rgba(201,168,76,0.1)', color: '#C9A84C' }}>
                   {LIST_META[list].label.toUpperCase()}
                 </span>
               </div>
 
               {c.phone && (
-                <div className="font-mono text-[10px] mb-0.5" style={{ color: 'var(--muted)' }}>
-                  📞 <a href={`tel:${c.phone}`} style={{ color: 'var(--text)' }}>{c.phone}</a>
+                <div className="font-mono text-[10px] mb-0.5" style={{ color: '#71717a' }}>
+                  📞 <a href={`tel:${c.phone}`} style={{ color: '#f4f4f5' }}>{c.phone}</a>
                 </div>
               )}
               {c.email && (
-                <div className="font-mono text-[10px] mb-1" style={{ color: 'var(--muted)' }}>
-                  ✉ <a href={`mailto:${c.email}`} style={{ color: 'var(--text)' }}>{c.email}</a>
+                <div className="font-mono text-[10px] mb-1" style={{ color: '#71717a' }}>
+                  ✉ <a href={`mailto:${c.email}`} style={{ color: '#f4f4f5' }}>{c.email}</a>
                 </div>
               )}
 
               <div
                 className="font-mono text-[9px] mb-2"
-                style={{ color: isStale ? '#E05252' : days !== null ? '#4CAF82' : 'var(--muted)' }}
+                style={{ color: isStale ? '#E05252' : days !== null ? '#4CAF82' : '#71717a' }}
               >
                 ⏱ Last Touch: {days === null ? 'Never' : days === 0 ? 'Today' : `${days}d ago`}
                 {c.lastTouch ? ` (${c.lastTouch})` : ''}
               </div>
 
               {c.note && (
-                <div className="font-mono text-[10px] mb-2 pb-2 border-b" style={{ color: 'var(--muted)', borderColor: 'var(--border)' }}>
+                <div className="font-mono text-[10px] mb-2 pb-2 border-b" style={{ color: '#71717a', borderColor: '#3f3f46' }}>
                   💬 {c.note}
                 </div>
               )}
 
               {c.callHistory && c.callHistory.length > 0 && (
-                <div className="font-mono text-[9px] mb-2" style={{ color: 'var(--muted)' }}>
+                <div className="font-mono text-[9px] mb-2" style={{ color: '#71717a' }}>
                   Recent: {c.callHistory.slice(0, 2).map((h, i) => (
                     <span key={i}>{i > 0 ? ' · ' : ''}{h.date}{h.note ? ` (${h.note})` : ''}</span>
                   ))}
@@ -975,7 +975,7 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
             <div className="font-mono text-xs font-semibold mb-0.5" style={{ color: '#9B72CF' }}>
               🏆 TESTIMONIALS AUTOMATION
             </div>
-            <div className="font-mono text-[9px] leading-snug" style={{ color: 'var(--muted)' }}>
+            <div className="font-mono text-[9px] leading-snug" style={{ color: '#71717a' }}>
               Runs the LoanOS Weekly Social Post n8n workflow — pulls recent reviews
               and generates LinkedIn/Facebook posts automatically.
             </div>
@@ -1001,7 +1001,7 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
               {runningTestimonials ? '⟳ RUNNING…' : '▶ RUN NOW'}
             </button>
             {s.last['social-post'] && (
-              <span className="font-mono text-[8px]" style={{ color: 'var(--muted)' }}>
+              <span className="font-mono text-[8px]" style={{ color: '#71717a' }}>
                 Last: {fmtDate(s.last['social-post'])}
               </span>
             )}
@@ -1017,8 +1017,8 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
               onClick={() => setPlatFilter(p)}
               className="font-mono text-[9px] tracking-widest px-2.5 py-1 border rounded-sm transition-colors"
               style={{
-                borderColor: platFilter === p ? 'var(--gold)' : 'var(--border)',
-                color:       platFilter === p ? 'var(--gold)' : 'var(--muted)',
+                borderColor: platFilter === p ? '#C9A84C' : '#3f3f46',
+                color:       platFilter === p ? '#C9A84C' : '#71717a',
                 background:  platFilter === p ? 'rgba(201,168,76,0.08)' : 'transparent',
               }}
             >
@@ -1034,12 +1034,12 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
           <SectionLabel>LOG SOCIAL POST</SectionLabel>
           <div className="flex flex-col gap-3">
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>PLATFORM</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>PLATFORM</div>
               <select
                 value={form.platform}
                 onChange={e => setForm(p => ({ ...p, platform: e.target.value }))}
                 className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
               >
                 {PLAT_OPTS.map(p => (
                   <option key={p} value={p} style={{ background: '#1a1a1a' }}>{PLAT_DISPLAY[p] ?? p}</option>
@@ -1048,7 +1048,7 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
             </div>
             {(['caption', 'url', 'date', 'notes'] as const).map(f => (
               <div key={f}>
-                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>
                   {f === 'url' ? 'POST URL (optional)' : f === 'notes' ? 'NOTES (optional)' : f.toUpperCase()}
                 </div>
                 <Input
@@ -1068,7 +1068,7 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
       )}
 
       {filtered.length === 0 && (
-        <div className="font-mono text-xs" style={{ color: 'var(--muted)' }}>No posts logged yet.</div>
+        <div className="font-mono text-xs" style={{ color: '#71717a' }}>No posts logged yet.</div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {[...filtered].reverse().map(p => {
@@ -1082,10 +1082,10 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
                 >
                   {PLAT_DISPLAY[p.platform] ?? p.platform}
                 </div>
-                <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>{fmtDate(p.date)}</span>
+                <span className="font-mono text-[9px]" style={{ color: '#71717a' }}>{fmtDate(p.date)}</span>
               </div>
               {p.caption && (
-                <div className="font-mono text-[10px] mb-1 leading-snug" style={{ color: 'var(--text)' }}>
+                <div className="font-mono text-[10px] mb-1 leading-snug" style={{ color: '#f4f4f5' }}>
                   {p.caption.slice(0, 140)}{p.caption.length > 140 ? '…' : ''}
                 </div>
               )}
@@ -1094,7 +1094,7 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
                   <a href={p.url} target="_blank" rel="noopener noreferrer">{p.url}</a>
                 </div>
               )}
-              {p.notes && <div className="font-mono text-[9px] mb-2" style={{ color: 'var(--muted)' }}>💬 {p.notes}</div>}
+              {p.notes && <div className="font-mono text-[9px] mb-2" style={{ color: '#71717a' }}>💬 {p.notes}</div>}
               <Btn onClick={() => save({ ...s, socialPosts: s.socialPosts.filter(x => x.id !== p.id) })} variant="danger">✕ DELETE</Btn>
             </Card>
           )
@@ -1285,11 +1285,11 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
     <div className="max-w-4xl">
 
       {/* ── Generator Panel ── */}
-      <Card className="mb-4" style={{ borderColor: showGen ? 'var(--gold)' : undefined }}>
+      <Card className="mb-4" style={{ borderColor: showGen ? '#C9A84C' : undefined }}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div className="font-mono text-xs font-semibold" style={{ color: 'var(--gold)' }}>🚀 NEWSLETTER GENERATOR</div>
-            <div className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--muted)' }}>
+            <div className="font-mono text-xs font-semibold" style={{ color: '#C9A84C' }}>🚀 NEWSLETTER GENERATOR</div>
+            <div className="font-mono text-[9px] mt-0.5" style={{ color: '#71717a' }}>
               AI drafts → Mailchimp campaign → publish to website
             </div>
           </div>
@@ -1302,12 +1302,12 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>AUDIENCE</div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
                 <select
                   value={genAudience}
                   onChange={e => setGenAud(e.target.value as GenAudience)}
                   className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
-                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                  style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
                 >
                   {(['Realtors', 'Borrowers', 'Both'] as const).map(a => (
                     <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
@@ -1315,7 +1315,7 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
                 </select>
               </div>
               <div>
-                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>
                   RATE / MARKET CONTEXT (optional)
                 </div>
                 <Input
@@ -1360,24 +1360,24 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
             {preview && (
               <div className="flex flex-col gap-3 mt-1">
                 <div>
-                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--gold)' }}>SUBJECT LINE</div>
-                  <div className="font-mono text-xs px-3 py-2 rounded-sm" style={{ background: 'rgba(201,168,76,0.08)', color: 'var(--text)' }}>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#C9A84C' }}>SUBJECT LINE</div>
+                  <div className="font-mono text-xs px-3 py-2 rounded-sm" style={{ background: 'rgba(201,168,76,0.08)', color: '#f4f4f5' }}>
                     {preview.subject}
                   </div>
                 </div>
                 <div>
-                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>TEASER EMAIL (Mailchimp)</div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>TEASER EMAIL (Mailchimp)</div>
                   <div
                     className="text-xs rounded-sm p-3 overflow-auto max-h-40 font-mono leading-relaxed"
-                    style={{ background: '#0D0D0D', color: 'var(--muted)', border: '1px solid var(--border)', fontSize: 10 }}
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', fontSize: 10 }}
                     dangerouslySetInnerHTML={{ __html: preview.teaserHtml }}
                   />
                 </div>
                 <div>
-                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>WEB PAGE CONTENT</div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>WEB PAGE CONTENT</div>
                   <div
                     className="font-mono text-[9px] px-3 py-2 rounded-sm leading-snug"
-                    style={{ background: '#0D0D0D', color: 'var(--muted)', border: '1px solid var(--border)', whiteSpace: 'pre-wrap', maxHeight: 160, overflow: 'auto' }}
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', whiteSpace: 'pre-wrap', maxHeight: 160, overflow: 'auto' }}
                   >
                     {preview.webTitle} — slug: /{preview.slug}
                   </div>
@@ -1396,8 +1396,8 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
               onClick={() => setFilter(f)}
               className="font-mono text-[9px] tracking-widest px-2.5 py-1 border rounded-sm transition-colors"
               style={{
-                borderColor: filter === f ? 'var(--gold)' : 'var(--border)',
-                color:       filter === f ? 'var(--gold)' : 'var(--muted)',
+                borderColor: filter === f ? '#C9A84C' : '#3f3f46',
+                color:       filter === f ? '#C9A84C' : '#71717a',
                 background:  filter === f ? 'rgba(201,168,76,0.08)' : 'transparent',
               }}
             >
@@ -1413,12 +1413,12 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
           <SectionLabel>LOG NEWSLETTER</SectionLabel>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>AUDIENCE</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
               <select
                 value={form.audience}
                 onChange={e => setForm(p => ({ ...p, audience: e.target.value }))}
                 className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
               >
                 {['Realtors', 'Borrowers', 'Both'].map(a => (
                   <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
@@ -1426,19 +1426,19 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
               </select>
             </div>
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>DATE SENT</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>DATE SENT</div>
               <Input type="date" value={form.date} onChange={v => setForm(p => ({ ...p, date: v }))} />
             </div>
             <div className="md:col-span-2">
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>SUBJECT LINE *</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>SUBJECT LINE *</div>
               <Input value={form.subject} onChange={v => setForm(p => ({ ...p, subject: v }))} placeholder="Austin Market Update — Feb 2026" />
             </div>
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>OPEN RATE</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>OPEN RATE</div>
               <Input value={form.openRate} onChange={v => setForm(p => ({ ...p, openRate: v }))} placeholder="42%" />
             </div>
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>MAILCHIMP URL</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>MAILCHIMP URL</div>
               <Input value={form.mailchimpUrl} onChange={v => setForm(p => ({ ...p, mailchimpUrl: v }))} placeholder="https://mailchi.mp/…" />
             </div>
           </div>
@@ -1450,31 +1450,31 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
       )}
 
       {/* Table */}
-      <div className="border rounded-sm overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+      <div className="border rounded-sm overflow-hidden" style={{ borderColor: '#3f3f46' }}>
         <div
           className="grid font-mono text-[9px] tracking-widest px-3 py-2"
           style={{
             gridTemplateColumns: '90px 1fr 90px 70px 80px',
-            background: 'var(--bg)', color: 'var(--muted)', borderBottom: '1px solid var(--border)',
+            background: '#09090b', color: '#71717a', borderBottom: '1px solid #3f3f46',
           }}
         >
           <span>DATE</span><span>SUBJECT</span><span>AUDIENCE</span><span>OPEN %</span><span>ACTIONS</span>
         </div>
         {sorted.length === 0 && (
-          <div className="font-mono text-[10px] px-3 py-4" style={{ color: 'var(--muted)' }}>No newsletters logged yet.</div>
+          <div className="font-mono text-[10px] px-3 py-4" style={{ color: '#71717a' }}>No newsletters logged yet.</div>
         )}
         {sorted.map(n => (
           <div
             key={n.id}
             className="grid items-center px-3 py-2.5 border-b font-mono"
-            style={{ gridTemplateColumns: '90px 1fr 90px 70px 80px', borderColor: 'var(--border)', background: 'var(--surface)' }}
+            style={{ gridTemplateColumns: '90px 1fr 90px 70px 80px', borderColor: '#3f3f46', background: '#18181b' }}
           >
-            <span className="text-[9px]" style={{ color: 'var(--muted)' }}>
+            <span className="text-[9px]" style={{ color: '#71717a' }}>
               {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
             </span>
             <div>
-              <div className="text-[10px]" style={{ color: 'var(--text)' }}>{n.subject}</div>
-              {n.notes && <div className="text-[9px]" style={{ color: 'var(--muted)' }}>{n.notes}</div>}
+              <div className="text-[10px]" style={{ color: '#f4f4f5' }}>{n.subject}</div>
+              {n.notes && <div className="text-[9px]" style={{ color: '#71717a' }}>{n.notes}</div>}
             </div>
             <span>
               <span
@@ -1484,7 +1484,7 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
                 {n.audience.toUpperCase()}
               </span>
             </span>
-            <span className="text-[10px]" style={{ color: n.openRate ? '#4CAF82' : 'var(--muted)' }}>
+            <span className="text-[10px]" style={{ color: n.openRate ? '#4CAF82' : '#71717a' }}>
               {n.openRate || '—'}
             </span>
             <div className="flex gap-1">
@@ -1526,17 +1526,17 @@ function TrackerTab({ s, onLogTracker }: { s: MCCState; onLogTracker: (id: strin
             <Card key={t.id}>
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <div className="font-mono text-xs" style={{ color: 'var(--text)' }}>{t.name}</div>
-                  <div className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>{t.channel}</div>
+                  <div className="font-mono text-xs" style={{ color: '#f4f4f5' }}>{t.name}</div>
+                  <div className="font-mono text-[9px]" style={{ color: '#71717a' }}>{t.channel}</div>
                 </div>
                 <Btn onClick={() => onLogTracker(t.id)} variant="gold">LOG NOW</Btn>
               </div>
-              <div className="h-1.5 rounded-full mb-2" style={{ background: 'var(--border)' }}>
+              <div className="h-1.5 rounded-full mb-2" style={{ background: '#3f3f46' }}>
                 <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: fillColor }} />
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs" style={{ color }}>{lbl}</span>
-                <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>{dt} · every {t.freq}d</span>
+                <span className="font-mono text-[9px]" style={{ color: '#71717a' }}>{dt} · every {t.freq}d</span>
               </div>
             </Card>
           )
@@ -1604,8 +1604,8 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
               onClick={() => setView(v)}
               className="font-mono text-[9px] tracking-widest px-3 py-1.5 border rounded-sm transition-colors"
               style={{
-                borderColor: view === v ? 'var(--gold)' : 'var(--border)',
-                color:       view === v ? 'var(--gold)' : 'var(--muted)',
+                borderColor: view === v ? '#C9A84C' : '#3f3f46',
+                color:       view === v ? '#C9A84C' : '#71717a',
                 background:  view === v ? 'rgba(201,168,76,0.08)' : 'transparent',
               }}
             >
@@ -1620,27 +1620,27 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
         <Card className="mb-3">
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>DATE</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>DATE</div>
               <Input type="date" value={form.date} onChange={v => setForm(p => ({ ...p, date: v }))} />
             </div>
             <div>
-              <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>CHANNEL</div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>CHANNEL</div>
               <select
                 value={form.channel}
                 onChange={e => setForm(p => ({ ...p, channel: e.target.value }))}
                 className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
               >
                 {LOG_CHANNELS.map(c => <option key={c} value={c} style={{ background: '#1a1a1a' }}>{c}</option>)}
               </select>
             </div>
           </div>
           <div className="mb-3">
-            <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>ACTIVITY</div>
+            <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>ACTIVITY</div>
             <Input value={form.activity} onChange={v => setForm(p => ({ ...p, activity: v }))} placeholder="What did you do?" />
           </div>
           <div className="mb-3">
-            <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>NOTES</div>
+            <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>NOTES</div>
             <Input value={form.notes} onChange={v => setForm(p => ({ ...p, notes: v }))} placeholder="Details…" />
           </div>
           <div className="flex gap-2">
@@ -1655,7 +1655,7 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
         <>
           <div className="flex items-center gap-3 mb-3">
             <Btn onClick={() => setCalOffset(p => p - 1)}>← PREV</Btn>
-            <span className="font-mono text-xs flex-1 text-center" style={{ color: 'var(--muted)' }}>{weekLabel}</span>
+            <span className="font-mono text-xs flex-1 text-center" style={{ color: '#71717a' }}>{weekLabel}</span>
             <Btn onClick={() => setCalOffset(p => Math.min(0, p + 1))} disabled={calOffset === 0}>NEXT →</Btn>
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -1667,28 +1667,28 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
                   key={day.toDateString()}
                   className="border rounded-sm p-2"
                   style={{
-                    borderColor: isToday ? 'rgba(201,168,76,0.5)' : 'var(--border)',
-                    background:  isToday ? 'rgba(201,168,76,0.05)' : 'var(--surface)',
+                    borderColor: isToday ? 'rgba(201,168,76,0.5)' : '#3f3f46',
+                    background:  isToday ? 'rgba(201,168,76,0.05)' : '#18181b',
                     minHeight:   80,
                   }}
                 >
-                  <div className="font-mono text-[8px] mb-0.5" style={{ color: 'var(--muted)' }}>
+                  <div className="font-mono text-[8px] mb-0.5" style={{ color: '#71717a' }}>
                     {DAY_NAMES[day.getDay()]}
                   </div>
                   <div
                     className="font-mono text-sm font-semibold mb-1"
-                    style={{ color: isToday ? 'var(--gold)' : 'var(--text)' }}
+                    style={{ color: isToday ? '#C9A84C' : '#f4f4f5' }}
                   >
                     {day.getDate()}
                   </div>
                   {entries.length === 0
-                    ? <div className="font-mono text-[8px]" style={{ color: 'var(--border)' }}>—</div>
+                    ? <div className="font-mono text-[8px]" style={{ color: '#3f3f46' }}>—</div>
                     : entries.map((e, i) => (
                       <div key={i} className="mb-0.5">
-                        <div className="font-mono text-[8px] leading-snug" style={{ color: 'var(--text)' }}>
+                        <div className="font-mono text-[8px] leading-snug" style={{ color: '#f4f4f5' }}>
                           {e.activity.slice(0, 22)}{e.activity.length > 22 ? '…' : ''}
                         </div>
-                        <div className="font-mono text-[7px]" style={{ color: 'var(--muted)' }}>{e.channel}</div>
+                        <div className="font-mono text-[7px]" style={{ color: '#71717a' }}>{e.channel}</div>
                       </div>
                     ))
                   }
@@ -1704,7 +1704,7 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
         <div>
           <div
             className="grid font-mono text-[9px] tracking-widest px-3 py-2 border"
-            style={{ gridTemplateColumns: '80px 1fr 100px 50px 24px', background: 'var(--bg)', borderColor: 'var(--border)', color: 'var(--muted)' }}
+            style={{ gridTemplateColumns: '80px 1fr 100px 50px 24px', background: '#09090b', borderColor: '#3f3f46', color: '#71717a' }}
           >
             <span>DATE</span><span>ACTIVITY</span><span>CHANNEL</span><span>STATUS</span><span />
           </div>
@@ -1712,16 +1712,16 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
             <div
               key={entry.id}
               className="grid items-center px-3 py-2 border-b font-mono"
-              style={{ gridTemplateColumns: '80px 1fr 100px 50px 24px', borderColor: 'var(--border)', background: 'var(--surface)' }}
+              style={{ gridTemplateColumns: '80px 1fr 100px 50px 24px', borderColor: '#3f3f46', background: '#18181b' }}
             >
-              <span className="text-[9px]" style={{ color: 'var(--muted)' }}>
+              <span className="text-[9px]" style={{ color: '#71717a' }}>
                 {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
               <div>
-                <div className="text-[10px]" style={{ color: 'var(--text)' }}>{entry.activity}</div>
-                {entry.notes && <div className="text-[9px]" style={{ color: 'var(--muted)' }}>{entry.notes}</div>}
+                <div className="text-[10px]" style={{ color: '#f4f4f5' }}>{entry.activity}</div>
+                {entry.notes && <div className="text-[9px]" style={{ color: '#71717a' }}>{entry.notes}</div>}
               </div>
-              <span className="text-[9px]" style={{ color: 'var(--muted)' }}>{entry.channel}</span>
+              <span className="text-[9px]" style={{ color: '#71717a' }}>{entry.channel}</span>
               <span className="text-[9px]" style={{ color: '#4CAF82' }}>Done</span>
               <button
                 onClick={() => save({ ...s, log: s.log.filter(x => x.id !== entry.id) })}
@@ -1733,7 +1733,7 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
             </div>
           ))}
           {s.log.length === 0 && (
-            <div className="font-mono text-[10px] px-3 py-4" style={{ color: 'var(--muted)' }}>No activity logged yet.</div>
+            <div className="font-mono text-[10px] px-3 py-4" style={{ color: '#71717a' }}>No activity logged yet.</div>
           )}
         </div>
       )}
@@ -1771,22 +1771,22 @@ function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void
           onKeyDown={e => e.key === 'Enter' && addTodo()}
           placeholder="Capture anything on your mind…"
           className="flex-1 bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none"
-          style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+          style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
         />
         <Btn onClick={addTodo} variant="gold">ADD</Btn>
       </div>
 
       <div className="flex flex-col gap-1.5 mb-6">
         {s.todos.map(t => (
-          <div key={t.id} className="flex items-center gap-3 px-3 py-2 border" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-            <button onClick={() => completeTodo(t.id)} className="w-4 h-4 border flex-shrink-0 hover:opacity-70 transition-opacity" style={{ borderColor: 'var(--border)' }} />
-            <span className="font-mono text-xs flex-1" style={{ color: 'var(--text)' }}>{t.text}</span>
-            <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>{t.created}</span>
+          <div key={t.id} className="flex items-center gap-3 px-3 py-2 border" style={{ borderColor: '#3f3f46', background: '#18181b' }}>
+            <button onClick={() => completeTodo(t.id)} className="w-4 h-4 border flex-shrink-0 hover:opacity-70 transition-opacity" style={{ borderColor: '#3f3f46' }} />
+            <span className="font-mono text-xs flex-1" style={{ color: '#f4f4f5' }}>{t.text}</span>
+            <span className="font-mono text-[9px]" style={{ color: '#71717a' }}>{t.created}</span>
             <Btn onClick={() => save({ ...s, todos: s.todos.filter(x => x.id !== t.id) })} variant="danger">×</Btn>
           </div>
         ))}
         {s.todos.length === 0 && (
-          <div className="font-mono text-xs" style={{ color: 'var(--muted)' }}>Nothing here. You&apos;re clear.</div>
+          <div className="font-mono text-xs" style={{ color: '#71717a' }}>Nothing here. You&apos;re clear.</div>
         )}
       </div>
 
@@ -1795,12 +1795,12 @@ function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void
           <SectionLabel>COMPLETED</SectionLabel>
           <div className="flex flex-col gap-1.5">
             {s.doneTodos.slice(0, 20).map(t => (
-              <div key={t.id} className="flex items-center gap-3 px-3 py-2 border" style={{ borderColor: 'var(--border)', background: 'var(--bg)', opacity: 0.6 }}>
+              <div key={t.id} className="flex items-center gap-3 px-3 py-2 border" style={{ borderColor: '#3f3f46', background: '#09090b', opacity: 0.6 }}>
                 <div className="w-4 h-4 border flex-shrink-0 flex items-center justify-center" style={{ borderColor: '#4CAF82' }}>
                   <div className="w-2 h-2" style={{ background: '#4CAF82' }} />
                 </div>
-                <span className="font-mono text-xs flex-1 line-through" style={{ color: 'var(--muted)' }}>{t.text}</span>
-                <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>done {t.done_at}</span>
+                <span className="font-mono text-xs flex-1 line-through" style={{ color: '#71717a' }}>{t.text}</span>
+                <span className="font-mono text-[9px]" style={{ color: '#71717a' }}>done {t.done_at}</span>
                 <Btn onClick={() => save({ ...s, doneTodos: s.doneTodos.filter(x => x.id !== t.id) })} variant="danger">×</Btn>
               </div>
             ))}
@@ -1884,7 +1884,7 @@ export default function MarketingPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64 font-mono text-xs" style={{ color: 'var(--muted)' }}>
+    <div className="flex items-center justify-center h-64 font-mono text-xs" style={{ color: '#71717a' }}>
       LOADING…
     </div>
   )
@@ -1906,9 +1906,9 @@ export default function MarketingPage() {
             onClick={() => setTab(t)}
             className="font-mono text-[10px] tracking-widest px-3 py-1.5 rounded-sm transition-colors"
             style={{
-              background: tab === t ? 'var(--gold)' : 'var(--bg)',
-              color:      tab === t ? 'var(--bg-deep)' : 'var(--muted)',
-              border:     `1px solid ${tab === t ? 'var(--gold)' : 'var(--border)'}`,
+              background: tab === t ? '#C9A84C' : '#09090b',
+              color:      tab === t ? '#000000' : '#71717a',
+              border:     `1px solid ${tab === t ? '#C9A84C' : '#3f3f46'}`,
             }}
           >
             {t}
@@ -1918,7 +1918,7 @@ export default function MarketingPage() {
 
       {/* ── Tab content ── */}
       {tab === 'TODAY' && (isWeekend
-        ? <div className="font-mono text-xs max-w-sm" style={{ color: 'var(--muted)' }}>
+        ? <div className="font-mono text-xs max-w-sm" style={{ color: '#71717a' }}>
             No tasks today — it&apos;s the weekend. Come back Monday.
           </div>
         : <TodayTab todayDow={todayDow} todayTasks={todayTasks} toggle={toggle} s={s} save={save} onLogTracker={openLogModal} />

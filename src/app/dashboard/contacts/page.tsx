@@ -536,6 +536,16 @@ export default function ContactsPage() {
         setSelectedContact(prev => prev ? { ...prev, stage: stageValue } : null)
     }
     await supabase.from('contacts').update({ stage: normalizeStage(stageValue) }).eq('id', contactId)
+    supabase.from('activity_log').insert({
+      action: 'contact.stage_changed',
+      entity_type: 'contact',
+      contact_id: contactId,
+      metadata: {
+        from: contact.stage ?? null,
+        to: stageValue,
+        name: `${contact.first_name ?? ''} ${contact.last_name ?? ''}`.trim(),
+      },
+    })
     fetchCounts()
   }
 

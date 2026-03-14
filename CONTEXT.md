@@ -22,6 +22,7 @@ AI Chat fully live as of March 11, 2026 — contact context working, clear butto
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs migration 010 + Vercel env vars to fully activate. Agent 1 (Daily Briefing): ESLint build errors fixed (commit 34d4c81), deploying to Vercel — visible in sidebar as first nav item.
 ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (2026-03-11). Migrations 011 + 012 need to be run in Supabase SQL Editor. Netlify/Vercel webhook endpoints need ARIVE_WEBHOOK_SECRET + LOANOS_SYSTEM_USER_ID env vars. Contact detail view: phone_mobile display row + inline notes editing with save-on-blur.
 v1.9.0 deployed to Vercel (2026-03-12).
+**Backlog Cleanup v1.20.0 (2026-03-14)**: Migration 017 (`user_settings`) applied via Supabase MCP. `RUN_ALL_PENDING.sql` updated to cover all migrations 006–017. Activity auto-log added to contacts stage changes (`contact.stage_changed`) and loans status changes (`loan.status_changed`) — fire-and-forget, no UI impact. Two new Next.js API routes: `POST /api/agents/cd-extraction` + `POST /api/agents/pa-extraction` — n8n calls these after Claude extracts CD/PA fields; routes update loans table and log to activity_log. Marketing page (`/dashboard/marketing`) migrated from Bloomberg CSS vars to hardcoded dark zinc hex values — all 142 `var(--)` references replaced. `docs/n8n-credentials-setup.md` created with setup steps for Review Request + Social Post workflows + CD/PA payload reference.
 **Email Draft Preview v1.19.0 (2026-03-14)**: Email Draft Preview fully wired. POST endpoint added to `/api/email-drafts` for external callers (n8n). Email History tab added to loan detail page (5th tab) — queries `email_drafts` where `loan_id = id`, inline iframe HTML preview, Mark Sent / Discard for pending drafts. Email History tab added to contact detail page — same pattern with `contact_id` filter. `EmailDraftRow` type exported from `ContactRecordView.tsx`. All new automations should call `logEmailDraft()` from `src/lib/supabase/logEmailDraft.ts`.
 **Marketing: Newsletter Generator + Testimonials v1.18.0 (2026-03-14)**: Newsletter Generator panel in NEWSLETTERS tab — AI drafts teaser email HTML + full web page HTML via `/api/marketing/generate-newsletter` (Claude); SEND MAILCHIMP + PUBLISH TO WEBSITE actions. Testimonials Automation card in SOCIAL tab — RUN NOW triggers n8n Weekly Social Post workflow (`eJG4wckrj6SmSpm1`). 4 new API routes. TopNav Marketing dropdown deep links to `?tab=` URL params. Requires Vercel env: `N8N_API_KEY`, Mailchimp keys in Settings, dispatch webhook in Settings.
 **CRM + Dashboard Overhaul v1.17.0 (2026-03-14)**: 5-task sprint — (1) Fixed Closing Volume 90d chart: status case sensitivity bug (`'closed'` vs `'Closed'`) caused 0 results; fixed `.in()` filter + added 90d totals to chart header. (2) Global Search: replaced CSS vars with hardcoded zinc palette, added type pills, fixed text overflow. (3) Contacts default view → Hot List / Pre-Approved; added `all-borrowers` smart list + quick filter dropdown. (4) Loans default view → In Process; closing date ASC sort; urgency row coloring (amber ≤14d, red ≤7d); quick filter dropdown. (5) AI Chat system prompt: full replacement with LoanOS AI identity + Adam's revenue framework + today's date injection.
@@ -253,11 +254,12 @@ These tools are working and must NOT be broken during LoanOS build:
   - [ ] End-to-end testing: quick add flow, bulk email/text generation, bulk admin actions
 
 **Not Yet Built 🚧**
-- 🚧 **CD extraction workflow** — same n8n pattern as contract pipeline, Claude extracts Closing Disclosure fields
-- 🚧 **Pre-approval extraction workflow** — same pattern, Claude extracts PA letter fields
+- ✅ **CD extraction API route** — `POST /api/agents/cd-extraction` live; n8n calls after Claude extracts CD fields (needs n8n workflow wiring)
+- ✅ **PA extraction API route** — `POST /api/agents/pa-extraction` live; same pattern (needs n8n workflow wiring)
+- ✅ **Activity auto-log** — contact stage changes + loan status changes now write to activity_log automatically
+- ✅ **Marketing page theme** — Bloomberg CSS vars removed; all hardcoded dark zinc hex values
 - 🚧 **Rate update publisher migration** — move from styer-mortgage-site Netlify to LoanOS native
-- 🚧 **Activity auto-log** — automatic activity_log entries from key CRM actions (stage changes, notes, calls)
-- 🚧 **Marketing page light mode** — still using Bloomberg/gold CSS vars, needs migration to emerald/Inter theme
+- 🚧 **CD/PA n8n workflow wiring** — Next.js routes exist; need n8n workflows that upload PDF → Claude → call these endpoints
 
 ### Phase 3 — Calculator Suite (replaces Mortgage Coach)
 

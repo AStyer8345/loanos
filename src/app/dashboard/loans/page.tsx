@@ -312,6 +312,7 @@ export default function LoansPage() {
     const { error } = await supabase.from('loans').update({ status: newStatus }).eq('id', loanId)
     if (!error) {
       setLoans(prev => prev.map(l => l.id === loanId ? { ...l, status: newStatus } : l))
+      supabase.from('activity_log').insert({ action: 'loan.status_changed', entity_type: 'loan', loan_id: loanId, metadata: { to: newStatus } })
       await fetchCounts()
       if (!activeList.startsWith('custom-')) fetchLoans(activeList)
     }
@@ -335,6 +336,7 @@ export default function LoansPage() {
     const { error } = await supabase.from('loans').update({ status: newStatus }).in('id', ids)
     if (!error) {
       setLoans(prev => prev.map(l => ids.includes(l.id) ? { ...l, status: newStatus } : l))
+      supabase.from('activity_log').insert(ids.map(id => ({ action: 'loan.status_changed', entity_type: 'loan', loan_id: id, metadata: { to: newStatus } })))
       setSelected(new Set())
       setBulkStatus('')
       await fetchCounts()

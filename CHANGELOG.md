@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## [1.20.0] — 2026-03-14 — Backlog Cleanup: Migrations, Activity Log, Extraction Routes, Marketing Theme
+
+### Added
+- **Migration 017 applied** — `user_settings` table live in Supabase (Settings page now functional)
+- **`RUN_ALL_PENDING.sql` updated** — now covers all migrations 006-017; idempotent, safe to re-run on any fresh environment
+- **`POST /api/agents/cd-extraction`** — n8n calls this after extracting Closing Disclosure fields via Claude; updates `loans` record with CD dates + financial fields + logs `loan.cd_received` to `activity_log`
+- **`POST /api/agents/pa-extraction`** — same pattern for Pre-Approval letters; updates loan fields + sets status to `Pre-Approved` + logs `loan.pa_received`
+- **`docs/n8n-credentials-setup.md`** — step-by-step setup guides for Review Request + Weekly Testimonial Social Post workflows (SMTP, Gemini API, Google Sheets OAuth2, Publer) + CD/PA extraction payload reference
+
+### Changed
+- **`contacts/page.tsx` — `handleStageChange()`**: fire-and-forget `activity_log` insert after stage update (`contact.stage_changed`, includes `from`/`to`/`name`)
+- **`loans/page.tsx` — `handleStatusChange()`**: fire-and-forget `activity_log` insert after inline status change (`loan.status_changed`)
+- **`loans/page.tsx` — `handleBulkStatusUpdate()`**: bulk `activity_log` insert (one row per loan) after bulk status update
+- **`marketing/page.tsx`** — all CSS vars (`var(--gold)`, `var(--muted)`, `var(--text)`, `var(--surface)`, `var(--border)`, `var(--bg)`, `var(--bg-deep)`) replaced with hardcoded dark zinc hex values (`#C9A84C`, `#71717a`, `#f4f4f5`, `#18181b`, `#3f3f46`, `#09090b`, `#000000`); visual output unchanged, no Bloomberg CSS dependency
+
+### Manual steps still needed
+- n8n credentials (see `docs/n8n-credentials-setup.md`): SMTP for Review Request, Gemini + Google Sheets OAuth2 for Social Post
+- Outlook: Azure App Registration + 6x env vars (see `docs/outlook-azure-setup.md`)
+
+---
+
 ## [1.19.0] — 2026-03-14 — Email Draft Preview: Full Integration
 
 ### Added

@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-14 (session 2)_
+_Last updated: 2026-03-14 (morning audit)_
 
 ---
 
@@ -15,7 +15,7 @@ _Last updated: 2026-03-14 (session 2)_
 
 ## 🟡 Medium Priority
 
-- [ ] **EmailDraftPreview dark theme** — component uses light colors (bg-emerald-100, text-slate-900) while dashboard is zinc-950 dark. Visually inconsistent. Update AUTOMATION_COLORS and card styles to match dark theme.
+- [x] **EmailDraftPreview dark theme** — fixed 2026-03-14 morning audit. All slate/white → zinc-900/zinc-800. AUTOMATION_COLORS → dark variants (bg-*-900/40, text-*-400, border-*-800). Action buttons, skeleton, empty state all updated.
 - [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` calls Claude but doesn't log to `email_drafts`. Add after n8n webhook call.
 - [ ] **Wire logEmailDraft to final-cd** — same pattern as refi-intake.
 - [ ] **E2E test WF1 + WF2** — after migrations applied: trigger test webhook, verify loan row in Supabase, verify loan_status_history row.

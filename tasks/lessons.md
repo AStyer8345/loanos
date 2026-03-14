@@ -63,7 +63,9 @@ Supabase migrations in `/supabase/migrations/` are local files only. They must b
 `EmailDraftPreview` component was fully built (migration, helper, API route, component) but Step 5 (adding to dashboard) was never completed. Component sat dormant in `/src/components/`. Always verify that built components are actually imported and rendered somewhere.
 
 ### Light/dark theme mismatch
-`EmailDraftPreview` was built with light Tailwind colors (bg-emerald-100, text-slate-900) while the dashboard uses a dark zinc-950 theme. Visual inconsistency goes undetected without live preview. When building new components, check the theme of the target page before writing Tailwind classes.
+`EmailDraftPreview` was built with light Tailwind colors (bg-emerald-100, text-slate-900) while the dashboard uses a dark zinc-950 theme. Fixed 2026-03-14: all `slate-*`/`white` → `zinc-900`/`zinc-800`; AUTOMATION_COLORS → dark variants (`bg-*-900/40`, `text-*-400`, `border-*-800`). Visual inconsistency goes undetected without live preview — always check target page theme before writing Tailwind classes.
+
+**Briefing page** (`/dashboard/briefing/page.tsx`) still uses light theme (bg-slate-50, bg-white) — not yet fixed.
 
 ---
 

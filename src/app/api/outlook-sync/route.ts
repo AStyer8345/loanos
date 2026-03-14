@@ -135,18 +135,12 @@ async function logEmailActivity(
 }
 
 async function runSync() {
-  const { accessToken, email: myEmail } = await getValidAccessToken();
-
-  console.log(`[outlook-sync] Starting sync for ${myEmail}, window: ${SYNC_WINDOW_MINUTES}min`);
+  const { accessToken } = await getValidAccessToken();
 
   const [inboxMessages, sentMessages] = await Promise.all([
     fetchEmails(accessToken, 'inbox'),
     fetchEmails(accessToken, 'sentitems'),
   ]);
-
-  console.log(
-    `[outlook-sync] Fetched ${inboxMessages.length} inbox, ${sentMessages.length} sent`
-  );
 
   const stats = { processed: 0, inserted: 0, skipped: 0, unmatched: 0 };
 
@@ -187,7 +181,6 @@ async function runSync() {
     if (!matched) stats.unmatched++;
   }
 
-  console.log(`[outlook-sync] Done — ${JSON.stringify(stats)}`);
   return stats;
 }
 

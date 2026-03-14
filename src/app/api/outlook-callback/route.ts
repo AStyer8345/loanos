@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
   try {
     const stateValid = await validateState(state);
     if (!stateValid) {
-      console.warn('[outlook-callback] Invalid or expired state — continuing (non-fatal)');
+      // Invalid or expired state — continuing (non-fatal)
     }
 
     const tokens = await exchangeCode(code);
@@ -151,8 +151,6 @@ export async function GET(request: NextRequest) {
       expiresIn: tokens.expires_in,
       email,
     });
-
-    console.log(`[outlook-callback] Connected Outlook: ${email}`);
 
     return NextResponse.redirect(`${base}/dashboard/settings?outlook=connected`);
   } catch (err: unknown) {

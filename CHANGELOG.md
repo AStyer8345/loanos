@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [1.15.1] — 2026-03-14 — Daily Audit: 5 Bug Fixes
+
+### Fixed
+- **`src/app/api/automations/refi-intake/route.ts`** — Wrong Claude model string `claude-sonnet-4-20250514` → `claude-sonnet-4-5`. Invalid model was causing every refi intake automation to 502.
+- **`src/app/dashboard/layout.tsx`** — Layout wrapper background changed from `bg-slate-50` (light) → `bg-zinc-950` (dark). Prevents light flash under dark dashboard pages on load.
+- **`src/app/api/arive-webhook/route.ts`** — Removed `console.log` success log on every webhook hit.
+- **`src/app/api/outlook-callback/route.ts`** — Removed `console.log` and `console.warn` debug logs.
+- **`src/app/api/outlook-sync/route.ts`** — Removed 3 `console.log` statements; removed unused `myEmail` destructure.
+
+### Removed
+- **`src/app/dashboard/SidebarNav.tsx`** — Dead code. Component was never imported after switching to `TopNav` horizontal layout. Deleted.
+
+### Added
+- **`tasks/audit-reports/AUDIT-2026-03-14.md`** — Full codebase audit report covering all 7 categories: Architecture, Supabase Schema, UI/UX, Feature Completeness, Claude API Usage, Simplification, Quick Wins.
+
+---
+
 ## [1.15.0] — 2026-03-14 — Marketing Fix + Content Board + Settings Expansion
 
 ### Fixed

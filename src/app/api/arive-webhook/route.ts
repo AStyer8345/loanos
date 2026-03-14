@@ -251,10 +251,6 @@ export async function POST(request: NextRequest) {
       user_id: SYSTEM_USER_ID,
     })
 
-    console.log(
-      `[arive-webhook] OK — loan ${loan.id} | contact ${contact.id} | arive_id ${ariveLoanId} | loan# ${loanNumber}`
-    )
-
     return NextResponse.json(
       {
         success: true,

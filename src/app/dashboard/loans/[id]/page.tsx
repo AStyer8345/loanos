@@ -263,10 +263,10 @@ export default function LoanDetailPage() {
   useEffect(() => { fetchAll() }, [fetchAll])
 
   if (loading) return (
-    <div className="flex items-center justify-center h-96 text-slate-400 text-sm">Loading…</div>
+    <div className="flex items-center justify-center h-96 text-zinc-500 text-sm font-mono">Loading…</div>
   )
   if (!loan) return (
-    <div className="flex flex-col items-center justify-center h-96 gap-3 text-slate-400">
+    <div className="flex flex-col items-center justify-center h-96 gap-3 text-zinc-500 font-mono">
       <AlertCircle size={24} />
       <p>Loan not found</p>
       <Link href="/dashboard/loans" className="text-emerald-600 hover:underline text-sm">← Back to loans</Link>
@@ -280,26 +280,26 @@ export default function LoanDetailPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-200 bg-white">
-        <Link href="/dashboard/loans" className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 mb-2 transition-colors">
+      <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/50">
+        <Link href="/dashboard/loans" className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 font-mono mb-2 transition-colors">
           <ArrowLeft size={12} /> Back to Loans
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-slate-900">{displayName}</h1>
+            <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider">{displayName}</h1>
             {loan.loan_name && loan.loan_name !== displayName && (
-              <p className="text-xs text-slate-400 mt-0.5">{loan.loan_name}</p>
+              <p className="text-xs text-zinc-500 mt-0.5 font-mono">{loan.loan_name}</p>
             )}
             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
               <StatusBadge status={loan.status} />
-              {loan.loan_purpose && <span className="text-xs text-slate-500">{loan.loan_purpose}</span>}
-              {location && <span className="text-xs text-slate-500">{location}</span>}
+              {loan.loan_purpose && <span className="text-xs text-zinc-500 font-mono">{loan.loan_purpose}</span>}
+              {location && <span className="text-xs text-zinc-500 font-mono">{location}</span>}
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-slate-900">{fmtCurrency(loan.loan_amount)}</p>
+            <p className="text-2xl font-mono font-bold text-amber-400">{fmtCurrency(loan.loan_amount)}</p>
             {loan.closing_date && (
-              <p className="text-xs text-slate-500 mt-1">Closes {fmtDate(loan.closing_date)}</p>
+              <p className="text-xs text-zinc-500 mt-1 font-mono">Closes {fmtDate(loan.closing_date)}</p>
             )}
           </div>
         </div>
@@ -315,10 +315,10 @@ export default function LoanDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm rounded font-mono font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-transparent'
               }`}
             >
               {tab.label}
@@ -354,14 +354,14 @@ function SectionCard({ title, fields }: {
   fields: { label: string; value: React.ReactNode }[]
 }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{title}</h2>
+    <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">{title}</h2>
       </div>
       {fields.map((f, i) => (
-        <div key={f.label} className={`flex items-start px-4 py-2 text-sm ${i > 0 ? 'border-t border-slate-100' : ''}`}>
-          <span className="w-40 shrink-0 text-slate-500 text-xs leading-5">{f.label}</span>
-          <span className="text-slate-900">{f.value ?? '—'}</span>
+        <div key={f.label} className={`flex items-start px-4 py-2 text-sm ${i > 0 ? 'border-t border-zinc-700' : ''}`}>
+          <span className="w-40 shrink-0 text-zinc-500 text-xs font-mono leading-5">{f.label}</span>
+          <span className="text-zinc-200 font-mono">{f.value ?? '—'}</span>
         </div>
       ))}
     </div>
@@ -487,25 +487,25 @@ function OverviewTab({ loan, contact, loanId }: {
 
         {/* Linked Contact */}
         {contact && (
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Linked Contact</h2>
+          <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
             </div>
             <div className="p-4">
               <Link
                 href={`/dashboard/contacts?id=${contact.id}`}
-                className="font-semibold text-slate-900 hover:text-emerald-700 hover:underline"
+                className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors"
               >
                 {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
               </Link>
-              {contact.email && <p className="text-sm text-slate-600 mt-1">{contact.email}</p>}
-              {contact.phone && <p className="text-sm text-slate-600">{contact.phone}</p>}
+              {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
+              {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
               {contact.referred_by && (
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  <p className="text-xs text-slate-400">Referred by</p>
+                <div className="mt-3 pt-3 border-t border-zinc-700">
+                  <p className="text-xs text-zinc-500 font-mono">Referred by</p>
                   <Link
                     href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
-                    className="text-sm text-emerald-700 hover:underline flex items-center gap-1 mt-0.5"
+                    className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5"
                   >
                     {contact.referred_by}
                     <ChevronRight size={12} />
@@ -518,11 +518,11 @@ function OverviewTab({ loan, contact, loanId }: {
       </div>
 
       {/* 8 — Notes */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Notes</h2>
-          {saving && <span className="text-xs text-slate-400">Saving…</span>}
-          {!saving && saved && <span className="text-xs text-emerald-600">Saved ✓</span>}
+      <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+        <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
+          {saving && <span className="text-xs text-zinc-500 font-mono">Saving…</span>}
+          {!saving && saved && <span className="text-xs text-[#4ADE80] font-mono">Saved ✓</span>}
         </div>
         <textarea
           value={notesVal}
@@ -530,7 +530,7 @@ function OverviewTab({ loan, contact, loanId }: {
           onBlur={handleNotesBlur}
           rows={6}
           placeholder="Add notes about this loan…"
-          className="w-full p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none resize-y"
+          className="w-full p-4 text-sm text-zinc-200 bg-zinc-800/50 placeholder-zinc-500 focus:outline-none resize-y font-mono border-0"
         />
       </div>
     </div>
@@ -584,7 +584,7 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
 
   if (docs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-400">
+      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
         <FileText size={24} />
         <p className="text-sm">No documents attached to this loan</p>
         <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
@@ -603,40 +603,40 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-slate-700">{docs.length} document{docs.length !== 1 ? 's' : ''}</h2>
+        <h2 className="text-sm font-mono font-semibold text-zinc-400">{docs.length} document{docs.length !== 1 ? 's' : ''}</h2>
         <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+          className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono disabled:opacity-50"
         >
           <Upload size={12} />
           {uploading ? 'Uploading…' : '+ Upload Document'}
         </button>
       </div>
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">File</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Uploaded</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Size</th>
+            <tr className="bg-zinc-800/80 border-b border-zinc-700">
+              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">File</th>
+              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Type</th>
+              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Uploaded</th>
+              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Size</th>
               <th className="px-4 py-2.5"></th>
             </tr>
           </thead>
           <tbody>
             {docs.map((doc, i) => (
-              <tr key={doc.id} className={`${i !== 0 ? 'border-t border-slate-100' : ''} hover:bg-slate-50`}>
-                <td className="px-4 py-3 font-medium text-slate-900">{doc.file_name}</td>
-                <td className="px-4 py-3 text-slate-600">{doc.doc_type || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 text-xs">{fmtRelative(doc.created_at)}</td>
-                <td className="px-4 py-3 text-slate-500 text-xs">{fmtBytes(doc.file_size)}</td>
+              <tr key={doc.id} className={`${i !== 0 ? 'border-t border-zinc-700' : ''} hover:bg-zinc-800/50`}>
+                <td className="px-4 py-3 font-mono font-medium text-zinc-200">{doc.file_name}</td>
+                <td className="px-4 py-3 text-zinc-400 font-mono">{doc.doc_type || '—'}</td>
+                <td className="px-4 py-3 text-zinc-500 text-xs font-mono">{fmtRelative(doc.created_at)}</td>
+                <td className="px-4 py-3 text-zinc-500 text-xs font-mono">{fmtBytes(doc.file_size)}</td>
                 <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => handleDownload(doc)}
                     disabled={signingId === doc.id}
-                    className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono disabled:opacity-50"
                   >
                     {signingId === doc.id ? 'Loading…' : <><Download size={12} /> Download</>}
                   </button>
@@ -657,17 +657,17 @@ function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCre
 
   return (
     <div>
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-zinc-500 font-mono mb-4">
         Run automations pre-filled with this loan&apos;s details. Output will be an Outlook draft.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {WORKFLOWS.map(wf => (
-          <div key={wf.id} className="bg-white border border-slate-200 rounded-xl p-4 hover:border-emerald-300 transition-colors">
+          <div key={wf.id} className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl p-4 hover:border-amber-500/70 transition-colors">
             <div className="flex items-start gap-3">
               <span className="text-2xl">{wf.icon}</span>
               <div className="flex-1">
-                <p className="font-medium text-slate-900 text-sm">{wf.name}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{wf.description}</p>
+                <p className="font-mono font-medium text-zinc-100 text-sm">{wf.name}</p>
+                <p className="text-xs text-zinc-500 font-mono mt-0.5">{wf.description}</p>
               </div>
             </div>
             <button
@@ -750,25 +750,25 @@ function LoanTriggerModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl w-full max-w-md">
+        <div className="px-5 py-4 border-b border-zinc-700 flex items-center justify-between">
           <div>
-            <p className="font-semibold text-slate-900">{workflow.icon} {workflow.name}</p>
-            <p className="text-xs text-slate-500 mt-0.5">For: {loan.borrower_name || loan.loan_name}</p>
+            <p className="font-mono font-semibold text-zinc-100">{workflow.icon} {workflow.name}</p>
+            <p className="text-xs text-zinc-500 font-mono mt-0.5">For: {loan.borrower_name || loan.loan_name}</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg leading-none">×</button>
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 text-lg leading-none">×</button>
         </div>
         <div className="p-5">
           {done ? (
             <div className="flex flex-col items-center py-4 gap-2 text-emerald-700">
               <Check size={28} />
               <p className="font-medium">Sent to n8n</p>
-              <p className="text-xs text-slate-500">Check Outlook for draft</p>
+              <p className="text-xs text-zinc-500 font-mono">Check Outlook for draft</p>
             </div>
           ) : (
             <>
               {/* Loan context preview */}
-              <div className="bg-slate-50 rounded-lg p-3 mb-4 text-xs text-slate-600 space-y-1">
+              <div className="bg-zinc-800 rounded-lg p-3 mb-4 text-xs text-zinc-400 font-mono space-y-1 border border-zinc-700">
                 <p><span className="font-medium">Borrower:</span> {loan.borrower_name || '—'}</p>
                 <p><span className="font-medium">Amount:</span> {fmtCurrency(loan.loan_amount)}</p>
                 {loan.closing_date && <p><span className="font-medium">Closing:</span> {fmtDate(loan.closing_date)}</p>}
@@ -777,28 +777,28 @@ function LoanTriggerModal({
 
               {workflow.triggerType === 'pdf' ? (
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">{workflow.triggerLabel}</label>
+                  <label className="block text-xs font-mono text-zinc-400 mb-1">{workflow.triggerLabel}</label>
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center cursor-pointer hover:border-emerald-400 transition-colors"
+                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-amber-500 transition-colors bg-zinc-800/50"
                   >
                     {file ? (
                       <p className="text-sm text-emerald-700 font-medium">{file.name}</p>
                     ) : (
-                      <p className="text-sm text-slate-400">Drop PDF here or click to browse</p>
+                      <p className="text-sm text-zinc-500 font-mono">Drop PDF here or click to browse</p>
                     )}
                   </div>
                   <input ref={fileRef} type="file" accept=".pdf" hidden onChange={e => setFile(e.target.files?.[0] || null)} />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Referral Details</label>
+                  <label className="block text-xs font-mono text-zinc-400 mb-1">Referral Details</label>
                   <textarea
                     rows={5}
                     value={referralText}
                     onChange={e => setReferralText(e.target.value)}
                     placeholder="Name, contact info, what they're looking for…"
-                    className="w-full text-sm border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-amber-500 resize-none"
                   />
                 </div>
               )}
@@ -838,7 +838,7 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
 
   if (activity.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-400">
+      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
         <Activity size={24} />
         <p className="text-sm">No activity yet</p>
       </div>
@@ -861,8 +861,8 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 filter === f
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-600'
               }`}
             >
               {label}
@@ -872,7 +872,7 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-32 gap-2 text-slate-400">
+        <div className="flex flex-col items-center justify-center h-32 gap-2 text-zinc-500 font-mono">
           <p className="text-sm">No {filter} activity</p>
         </div>
       ) : (
@@ -882,13 +882,13 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
               {/* Timeline dot */}
               <div className="flex flex-col items-center">
                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isSystem(item) ? 'bg-emerald-500' : 'bg-blue-400'}`} />
-                {i !== visible.length - 1 && <div className="w-px flex-1 bg-slate-200 mt-1" />}
+                {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
               </div>
               <div className="pb-4">
-                <p className="text-sm text-slate-900">{item.action}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{fmtRelative(item.created_at)}</p>
+                <p className="text-sm font-mono text-zinc-200">{item.action}</p>
+                <p className="text-xs text-zinc-500 font-mono mt-0.5">{fmtRelative(item.created_at)}</p>
                 {item.metadata && Object.keys(item.metadata).length > 0 && (
-                  <div className="mt-1 bg-slate-50 rounded px-2 py-1 text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+                  <div className="mt-1 bg-zinc-800 rounded px-2 py-1 text-xs text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-1 border border-zinc-700">
                     {Object.entries(item.metadata)
                       .filter(([k]) => !INTERNAL_KEYS.has(k))
                       .map(([k, v]) => (
@@ -909,12 +909,12 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
 // ── Status badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-slate-400 text-xs">—</span>
+  if (!status) return <span className="text-zinc-500 text-xs font-mono">—</span>
   const s = status.toLowerCase()
-  let cls = 'bg-slate-100 text-slate-600'
-  if (['closed', 'funded'].some(v => s.includes(v))) cls = 'bg-emerald-100 text-emerald-700'
-  else if (['process', 'submitted', 'conditional', 'clear to close', 'approved'].some(v => s.includes(v))) cls = 'bg-blue-100 text-blue-700'
-  else if (['started'].some(v => s.includes(v))) cls = 'bg-amber-100 text-amber-700'
-  else if (['cancelled', 'denied', 'withdrawn'].some(v => s.includes(v))) cls = 'bg-red-100 text-red-600'
+  let cls = 'bg-zinc-800 text-zinc-400 border border-zinc-600'
+  if (['closed', 'funded'].some(v => s.includes(v))) cls = 'bg-[#4ADE80]/10 text-[#4ADE80] border-[#4ADE80]/40'
+  else if (['process', 'submitted', 'conditional', 'clear to close', 'approved'].some(v => s.includes(v))) cls = 'bg-amber-500/10 text-amber-400 border-amber-500/40'
+  else if (['started'].some(v => s.includes(v))) cls = 'bg-amber-500/10 text-amber-400 border-amber-500/40'
+  else if (['cancelled', 'denied', 'withdrawn'].some(v => s.includes(v))) cls = 'bg-red-900/30 text-red-400 border-red-800'
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{status}</span>
 }

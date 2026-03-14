@@ -72,19 +72,19 @@ function SecretField({
   const [visible, setVisible] = useState(false)
   return (
     <div>
-      <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
       <div className="relative">
         <input
           type={visible ? 'text' : 'password'}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder ?? '••••••••••••'}
-          className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 pr-9 focus:outline-none focus:border-emerald-500 transition-colors font-mono placeholder-slate-300"
+          className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 pr-9 focus:outline-none focus:border-amber-500 transition-colors font-mono placeholder-zinc-500"
         />
         <button
           type="button"
           onClick={() => setVisible(v => !v)}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           {visible ? <EyeOff size={14} /> : <Eye size={14} />}
         </button>
@@ -103,13 +103,13 @@ function TextField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-500 transition-colors"
+        className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500 transition-colors"
       />
     </div>
   )
@@ -129,19 +129,19 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-6">
+    <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
       <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center">
-            <Icon size={17} className="text-slate-500" />
+          <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+            <Icon size={17} className="text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-            <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+            <h2 className="text-sm font-mono font-semibold text-zinc-100">{title}</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>
           </div>
         </div>
         {updatedAt && (
-          <span className="text-xs text-slate-400 font-mono mt-0.5">
+          <span className="text-xs text-zinc-500 font-mono mt-0.5">
             Saved {fmtTime(updatedAt)}
           </span>
         )}
@@ -153,7 +153,7 @@ function SectionCard({
         <button
           onClick={onSave}
           disabled={saving}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
           {saving ? 'Saving…' : 'Save'}
@@ -311,18 +311,18 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4 space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900 mb-1">Settings</h1>
-        <p className="text-sm text-slate-500">Manage integrations, credentials, and account preferences.</p>
+        <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider mb-1">Settings</h1>
+        <p className="text-sm font-mono text-zinc-500">Manage integrations, credentials, and account preferences.</p>
       </div>
 
       {/* Flash message */}
       {flashMsg && (
         <div
           onClick={() => setFlashMsg(null)}
-          className={`px-4 py-3 rounded-md text-sm border cursor-pointer ${
+          className={`px-4 py-3 rounded text-sm font-mono border cursor-pointer ${
             flashMsg.startsWith('✗') || flashMsg.includes('failed') || flashMsg.includes('error')
-              ? 'bg-red-50 border-red-200 text-red-700'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              ? 'bg-red-900/20 border-red-800 text-red-400'
+              : 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
           }`}
         >
           {flashMsg}
@@ -360,14 +360,14 @@ export default function SettingsPage() {
       >
         <div>
           <SecretField label="Anthropic API Key" value={integrations.anthropic_api_key} onChange={v => setIntegrations(p => ({ ...p, anthropic_api_key: v }))} placeholder="sk-ant-…" />
-          <button onClick={testAnthropic} className="mt-1.5 text-xs text-emerald-600 hover:text-emerald-800 transition-colors">
+          <button onClick={testAnthropic} className="mt-1.5 text-xs text-amber-400 hover:text-amber-300 font-mono transition-colors">
             Test connection →
           </button>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <SecretField label="Mailchimp API Key" value={integrations.mailchimp_api_key} onChange={v => setIntegrations(p => ({ ...p, mailchimp_api_key: v }))} placeholder="…-us21" />
-            <button onClick={testMailchimp} className="mt-1.5 text-xs text-emerald-600 hover:text-emerald-800 transition-colors">
+            <button onClick={testMailchimp} className="mt-1.5 text-xs text-amber-400 hover:text-amber-300 font-mono transition-colors">
               Test connection →
             </button>
           </div>
@@ -408,22 +408,22 @@ export default function SettingsPage() {
       </SectionCard>
 
       {/* ── OUTLOOK ── */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6">
+      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-blue-50 flex items-center justify-center">
-              <Mail size={17} className="text-blue-600" />
+            <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+              <Mail size={17} className="text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Outlook / Microsoft 365</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Auto-log emails to matching contact activity timelines.</p>
+              <h2 className="text-sm font-mono font-semibold text-zinc-100">Outlook / Microsoft 365</h2>
+              <p className="text-xs text-zinc-500 mt-0.5">Auto-log emails to matching contact activity timelines.</p>
             </div>
           </div>
           {!outlookLoading && (
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
               status?.connected
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-slate-100 text-slate-500 border border-slate-200'
+                ? 'bg-[#4ADE80]/10 text-[#4ADE80] border border-[#4ADE80]/40'
+                : 'bg-zinc-800 text-zinc-500 border border-zinc-600'
             }`}>
               {status?.connected ? <><CheckCircle size={11} /> Connected</> : <><XCircle size={11} /> Not connected</>}
             </span>
@@ -431,39 +431,39 @@ export default function SettingsPage() {
         </div>
 
         {outlookLoading ? (
-          <div className="flex items-center gap-2 text-sm text-slate-400"><Loader2 size={14} className="animate-spin" /> Loading status…</div>
+          <div className="flex items-center gap-2 text-sm text-zinc-500 font-mono"><Loader2 size={14} className="animate-spin" /> Loading status…</div>
         ) : status?.connected ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <div className="text-slate-400 uppercase tracking-wide mb-0.5">Account</div>
-                <div className="text-slate-700 font-mono">{status.email}</div>
+                <div className="text-zinc-500 uppercase tracking-wide mb-0.5 font-mono">Account</div>
+                <div className="text-zinc-300 font-mono">{status.email}</div>
               </div>
               {expiryLabel && (
                 <div>
-                  <div className="text-slate-400 uppercase tracking-wide mb-0.5">Token expires</div>
-                  <div className="text-slate-700">{expiryLabel}</div>
+                  <div className="text-zinc-500 uppercase tracking-wide mb-0.5 font-mono">Token expires</div>
+                  <div className="text-zinc-300">{expiryLabel}</div>
                 </div>
               )}
             </div>
             {syncResult && (
-              <div className="text-xs px-3 py-2 rounded bg-slate-50 border border-slate-200 text-slate-600">{syncResult}</div>
+              <div className="text-xs px-3 py-2 rounded bg-zinc-800 border border-zinc-600 text-zinc-400 font-mono">{syncResult}</div>
             )}
             <div className="flex items-center gap-2 pt-1">
-              <button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+              <button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 disabled:opacity-50 transition-colors">
                 {syncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                 {syncing ? 'Syncing...' : 'Sync Now'}
               </button>
-              <button onClick={handleDisconnect} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+              <button onClick={handleDisconnect} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium border border-zinc-600 text-zinc-400 hover:bg-zinc-800 transition-colors">
                 <Unplug size={12} /> Disconnect
               </button>
             </div>
-            <p className="text-xs text-slate-400">Emails are synced automatically every 15 minutes via n8n.</p>
+            <p className="text-xs text-zinc-500 font-mono">Emails are synced automatically every 15 minutes via n8n.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-slate-600">Connect your Outlook account to automatically log emails to contact timelines.</p>
-            <a href="/api/outlook-auth" className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+            <p className="text-sm text-zinc-400 font-mono">Connect your Outlook account to automatically log emails to contact timelines.</p>
+            <a href="/api/outlook-auth" className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 transition-colors">
               <Mail size={14} /> Connect Outlook
             </a>
           </div>

@@ -1062,7 +1062,7 @@ export default function ContactsPage() {
               <button
                 onClick={loadMoreContacts}
                 disabled={loadingMore}
-                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-slate-200 rounded text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-zinc-600 rounded text-zinc-400 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length})`}
               </button>

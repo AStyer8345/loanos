@@ -82,42 +82,42 @@ function EntryIcon({ type }: { type: string }) {
 
   if (t.includes('email_inbound') || t.includes('email_received')) {
     return (
-      <div className={`${cls} bg-blue-50`}>
-        <Mail size={14} className="text-blue-600" />
+      <div className={`${cls} bg-zinc-800 border border-zinc-600`}>
+        <Mail size={14} className="text-blue-400" />
       </div>
     )
   }
   if (t.includes('email_outbound') || t.includes('email_sent')) {
     return (
-      <div className={`${cls} bg-emerald-50`}>
-        <Send size={14} className="text-emerald-600" />
+      <div className={`${cls} bg-[#4ADE80]/10 border border-[#4ADE80]/30`}>
+        <Send size={14} className="text-[#4ADE80]" />
       </div>
     )
   }
   if (t.includes('doc') || t.includes('file') || t.includes('upload')) {
     return (
-      <div className={`${cls} bg-amber-50`}>
-        <FileText size={14} className="text-amber-600" />
+      <div className={`${cls} bg-amber-500/10 border border-amber-500/30`}>
+        <FileText size={14} className="text-amber-400" />
       </div>
     )
   }
   if (t.includes('call') || t.includes('phone')) {
     return (
-      <div className={`${cls} bg-purple-50`}>
-        <Phone size={14} className="text-purple-600" />
+      <div className={`${cls} bg-zinc-800 border border-zinc-600`}>
+        <Phone size={14} className="text-purple-400" />
       </div>
     )
   }
   if (t.includes('note')) {
     return (
-      <div className={`${cls} bg-slate-100`}>
-        <StickyNote size={14} className="text-slate-500" />
+      <div className={`${cls} bg-zinc-800 border border-zinc-600`}>
+        <StickyNote size={14} className="text-amber-400" />
       </div>
     )
   }
   return (
-    <div className={`${cls} bg-slate-100`}>
-      <Activity size={14} className="text-slate-400" />
+    <div className={`${cls} bg-zinc-800 border border-zinc-600`}>
+      <Activity size={14} className="text-zinc-400" />
     </div>
   )
 }
@@ -147,24 +147,24 @@ function TimelineEntry({ entry }: { entry: NormalizedEntry }) {
     <div className="flex gap-3 group">
       <div className="flex flex-col items-center">
         <EntryIcon type={entry.type} />
-        <div className="w-px flex-1 bg-slate-100 mt-1" />
+        <div className="w-px flex-1 bg-zinc-700 mt-1" />
       </div>
 
       <div className="pb-5 flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm text-slate-700 leading-snug break-words">{entry.summary}</p>
-          <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0 mt-0.5">
+          <p className="text-sm text-zinc-200 font-mono leading-snug break-words">{entry.summary}</p>
+          <span className="text-xs text-zinc-500 font-mono whitespace-nowrap flex-shrink-0 mt-0.5">
             {relativeTime(entry.created_at)}
           </span>
         </div>
 
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-slate-400 capitalize">
+          <span className="text-xs text-zinc-500 font-mono capitalize">
             {entry.type.replace(/_/g, ' ')}
           </span>
 
           {entry.source && (
-            <span className="text-xs text-slate-400 bg-slate-100 rounded px-1.5 py-0.5 leading-none">
+            <span className="text-xs text-zinc-400 bg-zinc-800 border border-zinc-600 rounded px-1.5 py-0.5 leading-none">
               {entry.source}
             </span>
           )}
@@ -172,7 +172,7 @@ function TimelineEntry({ entry }: { entry: NormalizedEntry }) {
           {hasDetail && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-0.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="inline-flex items-center gap-0.5 text-xs text-zinc-500 hover:text-zinc-300 font-mono transition-colors"
             >
               {expanded ? (
                 <><ChevronUp size={11} /> hide</>
@@ -184,7 +184,7 @@ function TimelineEntry({ entry }: { entry: NormalizedEntry }) {
         </div>
 
         {expanded && hasDetail && (
-          <pre className="mt-2 p-2 rounded bg-slate-50 border border-slate-100 text-xs text-slate-600 overflow-x-auto whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
+          <pre className="mt-2 p-2 rounded bg-zinc-800 border border-zinc-700 text-xs text-zinc-400 font-mono overflow-x-auto whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
             {JSON.stringify(entry.detail, null, 2)}
           </pre>
         )}
@@ -211,7 +211,7 @@ export default function ActivityTimeline({ rows, loading = false }: Props) {
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-sm text-slate-400 animate-pulse">
+      <div className="py-10 text-center text-sm text-zinc-500 font-mono animate-pulse">
         Loading activity...
       </div>
     )
@@ -219,7 +219,7 @@ export default function ActivityTimeline({ rows, loading = false }: Props) {
 
   if (entries.length === 0) {
     return (
-      <div className="py-10 text-center text-sm text-slate-400">
+      <div className="py-10 text-center text-sm text-zinc-500 font-mono">
         No activity yet.
       </div>
     )

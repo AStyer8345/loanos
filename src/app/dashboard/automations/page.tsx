@@ -262,15 +262,15 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-6"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white border border-slate-200 border-l-4 border-l-emerald-500 rounded-lg p-7 w-full max-w-lg relative shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-7 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
         {/* Close */}
-        <button onClick={onClose} className="absolute top-3 right-4 text-xs text-slate-400 hover:text-slate-600 font-mono">
+        <button onClick={onClose} className="absolute top-3 right-4 text-xs text-zinc-500 hover:text-zinc-300 font-mono">
           [ESC]
         </button>
 
         {/* Title */}
-        <div className="text-lg font-semibold text-slate-900 mb-0.5">{wf.name}</div>
-        <div className="text-xs text-slate-400 font-mono mb-5">
+        <div className="text-lg font-mono font-semibold text-zinc-100 mb-0.5">{wf.name}</div>
+        <div className="text-xs text-zinc-500 font-mono mb-5">
           {phase === 'upload'     && 'Step 1 of 3 — Upload IFW PDF'}
           {phase === 'extracting' && 'Extracting fields…'}
           {phase === 'review'     && 'Step 2 of 3 — Review & confirm'}
@@ -288,10 +288,10 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
               onClick={() => fileRef.current?.click()}
               className={`
                 border border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-4
-                ${drag ? 'border-emerald-400 bg-emerald-50' : file ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'}
+                ${drag ? 'border-amber-500 bg-amber-500/10' : file ? 'border-amber-500/70 bg-amber-500/5' : 'border-zinc-600 bg-zinc-800 hover:border-zinc-500'}
               `}
             >
-              <div className={`text-sm font-medium ${file ? 'text-emerald-600' : 'text-slate-500'}`}>
+              <div className={`text-sm font-medium ${file ? 'text-amber-400' : 'text-zinc-500'}`}>
                 {file ? `✓  ${file.name}` : 'Drop IFW PDF here or click to select'}
               </div>
               {file && <div className="text-xs text-slate-400 mt-1 font-mono">{(file.size / 1024).toFixed(0)} KB</div>}
@@ -304,7 +304,7 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
               onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) pickFile(f) }}
             />
             {extractErr && (
-              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-50 border border-red-200 text-red-600">
+              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-900/20 border border-red-800 text-red-400 font-mono">
                 {extractErr}
               </div>
             )}
@@ -312,11 +312,11 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
               <button
                 onClick={handleExtract}
                 disabled={phase === 'extracting' || !file}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                className="px-4 py-2 text-sm font-medium text-zinc-900 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
               >
                 {phase === 'extracting' ? 'Extracting…' : 'Extract Fields'}
               </button>
-              <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-md transition-colors">
+              <button onClick={onClose} className="px-4 py-2 text-sm font-mono font-medium text-zinc-400 hover:text-zinc-200 border border-zinc-600 hover:border-zinc-500 rounded transition-colors">
                 Cancel
               </button>
             </div>
@@ -330,46 +330,46 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
             <div className="grid grid-cols-2 gap-3 mb-4">
               {REVIEW_LABELS.map(({ key, label }) => (
                 <div key={key}>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
+                  <label className="block text-xs font-mono text-zinc-500 mb-1">{label}</label>
                   <input
                     value={fields[key]}
                     onChange={(e) => setFields(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                    className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500"
                   />
                 </div>
               ))}
             </div>
 
             {/* Divider */}
-            <div className="border-t border-slate-100 my-4" />
+            <div className="border-t border-zinc-700 my-4" />
 
             {/* Manual fields */}
             <div className="flex flex-col gap-3 mb-4">
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Co-Borrower First Name <span className="text-slate-300">(optional)</span></label>
+                <label className="block text-xs font-mono text-zinc-500 mb-1">Co-Borrower First Name <span className="text-zinc-500">(optional)</span></label>
                 <input
                   value={coBorrowerFirst}
                   onChange={(e) => setCoBorrowerFirst(e.target.value)}
                   placeholder="Jane"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Borrower Email *</label>
+                <label className="block text-xs font-mono text-zinc-500 mb-1">Borrower Email *</label>
                 <input
                   value={borrowerEmail}
                   onChange={(e) => setBorrowerEmail(e.target.value)}
                   placeholder="john@example.com"
                   type="email"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Rate Lock Status</label>
+                <label className="block text-xs font-mono text-zinc-500 mb-1">Rate Lock Status</label>
                 <select
                   value={rateLockStatus}
                   onChange={(e) => setRateLockStatus(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500"
                 >
                   <option value="not locked yet">Not locked yet</option>
                   <option value="locked">Locked</option>
@@ -378,7 +378,7 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
             </div>
 
             {sendErr && (
-              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-50 border border-red-200 text-red-600">
+              <div className="text-sm rounded-md px-3 py-2 mb-4 bg-red-900/20 border border-red-800 text-red-400 font-mono">
                 {sendErr}
               </div>
             )}
@@ -528,10 +528,10 @@ function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | 
               onClick={() => fileRef.current?.click()}
               className={`
                 border border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-4
-                ${drag ? 'border-emerald-400 bg-emerald-50' : file ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'}
+                ${drag ? 'border-amber-500 bg-amber-500/10' : file ? 'border-amber-500/70 bg-amber-500/5' : 'border-zinc-600 bg-zinc-800 hover:border-zinc-500'}
               `}
             >
-              <div className={`text-sm font-medium ${file ? 'text-emerald-600' : 'text-slate-500'}`}>
+              <div className={`text-sm font-medium ${file ? 'text-amber-400' : 'text-zinc-500'}`}>
                 {file ? `✓  ${file.name}` : 'Drop PDF here or click to select'}
               </div>
               {file && (
@@ -588,7 +588,7 @@ function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | 
           <div className={`
             text-sm rounded-md px-3 py-2 mb-4
             ${status === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : ''}
-            ${status === 'error' ? 'bg-red-50 border border-red-200 text-red-600' : ''}
+            ${status === 'error' ? 'bg-red-900/20 border border-red-800 text-red-400 font-mono' : ''}
           `}>
             {msg}
           </div>
@@ -600,7 +600,7 @@ function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | 
             <button
               onClick={handleSubmit}
               disabled={status === 'loading'}
-              className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-zinc-900 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
             >
               {status === 'loading' ? 'Running...' : 'Trigger Now'}
             </button>

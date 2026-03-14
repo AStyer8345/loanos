@@ -1,5 +1,35 @@
 # LoanOS Changelog
 
+## [1.14.0] — 2026-03-13 — Pipeline Dashboard Redesign
+
+### Added
+
+- **`src/app/dashboard/page.tsx` — full rewrite** — replaced 5-stat card landing page with production pipeline dashboard. Async server component fetches pipeline data, activity log, and urgent flags inline; passes typed props to client components. Layout: header → urgent flags → KPI row → charts → briefing+todo → activity.
+- **`src/components/dashboard/PipelineKPIs.tsx`** — 4 KPI cards: Active Pipeline (count + total volume), Closed MTD (with +/- delta vs last month, trending arrow), Est. Close 30d (projected count + volume), Needs Attention (urgent flag count with amber border when non-zero).
+- **`src/components/dashboard/PipelineCharts.tsx`** — Two recharts visualizations: (1) Bar chart — loan count per pipeline stage, gold bars for closing-side stages; (2) Line chart — 90-day closing volume trend in weekly buckets with count overlay. Both have empty states with helpful copy.
+- **`src/components/dashboard/UrgentFlags.tsx`** — Dismissable flag strip (amber border). Auto-detects: pre-approvals expiring within 7 days, loans past estimated closing date (not yet closed/funded). Dismissed client-side per session. Links to loan detail page.
+- **`src/components/dashboard/DailyBriefingPanel.tsx`** — Embedded briefing panel with Run Briefing button, AI summary display, top 3 action items with inline checkboxes, link to full `/dashboard/briefing` page. Loading skeleton (3 pulse bars). Empty state with Brain icon.
+- **`src/components/dashboard/TodoList.tsx`** — Persistent to-do list backed by Supabase `todo_items` table. Add task (inline form + urgent toggle button). Complete task (click circle → removed from list). Delete (hover to reveal Trash2). Flag/unflag urgent (hover AlertTriangle). Urgent tasks render first with amber background. Fetches open todos on mount.
+- **`src/components/dashboard/RecentActivity.tsx`** — 7-day activity feed from `activity_log`. Type filter pills: all / email / call / automation / document / note / task. Icon + color per type. Relative timestamps (`timeAgo`). Empty state per filter. Max 25 rows.
+- **`src/app/api/todos/route.ts`** — `GET` (open todos, sorted urgent-first), `POST` (create todo with user_id from session).
+- **`src/app/api/todos/[id]/route.ts`** — `PATCH` (complete, urgent toggle, text update), `DELETE`. Both scoped to authenticated user.
+- **`src/app/api/pipeline/stats/route.ts`** — Pipeline stats API endpoint (for external use). Returns totalCount, totalVolume, stageCounts, MTD closed, next-30 projections, weekly trend, urgent flags.
+- **`supabase/migrations/0016_create_todo_items.sql`** — `todo_items` table: id, created_at, updated_at, user_id (FK auth.users), text, is_complete, is_urgent, completed_at, related_loan_id (FK), related_contact_id (FK). RLS: user_id match. Indexes on user_id and (user_id, is_complete). Auto-update trigger on updated_at. **⚠️ NOT YET APPLIED — run in Supabase SQL Editor.**
+- **recharts ^3.8.0** added to dependencies (`npm install recharts`).
+
+### Changed
+
+- **`src/app/dashboard/page.tsx`** — fully replaced. Previous version (stat cards + email drafts) is gone. All existing routes/layout unaffected.
+
+### Notes
+
+- Migration 0016 must be applied before TodoList component can persist tasks.
+- All pipeline data pulls from `loans` table (existing data). Charts populate immediately for any user with loan records.
+- Dashboard data is fetched server-side on page load — no client-side API calls except briefing (on demand) and todos.
+- Design: dark zinc (zinc-950/900/800), gold accents (yellow-500/amber-500), IBM Plex Mono. Zero white backgrounds.
+
+---
+
 ## [1.13.0] — 2026-03-13 — Refi Intake Email Automation
 
 ### Added

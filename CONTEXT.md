@@ -24,6 +24,7 @@ ARIVE webhook integration + Jungo CSV backfill + DB field expansion complete (20
 v1.9.0 deployed to Vercel (2026-03-12).
 **Sprint 1 audit fixes (2026-03-13)**: 4 bugs + 2 UX improvements. Closed Borrowers filter fixed (`'Closed'` not `'Closed Client'`), last_touch timestamps formatted, Lead status color → slate, `mobile_phone` consolidated to `phone_mobile` (migration 014). Loans page bulk actions bar (checkbox + floating emerald bar + UPDATE STATUS/DELETE). Inline file upload in loan detail DocumentsTab. TypeScript clean (0 errors).
 **Sprint 3 — Data Integrity (2026-03-13)**: Activity log improvements across loans + contacts.
+**Dashboard Redesign v1.14.0 (2026-03-13)**: Full dashboard rebuilt from scratch. Replaced 5-stat landing page with production pipeline dashboard. New components: PipelineKPIs (4 KPI cards with MTD delta), PipelineCharts (stage bar chart + 90-day closing trend via recharts), UrgentFlags (pre-approval expiry + past-close-date alerts), DailyBriefingPanel (embedded briefing with Run button), TodoList (Supabase-persisted CRUD tasks with urgent flag), RecentActivity (7-day log with type filter). New Supabase table: `todo_items` (migration 016 — apply via SQL Editor). New API routes: `/api/todos`, `/api/todos/[id]`, `/api/pipeline/stats`. recharts ^3.8.0 installed. Build verified clean.
 - **3.4a — Loan detail ActivityTab** (`loans/[id]/page.tsx`): Removed `.slice(0, 3)` metadata hard cap; expanded `INTERNAL_KEYS` Set to include `'id'` and `'created_at'`; added All/System/Manual pill filter (`useState<'all'|'system'|'manual'>`); system heuristic = `action.includes('.')` (n8n uses dot-notation); color-coded timeline dots (emerald=system, blue=manual); empty state within filtered view.
 - **3.4b — Cross-entity activity merge** (`contacts/[id]/page.tsx`, `ContactRecordView.tsx`, `ActivityTimeline.tsx`): Contact detail activity now merges contact-level + loan-level activity. `fetchActivity` runs 3 Supabase queries: contact rows → linked loans → loan activity rows. Deduplicates by `row.id` (Set). Tags net-new loan entries `_source: 'Loan: {loan_name}'`. Sorts merged array descending. `_source` is purely client-side — zero DB schema changes. `ActivityEntry` type extended with `loan_id?` + `_source?`. `ActivityLogRow` and `NormalizedEntry` in `ActivityTimeline.tsx` extended with same fields. Source badge rendered in `TimelineEntry` as slate-100 pill.
 **Sprint 4+5 — UX polish (2026-03-13)**: Global search palette + activity feed + kanban view + smart list actions.
@@ -178,8 +179,8 @@ These tools are working and must NOT be broken during LoanOS build:
 - ✅ Supabase schema (contacts, loans, documents, activity_log)
 - ✅ Auth (email/password)
 - ✅ PDF upload end-to-end
-- ✅ Dashboard with stat cards
-- ✅ Bloomberg terminal UI → Linear/Attio light mode redesign
+- ✅ Dashboard with stat cards → **fully rebuilt as pipeline dashboard (v1.14.0)**
+- ✅ Bloomberg terminal UI → Linear/Attio light mode redesign → **dark monochromatic dashboard (v1.14.0)**
 
 ### Phase 2 — Automation (~80% complete)
 

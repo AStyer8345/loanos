@@ -102,15 +102,15 @@ export default function TopNav() {
               },
               {
                 label: 'Newsletter Generator',
-                onClick: () => navigate('/dashboard/marketing'),
+                onClick: () => navigate('/dashboard/marketing?tab=NEWSLETTERS'),
               },
               {
                 label: 'Social Media Posts',
-                onClick: () => navigate('/dashboard/marketing'),
+                onClick: () => navigate('/dashboard/marketing?tab=SOCIAL'),
               },
               {
                 label: 'Rate Updates',
-                onClick: () => navigate('/dashboard/marketing'),
+                onClick: () => navigate('/dashboard/marketing?tab=TRACKER'),
               },
               {
                 label: 'Automations (n8n, Zapier)',
@@ -253,14 +253,14 @@ export default function TopNav() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing')}
+                onClick={() => navigate('/dashboard/marketing?tab=NEWSLETTERS')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Newsletter Generator</span>
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing')}
+                onClick={() => navigate('/dashboard/marketing?tab=SOCIAL')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Social Media</span>

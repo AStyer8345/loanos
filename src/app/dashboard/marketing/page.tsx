@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -32,6 +33,24 @@ type SocialPost = {
 type Newsletter = {
   id: string; audience: string; subject: string; date: string
   mailchimpUrl: string; openRate: string; notes: string
+}
+
+type GeneratedNewsletter = {
+  subject: string
+  teaserHtml: string
+  webTitle: string
+  webHtml: string
+  slug: string
+}
+
+type UserMarketingSettings = {
+  anthropic_api_key?: string
+  mailchimp_api_key?: string
+  mailchimp_server_prefix?: string
+  mailchimp_realtor_list_id?: string
+  mailchimp_borrower_list_id?: string
+  dispatch_webhook_url?: string
+  dispatch_secret?: string
 }
 
 type Todo    = { id: string; text: string; created: string }
@@ -888,6 +907,41 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
   const BLANK: Omit<SocialPost, 'id'> = { platform: 'Both', caption: '', url: '', date: isoDate(), notes: '' }
   const [form, setForm] = useState({ ...BLANK })
 
+  // ── Testimonials automation ──────────────────────────────────────
+  const [runningTestimonials, setRunningTestimonials] = useState(false)
+  const [testimonialsStatus, setTestimonialsStatus]   = useState('')
+
+  async function runTestimonialsAutomation() {
+    setRunningTestimonials(true)
+    setTestimonialsStatus('')
+    try {
+      const res = await fetch('/api/marketing/run-testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setTestimonialsStatus(`✓ Workflow triggered! Execution ID: ${data.executionId}`)
+        // Log it to the tracker
+        save({
+          ...s,
+          log: [...s.log, {
+            id: uid(), date: new Date().toISOString(),
+            activity: 'Testimonials automation triggered', channel: 'LinkedIn', notes: '',
+          }],
+          last: { ...s.last, 'social-post': new Date().toISOString() },
+        })
+      } else {
+        setTestimonialsStatus(`Error: ${data.error}`)
+      }
+    } catch {
+      setTestimonialsStatus('Network error — check N8N_API_KEY env variable.')
+    } finally {
+      setRunningTestimonials(false)
+    }
+  }
+
   const filtered = platFilter === 'All' ? s.socialPosts : s.socialPosts.filter(p => {
     if (platFilter === 'LinkedIn')   return p.platform === 'LinkedIn' || p.platform === 'Both' || p.platform === 'All'
     if (platFilter === 'Facebook')   return p.platform === 'Facebook' || p.platform === 'Both' || p.platform === 'All'
@@ -913,6 +967,48 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
 
   return (
     <div className="max-w-3xl">
+
+      {/* ── Testimonials Automation ── */}
+      <Card className="mb-4" style={{ borderColor: 'rgba(155,114,207,0.4)' }}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="font-mono text-xs font-semibold mb-0.5" style={{ color: '#9B72CF' }}>
+              🏆 TESTIMONIALS AUTOMATION
+            </div>
+            <div className="font-mono text-[9px] leading-snug" style={{ color: 'var(--muted)' }}>
+              Runs the LoanOS Weekly Social Post n8n workflow — pulls recent reviews
+              and generates LinkedIn/Facebook posts automatically.
+            </div>
+            {testimonialsStatus && (
+              <div
+                className="font-mono text-[9px] mt-2 px-2 py-1 rounded-sm"
+                style={{
+                  background: testimonialsStatus.startsWith('✓') ? 'rgba(76,175,130,0.1)' : 'rgba(224,82,82,0.1)',
+                  color:      testimonialsStatus.startsWith('✓') ? '#4CAF82' : '#E05252',
+                }}
+              >
+                {testimonialsStatus}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <button
+              onClick={runTestimonialsAutomation}
+              disabled={runningTestimonials}
+              className="font-mono text-[10px] tracking-widest border px-2 py-1 transition-opacity hover:opacity-70 disabled:opacity-40"
+              style={{ background: 'rgba(155,114,207,0.15)', borderColor: 'rgba(155,114,207,0.5)', color: '#9B72CF' }}
+            >
+              {runningTestimonials ? '⟳ RUNNING…' : '▶ RUN NOW'}
+            </button>
+            {s.last['social-post'] && (
+              <span className="font-mono text-[8px]" style={{ color: 'var(--muted)' }}>
+                Last: {fmtDate(s.last['social-post'])}
+              </span>
+            )}
+          </div>
+        </div>
+      </Card>
+
       <div className="flex flex-wrap gap-2 items-center justify-between mb-3">
         <div className="flex gap-1">
           {PLAT_FILTERS.map(p => (
@@ -1011,15 +1107,49 @@ function SocialTab({ s, save }: { s: MCCState; save: (next: MCCState) => void })
 // ── NEWSLETTERS tab ───────────────────────────────────────────────────────────
 
 type AudienceFilter = 'all' | 'Realtors' | 'Borrowers' | 'Both'
+type GenAudience    = 'Realtors' | 'Borrowers' | 'Both'
 const AUDIENCE_BADGE: Record<string, string> = { Realtors: '#5B8FD4', Borrowers: '#4CAF82', Both: '#C9A84C' }
 
+function useMarketingSettings() {
+  const supabase = useSupabase()
+  const [settings, setSettings] = useState<UserMarketingSettings>({})
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      Promise.all([
+        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'integrations').single(),
+        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'website').single(),
+      ]).then(([integ, site]) => {
+        setSettings({
+          ...((integ.data?.value as Record<string, string>) ?? {}),
+          ...((site.data?.value  as Record<string, string>) ?? {}),
+        })
+      })
+    })
+  }, [supabase])
+  return settings
+}
+
 function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
+  const settings = useMarketingSettings()
+
+  // ── Log form (manual entry) ──────────────────────────────────────
   const [filter, setFilter]   = useState<AudienceFilter>('all')
   const [showAdd, setShowAdd] = useState(false)
   const BLANK: Omit<Newsletter, 'id'> = {
     audience: 'Realtors', subject: '', date: isoDate(), mailchimpUrl: '', openRate: '', notes: '',
   }
   const [form, setForm] = useState({ ...BLANK })
+
+  // ── Generator state ──────────────────────────────────────────────
+  const [showGen, setShowGen]     = useState(false)
+  const [genAudience, setGenAud]  = useState<GenAudience>('Realtors')
+  const [genNotes, setGenNotes]   = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [preview, setPreview]     = useState<GeneratedNewsletter | null>(null)
+  const [sendingMC, setSendingMC] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [statusMsg, setStatusMsg] = useState('')
 
   const filtered = filter === 'all' ? s.newsletters : s.newsletters.filter(n => n.audience === filter)
   const sorted   = [...filtered].reverse()
@@ -1039,8 +1169,225 @@ function NewslettersTab({ s, save }: { s: MCCState; save: (next: MCCState) => vo
     setShowAdd(false)
   }
 
+  // ── Generator functions ──────────────────────────────────────────
+
+  async function generateNewsletter() {
+    setGenerating(true)
+    setStatusMsg('')
+    setPreview(null)
+    try {
+      const res = await fetch('/api/marketing/generate-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audience: genAudience,
+          notes: genNotes,
+          apiKey: settings.anthropic_api_key,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setStatusMsg(`Error: ${data.error}`); return }
+      setPreview(data as GeneratedNewsletter)
+    } catch {
+      setStatusMsg('Generation failed — check Anthropic API key in Settings.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  async function sendMailchimp() {
+    if (!preview) return
+    if (!settings.mailchimp_api_key || !settings.mailchimp_server_prefix) {
+      setStatusMsg('Mailchimp credentials not configured. Go to Settings → Integrations.')
+      return
+    }
+    const listId = genAudience === 'Realtors'
+      ? settings.mailchimp_realtor_list_id
+      : settings.mailchimp_borrower_list_id
+    if (!listId) {
+      setStatusMsg(`Mailchimp ${genAudience} list ID not configured in Settings.`)
+      return
+    }
+    setSendingMC(true)
+    setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/send-mailchimp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key:         settings.mailchimp_api_key,
+          server_prefix:   settings.mailchimp_server_prefix,
+          list_id:         listId,
+          subject:         preview.subject,
+          html_body:       preview.teaserHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`✓ Mailchimp campaign sent! Campaign ID: ${data.campaignId}`)
+      else setStatusMsg(`Mailchimp error: ${data.error}`)
+    } finally {
+      setSendingMC(false)
+    }
+  }
+
+  async function publishToWebsite() {
+    if (!preview) return
+    if (!settings.dispatch_webhook_url) {
+      setStatusMsg('Dispatch webhook URL not configured. Go to Settings → Website.')
+      return
+    }
+    setPublishing(true)
+    setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/publish-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dispatch_url:    settings.dispatch_webhook_url,
+          dispatch_secret: settings.dispatch_secret,
+          audience:        genAudience,
+          slug:            preview.slug,
+          title:           preview.webTitle,
+          html:            preview.webHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`✓ Published to website! ${data.url ? `URL: ${data.url}` : 'Check your site.'}`)
+      else setStatusMsg(`Publish error: ${data.error}`)
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  function logGeneratedNewsletter() {
+    if (!preview) return
+    const now = new Date().toISOString()
+    const nl: Newsletter = {
+      id: uid(), audience: genAudience, subject: preview.subject,
+      date: isoDate(), mailchimpUrl: '', openRate: '', notes: genNotes,
+    }
+    const lastUpd = { ...s.last }
+    if (genAudience === 'Realtors'  || genAudience === 'Both') lastUpd['realtor-nl']  = now
+    if (genAudience === 'Borrowers' || genAudience === 'Both') lastUpd['borrower-nl'] = now
+    const logEntry: LogEntry = {
+      id: uid(), date: now,
+      activity: `Newsletter generated & sent — ${preview.subject}`,
+      channel: 'Email', notes: genAudience,
+    }
+    save({ ...s, newsletters: [...s.newsletters, nl], log: [...s.log, logEntry], last: lastUpd })
+    setPreview(null)
+    setShowGen(false)
+    setGenNotes('')
+    setStatusMsg('')
+  }
+
   return (
     <div className="max-w-4xl">
+
+      {/* ── Generator Panel ── */}
+      <Card className="mb-4" style={{ borderColor: showGen ? 'var(--gold)' : undefined }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="font-mono text-xs font-semibold" style={{ color: 'var(--gold)' }}>🚀 NEWSLETTER GENERATOR</div>
+            <div className="font-mono text-[9px] mt-0.5" style={{ color: 'var(--muted)' }}>
+              AI drafts → Mailchimp campaign → publish to website
+            </div>
+          </div>
+          <Btn onClick={() => { setShowGen(v => !v); setPreview(null); setStatusMsg('') }} variant="gold">
+            {showGen ? 'COLLAPSE' : 'GENERATE NEW'}
+          </Btn>
+        </div>
+
+        {showGen && (
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>AUDIENCE</div>
+                <select
+                  value={genAudience}
+                  onChange={e => setGenAud(e.target.value as GenAudience)}
+                  className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                >
+                  {(['Realtors', 'Borrowers', 'Both'] as const).map(a => (
+                    <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>
+                  RATE / MARKET CONTEXT (optional)
+                </div>
+                <Input
+                  value={genNotes}
+                  onChange={setGenNotes}
+                  placeholder="e.g. 30yr at 6.875%, Austin inventory up 12% MOM"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              <Btn onClick={generateNewsletter} variant="gold" disabled={generating}>
+                {generating ? '⟳ GENERATING…' : '✦ GENERATE DRAFT'}
+              </Btn>
+              {preview && (
+                <>
+                  <Btn onClick={sendMailchimp} disabled={sendingMC}>
+                    {sendingMC ? '⟳ SENDING…' : '📧 SEND MAILCHIMP'}
+                  </Btn>
+                  <Btn onClick={publishToWebsite} disabled={publishing}>
+                    {publishing ? '⟳ PUBLISHING…' : '🌐 PUBLISH TO WEBSITE'}
+                  </Btn>
+                  <Btn onClick={logGeneratedNewsletter} variant="green">✓ LOG THIS</Btn>
+                </>
+              )}
+            </div>
+
+            {statusMsg && (
+              <div
+                className="font-mono text-[10px] px-3 py-2 rounded-sm"
+                style={{
+                  background: statusMsg.startsWith('✓') ? 'rgba(76,175,130,0.1)' : 'rgba(224,82,82,0.1)',
+                  color:      statusMsg.startsWith('✓') ? '#4CAF82' : '#E05252',
+                  border:     `1px solid ${statusMsg.startsWith('✓') ? '#4CAF8233' : '#E0525233'}`,
+                }}
+              >
+                {statusMsg}
+              </div>
+            )}
+
+            {/* Preview */}
+            {preview && (
+              <div className="flex flex-col gap-3 mt-1">
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--gold)' }}>SUBJECT LINE</div>
+                  <div className="font-mono text-xs px-3 py-2 rounded-sm" style={{ background: 'rgba(201,168,76,0.08)', color: 'var(--text)' }}>
+                    {preview.subject}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>TEASER EMAIL (Mailchimp)</div>
+                  <div
+                    className="text-xs rounded-sm p-3 overflow-auto max-h-40 font-mono leading-relaxed"
+                    style={{ background: '#0D0D0D', color: 'var(--muted)', border: '1px solid var(--border)', fontSize: 10 }}
+                    dangerouslySetInnerHTML={{ __html: preview.teaserHtml }}
+                  />
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: 'var(--muted)' }}>WEB PAGE CONTENT</div>
+                  <div
+                    className="font-mono text-[9px] px-3 py-2 rounded-sm leading-snug"
+                    style={{ background: '#0D0D0D', color: 'var(--muted)', border: '1px solid var(--border)', whiteSpace: 'pre-wrap', maxHeight: 160, overflow: 'auto' }}
+                  >
+                    {preview.webTitle} — slug: /{preview.slug}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
       <div className="flex flex-wrap gap-2 items-center justify-between mb-3">
         <div className="flex gap-1">
           {(['all', 'Realtors', 'Borrowers', 'Both'] as const).map(f => (
@@ -1467,9 +1814,13 @@ function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function MarketingPage() {
-  const supabase = useSupabase()
-  const [s, setState]         = useState<MCCState>(BLANK_STATE)
-  const [tab, setTab]         = useState<Tab>('TODAY')
+  const supabase      = useSupabase()
+  const searchParams  = useSearchParams()
+  const [s, setState] = useState<MCCState>(BLANK_STATE)
+  const [tab, setTab] = useState<Tab>(() => {
+    const p = searchParams?.get('tab')?.toUpperCase() as Tab | undefined
+    return p && (TABS as readonly string[]).includes(p) ? p : 'TODAY'
+  })
   const [loading, setLoading] = useState(true)
   const [userId, setUserId]   = useState<string | null>(null)
 

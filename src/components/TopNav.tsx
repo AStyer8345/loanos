@@ -9,12 +9,13 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'briefing' | 'contacts' | 'loans' | 'marketing' | 'settings'
+type Section = 'briefing' | 'contacts' | 'loans' | 'performance' | 'marketing' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/briefing')) return 'briefing'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
   if (pathname.startsWith('/dashboard/loans')) return 'loans'
+  if (pathname.startsWith('/dashboard/performance')) return 'performance'
   if (
     pathname.startsWith('/dashboard/marketing') ||
     pathname.startsWith('/dashboard/automations')
@@ -80,6 +81,13 @@ export default function TopNav() {
             icon="📋"
             isActive={currentSection === 'loans'}
             onClick={() => navigate('/dashboard/loans')}
+          />
+
+          <NavItem
+            label="Performance"
+            icon="📈"
+            isActive={currentSection === 'performance'}
+            onClick={() => navigate('/dashboard/performance')}
           />
 
           <NavDropdown
@@ -217,6 +225,19 @@ export default function TopNav() {
             >
               <span className="text-base">📋</span>
               <span>Loans</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/performance')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'performance'
+                  ? 'bg-white/10 text-white'
+                  : 'text-emerald-50/90'
+              }`}
+            >
+              <span className="text-base">📈</span>
+              <span>Performance</span>
             </button>
 
             <div className="mt-2">

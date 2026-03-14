@@ -79,13 +79,10 @@ export default function TopNav() {
             isOpen={openDropdown === 'pipeline'}
             onToggle={() => toggleDropdown('pipeline')}
             items={[
+              { label: 'Dashboard', onClick: () => navigate('/dashboard') },
               { label: 'Contacts', onClick: () => navigate('/dashboard/contacts') },
               { label: 'Loans', onClick: () => navigate('/dashboard/loans') },
-              // Referrals view routes through contacts for now
-              {
-                label: 'Referrals',
-                onClick: () => navigate('/dashboard/contacts'),
-              },
+              { label: 'Referrals', onClick: () => navigate('/dashboard/contacts') },
             ]}
           />
 
@@ -213,6 +210,13 @@ export default function TopNav() {
               <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-emerald-200/70">
                 Pipeline
               </p>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+              >
+                <span>Dashboard</span>
+              </button>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/contacts')}

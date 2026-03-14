@@ -834,7 +834,9 @@ export default function MarketingPage() {
   const [userId, setUserId] = useState<string | null>(null)
 
   const todayKey = isoDate()
-  const todayDow = new Date().getDay()
+  const rawDow = new Date().getDay()
+  const isWeekend = rawDow === 0 || rawDow === 6
+  const todayDow = rawDow === 0 ? 1 : rawDow === 6 ? 5 : rawDow
   const todayTasks = s.tasks[todayKey] ?? {}
 
   useEffect(() => {
@@ -899,7 +901,12 @@ export default function MarketingPage() {
       </div>
 
       {/* Tab content */}
-      {tab === 'TODAY'       && <TodayTab todayDow={todayDow} todayTasks={todayTasks} toggle={toggle} />}
+      {tab === 'TODAY'       && (isWeekend
+        ? <div className="font-mono text-xs max-w-sm" style={{ color: 'var(--muted)' }}>
+            No tasks today — it&apos;s the weekend. Come back Monday.
+          </div>
+        : <TodayTab todayDow={todayDow} todayTasks={todayTasks} toggle={toggle} />
+      )}
       {tab === 'WEEK'        && <WeekTab s={s} todayKey={todayKey} />}
       {tab === 'CONTACTS'    && <ContactsTab s={s} save={save} />}
       {tab === 'SOCIAL'      && <SocialTab s={s} save={save} />}

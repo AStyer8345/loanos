@@ -32,25 +32,94 @@ interface SmartList {
 }
 
 // ── Smart lists ──────────────────────────────────────────────────────────────
+// Each list maps to a set of status strings stored in the DB.
+// Arive sends statuses verbatim (e.g. RESUBMIT, DISCLOSURE_SENT) — include all
+// known variants here so webhook-updated loans always land in the right tab.
 
 const SMART_LISTS: SmartList[] = [
-  { id: 'all',           label: 'All Loans',    statuses: null },
-  { id: 'inprocess',     label: 'In Process',   statuses: ['In Process', 'Loan in Process', 'Processing', 'processing', 'Submitted', 'Conditional Approval', 'Clear to Close', 'Approved', 'QUALIFICATION', 'DISCLOSURE_SENT'] },
-  { id: 'closed',        label: 'Closed',       statuses: ['Closed', 'Funded', 'Closed/Funded'] },
-  { id: 'preapproval',   label: 'Pre-Approval', statuses: ['Pre-Approved', 'Started', 'Started App', 'lead', 'Lead', 'Pre-App', 'Application', 'APPLICATION_INTAKE'] },
-  { id: 'cancelled',     label: 'Other',        statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
+  { id: 'all',        label: 'All Loans',         statuses: null },
+  {
+    id: 'inprocess',
+    label: 'Loans in Process',
+    statuses: [
+      // Canonical LoanOS statuses
+      'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
+      'Resubmitted', 'Clear to Close', 'Loan in Process',
+      // Arive raw status variants (stored verbatim from webhook)
+      'LOAN_SETUP', 'In Process', 'Processing', 'processing',
+      'DISCLOSURE_SENT',
+      'SUBMITTED', 'Submitted', 'Submitted to Underwriting',
+      'CONDITIONAL_APPROVAL', 'Conditional Approval', 'Approved', 'APPROVED_WITH_CONDITIONS',
+      'RESUBMIT', 'Resubmit', 'resubmit', 'RESUBMITTED',
+      'CLEAR_TO_CLOSE', 'CTC', 'Clear To Close',
+    ],
+  },
+  { id: 'closed',      label: 'Closed',       statuses: ['Closed', 'Funded', 'Closed/Funded'] },
+  {
+    id: 'preapproval',
+    label: 'Pre-Approval',
+    statuses: ['Pre-Approved', 'Started', 'Started App', 'lead', 'Lead', 'Pre-App', 'Application', 'APPLICATION_INTAKE', 'QUALIFICATION'],
+  },
+  { id: 'cancelled',   label: 'Other',        statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
 ]
 
 // ── Quick filter options (maps to smart list IDs) ──────────────────────────────
 const LOAN_QUICK_FILTERS = [
-  { id: 'inprocess',   label: 'In Process' },
+  { id: 'inprocess',   label: 'Loans in Process' },
   { id: 'all',         label: 'All Loans' },
   { id: 'closed',      label: 'Closed' },
   { id: 'preapproval', label: 'Pre-Approval' },
   { id: 'cancelled',   label: 'Other' },
 ] as const
 
-const LOAN_STATUS_OPTIONS = ['Lead', 'Pre-App', 'Application', 'In Process', 'Clear to Close', 'Closed', 'On Hold', 'Dead'] as const
+// Status options for manual inline edit + bulk update dropdowns
+const LOAN_STATUS_OPTIONS = [
+  'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
+  'Resubmitted', 'Clear to Close',
+  'Pre-Approved', 'Pre-App', 'Application', 'Lead',
+  'Closed', 'Funded', 'On Hold', 'Cancelled', 'Denied', 'Dead',
+] as const
+
+// ── Pipeline stage definitions (used by in-process dashboard bar) ────────────
+// These group raw DB status values into the 6 canonical in-process stages.
+const PIPELINE_STAGES: { label: string; short: string; statuses: string[]; hex: string }[] = [
+  {
+    label: 'Loan Setup',
+    short: 'Setup',
+    statuses: ['Loan Setup', 'LOAN_SETUP', 'In Process', 'Loan in Process', 'Processing', 'processing'],
+    hex: '#52525b',
+  },
+  {
+    label: 'Disclosed',
+    short: 'Disclosed',
+    statuses: ['Disclosed', 'DISCLOSURE_SENT'],
+    hex: '#2563eb',
+  },
+  {
+    label: 'Submitted to UW',
+    short: 'Submitted',
+    statuses: ['Submitted to UW', 'SUBMITTED', 'Submitted', 'Submitted to Underwriting'],
+    hex: '#7c3aed',
+  },
+  {
+    label: 'Approved w/ Cond.',
+    short: 'Approved',
+    statuses: ['Approved with Conditions', 'Conditional Approval', 'CONDITIONAL_APPROVAL', 'Approved', 'APPROVED_WITH_CONDITIONS'],
+    hex: '#059669',
+  },
+  {
+    label: 'Resubmitted',
+    short: 'Resubmit',
+    statuses: ['Resubmitted', 'RESUBMIT', 'Resubmit', 'resubmit', 'RESUBMITTED'],
+    hex: '#d97706',
+  },
+  {
+    label: 'Clear to Close',
+    short: 'CTC',
+    statuses: ['Clear to Close', 'CLEAR_TO_CLOSE', 'CTC', 'Clear To Close'],
+    hex: '#C9A84C',
+  },
+]
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -645,6 +714,47 @@ export default function LoansPage() {
             </div>
           </div>
         )}
+
+        {/* Pipeline dashboard — shown only on Loans in Process tab */}
+        {activeList === 'inprocess' && !loading && loans.length > 0 && (() => {
+          const stageLoans = PIPELINE_STAGES.map(stage => ({
+            ...stage,
+            count: loans.filter(l => stage.statuses.includes(l.status ?? '')).length,
+          }))
+          const total = stageLoans.reduce((sum, s) => sum + s.count, 0)
+          return (
+            <div className="px-4 pt-3 pb-2 border-b border-[#2A2A2A] bg-[#0E0E0E]">
+              {/* Stage cards */}
+              <div className="flex gap-2 mb-2">
+                {stageLoans.map(stage => (
+                  <div
+                    key={stage.label}
+                    className="flex-1 rounded-md px-3 py-2 border"
+                    style={{ borderColor: `${stage.hex}40`, background: `${stage.hex}12` }}
+                  >
+                    <p className="text-[9px] font-mono font-semibold uppercase tracking-wider" style={{ color: stage.hex }}>
+                      {stage.short}
+                    </p>
+                    <p className="text-lg font-mono font-bold text-[#F0F0F0] leading-tight">{stage.count}</p>
+                    <p className="text-[9px] font-mono text-[#555555] mt-0.5 truncate">{stage.label}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Progress bar */}
+              {total > 0 && (
+                <div className="flex h-1 rounded-full overflow-hidden gap-px">
+                  {stageLoans.filter(s => s.count > 0).map(stage => (
+                    <div
+                      key={stage.label}
+                      style={{ flex: stage.count, background: stage.hex, opacity: 0.7 }}
+                      title={`${stage.label}: ${stage.count}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         {/* Table */}
         <div className="flex-1 overflow-auto">

@@ -366,10 +366,10 @@ export default function LoansPage() {
 
   // ── Sort icon ──────────────────────────────────────────────────────────
   const SortIcon = ({ k }: { k: SortKey }) => {
-    if (sortKey !== k) return <ChevronDown size={12} className="text-slate-300 ml-0.5" />
+    if (sortKey !== k) return <ChevronDown size={12} className="text-[#666666] ml-0.5" />
     return sortDir === 'asc'
-      ? <ChevronUp size={12} className="text-emerald-600 ml-0.5" />
-      : <ChevronDown size={12} className="text-emerald-600 ml-0.5" />
+      ? <ChevronUp size={12} className="text-[#C9A84C] ml-0.5" />
+      : <ChevronDown size={12} className="text-[#C9A84C] ml-0.5" />
   }
 
   // ── Property location ──────────────────────────────────────────────────
@@ -422,20 +422,20 @@ export default function LoansPage() {
   }
 
   return (
-    <div className="flex h-full">
-      {/* Sidebar — collapses to icon rail under 1280px or via toggle */}
+    <div className="flex min-h-screen bg-[#0A0A0A]">
+      {/* Sidebar */}
       <aside
-        className="shrink-0 border-r border-slate-200 flex flex-col transition-[width] duration-200"
+        className="shrink-0 border-r border-[#2A2A2A] bg-[#0A0A0A] flex flex-col transition-[width] duration-200"
         style={{ width: sidebarCollapsed ? 52 : 200 }}
       >
         <div className="flex items-center justify-between px-2 py-3 min-h-[40px]">
           {!sidebarCollapsed && (
-            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Views</p>
+            <p className="text-[9px] font-mono font-semibold text-[#666666] uppercase tracking-wider">Views</p>
           )}
           <button
             type="button"
             onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-            className="text-slate-400 text-xs p-1 hover:text-slate-600"
+            className="text-[#666666] text-xs p-1 hover:text-[#F0F0F0] transition-colors"
             title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {sidebarCollapsed ? '›' : '‹'}
@@ -450,10 +450,10 @@ export default function LoansPage() {
                 onClick={() => handleListChange(list.id)}
                 className={`w-full flex items-center justify-between rounded text-left transition-colors ${
                   sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                } text-[11px] ${
+                } text-[11px] font-mono ${
                   activeList === list.id
-                    ? 'text-emerald-700 font-semibold bg-emerald-50 border-r-2 border-emerald-600'
-                    : 'text-slate-600 hover:bg-slate-50'
+                    ? 'text-[#C9A84C] font-semibold bg-[#C9A84C]/10 border-r-2 border-[#C9A84C]'
+                    : 'text-[#999999] hover:bg-[#1A1A1A] hover:text-[#F0F0F0]'
                 }`}
                 title={sidebarCollapsed ? list.label : undefined}
               >
@@ -463,7 +463,7 @@ export default function LoansPage() {
                   <span className="truncate">{list.label}</span>
                 )}
                 <span className={`text-[10px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                  activeList === list.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  activeList === list.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[#2A2A2A] text-[#666666]'
                 }`}>
                   {counts[list.id] ?? '…'}
                 </span>
@@ -479,10 +479,10 @@ export default function LoansPage() {
                   onClick={() => handleListChange(cl.id)}
                   className={`w-full flex items-center justify-between rounded text-left transition-colors ${
                     sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                  } text-[11px] flex-1 min-w-0 ${
+                  } text-[11px] font-mono flex-1 min-w-0 ${
                     activeList === cl.id
-                      ? 'text-emerald-700 font-semibold bg-emerald-50 border-r-2 border-emerald-600'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? 'text-[#C9A84C] font-semibold bg-[#C9A84C]/10 border-r-2 border-[#C9A84C]'
+                      : 'text-[#999999] hover:bg-[#1A1A1A] hover:text-[#F0F0F0]'
                   }`}
                   title={sidebarCollapsed ? cl.name : undefined}
                 >
@@ -492,7 +492,7 @@ export default function LoansPage() {
                     <span className="truncate">{cl.name}</span>
                   )}
                   <span className={`text-[10px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                    activeList === cl.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    activeList === cl.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[#2A2A2A] text-[#666666]'
                   }`}>
                     {counts[cl.id] ?? '…'}
                   </span>
@@ -501,7 +501,7 @@ export default function LoansPage() {
                   <button
                     type="button"
                     onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
-                    className="text-slate-400 hover:text-slate-600 p-0.5 text-xs"
+                    className="text-[#666666] hover:text-[#F0F0F0] p-0.5 text-xs transition-colors"
                     title="Delete list"
                   >
                     ×
@@ -513,7 +513,7 @@ export default function LoansPage() {
           <button
             type="button"
             onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
-            className="w-full mt-2 text-[10px] text-emerald-600 border border-dashed border-emerald-300 rounded px-2 py-1.5 hover:bg-emerald-50"
+            className="w-full mt-2 text-[10px] font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1.5 hover:bg-[#C9A84C]/10 transition-colors"
           >
             + New List
           </button>
@@ -523,12 +523,12 @@ export default function LoansPage() {
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A]">
           <div>
-            <h1 className="text-lg font-semibold text-slate-900">
+            <h1 className="text-lg font-mono font-semibold text-[#F0F0F0]">
               {activeListLabel}
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs font-mono text-[#666666] mt-0.5">
               {filtered.length} {filtered.length === 1 ? 'loan' : 'loans'}
               {search && ` matching "${search}"`}
             </p>
@@ -538,26 +538,26 @@ export default function LoansPage() {
             <button
               type="button"
               onClick={() => setShowColPicker(p => !p)}
-              className="text-xs font-medium text-slate-500 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50"
+              className="text-xs font-mono font-medium text-[#666666] px-3 py-1.5 border border-[#2A2A2A] rounded-lg hover:bg-[#1A1A1A] hover:text-[#F0F0F0] transition-colors"
             >
               COLUMNS ▾
             </button>
             {showColPicker && (
               <div
                 role="listbox"
-                className="absolute right-0 top-full mt-1 z-[100] min-w-[180px] py-2 bg-white border border-slate-200 rounded-lg shadow-lg"
+                className="absolute right-0 top-full mt-1 z-[100] min-w-[180px] py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl"
               >
                 {LOAN_COLUMNS.map(col => (
                   <label
                     key={col.id}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 cursor-pointer hover:bg-slate-50"
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[#F0F0F0] cursor-pointer hover:bg-[#2A2A2A]"
                   >
                     <input
                       type="checkbox"
                       checked={visibleColumns.includes(col.id)}
                       onChange={() => toggleColumn(col.id)}
                       onClick={e => e.stopPropagation()}
-                      className="rounded accent-emerald-600 cursor-pointer"
+                      className="rounded cursor-pointer accent-[#C9A84C]"
                     />
                     {col.label}
                   </label>
@@ -567,40 +567,40 @@ export default function LoansPage() {
           </div>
           {/* Search */}
           <div className="relative w-64">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#666666]" />
             <input
               type="text"
               placeholder="Search loans…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[#2A2A2A] rounded-lg bg-[#1A1A1A] text-[#F0F0F0] placeholder:text-[#666666] focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Bulk actions bar */}
         {selected.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-lg mx-4 mb-2">
-            <span className="text-sm font-medium text-emerald-800">{selected.size} selected</span>
+          <div className="flex items-center gap-3 px-4 py-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded-lg mx-4 mb-2 mt-2">
+            <span className="text-sm font-mono font-medium text-[#C9A84C]">{selected.size} selected</span>
             <div className="flex items-center gap-2 ml-auto">
               <select
                 value={bulkStatus}
                 onChange={e => { setBulkStatus(e.target.value); if (e.target.value) handleBulkStatusUpdate(e.target.value) }}
-                className="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-800"
+                className="text-xs font-mono border border-[#2A2A2A] rounded px-2 py-1.5 bg-[#1A1A1A] text-[#F0F0F0]"
               >
                 <option value="">Update Status…</option>
                 {LOAN_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <button
                 onClick={handleBulkDelete}
-                className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors"
+                className="flex items-center gap-1 text-xs font-mono px-3 py-1.5 rounded bg-red-900/30 text-red-400 border border-red-800 hover:bg-red-900/50 transition-colors"
               >
                 <Trash2 size={12} />
                 Delete
               </button>
               <button
                 onClick={() => setSelected(new Set())}
-                className="text-xs text-slate-500 hover:text-slate-700 px-2 py-1.5"
+                className="text-xs font-mono text-[#666666] hover:text-[#F0F0F0] px-2 py-1.5 transition-colors"
               >
                 Cancel
               </button>
@@ -611,30 +611,30 @@ export default function LoansPage() {
         {/* Table */}
         <div className="flex-1 overflow-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-slate-400 text-sm">Loading…</div>
+            <div className="flex items-center justify-center h-48 text-[#666666] text-sm font-mono">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 gap-2 text-slate-400">
+            <div className="flex flex-col items-center justify-center h-48 gap-2 text-[#666666]">
               <AlertCircle size={20} />
-              <p className="text-sm">No loans found</p>
+              <p className="text-sm font-mono">No loans found</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+                <tr className="border-b border-[#2A2A2A] bg-[#161616]">
                   <th className="w-8 px-2 py-2.5">
                     <input
                       type="checkbox"
                       checked={filtered.length > 0 && selected.size === filtered.length}
                       onChange={toggleSelectAll}
-                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      className="rounded border-[#2A2A2A] accent-[#C9A84C] focus:ring-[#C9A84C]"
                     />
                   </th>
                   {colDefs.map(col => (
                     <th
                       key={col.id}
                       onClick={() => col.key && handleSort(col.key)}
-                      className={`text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide select-none ${
-                        col.key ? 'cursor-pointer hover:text-slate-700' : ''
+                      className={`text-left px-4 py-2.5 text-xs font-mono font-semibold text-[#666666] uppercase tracking-wide select-none ${
+                        col.key ? 'cursor-pointer hover:text-[#F0F0F0]' : ''
                       }`}
                     >
                       <span className="flex items-center gap-0.5">
@@ -647,29 +647,29 @@ export default function LoansPage() {
               </thead>
               <tbody>
                 {filtered.map(loan => (
-                  <tr key={loan.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${selected.has(loan.id) ? 'bg-emerald-50/50' : ''}`}>
+                  <tr key={loan.id} className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}>
                     <td className="w-8 px-2 py-3">
                       <input
                         type="checkbox"
                         checked={selected.has(loan.id)}
                         onChange={() => toggleSelect(loan.id)}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className="rounded border-[#2A2A2A] accent-[#C9A84C] focus:ring-[#C9A84C]"
                       />
                     </td>
                     {colDefs.map(col => {
                       if (col.id === 'borrower_name') {
                         return (
                           <td key={col.id} className="px-4 py-3 font-medium">
-                            <Link href={`/dashboard/loans/${loan.id}`} className="text-slate-900 hover:text-emerald-700 hover:underline">
+                            <Link href={`/dashboard/loans/${loan.id}`} className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono">
                               {loan.borrower_name || loan.loan_name || '(unnamed)'}
                             </Link>
                             {loan.loan_name && loan.borrower_name && (
-                              <p className="text-xs text-slate-400 mt-0.5">{loan.loan_name}</p>
+                              <p className="text-xs font-mono text-[#666666] mt-0.5">{loan.loan_name}</p>
                             )}
                           </td>
                         )
                       }
-                      if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 text-slate-700 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
+                      if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 font-mono text-[#CCCCCC] whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
                       if (col.id === 'status') {
                         return (
                           <td key={col.id} className="px-4 py-3" onClick={e => e.stopPropagation()}>
@@ -679,7 +679,7 @@ export default function LoansPage() {
                                 value={loan.status ?? ''}
                                 onChange={e => handleStatusChange(loan.id, e.target.value)}
                                 onBlur={() => setEditingStatusId(null)}
-                                className="text-xs border border-slate-200 rounded px-2 py-1 bg-white text-slate-800"
+                                className="text-xs font-mono border border-[#2A2A2A] rounded px-2 py-1 bg-[#1A1A1A] text-[#F0F0F0]"
                               >
                                 {LOAN_STATUS_OPTIONS.map(s => (
                                   <option key={s} value={s}>{s}</option>
@@ -693,16 +693,16 @@ export default function LoansPage() {
                           </td>
                         )
                       }
-                      if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 text-slate-600">{loan.loan_purpose || '—'}</td>
-                      if (col.id === 'closing_date') return <td key={col.id} className="px-4 py-3 text-slate-600 whitespace-nowrap">{fmtDate(loan.closing_date)}</td>
-                      if (col.id === 'location') return <td key={col.id} className="px-4 py-3 text-slate-600">{loanLocation(loan)}</td>
-                      if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 text-slate-600">{loan.loan_program || '—'}</td>
+                      if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_purpose || '—'}</td>
+                      if (col.id === 'closing_date') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{fmtDate(loan.closing_date)}</td>
+                      if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loanLocation(loan)}</td>
+                      if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
                       if (col.id === 'contact_email') {
                         const href = mailtoHref(loan.contact_email)
                         const val = loan.contact_email ?? '—'
                         return (
-                          <td key={col.id} className="px-4 py-3 text-slate-600">
-                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="text-inherit no-underline hover:underline">{val}</a> : val}
+                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
                           </td>
                         )
                       }
@@ -710,8 +710,8 @@ export default function LoansPage() {
                         const href = telHref(loan.contact_phone)
                         const val = loan.contact_phone ?? '—'
                         return (
-                          <td key={col.id} className="px-4 py-3 text-slate-600">
-                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="text-inherit no-underline hover:underline">{val}</a> : val}
+                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
                           </td>
                         )
                       }
@@ -724,11 +724,11 @@ export default function LoansPage() {
           )}
           {/* Load More */}
           {hasMore && !loading && (
-            <div className="flex justify-center py-4 border-t border-slate-100">
+            <div className="flex justify-center py-4 border-t border-[#2A2A2A]">
               <button
                 onClick={loadMoreLoans}
                 disabled={loadingMore}
-                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-slate-200 rounded text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-[#2A2A2A] rounded text-[#999999] hover:bg-[#1A1A1A] hover:text-[#F0F0F0] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loadingMore ? 'Loading…' : `Load more (showing ${loans.length})`}
               </button>
@@ -739,29 +739,29 @@ export default function LoansPage() {
 
       {/* New List (custom filter) modal */}
       {showNewListModal && (
-        <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center" onClick={() => setShowNewListModal(false)}>
-          <div className="bg-white border border-slate-200 rounded-lg p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">New Smart List</div>
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setShowNewListModal(false)}>
+          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-xs font-mono font-semibold text-[#666666] uppercase tracking-wider mb-3">New Smart List</div>
             <input
               placeholder="List name"
               value={newListName}
               onChange={e => setNewListName(e.target.value)}
-              className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-800 mb-4"
+              className="w-full border border-[#2A2A2A] rounded px-3 py-2 text-sm font-mono bg-[#0A0A0A] text-[#F0F0F0] placeholder:text-[#666666] mb-4 focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
             />
-            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Filter rules (AND)</div>
+            <div className="text-[10px] font-mono text-[#666666] uppercase tracking-wider mb-2">Filter rules (AND)</div>
             {newListRules.map((rule, idx) => (
               <div key={idx} className="flex gap-2 mb-2 flex-wrap items-center">
                 <select
                   value={rule.field}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, field: e.target.value } : r))}
-                  className="min-w-[100px] border border-slate-200 rounded px-2 py-1.5 text-xs text-slate-800"
+                  className="min-w-[100px] border border-[#2A2A2A] rounded px-2 py-1.5 text-xs font-mono bg-[#0A0A0A] text-[#F0F0F0]"
                 >
                   {LOAN_FILTER_FIELDS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
                 </select>
                 <select
                   value={rule.operator}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, operator: e.target.value } : r))}
-                  className="min-w-[80px] border border-slate-200 rounded px-2 py-1.5 text-xs text-slate-800"
+                  className="min-w-[80px] border border-[#2A2A2A] rounded px-2 py-1.5 text-xs font-mono bg-[#0A0A0A] text-[#F0F0F0]"
                 >
                   {FILTER_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
                 </select>
@@ -769,25 +769,25 @@ export default function LoansPage() {
                   placeholder="Value"
                   value={rule.value}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
-                  className="flex-1 min-w-[80px] border border-slate-200 rounded px-2 py-1.5 text-xs text-slate-800"
+                  className="flex-1 min-w-[80px] border border-[#2A2A2A] rounded px-2 py-1.5 text-xs font-mono bg-[#0A0A0A] text-[#F0F0F0] placeholder:text-[#666666]"
                 />
                 {newListRules.length > 1 && (
-                  <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} className="text-slate-400 hover:text-slate-600 p-1">×</button>
+                  <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} className="text-[#666666] hover:text-[#F0F0F0] p-1 transition-colors">×</button>
                 )}
               </div>
             ))}
             <button
               type="button"
               onClick={() => setNewListRules(prev => [...prev, { field: 'status', operator: 'is', value: '' }])}
-              className="text-xs text-emerald-600 border border-dashed border-emerald-300 rounded px-2 py-1 mb-4 hover:bg-emerald-50"
+              className="text-xs font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1 mb-4 hover:bg-[#C9A84C]/10 transition-colors"
             >
               + Add Filter
             </button>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowNewListModal(false)} className="px-3 py-1.5 text-xs border border-slate-200 rounded text-slate-500 hover:bg-slate-50">
+              <button onClick={() => setShowNewListModal(false)} className="px-3 py-1.5 text-xs font-mono border border-[#2A2A2A] rounded text-[#666666] hover:bg-[#2A2A2A] transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSaveNewList} disabled={!newListName.trim()} className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded font-medium disabled:opacity-50">
+              <button onClick={handleSaveNewList} disabled={!newListName.trim()} className="px-3 py-1.5 text-xs font-mono bg-[#C9A84C] text-[#0A0A0A] rounded font-semibold disabled:opacity-50 hover:bg-[#D4B05C] transition-colors">
                 Save List
               </button>
             </div>
@@ -797,13 +797,13 @@ export default function LoansPage() {
 
       {/* Delete custom list confirmation */}
       {deleteListId && (
-        <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center" onClick={() => setDeleteListId(null)}>
-          <div className="bg-white border border-slate-200 rounded-lg p-6 w-80 shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="text-sm text-slate-800 mb-2">Delete this list?</div>
-            <div className="text-xs text-slate-500 mb-4">This cannot be undone.</div>
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setDeleteListId(null)}>
+          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-sm font-mono text-[#F0F0F0] mb-2">Delete this list?</div>
+            <div className="text-xs font-mono text-[#666666] mb-4">This cannot be undone.</div>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeleteListId(null)} className="px-3 py-1.5 text-xs border border-slate-200 rounded text-slate-500">Cancel</button>
-              <button onClick={handleDeleteList} className="px-3 py-1.5 text-xs bg-red-600 text-white rounded">Delete</button>
+              <button onClick={() => setDeleteListId(null)} className="px-3 py-1.5 text-xs font-mono border border-[#2A2A2A] rounded text-[#666666] hover:bg-[#2A2A2A] transition-colors">Cancel</button>
+              <button onClick={handleDeleteList} className="px-3 py-1.5 text-xs font-mono bg-red-700 text-white rounded hover:bg-red-600 transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -821,24 +821,24 @@ export default function LoansPage() {
   )
 }
 
-// ── Status badge (color map per spec) ───────────────────────────────────────
+// ── Status badge (dark-theme color map) ──────────────────────────────────────
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  'Lead':           { bg: '#f1f5f9',  text: '#475569' },
-  'Pre-App':        { bg: 'rgba(76,126,201,0.2)',  text: '#4C7EC9' },
-  'Application':    { bg: 'rgba(123,76,201,0.2)',  text: '#7B4CC9' },
-  'In Process':     { bg: 'rgba(76,201,138,0.2)',  text: '#4CC98A' },
-  'Clear to Close': { bg: 'rgba(46,204,113,0.2)',   text: '#2ecc71' },
-  'Closed':         { bg: 'rgba(39,174,96,0.2)',    text: '#27ae60' },
-  'On Hold':        { bg: 'rgba(230,126,34,0.2)', text: '#e67e22' },
-  'Dead':           { bg: 'rgba(149,165,166,0.3)', text: '#95a5a6' },
+  'Lead':           { bg: 'rgba(255,255,255,0.06)',  text: '#888888' },
+  'Pre-App':        { bg: 'rgba(76,126,201,0.2)',    text: '#7AABEE' },
+  'Application':    { bg: 'rgba(123,76,201,0.2)',    text: '#A97EEE' },
+  'In Process':     { bg: 'rgba(76,201,138,0.15)',   text: '#5CC99A' },
+  'Clear to Close': { bg: 'rgba(46,204,113,0.15)',   text: '#4ECC80' },
+  'Closed':         { bg: 'rgba(201,168,76,0.15)',   text: '#C9A84C' },
+  'On Hold':        { bg: 'rgba(230,126,34,0.15)',   text: '#E8944A' },
+  'Dead':           { bg: 'rgba(100,100,100,0.2)',   text: '#666666' },
 }
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-slate-400">—</span>
+  if (!status) return <span className="text-[#666666] font-mono">—</span>
 
   const s = status.toLowerCase()
-  let style = STATUS_STYLES[status] ?? { bg: 'rgba(148,163,184,0.2)', text: '#64748b' }
+  let style = STATUS_STYLES[status] ?? { bg: 'rgba(100,100,100,0.2)', text: '#666666' }
   if (!STATUS_STYLES[status]) {
     if (['closed', 'funded', 'closed/funded'].some(v => s.includes(v))) style = STATUS_STYLES['Closed'] ?? style
     else if (['in process', 'processing', 'clear to close', 'submitted', 'conditional', 'approved', 'pre-approved'].some(v => s.includes(v))) style = STATUS_STYLES['In Process'] ?? style
@@ -847,7 +847,7 @@ function StatusBadge({ status }: { status: string | null }) {
   }
 
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: style.bg, color: style.text }}>
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium" style={{ background: style.bg, color: style.text }}>
       {status}
     </span>
   )

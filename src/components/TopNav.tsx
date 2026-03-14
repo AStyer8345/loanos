@@ -2,23 +2,19 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Settings } from 'lucide-react'
 import { NavItem } from './NavItem'
 import { NavDropdown } from './NavDropdown'
 import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'briefing' | 'pipeline' | 'marketing' | 'admin' | 'settings'
+type Section = 'briefing' | 'contacts' | 'loans' | 'marketing' | 'settings'
 
-function sectionFromPath(pathname: string): Section {
+function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/briefing')) return 'briefing'
-  if (
-    pathname.startsWith('/dashboard/contacts') ||
-    pathname.startsWith('/dashboard/loans') ||
-    pathname.startsWith('/dashboard/referral')
-  ) {
-    return 'pipeline'
-  }
+  if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
+  if (pathname.startsWith('/dashboard/loans')) return 'loans'
   if (
     pathname.startsWith('/dashboard/marketing') ||
     pathname.startsWith('/dashboard/automations')
@@ -26,8 +22,7 @@ function sectionFromPath(pathname: string): Section {
     return 'marketing'
   }
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
-  if (pathname.startsWith('/dashboard')) return 'pipeline'
-  return 'briefing'
+  return null
 }
 
 export default function TopNav() {
@@ -52,10 +47,10 @@ export default function TopNav() {
     <>
       <GlobalSearch />
       <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-800 text-white shadow flex items-center px-3 md:px-6">
-        {/* Logo */}
+        {/* Logo → Pipeline Dashboard */}
         <button
           type="button"
-          onClick={() => navigate('/dashboard/briefing')}
+          onClick={() => navigate('/dashboard')}
           className="flex items-baseline gap-2 mr-4"
         >
           <span className="text-2xl leading-none">🧠</span>
@@ -73,17 +68,18 @@ export default function TopNav() {
             onClick={() => navigate('/dashboard/briefing')}
           />
 
-          <NavDropdown
-            label="Pipeline"
-            icon="📈"
-            isOpen={openDropdown === 'pipeline'}
-            onToggle={() => toggleDropdown('pipeline')}
-            items={[
-              { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-              { label: 'Contacts', onClick: () => navigate('/dashboard/contacts') },
-              { label: 'Loans', onClick: () => navigate('/dashboard/loans') },
-              { label: 'Referrals', onClick: () => navigate('/dashboard/contacts') },
-            ]}
+          <NavItem
+            label="Contacts"
+            icon="👥"
+            isActive={currentSection === 'contacts'}
+            onClick={() => navigate('/dashboard/contacts')}
+          />
+
+          <NavItem
+            label="Loans"
+            icon="📋"
+            isActive={currentSection === 'loans'}
+            onClick={() => navigate('/dashboard/loans')}
           />
 
           <NavDropdown
@@ -114,28 +110,6 @@ export default function TopNav() {
               },
             ]}
           />
-
-          <NavDropdown
-            label="Admin"
-            icon="⚙️"
-            isOpen={openDropdown === 'admin'}
-            onToggle={() => toggleDropdown('admin')}
-            items={[
-              { label: 'Settings', onClick: () => navigate('/dashboard/settings') },
-              // Future admin screens can replace these placeholders
-              { label: 'Users', onClick: () => navigate('/dashboard/settings') },
-              { label: 'Integrations', onClick: () => navigate('/dashboard/settings') },
-              { label: 'Billing', onClick: () => navigate('/dashboard/settings') },
-              { label: 'Logs', onClick: () => navigate('/dashboard/settings') },
-            ]}
-          />
-
-          <NavItem
-            label="Settings"
-            icon="🛠"
-            isActive={currentSection === 'settings'}
-            onClick={() => navigate('/dashboard/settings')}
-          />
         </div>
 
         {/* Spacer */}
@@ -157,8 +131,21 @@ export default function TopNav() {
 
         <ActivityFeed />
 
-        {/* Right side: profile + sign out */}
+        {/* Right side: settings icon + profile + sign out */}
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard/settings')}
+            className={`hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+              currentSection === 'settings'
+                ? 'bg-white/20 text-white'
+                : 'text-white/50 hover:bg-white/10 hover:text-white/80'
+            }`}
+            title="Settings"
+          >
+            <Settings size={15} />
+          </button>
+
           <div className="hidden sm:flex flex-col items-end mr-1">
             <span className="text-xs font-semibold tracking-widest text-emerald-100/90">
               ADAM STYER
@@ -206,39 +193,31 @@ export default function TopNav() {
               <span>Daily Briefing</span>
             </button>
 
-            <div className="mt-1">
-              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-emerald-200/70">
-                Pipeline
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Dashboard</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/contacts')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Contacts</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/loans')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Loans</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/contacts')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Referrals</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/contacts')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'contacts'
+                  ? 'bg-white/10 text-white'
+                  : 'text-emerald-50/90'
+              }`}
+            >
+              <span className="text-base">👥</span>
+              <span>Contacts</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/loans')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'loans'
+                  ? 'bg-white/10 text-white'
+                  : 'text-emerald-50/90'
+              }`}
+            >
+              <span className="text-base">📋</span>
+              <span>Loans</span>
+            </button>
 
             <div className="mt-2">
               <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-emerald-200/70">
@@ -274,15 +253,13 @@ export default function TopNav() {
               </button>
             </div>
 
-            <div className="mt-2">
-              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-emerald-200/70">
-                Admin
-              </p>
+            <div className="mt-2 border-t border-white/10 pt-2">
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/settings')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
               >
+                <span>⚙️</span>
                 <span>Settings</span>
               </button>
             </div>
@@ -292,4 +269,3 @@ export default function TopNav() {
     </>
   )
 }
-

@@ -39,7 +39,7 @@ export default async function DashboardPage() {
   // ── fetch loans ──
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, created_at')
     .eq('user_id', user.id)
 
   // ── compute pipeline stats ──
@@ -129,6 +129,42 @@ export default async function DashboardPage() {
     return { week: label, volume, count }
   })
 
+  // ── performance metrics ──
+  const totalAllLoans = loans?.length ?? 0
+  const totalClosedLoans = (loans ?? []).filter(l =>
+    ['closed', 'funded'].includes((l.status ?? '').toLowerCase())
+  ).length
+  const pullThroughRate = totalAllLoans > 0
+    ? Math.round((totalClosedLoans / totalAllLoans) * 100)
+    : null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const closedWithDates = (loans ?? []).filter((l: any) =>
+    ['closed', 'funded'].includes((l.status ?? '').toLowerCase()) &&
+    l.closing_date && l.created_at
+  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const avgDaysToClose = closedWithDates.length > 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? Math.round(closedWithDates.reduce((sum: number, l: any) => {
+        const start = new Date(l.created_at)
+        const end = new Date(l.closing_date)
+        return sum + Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      }, 0) / closedWithDates.length)
+    : null
+
+  const { count: leadsThisMonth } = await supabase
+    .from('contacts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('created_at', thisMonthStart.toISOString())
+
+  const { count: realtorContacts } = await supabase
+    .from('contacts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_realtor', true)
+
   // ── fetch activity (last 7 days) ──
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   const { data: activityEntries = [] } = await supabase
@@ -191,6 +227,60 @@ export default async function DashboardPage() {
 
       {/* ── Email Draft Preview ── */}
       <EmailDraftPreview />
+
+      {/* ── Performance Dashboard ── */}
+      <div className="space-y-3">
+        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest px-1">
+          Performance
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          <PerformanceCard
+            label="Loans Closed MTD"
+            value={closedThisMonth.toString()}
+            sub={closedThisMonthVolume > 0 ? fmtVolume(closedThisMonthVolume) : undefined}
+          />
+          <PerformanceCard
+            label="Loans in Pipeline"
+            value={totalCount.toString()}
+            sub={totalVolume > 0 ? fmtVolume(totalVolume) : undefined}
+          />
+          <PerformanceCard
+            label="Pull-Through Rate"
+            value={pullThroughRate != null ? `${pullThroughRate}%` : '—'}
+            sub="closed / all loans"
+          />
+          <PerformanceCard
+            label="Avg Days to Close"
+            value={avgDaysToClose != null ? `${avgDaysToClose}d` : '—'}
+          />
+          <PerformanceCard
+            label="Leads Added MTD"
+            value={leadsThisMonth != null ? leadsThisMonth.toString() : '—'}
+          />
+          <PerformanceCard
+            label="Referral Partners Active"
+            value={realtorContacts != null ? realtorContacts.toString() : '—'}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function fmtVolume(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
+  return `$${n}`
+}
+
+function PerformanceCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
+      <p className="text-2xl font-mono font-bold text-zinc-100">{value}</p>
+      {sub && <p className="text-xs font-mono text-zinc-500 mt-0.5">{sub}</p>}
     </div>
   )
 }

@@ -1,5 +1,18 @@
 # LoanOS Changelog
 
+## [1.19.0] — 2026-03-14 — Email Draft Preview: Full Integration
+
+### Added
+- **`POST /api/email-drafts`** — new endpoint for external callers (n8n, webhooks); validates required fields, generates `body_preview`, inserts with `status: 'pending'`. Internal code still uses `logEmailDraft()` directly.
+- **Loan detail → Emails tab** — 5th tab on every loan record. Queries `email_drafts` where `loan_id = id` (all statuses, chronological desc). Each card: type badge + status badge + relative timestamp; expands to iframe HTML preview; pending drafts get Mark Sent / Discard buttons that PATCH `/api/email-drafts`. Fetched in parallel with existing loan data.
+- **Contact detail → Emails tab** — new tab on every contact record. Same pattern, queries by `contact_id`. `ContactEmailHistory` component uses contact page's inline style convention.
+- **`EmailDraftRow` type** — exported from `ContactRecordView.tsx`, imported by `page.tsx` for type-safe state.
+
+### Architecture note
+Every automation that generates email should call `logEmailDraft()` from `src/lib/supabase/logEmailDraft.ts` (non-blocking, fire-and-forget pattern). The milestone agent (`/api/agents/milestone`) already does this. The dashboard `<EmailDraftPreview />` panel was already wired in v1.18.0.
+
+---
+
 ## [1.18.0] — 2026-03-14 — Marketing: Newsletter Generator + Testimonials + Nav Deep Links
 
 ### Added

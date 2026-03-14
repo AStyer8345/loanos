@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
-  ChevronRight, AlertCircle, Check
+  ChevronRight, AlertCircle, Check, Mail, Clock, Inbox, X
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 
@@ -143,6 +143,18 @@ interface ContactRow {
   referred_by: string | null
 }
 
+interface EmailDraftRow {
+  id: string
+  automation_name: string
+  recipient_name: string | null
+  recipient_email: string
+  subject: string
+  body_html: string
+  body_preview: string | null
+  status: string
+  created_at: string
+}
+
 // ── Workflow definitions (subset relevant to loan automation) ─────────────────
 
 const WORKFLOWS = [
@@ -231,16 +243,18 @@ export default function LoanDetailPage() {
   const [contact, setContact] = useState<ContactRow | null>(null)
   const [docs, setDocs] = useState<DocRow[]>([])
   const [activity, setActivity] = useState<ActivityRow[]>([])
+  const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'automations' | 'activity'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'automations' | 'activity' | 'emails'>('overview')
 
   // ── Fetch ────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const [loanRes, docsRes, actRes] = await Promise.all([
+    const [loanRes, docsRes, actRes, draftsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('id, created_at, action, entity_type, metadata').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(50),
+      supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
     ])
 
     if (loanRes.data) {
@@ -257,6 +271,7 @@ export default function LoanDetailPage() {
     }
     setDocs(docsRes.data || [])
     setActivity(actRes.data || [])
+    setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setLoading(false)
   }, [loanId, supabase])
 
@@ -311,6 +326,7 @@ export default function LoanDetailPage() {
             { id: 'documents',   label: `Documents (${docs.length})`, icon: FileText },
             { id: 'automations', label: 'Automations', icon: Zap },
             { id: 'activity',    label: `Activity (${activity.length})`, icon: Activity },
+            { id: 'emails',      label: `Emails (${emailDrafts.length})`, icon: Mail },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -340,6 +356,9 @@ export default function LoanDetailPage() {
         )}
         {activeTab === 'activity' && (
           <ActivityTab activity={activity} />
+        )}
+        {activeTab === 'emails' && (
+          <EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} />
         )}
       </div>
       <LoanOSChat recordId={loanId} recordType="loan" recordName={displayName} />
@@ -902,6 +921,120 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Email history tab ─────────────────────────────────────────────────────────
+
+const DRAFT_COLORS: Record<string, string> = {
+  pre_approval:      'bg-emerald-900/40 text-emerald-400 border-emerald-800',
+  contract_received: 'bg-blue-900/40 text-blue-400 border-blue-800',
+  final_cd:          'bg-amber-900/40 text-amber-400 border-amber-800',
+  review_request:    'bg-purple-900/40 text-purple-400 border-purple-800',
+  referral_intro:    'bg-orange-900/40 text-orange-400 border-orange-800',
+  milestone:         'bg-indigo-900/40 text-indigo-400 border-indigo-800',
+}
+
+const DRAFT_LABELS: Record<string, string> = {
+  pre_approval: 'Pre-Approval', contract_received: 'Contract', final_cd: 'Final CD',
+  review_request: 'Review Request', referral_intro: 'Referral Intro', milestone: 'Milestone',
+}
+
+const STATUS_CLASSES: Record<string, string> = {
+  pending:   'bg-amber-900/40 text-amber-400 border-amber-800',
+  sent:      'bg-emerald-900/40 text-emerald-400 border-emerald-800',
+  discarded: 'bg-zinc-800 text-zinc-500 border-zinc-700',
+}
+
+function EmailHistoryTab({ drafts, onRefresh }: { drafts: EmailDraftRow[]; onRefresh: () => void }) {
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const iframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({})
+
+  const updateStatus = async (id: string, status: 'sent' | 'discarded') => {
+    await fetch('/api/email-drafts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    })
+    onRefresh()
+  }
+
+  useEffect(() => {
+    if (!expanded) return
+    const iframe = iframeRefs.current[expanded]
+    const draft = drafts.find(d => d.id === expanded)
+    if (!iframe || !draft) return
+    const doc = iframe.contentDocument
+    if (doc) {
+      doc.open()
+      doc.write(`<html><head><style>body{font-family:-apple-system,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;padding:16px;margin:0}</style></head><body>${draft.body_html}</body></html>`)
+      doc.close()
+    }
+  }, [expanded, drafts])
+
+  if (drafts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
+        <Inbox size={24} />
+        <p className="text-sm">No emails logged for this loan</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3 max-w-2xl">
+      {drafts.map(draft => {
+        const colorClass = DRAFT_COLORS[draft.automation_name] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
+        const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
+        const isOpen = expanded === draft.id
+        return (
+          <div key={draft.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+            <button onClick={() => setExpanded(isOpen ? null : draft.id)} className="w-full text-left p-4 focus:outline-none">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_CLASSES[draft.status] ?? STATUS_CLASSES.pending}`}>{draft.status}</span>
+                  <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(draft.created_at)}</span>
+                </div>
+                {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+              </div>
+              <div className="text-sm font-medium text-zinc-100 mb-1 truncate">{draft.subject}</div>
+              <div className="text-xs text-zinc-400 truncate">To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}</div>
+              {!isOpen && draft.body_preview && <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{draft.body_preview}</div>}
+            </button>
+            {isOpen && (
+              <div className="border-t border-zinc-800">
+                <div className="bg-zinc-800 rounded-b-lg">
+                  <iframe
+                    ref={el => { iframeRefs.current[draft.id] = el }}
+                    className="w-full border-0 rounded-b-lg"
+                    style={{ minHeight: '180px', maxHeight: '400px' }}
+                    title="Email preview"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
+                {draft.status === 'pending' && (
+                  <div className="flex gap-2 p-3 border-t border-zinc-800">
+                    <button
+                      onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'sent') }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-400 bg-emerald-900/30 hover:bg-emerald-900/50 border border-emerald-800 rounded-md transition-colors"
+                    >
+                      <Check className="w-3.5 h-3.5" /> Mark Sent
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'discarded') }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-900/30 hover:bg-red-900/50 border border-red-800 rounded-md transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" /> Discard
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

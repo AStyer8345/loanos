@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -8,6 +8,11 @@ import {
   Mail,
   MessageSquare,
   AlertCircle,
+  Clock,
+  Inbox,
+  Check,
+  X,
+  ChevronRight,
 } from 'lucide-react'
 import ActivityTimeline from '@/components/ActivityTimeline'
 import LoanOSChat from '@/components/crm/LoanOSChat'
@@ -69,6 +74,18 @@ export type ActivityEntry = {
   _source?: string        // e.g. 'Contact' | 'Loan: 123 Main St' — set client-side when merging
 }
 
+export type EmailDraftRow = {
+  id: string
+  automation_name: string
+  recipient_name: string | null
+  recipient_email: string
+  subject: string
+  body_html: string
+  body_preview: string | null
+  status: string
+  created_at: string
+}
+
 function fmtCurrency(n: number | null) {
   if (n == null) return '-'
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -122,6 +139,7 @@ const CONTACT_TABS = [
   { id: 'loans' as const, label: 'Loans' },
   { id: 'activity' as const, label: 'Activity' },
   { id: 'notes' as const, label: 'Notes' },
+  { id: 'emails' as const, label: 'Emails' },
 ]
 
 const labelStyle: React.CSSProperties = {
@@ -136,9 +154,10 @@ type Props = {
   contact: Contact
   loans: ContactLoan[]
   activity: ActivityEntry[]
+  emailDrafts: EmailDraftRow[]
   referrerContactId: string | null
-  activeTab: 'overview' | 'loans' | 'activity' | 'notes'
-  setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'notes') => void
+  activeTab: 'overview' | 'loans' | 'activity' | 'notes' | 'emails'
+  setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'notes' | 'emails') => void
   newNote: string
   setNewNote: (s: string) => void
   savingNote: boolean
@@ -151,6 +170,7 @@ export function ContactRecordView(props: Props) {
     contact,
     loans,
     activity,
+    emailDrafts,
     referrerContactId,
     activeTab,
     setActiveTab,
@@ -496,6 +516,10 @@ export function ContactRecordView(props: Props) {
           </div>
         )}
 
+        {activeTab === 'emails' && (
+          <ContactEmailHistory drafts={emailDrafts} />
+        )}
+
         {activeTab === 'notes' && (
           <div style={cardStyle}>
             <div style={labelStyle}>NOTES</div>
@@ -546,6 +570,134 @@ export function ContactRecordView(props: Props) {
         )}
       </div>
       <LoanOSChat recordId={contact.id} recordType="contact" recordName={fullName(contact)} />
+    </div>
+  )
+}
+
+// ── Contact email history ─────────────────────────────────────────────────────
+
+const DRAFT_COLORS: Record<string, string> = {
+  pre_approval:      '#064e3b',
+  contract_received: '#1e3a5f',
+  final_cd:          '#78350f',
+  review_request:    '#3b0764',
+  referral_intro:    '#431407',
+  milestone:         '#1e1b4b',
+}
+
+const DRAFT_LABELS: Record<string, string> = {
+  pre_approval: 'Pre-Approval', contract_received: 'Contract', final_cd: 'Final CD',
+  review_request: 'Review Request', referral_intro: 'Referral Intro', milestone: 'Milestone',
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  pending: '#c9a84c', sent: '#6ee7b7', discarded: '#71717a',
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
+function ContactEmailHistory({ drafts }: { drafts: EmailDraftRow[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const iframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({})
+
+  useEffect(() => {
+    if (!expanded) return
+    const iframe = iframeRefs.current[expanded]
+    const draft = drafts.find(d => d.id === expanded)
+    if (!iframe || !draft) return
+    const doc = iframe.contentDocument
+    if (doc) {
+      doc.open()
+      doc.write(`<html><head><style>body{font-family:-apple-system,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;padding:16px;margin:0}</style></head><body>${draft.body_html}</body></html>`)
+      doc.close()
+    }
+  }, [expanded, drafts])
+
+  const updateStatus = async (id: string, status: 'sent' | 'discarded') => {
+    await fetch('/api/email-drafts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    })
+  }
+
+  if (drafts.length === 0) {
+    return (
+      <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '32px 0' }}>
+        <Inbox size={20} style={{ color: 'var(--muted)' }} />
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)' }}>No emails logged for this contact</span>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {drafts.map(draft => {
+        const bgColor = DRAFT_COLORS[draft.automation_name] ?? '#27272a'
+        const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
+        const isOpen = expanded === draft.id
+        return (
+          <div key={draft.id} style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+            <button
+              onClick={() => setExpanded(isOpen ? null : draft.id)}
+              style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: '14px 18px' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ background: bgColor, color: '#fff', fontSize: 10, fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 12, fontWeight: 600, letterSpacing: '0.05em' }}>{label}</span>
+                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: STATUS_COLOR[draft.status] ?? '#c9a84c', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{draft.status}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                    <Clock size={11} />{timeAgo(draft.created_at)}
+                  </span>
+                </div>
+                <ChevronRight size={14} style={{ color: 'var(--muted)', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{draft.subject}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}
+              </div>
+              {!isOpen && draft.body_preview && (
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginTop: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{draft.body_preview}</div>
+              )}
+            </button>
+            {isOpen && (
+              <div style={{ borderTop: '1px solid var(--border)' }}>
+                <iframe
+                  ref={el => { iframeRefs.current[draft.id] = el }}
+                  style={{ width: '100%', border: 'none', minHeight: 180, maxHeight: 360, display: 'block' }}
+                  title="Email preview"
+                  sandbox="allow-same-origin"
+                />
+                {draft.status === 'pending' && (
+                  <div style={{ display: 'flex', gap: 8, padding: '10px 14px', borderTop: '1px solid var(--border)' }}>
+                    <button
+                      onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'sent') }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontFamily: 'var(--font-mono)', background: 'rgba(52,211,153,0.1)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      <Check size={12} /> Mark Sent
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'discarded') }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontFamily: 'var(--font-mono)', background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      <X size={12} /> Discard
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

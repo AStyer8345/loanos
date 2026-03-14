@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
-import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry } from './ContactRecordView'
+import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type EmailDraftRow } from './ContactRecordView'
 
 export default function ContactRecordPage() {
   const params = useParams()
@@ -16,7 +16,8 @@ export default function ContactRecordPage() {
   const [activity, setActivity] = useState<ActivityEntry[]>([])
   const [referrerContactId, setReferrerContactId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'notes'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'notes' | 'emails'>('overview')
+  const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
 
@@ -109,6 +110,13 @@ export default function ContactRecordPage() {
       if (c) {
         await Promise.all([fetchLoans(), fetchActivity()])
         await resolveReferrer(c.referred_by)
+        const { data: drafts } = await supabase
+          .from('email_drafts')
+          .select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at')
+          .eq('contact_id', id)
+          .order('created_at', { ascending: false })
+          .limit(100)
+        setEmailDrafts((drafts ?? []) as EmailDraftRow[])
       }
       setLoading(false)
     }
@@ -182,6 +190,7 @@ export default function ContactRecordPage() {
       contact={contact}
       loans={loans}
       activity={activity}
+      emailDrafts={emailDrafts}
       referrerContactId={referrerContactId}
       activeTab={activeTab}
       setActiveTab={setActiveTab}

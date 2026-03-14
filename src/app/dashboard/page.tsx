@@ -12,12 +12,6 @@ export const dynamic = 'force-dynamic'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function formatDollars(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n}`
-}
-
 const STAGE_MAP: Record<string, string> = {
   lead: 'Lead',
   pre_approval: 'Pre-App',

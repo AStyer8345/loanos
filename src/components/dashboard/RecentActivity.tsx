@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Mail, Phone, FileText, Zap, MessageSquare, Clock } from 'lucide-react'
-import Link from 'next/link'
+
 
 interface ActivityEntry {
   id: string
@@ -93,7 +93,7 @@ export default function RecentActivity({ entries }: RecentActivityProps) {
           const type = (entry.type || entry.action || 'task').toLowerCase()
           const icon = TYPE_ICONS[type] ?? <Clock className="w-3.5 h-3.5" />
           const colors = TYPE_COLORS[type] ?? 'text-zinc-400 bg-zinc-800'
-          const contactName = (entry.metadata as any)?.contact_name || (entry.metadata as any)?.borrower_name || null
+          const contactName = (entry.metadata?.contact_name as string) || (entry.metadata?.borrower_name as string) || null
           const summary = entry.summary || entry.action || 'Activity logged'
 
           return (

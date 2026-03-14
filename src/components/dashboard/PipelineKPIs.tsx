@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, FileText, Calendar } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, FileText, Calendar } from 'lucide-react'
 
 interface PipelineKPIsProps {
   totalCount: number
@@ -21,7 +21,7 @@ function formatDollars(n: number): string {
 }
 
 export default function PipelineKPIs(props: PipelineKPIsProps) {
-  const { totalCount, totalVolume, closedThisMonth, closedLastMonth, closedThisMonthVolume, closedLastMonthVolume, closingNext30, closingNext30Volume, urgentCount } = props
+  const { totalCount, totalVolume, closedThisMonth, closedLastMonth, closedThisMonthVolume, closingNext30, closingNext30Volume, urgentCount } = props
 
   const mtdDelta = closedThisMonth - closedLastMonth
   const mtdTrending = mtdDelta >= 0

@@ -30,7 +30,13 @@ function formatDollars(n: number): string {
   return `$${n}`
 }
 
-const CustomTooltipBar = ({ active, payload, label }: any) => {
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{ value: number }>
+  label?: string
+}
+
+const CustomTooltipBar = ({ active, payload, label }: TooltipProps) => {
   if (active && payload?.length) {
     return (
       <div className="bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-xs font-mono">
@@ -42,7 +48,7 @@ const CustomTooltipBar = ({ active, payload, label }: any) => {
   return null
 }
 
-const CustomTooltipLine = ({ active, payload, label }: any) => {
+const CustomTooltipLine = ({ active, payload, label }: TooltipProps) => {
   if (active && payload?.length) {
     return (
       <div className="bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-xs font-mono">
@@ -95,7 +101,7 @@ export default function PipelineCharts({ stageCounts, weeklyTrend }: PipelineCha
               />
               <Tooltip content={<CustomTooltipBar />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
               <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                {stageData.map((entry, index) => (
+                {stageData.map((entry) => (
                   <Cell
                     key={entry.stage}
                     fill={['Closing', 'Clear to Close', 'Funded', 'Closed'].includes(entry.stage) ? '#eab308' : '#3f3f46'}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, CheckCircle2, Circle, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
+import { Plus, Circle, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
 
 interface TodoItem {
   id: string

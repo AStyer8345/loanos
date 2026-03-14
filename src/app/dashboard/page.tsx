@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   // ── fetch loans ──
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, est_closing_date, funding_date, pre_approval_expiry_date, borrower_name, loan_name')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name')
     .eq('user_id', user.id)
 
   // ── compute pipeline stats ──
@@ -86,22 +86,24 @@ export default async function DashboardPage() {
       }
     }
 
-    if (loan.est_closing_date) {
-      const ec = new Date(loan.est_closing_date)
+    if (loan.estimated_closing_date) {
+      const ec = new Date(loan.estimated_closing_date)
       if (ec >= now && ec <= next30) { closingNext30++; closingNext30Volume += amount }
     }
+
+    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.loan_name || 'Unknown'
 
     if (loan.pre_approval_expiry_date) {
       const exp = new Date(loan.pre_approval_expiry_date)
       if (exp >= now && exp <= next7) {
-        urgentFlags.push({ id: loan.id, name: loan.borrower_name ?? loan.loan_name ?? 'Unknown', flag: 'Pre-approval expiring', date: loan.pre_approval_expiry_date })
+        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Pre-approval expiring', date: loan.pre_approval_expiry_date })
       }
     }
 
-    if (loan.est_closing_date && !['closed', 'funded'].includes(status)) {
-      const ec = new Date(loan.est_closing_date)
+    if (loan.estimated_closing_date && !['closed', 'funded'].includes(status)) {
+      const ec = new Date(loan.estimated_closing_date)
       if (ec < now) {
-        urgentFlags.push({ id: loan.id, name: loan.borrower_name ?? loan.loan_name ?? 'Unknown', flag: 'Past est. closing date', date: loan.est_closing_date })
+        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Past est. closing date', date: loan.estimated_closing_date })
       }
     }
   }

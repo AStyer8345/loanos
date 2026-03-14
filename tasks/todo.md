@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-14 (morning audit)_
+_Last updated: 2026-03-14 (session 2)_
 
 ---
 
@@ -31,13 +31,17 @@ _Last updated: 2026-03-14 (morning audit)_
 
 ---
 
-## ✅ Completed
+## ✅ Completed (session 2 — 2026-03-14)
 
 - [x] Pipeline Dashboard redesign (v1.14.0)
 - [x] EmailDraftPreview component built
 - [x] `email_drafts` migration + API route + logEmailDraft helper created
 - [x] logEmailDraft wired to milestone agent
 - [x] **EmailDraftPreview added to dashboard** (2026-03-14 morning audit)
+- [x] **Marketing tab crash fixed** — `user_id` added to upsert/select, switched to SSR-aware Supabase client
+- [x] **Content Board built** — `/dashboard/marketing/content` kanban (Ideas/In Progress/Published), persisted to `mcc_state` key `content_board`
+- [x] **Settings page expanded** — 4 credential sections (Identity, Integrations, Website, Social) + per-section saves + last-saved timestamps + show/hide token fields + Anthropic/Mailchimp test buttons
+- [x] **Migration 0017** — `user_settings` table created (⚠️ NOT yet applied — run in Supabase SQL Editor)
 - [x] Refi intake email automation (v1.13.0)
 - [x] Arive full field expansion + n8n pipeline rebuild (v1.12.0)
 - [x] Global Search ⌘K, Activity Feed bell, Kanban, Smart list delete/edit (v1.11.0)

@@ -1,15 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 
 function useSupabase() {
-  return useMemo(() => createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  ), [])
+  return useMemo(() => createClient(), [])
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -834,28 +831,35 @@ export default function MarketingPage() {
   const [s, setState] = useState<MCCState>(BLANK_STATE)
   const [tab, setTab] = useState<Tab>('TODAY')
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
 
   const todayKey = isoDate()
   const todayDow = new Date().getDay()
   const todayTasks = s.tasks[todayKey] ?? {}
 
   useEffect(() => {
-    supabase
-      .from('mcc_state')
-      .select('value')
-      .eq('key', 'mcc')
-      .single()
-      .then(({ data }) => {
-        if (data) setState(data.value as MCCState)
-        setLoading(false)
-      })
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoading(false); return }
+      setUserId(user.id)
+      supabase
+        .from('mcc_state')
+        .select('value')
+        .eq('user_id', user.id)
+        .eq('key', 'mcc')
+        .single()
+        .then(({ data }) => {
+          if (data) setState(data.value as MCCState)
+          setLoading(false)
+        })
+    })
   }, [supabase])
 
   function save(next: MCCState) {
     setState(next)
+    if (!userId) return
     supabase
       .from('mcc_state')
-      .upsert({ key: 'mcc', value: next }, { onConflict: 'user_id,key' })
+      .upsert({ user_id: userId, key: 'mcc', value: next }, { onConflict: 'user_id,key' })
   }
 
   function toggle(taskId: string, tracker?: string) {

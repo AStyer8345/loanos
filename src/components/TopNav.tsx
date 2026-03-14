@@ -94,7 +94,7 @@ export default function TopNav() {
             items={[
               {
                 label: 'Content Dashboard',
-                onClick: () => navigate('/dashboard/marketing'),
+                onClick: () => navigate('/dashboard/marketing/content'),
               },
               {
                 label: 'Newsletter Generator',
@@ -246,7 +246,7 @@ export default function TopNav() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing')}
+                onClick={() => navigate('/dashboard/marketing/content')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Content Dashboard</span>

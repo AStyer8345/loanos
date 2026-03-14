@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [1.15.0] — 2026-03-14 — Marketing Fix + Content Board + Settings Expansion
+
+### Fixed
+- **`src/app/dashboard/marketing/page.tsx`** — Marketing tab crash. Root cause: bare `@supabase/supabase-js` client didn't share auth session; upsert sent `{ key, value }` with no `user_id`, failing RLS `WITH CHECK (auth.uid() = user_id)`. Fix: switched to `@/lib/supabase/client` (SSR-aware), added `userId` state from `supabase.auth.getUser()`, added `user_id` to upsert payload and `user_id` filter to select.
+
+### Added
+- **`src/app/dashboard/marketing/content/page.tsx`** — Content Board — 3-column kanban (Ideas / In Progress / Published). Migrated from `marketing-content.html` on styer-mortgage-site (localStorage → Supabase). Cards: title, type badge (Blog/Video/Social/Email/Guide), notes, date. Add/edit modal. Move left/right arrows. Delete with confirm. Persisted to `mcc_state` table under `key = 'content_board'`. Dark zinc theme.
+- **`src/app/dashboard/settings/page.tsx`** — Full rewrite. Four new credential sections backed by `user_settings` Supabase table (migration 0017): (1) Identity (name, company, NMLS, email, phone), (2) Integrations (Anthropic API key + test, Mailchimp API key + server prefix + list IDs + test), (3) Website (base URL, dispatch webhook URL, dispatch secret), (4) Social (LinkedIn token, Facebook page token + ID). Each section saves independently. Last-saved timestamp per section. All token/key fields masked by default with show/hide toggle.
+- **`src/app/api/settings/test-anthropic/route.ts`** — POST; validates Anthropic key by calling `/v1/models`; returns `{ ok, error }`.
+- **`src/app/api/settings/test-mailchimp/route.ts`** — POST; validates Mailchimp key by calling `/3.0/ping`; returns `{ ok, error }`.
+- **`supabase/migrations/0017_user_settings.sql`** — `user_settings` table: `(user_id, key)` PK, JSONB value, `updated_at` auto-trigger, RLS (user reads/writes own rows). **⚠️ NOT YET APPLIED — run in Supabase SQL Editor.**
+- **`src/components/TopNav.tsx`** — Content Dashboard nav link updated from `/dashboard/marketing` → `/dashboard/marketing/content`.
+
+### Notes
+- Migration 0017 must be applied before settings page can save/load credentials.
+- styer-mortgage-site files untouched — Content Board is a copy, not a move.
+
+---
+
 ## [1.14.1] — 2026-03-14 — Email Draft Preview Wired to Dashboard
 
 ### Added

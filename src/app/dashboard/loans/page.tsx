@@ -34,12 +34,21 @@ interface SmartList {
 // ── Smart lists ──────────────────────────────────────────────────────────────
 
 const SMART_LISTS: SmartList[] = [
-  { id: 'all',        label: 'All Loans',  statuses: null },
-  { id: 'closed',     label: 'Closed',     statuses: ['Closed', 'Funded', 'Closed/Funded'] },
-  { id: 'inprocess',  label: 'In Process', statuses: ['In Process', 'Loan in Process', 'Processing', 'processing', 'Submitted', 'Conditional Approval', 'Clear to Close', 'Approved', 'Pre-Approved', 'QUALIFICATION', 'DISCLOSURE_SENT'] },
-  { id: 'started',    label: 'Started',    statuses: ['Started', 'Started App', 'lead', 'Lead', 'Pre-App', 'Application', 'APPLICATION_INTAKE'] },
-  { id: 'cancelled',  label: 'Cancelled',  statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
+  { id: 'all',           label: 'All Loans',    statuses: null },
+  { id: 'inprocess',     label: 'In Process',   statuses: ['In Process', 'Loan in Process', 'Processing', 'processing', 'Submitted', 'Conditional Approval', 'Clear to Close', 'Approved', 'QUALIFICATION', 'DISCLOSURE_SENT'] },
+  { id: 'closed',        label: 'Closed',       statuses: ['Closed', 'Funded', 'Closed/Funded'] },
+  { id: 'preapproval',   label: 'Pre-Approval', statuses: ['Pre-Approved', 'Started', 'Started App', 'lead', 'Lead', 'Pre-App', 'Application', 'APPLICATION_INTAKE'] },
+  { id: 'cancelled',     label: 'Other',        statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
 ]
+
+// ── Quick filter options (maps to smart list IDs) ──────────────────────────────
+const LOAN_QUICK_FILTERS = [
+  { id: 'inprocess',   label: 'In Process' },
+  { id: 'all',         label: 'All Loans' },
+  { id: 'closed',      label: 'Closed' },
+  { id: 'preapproval', label: 'Pre-Approval' },
+  { id: 'cancelled',   label: 'Other' },
+] as const
 
 const LOAN_STATUS_OPTIONS = ['Lead', 'Pre-App', 'Application', 'In Process', 'Clear to Close', 'Closed', 'On Hold', 'Dead'] as const
 
@@ -65,6 +74,23 @@ function telHref(phone: string | null | undefined): string | null {
 function mailtoHref(email: string | null | undefined): string | null {
   if (!email || !String(email).trim() || !String(email).includes('@')) return null
   return `mailto:${String(email).trim()}`
+}
+
+function daysUntilClose(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const d = new Date(dateStr + 'T00:00:00')
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  return Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function closingUrgencyStyle(dateStr: string | null, isInProcess: boolean): Record<string, string> {
+  if (!isInProcess || !dateStr) return {}
+  const days = daysUntilClose(dateStr)
+  if (days === null) return {}
+  if (days <= 7) return { background: 'rgba(239,68,68,0.08)', borderLeft: '3px solid rgba(239,68,68,0.6)' }
+  if (days <= 14) return { background: 'rgba(245,158,11,0.08)', borderLeft: '3px solid rgba(245,158,11,0.5)' }
+  return {}
 }
 
 type SortKey = 'borrower_name' | 'loan_amount' | 'closing_date' | 'status'
@@ -145,10 +171,10 @@ export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
-  const [activeList, setActiveList] = useState('all')
+  const [activeList, setActiveList] = useState('inprocess')
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('closing_date')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_LOAN_COLUMNS)
   const [showColPicker, setShowColPicker] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -269,7 +295,7 @@ export default function LoansPage() {
 
   useEffect(() => {
     fetchCounts()
-    fetchLoans('all')
+    fetchLoans('inprocess')
   }, [fetchCounts, fetchLoans])
 
   const handleListChange = (listId: string) => {
@@ -533,6 +559,16 @@ export default function LoansPage() {
               {search && ` matching "${search}"`}
             </p>
           </div>
+          {/* Quick filter dropdown */}
+          <select
+            value={LOAN_QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
+            onChange={e => handleListChange(e.target.value)}
+            className="text-xs font-mono px-3 py-1.5 border border-[#C9A84C]/40 rounded-lg bg-[#1A1A1A] text-[#C9A84C] cursor-pointer outline-none"
+          >
+            {LOAN_QUICK_FILTERS.map(f => (
+              <option key={f.id} value={f.id}>{f.label}</option>
+            ))}
+          </select>
           {/* Column picker */}
           <div className="relative">
             <button
@@ -646,8 +682,13 @@ export default function LoansPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(loan => (
-                  <tr key={loan.id} className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}>
+                {filtered.map(loan => {
+                  const urgencyStyle = closingUrgencyStyle(loan.closing_date, activeList === 'inprocess')
+                  const days = activeList === 'inprocess' ? daysUntilClose(loan.closing_date) : null
+                  return (
+                  <tr key={loan.id}
+                    className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
+                    style={urgencyStyle}>
                     <td className="w-8 px-2 py-3">
                       <input
                         type="checkbox"
@@ -694,7 +735,18 @@ export default function LoansPage() {
                         )
                       }
                       if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_purpose || '—'}</td>
-                      if (col.id === 'closing_date') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{fmtDate(loan.closing_date)}</td>
+                      if (col.id === 'closing_date') return (
+                        <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
+                          <span className={days !== null && days <= 7 ? 'text-red-400' : days !== null && days <= 14 ? 'text-amber-400' : 'text-[#999999]'}>
+                            {fmtDate(loan.closing_date)}
+                          </span>
+                          {days !== null && days <= 14 && (
+                            <span className={`ml-2 text-[10px] ${days <= 7 ? 'text-red-400' : 'text-amber-400'}`}>
+                              {days <= 0 ? 'TODAY' : `${days}d`}
+                            </span>
+                          )}
+                        </td>
+                      )
                       if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loanLocation(loan)}</td>
                       if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
                       if (col.id === 'contact_email') {
@@ -718,7 +770,8 @@ export default function LoansPage() {
                       return null
                     })}
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           )}

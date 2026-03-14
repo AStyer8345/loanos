@@ -114,8 +114,8 @@ export default async function DashboardPage() {
     .from('loans')
     .select('closing_date, funding_date, loan_amount')
     .eq('user_id', user.id)
-    .in('status', ['closed', 'funded'])
-    .gte('closing_date', ninetyAgo.toISOString())
+    .in('status', ['Closed', 'Funded', 'Closed/Funded', 'closed', 'funded'])
+    .gte('closing_date', ninetyAgo.toISOString().split('T')[0])
 
   const weeklyTrend = Array.from({ length: 13 }, (_, i) => {
     const weekStart = new Date(now.getTime() - (12 - i) * 7 * 24 * 60 * 60 * 1000)

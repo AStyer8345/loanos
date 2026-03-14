@@ -122,8 +122,8 @@ export async function GET() {
     .from('loans')
     .select('closing_date, funding_date, loan_amount')
     .eq('user_id', user.id)
-    .in('status', ['closed', 'funded'])
-    .gte('closing_date', ninetyDaysAgo.toISOString())
+    .in('status', ['Closed', 'Funded', 'Closed/Funded', 'closed', 'funded'])
+    .gte('closing_date', ninetyDaysAgo.toISOString().split('T')[0])
 
   // Build weekly buckets
   const weeklyTrend: Array<{ week: string; volume: number; count: number }> = []

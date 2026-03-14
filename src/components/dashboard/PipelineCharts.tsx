@@ -120,7 +120,18 @@ export default function PipelineCharts({ stageCounts, weeklyTrend }: PipelineCha
 
       {/* Weekly Closing Trend */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
-        <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Closing Volume — Last 90 Days</h3>
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Closing Volume — Last 90 Days</h3>
+          {hasTrendData && (() => {
+            const total90Count = weeklyTrend.reduce((s, w) => s + w.count, 0)
+            const total90Vol = weeklyTrend.reduce((s, w) => s + w.volume, 0)
+            return (
+              <span className="text-xs font-mono text-yellow-500">
+                {total90Count} loans · {formatDollars(total90Vol)}
+              </span>
+            )
+          })()}
+        </div>
         {hasTrendData ? (
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={weeklyTrend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>

@@ -1,5 +1,32 @@
 # LoanOS Changelog
 
+## [1.17.0] — 2026-03-14 — Dashboard + Search + CRM Overhaul
+
+### Fixed
+- **Closing Volume Last 90 Days** (`dashboard/page.tsx`, `api/pipeline/stats/route.ts`): query used lowercase `['closed', 'funded']` status values — Postgres `IN` is case-sensitive and 740 loans have status `'Closed'` (capital C), so the chart returned 0 results. Fixed to `.in('status', ['Closed', 'Funded', 'Closed/Funded', 'closed', 'funded'])`. Also switched date filter to `YYYY-MM-DD` format instead of ISO timestamp.
+
+### Added
+- **90-day totals in chart header** (`PipelineCharts.tsx`): "Closing Volume — Last 90 Days" header now shows aggregate count + dollar volume (computed from `weeklyTrend` data client-side).
+- **Global Search formatting overhaul** (`GlobalSearch.tsx`): replaced all `var(--card)`, `var(--border)`, `var(--foreground)`, `var(--muted)` CSS vars with hardcoded zinc palette values matching the dark theme. Added type pills (contact/loan), proper text truncation with `overflow: hidden` + `textOverflow: ellipsis`, active highlight with left border accent, and `min-width: 0` for flex overflow. Results now show: type pill | name | detail (email/amount) | status badge.
+
+### Changed — Contacts Page
+- **Default view changed** from `'all'` → `'active'` (Hot List / Pre-Approved). Navigating to Contacts now shows Pre-Approved borrowers by default.
+- **`active` smart list renamed** to "Hot List / Pre-Approved" in the sidebar and dropdown.
+- **New `all-borrowers` smart list** added: filters `contact_type = 'borrower'`, shows all borrowers regardless of stage. Added to `applySmartList`, `fetchCounts`, and sidebar.
+- **Quick filter dropdown** added to contacts filter bar (gold border, monospace). Options: Hot List / Pre-Approved, All Contacts, Borrowers, Realtors, Others. Syncs with sidebar active list.
+
+### Changed — Loans Page
+- **Default view changed** from `'all'` → `'inprocess'`. Navigating to Loans now shows active pipeline.
+- **Default sort changed** from `closing_date DESC` → `closing_date ASC` (soonest closing first).
+- **Smart list restructured**: In Process, Closed, Pre-Approval (renamed from Started), Other (renamed from Cancelled). Pre-Approval now includes Pre-Approved + Started + Application statuses.
+- **Quick filter dropdown** added to loans header (gold border, monospace). Options: In Process, All Loans, Closed, Pre-Approval, Other. Syncs with sidebar.
+- **Closing urgency highlighting**: In Process view now colors rows and closing date text. ≤7 days: red background + red text + "Xd" indicator. ≤14 days: amber background + amber text. Logic in new `closingUrgencyStyle()` and `daysUntilClose()` helpers.
+
+### Changed — AI Chat
+- **System prompt replaced** (`api/chat/route.ts`): comprehensive LoanOS AI identity with Adam's revenue framework, today's date injection, explicit capability list, and communication rules (direct, punchy, always draft full emails not outlines).
+
+---
+
 ## [1.16.0] — 2026-03-14 — Marketing Command Center — Full HTML Parity
 
 ### Changed

@@ -121,19 +121,19 @@ export default function GlobalSearch() {
       {/* Backdrop */}
       <div
         onClick={() => setOpen(false)}
-        style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}
       />
 
       {/* Palette */}
       <div style={{
         position: 'fixed', top: '15vh', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 1000, width: '100%', maxWidth: 560,
-        background: 'var(--card)', border: '1px solid var(--border)',
-        borderRadius: 8, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', overflow: 'hidden',
+        zIndex: 1000, width: '100%', maxWidth: 580,
+        background: '#1a1a1a', border: '1px solid #2a2a2a',
+        borderRadius: 8, boxShadow: '0 24px 64px rgba(0,0,0,0.7)', overflow: 'hidden',
       }}>
         {/* Input row */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid var(--border)' }}>
-          <span style={{ color: 'var(--muted)', marginRight: 10, fontSize: 18 }}>⌕</span>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid #2a2a2a' }}>
+          <span style={{ color: '#666', marginRight: 10, fontSize: 16, lineHeight: 1 }}>⌕</span>
           <input
             ref={inputRef}
             value={query}
@@ -142,18 +142,18 @@ export default function GlobalSearch() {
             placeholder="Search contacts, loans…"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--foreground)',
+              fontFamily: 'IBM Plex Mono, monospace', fontSize: 13, color: '#f0f0f0',
               padding: '14px 0',
             }}
           />
-          {loading && <span style={{ color: 'var(--muted)', fontSize: 11, fontFamily: 'var(--font-mono)' }}>…</span>}
+          {loading && <span style={{ color: '#666', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}>…</span>}
         </div>
 
         {/* Results */}
-        <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           {!query.trim() ? (
             <div style={{ padding: '12px 16px' }}>
-              <p style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', marginBottom: 8, letterSpacing: '0.1em' }}>QUICK JUMP</p>
+              <p style={{ fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', marginBottom: 8, letterSpacing: '0.1em' }}>QUICK JUMP</p>
               {[
                 { label: 'All Contacts', href: '/dashboard/contacts' },
                 { label: 'All Loans', href: '/dashboard/loans' },
@@ -161,7 +161,7 @@ export default function GlobalSearch() {
                 <button key={link.href} onClick={() => { setOpen(false); router.push(link.href) }}
                   style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 4,
                     border: 'none', background: 'transparent', cursor: 'pointer',
-                    fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--foreground)' }}
+                    fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, color: '#c0c0c0' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                   → {link.label}
@@ -169,26 +169,36 @@ export default function GlobalSearch() {
               ))}
             </div>
           ) : allResults.length === 0 && !loading ? (
-            <p style={{ padding: '20px 16px', color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, textAlign: 'center' }}>
+            <p style={{ padding: '24px 16px', color: '#555', fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, textAlign: 'center' }}>
               No results for &quot;{query}&quot;
             </p>
           ) : (
             <>
               {results.contacts.length > 0 && (
                 <div>
-                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>CONTACTS</p>
+                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>CONTACTS</p>
                   {results.contacts.map((c, i) => (
                     <button key={c.id} onClick={() => navigate('contact', c.id)}
                       onMouseEnter={() => setHighlightIdx(i)}
-                      style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '9px 16px', border: 'none',
-                        cursor: 'pointer', textAlign: 'left', gap: 10,
-                        background: i === highlightIdx ? 'rgba(201,168,76,0.12)' : 'transparent' }}>
-                      <span style={{ fontSize: 13, color: 'var(--foreground)', fontFamily: 'var(--font-mono)', flex: 1 }}>
+                      style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 16px', border: 'none',
+                        cursor: 'pointer', textAlign: 'left', gap: 8, minWidth: 0,
+                        background: i === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
+                        borderLeft: i === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
+                      {/* Type pill */}
+                      <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: '#2a2a2a', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                        {c.contact_type ?? 'contact'}
+                      </span>
+                      {/* Name */}
+                      <span style={{ fontSize: 13, color: '#f0f0f0', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
                         {[c.first_name, c.last_name].filter(Boolean).join(' ') || '—'}
                       </span>
-                      <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{c.email ?? ''}</span>
+                      {/* Detail: email */}
+                      <span style={{ fontSize: 11, color: '#666', fontFamily: 'IBM Plex Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160, flexShrink: 0 }}>
+                        {c.email ?? ''}
+                      </span>
+                      {/* Stage badge */}
                       {c.stage && (
-                        <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'var(--font-mono)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px' }}>
+                        <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                           {c.stage}
                         </span>
                       )}
@@ -199,23 +209,31 @@ export default function GlobalSearch() {
 
               {results.loans.length > 0 && (
                 <div>
-                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>LOANS</p>
+                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>LOANS</p>
                   {results.loans.map((l, i) => {
                     const flatIdx = results.contacts.length + i
                     return (
                       <button key={l.id} onClick={() => navigate('loan', l.id)}
                         onMouseEnter={() => setHighlightIdx(flatIdx)}
-                        style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '9px 16px', border: 'none',
-                          cursor: 'pointer', textAlign: 'left', gap: 10,
-                          background: flatIdx === highlightIdx ? 'rgba(201,168,76,0.12)' : 'transparent' }}>
-                        <span style={{ fontSize: 13, color: 'var(--foreground)', fontFamily: 'var(--font-mono)', flex: 1 }}>
+                        style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 16px', border: 'none',
+                          cursor: 'pointer', textAlign: 'left', gap: 8, minWidth: 0,
+                          background: flatIdx === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
+                          borderLeft: flatIdx === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
+                        {/* Type pill */}
+                        <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: '#2a2a2a', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                          loan
+                        </span>
+                        {/* Borrower name */}
+                        <span style={{ fontSize: 13, color: '#f0f0f0', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
                           {l.borrower_name ?? l.loan_name ?? '—'}
                         </span>
-                        <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
-                          {l.loan_amount ? `$${l.loan_amount.toLocaleString()}` : ''}
+                        {/* Detail: amount */}
+                        <span style={{ fontSize: 11, color: '#888', fontFamily: 'IBM Plex Mono, monospace', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                          {l.loan_amount ? `$${l.loan_amount.toLocaleString()}` : '—'}
                         </span>
+                        {/* Status badge */}
                         {l.status && (
-                          <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'var(--font-mono)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px' }}>
+                          <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                             {l.status}
                           </span>
                         )}
@@ -229,10 +247,10 @@ export default function GlobalSearch() {
         </div>
 
         {/* Footer hint bar */}
-        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid #2a2a2a', background: 'rgba(0,0,0,0.3)' }}>
           {([['↵', 'select'], ['↑↓', 'navigate'], ['esc', 'close']] as const).map(([key, label]) => (
-            <span key={key} style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <kbd style={{ background: 'var(--border)', borderRadius: 3, padding: '1px 5px', fontSize: 9 }}>{key}</kbd>
+            <span key={key} style={{ fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <kbd style={{ background: '#2a2a2a', borderRadius: 3, padding: '1px 5px', fontSize: 9, color: '#888' }}>{key}</kbd>
               {label}
             </span>
           ))}

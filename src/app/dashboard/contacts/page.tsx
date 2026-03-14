@@ -126,15 +126,25 @@ function stageToList(stage: string | null, contactType: string | null): string {
 
 // ── Smart Lists ───────────────────────────────────────────────────────────────
 const SMART_LISTS: SmartListDef[] = [
-  { id: 'all',          label: 'All Contacts' },
-  { id: 'new-apps',     label: 'New Applications',   section: 'BORROWERS' },
-  { id: 'active',       label: 'Active Borrowers' },
-  { id: 'in-process',   label: 'In Process' },
-  { id: 'closed',       label: 'Closed Borrowers' },
-  { id: 'all-realtors', label: 'All Realtors',       section: 'REALTORS' },
-  { id: 'top-realtors', label: 'Top / Target' },
-  { id: 'unassigned',   label: 'Unassigned / Other', section: 'OTHER' },
+  { id: 'active',         label: 'Hot List / Pre-Approved' },
+  { id: 'all',            label: 'All Contacts' },
+  { id: 'all-borrowers',  label: 'All Borrowers',          section: 'BORROWERS' },
+  { id: 'new-apps',       label: 'New Applications' },
+  { id: 'in-process',     label: 'In Process' },
+  { id: 'closed',         label: 'Closed Borrowers' },
+  { id: 'all-realtors',   label: 'All Realtors',           section: 'REALTORS' },
+  { id: 'top-realtors',   label: 'Top / Target' },
+  { id: 'unassigned',     label: 'Unassigned / Other',     section: 'OTHER' },
 ]
+
+// ── Quick filter dropdown options (maps to smart list IDs) ────────────────────
+const QUICK_FILTERS = [
+  { id: 'active',        label: 'Hot List / Pre-Approved' },
+  { id: 'all',           label: 'All Contacts' },
+  { id: 'all-borrowers', label: 'Borrowers' },
+  { id: 'all-realtors',  label: 'Realtors' },
+  { id: 'unassigned',    label: 'Others' },
+] as const
 
 // ── Custom lists (filter builder) ─────────────────────────────────────────────
 type CustomListRule = { field: string; operator: string; value: string }
@@ -231,6 +241,8 @@ function applySmartList(query: any, listId: string): any {
       return query.eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application'])
     case 'active':
       return query.eq('contact_type', 'borrower').in('stage', ['Pre-Approved'])
+    case 'all-borrowers':
+      return query.eq('contact_type', 'borrower')
     case 'in-process':
       return query.eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing'])
     case 'closed':
@@ -262,7 +274,7 @@ export default function ContactsPage() {
   // list state
   const [contacts, setContacts]     = useState<Contact[]>([])
   const [loading, setLoading]       = useState(true)
-  const [activeList, setActiveList] = useState('all')
+  const [activeList, setActiveList] = useState('active')
   const [search, setSearch]         = useState('')
   const [sort, setSort]             = useState<SortConfig>({ key: 'last_name', dir: 'asc' })
   const [total, setTotal]           = useState(0)
@@ -370,15 +382,16 @@ export default function ContactsPage() {
     const h = { count: 'exact', head: true } as const
     const base = [
       supabase.from('contacts').select('*', h),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower'),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'),
     ]
-    const builtInIds = ['all', 'new-apps', 'active', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned']
+    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned']
     const results = await Promise.all(base)
     const next: Record<string, number> = {}
     builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })
@@ -822,6 +835,20 @@ export default function ContactsPage() {
         {/* Filter bar */}
         <div className="flex items-center gap-3 px-6 py-3 border-b flex-shrink-0"
              style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+          {/* Quick filter dropdown */}
+          <select
+            value={QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
+            onChange={e => { setActiveList(e.target.value); setSelectedContact(null); setSelectedIds(new Set()) }}
+            style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em',
+              background: 'var(--bg)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.4)',
+              borderRadius: 4, padding: '6px 10px', cursor: 'pointer', outline: 'none', flexShrink: 0,
+            }}
+          >
+            {QUICK_FILTERS.map(f => (
+              <option key={f.id} value={f.id}>{f.label}</option>
+            ))}
+          </select>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search contacts…"

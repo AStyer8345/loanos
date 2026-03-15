@@ -33,9 +33,29 @@ function fmtDate(s: string | null): string {
   return new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+// Normalize raw Arive status values to clean display labels
+const STATUS_LABELS: Record<string, string> = {
+  application_intake:          'Pre-App',
+  pre_approved:                'Pre-Approved',
+  'pre-approved':              'Pre-Approved',
+  pre_approval:                'Pre-Approval',
+  loan_setup:                  'Loan Setup',
+  submitted_to_uw:             'Submitted to UW',
+  approved_with_conditions:    'Approved w/ Conditions',
+  clear_to_close:              'Clear to Close',
+  'clear-to-close':            'Clear to Close',
+}
+
+function normalizeStatus(raw: string | null): string {
+  if (!raw) return ''
+  const key = raw.toLowerCase().replace(/ /g, '_')
+  return STATUS_LABELS[key] || STATUS_LABELS[raw.toLowerCase()] || raw
+}
+
 function StatusBadge({ status }: { status: string | null }) {
   if (!status) return <span className="text-zinc-600 text-xs font-mono">—</span>
-  const s = status.toLowerCase()
+  const label = normalizeStatus(status)
+  const s = label.toLowerCase()
   let cls = 'bg-zinc-800 text-zinc-400 border border-zinc-600'
   if (['closed', 'funded'].some(v => s.includes(v)))
     cls = 'bg-emerald-900/30 text-emerald-400 border border-emerald-800'
@@ -43,25 +63,26 @@ function StatusBadge({ status }: { status: string | null }) {
     cls = 'bg-indigo-900/30 text-indigo-300 border border-indigo-700'
   else if (['underwriting', 'conditional', 'approved'].some(v => s.includes(v)))
     cls = 'bg-amber-900/20 text-amber-400 border border-amber-800'
-  else if (['processing', 'submitted'].some(v => s.includes(v)))
+  else if (['processing', 'submitted', 'loan setup', 'disclosed'].some(v => s.includes(v)))
     cls = 'bg-orange-900/20 text-orange-400 border border-orange-800'
-  else if (['pre-app', 'pre_app', 'pre-approval', 'lead', 'application'].some(v => s.includes(v)))
+  else if (['pre-app', 'pre_app', 'pre-approval', 'pre_approved', 'lead', 'application', 'intake'].some(v => s.includes(v)))
     cls = 'bg-blue-900/20 text-blue-400 border border-blue-800'
-  else if (['cancelled', 'denied', 'withdrawn', 'dead'].some(v => s.includes(v)))
+  else if (['cancelled', 'denied', 'withdrawn', 'dead', 'on hold'].some(v => s.includes(v)))
     cls = 'bg-red-900/20 text-red-400 border border-red-800'
 
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium ${cls}`}>
-      {status}
+      {label}
     </span>
   )
 }
 
 function productLabel(loan: LoanRow): string {
+  // Prefer program (e.g. "Conventional 30 yr Fixed") over raw type + term
+  if (loan.loan_program) return loan.loan_program
   const parts: string[] = []
   if (loan.loan_type) parts.push(loan.loan_type)
-  if (loan.loan_term) parts.push(`${loan.loan_term / 12}yr`)
-  if (loan.loan_program && loan.loan_program !== loan.loan_type) parts.push(loan.loan_program)
+  if (loan.loan_term) parts.push(`${Math.round(loan.loan_term / 12)}yr`)
   return parts.join(' ') || '—'
 }
 

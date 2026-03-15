@@ -8,23 +8,64 @@ import RecentActivity from '@/components/dashboard/RecentActivity'
 
 export const dynamic = 'force-dynamic'
 
-// ─── helpers ────────────────────────────────────────────────────────────────
+// ─── status → pipeline stage mapping ────────────────────────────────────────
+// Keys are lowercased loan.status values (covers Arive API values + display values)
 
 const STAGE_MAP: Record<string, string> = {
-  lead: 'Lead',
-  pre_approval: 'Pre-App',
-  'pre-approval': 'Pre-App',
-  application: 'Application',
-  processing: 'Processing',
-  underwriting: 'Underwriting',
-  conditional_approval: 'Cond. Approval',
-  'conditional-approval': 'Cond. Approval',
-  clear_to_close: 'Clear to Close',
-  'clear-to-close': 'Clear to Close',
-  closing: 'Closing',
-  closed: 'Closed',
-  funded: 'Funded',
+  // Pre-App bucket
+  lead:                  'Pre-App',
+  pre_approval:          'Pre-App',
+  'pre-approval':        'Pre-App',
+  pre_approved:          'Pre-App',
+  'pre-approved':        'Pre-App',
+  'pre-app':             'Pre-App',
+  application:           'Pre-App',
+  application_intake:    'Pre-App',
+  'application intake':  'Pre-App',
+
+  // Processing bucket
+  processing:            'Processing',
+  loan_setup:            'Processing',
+  'loan setup':          'Processing',
+  disclosed:             'Processing',
+  submitted:             'Processing',
+
+  // Underwriting bucket
+  underwriting:          'Underwriting',
+  submitted_to_uw:       'Underwriting',
+  'submitted to uw':     'Underwriting',
+  resubmitted:           'Underwriting',
+  approved:              'Underwriting',
+  approved_with_conditions: 'Cond. Approval',
+  'approved with conditions': 'Cond. Approval',
+  conditional_approval:  'Cond. Approval',
+  'conditional-approval':'Cond. Approval',
+  'approved w/ conditions': 'Cond. Approval',
+
+  // Clear to Close bucket
+  clear_to_close:        'Clear to Close',
+  'clear-to-close':      'Clear to Close',
+  'clear to close':      'Clear to Close',
+  ctc:                   'Clear to Close',
+  closing:               'Clear to Close',
+
+  // Terminal — excluded from active count
+  closed:                'Closed',
+  funded:                'Funded',
+  cancelled:             'Cancelled',
+  canceled:              'Cancelled',
+  dead:                  'Dead',
+  denied:                'Denied',
+  withdrawn:             'Withdrawn',
+  'on hold':             'On Hold',
+  on_hold:               'On Hold',
 }
+
+// Statuses that mean the loan is no longer active in the pipeline
+const INACTIVE = new Set([
+  'closed', 'funded', 'cancelled', 'canceled',
+  'dead', 'denied', 'withdrawn', 'on hold', 'on_hold',
+])
 
 // ─── page ────────────────────────────────────────────────────────────────────
 
@@ -50,20 +91,21 @@ export default async function DashboardPage() {
   const urgentFlags: Array<{ id: string; name: string; flag: string; date: string }> = []
 
   for (const loan of loans ?? []) {
-    const status = (loan.status ?? 'unknown').toLowerCase()
-    const stageName = STAGE_MAP[status] ?? loan.status ?? 'Unknown'
+    const rawStatus = (loan.status ?? 'unknown').toLowerCase()
+    const stageName = STAGE_MAP[rawStatus] ?? loan.status ?? 'Other'
     const amount = loan.loan_amount ?? 0
 
     if (!stageCounts[stageName]) stageCounts[stageName] = { count: 0, volume: 0 }
     stageCounts[stageName].count++
     stageCounts[stageName].volume += amount
 
-    if (!['closed', 'funded'].includes(status)) {
+    if (!INACTIVE.has(rawStatus)) {
       totalCount++
       totalVolume += amount
     }
 
-    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.loan_name || 'Unknown'
+    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+      || loan.loan_name || 'Unknown'
 
     if (loan.pre_approval_expiry_date) {
       const exp = new Date(loan.pre_approval_expiry_date)
@@ -72,7 +114,7 @@ export default async function DashboardPage() {
       }
     }
 
-    if (loan.estimated_closing_date && !['closed', 'funded'].includes(status)) {
+    if (loan.estimated_closing_date && !INACTIVE.has(rawStatus)) {
       const ec = new Date(loan.estimated_closing_date)
       if (ec < now) {
         urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Past est. closing date', date: loan.estimated_closing_date })
@@ -80,20 +122,33 @@ export default async function DashboardPage() {
     }
   }
 
-  // ── recent loans (active only, up to 8, sorted by soonest closing) ──
+  // ── recent loans: active only, up to 8, soonest closing first ──
   const recentLoans = (loans ?? [])
-    .filter(l => !['closed', 'funded'].includes((l.status ?? '').toLowerCase()))
+    .filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
     .slice(0, 8)
 
-  // ── fetch activity (last 7 days) ──
+  // ── fetch activity (last 7 days, exclude webhook/system noise) ──
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const { data: activityEntries = [] } = await supabase
+  const { data: rawActivity = [] } = await supabase
     .from('activity_log')
     .select('id, created_at, type, action, summary, contact_id, loan_id, metadata')
     .eq('user_id', user.id)
     .gte('created_at', sevenDaysAgo.toISOString())
     .order('created_at', { ascending: false })
-    .limit(50)
+    .limit(100)
+
+  // Filter out webhook errors and system noise from the activity feed
+  const activityEntries = (rawActivity ?? []).filter(e => {
+    const action = (e.action ?? '').toLowerCase()
+    const summary = (e.summary ?? '').toLowerCase()
+    return (
+      !action.includes('webhook.error') &&
+      !action.includes('error_loan_not_found') &&
+      !action.startsWith('arive.webhook') &&
+      !summary.includes('webhook error') &&
+      !action.includes('error_')
+    )
+  })
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 lg:p-6 space-y-4">
@@ -157,7 +212,7 @@ export default async function DashboardPage() {
           <RecentLoans loans={recentLoans} />
         </div>
         <div>
-          <RecentActivity entries={activityEntries ?? []} />
+          <RecentActivity entries={activityEntries} />
         </div>
       </div>
 

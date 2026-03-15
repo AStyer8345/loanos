@@ -19,20 +19,21 @@
   --fg:       #e5e5e5;
 
   /* Accents */
-  --gold:     #D4AF37;
+  --gold:     hsl(210, 70%, 60%);
   --green:    #4ADE80;
   --red:      #DC2626;
 
   /* Legacy aliases */
   --accent:        var(--gold);
-  --accent-light:  rgba(212, 175, 55, 0.12);
-  --accent-border: rgba(212, 175, 55, 0.5);
+  --accent-light:  hsla(210, 70%, 60%, 0.12);
+  --accent-border: hsla(210, 70%, 60%, 0.5);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
   -webkit-font-smoothing: antialiased;
 }
 

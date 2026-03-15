@@ -209,6 +209,27 @@ export default async function DashboardPage() {
         urgentCount={urgentFlags.length}
       />
 
+      {/* ── Quick Actions ── */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { icon: '✉️', label: 'Send PA Email',      href: '/dashboard/loans' },
+          { icon: '🔒', label: 'Lock Rate',           href: '/dashboard/loans' },
+          { icon: '📋', label: 'Order Appraisal',     href: '/dashboard/loans' },
+          { icon: '📎', label: 'Request Docs',        href: '/dashboard/loans' },
+          { icon: '👤', label: 'Add Contact',         href: '/dashboard/contacts' },
+          { icon: '📄', label: 'New Loan',            href: '/dashboard/loans' },
+        ].map(({ icon, label, href }) => (
+          <a
+            key={label}
+            href={href}
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-900 rounded shadow shadow-black/40 text-xs font-mono text-blue-400 border border-blue-400/20 hover:border-blue-400/50 hover:bg-zinc-800 transition-colors"
+          >
+            <span>{icon}</span>
+            <span>{label}</span>
+          </a>
+        ))}
+      </div>
+
       {/* ── Charts ── */}
       <PipelineCharts stageCounts={stageCounts} weeklyTrend={weeklyTrend} />
 
@@ -277,7 +298,7 @@ function fmtVolume(n: number): string {
 
 function PerformanceCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+    <div className="bg-zinc-900 rounded shadow-lg shadow-black/50 p-3.5">
       <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
       <p className="text-2xl font-mono font-bold text-zinc-100">{value}</p>
       {sub && <p className="text-xs font-mono text-zinc-500 mt-0.5">{sub}</p>}

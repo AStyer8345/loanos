@@ -47,7 +47,7 @@ export default function TopNav() {
   return (
     <>
       <GlobalSearch />
-      <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-800 text-white shadow flex items-center px-3 md:px-6">
+      <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-900 text-white shadow flex items-center px-3 md:px-6">
         {/* Logo → Pipeline Dashboard */}
         <button
           type="button"
@@ -56,7 +56,7 @@ export default function TopNav() {
         >
           <span className="text-2xl leading-none">🧠</span>
           <span className="text-lg font-semibold tracking-tight leading-none">
-            Loan<span className="text-emerald-400">OS</span>
+            Loan<span className="text-blue-400">OS</span>
           </span>
         </button>
 
@@ -155,14 +155,14 @@ export default function TopNav() {
           </button>
 
           <div className="hidden sm:flex flex-col items-end mr-1">
-            <span className="text-xs font-semibold tracking-widest text-emerald-100/90">
+            <span className="text-xs font-semibold tracking-widest text-blue-100/90">
               ADAM STYER
             </span>
-            <span className="text-[10px] text-emerald-100/60 font-mono tracking-[0.18em] uppercase">
+            <span className="text-[10px] text-blue-100/60 font-mono tracking-[0.18em] uppercase">
               Mortgage Solutions LP
             </span>
           </div>
-          <div className="hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-300/60 text-sm font-semibold">
+          <div className="hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 border border-blue-300/60 text-sm font-semibold">
             AS
           </div>
           <div className="ml-1">
@@ -194,7 +194,7 @@ export default function TopNav() {
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'briefing'
                   ? 'bg-white/10 text-white'
-                  : 'text-emerald-50/90'
+                  : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">📊</span>
@@ -207,7 +207,7 @@ export default function TopNav() {
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'contacts'
                   ? 'bg-white/10 text-white'
-                  : 'text-emerald-50/90'
+                  : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">👥</span>
@@ -220,7 +220,7 @@ export default function TopNav() {
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'loans'
                   ? 'bg-white/10 text-white'
-                  : 'text-emerald-50/90'
+                  : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">📋</span>
@@ -233,7 +233,7 @@ export default function TopNav() {
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'performance'
                   ? 'bg-white/10 text-white'
-                  : 'text-emerald-50/90'
+                  : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">📈</span>
@@ -241,34 +241,34 @@ export default function TopNav() {
             </button>
 
             <div className="mt-2">
-              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-emerald-200/70">
+              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-blue-200/70">
                 Marketing
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/marketing/content')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Content Dashboard</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/marketing?tab=NEWSLETTERS')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Newsletter Generator</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/marketing?tab=SOCIAL')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Social Media</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/automations')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>Automations</span>
               </button>
@@ -278,7 +278,7 @@ export default function TopNav() {
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/settings')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-emerald-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
                 <span>⚙️</span>
                 <span>Settings</span>

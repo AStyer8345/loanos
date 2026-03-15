@@ -58,7 +58,7 @@ export default function RecentActivity({ entries }: RecentActivityProps) {
     : entries.filter(e => (e.type || e.action || '').toLowerCase().includes(filter))
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+    <div className="bg-zinc-900 rounded shadow-lg shadow-black/50 p-3.5">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Activity — Last 7 Days</span>
         <span className="text-xs font-mono text-zinc-600">{filtered.length} entries</span>

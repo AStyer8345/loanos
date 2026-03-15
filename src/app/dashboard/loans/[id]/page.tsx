@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
-  ChevronRight, AlertCircle, Check, Mail, Clock, Inbox, X, ChevronDown,
+  ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 
@@ -208,12 +208,6 @@ function fmtDate(s: string | null) {
   return new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function fmtBytes(n: number | null) {
-  if (!n) return ''
-  if (n < 1024) return `${n} B`
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`
-}
 
 function fmtRelative(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -1094,93 +1088,6 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
           placeholder="Add notes about this loan…"
           className="w-full p-4 text-sm text-zinc-200 bg-zinc-800/50 placeholder-zinc-500 focus:outline-none resize-y font-mono border-0"
         />
-      </div>
-    </div>
-  )
-}
-
-// ── Documents tab (full, used from old flow) ──────────────────────────────────
-
-function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
-  const supabase = createClient()
-  const [signingId, setSigningId] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    const storagePath = `loans/${loanId}/${file.name}`
-    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
-    if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
-    await supabase.from('documents').insert({ loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
-    setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    onRefresh()
-  }
-
-  const handleDownload = async (doc: DocRow) => {
-    setSigningId(doc.id)
-    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 120)
-    setSigningId(null)
-    if (error || !data?.signedUrl) { alert('Could not generate download link.'); return }
-    window.open(data.signedUrl, '_blank')
-  }
-
-  if (docs.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
-        <FileText size={24} />
-        <p className="text-sm">No documents attached to this loan</p>
-        <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-        <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-800 disabled:opacity-50">
-          <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload a document'}
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-mono font-semibold text-zinc-400">{docs.length} document{docs.length !== 1 ? 's' : ''}</h2>
-        <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-        <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50">
-          <Upload size={12} /> {uploading ? 'Uploading…' : '+ Upload Document'}
-        </button>
-      </div>
-      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-zinc-800/80 border-b border-zinc-700">
-              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">File</th>
-              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Type</th>
-              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Uploaded</th>
-              <th className="text-left px-4 py-2.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Size</th>
-              <th className="px-4 py-2.5"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {docs.map((doc, i) => (
-              <tr key={doc.id} className={`${i !== 0 ? 'border-t border-zinc-700' : ''} hover:bg-zinc-800/50`}>
-                <td className="px-4 py-3 font-mono font-medium text-zinc-200">{doc.file_name}</td>
-                <td className="px-4 py-3 text-zinc-400 font-mono">{doc.doc_type || '—'}</td>
-                <td className="px-4 py-3 text-zinc-500 text-xs font-mono">{fmtRelative(doc.created_at)}</td>
-                <td className="px-4 py-3 text-zinc-500 text-xs font-mono">{fmtBytes(doc.file_size)}</td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleDownload(doc)}
-                    disabled={signingId === doc.id}
-                    className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50"
-                  >
-                    {signingId === doc.id ? 'Loading…' : <><Download size={12} /> Download</>}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   )

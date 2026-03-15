@@ -1089,12 +1089,12 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
   const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
     const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
-    if (!error) setLoan(prev => prev ? { ...prev, [field]: value } as Loan : prev)
+    if (!error) setLoan((prev: Loan | null) => prev ? { ...prev, [field]: value } as Loan : prev)
   }, [supabase, loanId, setLoan])
 
   const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
     const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
-    if (!error) setLoan(prev => prev ? { ...prev, ...fields } as Loan : prev)
+    if (!error) setLoan((prev: Loan | null) => prev ? { ...prev, ...fields } as Loan : prev)
   }, [supabase, loanId, setLoan])
 
   const handleNotesBlur = async () => {

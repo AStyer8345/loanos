@@ -11,7 +11,7 @@ import type {
   RefiScenarioInput, RefiCalculatedResult,
 } from '@/lib/scenarios/types'
 
-const COLORS = ['#C9A84C', '#4C7EC9', '#4CC98A', '#C94C4C']
+const COLORS = ['#5b8def', '#4ade80', '#a78bfa', '#f87171']
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmtTooltipCurrency = (value: any) => typeof value === 'number' ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : String(value ?? '')
@@ -20,8 +20,8 @@ const fmtTooltipK = (value: any) => typeof value === 'number' ? (value >= 1000 ?
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg p-4" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-      <h4 className="text-sm font-semibold mb-4" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>{title}</h4>
+    <div className="rounded-[14px] p-5" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+      <h4 className="text-sm font-semibold mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>{title}</h4>
       {children}
     </div>
   )
@@ -29,16 +29,16 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function HorizonToggle({ value, onChange, options }: { value: number; onChange: (v: number) => void; options: number[] }) {
   return (
-    <div className="flex gap-1 mb-3">
+    <div className="flex gap-1.5 mb-4">
       {options.map(o => (
         <button
           key={o}
           onClick={() => onChange(o)}
-          className="px-2 py-1 rounded text-[10px] font-medium transition-colors"
+          className="px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors"
           style={{
-            background: value === o ? 'var(--sc-gold)' : 'transparent',
-            color: value === o ? '#0a0a0a' : 'var(--sc-muted)',
-            border: `1px solid ${value === o ? 'var(--sc-gold)' : 'var(--sc-border)'}`,
+            background: value === o ? 'var(--sc-accent)' : 'transparent',
+            color: value === o ? '#ffffff' : 'var(--sc-muted)',
+            border: `1px solid ${value === o ? 'var(--sc-accent)' : 'var(--sc-border)'}`,
           }}
         >
           {o}yr
@@ -55,8 +55,8 @@ const fmtK = (v: number) => {
 }
 
 const tooltipStyle = {
-  contentStyle: { background: '#141414', border: '1px solid #262626', borderRadius: '6px', fontSize: '11px', color: '#F0EDE8' },
-  labelStyle: { color: '#F0EDE880' },
+  contentStyle: { background: 'var(--sc-card)', border: '1px solid var(--sc-border)', borderRadius: '10px', fontSize: '11px', color: 'var(--sc-text)' },
+  labelStyle: { color: 'var(--sc-muted)' },
 }
 
 export default function ScenarioCharts({ mode, purchaseScenarios, purchaseResults, refiScenarios, refiResults }: {
@@ -70,7 +70,7 @@ export default function ScenarioCharts({ mode, purchaseScenarios, purchaseResult
   const results = mode === 'purchase' ? purchaseResults : refiResults
 
   return (
-    <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <MonthlyPaymentChart mode={mode} scenarios={scenarios} results={results} />
       <EquityChart mode={mode} scenarios={scenarios} results={results} />
       <SavingsChart mode={mode} scenarios={scenarios} results={results} />
@@ -117,16 +117,16 @@ function MonthlyPaymentChart({ mode, scenarios, results }: {
     <ChartCard title="Monthly Payment Comparison">
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} barCategoryGap="20%">
-          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-          <XAxis dataKey="name" tick={{ fill: '#F0EDE880', fontSize: 11 }} />
-          <YAxis tickFormatter={fmtK} tick={{ fill: '#F0EDE880', fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" />
+          <XAxis dataKey="name" tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
+          <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
           <Tooltip {...tooltipStyle} formatter={fmtTooltipCurrency} />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Bar dataKey="P&I" stackId="a" fill="#C9A84C" />
-          <Bar dataKey="Taxes" stackId="a" fill="#8B7A3B" />
-          <Bar dataKey="Insurance" stackId="a" fill="#5A5040" />
-          <Bar dataKey="HOA" stackId="a" fill="#3A3A3A" />
-          <Bar dataKey="PMI" stackId="a" fill="#4A3A2A" />
+          <Bar dataKey="P&I" stackId="a" fill="#5b8def" />
+          <Bar dataKey="Taxes" stackId="a" fill="#3b5fa0" />
+          <Bar dataKey="Insurance" stackId="a" fill="#2d4a7a" />
+          <Bar dataKey="HOA" stackId="a" fill="#1e3560" />
+          <Bar dataKey="PMI" stackId="a" fill="#162545" />
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
@@ -173,9 +173,9 @@ function EquityChart({ mode, scenarios, results }: {
       <HorizonToggle value={horizon} onChange={setHorizon} options={[5, 10, 15, 30]} />
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-          <XAxis dataKey="year" tick={{ fill: '#F0EDE880', fontSize: 11 }} />
-          <YAxis tickFormatter={fmtK} tick={{ fill: '#F0EDE880', fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" />
+          <XAxis dataKey="year" tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
+          <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
           <Tooltip {...tooltipStyle} formatter={fmtTooltipK} />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
           {labels.map((label, i) => (
@@ -228,12 +228,12 @@ function SavingsChart({ mode, scenarios, results }: {
       <HorizonToggle value={horizon} onChange={setHorizon} options={[3, 5, 10]} />
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-          <XAxis dataKey="month" tick={{ fill: '#F0EDE880', fontSize: 11 }} label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: '#F0EDE880', fontSize: 10 }} />
-          <YAxis tickFormatter={fmtK} tick={{ fill: '#F0EDE880', fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" />
+          <XAxis dataKey="month" tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: 'var(--sc-muted)', fontSize: 10 }} />
+          <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
           <Tooltip {...tooltipStyle} formatter={fmtTooltipK} />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <ReferenceLine y={0} stroke="#F0EDE830" strokeDasharray="3 3" />
+          <ReferenceLine y={0} stroke="var(--sc-muted)" strokeDasharray="3 3" />
           {labels.map((label, i) => (
             <Line key={label} type="monotone" dataKey={label} stroke={COLORS[mode === 'purchase' ? i + 1 : i]} strokeWidth={2} dot={false} />
           ))}
@@ -291,13 +291,13 @@ function AmortizationChart({ mode, scenarios, results }: {
       </div>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-          <XAxis dataKey="year" tick={{ fill: '#F0EDE880', fontSize: 11 }} label={{ value: 'Years', position: 'insideBottom', offset: -5, fill: '#F0EDE880', fontSize: 10 }} />
-          <YAxis tickFormatter={fmtK} tick={{ fill: '#F0EDE880', fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" />
+          <XAxis dataKey="year" tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} label={{ value: 'Years', position: 'insideBottom', offset: -5, fill: 'var(--sc-muted)', fontSize: 10 }} />
+          <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} />
           <Tooltip {...tooltipStyle} formatter={fmtTooltipK} />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Area type="monotone" dataKey="principal" stackId="1" stroke="#C9A84C" fill="#C9A84C" fillOpacity={0.3} name="Principal" />
-          <Area type="monotone" dataKey="interest" stackId="1" stroke="#5A5A5A" fill="#5A5A5A" fillOpacity={0.2} name="Interest" />
+          <Area type="monotone" dataKey="principal" stackId="1" stroke="#5b8def" fill="#5b8def" fillOpacity={0.3} name="Principal" />
+          <Area type="monotone" dataKey="interest" stackId="1" stroke="#4a5568" fill="#4a5568" fillOpacity={0.2} name="Interest" />
         </AreaChart>
       </ResponsiveContainer>
     </ChartCard>

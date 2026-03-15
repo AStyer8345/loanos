@@ -360,6 +360,17 @@ export default function LoanDetailPage() {
                       </button>
                     ))}
                     <div className="border-t border-zinc-800 mt-1 pt-1">
+                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Tools</p>
+                      <Link
+                        href={`/dashboard/scenarios/new?loan_id=${loanId}`}
+                        onClick={() => setActionsOpen(false)}
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                      >
+                        <span className="text-amber-400 shrink-0">📐</span>
+                        Create Scenario
+                      </Link>
+                    </div>
+                    <div className="border-t border-zinc-800 mt-1 pt-1">
                       <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">View</p>
                       {[
                         { label: 'Activity Log', tab: 'activity' as const },

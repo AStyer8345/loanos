@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Check, Info } from 'lucide-react'
+import { Check } from 'lucide-react'
 import type {
   ScenarioMode, PurchaseScenarioInput, PurchaseCalculatedResult,
   RefiScenarioInput, RefiCalculatedResult,
@@ -14,27 +14,12 @@ const fmt = (v: number | undefined, prefix = '$') => {
   return v.toLocaleString('en-US')
 }
 
-interface RowConfig {
+interface MetricRow {
   label: string
-  key: string
-  format: 'currency' | 'percent' | 'number' | 'text'
   getValue: (result: PurchaseCalculatedResult | RefiCalculatedResult, idx: number) => number | string | undefined
+  format: 'currency' | 'percent' | 'number' | 'text'
   best?: 'lowest' | 'highest'
-  highlight?: boolean
-  tooltip?: string
   condition?: (results: (PurchaseCalculatedResult | RefiCalculatedResult)[]) => boolean
-}
-
-function Tooltip({ text }: { text: string }) {
-  return (
-    <span className="relative group/tip inline-flex ml-1">
-      <Info size={11} style={{ color: 'var(--sc-muted)' }} />
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity z-10"
-        style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)', color: 'var(--sc-text)' }}>
-        {text}
-      </span>
-    </span>
-  )
 }
 
 export default function ResultsTable({ mode, purchaseScenarios, purchaseResults, refiScenarios, refiResults }: {
@@ -45,178 +30,225 @@ export default function ResultsTable({ mode, purchaseScenarios, purchaseResults,
   refiResults: RefiCalculatedResult[]
 }) {
   if (mode === 'purchase') {
-    return <PurchaseTable scenarios={purchaseScenarios} results={purchaseResults} />
+    return <PurchaseCards scenarios={purchaseScenarios} results={purchaseResults} />
   }
-  return <RefinanceTable scenarios={refiScenarios} results={refiResults} />
+  return <RefinanceCards scenarios={refiScenarios} results={refiResults} />
 }
 
-function PurchaseTable({ scenarios, results }: { scenarios: PurchaseScenarioInput[]; results: PurchaseCalculatedResult[] }) {
-  const rows: RowConfig[] = useMemo(() => [
-    { label: 'Monthly P&I', key: 'pi', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).monthlyPI, best: 'lowest' },
-    { label: 'Total Monthly Payment', key: 'total', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalMonthlyPayment, best: 'lowest', highlight: true },
-    { label: 'Monthly Savings vs Option A', key: 'savings', format: 'currency',
-      getValue: (r, idx) => idx === 0 ? undefined : (results[0]?.totalMonthlyPayment ?? 0) - (r as PurchaseCalculatedResult).totalMonthlyPayment },
-    { label: 'LTV', key: 'ltv', format: 'percent', getValue: r => (r as PurchaseCalculatedResult).ltv, best: 'lowest' },
-    { label: 'APR', key: 'apr', format: 'percent', getValue: r => (r as PurchaseCalculatedResult).apr, best: 'lowest' },
-    { label: 'Cash to Close', key: 'ctc', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).cashToClose, best: 'lowest' },
-    { label: 'Total Interest (Life of Loan)', key: 'interest', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalInterest, best: 'lowest' },
-    { label: '5-Year Total Cost', key: 'cost5', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalCost5Year, best: 'lowest', highlight: true,
-      tooltip: 'Primary comparison metric — avg borrower keeps loan ~5 years' },
-    { label: '10-Year Total Cost', key: 'cost10', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalCost10Year, best: 'lowest' },
-    { label: 'Lifetime Total Cost', key: 'costLife', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalCostLifetime, best: 'lowest' },
-    { label: 'Equity at Year 1', key: 'eq1', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear1, best: 'highest' },
-    { label: 'Equity at Year 5', key: 'eq5', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear5, best: 'highest' },
-    { label: 'Equity at Year 10', key: 'eq10', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear10, best: 'highest' },
-  ], [results])
+// ─── Purchase Per-Scenario Cards ──────────────────────────────────
+
+function PurchaseCards({ scenarios, results }: { scenarios: PurchaseScenarioInput[]; results: PurchaseCalculatedResult[] }) {
+  const metrics: MetricRow[] = useMemo(() => [
+    { label: 'Monthly P&I', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).monthlyPI, best: 'lowest' },
+    { label: 'LTV', format: 'percent', getValue: r => (r as PurchaseCalculatedResult).ltv, best: 'lowest' },
+    { label: 'APR', format: 'percent', getValue: r => (r as PurchaseCalculatedResult).apr, best: 'lowest' },
+    { label: 'Cash to Close', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).cashToClose, best: 'lowest' },
+    { label: 'Total Interest (Life)', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalInterest, best: 'lowest' },
+    { label: '5-Year Total Cost', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalCost5Year, best: 'lowest' },
+    { label: '10-Year Total Cost', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).totalCost10Year, best: 'lowest' },
+    { label: 'Equity at Year 1', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear1, best: 'highest' },
+    { label: 'Equity at Year 5', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear5, best: 'highest' },
+    { label: 'Equity at Year 10', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).equityYear10, best: 'highest' },
+  ], [])
 
   // Buydown rows
   const hasBuydown = results.some(r => r.buydownPayments && r.buydownPayments.length > 0)
-  const buydownRows: RowConfig[] = hasBuydown ? [
-    { label: 'Year 1 Payment', key: 'bd1', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[0]?.monthlyPI },
-    { label: 'Year 2 Payment', key: 'bd2', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[1]?.monthlyPI },
-    { label: 'Year 3 Payment', key: 'bd3', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[2]?.monthlyPI },
-    { label: 'Permanent Payment', key: 'bdp', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).monthlyPI },
+  const buydownMetrics: MetricRow[] = hasBuydown ? [
+    { label: 'Year 1 Payment', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[0]?.monthlyPI },
+    { label: 'Year 2 Payment', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[1]?.monthlyPI },
+    { label: 'Year 3 Payment', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).buydownPayments?.[2]?.monthlyPI },
   ] : []
 
   // Extra payment rows
   const hasExtra = results.some(r => r.adjustedPayoffMonths !== undefined)
-  const extraRows: RowConfig[] = hasExtra ? [
-    { label: 'Years Saved', key: 'ys', format: 'text', getValue: r => {
+  const extraMetrics: MetricRow[] = hasExtra ? [
+    { label: 'Years Saved', format: 'text', getValue: r => {
       const pr = r as PurchaseCalculatedResult
-      return pr.yearsSaved !== undefined ? `${pr.yearsSaved} years, ${pr.monthsSaved} months` : undefined
+      return pr.yearsSaved !== undefined ? `${pr.yearsSaved}y ${pr.monthsSaved}m` : undefined
     }},
-    { label: 'Interest Saved', key: 'is', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).interestSaved },
+    { label: 'Interest Saved', format: 'currency', getValue: r => (r as PurchaseCalculatedResult).interestSaved },
   ] : []
 
-  const allRows = [...rows, ...buydownRows, ...extraRows]
+  const allMetrics = [...metrics, ...buydownMetrics, ...extraMetrics]
 
   return (
-    <ComparisonTable
+    <ScenarioCards
       title="Purchase Comparison"
-      columnLabels={scenarios.map(s => s.label || 'Option')}
-      rows={allRows}
+      heroLabel="Total Monthly Payment"
+      heroGetValue={r => (r as PurchaseCalculatedResult).totalMonthlyPayment}
+      heroBest="lowest"
+      labels={scenarios.map(s => s.label || 'Option')}
+      loanTypes={scenarios.map(s => s.loanType)}
+      metrics={allMetrics}
       results={results}
     />
   )
 }
 
-function RefinanceTable({ scenarios, results }: {
-  scenarios: RefiScenarioInput[]; results: RefiCalculatedResult[]
-}) {
-  const rows: RowConfig[] = useMemo(() => [
-    { label: 'Current Monthly Payment', key: 'curPmt', format: 'currency', getValue: r => (r as RefiCalculatedResult).currentMonthlyPayment },
-    { label: 'New Monthly Payment', key: 'newPmt', format: 'currency', getValue: r => (r as RefiCalculatedResult).newTotalMonthlyPayment, best: 'lowest' },
-    { label: 'Monthly Savings', key: 'mSave', format: 'currency', getValue: r => (r as RefiCalculatedResult).monthlySavings, best: 'highest', highlight: true },
-    { label: 'Annual Savings', key: 'aSave', format: 'currency', getValue: r => (r as RefiCalculatedResult).annualSavings, best: 'highest' },
-    { label: 'Net Monthly Cash Flow Improvement', key: 'netCF', format: 'currency', getValue: r => (r as RefiCalculatedResult).netMonthlyCashFlowImprovement, best: 'highest',
-      tooltip: 'Includes eliminated debt payments for cash-out consolidation' },
-    { label: 'Break-Even Month', key: 'be', format: 'number', getValue: r => (r as RefiCalculatedResult).breakEvenMonth, best: 'lowest', highlight: true,
-      tooltip: 'Month when cumulative savings exceed closing costs' },
-    { label: '3-Year Total Savings', key: 's3', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings3Year, best: 'highest' },
-    { label: '5-Year Total Savings', key: 's5', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings5Year, best: 'highest', highlight: true },
-    { label: '10-Year Total Savings', key: 's10', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings10Year, best: 'highest' },
-    { label: 'Remaining Interest (Current)', key: 'riCur', format: 'currency', getValue: r => (r as RefiCalculatedResult).remainingInterestCurrent },
-    { label: 'Total Interest (New)', key: 'tiNew', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalInterestNew, best: 'lowest' },
-    { label: 'Lifetime Interest Savings', key: 'liSave', format: 'currency', getValue: r => (r as RefiCalculatedResult).lifetimeInterestSavings, best: 'highest' },
-    { label: 'Cash Out Received', key: 'co', format: 'currency', getValue: r => (r as RefiCalculatedResult).cashOutReceived,
-      condition: (rs) => rs.some(r => (r as RefiCalculatedResult).cashOutReceived > 0) },
-    { label: 'New LTV', key: 'ltv', format: 'percent', getValue: r => (r as RefiCalculatedResult).newLtv, best: 'lowest' },
-    { label: 'Equity at Year 1', key: 'eq1', format: 'currency', getValue: r => (r as RefiCalculatedResult).equityYear1, best: 'highest' },
-    { label: 'Equity at Year 5', key: 'eq5', format: 'currency', getValue: r => (r as RefiCalculatedResult).equityYear5, best: 'highest' },
-    { label: 'Equity at Year 10', key: 'eq10', format: 'currency', getValue: r => (r as RefiCalculatedResult).equityYear10, best: 'highest' },
+// ─── Refinance Per-Scenario Cards ─────────────────────────────────
+
+function RefinanceCards({ scenarios, results }: { scenarios: RefiScenarioInput[]; results: RefiCalculatedResult[] }) {
+  const metrics: MetricRow[] = useMemo(() => [
+    { label: 'Current Payment', format: 'currency', getValue: r => (r as RefiCalculatedResult).currentMonthlyPayment },
+    { label: 'New Payment', format: 'currency', getValue: r => (r as RefiCalculatedResult).newTotalMonthlyPayment, best: 'lowest' },
+    { label: 'Annual Savings', format: 'currency', getValue: r => (r as RefiCalculatedResult).annualSavings, best: 'highest' },
+    { label: 'Break-Even Month', format: 'number', getValue: r => (r as RefiCalculatedResult).breakEvenMonth, best: 'lowest' },
+    { label: '3-Year Savings', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings3Year, best: 'highest' },
+    { label: '5-Year Savings', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings5Year, best: 'highest' },
+    { label: '10-Year Savings', format: 'currency', getValue: r => (r as RefiCalculatedResult).totalSavings10Year, best: 'highest' },
+    { label: 'Lifetime Interest Savings', format: 'currency', getValue: r => (r as RefiCalculatedResult).lifetimeInterestSavings, best: 'highest' },
+    { label: 'Cash Out', format: 'currency', getValue: r => (r as RefiCalculatedResult).cashOutReceived,
+      condition: rs => rs.some(r => (r as RefiCalculatedResult).cashOutReceived > 0) },
+    { label: 'New LTV', format: 'percent', getValue: r => (r as RefiCalculatedResult).newLtv, best: 'lowest' },
+    { label: 'Equity at Year 5', format: 'currency', getValue: r => (r as RefiCalculatedResult).equityYear5, best: 'highest' },
   ], [])
 
   return (
-    <ComparisonTable
+    <ScenarioCards
       title="Refinance Comparison"
-      columnLabels={scenarios.map(s => s.label || 'Option')}
-      rows={rows}
+      heroLabel="Monthly Savings"
+      heroGetValue={r => (r as RefiCalculatedResult).monthlySavings}
+      heroBest="highest"
+      labels={scenarios.map(s => s.label || 'Option')}
+      loanTypes={scenarios.map(s => s.loanType)}
+      metrics={metrics}
       results={results}
     />
   )
 }
 
-function ComparisonTable({ title, columnLabels, rows, results }: {
+// ─── Per-Scenario Card Layout ─────────────────────────────────────
+
+function ScenarioCards({ title, heroLabel, heroGetValue, heroBest, labels, loanTypes, metrics, results }: {
   title: string
-  columnLabels: string[]
-  rows: RowConfig[]
+  heroLabel: string
+  heroGetValue: (r: PurchaseCalculatedResult | RefiCalculatedResult) => number | undefined
+  heroBest: 'lowest' | 'highest'
+  labels: string[]
+  loanTypes: string[]
+  metrics: MetricRow[]
   results: (PurchaseCalculatedResult | RefiCalculatedResult)[]
 }) {
+  // Pre-compute best values for each metric
+  const bestMap = useMemo(() => {
+    const map: Record<string, number | undefined> = {}
+    // Hero
+    const heroVals = results.map(r => heroGetValue(r)).filter((v): v is number => typeof v === 'number')
+    map['__hero'] = heroBest === 'lowest' ? Math.min(...heroVals) : Math.max(...heroVals)
+    // All metrics
+    metrics.forEach((m, mi) => {
+      if (!m.best) return
+      const vals = results.map((r, i) => m.getValue(r, i)).filter((v): v is number => typeof v === 'number')
+      if (vals.length > 1) {
+        map[mi] = m.best === 'lowest' ? Math.min(...vals) : Math.max(...vals)
+      }
+    })
+    return map
+  }, [results, metrics, heroGetValue, heroBest])
+
   return (
-    <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--sc-border)' }}>
-      <div className="px-4 py-3" style={{ background: 'var(--sc-card)' }}>
-        <h3 className="text-sm font-semibold" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>{title}</h3>
-      </div>
+    <div>
+      <h3 className="text-sm font-semibold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>{title}</h3>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ background: 'var(--sc-card)' }}>
-              <th className="text-left px-4 py-2 font-medium text-xs" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Sans', sans-serif" }}>Metric</th>
-              {columnLabels.map((label, i) => (
-                <th key={i} className="text-right px-4 py-2 font-medium text-xs" style={{ color: 'var(--sc-gold)', fontFamily: "'IBM Plex Sans', sans-serif" }}>
-                  {label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIdx) => {
-              // Check condition
-              if (row.condition && !row.condition(results)) return null
+      <div className="grid gap-5" style={{ gridTemplateColumns: `repeat(${Math.min(results.length, 4)}, 1fr)` }}>
+        {results.map((r, idx) => {
+          const heroVal = heroGetValue(r)
+          const isHeroBest = heroVal !== undefined && heroVal === bestMap['__hero'] && results.length > 1
 
-              // Get values for all columns
-              const values = results.map((r, i) => row.getValue(r, i))
+          return (
+            <div
+              key={idx}
+              className="rounded-[14px] overflow-hidden"
+              style={{
+                background: 'var(--sc-card)',
+                border: `1px solid ${isHeroBest ? 'var(--sc-accent)' : 'var(--sc-border)'}`,
+              }}
+            >
+              {/* Card Header */}
+              <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+                    {labels[idx]}
+                  </span>
+                  <span
+                    className="text-[9px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider"
+                    style={{ background: 'var(--sc-accent-dim)', border: '1px solid var(--sc-accent)', color: 'var(--sc-accent)' }}
+                  >
+                    {loanTypes[idx]}
+                  </span>
+                </div>
+                {isHeroBest && (
+                  <span
+                    className="text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center gap-1"
+                    style={{ background: 'var(--sc-accent)', color: '#ffffff' }}
+                  >
+                    <Check size={10} /> Best
+                  </span>
+                )}
+              </div>
 
-              // Determine "best" value
-              const numericValues = values.map(v => typeof v === 'number' ? v : NaN).filter(v => !isNaN(v))
-              let bestValue: number | undefined
-              if (row.best === 'lowest' && numericValues.length > 0) bestValue = Math.min(...numericValues)
-              if (row.best === 'highest' && numericValues.length > 0) bestValue = Math.max(...numericValues)
+              {/* Hero Metric */}
+              <div className="px-5 pb-5">
+                <div className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--sc-muted)' }}>
+                  {heroLabel}
+                </div>
+                <div
+                  className="text-3xl font-bold tracking-tight"
+                  style={{ color: isHeroBest ? 'var(--sc-accent)' : 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+                >
+                  {heroVal !== undefined ? fmt(heroVal) : '—'}
+                </div>
+              </div>
 
-              const isAlt = rowIdx % 2 === 1
+              {/* Metrics List */}
+              <div className="border-t" style={{ borderColor: 'var(--sc-border)' }}>
+                {metrics.map((m, mi) => {
+                  if (m.condition && !m.condition(results)) return null
 
-              return (
-                <tr key={row.key} style={{ background: row.highlight ? 'var(--sc-gold-dim)' : isAlt ? 'var(--sc-card-alt)' : 'var(--sc-card)' }}>
-                  <td className="px-4 py-2.5 text-xs font-medium whitespace-nowrap" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Sans', sans-serif" }}>
-                    {row.label}
-                    {row.tooltip && <Tooltip text={row.tooltip} />}
-                  </td>
-                  {values.map((val, i) => {
-                    const isBest = bestValue !== undefined && val === bestValue && numericValues.length > 1
-                    const isSavings = row.key === 'savings' || row.key === 'mSave' || row.key === 'aSave' || row.key === 'netCF' || row.key.startsWith('s') || row.key === 'liSave'
-                    let color = 'var(--sc-text)'
-                    if (isSavings && typeof val === 'number') {
-                      color = val > 0 ? 'var(--sc-green)' : val < 0 ? 'var(--sc-red)' : 'var(--sc-text)'
-                    }
+                  const val = m.getValue(r, idx)
+                  if (val === undefined || val === null) return null
 
-                    let display: string
-                    if (val === undefined || val === null) {
-                      display = '—'
-                    } else if (row.format === 'currency') {
-                      display = fmt(val as number)
-                    } else if (row.format === 'percent') {
-                      display = fmt(val as number, '%')
-                    } else if (row.format === 'number') {
-                      display = typeof val === 'number' ? val.toLocaleString() : String(val)
-                    } else {
-                      display = String(val)
-                    }
+                  const isBest = bestMap[mi] !== undefined && val === bestMap[mi]
+                  const isSavings = m.label.includes('Savings') || m.label.includes('Saved')
 
-                    return (
-                      <td key={i} className="px-4 py-2.5 text-right whitespace-nowrap" style={{ fontFamily: "'IBM Plex Mono', monospace", color, fontSize: '12px' }}>
-                        <span className="inline-flex items-center gap-1.5">
-                          {isBest && <Check size={12} style={{ color: 'var(--sc-gold)' }} />}
-                          {display}
-                        </span>
-                      </td>
-                    )
-                  })}
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                  let display: string
+                  if (m.format === 'currency') display = fmt(val as number)
+                  else if (m.format === 'percent') display = fmt(val as number, '%')
+                  else if (m.format === 'number') display = typeof val === 'number' ? val.toLocaleString() : String(val)
+                  else display = String(val)
+
+                  let valueColor = 'var(--sc-text)'
+                  if (isBest) valueColor = 'var(--sc-accent)'
+                  else if (isSavings && typeof val === 'number') {
+                    valueColor = val > 0 ? 'var(--sc-green)' : val < 0 ? 'var(--sc-red)' : 'var(--sc-text)'
+                  }
+
+                  return (
+                    <div
+                      key={mi}
+                      className="flex items-center justify-between px-5 py-2.5"
+                      style={{
+                        borderBottom: '1px solid var(--sc-border)',
+                        background: mi % 2 === 0 ? 'transparent' : 'var(--sc-card-alt)',
+                      }}
+                    >
+                      <span className="text-[11px] font-medium" style={{ color: 'var(--sc-muted)', fontFamily: "'Inter', sans-serif" }}>
+                        {m.label}
+                      </span>
+                      <span
+                        className="text-xs font-semibold flex items-center gap-1.5"
+                        style={{ color: valueColor, fontFamily: "'IBM Plex Mono', monospace" }}
+                      >
+                        {isBest && <Check size={11} style={{ color: 'var(--sc-accent)' }} />}
+                        {display}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

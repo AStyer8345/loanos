@@ -15,6 +15,7 @@ import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
+import StatementUpload from './StatementUpload'
 
 function makeId() { return crypto.randomUUID() }
 
@@ -184,19 +185,27 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
     if (data.purchasePrice) setPropertyValue(data.purchasePrice as number)
   }
 
+  // ─── Mortgage statement import handler ────────────────────────
+  const handleStatementImport = (data: Partial<CurrentLoanInput> & { borrowerName?: string; propertyAddress?: string }) => {
+    const { borrowerName: name, propertyAddress: addr, ...loanUpdates } = data
+    setCurrentLoan(prev => ({ ...prev, ...loanUpdates }))
+    if (name) setBorrowerName(name)
+    if (addr) setPropertyAddress(addr)
+  }
+
   const hasResults = mode === 'purchase' ? purchaseResults.length > 0 : refiResults.length > 0
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Sans', sans-serif" }}>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+    <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+      <div className="max-w-[1600px] mx-auto px-5 md:px-8 py-8">
 
         {/* ─── Header ────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+            <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
               Scenario Builder
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--sc-muted)' }}>
+            <p className="text-sm mt-2" style={{ color: 'var(--sc-muted)' }}>
               Compare loan options side by side
             </p>
           </div>
@@ -204,13 +213,13 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
         </div>
 
         {/* ─── Mode Toggle ───────────────────────────────────────── */}
-        <div className="flex items-center gap-1 p-1 rounded-lg w-fit mb-6" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+        <div className="flex items-center gap-1 p-1.5 rounded-[14px] w-fit mb-8" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
           <button
             onClick={() => setMode('purchase')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-all"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
             style={{
-              background: mode === 'purchase' ? 'var(--sc-gold)' : 'transparent',
-              color: mode === 'purchase' ? '#0a0a0a' : 'var(--sc-muted)',
+              background: mode === 'purchase' ? 'var(--sc-accent)' : 'transparent',
+              color: mode === 'purchase' ? '#ffffff' : 'var(--sc-muted)',
             }}
           >
             <Home size={16} />
@@ -218,10 +227,10 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
           </button>
           <button
             onClick={() => setMode('refinance')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-all"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
             style={{
-              background: mode === 'refinance' ? 'var(--sc-gold)' : 'transparent',
-              color: mode === 'refinance' ? '#0a0a0a' : 'var(--sc-muted)',
+              background: mode === 'refinance' ? 'var(--sc-accent)' : 'transparent',
+              color: mode === 'refinance' ? '#ffffff' : 'var(--sc-muted)',
             }}
           >
             <RefreshCw size={16} />
@@ -230,69 +239,79 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
         </div>
 
         {/* ─── Borrower Info Row ──────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
           <InputField label="Borrower Name" value={borrowerName} onChange={setBorrowerName} placeholder="John & Jane Smith" />
           <InputField label="Property Address" value={propertyAddress} onChange={setPropertyAddress} placeholder="123 Main St, Austin, TX" />
           <CurrencyField label="Estimated Property Value" value={propertyValue} onChange={setPropertyValue} />
         </div>
 
-        {/* ─── Scenario Inputs ────────────────────────────────────── */}
-        {mode === 'purchase' ? (
+        {/* ═══ Side-by-Side Layout ═══════════════════════════════════ */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8">
+
+          {/* ─── LEFT: Scenario Inputs ─────────────────────────────── */}
           <div>
-            <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(purchaseScenarios.length, 4)}, 1fr)` }}>
-              {purchaseScenarios.map((s, i) => (
-                <ScenarioCard
-                  key={s.id}
-                  scenario={s}
-                  index={i}
-                  propertyValue={propertyValue}
-                  canRemove={purchaseScenarios.length > 2}
-                  onUpdate={(updates) => updatePurchaseScenario(i, updates)}
-                  onRemove={() => removePurchaseScenario(i)}
-                  copySource={i > 0 ? purchaseScenarios[0] : null}
-                  onCopyFrom={i > 0 ? () => {
-                    const src = purchaseScenarios[0]
-                    updatePurchaseScenario(i, {
-                      loanType: src.loanType,
-                      purchasePrice: src.purchasePrice,
-                      downPaymentAmount: src.downPaymentAmount,
-                      downPaymentPercent: src.downPaymentPercent,
-                      loanAmount: src.loanAmount,
-                      interestRate: src.interestRate,
-                      loanTerm: src.loanTerm,
-                      points: src.points,
-                      propertyTaxes: src.propertyTaxes,
-                      homeownersInsurance: src.homeownersInsurance,
-                      hoa: src.hoa,
-                      pmi: src.pmi,
-                      totalClosingCosts: src.totalClosingCosts,
-                      sellerCredits: src.sellerCredits,
-                      buydownType: src.buydownType,
-                      buydownYearRates: [...src.buydownYearRates],
-                      extraMonthlyPayment: src.extraMonthlyPayment,
-                    })
-                  } : undefined}
-                />
-              ))}
-            </div>
-            {purchaseScenarios.length < 4 && (
-              <button
-                onClick={addPurchaseScenario}
-                className="mt-4 px-4 py-2 rounded-md text-sm font-medium border border-dashed transition-colors hover:border-solid"
-                style={{ borderColor: 'var(--sc-gold)', color: 'var(--sc-gold)' }}
-              >
-                + Add Option
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-4">
-            <CurrentLoanCard
-              currentLoan={currentLoan}
-              onUpdate={(updates) => setCurrentLoan(prev => ({ ...prev, ...updates }))}
-            />
-            <div>
-              <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(refiScenarios.length, 3)}, 1fr)` }}>
+            <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
+              Loan Options
+            </h2>
+
+            {mode === 'purchase' ? (
+              <div className="space-y-5">
+                {purchaseScenarios.map((s, i) => (
+                  <ScenarioCard
+                    key={s.id}
+                    scenario={s}
+                    index={i}
+                    propertyValue={propertyValue}
+                    canRemove={purchaseScenarios.length > 2}
+                    onUpdate={(updates) => updatePurchaseScenario(i, updates)}
+                    onRemove={() => removePurchaseScenario(i)}
+                    copySource={i > 0 ? purchaseScenarios[0] : null}
+                    onCopyFrom={i > 0 ? () => {
+                      const src = purchaseScenarios[0]
+                      updatePurchaseScenario(i, {
+                        loanType: src.loanType,
+                        purchasePrice: src.purchasePrice,
+                        downPaymentAmount: src.downPaymentAmount,
+                        downPaymentPercent: src.downPaymentPercent,
+                        loanAmount: src.loanAmount,
+                        interestRate: src.interestRate,
+                        loanTerm: src.loanTerm,
+                        points: src.points,
+                        propertyTaxes: src.propertyTaxes,
+                        homeownersInsurance: src.homeownersInsurance,
+                        hoa: src.hoa,
+                        pmi: src.pmi,
+                        totalClosingCosts: src.totalClosingCosts,
+                        sellerCredits: src.sellerCredits,
+                        buydownType: src.buydownType,
+                        buydownYearRates: [...src.buydownYearRates],
+                        extraMonthlyPayment: src.extraMonthlyPayment,
+                      })
+                    } : undefined}
+                  />
+                ))}
+                {purchaseScenarios.length < 4 && (
+                  <button
+                    onClick={addPurchaseScenario}
+                    className="w-full py-3 rounded-[14px] text-sm font-medium border border-dashed transition-colors hover:border-solid"
+                    style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-accent)' }}
+                  >
+                    + Add Option
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium" style={{ color: 'var(--sc-muted)' }}>Current Loan</span>
+                    <StatementUpload onImport={handleStatementImport} />
+                  </div>
+                  <CurrentLoanCard
+                    currentLoan={currentLoan}
+                    onUpdate={(updates) => setCurrentLoan(prev => ({ ...prev, ...updates }))}
+                  />
+                </div>
                 {refiScenarios.map((s, i) => (
                   <ScenarioCard
                     key={s.id}
@@ -325,99 +344,109 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                     } : undefined}
                   />
                 ))}
+                {refiScenarios.length < 3 && (
+                  <button
+                    onClick={addRefiScenario}
+                    className="w-full py-3 rounded-[14px] text-sm font-medium border border-dashed transition-colors hover:border-solid"
+                    style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-accent)' }}
+                  >
+                    + Add Option
+                  </button>
+                )}
               </div>
-              {refiScenarios.length < 3 && (
-                <button
-                  onClick={addRefiScenario}
-                  className="mt-4 px-4 py-2 rounded-md text-sm font-medium border border-dashed transition-colors hover:border-solid"
-                  style={{ borderColor: 'var(--sc-gold)', color: 'var(--sc-gold)' }}
-                >
-                  + Add Option
-                </button>
-              )}
+            )}
+
+            {/* ─── Calculate Button ─────────────────────────────────── */}
+            <div className="mt-6">
+              <button
+                onClick={runCalculation}
+                disabled={calculating}
+                className="w-full py-3.5 rounded-[14px] text-sm font-semibold transition-all"
+                style={{
+                  background: calculating ? 'var(--sc-border)' : 'var(--sc-accent)',
+                  color: calculating ? 'var(--sc-muted)' : '#ffffff',
+                }}
+              >
+                {calculating ? 'Calculating...' : 'Calculate & Compare'}
+              </button>
             </div>
           </div>
-        )}
 
-        {/* ─── Calculate Button ───────────────────────────────────── */}
-        <div className="mt-8 flex justify-center">
-          <button
-            onClick={runCalculation}
-            disabled={calculating}
-            className="px-8 py-3 rounded-lg text-base font-semibold transition-all"
-            style={{
-              background: calculating ? 'var(--sc-border)' : 'var(--sc-gold)',
-              color: calculating ? 'var(--sc-muted)' : '#0a0a0a',
-            }}
-          >
-            {calculating ? 'Calculating...' : 'Calculate & Compare'}
-          </button>
-        </div>
-
-        {/* ─── Results ────────────────────────────────────────────── */}
-        {hasResults && (
+          {/* ─── RIGHT: Results Panel ──────────────────────────────── */}
           <div ref={resultsRef}>
-            <div className="mt-12 mb-8 border-t" style={{ borderColor: 'var(--sc-border)' }} />
+            <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
+              Results
+            </h2>
 
-            <ResultsTable
-              mode={mode}
-              purchaseScenarios={purchaseScenarios}
-              purchaseResults={purchaseResults}
-              refiScenarios={refiScenarios}
-              refiResults={refiResults}
-            />
+            {!hasResults ? (
+              <div className="rounded-[14px] p-12 text-center" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--sc-muted)' }}>
+                  Enter loan options and click Calculate to see results
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <ResultsTable
+                  mode={mode}
+                  purchaseScenarios={purchaseScenarios}
+                  purchaseResults={purchaseResults}
+                  refiScenarios={refiScenarios}
+                  refiResults={refiResults}
+                />
 
-            <ScenarioCharts
-              mode={mode}
-              purchaseScenarios={purchaseScenarios}
-              purchaseResults={purchaseResults}
-              refiScenarios={refiScenarios}
-              refiResults={refiResults}
-            />
+                <ScenarioCharts
+                  mode={mode}
+                  purchaseScenarios={purchaseScenarios}
+                  purchaseResults={purchaseResults}
+                  refiScenarios={refiScenarios}
+                  refiResults={refiResults}
+                />
 
-            <ReinvestmentAnalysis
-              mode={mode}
-              purchaseResults={purchaseResults}
-              refiResults={refiResults}
-              settings={reinvestmentSettings}
-              result={reinvestmentResult}
-              onSettingsChange={setReinvestmentSettings}
-              onRecalculate={runCalculation}
-            />
+                <ReinvestmentAnalysis
+                  mode={mode}
+                  purchaseResults={purchaseResults}
+                  refiResults={refiResults}
+                  settings={reinvestmentSettings}
+                  result={reinvestmentResult}
+                  onSettingsChange={setReinvestmentSettings}
+                  onRecalculate={runCalculation}
+                />
 
-            <NarrativeSection
-              mode={mode}
-              narrative={narrative}
-              narrativeEdited={narrativeEdited}
-              purchaseScenarios={purchaseScenarios}
-              purchaseResults={purchaseResults}
-              refiScenarios={refiScenarios}
-              refiResults={refiResults}
-              currentLoan={currentLoan}
-              reinvestmentResult={reinvestmentResult}
-              borrowerName={borrowerName}
-              onNarrativeChange={(text) => { setNarrative(text); setNarrativeEdited(true) }}
-              onNarrativeGenerated={setNarrative}
-            />
+                <NarrativeSection
+                  mode={mode}
+                  narrative={narrative}
+                  narrativeEdited={narrativeEdited}
+                  purchaseScenarios={purchaseScenarios}
+                  purchaseResults={purchaseResults}
+                  refiScenarios={refiScenarios}
+                  refiResults={refiResults}
+                  currentLoan={currentLoan}
+                  reinvestmentResult={reinvestmentResult}
+                  borrowerName={borrowerName}
+                  onNarrativeChange={(text) => { setNarrative(text); setNarrativeEdited(true) }}
+                  onNarrativeGenerated={setNarrative}
+                />
 
-            <ActionsBar
-              mode={mode}
-              borrowerName={borrowerName}
-              propertyAddress={propertyAddress}
-              propertyValue={propertyValue}
-              purchaseScenarios={purchaseScenarios}
-              purchaseResults={purchaseResults}
-              refiScenarios={refiScenarios}
-              refiResults={refiResults}
-              currentLoan={currentLoan}
-              narrative={narrative}
-              narrativeEdited={narrativeEdited}
-              reinvestmentResult={reinvestmentResult}
-              scenarioId={scenarioId}
-              onSaved={setScenarioId}
-            />
+                <ActionsBar
+                  mode={mode}
+                  borrowerName={borrowerName}
+                  propertyAddress={propertyAddress}
+                  propertyValue={propertyValue}
+                  purchaseScenarios={purchaseScenarios}
+                  purchaseResults={purchaseResults}
+                  refiScenarios={refiScenarios}
+                  refiResults={refiResults}
+                  currentLoan={currentLoan}
+                  narrative={narrative}
+                  narrativeEdited={narrativeEdited}
+                  reinvestmentResult={reinvestmentResult}
+                  scenarioId={scenarioId}
+                  onSaved={setScenarioId}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
@@ -430,14 +459,14 @@ export function InputField({ label, value, onChange, placeholder, className }: {
 }) {
   return (
     <div className={className}>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--sc-muted)' }}>{label}</label>
+      <label className="block text-xs font-medium mb-2" style={{ color: 'var(--sc-muted)' }}>{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 rounded-md text-sm border outline-none focus:ring-1"
-        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Sans', sans-serif" }}
+        className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none focus:ring-1"
+        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'Inter', sans-serif" }}
       />
     </div>
   )
@@ -449,9 +478,9 @@ export function CurrencyField({ label, value, onChange, className, readOnly, acc
   const display = value > 0 ? value.toLocaleString('en-US') : ''
   return (
     <div className={className}>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--sc-muted)' }}>{label}</label>
+      <label className="block text-xs font-medium mb-2" style={{ color: 'var(--sc-muted)' }}>{label}</label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--sc-muted)' }}>$</span>
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--sc-muted)' }}>$</span>
         <input
           type="text"
           value={display}
@@ -460,7 +489,7 @@ export function CurrencyField({ label, value, onChange, className, readOnly, acc
             const raw = e.target.value.replace(/[^0-9.]/g, '')
             onChange(parseFloat(raw) || 0)
           }}
-          className="w-full pl-7 pr-3 py-2 rounded-md text-sm border outline-none focus:ring-1"
+          className="w-full pl-8 pr-3.5 py-2.5 rounded-[10px] text-sm border outline-none focus:ring-1"
           style={{
             borderColor: 'var(--sc-border)',
             color: accent || 'var(--sc-text)',
@@ -478,7 +507,7 @@ export function PercentField({ label, value, onChange, decimals = 3 }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--sc-muted)' }}>{label}</label>
+      <label className="block text-xs font-medium mb-2" style={{ color: 'var(--sc-muted)' }}>{label}</label>
       <div className="relative">
         <input
           type="text"
@@ -487,10 +516,10 @@ export function PercentField({ label, value, onChange, decimals = 3 }: {
             const raw = e.target.value.replace(/[^0-9.]/g, '')
             onChange(parseFloat(raw) || 0)
           }}
-          className="w-full px-3 py-2 rounded-md text-sm border outline-none focus:ring-1 pr-8"
+          className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none focus:ring-1 pr-8"
           style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Mono', monospace" }}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--sc-muted)' }}>%</span>
+        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--sc-muted)' }}>%</span>
       </div>
     </div>
   )
@@ -501,12 +530,12 @@ export function SelectField({ label, value, onChange, options }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--sc-muted)' }}>{label}</label>
+      <label className="block text-xs font-medium mb-2" style={{ color: 'var(--sc-muted)' }}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-2 rounded-md text-sm border outline-none"
-        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-card)', fontFamily: "'IBM Plex Sans', sans-serif" }}
+        className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none"
+        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-card)', fontFamily: "'Inter', sans-serif" }}
       >
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>

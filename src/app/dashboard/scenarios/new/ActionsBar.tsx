@@ -124,12 +124,12 @@ export default function ActionsBar({
   }
 
   return (
-    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
       <button
         onClick={generatePdf}
         disabled={generatingPdf}
-        className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all"
-        style={{ background: 'var(--sc-gold)', color: '#0a0a0a' }}
+        className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-semibold transition-all"
+        style={{ background: 'var(--sc-accent)', color: '#ffffff' }}
       >
         <Download size={16} />
         {generatingPdf ? 'Generating...' : 'Download PDF'}
@@ -137,7 +137,7 @@ export default function ActionsBar({
 
       <button
         onClick={copyShareLink}
-        className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
+        className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-medium transition-all"
         style={{ border: '1px solid var(--sc-border)', color: 'var(--sc-text)' }}
       >
         <Link2 size={16} />
@@ -147,7 +147,7 @@ export default function ActionsBar({
       <button
         onClick={save}
         disabled={saving}
-        className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
+        className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-medium transition-all"
         style={{ border: '1px solid var(--sc-border)', color: 'var(--sc-text)' }}
       >
         <Save size={16} />

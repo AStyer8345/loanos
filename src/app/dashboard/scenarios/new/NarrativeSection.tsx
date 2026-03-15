@@ -94,11 +94,11 @@ export default function NarrativeSection({
   }
 
   return (
-    <div className="mt-8 rounded-lg" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Sparkles size={16} style={{ color: 'var(--sc-gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>AI Analysis</h3>
+    <div className="rounded-[14px]" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+      <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <Sparkles size={16} style={{ color: 'var(--sc-accent)' }} />
+          <h3 className="text-sm font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>AI Analysis</h3>
         </div>
         <div className="flex items-center gap-2">
           {narrative && (
@@ -129,12 +129,12 @@ export default function NarrativeSection({
         </div>
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="px-5 pb-5">
         {!narrative && !generating ? (
           <button
             onClick={generate}
-            className="w-full py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition-all"
-            style={{ background: 'var(--sc-gold)', color: '#0a0a0a' }}
+            className="w-full py-3.5 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-2 transition-all"
+            style={{ background: 'var(--sc-accent)', color: '#ffffff' }}
           >
             <Sparkles size={16} />
             Generate Analysis
@@ -150,17 +150,17 @@ export default function NarrativeSection({
               borderColor: 'var(--sc-border)',
               color: 'var(--sc-text)',
               background: 'var(--sc-card-alt)',
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               lineHeight: '1.6',
             }}
           />
         ) : (
           <div
             className="text-sm leading-relaxed whitespace-pre-wrap"
-            style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Sans', sans-serif" }}
+            style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
           >
             {narrative || (generating ? 'Generating analysis...' : '')}
-            {generating && <span className="inline-block w-2 h-4 ml-0.5 animate-pulse" style={{ background: 'var(--sc-gold)' }} />}
+            {generating && <span className="inline-block w-2 h-4 ml-0.5 animate-pulse" style={{ background: 'var(--sc-accent)' }} />}
           </div>
         )}
 

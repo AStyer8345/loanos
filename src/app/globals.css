@@ -28,19 +28,21 @@
   --accent-light:  hsla(210, 70%, 60%, 0.12);
   --accent-border: hsla(210, 70%, 60%, 0.5);
 
-  /* Scenario Builder palette */
-  --sc-bg:       #0a0a0a;
-  --sc-card:     #141414;
-  --sc-card-alt: #1a1a1a;
-  --sc-border:   #262626;
-  --sc-gold:     #C9A84C;
-  --sc-gold-dim: rgba(201, 168, 76, 0.15);
-  --sc-blue:     #4C7EC9;
-  --sc-blue-dim: rgba(76, 126, 201, 0.15);
-  --sc-green:    #4CC98A;
-  --sc-red:      #C94C4C;
-  --sc-text:     #F0EDE8;
-  --sc-muted:    rgba(240, 237, 232, 0.5);
+  /* Scenario Builder palette — navy + blue accent */
+  --sc-bg:       #0c1220;
+  --sc-card:     #111a2e;
+  --sc-card-alt: #162035;
+  --sc-border:   #1e2d4a;
+  --sc-accent:   #5b8def;
+  --sc-accent-dim: rgba(91, 141, 239, 0.10);
+  --sc-gold:     #5b8def;
+  --sc-gold-dim: rgba(91, 141, 239, 0.10);
+  --sc-blue:     #5b8def;
+  --sc-blue-dim: rgba(91, 141, 239, 0.10);
+  --sc-green:    #4ade80;
+  --sc-red:      #f87171;
+  --sc-text:     #e0e6f0;
+  --sc-muted:    rgba(224, 230, 240, 0.5);
 }
 
 body {

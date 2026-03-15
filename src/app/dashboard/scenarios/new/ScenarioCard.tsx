@@ -63,16 +63,16 @@ const REFI_CC_TEMPLATES = [
 function Collapsible({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="mt-3">
+    <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--sc-border)' }}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 w-full text-xs font-medium py-1.5 transition-colors"
-        style={{ color: 'var(--sc-muted)' }}
+        className="flex items-center gap-2 w-full text-xs font-semibold py-1 transition-colors"
+        style={{ color: 'var(--sc-muted)', fontFamily: "'Inter', sans-serif" }}
       >
         {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         {title}
       </button>
-      {open && <div className="mt-2 space-y-3">{children}</div>}
+      {open && <div className="mt-3 space-y-4">{children}</div>}
     </div>
   )
 }
@@ -120,10 +120,10 @@ export default function ScenarioCard({
   }
 
   return (
-    <div className="rounded-lg p-4 relative group" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+    <div className="rounded-[14px] p-5 relative group" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
           {editingLabel ? (
             <input
               autoFocus
@@ -132,37 +132,37 @@ export default function ScenarioCard({
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-gold)', color: 'var(--sc-text)' }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)' }}>
+            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
               {label}
             </button>
           )}
           <select
             value={scenario.loanType}
             onChange={e => onUpdate({ loanType: e.target.value as LoanType })}
-            className="text-[10px] font-medium px-2 py-0.5 rounded border uppercase tracking-wider"
-            style={{ background: 'var(--sc-gold-dim)', borderColor: 'var(--sc-gold)', color: 'var(--sc-gold)' }}
+            className="text-[10px] font-medium px-2.5 py-1 rounded-md border uppercase tracking-wider"
+            style={{ background: 'var(--sc-accent-dim)', borderColor: 'var(--sc-accent)', color: 'var(--sc-accent)' }}
           >
             {LOAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {index > 0 && onCopyFrom && (
             <button
               onClick={onCopyFrom}
-              className="text-[10px] font-medium px-2 py-1 rounded transition-colors hover:bg-white/10"
-              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-gold)' }}
+              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-accent)' }}
               title="Copy all fields from Option A"
             >
-              Copy A →
+              Copy A
             </button>
           )}
           {canRemove && (
             <button
               onClick={onRemove}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5"
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-white/5"
               style={{ color: 'var(--sc-muted)' }}
             >
               <X size={14} />
@@ -171,11 +171,11 @@ export default function ScenarioCard({
         </div>
       </div>
 
-      {/* Core Fields */}
-      <div className="space-y-3">
+      {/* Core Fields — always visible */}
+      <div className="space-y-4">
         <CurrencyField label="Purchase Price" value={scenario.purchasePrice} onChange={handlePurchasePriceChange} />
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <CurrencyField label="Down Payment ($)" value={scenario.downPaymentAmount} onChange={handleDownPaymentAmountChange} />
           <PercentField label="Down Payment (%)" value={scenario.downPaymentPercent} onChange={handleDownPaymentPercentChange} decimals={1} />
         </div>
@@ -186,8 +186,8 @@ export default function ScenarioCard({
         <CurrencyField label="Points / Credits" value={scenario.points} onChange={v => onUpdate({ points: v })} />
       </div>
 
-      {/* Monthly Costs */}
-      <Collapsible title="Monthly Costs" defaultOpen>
+      {/* Monthly Costs — collapsed by default (progressive disclosure) */}
+      <Collapsible title="Monthly Costs">
         <CurrencyField label="Property Taxes" value={scenario.propertyTaxes} onChange={v => onUpdate({ propertyTaxes: v })} />
         <CurrencyField label="Homeowner's Insurance" value={scenario.homeownersInsurance} onChange={v => onUpdate({ homeownersInsurance: v })} />
         <CurrencyField label="HOA" value={scenario.hoa} onChange={v => onUpdate({ hoa: v })} />
@@ -199,14 +199,14 @@ export default function ScenarioCard({
 
       {/* Closing Costs */}
       <Collapsible title="Closing Costs">
-        <div className="flex items-center gap-1.5 mb-2">
+        <div className="flex items-center gap-2 mb-3">
           <span className="text-[10px] font-medium" style={{ color: 'var(--sc-muted)' }}>Template:</span>
           {PURCHASE_CC_TEMPLATES.map(t => (
             <button
               key={t.pct}
               onClick={() => onUpdate({ totalClosingCosts: Math.round(scenario.loanAmount * t.pct) })}
-              className="text-[10px] px-2 py-0.5 rounded transition-colors hover:bg-white/10"
-              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-border)' }}
+              className="text-[10px] px-2.5 py-1 rounded-md transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-border)' }}
             >
               {t.label}
             </button>
@@ -264,10 +264,10 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
   const label = scenario.label || `Option ${index + 1}`
 
   return (
-    <div className="rounded-lg p-4 relative group" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-gold)', borderWidth: '1px' }}>
+    <div className="rounded-[14px] p-5 relative group" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-accent)', borderWidth: '1px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
           {editingLabel ? (
             <input
               autoFocus
@@ -276,55 +276,56 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-gold)', color: 'var(--sc-text)' }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)' }}>
+            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
               {label}
             </button>
           )}
           <select
             value={scenario.loanType}
             onChange={e => onUpdate({ loanType: e.target.value as LoanType })}
-            className="text-[10px] font-medium px-2 py-0.5 rounded border uppercase tracking-wider"
-            style={{ background: 'var(--sc-gold-dim)', borderColor: 'var(--sc-gold)', color: 'var(--sc-gold)' }}
+            className="text-[10px] font-medium px-2.5 py-1 rounded-md border uppercase tracking-wider"
+            style={{ background: 'var(--sc-accent-dim)', borderColor: 'var(--sc-accent)', color: 'var(--sc-accent)' }}
           >
             {LOAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {index > 0 && onCopyFrom && (
             <button
               onClick={onCopyFrom}
-              className="text-[10px] font-medium px-2 py-1 rounded transition-colors hover:bg-white/10"
-              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-gold)' }}
+              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-accent)' }}
               title="Copy all fields from Option 1"
             >
-              Copy 1 →
+              Copy 1
             </button>
           )}
           {canRemove && (
-            <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5" style={{ color: 'var(--sc-muted)' }}>
+            <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-white/5" style={{ color: 'var(--sc-muted)' }}>
               <X size={14} />
             </button>
           )}
         </div>
       </div>
 
-      <div className="space-y-3">
+      {/* Core Fields */}
+      <div className="space-y-4">
         <CurrencyField label="New Loan Amount" value={scenario.newLoanAmount} onChange={v => onUpdate({ newLoanAmount: v })} />
         <PercentField label="Interest Rate" value={scenario.interestRate} onChange={v => onUpdate({ interestRate: v })} />
         <SelectField label="Loan Term" value={scenario.loanTerm.toString()} onChange={v => onUpdate({ loanTerm: parseInt(v) as LoanTerm })} options={LOAN_TERMS} />
         <CurrencyField label="Points / Credits" value={scenario.points} onChange={v => onUpdate({ points: v })} />
         <div>
-          <div className="flex items-center gap-1.5 mb-2">
+          <div className="flex items-center gap-2 mb-3">
             <span className="text-[10px] font-medium" style={{ color: 'var(--sc-muted)' }}>Template:</span>
             {REFI_CC_TEMPLATES.map(t => (
               <button
                 key={t.pct}
                 onClick={() => onUpdate({ closingCosts: Math.round(scenario.newLoanAmount * t.pct) })}
-                className="text-[10px] px-2 py-0.5 rounded transition-colors hover:bg-white/10"
-                style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-border)' }}
+                className="text-[10px] px-2.5 py-1 rounded-md transition-colors hover:bg-white/10"
+                style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-border)' }}
               >
                 {t.label}
               </button>
@@ -334,10 +335,11 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
         </div>
       </div>
 
+      {/* Progressive disclosure sections */}
       <Collapsible title="Cash Out">
         <CurrencyField label="Cash Out Amount" value={scenario.cashOutAmount} onChange={v => onUpdate({ cashOutAmount: v })} />
         {currentLoan && currentLoan.debts.length > 0 && (
-          <label className="flex items-center gap-2 mt-2 cursor-pointer text-xs" style={{ color: 'var(--sc-muted)' }}>
+          <label className="flex items-center gap-2 mt-3 cursor-pointer text-xs" style={{ color: 'var(--sc-muted)' }}>
             <input
               type="checkbox"
               checked={scenario.payOffDebts}
@@ -349,7 +351,7 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
         )}
       </Collapsible>
 
-      <Collapsible title="Monthly Costs" defaultOpen>
+      <Collapsible title="Monthly Costs">
         <CurrencyField label="Property Taxes" value={scenario.propertyTaxes} onChange={v => onUpdate({ propertyTaxes: v })} />
         <CurrencyField label="Insurance" value={scenario.insurance} onChange={v => onUpdate({ insurance: v })} />
         <CurrencyField label="HOA" value={scenario.hoa} onChange={v => onUpdate({ hoa: v })} />

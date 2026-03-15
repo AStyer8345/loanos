@@ -892,12 +892,14 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
     const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ')
     setSuggestions([])
     setEditing(false)
-    await onSave!(field, name)
-    if (onSaveMultiple && relatedFields) {
-      const updates: Record<string, string | null> = {}
-      if (relatedFields.email) updates[relatedFields.email] = contact.email ?? null
-      if (relatedFields.phone) updates[relatedFields.phone] = contact.phone ?? null
-      if (Object.keys(updates).length > 0) await onSaveMultiple(updates)
+    // Bundle name + email + phone into one save so there's a single state update
+    if (onSaveMultiple) {
+      const updates: Record<string, string | null> = { [field]: name }
+      if (relatedFields?.email) updates[relatedFields.email] = contact.email ?? null
+      if (relatedFields?.phone) updates[relatedFields.phone] = contact.phone ?? null
+      await onSaveMultiple(updates)
+    } else {
+      await onSave!(field, name)
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -1089,13 +1091,13 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
   const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
     const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
-    if (!error) setLoan((prev: Loan | null) => prev ? { ...prev, [field]: value } as Loan : prev)
-  }, [supabase, loanId, setLoan])
+    if (!error) setLoan({ ...loan, [field]: value } as Loan)
+  }, [supabase, loanId, loan, setLoan])
 
   const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
     const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
-    if (!error) setLoan((prev: Loan | null) => prev ? { ...prev, ...fields } as Loan : prev)
-  }, [supabase, loanId, setLoan])
+    if (!error) setLoan({ ...loan, ...fields } as Loan)
+  }, [supabase, loanId, loan, setLoan])
 
   const handleNotesBlur = async () => {
     if (notesVal === (loan.notes ?? '')) return

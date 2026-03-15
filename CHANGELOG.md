@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [1.22.0] — 2026-03-15 — Daily Audit: Nav, Actions Button, Dark Theme, CSS Vars, max_tokens
+
+### Fixed
+- **`src/components/TopNav.tsx`** — Removed duplicate "Pipeline" nav item (was a second link to `/dashboard/loans`, identical to "Loans" nav item below it; also never highlighted because `sectionFromPath` doesn't return `'pipeline'`). Replaced with "Briefing" nav item pointing to `/dashboard/briefing`. Removed `'pipeline'` from the `Section` type. Added "Daily Briefing" to mobile menu. Daily Briefing agent page is now reachable from the nav.
+- **`src/app/dashboard/loans/[id]/page.tsx`** — Wired up the "Actions" button. Was a non-functional stub that rendered a `<button>` with no `onClick`. Now opens a click-outside-aware dropdown with two sections: (1) Automations — PA Email, CD Email, Referral Intro (each switches to the Automations tab); (2) View — Activity Log, Email History, Documents (each switches to the corresponding tab). Uses `actionsRef` + `useEffect` for click-outside close. `actionsOpen` state added.
+- **`src/app/dashboard/automations/page.tsx`** — Fully converted from light slate theme to dark zinc. Changed: page bg (`bg-slate-50` → `bg-zinc-950`), stat row (`bg-white border-slate-200` → `bg-zinc-900 border-zinc-700`), infra status badge (`bg-emerald-50 border-emerald-200 text-emerald-700` → `bg-emerald-900/30 border-emerald-700 text-emerald-400`), workflow cards (`bg-white border-slate-200` → `bg-zinc-900 border-zinc-700`), heading text (`text-slate-900` → `text-zinc-100`), muted text (`text-slate-400/500` → `text-zinc-400/500`), pipeline step nodes (inactive: `border-slate-200 bg-slate-50 text-slate-400` → `border-zinc-700 bg-zinc-800 text-zinc-500`), connectors (`bg-slate-200` → `bg-zinc-700`), modal (`bg-white border-slate-200` → `bg-zinc-900 border-zinc-700`), form inputs (`bg-slate-50 border-slate-200 text-slate-900` → `bg-zinc-800 border-zinc-600 text-zinc-100`), cancel/back buttons (`text-slate-500 border-slate-200` → `text-zinc-400 border-zinc-700`), footer note (`bg-white border-slate-200 text-slate-400` → `bg-zinc-900 border-zinc-700 text-zinc-500`). Functional logic 100% unchanged.
+- **`src/app/dashboard/referral/[referrerName]/page.tsx`** — Replaced all inline `var(--)` CSS custom property references with hardcoded dark zinc hex values: `var(--bg)` → `#09090b`, `var(--surface)` → `#18181b`, `var(--border)` → `#3f3f46`, `var(--muted)` → `#71717a`, `var(--fg)` → `#e4e4e7`, `var(--font-mono)` → `'IBM Plex Mono', monospace`, `var(--font-display)` → `'IBM Plex Mono', monospace`. Visual output identical to before.
+- **`src/app/api/chat/route.ts`** — `max_tokens` bumped from `1024` → `2048` on the main LoanOS AI chat endpoint. Prevents truncation when Claude is drafting full emails or longer analytical responses.
+
+### Added
+- **`tasks/audit-reports/AUDIT-2026-03-15.md`** — Full codebase audit report: Architecture, Supabase Schema, UI/UX, Feature Completeness, Claude API Usage, Simplification, Quick Wins across 7 categories. Includes complete findings on pending migrations, tech debt, and feature gaps.
+
+---
+
 ## [1.21.0] — 2026-03-14 — Loan Detail Dashboard Layout
 
 ### Changed

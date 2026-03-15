@@ -253,6 +253,18 @@ export default function LoanDetailPage() {
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails'>('dashboard')
+  const [actionsOpen, setActionsOpen] = useState(false)
+  const actionsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
+        setActionsOpen(false)
+      }
+    }
+    if (actionsOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [actionsOpen])
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -319,9 +331,51 @@ export default function LoanDetailPage() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <StatusBadge status={loan.status} />
-              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors font-mono">
-                Actions <ChevronDown size={11} />
-              </button>
+              {/* Actions dropdown */}
+              <div className="relative" ref={actionsRef}>
+                <button
+                  onClick={() => setActionsOpen(prev => !prev)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors font-mono"
+                >
+                  Actions <ChevronDown size={11} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                </button>
+                {actionsOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden">
+                    <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
+                    {[
+                      { label: 'Send PA Email', tab: 'automations' as const },
+                      { label: 'Send CD Email', tab: 'automations' as const },
+                      { label: 'Referral Intro', tab: 'automations' as const },
+                    ].map(({ label, tab }) => (
+                      <button
+                        key={label}
+                        onClick={() => { setActiveTab(tab); setActionsOpen(false) }}
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                      >
+                        <Zap size={12} className="text-emerald-400 shrink-0" />
+                        {label}
+                      </button>
+                    ))}
+                    <div className="border-t border-zinc-800 mt-1 pt-1">
+                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">View</p>
+                      {[
+                        { label: 'Activity Log', tab: 'activity' as const },
+                        { label: 'Email History', tab: 'emails' as const },
+                        { label: 'Documents', tab: 'dashboard' as const },
+                      ].map(({ label, tab }) => (
+                        <button
+                          key={label}
+                          onClick={() => { setActiveTab(tab); setActionsOpen(false) }}
+                          className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                        >
+                          <ChevronRight size={12} className="text-zinc-500 shrink-0" />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

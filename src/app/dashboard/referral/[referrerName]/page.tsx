@@ -60,9 +60,9 @@ function fullName(c: ReferralContact) {
 // ── Status Badge ─────────────────────────────────────────────────────────────
 
 function LoanStatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span style={{ color: 'var(--muted)' }}>—</span>
+  if (!status) return <span style={{ color: '#71717a' }}>—</span>
   const s = status.toLowerCase()
-  let color = 'var(--muted)'
+  let color = '#71717a'
   if (['closed', 'funded', 'closed/funded'].some(v => s.includes(v))) color = '#4ade80'
   else if (['in process', 'processing', 'submitted', 'conditional', 'clear to close', 'approved'].some(v => s.includes(v))) color = '#60a5fa'
   else if (['started'].some(v => s.includes(v))) color = '#fbbf24'
@@ -149,10 +149,10 @@ export default function ReferralPage() {
     return parts.length ? parts.join(', ') : '—'
   }
 
-  // ── Bloomberg dark styles ─────────────────────────────────────────────────
+  // ── Dark zinc styles ─────────────────────────────────────────────────────
   const card = {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
+    background: '#18181b',
+    border: '1px solid #3f3f46',
     borderRadius: 6,
     padding: '16px 20px',
   }
@@ -160,30 +160,30 @@ export default function ReferralPage() {
   const thStyle: React.CSSProperties = {
     textAlign: 'left' as const,
     padding: '8px 14px',
-    fontFamily: 'var(--font-mono)',
+    fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 10,
-    color: 'var(--muted)',
+    color: '#71717a',
     letterSpacing: '0.1em',
     fontWeight: 600,
-    borderBottom: '1px solid var(--border)',
+    borderBottom: '1px solid #3f3f46',
     whiteSpace: 'nowrap' as const,
   }
 
   const tdStyle: React.CSSProperties = {
     padding: '10px 14px',
     fontSize: 13,
-    color: 'var(--fg)',
-    borderBottom: '1px solid var(--border)',
+    color: '#e4e4e7',
+    borderBottom: '1px solid #3f3f46',
     verticalAlign: 'middle',
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', padding: '28px 32px', fontFamily: 'var(--font-mono)' }}>
+    <div style={{ background: '#09090b', minHeight: '100%', padding: '28px 32px', fontFamily: "'IBM Plex Mono', monospace" }}>
 
       {/* Back nav */}
       <Link
         href="/dashboard/contacts"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)', marginBottom: 20, textDecoration: 'none' }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#71717a', marginBottom: 20, textDecoration: 'none' }}
       >
         <ArrowLeft size={13} />
         Back to Contacts
@@ -191,7 +191,7 @@ export default function ReferralPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
           {referrerContactId ? (
             <Link href={`/dashboard/contacts/${referrerContactId}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
               {referrerName}
@@ -200,13 +200,13 @@ export default function ReferralPage() {
             <span style={{ color: '#c9a84c' }}>{referrerName}</span>
           )}
         </h1>
-        <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, letterSpacing: '0.08em' }}>
+        <p style={{ fontSize: 12, color: '#71717a', marginTop: 4, letterSpacing: '0.08em' }}>
           REFERRAL SUMMARY
         </p>
       </div>
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', fontSize: 13, paddingTop: 40, textAlign: 'center' }}>Loading…</div>
+        <div style={{ color: '#71717a', fontSize: 13, paddingTop: 40, textAlign: 'center' }}>Loading…</div>
       ) : (
         <>
           {/* Stats cards */}
@@ -214,39 +214,39 @@ export default function ReferralPage() {
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <Users size={14} color="#c9a84c" />
-                <span style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.1em', fontWeight: 600 }}>TOTAL REFERRALS</span>
+                <span style={{ fontSize: 10, color: '#71717a', letterSpacing: '0.1em', fontWeight: 600 }}>TOTAL REFERRALS</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: '#e4e4e7', fontFamily: "'IBM Plex Mono', monospace" }}>
                 {contacts.length}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>contacts referred</div>
+              <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>contacts referred</div>
             </div>
 
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <TrendingUp size={14} color="#4ade80" />
-                <span style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.1em', fontWeight: 600 }}>CLOSED LOANS</span>
+                <span style={{ fontSize: 10, color: '#71717a', letterSpacing: '0.1em', fontWeight: 600 }}>CLOSED LOANS</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: '#e4e4e7', fontFamily: "'IBM Plex Mono', monospace" }}>
                 {closedLoans.length}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>of {loans.length} total loans</div>
+              <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>of {loans.length} total loans</div>
             </div>
 
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <DollarSign size={14} color="#4ade80" />
-                <span style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.1em', fontWeight: 600 }}>TOTAL VOLUME</span>
+                <span style={{ fontSize: 10, color: '#71717a', letterSpacing: '0.1em', fontWeight: 600 }}>TOTAL VOLUME</span>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: '#e4e4e7', fontFamily: "'IBM Plex Mono', monospace" }}>
                 {fmtCurrency(totalVolume)}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>closed loan volume</div>
+              <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>closed loan volume</div>
             </div>
           </div>
 
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #3f3f46', marginBottom: 20 }}>
             {(['borrowers', 'loans'] as const).map(t => (
               <button
                 key={t}
@@ -254,13 +254,13 @@ export default function ReferralPage() {
                 style={{
                   padding: '8px 18px',
                   fontSize: 12,
-                  fontFamily: 'var(--font-mono)',
+                  fontFamily: "'IBM Plex Mono', monospace",
                   fontWeight: 600,
                   letterSpacing: '0.08em',
                   background: 'none',
                   border: 'none',
                   borderBottom: tab === t ? '2px solid #c9a84c' : '2px solid transparent',
-                  color: tab === t ? '#c9a84c' : 'var(--muted)',
+                  color: tab === t ? '#c9a84c' : '#71717a',
                   cursor: 'pointer',
                   textTransform: 'uppercase' as const,
                   marginBottom: -1,
@@ -274,7 +274,7 @@ export default function ReferralPage() {
           {/* Borrowers tab */}
           {tab === 'borrowers' && (
             contacts.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '48px 0', color: 'var(--muted)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '48px 0', color: '#71717a' }}>
                 <AlertCircle size={20} />
                 <span style={{ fontSize: 13 }}>No contacts found for &ldquo;{referrerName}&rdquo;</span>
               </div>
@@ -295,11 +295,11 @@ export default function ReferralPage() {
                           {fullName(c)}
                         </Link>
                       </td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.email || '—'}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.phone || '—'}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.contact_type || '—'}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{c.stage || '—'}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{c.email || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{c.phone || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{c.contact_type || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{c.stage || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a', whiteSpace: 'nowrap' }}>
                         {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </td>
                     </tr>
@@ -312,7 +312,7 @@ export default function ReferralPage() {
           {/* Loans tab */}
           {tab === 'loans' && (
             loans.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '48px 0', color: 'var(--muted)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '48px 0', color: '#71717a' }}>
                 <AlertCircle size={20} />
                 <span style={{ fontSize: 13 }}>No loans linked to contacts referred by &ldquo;{referrerName}&rdquo;</span>
               </div>
@@ -336,15 +336,15 @@ export default function ReferralPage() {
                           {l.borrower_name || l.loan_name || '(unnamed)'}
                         </Link>
                         {l.loan_name && l.borrower_name && (
-                          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{l.loan_name}</div>
+                          <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>{l.loan_name}</div>
                         )}
                       </td>
                       <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{fmtCurrency(l.loan_amount)}</td>
                       <td style={tdStyle}><LoanStatusBadge status={l.status} /></td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{l.loan_purpose || '—'}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)', whiteSpace: 'nowrap' }}>{fmtDate(l.closing_date)}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{loanLocation(l)}</td>
-                      <td style={{ ...tdStyle, color: 'var(--muted)' }}>{l.loan_program || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{l.loan_purpose || '—'}</td>
+                      <td style={{ ...tdStyle, color: '#71717a', whiteSpace: 'nowrap' }}>{fmtDate(l.closing_date)}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{loanLocation(l)}</td>
+                      <td style={{ ...tdStyle, color: '#71717a' }}>{l.loan_program || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

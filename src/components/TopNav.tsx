@@ -9,7 +9,7 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'pipeline' | 'contacts' | 'loans' | 'reports' | 'marketing' | 'settings'
+type Section = 'dashboard' | 'contacts' | 'loans' | 'reports' | 'marketing' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
@@ -71,10 +71,10 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Pipeline"
-            icon="🔀"
-            isActive={currentSection === 'pipeline'}
-            onClick={() => navigate('/dashboard/loans')}
+            label="Briefing"
+            icon="🧠"
+            isActive={pathname?.startsWith('/dashboard/briefing') ?? false}
+            onClick={() => navigate('/dashboard/briefing')}
           />
 
           <NavItem
@@ -211,15 +211,15 @@ export default function TopNav() {
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/loans')}
+              onClick={() => navigate('/dashboard/briefing')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'pipeline'
+                pathname?.startsWith('/dashboard/briefing')
                   ? 'bg-white/10 text-white'
                   : 'text-blue-50/90'
               }`}
             >
-              <span className="text-base">🔀</span>
-              <span>Pipeline</span>
+              <span className="text-base">🧠</span>
+              <span>Daily Briefing</span>
             </button>
 
             <button

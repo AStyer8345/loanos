@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
+import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // ── POST /api/agents/cd-extraction ───────────────────────────────────────────
 // Called by n8n after extracting Closing Disclosure fields via Claude.
 // Payload: loan_id (internal UUID) + any extracted CD fields.
 // Updates the loans record and logs to activity_log.
 export async function POST(req: NextRequest) {
+  const authError = validateAgentSecret(req)
+  if (authError) return authError
+
   try {
     const body = await req.json()
     const {
@@ -33,7 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'loan_id is required' }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
 
     // Build update payload — only include fields that were provided
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }

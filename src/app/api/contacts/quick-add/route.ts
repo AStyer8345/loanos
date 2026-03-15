@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-parser'
 import { normalizeStage } from '@/lib/stageNormalization'
-
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, serviceKey)
-}
+import { createServiceClient } from '@/lib/supabase/service'
 
 /**
  * POST /api/contacts/quick-add
@@ -19,7 +13,7 @@ function getServiceClient() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
 
     let extracted: ExtractedContact
 

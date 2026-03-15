@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
-
-// Service role client — bypasses RLS, server-only, never expose to browser
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, serviceKey)
-}
+import { createServiceClient } from '@/lib/supabase/service'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -15,7 +8,7 @@ async function buildSystemPrompt(
   recordId: string,
   recordType: 'contact' | 'loan'
 ): Promise<string> {
-  const supabase = getServiceClient()
+  const supabase = createServiceClient()
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
   const base = `You are LoanOS AI — the operations brain for Adam Styer, a producing mortgage loan officer at Adam Styer | Mortgage Solutions LP in Austin, TX (NMLS #513013).
 
@@ -190,7 +183,7 @@ export async function POST(req: NextRequest) {
     }
 
     const updatedMessages = [...messages, assistantMessage]
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
 
     let newSessionId = sessionId
     if (sessionId) {
@@ -225,7 +218,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing recordId or recordType' }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
     const { data } = await supabase
       .from('chat_sessions')
       .select('id, messages, updated_at')

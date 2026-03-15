@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 
-const N8N_BASE = 'https://styer.app.n8n.cloud/webhook'
+const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

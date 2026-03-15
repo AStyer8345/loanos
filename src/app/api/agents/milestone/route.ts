@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import Anthropic from '@anthropic-ai/sdk'
 import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
-
-// ── Supabase service client (bypasses RLS) ────────────────────────────────────
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, serviceKey)
-}
+import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -55,6 +49,9 @@ async function pushDraftToOutlook(
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const authError = validateAgentSecret(req)
+  if (authError) return authError
+
   try {
     const body = await req.json()
     const {
@@ -79,7 +76,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
     const milestoneLabel = MILESTONE_LABELS[milestone]
 
     // ── 1. Insert milestone event ──────────────────────────────────────────────

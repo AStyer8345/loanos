@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, type ChangeEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
+const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
 
 // ─── Workflow data ────────────────────────────────────────────────────────────
 
@@ -232,7 +233,7 @@ function RefiIntakeModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string
         rate_lock_status: rateLockStatus,
         ...(loanId ? { loan_id: loanId } : {}),
       }
-      const res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+      const res = await fetch(`${N8N_BASE}/${wf.webhookPath}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -463,7 +464,7 @@ function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | 
         fd.append('triggered_by', 'loanos_ui')
         fd.append('workflow_id', wf.id)
         if (loanId) fd.append('loan_id', loanId)
-        res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+        res = await fetch(`${N8N_BASE}/${wf.webhookPath}`, {
           method: 'POST',
           body: fd,
         })
@@ -473,7 +474,7 @@ function TriggerModal({ wf, loanId, onClose }: { wf: Workflow; loanId: string | 
           setMsg('Lead name is required')
           return
         }
-        res = await fetch(`https://styer.app.n8n.cloud/webhook/${wf.webhookPath}`, {
+        res = await fetch(`${N8N_BASE}/${wf.webhookPath}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { normalizeStage } from '@/lib/stageNormalization'
-
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, serviceKey)
-}
+import { createServiceClient } from '@/lib/supabase/service'
 
 type BulkActionBody = {
   contactIds: string[]
@@ -27,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'action required' }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const supabase = createServiceClient()
 
     if (action === 'update_stage') {
       if (!value) {

@@ -9,13 +9,14 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'contacts' | 'loans' | 'reports' | 'marketing' | 'settings'
+type Section = 'dashboard' | 'contacts' | 'loans' | 'scenarios' | 'reports' | 'marketing' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
   if (pathname.startsWith('/dashboard/briefing')) return 'dashboard'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
   if (pathname.startsWith('/dashboard/loans')) return 'loans'
+  if (pathname.startsWith('/dashboard/scenarios')) return 'scenarios'
   if (pathname.startsWith('/dashboard/performance')) return 'reports'
   if (
     pathname.startsWith('/dashboard/marketing') ||
@@ -89,6 +90,13 @@ export default function TopNav() {
             icon="👥"
             isActive={currentSection === 'contacts'}
             onClick={() => navigate('/dashboard/contacts')}
+          />
+
+          <NavItem
+            label="Scenarios"
+            icon="📐"
+            isActive={currentSection === 'scenarios'}
+            onClick={() => navigate('/dashboard/scenarios')}
           />
 
           <NavItem
@@ -246,6 +254,19 @@ export default function TopNav() {
             >
               <span className="text-base">👥</span>
               <span>Contacts</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/scenarios')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'scenarios'
+                  ? 'bg-white/10 text-white'
+                  : 'text-blue-50/90'
+              }`}
+            >
+              <span className="text-base">📐</span>
+              <span>Scenarios</span>
             </button>
 
             <button

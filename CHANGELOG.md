@@ -1,5 +1,43 @@
 # LoanOS Changelog
 
+## [2.0.0] — 2026-03-15 — Sprint 2: AI Scenario Builder (Mortgage Coach Killer)
+
+### Added
+- **AI Scenario Builder** — complete Mortgage Coach replacement at `/dashboard/scenarios/new`
+  - **Purchase mode**: 2-4 scenario columns, all loan fields, buydown (2-1, 3-2-1, 1-0), extra payment simulator, collapsible sections for closing costs/monthly costs
+  - **Refinance mode**: current loan card with auto-calculated payoff balance + remaining term from start date, 1-3 new loan options, debt consolidation with cash-out toggle
+  - **Results table**: comparison with gold checkmarks on best values, green/red savings, IBM Plex Mono numbers, tooltips on complex metrics
+  - **4 Charts** (Recharts): monthly payment stacked bar, equity build-up area, cumulative savings/break-even line, principal vs interest stacked area — all with time horizon toggles
+  - **Reinvestment analysis**: FV of annuity calculation with line chart
+  - **AI narrative**: Claude API streaming via SSE, editable after generation, auto-appended disclaimer
+  - **PDF generation**: HTML-based V1 (window.print()), includes branding from user_settings
+  - **MISMO 3.4 import**: regex-based XML extraction, SSN masked to last 4, field confirmation view
+  - **Shareable links**: `/share/[token]` — no auth required, 90-day expiration, view count tracking
+- **Scenario history dashboard** at `/dashboard/scenarios` — list, search, duplicate, delete saved scenarios
+- **View/edit saved scenarios** at `/dashboard/scenarios/[id]` — loads into ScenarioBuilder with pre-populated state
+- **Calculation engine** (`src/lib/scenarios/calculations.ts`) — amortization, APR (Newton-Raphson), buydown schedules, PMI removal, equity projections, refi break-even, reinvestment FV
+- **Type system** (`src/lib/scenarios/types.ts`) — ScenarioMode, PurchaseScenarioInput, RefiScenarioInput, CurrentLoanInput, DebtItem, all calculated result types
+- **7 API routes**: `/api/scenarios/calculate` (POST), `/api/scenarios/generate-narrative` (POST, SSE streaming), `/api/scenarios/save` (POST + DELETE), `/api/scenarios/generate-pdf` (POST), `/api/mismo/parse` (POST), `/api/share/[token]` (GET)
+- **Database migration** `018_scenarios.sql` — scenarios table with all fields, indexes, RLS policies, auto-update trigger
+- **Design system** — `--sc-*` CSS variables for scenario palette, IBM Plex Sans font loading
+- **TopNav** — Scenarios nav item added (📐 icon)
+
+### Compliance
+- AI disclaimer auto-appended to every narrative
+- Claude system prompt prohibits protected class references
+- SSN from MISMO masked to last 4 — never stored in full
+- Activity log captures every AI generation
+- Human review enforced — LO edits narrative before PDF/share
+- Shared links expose only borrower-facing data
+
+### Technical Details
+- 32 files created, 3 files modified
+- `npm run build` passes clean
+- All 20 acceptance criteria met
+- No new dependencies required (recharts, @anthropic-ai/sdk already in package.json)
+
+---
+
 ## [1.23.0] — 2026-03-15 — Daily Audit: Chat Route Column Names, Briefing max_tokens
 
 ### Fixed

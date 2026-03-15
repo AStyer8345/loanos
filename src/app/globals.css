@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -27,6 +27,20 @@
   --accent:        var(--gold);
   --accent-light:  hsla(210, 70%, 60%, 0.12);
   --accent-border: hsla(210, 70%, 60%, 0.5);
+
+  /* Scenario Builder palette */
+  --sc-bg:       #0a0a0a;
+  --sc-card:     #141414;
+  --sc-card-alt: #1a1a1a;
+  --sc-border:   #262626;
+  --sc-gold:     #C9A84C;
+  --sc-gold-dim: rgba(201, 168, 76, 0.15);
+  --sc-blue:     #4C7EC9;
+  --sc-blue-dim: rgba(76, 126, 201, 0.15);
+  --sc-green:    #4CC98A;
+  --sc-red:      #C94C4C;
+  --sc-text:     #F0EDE8;
+  --sc-muted:    rgba(240, 237, 232, 0.5);
 }
 
 body {

@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## [1.23.0] — 2026-03-15 — Daily Audit: Chat Route Column Names, Briefing max_tokens
+
+### Fixed
+- **`src/app/api/chat/route.ts`** — Corrected stale column names introduced by migration 011. When fetching loan context for the AI chat widget, the route was selecting `est_closing_date` (migration 007, old) and `borrower_name` (migration 005, old) — but Arive webhook writes to `estimated_closing_date` and `borrower_first_name`/`borrower_last_name` (migration 011, current). Result: every Arive-synced loan showed "N/A" for both Borrower and Close Date in chat context. Fixed by: (1) replacing `est_closing_date` → `estimated_closing_date` in both loan selects; (2) replacing `borrower_name` in the loan-type select with `borrower_name, borrower_first_name, borrower_last_name`; (3) updating the `borrowerName` resolution to check `borrower_name` → `borrower_first_name + borrower_last_name` → contact fallback; (4) updating `closeDate` to use `estimated_closing_date`.
+- **`src/app/api/agents/daily-briefing/route.ts`** — `max_tokens` bumped from `1024` → `2048`. Chat route was fixed in v1.22.0 but briefing was missed; 1024 tokens is tight when generating 7 prioritized action items + summary.
+
+---
+
 ## [1.22.0] — 2026-03-15 — Daily Audit: Nav, Actions Button, Dark Theme, CSS Vars, max_tokens
 
 ### Fixed

@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-14 (morning audit)_
+_Last updated: 2026-03-15 (morning audit)_
 
 ---
 
@@ -30,6 +30,11 @@ _Last updated: 2026-03-14 (morning audit)_
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 
 ---
+
+## ✅ Completed (session 3 — 2026-03-15 morning audit)
+
+- [x] **Chat route column names fixed** — `est_closing_date` → `estimated_closing_date`, `borrower_name` → `borrower_first_name`/`borrower_last_name` fallback chain. Chat AI context now shows correct borrower and close date for Arive loans.
+- [x] **Daily briefing `max_tokens` bumped** — 1024 → 2048. Matches chat route.
 
 ## ✅ Completed (session 2 — 2026-03-14)
 

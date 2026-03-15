@@ -67,6 +67,13 @@ Supabase migrations in `/supabase/migrations/` are local files only. They must b
 
 **Briefing page** (`/dashboard/briefing/page.tsx`) still uses light theme (bg-slate-50, bg-white) — not yet fixed.
 
+### Column name drift between migrations (2026-03-15)
+`loans` table has TWO generations of column names that both exist in production:
+- **Old (migrations 005/007):** `borrower_name`, `est_closing_date`
+- **New (migration 011):** `borrower_first_name`, `borrower_last_name`, `estimated_closing_date`
+
+The Arive webhook (`/api/arive-webhook/route.ts`) writes to the NEW columns. Any route that reads the old columns gets null for Arive-synced loans. Always check which migration introduced a column before using it in a new route.
+
 ---
 
 ## Claude API in n8n

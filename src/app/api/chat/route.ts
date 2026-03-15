@@ -62,7 +62,7 @@ Communication rules:
 
     const { data: loanRows } = await supabase
       .from('loans')
-      .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, est_closing_date, sales_price, buyer_agent_name')
+      .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name')
       .eq('contact_id', recordId)
       .limit(1)
 
@@ -95,7 +95,7 @@ ${loan ? `
 - Type: ${loan.loan_type || 'N/A'}
 - Program: ${loan.loan_program || 'N/A'}
 - Status: ${loan.status || 'N/A'}
-- Close Date: ${loan.closing_date || loan.est_closing_date || 'N/A'}
+- Close Date: ${loan.closing_date || loan.estimated_closing_date || 'N/A'}
 - Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}` : ''}`
   }
 
@@ -106,11 +106,12 @@ ${loan ? `
       loan_name, loan_number, loan_amount, loan_type, loan_program,
       property_address, property_city, property_state,
       loan_purpose, occupancy, status, contact_id,
-      sales_price, interest_rate, closing_date, est_closing_date,
+      sales_price, interest_rate, closing_date, estimated_closing_date,
       buyer_agent_name, buyer_agent_email, buyer_agent_brokerage,
       listing_agent_name, listing_agent_email,
       title_company, county, seller_concessions,
-      down_payment_pct, estimated_ltv, effective_date, borrower_name
+      down_payment_pct, estimated_ltv, effective_date,
+      borrower_name, borrower_first_name, borrower_last_name
     `)
     .eq('id', recordId)
     .maybeSingle()
@@ -129,11 +130,13 @@ ${loan ? `
   }
 
   const borrowerName = data.borrower_name
-    || (contact ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') : 'N/A')
+    || [data.borrower_first_name, data.borrower_last_name].filter(Boolean).join(' ')
+    || (contact ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') : '')
+    || 'N/A'
   const propertyFull = [data.property_address, data.property_city, data.property_state]
     .filter(Boolean)
     .join(', ')
-  const closeDate = data.closing_date || data.est_closing_date
+  const closeDate = data.closing_date || data.estimated_closing_date
 
   return `${base}
 

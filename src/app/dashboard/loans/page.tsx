@@ -813,11 +813,16 @@ export default function LoansPage() {
                       if (col.id === 'borrower_name') {
                         return (
                           <td key={col.id} className="px-4 py-3 font-medium">
-                            <Link href={`/dashboard/loans/${loan.id}`} className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono">
+                            <Link
+                              href={loan.contact_id ? `/dashboard/contacts?id=${loan.contact_id}` : `/dashboard/loans/${loan.id}`}
+                              className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono"
+                            >
                               {loan.borrower_name || loan.loan_name || '(unnamed)'}
                             </Link>
                             {loan.loan_name && loan.borrower_name && (
-                              <p className="text-xs font-mono text-[#666666] mt-0.5">{loan.loan_name}</p>
+                              <Link href={`/dashboard/loans/${loan.id}`} className="block text-xs font-mono text-[#666666] hover:text-[#C9A84C] mt-0.5">
+                                {loan.loan_name}
+                              </Link>
                             )}
                           </td>
                         )

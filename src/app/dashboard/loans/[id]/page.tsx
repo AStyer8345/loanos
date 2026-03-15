@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -831,7 +832,16 @@ const LOAN_STATUS_OPTS = [
 
 type FieldType = 'text' | 'number' | 'date' | 'select' | 'percent'
 
-function EditableRow({ label, displayValue, field, rawValue, type = 'text', options, onSave, index }: {
+interface ContactSuggestion {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  email: string | null
+  phone: string | null
+  contact_type: string | null
+}
+
+function EditableRow({ label, displayValue, field, rawValue, type = 'text', options, onSave, onSaveMultiple, searchContacts, relatedFields, index }: {
   label: string
   displayValue: React.ReactNode
   field?: string
@@ -839,11 +849,17 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   type?: FieldType
   options?: string[]
   onSave?: (field: string, value: string | number | null) => Promise<void>
+  onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
+  searchContacts?: boolean
+  relatedFields?: { email?: string; phone?: string }
   index: number
 }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const [saved, setSaved] = useState(false)
+  const [suggestions, setSuggestions] = useState<ContactSuggestion[]>([])
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+  const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const selectRef = useRef<HTMLSelectElement>(null)
   const canEdit = !!field && !!onSave
@@ -857,6 +873,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   async function commit() {
     if (!canEdit) return
     setEditing(false)
+    setSuggestions([])
     let val: string | number | null = (draft ?? '').trim() || null
     if ((type === 'number' || type === 'percent') && val != null) {
       const n = parseFloat(val as string)
@@ -867,20 +884,105 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
     setTimeout(() => setSaved(false), 2000)
   }
 
+  async function selectContact(contact: ContactSuggestion) {
+    if (!canEdit || !field) return
+    const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+    setSuggestions([])
+    setEditing(false)
+    await onSave!(field, name)
+    if (onSaveMultiple && relatedFields) {
+      const updates: Record<string, string | null> = {}
+      if (relatedFields.email) updates[relatedFields.email] = contact.email ?? null
+      if (relatedFields.phone) updates[relatedFields.phone] = contact.phone ?? null
+      if (Object.keys(updates).length > 0) await onSaveMultiple(updates)
+    }
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') { e.preventDefault(); commit() }
-    if (e.key === 'Escape') setEditing(false)
+    if (e.key === 'Escape') { setSuggestions([]); setEditing(false) }
   }
 
   useEffect(() => {
-    if (editing) { inputRef.current?.focus(); selectRef.current?.focus() }
-  }, [editing])
+    if (editing) {
+      inputRef.current?.focus()
+      selectRef.current?.focus()
+      if (searchContacts && inputRef.current) {
+        const r = inputRef.current.getBoundingClientRect()
+        setDropdownRect({ top: r.bottom + 4, left: r.left, width: r.width })
+      }
+    }
+  }, [editing, searchContacts])
+
+  useEffect(() => {
+    if (!searchContacts || !editing || draft.trim().length < 2) {
+      setSuggestions([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      setLoadingSuggestions(true)
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, email, phone, contact_type')
+        .or(`first_name.ilike.%${draft.trim()}%,last_name.ilike.%${draft.trim()}%`)
+        .limit(6)
+      setSuggestions(data ?? [])
+      setLoadingSuggestions(false)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [draft, searchContacts, editing])
 
   return (
     <div className={`flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-zinc-700/60' : ''}`}>
       <span className="w-40 shrink-0 text-zinc-500 text-xs font-mono leading-5 mt-0.5">{label}</span>
       <div className="flex-1 min-w-0">
-        {editing ? (
+        {editing && searchContacts ? (
+          <>
+            <input
+              ref={inputRef}
+              type="text"
+              value={draft}
+              onChange={e => {
+                setDraft(e.target.value)
+                if (inputRef.current) {
+                  const r = inputRef.current.getBoundingClientRect()
+                  setDropdownRect({ top: r.bottom + 4, left: r.left, width: r.width })
+                }
+              }}
+              onBlur={commit}
+              onKeyDown={onKeyDown}
+              placeholder="Type to search contacts…"
+              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full placeholder-zinc-600"
+            />
+            {(loadingSuggestions || suggestions.length > 0) && dropdownRect && typeof document !== 'undefined' && createPortal(
+              <div
+                style={{ position: 'fixed', top: dropdownRect.top, left: dropdownRect.left, width: Math.max(dropdownRect.width, 256), zIndex: 9999 }}
+                className="bg-zinc-800 border border-zinc-600 rounded shadow-xl max-h-52 overflow-y-auto"
+              >
+                {loadingSuggestions && suggestions.length === 0 && (
+                  <div className="px-3 py-2 text-xs font-mono text-zinc-500">Searching…</div>
+                )}
+                {suggestions.map(c => (
+                  <button
+                    key={c.id}
+                    onMouseDown={e => { e.preventDefault(); selectContact(c) }}
+                    className="w-full text-left px-3 py-2 hover:bg-zinc-700 transition-colors border-b border-zinc-700/50 last:border-0"
+                  >
+                    <div className="text-xs font-mono text-zinc-100 font-medium">
+                      {[c.first_name, c.last_name].filter(Boolean).join(' ')}
+                    </div>
+                    {c.email && <div className="text-[10px] font-mono text-zinc-400 mt-0.5">{c.email}</div>}
+                    {c.contact_type && <span className="text-[9px] font-mono text-indigo-400 uppercase tracking-wide">{c.contact_type}</span>}
+                  </button>
+                ))}
+              </div>,
+              document.body
+            )}
+          </>
+        ) : editing ? (
           type === 'select' ? (
             <select
               ref={selectRef}
@@ -929,7 +1031,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   )
 }
 
-function EditableSectionCard({ title, fields, onSave }: {
+function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   title: string
   fields: {
     label: string
@@ -938,8 +1040,11 @@ function EditableSectionCard({ title, fields, onSave }: {
     rawValue?: string | number | null
     type?: FieldType
     options?: string[]
+    searchContacts?: boolean
+    relatedFields?: { email?: string; phone?: string }
   }[]
   onSave: (field: string, value: string | number | null) => Promise<void>
+  onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
 }) {
   return (
     <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
@@ -957,6 +1062,9 @@ function EditableSectionCard({ title, fields, onSave }: {
           type={f.type}
           options={f.options}
           onSave={onSave}
+          onSaveMultiple={onSaveMultiple}
+          searchContacts={f.searchContacts}
+          relatedFields={f.relatedFields}
         />
       ))}
     </div>
@@ -977,6 +1085,11 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
   const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
     const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
     if (!error) setLoan({ ...loan, [field]: value } as Loan)
+  }, [supabase, loanId, loan, setLoan])
+
+  const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
+    const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
+    if (!error) setLoan({ ...loan, ...fields } as Loan)
   }, [supabase, loanId, loan, setLoan])
 
   const handleNotesBlur = async () => {
@@ -1069,13 +1182,13 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
         ]} />
 
         {/* 6 — Parties */}
-        <EditableSectionCard title="Parties" onSave={handleSaveField} fields={[
-          { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name },
+        <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
+          { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' } },
           { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email },
           { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone },
-          { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name },
+          { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email' } },
           { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email },
-          { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name,   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name },
+          { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name,   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email' } },
           { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email },
           { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
           { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },

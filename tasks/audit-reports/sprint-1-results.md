@@ -43,27 +43,27 @@ Corrected to: `0016` → `017`, `0017` → `018`. New migrations: `019`–`022`.
 
 ---
 
-## Required Follow-Up Actions (Manual — Cannot Do From Code)
+## Follow-Up Actions — Status
 
-### 1. Apply migrations to Supabase (REQUIRED before these fixes are live)
-Run these 4 migrations in order in the Supabase SQL Editor:
-- `019_fix_activity_log_rls.sql`
-- `020_fix_chat_sessions_rls.sql`
-- `021_fix_email_drafts_rls.sql`
-- `022_fix_contract_webhook.sql`
+### 1. ✅ Apply migrations to Supabase — DONE (2026-03-15)
+Applied via Supabase MCP (`apply_migration` tool), project `uuqedsvjlkeszrbwzizl`:
+- `019_fix_activity_log_rls.sql` ✅
+- `020_fix_chat_sessions_rls.sql` ✅
+- `021_fix_email_drafts_rls.sql` ✅
+- `022_fix_contract_webhook.sql` ✅
 
-### 2. Add env vars to Vercel (REQUIRED for agent route security to work in production)
+### 2. ⏳ Add env vars to Vercel — PENDING (manual — Vercel dashboard)
 In Vercel dashboard → Project Settings → Environment Variables:
 - `LOANOS_AGENT_SECRET` = `0bbc8cff-94b2-43bb-b005-a8b0665b1f7d`
 - `NEXT_PUBLIC_N8N_WEBHOOK_BASE` = `https://styer.app.n8n.cloud/webhook`
 
-### 3. Update n8n HTTP request nodes to send the agent secret
-In every n8n workflow that calls `/api/agents/*`:
-- Add header: `Authorization: Bearer 0bbc8cff-94b2-43bb-b005-a8b0665b1f7d`
-- Affected workflows: Milestone (WF3), CD Email (WF8), New App Received (WF9), Pre-Approval (WF5)
+### 3. ✅ Update n8n auth headers — DONE (2026-03-15)
+Investigation found only **WF3 (Milestone)** actually calls a LoanOS `/api/agents/*` route.
+WF5 (PA), WF8 (CD), WF9 (New App) call Supabase REST + Anthropic API directly — not agent routes.
+- WF3 `1hjOmS7inZcxEJQr` updated via n8n REST API — `Authorization: Bearer 0bbc8cff-94b2-43bb-b005-a8b0665b1f7d` added alongside existing `X-Webhook-Secret` header ✅
 
-### 4. Deploy to Vercel
-Push to main → Vercel auto-deploys. Confirm deployment succeeds.
+### 4. ✅ Deploy to Vercel — DONE
+Deployed on initial commit push to main.
 
 ---
 

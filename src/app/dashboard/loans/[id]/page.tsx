@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
-  ChevronRight, AlertCircle, Check, Mail, Clock, Inbox, X
+  ChevronRight, AlertCircle, Check, Mail, Clock, Inbox, X, ChevronDown,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 
@@ -155,7 +155,7 @@ interface EmailDraftRow {
   created_at: string
 }
 
-// ── Workflow definitions (subset relevant to loan automation) ─────────────────
+// ── Workflow definitions ──────────────────────────────────────────────────────
 
 const WORKFLOWS = [
   {
@@ -232,6 +232,19 @@ function fmtPct(n: number | null) {
   return `${parseFloat(n.toFixed(3))}%`
 }
 
+// ── Pipeline helpers ──────────────────────────────────────────────────────────
+
+const PIPELINE_STAGES = ['Application', 'Processing', 'Underwriting', 'CTC', 'Funding']
+
+function getStageIndex(status: string | null): number {
+  const s = (status || '').toLowerCase()
+  if (['closed', 'funded'].some(v => s.includes(v))) return 4
+  if (['clear to close', 'ctc'].some(v => s.includes(v))) return 3
+  if (['submitted to uw', 'underwriting', 'approved', 'conditional', 'resubmit', 'in process', 'loan in process'].some(v => s.includes(v))) return 2
+  if (['processing', 'submitted', 'pre-approved', 'disclosure', 'pre_approved'].some(v => s.includes(v))) return 1
+  return 0
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function LoanDetailPage() {
@@ -245,9 +258,8 @@ export default function LoanDetailPage() {
   const [activity, setActivity] = useState<ActivityRow[]>([])
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'automations' | 'activity' | 'emails'>('overview')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails'>('dashboard')
 
-  // ── Fetch ────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true)
     const [loanRes, docsRes, actRes, draftsRes] = await Promise.all([
@@ -259,7 +271,6 @@ export default function LoanDetailPage() {
 
     if (loanRes.data) {
       setLoan(loanRes.data)
-      // Fetch linked contact
       if (loanRes.data.contact_id) {
         const { data: c } = await supabase
           .from('contacts')
@@ -289,52 +300,95 @@ export default function LoanDetailPage() {
   )
 
   const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
-  const location = [loan.property_city, loan.property_state].filter(Boolean).join(', ')
-    || loan.property_address || ''
+  const addressLine = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
+  const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/50">
-        <Link href="/dashboard/loans" className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 font-mono mb-2 transition-colors">
-          <ArrowLeft size={12} /> Back to Loans
-        </Link>
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider">{displayName}</h1>
-            {loan.loan_name && loan.loan_name !== displayName && (
-              <p className="text-xs text-zinc-500 mt-0.5 font-mono">{loan.loan_name}</p>
-            )}
-            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+      {/* ── Header ── */}
+      <div className="border-b border-zinc-800 bg-zinc-900/50 shrink-0">
+        <div className="px-6 pt-4 pb-0">
+          {/* Breadcrumb */}
+          <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 font-mono mb-3 transition-colors">
+            <ArrowLeft size={12} /> Loans
+          </Link>
+
+          {/* Name row */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-xl font-mono font-bold text-zinc-100">{displayName}</h1>
+              {(addressLine || loan.loan_number) && (
+                <p className="text-xs text-zinc-500 font-mono mt-0.5">
+                  {addressLine}{loan.loan_number ? ` · #${loan.loan_number}` : ''}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
               <StatusBadge status={loan.status} />
-              {loan.loan_purpose && <span className="text-xs text-zinc-500 font-mono">{loan.loan_purpose}</span>}
-              {location && <span className="text-xs text-zinc-500 font-mono">{location}</span>}
+              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors font-mono">
+                Actions <ChevronDown size={11} />
+              </button>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-mono font-bold text-indigo-400">{fmtCurrency(loan.loan_amount)}</p>
-            {loan.closing_date && (
-              <p className="text-xs text-zinc-500 mt-1 font-mono">Closes {fmtDate(loan.closing_date)}</p>
+
+          {/* Meta strip */}
+          <div className="flex items-end gap-6 mt-3 pb-3 flex-wrap border-b border-zinc-800/60">
+            {loan.loan_amount && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Amount</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtCurrency(loan.loan_amount)}</p>
+              </div>
+            )}
+            {productLabel && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Product</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{productLabel}</p>
+              </div>
+            )}
+            {loan.interest_rate && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Rate</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtPct(loan.interest_rate)}</p>
+              </div>
+            )}
+            {(loan.closing_date || loan.estimated_closing_date) && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Close Date</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtDate(loan.closing_date || loan.estimated_closing_date)}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Officer</p>
+              <p className="text-sm font-mono font-semibold text-zinc-100">Adam Styer</p>
+            </div>
+            {loan.referring_agent_name && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Realtor</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
+              </div>
             )}
           </div>
+
+          {/* Pipeline progress bar */}
+          <PipelineProgressBar status={loan.status} />
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mt-4">
+        {/* Tab bar */}
+        <div className="px-6 flex gap-0">
           {([
-            { id: 'overview',    label: 'Overview',    icon: FileText },
-            { id: 'documents',   label: `Documents (${docs.length})`, icon: FileText },
-            { id: 'automations', label: 'Automations', icon: Zap },
-            { id: 'activity',    label: `Activity (${activity.length})`, icon: Activity },
-            { id: 'emails',      label: `Emails (${emailDrafts.length})`, icon: Mail },
+            { id: 'dashboard',   label: 'Dashboard' },
+            { id: 'details',     label: 'Details' },
+            { id: 'automations', label: 'Automations' },
+            { id: 'activity',    label: `Activity (${activity.length})` },
+            { id: 'emails',      label: `Emails (${emailDrafts.length})` },
           ] as const).map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 text-sm rounded font-mono font-medium transition-colors ${
+              className={`px-4 py-2.5 text-sm font-mono font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/50'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-transparent'
+                  ? 'border-emerald-500 text-emerald-400'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
               {tab.label}
@@ -343,30 +397,382 @@ export default function LoanDetailPage() {
         </div>
       </div>
 
-      {/* Tab content */}
-      <div className="flex-1 overflow-auto p-6">
-        {activeTab === 'overview' && (
-          <OverviewTab loan={loan} setLoan={l => setLoan(l)} contact={contact} loanId={loanId} />
+      {/* ── Content ── */}
+      <div className="flex-1 overflow-auto">
+        {activeTab === 'dashboard' && (
+          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} onRefresh={fetchAll} />
         )}
-        {activeTab === 'documents' && (
-          <DocumentsTab loanId={loanId} docs={docs} onRefresh={fetchAll} />
+        {activeTab === 'details' && (
+          <DetailsTab loan={loan} setLoan={l => setLoan(l)} contact={contact} loanId={loanId} />
         )}
         {activeTab === 'automations' && (
-          <AutomationsTab loan={loan} onActivityCreated={fetchAll} />
+          <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} /></div>
         )}
         {activeTab === 'activity' && (
-          <ActivityTab activity={activity} />
+          <div className="p-6"><ActivityTab activity={activity} /></div>
         )}
         {activeTab === 'emails' && (
-          <EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} />
+          <div className="p-6"><EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} /></div>
         )}
       </div>
+
       <LoanOSChat recordId={loanId} recordType="loan" recordName={displayName} />
     </div>
   )
 }
 
-// ── Overview tab ─────────────────────────────────────────────────────────────
+// ── Pipeline progress bar ─────────────────────────────────────────────────────
+
+function PipelineProgressBar({ status }: { status: string | null }) {
+  const currentIdx = getStageIndex(status)
+  const pct = (currentIdx / (PIPELINE_STAGES.length - 1)) * 100
+
+  return (
+    <div className="py-3">
+      <div className="flex justify-between mb-1.5">
+        {PIPELINE_STAGES.map((stage, i) => (
+          <span
+            key={stage}
+            className={`text-[10px] font-mono ${
+              i === currentIdx
+                ? 'text-emerald-400 font-semibold'
+                : i < currentIdx
+                ? 'text-zinc-400'
+                : 'text-zinc-600'
+            }`}
+          >
+            {stage}
+          </span>
+        ))}
+      </div>
+      <div className="h-1 bg-zinc-700/60 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── Dashboard tab ─────────────────────────────────────────────────────────────
+
+function DashboardTab({ loan, setLoan, loanId, docs, activity, onRefresh }: {
+  loan: Loan
+  setLoan: (l: Loan) => void
+  loanId: string
+  docs: DocRow[]
+  activity: ActivityRow[]
+  onRefresh: () => void
+}) {
+  return (
+    <div className="p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* Left — 3/5 */}
+      <div className="lg:col-span-3 space-y-5">
+        <KeyDetailsCard loan={loan} />
+        <DocumentsPreview loanId={loanId} docs={docs} onRefresh={onRefresh} />
+      </div>
+      {/* Right — 2/5 */}
+      <div className="lg:col-span-2 space-y-5">
+        <MilestoneTimeline loan={loan} />
+        <ActivityNotesPanel loan={loan} setLoan={setLoan} loanId={loanId} activity={activity} />
+      </div>
+    </div>
+  )
+}
+
+// ── Key details card ──────────────────────────────────────────────────────────
+
+function KeyDetailsCard({ loan }: { loan: Loan }) {
+  const miPct = loan.mi_monthly && loan.loan_amount
+    ? ((loan.mi_monthly * 12) / loan.loan_amount * 100).toFixed(2)
+    : null
+  const miLabel = miPct ? `Yes — ${miPct}%` : (loan.mi_monthly ? 'Yes' : 'No')
+
+  const downLabel = loan.down_payment
+    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
+    : '—'
+
+  const rateApr = loan.interest_rate && loan.apr
+    ? `${fmtPct(loan.interest_rate)} / ${fmtPct(loan.apr)}`
+    : fmtPct(loan.interest_rate)
+
+  const termLabel = loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : '—'
+
+  const rows = [
+    [
+      { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
+      { label: 'Down Payment', value: downLabel },
+      { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
+    ],
+    [
+      { label: 'Rate / APR', value: rateApr },
+      { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
+      { label: 'Term', value: termLabel },
+    ],
+    [
+      { label: 'LTV', value: fmtPct(loan.ltv) },
+      { label: 'CLTV', value: fmtPct(loan.cltv) },
+      { label: 'DTI', value: fmtPct(loan.back_end_dti) },
+    ],
+    [
+      { label: 'Loan Type', value: loan.loan_type || loan.loan_program || '—' },
+      { label: 'AUS Result', value: loan.milestone || '—' },
+      { label: 'MI Required', value: miLabel },
+    ],
+  ]
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Key Loan Details</h2>
+      </div>
+      <div className="p-4 divide-y divide-zinc-700/40">
+        {rows.map((row, ri) => (
+          <div key={ri} className={`grid grid-cols-3 gap-4 ${ri > 0 ? 'pt-3 mt-0' : ''} pb-3`}>
+            {row.map(cell => (
+              <div key={cell.label}>
+                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">{cell.label}</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100 leading-tight">{cell.value}</p>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Documents preview ─────────────────────────────────────────────────────────
+
+function DocumentsPreview({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+  const supabase = createClient()
+  const [signingId, setSigningId] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const storagePath = `loans/${loanId}/${file.name}`
+    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
+    if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
+    await supabase.from('documents').insert({ loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    onRefresh()
+  }
+
+  const handleDownload = async (doc: DocRow) => {
+    setSigningId(doc.id)
+    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 120)
+    setSigningId(null)
+    if (error || !data?.signedUrl) { alert('Could not generate download link.'); return }
+    window.open(data.signedUrl, '_blank')
+  }
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
+          <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 hover:text-emerald-400 disabled:opacity-50 transition-colors"
+          >
+            <Upload size={10} /> {uploading ? 'Uploading…' : 'Upload'}
+          </button>
+        </div>
+      </div>
+      {docs.length === 0 ? (
+        <div className="py-8 text-center text-xs text-zinc-500 font-mono">No documents attached</div>
+      ) : (
+        <div>
+          {docs.map((doc, i) => (
+            <div
+              key={doc.id}
+              className={`flex items-center justify-between px-4 py-2.5 hover:bg-zinc-800/40 transition-colors ${i > 0 ? 'border-t border-zinc-700/50' : ''}`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText size={12} className="text-zinc-500 shrink-0" />
+                <span className="text-xs font-mono text-zinc-200 truncate">{doc.file_name}</span>
+              </div>
+              <div className="flex items-center gap-3 shrink-0 ml-3">
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/40 text-emerald-400 border border-emerald-800/60 font-mono">Received</span>
+                <button
+                  onClick={() => handleDownload(doc)}
+                  disabled={signingId === doc.id}
+                  className="text-zinc-500 hover:text-zinc-300 disabled:opacity-50 transition-colors"
+                  title="Download"
+                >
+                  {signingId === doc.id ? <span className="text-[10px] font-mono">…</span> : <Download size={12} />}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Milestone timeline ────────────────────────────────────────────────────────
+
+function MilestoneTimeline({ loan }: { loan: Loan }) {
+  const currentIdx = getStageIndex(loan.status)
+
+  // targetStage: milestone is "complete" when currentIdx > targetStage, "active" when currentIdx === targetStage
+  const milestones = [
+    { label: 'Application Received',      date: loan.application_date,                     targetStage: 0 },
+    { label: 'Disclosures Sent (LE)',      date: null as string | null,                     targetStage: 0 },
+    { label: 'Submitted to Processing',   date: loan.submission_date,                      targetStage: 1 },
+    { label: 'Submitted to Underwriting', date: null as string | null,                     targetStage: 2 },
+    { label: 'CTC Issued',                date: loan.approval_date,                        targetStage: 3 },
+    { label: 'Closing Docs Drawn',        date: null as string | null,
+      est: loan.estimated_closing_date,                                                    targetStage: 4 },
+    { label: 'Funded',
+      date: loan.funding_date || loan.closing_date,
+      est: loan.closing_date || loan.estimated_closing_date,                               targetStage: 4 },
+  ]
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Milestones</h2>
+      </div>
+      <div className="p-4 space-y-3">
+        {milestones.map((m, i) => {
+          const isComplete = m.date != null || currentIdx > m.targetStage
+          const isActive = !isComplete && currentIdx === m.targetStage
+          const isPending = !isComplete && !isActive
+          const estDate = 'est' in m ? m.est : null
+
+          return (
+            <div key={m.label} className="flex items-start gap-3">
+              {/* Icon + connector */}
+              <div className="flex flex-col items-center">
+                {isComplete ? (
+                  <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                    <Check size={10} className="text-white" strokeWidth={3} />
+                  </div>
+                ) : isActive ? (
+                  <div className="w-5 h-5 rounded-full border-2 border-emerald-500 flex items-center justify-center shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-zinc-600 shrink-0" />
+                )}
+                {i < milestones.length - 1 && (
+                  <div className={`w-px flex-1 mt-1 ${isComplete ? 'bg-emerald-500/40' : 'bg-zinc-700/60'}`} style={{ minHeight: '12px' }} />
+                )}
+              </div>
+
+              {/* Label + date */}
+              <div className="flex-1 pb-2">
+                <p className={`text-xs font-mono font-medium leading-tight ${
+                  isComplete ? 'text-zinc-200' : isActive ? 'text-zinc-200' : 'text-zinc-500'
+                }`}>
+                  {m.label}
+                </p>
+                {isComplete && m.date && (
+                  <p className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtDate(m.date)}</p>
+                )}
+                {isComplete && !m.date && (
+                  <p className="text-[10px] font-mono text-zinc-600 mt-0.5">Completed</p>
+                )}
+                {isActive && (
+                  <p className="text-[10px] font-mono text-zinc-400 mt-0.5">
+                    {m.date ? fmtDate(m.date) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {' — In progress'}
+                  </p>
+                )}
+                {isPending && estDate && (
+                  <p className="text-[10px] font-mono text-zinc-600 mt-0.5">Est. {fmtDate(estDate)}</p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Activity & Notes panel ────────────────────────────────────────────────────
+
+function ActivityNotesPanel({ loan, setLoan, loanId, activity }: {
+  loan: Loan
+  setLoan: (l: Loan) => void
+  loanId: string
+  activity: ActivityRow[]
+}) {
+  const supabase = createClient()
+  const [notesVal, setNotesVal] = useState(loan.notes ?? '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleNotesBlur = async () => {
+    if (notesVal === (loan.notes ?? '')) return
+    setSaving(true)
+    await supabase.from('loans').update({ notes: notesVal }).eq('id', loanId)
+    setLoan({ ...loan, notes: notesVal })
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const recent = activity.slice(0, 8)
+
+  return (
+    <div className="space-y-4">
+      {/* Notes */}
+      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+        <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
+          {saving && <span className="text-[10px] text-zinc-500 font-mono">Saving…</span>}
+          {!saving && saved && <span className="text-[10px] text-emerald-400 font-mono">Saved ✓</span>}
+        </div>
+        <textarea
+          value={notesVal}
+          onChange={e => setNotesVal(e.target.value)}
+          onBlur={handleNotesBlur}
+          rows={4}
+          placeholder="Add notes about this loan…"
+          className="w-full p-3 text-xs text-zinc-200 bg-zinc-800/50 placeholder-zinc-600 focus:outline-none resize-y font-mono border-0"
+        />
+      </div>
+
+      {/* Recent activity */}
+      {recent.length > 0 && (
+        <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+          <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+            <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h2>
+          </div>
+          <div className="p-3 space-y-2.5">
+            {recent.map(item => (
+              <div key={item.id} className="flex gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${item.action.includes('.') ? 'bg-emerald-500' : 'bg-blue-400'}`} />
+                <div className="min-w-0">
+                  <p className="text-xs font-mono text-zinc-300 truncate">{item.action}</p>
+                  <p className="text-[10px] font-mono text-zinc-600">{fmtRelative(item.created_at)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Details tab (full editable field cards) ───────────────────────────────────
 
 const LOAN_STATUS_OPTS = [
   'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
@@ -377,7 +783,6 @@ const LOAN_STATUS_OPTS = [
 
 type FieldType = 'text' | 'number' | 'date' | 'select' | 'percent'
 
-// Inline-editable row — click value to edit, blur/Enter to save
 function EditableRow({ label, displayValue, field, rawValue, type = 'text', options, onSave, index }: {
   label: string
   displayValue: React.ReactNode
@@ -510,7 +915,7 @@ function EditableSectionCard({ title, fields, onSave }: {
   )
 }
 
-function OverviewTab({ loan, setLoan, contact, loanId }: {
+function DetailsTab({ loan, setLoan, contact, loanId }: {
   loan: Loan
   setLoan: (l: Loan) => void
   contact: ContactRow | null
@@ -536,7 +941,7 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 1 — Loan Terms */}
         <EditableSectionCard title="Loan Terms" onSave={handleSaveField} fields={[
@@ -674,7 +1079,7 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
         )}
       </div>
 
-      {/* 8 — Notes */}
+      {/* Notes */}
       <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
         <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
           <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
@@ -694,7 +1099,7 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
   )
 }
 
-// ── Documents tab ─────────────────────────────────────────────────────────────
+// ── Documents tab (full, used from old flow) ──────────────────────────────────
 
 function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const supabase = createClient()
@@ -708,19 +1113,8 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
     setUploading(true)
     const storagePath = `loans/${loanId}/${file.name}`
     const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
-    if (uploadError) {
-      alert('Upload failed: ' + uploadError.message)
-      setUploading(false)
-      return
-    }
-    // Insert document record
-    await supabase.from('documents').insert({
-      loan_id: loanId,
-      file_name: file.name,
-      file_path: storagePath,
-      file_size: file.size,
-      doc_type: file.type || null,
-    })
+    if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
+    await supabase.from('documents').insert({ loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
     onRefresh()
@@ -728,14 +1122,9 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
 
   const handleDownload = async (doc: DocRow) => {
     setSigningId(doc.id)
-    const { data, error } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(doc.file_path, 120) // 2-minute URL
+    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 120)
     setSigningId(null)
-    if (error || !data?.signedUrl) {
-      alert('Could not generate download link. Please try again.')
-      return
-    }
+    if (error || !data?.signedUrl) { alert('Could not generate download link.'); return }
     window.open(data.signedUrl, '_blank')
   }
 
@@ -745,13 +1134,8 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
         <FileText size={24} />
         <p className="text-sm">No documents attached to this loan</p>
         <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-800 disabled:opacity-50"
-        >
-          <Upload size={14} />
-          {uploading ? 'Uploading…' : 'Upload a document'}
+        <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-800 disabled:opacity-50">
+          <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload a document'}
         </button>
       </div>
     )
@@ -762,13 +1146,8 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-mono font-semibold text-zinc-400">{docs.length} document{docs.length !== 1 ? 's' : ''}</h2>
         <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50"
-        >
-          <Upload size={12} />
-          {uploading ? 'Uploading…' : '+ Upload Document'}
+        <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50">
+          <Upload size={12} /> {uploading ? 'Uploading…' : '+ Upload Document'}
         </button>
       </div>
       <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
@@ -851,9 +1230,7 @@ function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCre
 
 // ── Loan trigger modal ────────────────────────────────────────────────────────
 
-function LoanTriggerModal({
-  workflow, loan, onClose, onSuccess
-}: {
+function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
   workflow: typeof WORKFLOWS[0]
   loan: Loan
   onClose: () => void
@@ -924,7 +1301,6 @@ function LoanTriggerModal({
             </div>
           ) : (
             <>
-              {/* Loan context preview */}
               <div className="bg-zinc-800 rounded-lg p-3 mb-4 text-xs text-zinc-400 font-mono space-y-1 border border-zinc-700">
                 <p><span className="font-medium">Borrower:</span> {loan.borrower_name || '—'}</p>
                 <p><span className="font-medium">Amount:</span> {fmtCurrency(loan.loan_amount)}</p>
@@ -1004,7 +1380,6 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
 
   return (
     <div className="max-w-2xl">
-      {/* Filter bar */}
       <div className="flex gap-1 mb-4">
         {(['all', 'system', 'manual'] as const).map(f => {
           const label = f === 'all'
@@ -1036,7 +1411,6 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
         <div className="space-y-0">
           {visible.map((item, i) => (
             <div key={item.id} className="flex gap-3">
-              {/* Timeline dot */}
               <div className="flex flex-col items-center">
                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isSystem(item) ? 'bg-emerald-500' : 'bg-blue-400'}`} />
                 {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
@@ -1177,7 +1551,7 @@ function EmailHistoryTab({ drafts, onRefresh }: { drafts: EmailDraftRow[]; onRef
   )
 }
 
-// ── Status badge ─────────────────────────────────────────────────────────────
+// ── Status badge ──────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string | null }) {
   if (!status) return <span className="text-zinc-500 text-xs font-mono">—</span>
@@ -1189,3 +1563,4 @@ function StatusBadge({ status }: { status: string | null }) {
   else if (['cancelled', 'denied', 'withdrawn'].some(v => s.includes(v))) cls = 'bg-red-900/30 text-red-400 border-red-800'
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{status}</span>
 }
+

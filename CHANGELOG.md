@@ -1,5 +1,16 @@
 # LoanOS Changelog
 
+## [1.21.0] — 2026-03-14 — Loan Detail Dashboard Layout
+
+### Changed
+- **`loans/[id]/page.tsx`** — complete layout overhaul. Replaced single-column tab-based overview with 2-column dashboard layout:
+  - **Header**: breadcrumb → borrower name + address line → status badge + Actions button → 6-field meta strip (Loan Amount, Product, Rate, Close Date, Loan Officer, Realtor) → pipeline progress bar (Application → Processing → Underwriting → CTC → Funding)
+  - **Dashboard tab** (new default): left col (3/5) = KeyDetailsCard (3×4 grid: Purchase Price, Down Payment, Loan Amount, Rate/APR, Monthly P&I, Term, LTV, CLTV, DTI, Loan Type, AUS Result, MI Required) + DocumentsPreview (inline doc list with upload); right col (2/5) = MilestoneTimeline (7-step timeline with completion status from loan dates + stage inference) + ActivityNotesPanel (notes textarea + recent activity feed)
+  - **Tabs**: Dashboard (new) | Details (all editable field cards, was "Overview") | Automations | Activity | Emails
+  - All existing functionality preserved: inline editing, document upload/download, automation triggers, activity log, email draft history, LoanOSChat widget
+
+---
+
 ## [1.20.0] — 2026-03-14 — Backlog Cleanup: Migrations, Activity Log, Extraction Routes, Marketing Theme
 
 ### Added

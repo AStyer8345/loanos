@@ -150,7 +150,7 @@ None — all dependencies already in package.json (recharts, @anthropic-ai/sdk, 
 
 ## Go-Live Steps
 
-1. Run `supabase/migrations/018_scenarios.sql` in Supabase SQL Editor
+1. ~~Run `supabase/migrations/018_scenarios.sql` in Supabase SQL Editor~~ ✅ Applied via Supabase MCP (2026-03-15) — 20 columns, 3 indexes, 4 RLS policies, auto-update trigger confirmed
 2. Ensure `ANTHROPIC_API_KEY` is set in Vercel env vars (same as AI Chat)
-3. Deploy to Vercel (build passes clean)
+3. ~~Deploy to Vercel (build passes clean)~~ ✅ Deployed — `dpl_BA2rfPXz5nT73nv4AtAumeKGi7XQ`, READY
 4. Test end-to-end: create scenario → calculate → generate narrative → save → share → PDF

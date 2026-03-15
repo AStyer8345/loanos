@@ -91,8 +91,10 @@ interface Loan {
   referring_agent_phone: string | null
   listing_agent_name: string | null
   listing_agent_email: string | null
+  listing_agent_phone: string | null
   buyers_agent_name: string | null
   buyers_agent_email: string | null
+  buyers_agent_phone: string | null
   buyer_agent_name: string | null
   buyer_agent_email: string | null
   title_company: string | null
@@ -841,7 +843,7 @@ interface ContactSuggestion {
   contact_type: string | null
 }
 
-function EditableRow({ label, displayValue, field, rawValue, type = 'text', options, onSave, onSaveMultiple, searchContacts, relatedFields, index }: {
+function EditableRow({ label, displayValue, field, rawValue, type = 'text', options, onSave, onSaveMultiple, searchContacts, relatedFields, labelColor, index }: {
   label: string
   displayValue: React.ReactNode
   field?: string
@@ -852,6 +854,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
   searchContacts?: boolean
   relatedFields?: { email?: string; phone?: string }
+  labelColor?: string
   index: number
 }) {
   const [editing, setEditing] = useState(false)
@@ -937,7 +940,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
 
   return (
     <div className={`flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-zinc-700/60' : ''}`}>
-      <span className="w-40 shrink-0 text-zinc-500 text-xs font-mono leading-5 mt-0.5">{label}</span>
+      <span className={`w-40 shrink-0 text-xs font-mono leading-5 mt-0.5 ${labelColor ?? 'text-zinc-500'}`}>{label}</span>
       <div className="flex-1 min-w-0">
         {editing && searchContacts ? (
           <>
@@ -1042,6 +1045,7 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
     options?: string[]
     searchContacts?: boolean
     relatedFields?: { email?: string; phone?: string }
+    labelColor?: string
   }[]
   onSave: (field: string, value: string | number | null) => Promise<void>
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
@@ -1065,6 +1069,7 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
           onSaveMultiple={onSaveMultiple}
           searchContacts={f.searchContacts}
           relatedFields={f.relatedFields}
+          labelColor={f.labelColor}
         />
       ))}
     </div>
@@ -1084,13 +1089,13 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
   const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
     const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
-    if (!error) setLoan({ ...loan, [field]: value } as Loan)
-  }, [supabase, loanId, loan, setLoan])
+    if (!error) setLoan(prev => prev ? { ...prev, [field]: value } as Loan : prev)
+  }, [supabase, loanId, setLoan])
 
   const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
     const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
-    if (!error) setLoan({ ...loan, ...fields } as Loan)
-  }, [supabase, loanId, loan, setLoan])
+    if (!error) setLoan(prev => prev ? { ...prev, ...fields } as Loan : prev)
+  }, [supabase, loanId, setLoan])
 
   const handleNotesBlur = async () => {
     if (notesVal === (loan.notes ?? '')) return
@@ -1183,13 +1188,15 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
         {/* 6 — Parties */}
         <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
-          { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' } },
-          { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email },
-          { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone },
-          { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email' } },
-          { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email },
-          { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name,   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email' } },
-          { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email },
+          { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
+          { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
+          { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
+          { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
+          { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
+          { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
+          { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name,   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
+          { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
+          { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone,    field: 'buyers_agent_phone',    rawValue: loan.buyers_agent_phone,    labelColor: 'text-emerald-400/70' },
           { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
           { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },
           { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },

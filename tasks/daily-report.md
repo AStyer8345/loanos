@@ -2,91 +2,89 @@
 
 ## 🔴 Action Required
 
-### n8n Workflow Failures (Last 24h)
-Two critical Arive sync workflows failed repeatedly yesterday:
+### n8n — Arive Status Update Workflow Failing
+- Workflow: `LoanOS — Arive Status Update → Supabase` (`9JyzzwKac8v3uQ7d`)
+- 2 errors today: executions #168 (22:51 UTC) and #170 (22:54 UTC)
+- This pipeline syncs Arive loan status changes into Supabase — failures mean status updates from Arive won't reflect in LoanOS
+- **Action**: Check n8n execution logs for root cause and fix
 
-| Workflow | ID | Errors | Last Failure |
-|----------|----|--------|-------------|
-| Arive New Loan → Supabase | `1tagvoU0UXtdDiMY` | 3 errors (exec 141, 143, 148) | 2026-03-13 20:12 UTC |
-| Arive Status Update → Supabase | `9JyzzwKac8v3uQ7d` | 1 error (exec 147) | 2026-03-13 20:11 UTC |
+### Stale Active Loans (41 total, not updated since 2026-03-10)
+Key loans in active statuses with no update in 4+ days:
 
-These two workflows are the core data ingestion pipeline. Failures mean new loans and status changes from Arive are NOT syncing to Supabase. Check n8n execution logs for root cause.
+| Borrower | Status |
+|----------|--------|
+| Kyle Jennings | Loan in Process |
+| Martin Cuilla | Started |
+| Giulia Lewers | processing |
+| Loren Mesta | processing |
+| Jay Shapiro | processing |
+| Debbie Johnson | processing |
+| Kevin Spotts | processing |
+| Kyle Stavar | processing |
+| David Reed | processing |
+| Andrew Andress | processing |
+| Colin Recko | Started |
+| Matthew Ikenberry | Suspended |
 
-### Stale Active Loans (3+ days no update)
-57 loans in active statuses (processing, Started, Approved, In Process, etc.) not updated since 2026-03-10. Named loans flagged:
+> Most "Started" records appear to be batch-seeded test data from 2026-03-10. "processing" and "Loan in Process" statuses are the priority to review.
 
-| Borrower | Status | Last Updated |
-|----------|--------|-------------|
-| Eric Birdsall | processing | 2026-03-10 |
-| Martin Cuilla | Started | 2026-03-10 |
-| Brian Richards | processing | 2026-03-10 |
-| Farinaz Pisheh | Approved | 2026-03-10 |
-| Kenneth Turner | In Process | 2026-03-10 |
-| Jay Shapiro | processing | 2026-03-10 |
-| David Kloster | Started | 2026-03-10 |
-| Loren Mesta | processing | 2026-03-10 |
-| Giulia Lewers | processing | 2026-03-10 |
-| Debbie Johnson | processing | 2026-03-10 |
-| Brian Moskal | Started | 2026-03-10 |
-| Matthew Ikenberry | Suspended | 2026-03-10 |
-| Kyle Jennings | Loan in Process | 2026-03-10 |
+**David Annen duplicates** — 5 loan records with the same name and "Started" status. Likely seeded test data; worth cleaning up.
 
-*Note: Many of these may be seed/test data (many have null borrower names). The Arive sync failures above are likely the reason real loans aren't updating.*
+### Activity Gaps — All Active Loans Silent
+All 8 key in-process loans have **0 activity log entries** in the past 5 days:
+- Dhaval Poladia (In Process)
+- Kenneth Turner (In Process)
+- Kyle Jennings (Loan in Process)
+- Drew Benac (Loan in Process)
+- Chelsea Wise (Loan in Process)
+- Patrick Rademacher (Loan in Process)
+- Farinaz Pisheh (QUALIFICATION)
+- Andrew Mcneese (RE_SUBMITTAL)
+
+This may indicate the activity_log pipeline is broken, or these are all seeded records with no real loan events.
 
 ---
 
 ## 🟡 Watch Items
 
-### Inactive Workflows (Unexpected)
+### Review Request Email — Active but Erroring Repeatedly
+- Workflow: `Closed Loan — Review Request Email` (`AK1fBcaX1cPcdlGx`)
+- Shows as **ACTIVE** in n8n (memory marks it "Fixed, inactive" — discrepancy)
+- 3 trigger errors today: executions #172, #173, #175 (23:00–00:00 UTC)
+- **Action**: Deactivate this workflow if it's not ready, or investigate and fix the trigger error
+
+### Unexpected Inactive Workflows
 | Workflow | ID | Notes |
-|----------|----|-------|
-| LoanOS — Outlook Email Sync | `JMmstRl2C5ylmuIY` | Marked "Needs env vars" — may be intentional |
-| LoanOS — Contract Received (duplicate) | `w7hZLmIcQ4izmndb` | Duplicate of active `UfNcdpoVKQZqy0fj` — safe to ignore or delete |
-| LoanOS — Refi Intake Email | `yCTydQ7RfZK4DyUg` | Marked "Untested" — may need activation |
+|----------|-----|-------|
+| LoanOS — Outlook Email Sync | `JMmstRl2C5ylmuIY` | Expected — needs env vars per memory |
+| LoanOS — Contract Received (duplicate) | `w7hZLmIcQ4izmndb` | Different ID from active `UfNcdpoVKQZqy0fj`. Likely stale duplicate — safe to delete |
 
-### Pending Email Drafts
-None — all clear.
+### Unused Components (src/components/)
+- `ActivityFeed.tsx` — 0 imports in src/app
+- `GlobalSearch.tsx` — 0 imports in src/app
+- `NavDropdown.tsx` — 0 imports in src/app
+- `NavItem.tsx` — 0 imports in src/app
 
-### Console.log in API Routes (3 files)
-| File |
-|------|
-| `src/app/api/outlook-sync/route.ts` |
-| `src/app/api/outlook-callback/route.ts` |
-| `src/app/api/arive-webhook/route.ts` |
-
-### Unused Components (4 components)
-| Component | File |
-|-----------|------|
-| ActivityFeed | `src/components/ActivityFeed.tsx` |
-| GlobalSearch | `src/components/GlobalSearch.tsx` |
-| NavDropdown | `src/components/NavDropdown.tsx` |
-| NavItem | `src/components/NavItem.tsx` |
-
-### Dark Theme Violations (bg-white / bg-gray-100 / text-gray-900)
-5 files in `src/app/dashboard/`:
-- `loans/[id]/page.tsx`
-- `loans/page.tsx`
-- `settings/page.tsx`
-- `briefing/page.tsx`
-- `automations/page.tsx`
+### Dark Theme Violation
+- `src/app/dashboard/automations/page.tsx` uses hardcoded light colors (`bg-white`, `bg-gray-100`, or `text-gray-900`)
 
 ---
 
 ## 🟢 All Clear
 
-- **Email drafts**: No pending drafts older than 24h
-- **Core workflows active**: Milestone Agent, Final CD Email, Contract Received, Referral Intro, Pre-Approval, New Application all show `active=true`
-- **Weekly Social Post / Review Request**: Confirmed intentionally inactive (expected)
+- No pending email drafts older than 24h
+- No `console.log` statements in `src/app/api/`
+- Core active workflows running: Milestone Agent, Arive New Loan → Supabase, Final CD Email, Contract Received (`UfNcdpoVKQZqy0fj`), Referral Intro, New Application Received, Pre-Approval Email, Refi Intake Email
 
 ---
 
 ## Build
 
-**FAIL — 2 TypeScript errors**
+**FAIL** — 2 TypeScript errors
 
 ```
 error TS2688: Cannot find type definition file for 'json5 2'
 error TS2688: Cannot find type definition file for 'react-dom 2'
 ```
 
-These appear to be phantom entries in tsconfig (likely duplicate or stale `@types` references), not runtime errors. Low risk but should be cleaned up.
+These are type definition naming errors (likely a tsconfig `types` array issue with duplicate/stale entries), not runtime bugs. Low risk but should be cleaned up.

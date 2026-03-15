@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import { Mail, Phone, FileText, Zap, MessageSquare, Clock } from 'lucide-react'
-
 
 interface ActivityEntry {
   id: string
@@ -37,8 +35,6 @@ const TYPE_COLORS: Record<string, string> = {
   task: 'text-zinc-400 bg-zinc-800',
 }
 
-const ALL_TYPES = ['all', 'email', 'call', 'automation', 'document', 'note', 'task']
-
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60000)
@@ -51,67 +47,44 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function RecentActivity({ entries }: RecentActivityProps) {
-  const [filter, setFilter] = useState('all')
-
-  const filtered = filter === 'all'
-    ? entries
-    : entries.filter(e => (e.type || e.action || '').toLowerCase().includes(filter))
-
   return (
-    <div className="bg-zinc-900 rounded shadow-lg shadow-black/50 p-3.5">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Activity — Last 7 Days</span>
-        <span className="text-xs font-mono text-zinc-600">{filtered.length} entries</span>
+    <div className="bg-zinc-900 rounded shadow-lg shadow-black/50">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+        <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Activity</span>
+        <span className="text-xs font-mono text-zinc-600">{entries.length} entries</span>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 flex-wrap mb-3">
-        {ALL_TYPES.map(type => (
-          <button
-            key={type}
-            onClick={() => setFilter(type)}
-            className={`text-xs font-mono px-2 py-1 rounded transition-colors ${
-              filter === type
-                ? 'bg-zinc-700 text-zinc-200'
-                : 'text-zinc-600 hover:text-zinc-400'
-            }`}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
+      {entries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-zinc-600 font-mono">
+          <div className="text-sm">No activity in last 7 days</div>
+        </div>
+      ) : (
+        <div className="divide-y divide-zinc-800 overflow-y-auto max-h-96">
+          {entries.slice(0, 15).map(entry => {
+            const type = (entry.type || entry.action || 'task').toLowerCase()
+            const icon = TYPE_ICONS[type] ?? <Clock className="w-3.5 h-3.5" />
+            const colors = TYPE_COLORS[type] ?? 'text-zinc-400 bg-zinc-800'
+            const contactName = (entry.metadata?.contact_name as string) || (entry.metadata?.borrower_name as string) || null
+            const summary = entry.summary || entry.action || 'Activity logged'
 
-      {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-zinc-600">
-          <div className="font-mono text-sm">No activity in last 7 days</div>
-          <div className="font-mono text-xs mt-1 text-zinc-700">Activity logs will appear here</div>
+            return (
+              <div key={entry.id} className="flex items-start gap-2.5 px-4 py-3">
+                <span className={`p-1 rounded flex-shrink-0 mt-0.5 ${colors}`}>{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-xs font-mono text-zinc-200 leading-snug">{summary}</div>
+                    <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0 mt-0.5">{timeAgo(entry.created_at)}</span>
+                  </div>
+                  {contactName && (
+                    <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{contactName}</div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
-
-      <div className="space-y-1 max-h-64 overflow-y-auto">
-        {filtered.slice(0, 25).map(entry => {
-          const type = (entry.type || entry.action || 'task').toLowerCase()
-          const icon = TYPE_ICONS[type] ?? <Clock className="w-3.5 h-3.5" />
-          const colors = TYPE_COLORS[type] ?? 'text-zinc-400 bg-zinc-800'
-          const contactName = (entry.metadata?.contact_name as string) || (entry.metadata?.borrower_name as string) || null
-          const summary = entry.summary || entry.action || 'Activity logged'
-
-          return (
-            <div key={entry.id} className="flex items-start gap-2.5 py-2 border-b border-zinc-800 last:border-0">
-              <span className={`p-1 rounded flex-shrink-0 mt-0.5 ${colors}`}>{icon}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-sm font-mono text-zinc-200 truncate">{summary}</div>
-                  <span className="text-xs font-mono text-zinc-600 flex-shrink-0">{timeAgo(entry.created_at)}</span>
-                </div>
-                {contactName && (
-                  <div className="text-xs font-mono text-zinc-500 mt-0.5">{contactName}</div>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
     </div>
   )
 }

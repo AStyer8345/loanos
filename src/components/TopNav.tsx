@@ -9,13 +9,14 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'briefing' | 'contacts' | 'loans' | 'performance' | 'marketing' | 'settings'
+type Section = 'dashboard' | 'pipeline' | 'contacts' | 'loans' | 'reports' | 'marketing' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
-  if (pathname.startsWith('/dashboard/briefing')) return 'briefing'
+  if (pathname === '/dashboard') return 'dashboard'
+  if (pathname.startsWith('/dashboard/briefing')) return 'dashboard'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
   if (pathname.startsWith('/dashboard/loans')) return 'loans'
-  if (pathname.startsWith('/dashboard/performance')) return 'performance'
+  if (pathname.startsWith('/dashboard/performance')) return 'reports'
   if (
     pathname.startsWith('/dashboard/marketing') ||
     pathname.startsWith('/dashboard/automations')
@@ -63,17 +64,17 @@ export default function TopNav() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-2">
           <NavItem
-            label="Daily Briefing"
+            label="Dashboard"
             icon="📊"
-            isActive={currentSection === 'briefing'}
-            onClick={() => navigate('/dashboard/briefing')}
+            isActive={currentSection === 'dashboard'}
+            onClick={() => navigate('/dashboard')}
           />
 
           <NavItem
-            label="Contacts"
-            icon="👥"
-            isActive={currentSection === 'contacts'}
-            onClick={() => navigate('/dashboard/contacts')}
+            label="Pipeline"
+            icon="🔀"
+            isActive={currentSection === 'pipeline'}
+            onClick={() => navigate('/dashboard/loans')}
           />
 
           <NavItem
@@ -84,9 +85,16 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Performance"
+            label="Contacts"
+            icon="👥"
+            isActive={currentSection === 'contacts'}
+            onClick={() => navigate('/dashboard/contacts')}
+          />
+
+          <NavItem
+            label="Reports"
             icon="📈"
-            isActive={currentSection === 'performance'}
+            isActive={currentSection === 'reports'}
             onClick={() => navigate('/dashboard/performance')}
           />
 
@@ -190,28 +198,28 @@ export default function TopNav() {
           <div className="flex flex-col gap-1 px-3 py-3">
             <button
               type="button"
-              onClick={() => navigate('/dashboard/briefing')}
+              onClick={() => navigate('/dashboard')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'briefing'
+                currentSection === 'dashboard'
                   ? 'bg-white/10 text-white'
                   : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">📊</span>
-              <span>Daily Briefing</span>
+              <span>Dashboard</span>
             </button>
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/contacts')}
+              onClick={() => navigate('/dashboard/loans')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'contacts'
+                currentSection === 'pipeline'
                   ? 'bg-white/10 text-white'
                   : 'text-blue-50/90'
               }`}
             >
-              <span className="text-base">👥</span>
-              <span>Contacts</span>
+              <span className="text-base">🔀</span>
+              <span>Pipeline</span>
             </button>
 
             <button
@@ -229,15 +237,28 @@ export default function TopNav() {
 
             <button
               type="button"
+              onClick={() => navigate('/dashboard/contacts')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'contacts'
+                  ? 'bg-white/10 text-white'
+                  : 'text-blue-50/90'
+              }`}
+            >
+              <span className="text-base">👥</span>
+              <span>Contacts</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => navigate('/dashboard/performance')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'performance'
+                currentSection === 'reports'
                   ? 'bg-white/10 text-white'
                   : 'text-blue-50/90'
               }`}
             >
               <span className="text-base">📈</span>
-              <span>Performance</span>
+              <span>Reports</span>
             </button>
 
             <div className="mt-2">

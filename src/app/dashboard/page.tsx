@@ -1,13 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import PipelineKPIs from '@/components/dashboard/PipelineKPIs'
-import PipelineCharts from '@/components/dashboard/PipelineCharts'
 import UrgentFlags from '@/components/dashboard/UrgentFlags'
-import DailyBriefingPanel from '@/components/dashboard/DailyBriefingPanel'
-import TodoList from '@/components/dashboard/TodoList'
+import PipelineSummary from '@/components/dashboard/PipelineSummary'
+import RecentLoans from '@/components/dashboard/RecentLoans'
 import RecentActivity from '@/components/dashboard/RecentActivity'
-import EmailDraftPreview from '@/components/EmailDraftPreview'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,27 +36,17 @@ export default async function DashboardPage() {
   // ── fetch loans ──
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, created_at')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, created_at')
     .eq('user_id', user.id)
+    .order('estimated_closing_date', { ascending: true })
 
   // ── compute pipeline stats ──
   const now = new Date()
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
-  const next30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
   const next7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-  const ninetyAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
 
   const stageCounts: Record<string, { count: number; volume: number }> = {}
   let totalCount = 0
   let totalVolume = 0
-  let closedThisMonth = 0
-  let closedThisMonthVolume = 0
-  let closedLastMonth = 0
-  let closedLastMonthVolume = 0
-  let closingNext30 = 0
-  let closingNext30Volume = 0
   const urgentFlags: Array<{ id: string; name: string; flag: string; date: string }> = []
 
   for (const loan of loans ?? []) {
@@ -74,22 +61,6 @@ export default async function DashboardPage() {
     if (!['closed', 'funded'].includes(status)) {
       totalCount++
       totalVolume += amount
-    }
-
-    const closingDate = loan.closing_date ?? loan.funding_date
-    if (closingDate) {
-      const cd = new Date(closingDate)
-      if (cd >= thisMonthStart && cd <= now && ['closed', 'funded'].includes(status)) {
-        closedThisMonth++; closedThisMonthVolume += amount
-      }
-      if (cd >= lastMonthStart && cd <= lastMonthEnd && ['closed', 'funded'].includes(status)) {
-        closedLastMonth++; closedLastMonthVolume += amount
-      }
-    }
-
-    if (loan.estimated_closing_date) {
-      const ec = new Date(loan.estimated_closing_date)
-      if (ec >= now && ec <= next30) { closingNext30++; closingNext30Volume += amount }
     }
 
     const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.loan_name || 'Unknown'
@@ -109,61 +80,10 @@ export default async function DashboardPage() {
     }
   }
 
-  // ── closing trend (last 90 days, weekly buckets) ──
-  const { data: closedLoans = [] } = await supabase
-    .from('loans')
-    .select('closing_date, funding_date, loan_amount')
-    .eq('user_id', user.id)
-    .in('status', ['Closed', 'Funded', 'Closed/Funded', 'closed', 'funded'])
-    .gte('closing_date', ninetyAgo.toISOString().split('T')[0])
-
-  const weeklyTrend = Array.from({ length: 13 }, (_, i) => {
-    const weekStart = new Date(now.getTime() - (12 - i) * 7 * 24 * 60 * 60 * 1000)
-    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
-    const label = `${weekStart.getMonth() + 1}/${weekStart.getDate()}`
-    let volume = 0; let count = 0
-    for (const l of closedLoans ?? []) {
-      const d = new Date(l.closing_date ?? l.funding_date)
-      if (d >= weekStart && d < weekEnd) { volume += l.loan_amount ?? 0; count++ }
-    }
-    return { week: label, volume, count }
-  })
-
-  // ── performance metrics ──
-  const totalAllLoans = loans?.length ?? 0
-  const totalClosedLoans = (loans ?? []).filter(l =>
-    ['closed', 'funded'].includes((l.status ?? '').toLowerCase())
-  ).length
-  const pullThroughRate = totalAllLoans > 0
-    ? Math.round((totalClosedLoans / totalAllLoans) * 100)
-    : null
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const closedWithDates = (loans ?? []).filter((l: any) =>
-    ['closed', 'funded'].includes((l.status ?? '').toLowerCase()) &&
-    l.closing_date && l.created_at
-  )
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const avgDaysToClose = closedWithDates.length > 0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? Math.round(closedWithDates.reduce((sum: number, l: any) => {
-        const start = new Date(l.created_at)
-        const end = new Date(l.closing_date)
-        return sum + Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-      }, 0) / closedWithDates.length)
-    : null
-
-  const { count: leadsThisMonth } = await supabase
-    .from('contacts')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .gte('created_at', thisMonthStart.toISOString())
-
-  const { count: realtorContacts } = await supabase
-    .from('contacts')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('is_realtor', true)
+  // ── recent loans (active only, up to 8, sorted by soonest closing) ──
+  const recentLoans = (loans ?? [])
+    .filter(l => !['closed', 'funded'].includes((l.status ?? '').toLowerCase()))
+    .slice(0, 8)
 
   // ── fetch activity (last 7 days) ──
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -177,52 +97,53 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 lg:p-6 space-y-4">
+
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-lg font-mono font-bold text-zinc-100">Pipeline Dashboard</h1>
+          <h1 className="text-xl font-mono font-bold text-zinc-100">Dashboard</h1>
           <p className="text-xs font-mono text-zinc-500 mt-0.5">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
-        {urgentFlags.length > 0 && (
-          <div className="flex items-center gap-1.5 bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-xs font-mono text-amber-400">{urgentFlags.length} urgent</span>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {urgentFlags.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs font-mono text-amber-400">{urgentFlags.length} urgent</span>
+            </div>
+          )}
+          <a
+            href="/dashboard/loans"
+            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-semibold rounded transition-colors"
+          >
+            + New Loan
+          </a>
+        </div>
       </div>
 
       {/* ── Urgent Flags ── */}
       {urgentFlags.length > 0 && <UrgentFlags flags={urgentFlags} />}
 
-      {/* ── Pipeline KPIs ── */}
-      <PipelineKPIs
+      {/* ── Pipeline Summary ── */}
+      <PipelineSummary
+        stageCounts={stageCounts}
         totalCount={totalCount}
         totalVolume={totalVolume}
-        closedThisMonth={closedThisMonth}
-        closedThisMonthVolume={closedThisMonthVolume}
-        closedLastMonth={closedLastMonth}
-        closedLastMonthVolume={closedLastMonthVolume}
-        closingNext30={closingNext30}
-        closingNext30Volume={closingNext30Volume}
-        urgentCount={urgentFlags.length}
       />
 
       {/* ── Quick Actions ── */}
       <div className="flex flex-wrap gap-2">
         {[
-          { icon: '✉️', label: 'Send PA Email',      href: '/dashboard/loans' },
-          { icon: '🔒', label: 'Lock Rate',           href: '/dashboard/loans' },
-          { icon: '📋', label: 'Order Appraisal',     href: '/dashboard/loans' },
-          { icon: '📎', label: 'Request Docs',        href: '/dashboard/loans' },
-          { icon: '👤', label: 'Add Contact',         href: '/dashboard/contacts' },
-          { icon: '📄', label: 'New Loan',            href: '/dashboard/loans' },
+          { icon: '✉️', label: 'Send PA Email',  href: '/dashboard/loans' },
+          { icon: '🔒', label: 'Lock Rate',       href: '/dashboard/loans' },
+          { icon: '📋', label: 'Order Appraisal', href: '/dashboard/loans' },
+          { icon: '📎', label: 'Request Docs',    href: '/dashboard/loans' },
         ].map(({ icon, label, href }) => (
           <a
             key={label}
             href={href}
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-900 rounded shadow shadow-black/40 text-xs font-mono text-blue-400 border border-blue-400/20 hover:border-blue-400/50 hover:bg-zinc-800 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-zinc-900 rounded shadow shadow-black/40 text-xs font-mono text-zinc-300 border border-zinc-700 hover:border-indigo-500/50 hover:text-indigo-300 hover:bg-zinc-800 transition-colors"
           >
             <span>{icon}</span>
             <span>{label}</span>
@@ -230,78 +151,16 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* ── Charts ── */}
-      <PipelineCharts stageCounts={stageCounts} weeklyTrend={weeklyTrend} />
-
-      {/* ── Briefing + Todo ── */}
+      {/* ── Recent Loans + Activity ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <DailyBriefingPanel />
+          <RecentLoans loans={recentLoans} />
         </div>
         <div>
-          <TodoList />
+          <RecentActivity entries={activityEntries ?? []} />
         </div>
       </div>
 
-      {/* ── Activity Log ── */}
-      <RecentActivity entries={activityEntries ?? []} />
-
-      {/* ── Email Draft Preview ── */}
-      <EmailDraftPreview />
-
-      {/* ── Performance Dashboard ── */}
-      <div className="space-y-3">
-        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest px-1">
-          Performance
-        </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <PerformanceCard
-            label="Loans Closed MTD"
-            value={closedThisMonth.toString()}
-            sub={closedThisMonthVolume > 0 ? fmtVolume(closedThisMonthVolume) : undefined}
-          />
-          <PerformanceCard
-            label="Loans in Pipeline"
-            value={totalCount.toString()}
-            sub={totalVolume > 0 ? fmtVolume(totalVolume) : undefined}
-          />
-          <PerformanceCard
-            label="Pull-Through Rate"
-            value={pullThroughRate != null ? `${pullThroughRate}%` : '—'}
-            sub="closed / all loans"
-          />
-          <PerformanceCard
-            label="Avg Days to Close"
-            value={avgDaysToClose != null ? `${avgDaysToClose}d` : '—'}
-          />
-          <PerformanceCard
-            label="Leads Added MTD"
-            value={leadsThisMonth != null ? leadsThisMonth.toString() : '—'}
-          />
-          <PerformanceCard
-            label="Referral Partners Active"
-            value={realtorContacts != null ? realtorContacts.toString() : '—'}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── helpers ──────────────────────────────────────────────────────────────────
-
-function fmtVolume(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n}`
-}
-
-function PerformanceCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="bg-zinc-900 rounded shadow-lg shadow-black/50 p-3.5">
-      <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-2xl font-mono font-bold text-zinc-100">{value}</p>
-      {sub && <p className="text-xs font-mono text-zinc-500 mt-0.5">{sub}</p>}
     </div>
   )
 }

@@ -26,6 +26,12 @@ const config: Config = {
       },
     },
   },
+  safelist: [
+    // Parties color-coding — dynamic labelColor strings in data arrays get purged without this
+    'text-amber-400', 'text-amber-400/70',
+    'text-sky-400',   'text-sky-400/70',
+    'text-emerald-400', 'text-emerald-400/70',
+  ],
   plugins: [],
 };
 export default config;

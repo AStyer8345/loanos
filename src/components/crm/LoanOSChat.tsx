@@ -28,7 +28,7 @@ const QUICK_ACTIONS: Record<string, string[]> = {
   ],
 }
 
-const ACCENT = '#C9A84C'
+const ACCENT = 'hsl(245, 60%, 60%)'
 const BG = '#0f0f0f'
 const SURFACE = '#1a1a1a'
 const BORDER = '#2a2a2a'

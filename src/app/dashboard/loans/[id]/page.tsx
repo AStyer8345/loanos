@@ -312,7 +312,7 @@ export default function LoanDetailPage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-mono font-bold text-amber-400">{fmtCurrency(loan.loan_amount)}</p>
+            <p className="text-2xl font-mono font-bold text-indigo-400">{fmtCurrency(loan.loan_amount)}</p>
             {loan.closing_date && (
               <p className="text-xs text-zinc-500 mt-1 font-mono">Closes {fmtDate(loan.closing_date)}</p>
             )}
@@ -333,7 +333,7 @@ export default function LoanDetailPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 text-sm rounded font-mono font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+                  ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/50'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-transparent'
               }`}
             >
@@ -434,7 +434,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
-              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500 w-full"
+              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full"
             >
               <option value="">—</option>
               {(options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
@@ -448,13 +448,13 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
               onKeyDown={onKeyDown}
-              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500 w-full"
+              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full"
             />
           )
         ) : (
           <span
             onClick={canEdit ? startEdit : undefined}
-            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-300 transition-colors' : ''} ${saved ? 'text-emerald-400' : 'text-zinc-200'}`}
+            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-indigo-300 transition-colors' : ''} ${saved ? 'text-emerald-400' : 'text-zinc-200'}`}
           >
             {saved ? '✓ Saved' : (displayValue ?? <span className="text-zinc-600">—</span>)}
           </span>
@@ -463,7 +463,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
       {canEdit && !editing && !saved && (
         <button
           onClick={startEdit}
-          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-zinc-500 hover:text-amber-400 transition-all shrink-0"
+          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-zinc-500 hover:text-indigo-400 transition-all shrink-0"
           title="Edit"
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -489,7 +489,7 @@ function EditableSectionCard({ title, fields, onSave }: {
   onSave: (field: string, value: string | number | null) => Promise<void>
 }) {
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">{title}</h2>
       </div>
@@ -644,14 +644,14 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
 
         {/* Linked Contact */}
         {contact && (
-          <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
             <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
               <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
             </div>
             <div className="p-4">
               <Link
                 href={`/dashboard/contacts?id=${contact.id}`}
-                className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors"
+                className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors"
               >
                 {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
               </Link>
@@ -662,7 +662,7 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
                   <p className="text-xs text-zinc-500 font-mono">Referred by</p>
                   <Link
                     href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
-                    className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5"
+                    className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5"
                   >
                     {contact.referred_by}
                     <ChevronRight size={12} />
@@ -675,7 +675,7 @@ function OverviewTab({ loan, setLoan, contact, loanId }: {
       </div>
 
       {/* 8 — Notes */}
-      <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
         <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
           <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
           {saving && <span className="text-xs text-zinc-500 font-mono">Saving…</span>}
@@ -765,13 +765,13 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono disabled:opacity-50"
+          className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50"
         >
           <Upload size={12} />
           {uploading ? 'Uploading…' : '+ Upload Document'}
         </button>
       </div>
-      <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl overflow-hidden">
+      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-zinc-800/80 border-b border-zinc-700">
@@ -793,7 +793,7 @@ function DocumentsTab({ loanId, docs, onRefresh }: { loanId: string; docs: DocRo
                   <button
                     onClick={() => handleDownload(doc)}
                     disabled={signingId === doc.id}
-                    className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-mono disabled:opacity-50"
+                    className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-mono disabled:opacity-50"
                   >
                     {signingId === doc.id ? 'Loading…' : <><Download size={12} /> Download</>}
                   </button>
@@ -819,7 +819,7 @@ function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCre
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {WORKFLOWS.map(wf => (
-          <div key={wf.id} className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl p-4 hover:border-amber-500/70 transition-colors">
+          <div key={wf.id} className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 p-4 hover:border-indigo-500/50 transition-colors">
             <div className="flex items-start gap-3">
               <span className="text-2xl">{wf.icon}</span>
               <div className="flex-1">
@@ -907,7 +907,7 @@ function LoanTriggerModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-xl w-full max-w-md">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/60 w-full max-w-md">
         <div className="px-5 py-4 border-b border-zinc-700 flex items-center justify-between">
           <div>
             <p className="font-mono font-semibold text-zinc-100">{workflow.icon} {workflow.name}</p>
@@ -937,7 +937,7 @@ function LoanTriggerModal({
                   <label className="block text-xs font-mono text-zinc-400 mb-1">{workflow.triggerLabel}</label>
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-amber-500 transition-colors bg-zinc-800/50"
+                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-zinc-800/50"
                   >
                     {file ? (
                       <p className="text-sm text-emerald-700 font-medium">{file.name}</p>
@@ -955,7 +955,7 @@ function LoanTriggerModal({
                     value={referralText}
                     onChange={e => setReferralText(e.target.value)}
                     placeholder="Name, contact info, what they're looking for…"
-                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-amber-500 resize-none"
+                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500 resize-none"
                   />
                 </div>
               )}
@@ -1018,7 +1018,7 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 filter === f
-                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+                  ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/50'
                   : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-600'
               }`}
             >

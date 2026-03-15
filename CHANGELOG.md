@@ -1,5 +1,34 @@
 # LoanOS Changelog
 
+## [2.1.0] — 2026-03-15 — Scenario Builder UX Fixes + Loan Integration + Statement Upload
+
+### Fixed
+- **White input backgrounds** — `PercentField` had no `background` set; `CurrencyField` used `transparent` which failed in some browsers. All inputs now use explicit `background: 'var(--sc-bg)'`
+- **PDF generation completely broken** — `ActionsBar.generatePdf()` called `res.json()` on an HTML response, then looked for `data.url` — both failed silently. Fixed to use `res.text()` + `window.open()` + `document.write(html)`
+- **PDF/share scenarioId race condition** — `save()` updated React state async; by the time PDF request fired, `scenarioId` was still null. Fixed by having `save()` return `{ id, share_token }` directly
+
+### Added
+- **Closing costs templates** — purchase mode: 2% / 2.5% / 3% of loan amount; refi mode: 1.5% / 2% / 2.5%. Auto-fills `totalClosingCosts` based on loan amount × percentage
+- **"Copy A →" / "Copy 1 →" buttons** — purchase cards B/C/D can copy all fields from Option A; refi options 2/3 can copy from Option 1. Preserves label and id
+- **PDF route upgraded** — imports calculation functions server-side (`calculatePurchaseScenario`, `calculateCurrentLoan`, `calculateRefiScenario`), recalculates from saved inputs, renders full comparison table with 14–17 metrics
+- **Share page upgraded** — full comparison table with gold checkmarks (✦) on best values per metric, summary cards (monthly payment, rate, term), reinvestment analysis display, narrative section, disclaimer + LoanOS branding
+- **Loan record → Scenario Builder** — "Create Scenario" link in loan detail Actions dropdown routes to `/dashboard/scenarios/new?loan_id=xxx`. Server component fetches loan data, maps Arive fields (loan_type, term months→years, addresses) to scenario builder initial state. Purchase mode fills Option A; refi mode fills CurrentLoanInput
+- **Mortgage statement PDF upload** — "Upload Statement" button in refi mode above CurrentLoanCard. Uploads PDF → `/api/scenarios/parse-statement` → Claude extracts: original amount, current balance, rate, term, start date, monthly P&I, escrow breakdown, PMI, property address, borrower name. Preview extracted fields before applying
+- **`results_data` column** — migration 023 adds `results_data jsonb` to scenarios table. Save endpoint stores calculated results (amortization schedules stripped for size). Share page reads saved results instead of recalculating
+
+### New Files
+- `src/app/api/scenarios/parse-statement/route.ts` — Claude API PDF extraction endpoint
+- `src/app/dashboard/scenarios/new/StatementUpload.tsx` — upload button + modal + preview + apply component
+- `supabase/migrations/023_scenarios_results_data.sql` — results_data column
+
+### Technical Details
+- 12 files modified, 3 new files
+- Migration 023 applied to Supabase via MCP
+- Deployed to Vercel: `dpl_9M1VqMSBT68p5tN2nTAqxJnHpaHb`, state: READY
+- `npm run build` passes clean
+
+---
+
 ## [2.0.0] — 2026-03-15 — Sprint 2: AI Scenario Builder (Mortgage Coach Killer)
 
 ### Added

@@ -34,6 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       property_value: data.property_value,
       current_loan_data: data.current_loan_data,
       scenarios_data: data.scenarios_data,
+      results_data: data.results_data,
       narrative: data.narrative,
       reinvestment_data: data.reinvestment_data,
       created_at: data.created_at,

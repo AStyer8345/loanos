@@ -5,11 +5,12 @@ import { Download, Link2, Save } from 'lucide-react'
 import type {
   ScenarioMode, PurchaseScenarioInput,
   RefiScenarioInput, CurrentLoanInput, ReinvestmentResult,
+  PurchaseCalculatedResult, RefiCalculatedResult,
 } from '@/lib/scenarios/types'
 
 export default function ActionsBar({
   mode, borrowerName, propertyAddress, propertyValue,
-  purchaseScenarios, refiScenarios,
+  purchaseScenarios, purchaseResults, refiScenarios, refiResults,
   currentLoan, narrative, narrativeEdited, reinvestmentResult,
   scenarioId, onSaved,
 }: {
@@ -18,7 +19,9 @@ export default function ActionsBar({
   propertyAddress: string
   propertyValue: number
   purchaseScenarios: PurchaseScenarioInput[]
+  purchaseResults: PurchaseCalculatedResult[]
   refiScenarios: RefiScenarioInput[]
+  refiResults: RefiCalculatedResult[]
   currentLoan: CurrentLoanInput
   narrative: string
   narrativeEdited: boolean
@@ -31,9 +34,22 @@ export default function ActionsBar({
   const [copied, setCopied] = useState(false)
   const [shareToken, setShareToken] = useState<string | null>(null)
 
-  const save = async () => {
+  // Returns { id, share_token } so callers can use it immediately (avoids React state race)
+  const save = async (): Promise<{ id: string; share_token: string } | null> => {
     setSaving(true)
     try {
+      // Strip amortization schedules from results before saving (too large for JSONB)
+      const cleanPurchaseResults = purchaseResults.map(r => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { amortizationSchedule, ...rest } = r
+        return rest
+      })
+      const cleanRefiResults = refiResults.map(r => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { amortizationSchedule, currentLoanSchedule, ...rest } = r
+        return rest
+      })
+
       const res = await fetch('/api/scenarios/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,6 +61,7 @@ export default function ActionsBar({
           property_value: propertyValue,
           current_loan_data: mode === 'refinance' ? currentLoan : null,
           scenarios_data: mode === 'purchase' ? purchaseScenarios : refiScenarios,
+          results_data: mode === 'purchase' ? cleanPurchaseResults : cleanRefiResults,
           narrative,
           narrative_edited: narrativeEdited,
           reinvestment_data: reinvestmentResult ? { returnRate: 7, horizonYears: 10, result: reinvestmentResult } : null,
@@ -54,28 +71,37 @@ export default function ActionsBar({
       if (data.id) {
         onSaved(data.id)
         setShareToken(data.share_token)
+        return { id: data.id, share_token: data.share_token }
       }
+      return null
     } catch (e) {
       console.error('Save failed:', e)
+      return null
     } finally {
       setSaving(false)
     }
   }
 
   const generatePdf = async () => {
-    if (!scenarioId) {
-      await save()
+    let id = scenarioId
+    if (!id) {
+      const saved = await save()
+      if (!saved) return
+      id = saved.id
     }
     setGeneratingPdf(true)
     try {
       const res = await fetch('/api/scenarios/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenarioId: scenarioId }),
+        body: JSON.stringify({ scenarioId: id }),
       })
-      const data = await res.json()
-      if (data.url) {
-        window.open(data.url, '_blank')
+      // API returns HTML — open in new window for print-to-PDF
+      const html = await res.text()
+      const w = window.open('', '_blank')
+      if (w) {
+        w.document.write(html)
+        w.document.close()
       }
     } catch (e) {
       console.error('PDF generation failed:', e)
@@ -85,9 +111,12 @@ export default function ActionsBar({
   }
 
   const copyShareLink = async () => {
-    if (!scenarioId) await save()
-    const token = shareToken || scenarioId
-    if (!token) return
+    let token = shareToken
+    if (!token) {
+      const saved = await save()
+      if (!saved) return
+      token = saved.share_token
+    }
     const url = `${window.location.origin}/share/${token}`
     await navigator.clipboard.writeText(url)
     setCopied(true)
@@ -126,7 +155,7 @@ export default function ActionsBar({
       </button>
 
       <p className="text-[10px] mt-2 sm:mt-0 sm:ml-2" style={{ color: 'var(--sc-muted)' }}>
-        PDF includes your branding, comparison table, charts, and AI analysis
+        Use Ctrl/⌘+P in the PDF window to save as PDF
       </p>
     </div>
   )

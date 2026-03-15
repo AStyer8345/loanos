@@ -42,7 +42,23 @@ interface ScenarioCardProps {
   propertyValue: number
   canRemove: boolean
   onRemove: () => void
+  // Copy from first scenario
+  copySource?: PurchaseScenarioInput | RefiScenarioInput | null
+  onCopyFrom?: () => void
 }
+
+// ─── Closing Cost Templates ───────────────────────────────────────
+const PURCHASE_CC_TEMPLATES = [
+  { label: '~2% of loan', pct: 0.02 },
+  { label: '~2.5% of loan', pct: 0.025 },
+  { label: '~3% of loan', pct: 0.03 },
+]
+
+const REFI_CC_TEMPLATES = [
+  { label: '~1.5% of loan', pct: 0.015 },
+  { label: '~2% of loan', pct: 0.02 },
+  { label: '~2.5% of loan', pct: 0.025 },
+]
 
 function Collapsible({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -64,6 +80,8 @@ function Collapsible({ title, defaultOpen = false, children }: { title: string; 
 export default function ScenarioCard({
   scenario, onUpdate, refiScenario, onUpdateRefi,
   currentLoan, isRefi, index, canRemove, onRemove,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  copySource: _copySource, onCopyFrom,
 }: ScenarioCardProps) {
   const [editingLabel, setEditingLabel] = useState(false)
 
@@ -76,6 +94,7 @@ export default function ScenarioCard({
         index={index}
         canRemove={canRemove}
         onRemove={onRemove}
+        onCopyFrom={onCopyFrom}
       />
     )
   }
@@ -129,15 +148,27 @@ export default function ScenarioCard({
             {LOAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        {canRemove && (
-          <button
-            onClick={onRemove}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5"
-            style={{ color: 'var(--sc-muted)' }}
-          >
-            <X size={14} />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {index > 0 && onCopyFrom && (
+            <button
+              onClick={onCopyFrom}
+              className="text-[10px] font-medium px-2 py-1 rounded transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-gold)' }}
+              title="Copy all fields from Option A"
+            >
+              Copy A →
+            </button>
+          )}
+          {canRemove && (
+            <button
+              onClick={onRemove}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5"
+              style={{ color: 'var(--sc-muted)' }}
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Core Fields */}
@@ -168,6 +199,19 @@ export default function ScenarioCard({
 
       {/* Closing Costs */}
       <Collapsible title="Closing Costs">
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-[10px] font-medium" style={{ color: 'var(--sc-muted)' }}>Template:</span>
+          {PURCHASE_CC_TEMPLATES.map(t => (
+            <button
+              key={t.pct}
+              onClick={() => onUpdate({ totalClosingCosts: Math.round(scenario.loanAmount * t.pct) })}
+              className="text-[10px] px-2 py-0.5 rounded transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-border)' }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
         <CurrencyField label="Total Closing Costs" value={scenario.totalClosingCosts} onChange={v => onUpdate({ totalClosingCosts: v })} />
         <CurrencyField label="Seller Credits" value={scenario.sellerCredits} onChange={v => onUpdate({ sellerCredits: v })} />
         {scenario.points < 0 && (
@@ -207,13 +251,14 @@ export default function ScenarioCard({
 
 // ─── Refinance Scenario Card ──────────────────────────────────────
 
-function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove }: {
+function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove, onCopyFrom }: {
   scenario: RefiScenarioInput
   onUpdate: (updates: Partial<RefiScenarioInput>) => void
   currentLoan?: CurrentLoanInput
   index: number
   canRemove: boolean
   onRemove: () => void
+  onCopyFrom?: () => void
 }) {
   const [editingLabel, setEditingLabel] = useState(false)
   const label = scenario.label || `Option ${index + 1}`
@@ -247,11 +292,23 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove 
             {LOAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        {canRemove && (
-          <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5" style={{ color: 'var(--sc-muted)' }}>
-            <X size={14} />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {index > 0 && onCopyFrom && (
+            <button
+              onClick={onCopyFrom}
+              className="text-[10px] font-medium px-2 py-1 rounded transition-colors hover:bg-white/10"
+              style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-gold)' }}
+              title="Copy all fields from Option 1"
+            >
+              Copy 1 →
+            </button>
+          )}
+          {canRemove && (
+            <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/5" style={{ color: 'var(--sc-muted)' }}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -259,7 +316,22 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove 
         <PercentField label="Interest Rate" value={scenario.interestRate} onChange={v => onUpdate({ interestRate: v })} />
         <SelectField label="Loan Term" value={scenario.loanTerm.toString()} onChange={v => onUpdate({ loanTerm: parseInt(v) as LoanTerm })} options={LOAN_TERMS} />
         <CurrencyField label="Points / Credits" value={scenario.points} onChange={v => onUpdate({ points: v })} />
-        <CurrencyField label="Closing Costs" value={scenario.closingCosts} onChange={v => onUpdate({ closingCosts: v })} />
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="text-[10px] font-medium" style={{ color: 'var(--sc-muted)' }}>Template:</span>
+            {REFI_CC_TEMPLATES.map(t => (
+              <button
+                key={t.pct}
+                onClick={() => onUpdate({ closingCosts: Math.round(scenario.newLoanAmount * t.pct) })}
+                className="text-[10px] px-2 py-0.5 rounded transition-colors hover:bg-white/10"
+                style={{ color: 'var(--sc-gold)', border: '1px solid var(--sc-border)' }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <CurrencyField label="Closing Costs" value={scenario.closingCosts} onChange={v => onUpdate({ closingCosts: v })} />
+        </div>
       </div>
 
       <Collapsible title="Cash Out">

@@ -249,6 +249,29 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                   canRemove={purchaseScenarios.length > 2}
                   onUpdate={(updates) => updatePurchaseScenario(i, updates)}
                   onRemove={() => removePurchaseScenario(i)}
+                  copySource={i > 0 ? purchaseScenarios[0] : null}
+                  onCopyFrom={i > 0 ? () => {
+                    const src = purchaseScenarios[0]
+                    updatePurchaseScenario(i, {
+                      loanType: src.loanType,
+                      purchasePrice: src.purchasePrice,
+                      downPaymentAmount: src.downPaymentAmount,
+                      downPaymentPercent: src.downPaymentPercent,
+                      loanAmount: src.loanAmount,
+                      interestRate: src.interestRate,
+                      loanTerm: src.loanTerm,
+                      points: src.points,
+                      propertyTaxes: src.propertyTaxes,
+                      homeownersInsurance: src.homeownersInsurance,
+                      hoa: src.hoa,
+                      pmi: src.pmi,
+                      totalClosingCosts: src.totalClosingCosts,
+                      sellerCredits: src.sellerCredits,
+                      buydownType: src.buydownType,
+                      buydownYearRates: [...src.buydownYearRates],
+                      extraMonthlyPayment: src.extraMonthlyPayment,
+                    })
+                  } : undefined}
                 />
               ))}
             </div>
@@ -281,6 +304,25 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                     onUpdateRefi={(updates) => updateRefiScenario(i, updates)}
                     onRemove={() => removeRefiScenario(i)}
                     isRefi
+                    copySource={i > 0 ? refiScenarios[0] : null}
+                    onCopyFrom={i > 0 ? () => {
+                      const src = refiScenarios[0]
+                      updateRefiScenario(i, {
+                        loanType: src.loanType,
+                        newLoanAmount: src.newLoanAmount,
+                        interestRate: src.interestRate,
+                        loanTerm: src.loanTerm,
+                        points: src.points,
+                        closingCosts: src.closingCosts,
+                        cashOutAmount: src.cashOutAmount,
+                        payOffDebts: src.payOffDebts,
+                        propertyTaxes: src.propertyTaxes,
+                        insurance: src.insurance,
+                        hoa: src.hoa,
+                        pmi: src.pmi,
+                        extraMonthlyPayment: src.extraMonthlyPayment,
+                      })
+                    } : undefined}
                   />
                 ))}
               </div>
@@ -364,7 +406,9 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
               propertyAddress={propertyAddress}
               propertyValue={propertyValue}
               purchaseScenarios={purchaseScenarios}
+              purchaseResults={purchaseResults}
               refiScenarios={refiScenarios}
+              refiResults={refiResults}
               currentLoan={currentLoan}
               narrative={narrative}
               narrativeEdited={narrativeEdited}
@@ -392,8 +436,8 @@ export function InputField({ label, value, onChange, placeholder, className }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 rounded-md text-sm bg-transparent border outline-none focus:ring-1"
-        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Sans', sans-serif" }}
+        className="w-full px-3 py-2 rounded-md text-sm border outline-none focus:ring-1"
+        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Sans', sans-serif" }}
       />
     </div>
   )
@@ -420,7 +464,7 @@ export function CurrencyField({ label, value, onChange, className, readOnly, acc
           style={{
             borderColor: 'var(--sc-border)',
             color: accent || 'var(--sc-text)',
-            background: readOnly ? 'var(--sc-card)' : 'transparent',
+            background: readOnly ? 'var(--sc-card)' : 'var(--sc-bg)',
             fontFamily: "'IBM Plex Mono', monospace",
           }}
         />
@@ -444,7 +488,7 @@ export function PercentField({ label, value, onChange, decimals = 3 }: {
             onChange(parseFloat(raw) || 0)
           }}
           className="w-full px-3 py-2 rounded-md text-sm border outline-none focus:ring-1 pr-8"
-          style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+          style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Mono', monospace" }}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--sc-muted)' }}>%</span>
       </div>

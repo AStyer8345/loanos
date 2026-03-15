@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       id, scenario_type, borrower_name, property_address, property_value,
-      current_loan_data, scenarios_data, narrative, narrative_edited,
+      current_loan_data, scenarios_data, results_data, narrative, narrative_edited,
       reinvestment_data, source,
     } = body
 
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       property_value: property_value || null,
       current_loan_data: current_loan_data || null,
       scenarios_data,
+      results_data: results_data || null,
       narrative: narrative || null,
       narrative_edited: narrative_edited || false,
       reinvestment_data: reinvestment_data || null,

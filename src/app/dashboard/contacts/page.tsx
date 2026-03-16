@@ -1193,6 +1193,7 @@ export default function ContactsPage() {
               .contacts-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
               th:hover .col-drag-handle { opacity: 1 !important; }
             `}</style>
+            <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
             <div
               className="contacts-scroll"
               style={{ height: '100%', overflowX: 'auto', overflowY: 'auto' }}
@@ -1204,7 +1205,6 @@ export default function ContactsPage() {
               ) : (
                 <table style={{ minWidth: 'max-content', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                   <thead>
-                    <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
                       <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                         <tr style={{ borderBottom: '1px solid var(--border)' }}>
                           {/* Checkbox header — sticky left */}
@@ -1246,7 +1246,6 @@ export default function ContactsPage() {
                           ))}
                         </tr>
                       </SortableContext>
-                    </DndContext>
                   </thead>
                   <tbody>
                     {contacts.map((contact, i) => {
@@ -1343,6 +1342,7 @@ export default function ContactsPage() {
                 </div>
               )}
             </div>
+            </DndContext>
           </div>
         </div>
       </div>

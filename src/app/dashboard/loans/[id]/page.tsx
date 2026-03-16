@@ -297,6 +297,8 @@ export default function LoanDetailPage() {
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
+  const [editingCommission, setEditingCommission] = useState(false)
+  const [commissionInput, setCommissionInput] = useState('')
   const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -474,12 +476,36 @@ export default function LoanDetailPage() {
               <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Officer</p>
               <p className="text-sm font-mono font-semibold text-zinc-100">Adam Styer</p>
             </div>
-            {loan.commission_amount && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Commission</p>
-                <p className="text-sm font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.commission_amount)}</p>
-              </div>
-            )}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Commission</p>
+              {editingCommission ? (
+                <input
+                  autoFocus
+                  type="number"
+                  step="0.01"
+                  value={commissionInput}
+                  onChange={e => setCommissionInput(e.target.value)}
+                  onBlur={async () => {
+                    const val = commissionInput.trim() ? parseFloat(commissionInput) : null
+                    await supabase.from('loans').update({ commission_amount: val }).eq('id', loanId)
+                    setLoan({ ...loan, commission_amount: val })
+                    setEditingCommission(false)
+                  }}
+                  onKeyDown={async e => {
+                    if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                    if (e.key === 'Escape') setEditingCommission(false)
+                  }}
+                  className="w-28 text-sm font-mono font-semibold text-[#C9A84C] bg-transparent border-b border-[#C9A84C] outline-none"
+                />
+              ) : (
+                <p
+                  className="text-sm font-mono font-semibold text-[#C9A84C] cursor-pointer hover:underline"
+                  onClick={() => { setCommissionInput(loan.commission_amount?.toString() ?? ''); setEditingCommission(true) }}
+                >
+                  {loan.commission_amount ? fmtCurrency(loan.commission_amount) : '—'}
+                </p>
+              )}
+            </div>
             {loan.referring_agent_name && (
               <div>
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Realtor</p>
@@ -1243,6 +1269,7 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
         {/* 5 — Financials */}
         <EditableSectionCard title="Financials" onSave={handleSaveField} fields={[
+          { label: 'Commission',       displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
           { label: 'Monthly Payment',  displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
           { label: 'PITI',             displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
           { label: 'Cash to Close',    displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },

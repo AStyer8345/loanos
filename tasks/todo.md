@@ -1,11 +1,12 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-15 (full audit session)_
+_Last updated: 2026-03-16 (morning audit)_
 
 ---
 
 ## 🔴 High Priority
 
+- [ ] **Fix pipeline/stats route** — `/api/pipeline/stats/route.ts` uses old columns `est_closing_date` and `borrower_name`. Route is currently unused by UI but will break if wired. Fix to `estimated_closing_date` / `borrower_first_name`+`borrower_last_name`.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed.
 - [ ] **Add auth to /api/agents/* routes** — currently no API key or secret validation. Anyone who discovers the URL can trigger daily briefing or milestone agent. Add `LOANOS_AGENT_SECRET` env var + `Authorization: Bearer` header check.
@@ -33,6 +34,12 @@ _Last updated: 2026-03-15 (full audit session)_
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 
 ---
+
+## ✅ Completed (session 5 — 2026-03-16 morning audit)
+
+- [x] **Daily briefing broken auth fixed** — `/api/agents/daily-briefing` used `validateAgentSecret` exclusively, so browser calls from `/dashboard/briefing` always returned 401. Fixed to accept either agent secret (server-to-server) OR Supabase session auth (browser).
+- [x] **Daily briefing column name fixed** — same route used `est_closing_date` (old column, doesn't exist for Arive loans). Fixed to `estimated_closing_date`.
+- [x] **Review Request Email n8n workflow fixed** — `AK1fBcaX1cPcdlGx` was erroring every 30 minutes with Supabase 400. Root cause: `close_date` column doesn't exist. Fixed to `closing_date`. Pushed to n8n.
 
 ## ✅ Completed (session 4 — 2026-03-15 full audit)
 

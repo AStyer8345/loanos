@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
+import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function GET(request: NextRequest) {
-  const authError = validateAgentSecret(request)
-  if (authError) return authError
+  // Allow server-to-server calls with agent secret, or browser calls with session auth
+  const authHeader = request.headers.get('authorization')
+  const agentSecret = process.env.LOANOS_AGENT_SECRET
+  const hasValidSecret = agentSecret && authHeader === `Bearer ${agentSecret}`
+
+  if (!hasValidSecret) {
+    const sessionClient = createClient()
+    const { data: { user } } = await sessionClient.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   try {
     const supabase = createServiceClient()
@@ -38,9 +46,9 @@ export async function GET(request: NextRequest) {
       // Active loans: not funded/closed
       supabase
         .from('loans')
-        .select('id, loan_name, status, loan_amount, property_address, est_closing_date, arive_loan_id')
+        .select('id, loan_name, status, loan_amount, property_address, estimated_closing_date, arive_loan_id')
         .not('status', 'in', '("funded","closed","withdrawn","denied")')
-        .order('est_closing_date', { ascending: true })
+        .order('estimated_closing_date', { ascending: true })
         .limit(20),
 
       // Milestone events from last 24 hours

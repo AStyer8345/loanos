@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [3.1.1] — 2026-03-16 — Morning Audit Bugfixes
+
+### Fixed
+- **Daily briefing always 401** — `/api/agents/daily-briefing` used `validateAgentSecret` exclusively, blocking all browser calls from `/dashboard/briefing`. Now accepts Supabase session auth (browser) OR agent secret (server-to-server).
+- **Daily briefing wrong column** — same route queried `est_closing_date` (non-existent). Fixed to `estimated_closing_date`.
+- **Review Request Email n8n crashing every 30 min** — workflow `AK1fBcaX1cPcdlGx` queried `close_date` column (doesn't exist). Supabase returned 400 on every trigger. Fixed to `closing_date`. Pushed to n8n.
+
+### Audit Findings (no code change needed)
+- n8n: 11 of 13 workflows active. Outlook Email Sync (`JMmstRl2C5ylmuIY`) and duplicate Contract Received (`w7hZLmIcQ4izmndb`) correctly inactive.
+- Dashboard: all KPI cards, pipeline charts, stage cards, activity log pulling live Supabase data — no issues.
+- `/api/pipeline/stats` uses old column names but is not referenced anywhere in the UI — flagged in todo.md.
+
 ## [3.1.0] — 2026-03-16 — Dashboard Links + Automations + Filters
 
 ### Dashboard

@@ -102,3 +102,9 @@ Actions dropdown buttons set both `activeTab` and `selectedAutomationId` state. 
 
 ### Dashboard links use stage names
 Stage cards in the dashboard use `/dashboard/loans?stage=StageName`. The loans page client component reads URL params with `useSearchParams()` and applies post-fetch filters.
+
+### validateAgentSecret blocks browser-facing routes (2026-03-16)
+`validateAgentSecret` is for server-to-server calls only. Any route called from the browser must use Supabase session auth (`createClient().auth.getUser()`). Mixing them breaks browser-facing pages — they return 401 because the browser never sends the secret header. Pattern for routes that need to support both: check agent secret first, fall back to session auth.
+
+### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
+The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

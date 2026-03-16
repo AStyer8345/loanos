@@ -228,6 +228,13 @@ export default function LoansPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkStatus, setBulkStatus] = useState('')
   const [hasMore, setHasMore] = useState(false)
+  // Advanced filters
+  const [filterType, setFilterType] = useState<string>('')     // Loan type: Conventional, FHA, etc.
+  const [filterPurpose, setFilterPurpose] = useState<string>('')  // Purchase, Refinance
+  const [filterDateFrom, setFilterDateFrom] = useState<string>('')
+  const [filterDateTo, setFilterDateTo] = useState<string>('')
+  const [filterPreset, setFilterPreset] = useState<string>('')
+  const [showFilters, setShowFilters] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const loansOffsetRef = useRef(0)
 
@@ -484,6 +491,20 @@ export default function LoansPage() {
       // The dashboard already provides staleLoans, so this serves as a landing for that link
     }
 
+    // Advanced filters
+    if (filterType) {
+      list = list.filter(l => (l.loan_purpose || '').toLowerCase().includes(filterType.toLowerCase()))
+    }
+    if (filterPurpose) {
+      list = list.filter(l => (l.loan_program || '').toLowerCase().includes(filterPurpose.toLowerCase()))
+    }
+    if (filterDateFrom) {
+      list = list.filter(l => (l.closing_date ?? '') >= filterDateFrom)
+    }
+    if (filterDateTo) {
+      list = list.filter(l => (l.closing_date ?? '') <= filterDateTo)
+    }
+
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(l =>
@@ -491,6 +512,7 @@ export default function LoansPage() {
         (l.loan_name || '').toLowerCase().includes(q) ||
         (l.property_address || '').toLowerCase().includes(q) ||
         (l.property_city || '').toLowerCase().includes(q) ||
+        (l.contact_email || '').toLowerCase().includes(q) ||
         (l.status || '').toLowerCase().includes(q)
       )
     }
@@ -508,7 +530,7 @@ export default function LoansPage() {
       const bv = (b[sortKey] || '').toLowerCase()
       return mul * (av < bv ? -1 : av > bv ? 1 : 0)
     })
-  }, [loans, search, sortKey, sortDir, urlFilterActive])
+  }, [loans, search, sortKey, sortDir, urlFilterActive, filterType, filterPurpose, filterDateFrom, filterDateTo])
 
   // ── Sort icon ──────────────────────────────────────────────────────────
   const SortIcon = ({ k }: { k: SortKey }) => {
@@ -522,6 +544,61 @@ export default function LoansPage() {
   const loanLocation = (l: Loan) => {
     const parts = [l.property_city, l.property_state].filter(Boolean)
     return parts.length ? parts.join(', ') : l.property_address || '—'
+  }
+
+  const hasAdvancedFilters = !!(filterType || filterPurpose || filterDateFrom || filterDateTo)
+
+  const clearAllFilters = () => {
+    setFilterType('')
+    setFilterPurpose('')
+    setFilterDateFrom('')
+    setFilterDateTo('')
+    setFilterPreset('')
+    setSearch('')
+    setUrlFilterActive(null)
+    router.replace('/dashboard/loans')
+  }
+
+  const applyPreset = (preset: string) => {
+    clearAllFilters()
+    setFilterPreset(preset)
+    const now = new Date()
+    const year = now.getFullYear()
+    switch (preset) {
+      case 'inprocess':
+        handleListChange('inprocess')
+        break
+      case 'preapproval':
+        handleListChange('preapproval')
+        break
+      case 'leads':
+        handleListChange('preapproval')
+        break
+      case 'closed-jan':
+        handleListChange('closed')
+        setFilterDateFrom(`${year}-01-01`)
+        setFilterDateTo(`${year}-01-31`)
+        break
+      case 'closed-feb':
+        handleListChange('closed')
+        setFilterDateFrom(`${year}-02-01`)
+        setFilterDateTo(`${year}-02-28`)
+        break
+      case 'closed-mar':
+        handleListChange('closed')
+        setFilterDateFrom(`${year}-03-01`)
+        setFilterDateTo(`${year}-03-31`)
+        break
+      case 'closed-ytd':
+        handleListChange('closed')
+        setFilterDateFrom(`${year}-01-01`)
+        setFilterDateTo(`${year}-12-31`)
+        break
+      case 'needs-attention':
+        handleListChange('inprocess')
+        setUrlFilterActive({ filter: 'no_activity_3days' })
+        break
+    }
   }
 
   const colDefs = LOAN_COLUMNS.filter(c => visibleColumns.includes(c.id))
@@ -732,6 +809,118 @@ export default function LoansPage() {
               className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[#2A2A2A] rounded-lg bg-[#1A1A1A] text-[#F0F0F0] placeholder:text-[#666666] focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent"
             />
           </div>
+        </div>
+
+        {/* Filter bar */}
+        <div className="px-4 pt-3 pb-2 border-b border-[#2A2A2A] bg-[#0E0E0E]">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Preset dropdown */}
+            <select
+              value={filterPreset}
+              onChange={e => applyPreset(e.target.value)}
+              className="text-[11px] font-mono px-2 py-1.5 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#999999] outline-none"
+            >
+              <option value="">Presets…</option>
+              <option value="inprocess">Loans in Process</option>
+              <option value="preapproval">Pre-Approvals</option>
+              <option value="leads">Leads + New Applications</option>
+              <option value="closed-jan">Closed — January {new Date().getFullYear()}</option>
+              <option value="closed-feb">Closed — February {new Date().getFullYear()}</option>
+              <option value="closed-mar">Closed — March {new Date().getFullYear()}</option>
+              <option value="closed-ytd">Closed — YTD</option>
+              <option value="needs-attention">Needs Attention (3+ days idle)</option>
+            </select>
+
+            {/* Toggle advanced filters */}
+            <button
+              type="button"
+              onClick={() => setShowFilters(p => !p)}
+              className={`text-[11px] font-mono px-2 py-1.5 border rounded transition-colors ${
+                showFilters || hasAdvancedFilters
+                  ? 'border-[#C9A84C]/40 text-[#C9A84C] bg-[#C9A84C]/10'
+                  : 'border-[#2A2A2A] text-[#666666] hover:text-[#F0F0F0]'
+              }`}
+            >
+              Filters {hasAdvancedFilters ? '●' : '▾'}
+            </button>
+
+            {/* Active filter chips */}
+            {filterType && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[10px] font-mono text-violet-400">
+                Purpose: {filterType}
+                <button onClick={() => setFilterType('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {filterPurpose && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-900/30 border border-sky-700 text-[10px] font-mono text-sky-400">
+                Type: {filterPurpose}
+                <button onClick={() => setFilterPurpose('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {(filterDateFrom || filterDateTo) && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-[10px] font-mono text-emerald-400">
+                Date: {filterDateFrom || '…'} → {filterDateTo || '…'}
+                <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {hasAdvancedFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline"
+              >Clear all</button>
+            )}
+          </div>
+
+          {/* Expanded filter controls */}
+          {showFilters && (
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <div>
+                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Purpose</label>
+                <select
+                  value={filterType}
+                  onChange={e => setFilterType(e.target.value)}
+                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[110px]"
+                >
+                  <option value="">All</option>
+                  <option value="Purchase">Purchase</option>
+                  <option value="Refinance">Refinance</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Loan Type</label>
+                <select
+                  value={filterPurpose}
+                  onChange={e => setFilterPurpose(e.target.value)}
+                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[110px]"
+                >
+                  <option value="">All</option>
+                  <option value="Conventional">Conventional</option>
+                  <option value="FHA">FHA</option>
+                  <option value="VA">VA</option>
+                  <option value="USDA">USDA</option>
+                  <option value="Jumbo">Jumbo</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Close From</label>
+                <input
+                  type="date"
+                  value={filterDateFrom}
+                  onChange={e => setFilterDateFrom(e.target.value)}
+                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Close To</label>
+                <input
+                  type="date"
+                  value={filterDateTo}
+                  onChange={e => setFilterDateTo(e.target.value)}
+                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bulk actions bar */}

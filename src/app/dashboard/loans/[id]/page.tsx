@@ -853,10 +853,13 @@ function DocumentsPreview({ loanId, docs, onRefresh }: { loanId: string; docs: D
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-    const storagePath = `loans/${loanId}/${file.name}`
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { alert('Not authenticated'); setUploading(false); return }
+    const storagePath = `${user.id}/${loanId}/${file.name}`
     const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
     if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
-    await supabase.from('documents').insert({ loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    const { error: insertError } = await supabase.from('documents').insert({ user_id: user.id, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
     onRefresh()

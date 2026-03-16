@@ -303,6 +303,8 @@ export default function LoanDetailPage() {
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
   const [editingCommission, setEditingCommission] = useState(false)
   const [commissionInput, setCommissionInput] = useState('')
+  const [editingHeader, setEditingHeader] = useState<string | null>(null)
+  const [headerInput, setHeaderInput] = useState('')
   const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -357,6 +359,25 @@ export default function LoanDetailPage() {
   const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
   const addressLine = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
   const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
+
+  // Header inline edit save helper
+  const saveHeaderField = async (field: string, value: string | number | null) => {
+    await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
+    setLoan({ ...loan, [field]: value } as Loan)
+    setEditingHeader(null)
+    setHeaderInput('')
+  }
+
+  // Rate lock expiry warning
+  const lockExpiryWarning = (() => {
+    if (!loan.rate_lock_expiration) return null
+    const exp = new Date(loan.rate_lock_expiration + 'T00:00:00')
+    const now = new Date()
+    const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    if (diffDays < 0) return { type: 'expired' as const, text: 'Lock Expired' }
+    if (diffDays <= 5) return { type: 'warning' as const, text: `Expires in ${diffDays} day${diffDays !== 1 ? 's' : ''}` }
+    return null
+  })()
 
   return (
     <div className="flex flex-col h-full">
@@ -518,6 +539,112 @@ export default function LoanDetailPage() {
             )}
           </div>
 
+          {/* Meta strip — row 2: dates & rate lock */}
+          <div className="flex items-end gap-6 mt-0 pb-3 flex-wrap">
+            {/* Est. Close Date */}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Est. Close Date</p>
+              {editingHeader === 'estimated_closing_date' ? (
+                <input
+                  autoFocus
+                  type="date"
+                  value={headerInput}
+                  onChange={e => setHeaderInput(e.target.value)}
+                  onBlur={() => saveHeaderField('estimated_closing_date', headerInput || null)}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
+                  className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                />
+              ) : (
+                <p
+                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  onClick={() => { setHeaderInput(loan.estimated_closing_date ?? ''); setEditingHeader('estimated_closing_date') }}
+                >
+                  {fmtDate(loan.estimated_closing_date)}
+                </p>
+              )}
+            </div>
+
+            {/* Rate Lock Date */}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Rate Lock Date</p>
+              {editingHeader === 'rate_lock_date' ? (
+                <input
+                  autoFocus
+                  type="date"
+                  value={headerInput}
+                  onChange={e => setHeaderInput(e.target.value)}
+                  onBlur={() => saveHeaderField('rate_lock_date', headerInput || null)}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
+                  className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                />
+              ) : (
+                <p
+                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  onClick={() => { setHeaderInput(loan.rate_lock_date ?? ''); setEditingHeader('rate_lock_date') }}
+                >
+                  {fmtDate(loan.rate_lock_date)}
+                </p>
+              )}
+            </div>
+
+            {/* Lock Expiry */}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Lock Expiry</p>
+              <div className="flex items-center gap-2">
+                {editingHeader === 'rate_lock_expiration' ? (
+                  <input
+                    autoFocus
+                    type="date"
+                    value={headerInput}
+                    onChange={e => setHeaderInput(e.target.value)}
+                    onBlur={() => saveHeaderField('rate_lock_expiration', headerInput || null)}
+                    onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
+                    className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                  />
+                ) : (
+                  <p
+                    className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                    onClick={() => { setHeaderInput(loan.rate_lock_expiration ?? ''); setEditingHeader('rate_lock_expiration') }}
+                  >
+                    {fmtDate(loan.rate_lock_expiration)}
+                  </p>
+                )}
+                {lockExpiryWarning && (
+                  <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${
+                    lockExpiryWarning.type === 'expired'
+                      ? 'bg-red-900/40 text-red-400 border border-red-800'
+                      : 'bg-amber-900/40 text-amber-400 border border-amber-800'
+                  }`}>
+                    {lockExpiryWarning.text}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Days Locked */}
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
+              {editingHeader === 'rate_lock_days' ? (
+                <input
+                  autoFocus
+                  type="number"
+                  value={headerInput}
+                  onChange={e => setHeaderInput(e.target.value)}
+                  onBlur={() => saveHeaderField('rate_lock_days', headerInput ? parseInt(headerInput) : null)}
+                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
+                  className="w-20 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                />
+              ) : (
+                <p
+                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  onClick={() => { setHeaderInput(loan.rate_lock_days?.toString() ?? ''); setEditingHeader('rate_lock_days') }}
+                >
+                  {loan.rate_lock_days ? `${loan.rate_lock_days} days` : '—'}
+                </p>
+              )}
+            </div>
+          </div>
+
           {/* Pipeline progress bar */}
           <PipelineProgressBar status={loan.status} />
         </div>
@@ -668,6 +795,11 @@ function KeyDetailsCard({ loan }: { loan: Loan }) {
       { label: 'Loan Type', value: loan.loan_type || loan.loan_program || '—' },
       { label: 'AUS Result', value: loan.milestone || '—' },
       { label: 'MI Required', value: miLabel },
+    ],
+    [
+      { label: 'Est. Close Date', value: fmtDate(loan.estimated_closing_date) },
+      { label: 'Rate Lock Expiry', value: fmtDate(loan.rate_lock_expiration) },
+      { label: 'Commission', value: fmtCurrency(loan.commission_amount) },
     ],
   ]
 

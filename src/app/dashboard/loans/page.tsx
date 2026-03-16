@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X } from 'lucide-react'
+import { updateLastTouch } from '@/lib/updateLastTouch'
 import {
   IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
   LEAD_STATUSES, NEW_APP_STATUSES,
@@ -390,14 +391,18 @@ export default function LoansPage() {
   // ── Inline status change ───────────────────────────────────────────────
   const handleStatusChange = useCallback(async (loanId: string, newStatus: string) => {
     setEditingStatusId(null)
+    const loan = loans.find(l => l.id === loanId)
     const { error } = await supabase.from('loans').update({ status: newStatus }).eq('id', loanId)
     if (!error) {
       setLoans(prev => prev.map(l => l.id === loanId ? { ...l, status: newStatus } : l))
       supabase.from('activity_log').insert({ action: 'loan.status_changed', entity_type: 'loan', loan_id: loanId, metadata: { to: newStatus } })
+      if (loan?.contact_id) {
+        updateLastTouch(supabase, loan.contact_id, 'loan_stage_changed', `Loan moved to ${newStatus}`, loanId)
+      }
       await fetchCounts()
       if (!activeList.startsWith('custom-')) fetchLoans(activeList)
     }
-  }, [supabase, activeList, fetchCounts, fetchLoans])
+  }, [supabase, activeList, loans, fetchCounts, fetchLoans])
 
   // ── Bulk actions ──────────────────────────────────────────────────────
   const toggleSelect = (id: string) => setSelected(prev => {

@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
-import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type EmailDraftRow } from './ContactRecordView'
+import { updateLastTouch } from '@/lib/updateLastTouch'
+import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow } from './ContactRecordView'
 
 export default function ContactRecordPage() {
   const params = useParams()
@@ -14,10 +15,12 @@ export default function ContactRecordPage() {
   const [contact, setContact] = useState<Contact | null>(null)
   const [loans, setLoans] = useState<ContactLoan[]>([])
   const [activity, setActivity] = useState<ActivityEntry[]>([])
+  const [contactActivity, setContactActivity] = useState<ContactActivityRow[]>([])
   const [referrerContactId, setReferrerContactId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'notes' | 'emails'>('overview')
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
+  const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
 
@@ -70,7 +73,7 @@ export default function ContactRecordPage() {
         .limit(200)
 
       for (const row of (loanRows ?? []) as ActivityEntry[]) {
-        if (seen.has(row.id)) continue          // already in contact activity
+        if (seen.has(row.id)) continue
         const loan = linkedLoans.find((l: { id: string }) => l.id === row.loan_id)
         const label = (loan as { loan_name?: string | null } | undefined)?.loan_name
           ? `Loan: ${(loan as { loan_name: string }).loan_name}`
@@ -80,9 +83,17 @@ export default function ContactRecordPage() {
       }
     }
 
-    // 3. Sort merged list chronologically
     merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     setActivity(merged)
+  }, [id, supabase])
+
+  const fetchContactActivity = useCallback(async () => {
+    const { data } = await supabase
+      .from('contact_activity')
+      .select('id, activity_type, notes, logged_at, created_by, loan_id')
+      .eq('contact_id', id)
+      .order('logged_at', { ascending: false })
+    setContactActivity((data ?? []) as ContactActivityRow[])
   }, [id, supabase])
 
   const resolveReferrer = useCallback(async (referredBy: string | null) => {
@@ -108,21 +119,31 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchActivity()])
+        await Promise.all([fetchLoans(), fetchActivity(), fetchContactActivity()])
         await resolveReferrer(c.referred_by)
-        const { data: drafts } = await supabase
-          .from('email_drafts')
-          .select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at')
-          .eq('contact_id', id)
-          .order('created_at', { ascending: false })
-          .limit(100)
+        const [{ data: drafts }, { data: inbound }] = await Promise.all([
+          supabase
+            .from('email_drafts')
+            .select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at')
+            .eq('contact_id', id)
+            .order('created_at', { ascending: false })
+            .limit(100),
+          supabase
+            .from('activity_log')
+            .select('id, subject, from_address, body_snippet, occurred_at, metadata')
+            .eq('contact_id', id)
+            .eq('type', 'email_inbound')
+            .order('occurred_at', { ascending: false })
+            .limit(100),
+        ])
         setEmailDrafts((drafts ?? []) as EmailDraftRow[])
+        setInboundEmails((inbound ?? []) as InboundEmailRow[])
       }
       setLoading(false)
     }
     load()
     return () => { cancelled = true }
-  }, [fetchContact, fetchLoans, fetchActivity, resolveReferrer])
+  }, [fetchContact, fetchLoans, fetchActivity, fetchContactActivity, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -134,16 +155,7 @@ export default function ContactRecordPage() {
       .update({ notes: appended })
       .eq('id', contact.id)
     if (!updateErr) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        await supabase.from('activity_log').insert({
-          action: 'note.added',
-          entity_type: 'contact',
-          contact_id: contact.id,
-          metadata: { preview: newNote.trim().slice(0, 100) },
-          user_id: user.id,
-        })
-      }
+      await updateLastTouch(supabase, contact.id, 'note_added', 'Added a note')
       setContact(prev => prev ? { ...prev, notes: appended } : null)
       setNewNote('')
       await fetchActivity()
@@ -154,13 +166,40 @@ export default function ContactRecordPage() {
   const handleSaveNotes = async (notes: string) => {
     if (!contact) return
     const { error } = await supabase.from('contacts').update({ notes }).eq('id', contact.id)
-    if (!error) setContact(prev => prev ? { ...prev, notes } : null)
+    if (!error) {
+      updateLastTouch(supabase, contact.id, 'note_added', 'Added a note')
+      setContact(prev => prev ? { ...prev, notes } : null)
+    }
   }
 
   const handleSaveField = async (field: keyof Contact, value: string | null) => {
     if (!contact) return
     const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
-    if (!error) setContact(prev => prev ? { ...prev, [field]: value } : null)
+    if (!error) {
+      updateLastTouch(supabase, contact.id, 'contact_updated', 'Updated contact record')
+      setContact(prev => prev ? { ...prev, [field]: value } : null)
+    }
+  }
+
+  const handleLogActivity = async (type: ContactActivityRow['activity_type'], notes: string) => {
+    if (!contact) return
+    const res = await fetch(`/api/contacts/${contact.id}/activity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activity_type: type, notes: notes || null }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Failed to log activity')
+    // Optimistic update: prepend the new activity
+    if (json.activity) {
+      setContactActivity(prev => [json.activity as ContactActivityRow, ...prev])
+    }
+    // Log the touch with appropriate type
+    const touchType = type === 'call' ? 'call_logged' : type === 'email' ? 'email_outbound' : type === 'text' ? 'sms_sent' : 'note_added'
+    const touchDesc = type === 'call' ? 'Logged a call' : type === 'email' ? 'Sent email' : type === 'text' ? 'Sent text' : 'Added a note'
+    updateLastTouch(supabase, contact.id, touchType, touchDesc)
+    // Refresh contact to get updated last_activity fields
+    await fetchContact()
   }
 
   if (loading) {
@@ -191,7 +230,9 @@ export default function ContactRecordPage() {
       contact={contact}
       loans={loans}
       activity={activity}
+      contactActivity={contactActivity}
       emailDrafts={emailDrafts}
+      inboundEmails={inboundEmails}
       referrerContactId={referrerContactId}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
@@ -201,6 +242,7 @@ export default function ContactRecordPage() {
       onAddNote={handleAddNote}
       onSaveNotes={handleSaveNotes}
       onSaveField={handleSaveField}
+      onLogActivity={handleLogActivity}
     />
   )
 }

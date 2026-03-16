@@ -6,8 +6,24 @@ import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 import Papa from 'papaparse'
 import { normalizeStage } from '@/lib/stageNormalization'
-import { Trash2, Pencil } from 'lucide-react'
+import { updateLastTouch } from '@/lib/updateLastTouch'
+import { Trash2, Pencil, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -28,6 +44,10 @@ type Contact = {
   coborrower_last_name: string | null
   coborrower_birthday: string | null
   last_touch: string | null
+  last_touch_at: string | null
+  last_activity_date: string | null
+  last_activity_notes: string | null
+  last_activity_type: string | null
   top_realtor: boolean | null
   target_realtor: boolean | null
   salesforce_id: string | null
@@ -38,7 +58,7 @@ type Contact = {
 }
 
 type SmartListDef = { id: string; label: string; section?: string }
-type ColumnDef    = { id: string; label: string; render: (c: Contact) => React.ReactNode }
+type ColumnDef    = { id: string; label: string; minWidth: number; render: (c: Contact) => React.ReactNode }
 type SortConfig   = { key: keyof Contact; dir: 'asc' | 'desc' }
 type BulkAction   = 'stage' | 'type' | 'referred_by' | null
 
@@ -69,8 +89,22 @@ function fmtCurrency(n: number | null) {
 
 function fmtDate(s: string | null) {
   if (!s) return '—'
-  const d = new Date(s + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  // If it looks like a date-only string (YYYY-MM-DD), append T00:00 to avoid timezone shift
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s)
+  if (isNaN(d.getTime())) return '—'
+  const mo = String(d.getMonth() + 1).padStart(2, '0')
+  const da = String(d.getDate()).padStart(2, '0')
+  return `${mo}/${da}/${d.getFullYear()}`
+}
+
+/** Format any ISO timestamp or date string as MM/DD/YYYY, date only. */
+function fmtDateOnly(s: string | null): string {
+  if (!s) return '—'
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s)
+  if (isNaN(d.getTime())) return '—'
+  const mo = String(d.getMonth() + 1).padStart(2, '0')
+  const da = String(d.getDate()).padStart(2, '0')
+  return `${mo}/${da}/${d.getFullYear()}`
 }
 
 /** Normalize for tel: href (digits and + only) */
@@ -110,6 +144,31 @@ function EmailCell({ value }: { value: string | null }) {
     )
   }
   return <>{value}</>
+}
+
+function LastTouchCell({ date }: { date: string | null }) {
+  if (!date) return <span style={{ color: 'rgba(113,113,122,0.6)' }}>—</span>
+
+  const ts = new Date(date)
+  if (isNaN(ts.getTime())) return <span style={{ color: 'rgba(113,113,122,0.6)' }}>—</span>
+
+  const diffDays = Math.floor((Date.now() - ts.getTime()) / 86400000)
+
+  // Color coding by recency
+  let color = 'rgba(113,113,122,0.6)'
+  if (diffDays <= 3) color = '#4ade80'
+  else if (diffDays <= 7) color = '#facc15'
+  else color = '#f87171'
+
+  const mo = String(ts.getMonth() + 1).padStart(2, '0')
+  const da = String(ts.getDate()).padStart(2, '0')
+  const label = `${mo}/${da}/${ts.getFullYear()}`
+
+  return (
+    <span style={{ color, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+      {label}
+    </span>
+  )
 }
 
 function isClosedLoan(status: string | null) {
@@ -186,33 +245,45 @@ function applyCustomListRulesContact(query: any, rules: CustomListRule[]): any {
 
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
-  { id: 'name',         label: 'Name',             render: c => (
+  { id: 'name',         label: 'Name',             minWidth: 200, render: c => (
       <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none', fontWeight: 600 }}>
         {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—'}
       </Link>
     ) },
-  { id: 'type',         label: 'Type',             render: c => c.contact_type ?? '—' },
-  { id: 'phone',        label: 'Phone',            render: c => <PhoneCell value={c.phone} /> },
-  { id: 'mobile',       label: 'Mobile',           render: c => <PhoneCell value={c.phone_mobile} /> },
-  { id: 'email',        label: 'Email',            render: c => <EmailCell value={c.email} /> },
-  { id: 'stage',        label: 'Stage',            render: c => c.stage ?? '—' },
-  { id: 'lead_source',  label: 'Lead Source',      render: c => c.lead_source ?? '—' },
-  { id: 'referred_by',  label: 'Referred By',      render: c => c.referred_by
+  { id: 'type',         label: 'Type',             minWidth: 100, render: c => c.contact_type ?? '—' },
+  { id: 'phone',        label: 'Phone',            minWidth: 140, render: c => <PhoneCell value={c.phone} /> },
+  { id: 'mobile',       label: 'Mobile',           minWidth: 140, render: c => <PhoneCell value={c.phone_mobile} /> },
+  { id: 'email',        label: 'Email',            minWidth: 220, render: c => <EmailCell value={c.email} /> },
+  { id: 'stage',        label: 'Stage',            minWidth: 120, render: c => c.stage ?? '—' },
+  { id: 'lead_source',  label: 'Lead Source',      minWidth: 140, render: c => c.lead_source ?? '—' },
+  { id: 'referred_by',  label: 'Referred By',      minWidth: 160, render: c => c.referred_by
       ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
       : '—' },
-  { id: 'company',      label: 'Company',          render: c => c.company_name ?? '—' },
-  { id: 'birthday',     label: 'Birthday',         render: c => c.birthday ?? '—' },
-  { id: 'co_name',      label: 'Co-Borrower Name', render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
-  { id: 'co_bday',      label: 'Co-Bday',          render: c => c.coborrower_birthday ?? '—' },
-  { id: 'notes',        label: 'Notes',            render: c => c.notes ?? '—' },
-  { id: 'last_touch',   label: 'Last Touch',       render: c => c.last_touch ? new Date(c.last_touch).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' },
-  { id: 'closing_date', label: 'Closing Date',     render: c => c.closing_date ?? '—' },
-  { id: 'realtor_email',label: 'Realtor Email',    render: c => c.realtor_email ?? '—' },
-  { id: 'created',      label: 'Created Date',     render: c => c.created_at ? new Date(c.created_at).toLocaleDateString() : '—' },
+  { id: 'company',      label: 'Company',          minWidth: 160, render: c => c.company_name ?? '—' },
+  { id: 'birthday',     label: 'Birthday',         minWidth: 120, render: c => c.birthday ?? '—' },
+  { id: 'co_name',      label: 'Co-Borrower Name', minWidth: 180, render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
+  { id: 'co_bday',      label: 'Co-Bday',          minWidth: 120, render: c => c.coborrower_birthday ?? '—' },
+  { id: 'notes',        label: 'Notes',            minWidth: 200, render: c => {
+      const v = c.notes
+      if (!v) return '—'
+      // If the notes value looks like an ISO date/timestamp, display as MM/DD/YYYY only
+      if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+        const formatted = fmtDateOnly(v)
+        if (formatted !== '—') return formatted
+      }
+      return v
+    } },
+  { id: 'last_touch',   label: 'Last Touch',       minWidth: 180, render: c => <LastTouchCell date={c.last_touch_at ?? c.last_activity_date} /> },
+  { id: 'closing_date', label: 'Closing Date',     minWidth: 140, render: c => fmtDateOnly(c.closing_date) },
+  { id: 'realtor_email',label: 'Realtor Email',    minWidth: 220, render: c => <EmailCell value={c.realtor_email} /> },
+  { id: 'created',      label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
 ]
 
-const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by']
+const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by', 'last_touch']
 const LS_COLUMNS_KEY  = 'loanos_contacts_columns_v1'
+const LS_COL_ORDER_KEY = 'loanos_contacts_col_order_v1'
+// IDs of non-name (draggable) columns in their default order
+const DRAGGABLE_COL_IDS = ALL_COLUMNS.filter(c => c.id !== 'name').map(c => c.id)
 
 // ── Stage badge styles ────────────────────────────────────────────────────────
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
@@ -267,6 +338,64 @@ const BLANK_CONTACT = {
 
 const CONTACTS_PAGE_SIZE = 100
 
+// ── Sortable column header (for @dnd-kit drag reorder) ────────────────────────
+function SortableColumnHeader({
+  col, sortKey, sortDir, onSort,
+}: {
+  col: ColumnDef
+  sortKey: string
+  sortDir: 'asc' | 'desc'
+  onSort: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: col.id })
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    padding: '8px 16px',
+    textAlign: 'left',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 10,
+    letterSpacing: '0.1em',
+    color: sortKey === col.id ? '#c9a84c' : 'var(--muted)',
+    whiteSpace: 'nowrap',
+    userSelect: 'none',
+    minWidth: col.minWidth,
+    background: 'var(--surface)',
+    position: 'sticky' as const,
+    top: 0,
+    zIndex: 10,
+    cursor: isDragging ? 'grabbing' : 'pointer',
+    verticalAlign: 'middle',
+  }
+
+  return (
+    <th ref={setNodeRef} style={style} onClick={onSort}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span
+          {...attributes}
+          {...listeners}
+          onClick={e => e.stopPropagation()}
+          style={{
+            cursor: 'grab',
+            color: 'var(--muted)',
+            opacity: 0,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 2px',
+            // shown via parent :hover via CSS
+          }}
+          className="col-drag-handle"
+        >
+          <GripVertical size={12} />
+        </span>
+        {col.label.toUpperCase()}
+        {sortKey === col.id ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+      </div>
+    </th>
+  )
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ContactsPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -297,9 +426,13 @@ export default function ContactsPage() {
   const [, setCreating]         = useState(false)
   const [, setCreateError]   = useState<string | null>(null)
 
-  // column picker
+  // column picker + order
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
   const [showColPicker, setShowColPicker]   = useState(false)
+  const [columnOrder, setColumnOrder]       = useState<string[]>(DRAGGABLE_COL_IDS)
+
+  // @dnd-kit sensors for column reorder
+  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   // import modal
   const [showImport, setShowImport]     = useState(false)
@@ -342,11 +475,23 @@ export default function ContactsPage() {
     return () => mq.removeEventListener('change', sync)
   }, [sidebarCollapsedUser])
 
-  // init columns from localStorage
+  // init columns + column order from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LS_COLUMNS_KEY)
       if (stored) setVisibleColumns(JSON.parse(stored))
+    } catch {}
+    try {
+      const storedOrder = localStorage.getItem(LS_COL_ORDER_KEY)
+      if (storedOrder) {
+        const parsed: string[] = JSON.parse(storedOrder)
+        // Merge: keep stored order, add any new columns at the end
+        const merged = [
+          ...parsed.filter(id => DRAGGABLE_COL_IDS.includes(id)),
+          ...DRAGGABLE_COL_IDS.filter(id => !parsed.includes(id)),
+        ]
+        setColumnOrder(merged)
+      }
     } catch {}
   }, [])
 
@@ -536,16 +681,7 @@ export default function ContactsPage() {
         setSelectedContact(prev => prev ? { ...prev, stage: stageValue } : null)
     }
     await supabase.from('contacts').update({ stage: normalizeStage(stageValue) }).eq('id', contactId)
-    supabase.from('activity_log').insert({
-      action: 'contact.stage_changed',
-      entity_type: 'contact',
-      contact_id: contactId,
-      metadata: {
-        from: contact.stage ?? null,
-        to: stageValue,
-        name: `${contact.first_name ?? ''} ${contact.last_name ?? ''}`.trim(),
-      },
-    })
+    updateLastTouch(supabase, contactId, 'stage_changed', `Stage changed to ${stageValue ?? '(none)'}`)
     fetchCounts()
   }
 
@@ -600,6 +736,7 @@ export default function ContactsPage() {
     if (!error) {
       setEditMode(false)
       setSelectedContact(prev => prev ? { ...prev, ...editData } as Contact : null)
+      updateLastTouch(supabase, selectedContact.id, 'contact_updated', 'Updated contact record')
       await Promise.all([fetchContacts(), fetchCounts()])
     }
     setSaving(false)
@@ -674,11 +811,30 @@ export default function ContactsPage() {
     fetchContacts()
   }
 
+  // ── Column reorder handler ────────────────────────────────────────────────
+  function handleColDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setColumnOrder(prev => {
+      const oldIdx = prev.indexOf(active.id as string)
+      const newIdx = prev.indexOf(over.id as string)
+      const next = arrayMove(prev, oldIdx, newIdx)
+      localStorage.setItem(LS_COL_ORDER_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   // ── Derived ───────────────────────────────────────────────────────────────
   const activeListLabel = activeList.startsWith('custom-')
     ? (customLists.find(l => l.id === activeList)?.name ?? 'Custom List')
     : (SMART_LISTS.find(l => l.id === activeList)?.label ?? 'All Contacts')
-  const colDefs         = ALL_COLUMNS.filter(c => visibleColumns.includes(c.id))
+
+  // Name column is always pinned first; other visible columns follow columnOrder
+  const nameColDef = ALL_COLUMNS.find(c => c.id === 'name')!
+  const draggableColDefs = columnOrder
+    .map(id => ALL_COLUMNS.find(c => c.id === id))
+    .filter((c): c is ColumnDef => !!c && c.id !== 'name' && visibleColumns.includes(c.id))
+
   const allSelected     = contacts.length > 0 && selectedIds.size === contacts.length
   const someSelected    = selectedIds.size > 0
 
@@ -884,17 +1040,21 @@ export default function ContactsPage() {
               >
                 {ALL_COLUMNS.map(col => (
                   <label key={col.id} style={{
-                    display: 'flex', alignItems: 'center', gap: 8, padding: '5px 14px', cursor: 'pointer',
-                    fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)',
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '5px 14px',
+                    cursor: col.id === 'name' ? 'default' : 'pointer',
+                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    color: col.id === 'name' ? 'var(--muted)' : 'var(--fg)',
+                    opacity: col.id === 'name' ? 0.5 : 1,
                   }}>
                     <input
                       type="checkbox"
-                      checked={visibleColumns.includes(col.id)}
-                      onChange={() => toggleColumn(col.id)}
+                      checked={col.id === 'name' ? true : visibleColumns.includes(col.id)}
+                      disabled={col.id === 'name'}
+                      onChange={() => col.id !== 'name' && toggleColumn(col.id)}
                       onClick={e => e.stopPropagation()}
-                      style={{ accentColor: '#c9a84c', cursor: 'pointer' }}
+                      style={{ accentColor: '#c9a84c', cursor: col.id === 'name' ? 'default' : 'pointer' }}
                     />
-                    {col.label}
+                    {col.label}{col.id === 'name' ? ' (pinned)' : ''}
                   </label>
                 ))}
               </div>
@@ -1007,104 +1167,183 @@ export default function ContactsPage() {
         )}
 
         {/* Table */}
-        <div className="flex-1 overflow-auto" style={{ display: viewMode === 'kanban' ? 'none' : undefined }}>
-          {loading ? (
-            <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>LOADING…</div>
-          ) : contacts.length === 0 ? (
-            <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>NO CONTACTS FOUND</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-                  {/* Checkbox header */}
-                  <th style={{ padding: '8px 12px', width: 36 }} onClick={e => e.stopPropagation()}>
-                    <input type="checkbox" checked={allSelected} onChange={toggleSelectAll}
-                           style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
-                  </th>
-                  {colDefs.map(col => (
-                    <th key={col.id}
-                        onClick={() => handleSort(col.id as keyof Contact)}
-                        style={{
-                          padding: '8px 16px', textAlign: 'left', cursor: 'pointer',
-                          fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
-                          color: sort.key === col.id ? '#c9a84c' : 'var(--muted)',
-                          whiteSpace: 'nowrap', userSelect: 'none',
-                        }}>
-                      {col.label.toUpperCase()}
-                      {sort.key === col.id ? (sort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {contacts.map((contact, i) => (
-                  <tr key={contact.id}
-                      onClick={() => { setSelectedContact(contact); setEditMode(false); setEditData({}) }}
-                      style={{
-                        borderBottom: '1px solid var(--border)',
-                        background: selectedIds.has(contact.id)
-                          ? 'rgba(201,168,76,0.06)'
-                          : selectedContact?.id === contact.id
-                            ? 'rgba(201,168,76,0.08)'
-                            : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
-                        cursor: 'pointer',
-                      }}
-                      onMouseEnter={e => {
-                        if (!selectedIds.has(contact.id) && selectedContact?.id !== contact.id)
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'
-                      }}
-                      onMouseLeave={e => {
-                        if (!selectedIds.has(contact.id) && selectedContact?.id !== contact.id)
-                          (e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'
-                      }}>
-                    {/* Checkbox cell */}
-                    <td style={{ padding: '9px 12px' }} onClick={e => toggleSelect(contact.id, e)}>
-                      <input type="checkbox" checked={selectedIds.has(contact.id)}
-                             onChange={() => {}} style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
-                    </td>
+        <div
+          className="flex-1"
+          style={{
+            display: viewMode === 'kanban' ? 'none' : 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Scrollable table container */}
+          <div
+            style={{
+              flex: 1,
+              overflowX: 'auto',
+              overflowY: 'auto',
+              // Dark gold scrollbar
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#C9A84C44 transparent',
+            }}
+          >
+            <style>{`
+              .contacts-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+              .contacts-scroll::-webkit-scrollbar-track { background: transparent; }
+              .contacts-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 3px; }
+              .contacts-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
+              th:hover .col-drag-handle { opacity: 1 !important; }
+            `}</style>
+            <div
+              className="contacts-scroll"
+              style={{ height: '100%', overflowX: 'auto', overflowY: 'auto' }}
+            >
+              {loading ? (
+                <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>LOADING…</div>
+              ) : contacts.length === 0 ? (
+                <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>NO CONTACTS FOUND</div>
+              ) : (
+                <table style={{ minWidth: 'max-content', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                  <thead>
+                    <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
+                      <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                          {/* Checkbox header — sticky left */}
+                          <th
+                            style={{
+                              padding: '8px 12px', width: 36, position: 'sticky', left: 0,
+                              top: 0, zIndex: 30, background: 'var(--surface)',
+                            }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll}
+                                   style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
+                          </th>
+                          {/* Name column — sticky after checkbox */}
+                          <th
+                            onClick={() => handleSort('first_name' as keyof Contact)}
+                            style={{
+                              padding: '8px 16px', textAlign: 'left', cursor: 'pointer',
+                              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
+                              color: sort.key === 'first_name' ? '#c9a84c' : 'var(--muted)',
+                              whiteSpace: 'nowrap', userSelect: 'none',
+                              minWidth: nameColDef.minWidth,
+                              position: 'sticky', left: 36, top: 0, zIndex: 30,
+                              background: 'var(--surface)',
+                              borderRight: '1px solid var(--border)',
+                            }}
+                          >
+                            {nameColDef.label.toUpperCase()}
+                          </th>
+                          {/* Draggable column headers */}
+                          {draggableColDefs.map(col => (
+                            <SortableColumnHeader
+                              key={col.id}
+                              col={col}
+                              sortKey={sort.key as string}
+                              sortDir={sort.dir}
+                              onSort={() => handleSort(col.id as keyof Contact)}
+                            />
+                          ))}
+                        </tr>
+                      </SortableContext>
+                    </DndContext>
+                  </thead>
+                  <tbody>
+                    {contacts.map((contact, i) => {
+                      const isSelected = selectedIds.has(contact.id)
+                      const isActive   = selectedContact?.id === contact.id
+                      const rowBg      = isSelected
+                        ? 'rgba(201,168,76,0.06)'
+                        : isActive
+                          ? 'rgba(201,168,76,0.08)'
+                          : i % 2 === 0 ? 'var(--bg)' : 'rgba(255,255,255,0.02)'
+                      // Pinned cells need explicit bg matching the row
+                      const pinnedBg   = isSelected
+                        ? 'rgba(21,18,10,1)'
+                        : isActive
+                          ? 'rgba(22,19,11,1)'
+                          : i % 2 === 0 ? 'var(--bg)' : 'rgb(14,14,16)'
 
-                    {/* Data cells */}
-                    {colDefs.map(col => (
-                      <td key={col.id} style={{ padding: '9px 16px', color: 'var(--fg)', whiteSpace: 'nowrap', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {col.id === 'stage' ? (
-                          editingStageId === contact.id ? (
-                            <select
-                              autoFocus
-                              defaultValue={contact.stage ?? ''}
-                              onChange={e => handleStageChange(contact.id, e.target.value)}
-                              onBlur={() => setEditingStageId(null)}
-                              onClick={e => e.stopPropagation()}
-                              style={{ background: 'var(--bg)', color: 'var(--fg)', border: '1px solid var(--border)', borderRadius: 3, fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 4px' }}>
-                              <option value="">— No Stage —</option>
-                              {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                          ) : (
-                            <span
-                              onClick={e => { e.stopPropagation(); setEditingStageId(contact.id) }}
-                              style={getStageBadgeStyle(contact.stage)}>
-                              {contact.stage ?? '—'}
-                            </span>
-                          )
-                        ) : col.render(contact)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          {/* Load More */}
-          {hasMore && !loading && (
-            <div className="flex justify-center py-4 border-t border-zinc-700">
-              <button
-                onClick={loadMoreContacts}
-                disabled={loadingMore}
-                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-zinc-600 rounded text-zinc-400 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length})`}
-              </button>
+                      return (
+                        <tr
+                          key={contact.id}
+                          onClick={() => { setSelectedContact(contact); setEditMode(false); setEditData({}) }}
+                          style={{ borderBottom: '1px solid var(--border)', background: rowBg, cursor: 'pointer' }}
+                          onMouseEnter={e => {
+                            if (!isSelected && !isActive)
+                              (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'
+                          }}
+                          onMouseLeave={e => {
+                            if (!isSelected && !isActive)
+                              (e.currentTarget as HTMLElement).style.background = rowBg
+                          }}
+                        >
+                          {/* Checkbox — sticky left */}
+                          <td
+                            style={{ padding: '9px 12px', position: 'sticky', left: 0, zIndex: 10, background: pinnedBg }}
+                            onClick={e => toggleSelect(contact.id, e)}
+                          >
+                            <input type="checkbox" checked={isSelected}
+                                   onChange={() => {}} style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
+                          </td>
+
+                          {/* Name — sticky after checkbox */}
+                          <td
+                            style={{
+                              padding: '9px 16px', position: 'sticky', left: 36, zIndex: 10,
+                              background: pinnedBg, borderRight: '1px solid var(--border)',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                              minWidth: nameColDef.minWidth, maxWidth: nameColDef.minWidth,
+                            }}
+                          >
+                            {nameColDef.render(contact)}
+                          </td>
+
+                          {/* Data cells */}
+                          {draggableColDefs.map(col => (
+                            <td key={col.id} style={{ padding: '9px 16px', color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: col.minWidth }}>
+                              {col.id === 'stage' ? (
+                                editingStageId === contact.id ? (
+                                  <select
+                                    autoFocus
+                                    defaultValue={contact.stage ?? ''}
+                                    onChange={e => handleStageChange(contact.id, e.target.value)}
+                                    onBlur={() => setEditingStageId(null)}
+                                    onClick={e => e.stopPropagation()}
+                                    style={{ background: 'var(--bg)', color: 'var(--fg)', border: '1px solid var(--border)', borderRadius: 3, fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 4px' }}>
+                                    <option value="">— No Stage —</option>
+                                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                                  </select>
+                                ) : (
+                                  <span
+                                    onClick={e => { e.stopPropagation(); setEditingStageId(contact.id) }}
+                                    style={getStageBadgeStyle(contact.stage)}>
+                                    {contact.stage ?? '—'}
+                                  </span>
+                                )
+                              ) : col.render(contact)}
+                            </td>
+                          ))}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              )}
+              {/* Load More */}
+              {hasMore && !loading && (
+                <div className="flex justify-center py-4 border-t border-zinc-700">
+                  <button
+                    onClick={loadMoreContacts}
+                    disabled={loadingMore}
+                    className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-zinc-600 rounded text-zinc-400 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length})`}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -1189,7 +1428,9 @@ export default function ContactsPage() {
                   ['Stage', selectedContact.stage],
                   ['Lead Source', selectedContact.lead_source], ['Referred By', selectedContact.referred_by],
                   ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthday],
-                  ['Last Touch', selectedContact.last_touch], ['Notes', selectedContact.notes],
+                  ['Last Touch', selectedContact.last_activity_date
+                    ? new Date(selectedContact.last_activity_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : selectedContact.last_touch], ['Notes', selectedContact.notes],
                   ['Co-Borrower', selectedContact.coborrower_first_name
                     ? `${selectedContact.coborrower_first_name} ${selectedContact.coborrower_last_name ?? ''}`.trim()
                     : null],

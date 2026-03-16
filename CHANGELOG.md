@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [3.2.0] — 2026-03-16 — Loans + Contacts Sync Fix + UI Fixes
+
+### New
+- **Stage constants file** (`lib/constants/loan-stages.ts`): single source of truth for all stage definitions, labels, groups, raw status mappings, and helper functions. Replaces 6+ scattered hardcoded stage lists.
+- **Contact ↔ Loan sync trigger**: Supabase trigger `sync_contact_stage_from_loan()` auto-updates `contacts.stage` when `loans.status` changes. Fires on both INSERT and UPDATE.
+- **Filterable loan lists**: preset dropdown (8 presets including monthly closed, YTD, needs attention), advanced filters (Purpose, Loan Type, Date range), active filter chips with × clear.
+
+### Fixed
+- **Loan row click routing**: clicking any loan row now routes to `/dashboard/loans/[id]` — previously no row click handler existed.
+- **User scoping on loans list**: `user_id` filter added to ALL Supabase queries (counts + data). Previously showed all users' loans.
+- **Stage filter accuracy**: In Process and Closed filters now use constants, automatically including all Arive raw status variants.
+- **Borrower name → contact link**: borrower name in loans list links to `/dashboard/contacts/[contact_id]` instead of nowhere.
+
+### Changed
+- **Commission field**: now editable inline in loan detail header (click to edit). Added to Financials section in Details tab. Shows em dash when null.
+- **Dashboard page**: imports stage logic from constants instead of local STAGE_MAP.
+- **Contact backfill**: one-time sync of all existing contacts from their linked loan statuses (855 Closed, 18 In Process, 36 Pre-Approved, 1425 Leads).
+
 ## [3.1.1] — 2026-03-16 — Morning Audit Bugfixes
 
 ### Fixed

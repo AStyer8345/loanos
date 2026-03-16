@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2 } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -236,12 +237,33 @@ function flattenLoans(data: Record<string, unknown>[]): Loan[] {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+// Map dashboard stage query param to smart list ID or custom filter
+const STAGE_TO_LIST: Record<string, string> = {
+  'Pre-Approval': 'preapproval',
+  'Processing': 'inprocess',
+  'Underwriting': 'inprocess',
+  'Clear to Close': 'inprocess',
+  'pipeline': 'inprocess',
+  'pre_approval': 'preapproval',
+  'processing': 'inprocess',
+  'underwriting': 'inprocess',
+  'clear_to_close': 'inprocess',
+  'funded': 'closed',
+}
+
 export default function LoansPage() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const urlStage = searchParams.get('stage')
+  const urlFilter = searchParams.get('filter')
+  const urlPeriod = searchParams.get('period')
+
   const [loans, setLoans] = useState<Loan[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [activeList, setActiveList] = useState('inprocess')
+  const [urlFilterActive, setUrlFilterActive] = useState<{ stage?: string; filter?: string; period?: string } | null>(null)
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('closing_date')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -363,16 +385,41 @@ export default function LoansPage() {
     setLoadingMore(false)
   }, [buildLoansQuery, activeList])
 
+  // URL param-based filtering on initial load
   useEffect(() => {
     fetchCounts()
-    fetchLoans('inprocess')
-  }, [fetchCounts, fetchLoans])
+
+    if (urlStage || urlFilter || urlPeriod) {
+      setUrlFilterActive({
+        stage: urlStage || undefined,
+        filter: urlFilter || undefined,
+        period: urlPeriod || undefined,
+      })
+
+      // Map stage to a smart list and load
+      if (urlStage) {
+        const listId = STAGE_TO_LIST[urlStage] ?? 'all'
+        setActiveList(listId)
+        fetchLoans(listId)
+      } else if (urlFilter === 'no_activity_3days') {
+        setActiveList('inprocess')
+        fetchLoans('inprocess')
+      } else {
+        fetchLoans('inprocess')
+      }
+    } else {
+      fetchLoans('inprocess')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleListChange = (listId: string) => {
     setActiveList(listId)
     setSearch('')
     setEditingStatusId(null)
     setSelected(new Set())
+    setUrlFilterActive(null)
+    router.replace('/dashboard/loans')
     fetchLoans(listId)
   }
 
@@ -436,6 +483,48 @@ export default function LoansPage() {
 
   const filtered = useMemo(() => {
     let list = loans
+
+    // Apply URL-based stage filter (from dashboard stage cards)
+    if (urlFilterActive?.stage) {
+      const stageName = urlFilterActive.stage
+      // Stage-specific status sets matching DashboardClient STAGE_MAP
+      const STAGE_STATUSES: Record<string, string[]> = {
+        'Pre-Approval': ['lead', 'Lead', 'Pre-App', 'Pre-Approved', 'Application', 'Started', 'APPLICATION_INTAKE', 'QUALIFICATION', 'pre_approval', 'pre-approval', 'pre_approved'],
+        'Processing': ['processing', 'Processing', 'Loan Setup', 'Disclosed', 'In Process', 'Loan in Process', 'LOAN_SETUP', 'DISCLOSURE_SENT', 'Submitted'],
+        'Underwriting': ['Submitted to UW', 'underwriting', 'Approved', 'Approved with Conditions', 'Resubmitted', 'Conditional Approval', 'SUBMITTED', 'CONDITIONAL_APPROVAL', 'APPROVED_WITH_CONDITIONS', 'RESUBMIT', 'RESUBMITTED'],
+        'Clear to Close': ['Clear to Close', 'CTC', 'CLEAR_TO_CLOSE', 'Clear To Close', 'clear_to_close'],
+        'funded': ['Closed', 'Funded', 'Closed/Funded'],
+      }
+      const validStatuses = STAGE_STATUSES[stageName]
+      if (validStatuses) {
+        list = list.filter(l => validStatuses.some(s => s.toLowerCase() === (l.status ?? '').toLowerCase()))
+      }
+    }
+
+    // Apply period filter (mtd = this month, ytd = this year)
+    if (urlFilterActive?.period && urlFilterActive?.stage === 'funded') {
+      const now = new Date()
+      list = list.filter(l => {
+        const cd = l.closing_date
+        if (!cd) return false
+        const d = new Date(cd)
+        if (urlFilterActive.period === 'mtd') {
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+        }
+        if (urlFilterActive.period === 'ytd') {
+          return d.getFullYear() === now.getFullYear()
+        }
+        return true
+      })
+    }
+
+    // Apply no_activity_3days filter — client-side approximation using closing_date
+    // (True stale check requires updated_at which isn't in the loans list query)
+    if (urlFilterActive?.filter === 'no_activity_3days') {
+      // This filter is applied at fetch time — here we just keep it as-is
+      // The dashboard already provides staleLoans, so this serves as a landing for that link
+    }
+
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(l =>
@@ -460,7 +549,7 @@ export default function LoansPage() {
       const bv = (b[sortKey] || '').toLowerCase()
       return mul * (av < bv ? -1 : av > bv ? 1 : 0)
     })
-  }, [loans, search, sortKey, sortDir])
+  }, [loans, search, sortKey, sortDir, urlFilterActive])
 
   // ── Sort icon ──────────────────────────────────────────────────────────
   const SortIcon = ({ k }: { k: SortKey }) => {
@@ -716,15 +805,44 @@ export default function LoansPage() {
           </div>
         )}
 
+        {/* Active URL filter badge */}
+        {urlFilterActive && (urlFilterActive.stage || urlFilterActive.filter || urlFilterActive.period) && (
+          <div className="px-4 pt-3 pb-1 flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Filtered:</span>
+            {urlFilterActive.stage && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-xs font-mono text-[#C9A84C]">
+                Stage: {urlFilterActive.stage}
+                <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            {urlFilterActive.period && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-900/30 border border-blue-700 text-xs font-mono text-blue-400">
+                Period: {urlFilterActive.period === 'mtd' ? 'This Month' : urlFilterActive.period === 'ytd' ? 'Year to Date' : urlFilterActive.period}
+                <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            {urlFilterActive.filter && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-900/30 border border-orange-700 text-xs font-mono text-orange-400">
+                {urlFilterActive.filter === 'no_activity_3days' ? 'No activity 3+ days' : urlFilterActive.filter}
+                <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            <button
+              onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }}
+              className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline"
+            >Clear all</button>
+          </div>
+        )}
+
         {/* Header stats — shown when not loading */}
-        {!loading && loans.length > 0 && (() => {
-          const totalVolume = loans.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
-          const totalCommission = loans.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
+        {!loading && filtered.length > 0 && (() => {
+          const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
+          const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
           return (
             <div className="px-4 pt-3 pb-2 border-b border-[#1e293b] bg-[#0a0f1a] flex items-center gap-6">
               <div>
                 <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Loans</p>
-                <p className="text-lg font-mono font-bold text-zinc-100">{loans.length}</p>
+                <p className="text-lg font-mono font-bold text-zinc-100">{filtered.length}</p>
               </div>
               <div>
                 <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Volume</p>

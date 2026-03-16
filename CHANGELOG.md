@@ -1,5 +1,32 @@
 # LoanOS Changelog
 
+## [3.1.0] — 2026-03-16 — Dashboard Links + Automations + Filters
+
+### Dashboard
+- All 4 KPI cards (Pipeline Loans, Gross Commission, Commission YTD, This Month) now hyperlinked to /dashboard/loans with appropriate query params
+- Today's Focus section links to /dashboard/marketing with arrow indicator
+- Needs Attention section has "View all" link to /dashboard/loans?filter=no_activity_3days
+
+### Automations
+- Loan detail Automations tab expanded from 4 to 8 workflows: added Refi Intake, Refi Analysis, Website Lead Follow-up, Contract Received
+- Standalone /dashboard/automations page expanded from 5 to 8 workflows (same additions)
+- Actions dropdown buttons now pre-select automation: clicking "Send PA Email" auto-opens the PA Email modal in the Automations tab
+
+### Loans List
+- URL filter support: reads `stage`, `filter`, `period` query params from URL
+- Dashboard stage cards link to `?stage=StageName` — client-side filters loaded loans
+- Active filter badges (gold/blue/orange chips) with × clear buttons and "Clear all" link
+- Header stats (Total Loans, Volume, Commission) now recalculate for filtered loan set
+
+### Reports
+- New `/dashboard/reports/volume` page — server-rendered table of YTD funded loans with volume totals
+- New `/dashboard/reports/commission` page — server-rendered table of YTD funded loans with commission breakdown
+
+### Audit
+- Activity log verified working — `activity_log` table correct, insert/refresh/display all functional
+- MCC already fully migrated (v1.16.0–v1.18.0) — newsletter, Mailchimp, testimonials all in LoanOS
+- Full audit report: `tasks/audit-reports/dashboard-audit.md`
+
 ## [3.0.0] — 2026-03-16 — Dashboard Rebuild + Scenario Wizard + Branded PDF
 
 ### Theme

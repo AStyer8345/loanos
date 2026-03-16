@@ -10,16 +10,6 @@ const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.
 
 const WORKFLOWS = [
   {
-    id: 'final-cd',
-    name: 'Final CD Email',
-    description: 'Upload a Closing Disclosure PDF — Claude extracts 10 fields and generates a personalized closing email draft in Outlook.',
-    triggerLabel: 'Upload CD PDF',
-    triggerType: 'pdf' as const,
-    n8nId: 'SkzrWeR0bHZs8kWX',
-    webhookPath: 'loanos-final-cd',
-    icon: 'cd',
-  },
-  {
     id: 'pre-approval',
     name: 'Pre-Approval Email',
     description: 'Upload a Pre-Approval letter — Claude extracts borrower details and drafts a congratulations email ready to review.',
@@ -30,6 +20,36 @@ const WORKFLOWS = [
     icon: 'pa',
   },
   {
+    id: 'final-cd',
+    name: 'Final CD Email',
+    description: 'Upload a Closing Disclosure PDF — Claude extracts 10 fields and generates a personalized closing email draft in Outlook.',
+    triggerLabel: 'Upload CD PDF',
+    triggerType: 'pdf' as const,
+    n8nId: 'SkzrWeR0bHZs8kWX',
+    webhookPath: 'loanos-final-cd',
+    icon: 'cd',
+  },
+  {
+    id: 'refi-intake',
+    name: 'Refi Intake Email',
+    description: 'Upload an Initial Fees Worksheet — Claude extracts loan details and drafts the refinance kickoff email with disclosures breakdown.',
+    triggerLabel: 'Upload IFW PDF',
+    triggerType: 'refi' as const,
+    n8nId: 'yCTydQ7RfZK4DyUg',
+    webhookPath: 'loanos-refi-intake',
+    icon: 'refi',
+  },
+  {
+    id: 'refi-analysis',
+    name: 'Refi Analysis',
+    description: 'Upload an IFW PDF — builds a branded multi-page refinance analysis PDF and drafts the accompanying email.',
+    triggerLabel: 'Upload IFW PDF',
+    triggerType: 'pdf' as const,
+    n8nId: '',
+    webhookPath: 'loanos-refi-analysis',
+    icon: 'refi',
+  },
+  {
     id: 'referral-intro',
     name: 'Referral Intro Email',
     description: 'Paste referral details — Claude writes a personalized introduction email to the new lead in seconds.',
@@ -37,6 +57,16 @@ const WORKFLOWS = [
     triggerType: 'form' as const,
     n8nId: 'YbgDnTpPdefcazKy',
     webhookPath: 'loanos-referral-intro',
+    icon: 'referral',
+  },
+  {
+    id: 'website-lead',
+    name: 'Website Lead Follow-up',
+    description: 'Process a new inbound lead from styermortgage.com — creates Salesforce contact and drafts a personalized follow-up email.',
+    triggerLabel: 'Enter Lead Details',
+    triggerType: 'form' as const,
+    n8nId: '',
+    webhookPath: 'loanos-website-lead',
     icon: 'referral',
   },
   {
@@ -50,14 +80,14 @@ const WORKFLOWS = [
     icon: 'app',
   },
   {
-    id: 'refi-intake',
-    name: 'Refi Intake Email',
-    description: 'Upload an Initial Fees Worksheet — Claude extracts loan details and drafts the refinance kickoff email with disclosures breakdown.',
-    triggerLabel: 'Upload IFW PDF',
-    triggerType: 'refi' as const,
-    n8nId: '',
-    webhookPath: 'loanos-refi-intake',
-    icon: 'refi',
+    id: 'contract-received',
+    name: 'Contract Received',
+    description: 'Upload an executed purchase contract — Claude extracts all key fields, drafts reply-all to transaction parties.',
+    triggerLabel: 'Upload Contract PDF',
+    triggerType: 'pdf' as const,
+    n8nId: 'UfNcdpoVKQZqy0fj',
+    webhookPath: 'loanos-contract-received',
+    icon: 'cd',
   },
 ]
 
@@ -798,14 +828,14 @@ export default function AutomationsPage() {
             Automations
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
-            5 active workflows — Claude extracts, n8n routes, Outlook drafts. You review and send.
+            8 active workflows — Claude extracts, n8n routes, Outlook drafts. You review and send.
           </p>
         </div>
 
         {/* ── Stat row ────────────────────────────────────────────────── */}
         <div className="flex border border-zinc-700 rounded-lg overflow-hidden bg-zinc-900 mb-6">
           {[
-            { label: 'Active Workflows', value: '5',             color: 'text-emerald-400' },
+            { label: 'Active Workflows', value: '8',             color: 'text-emerald-400' },
             { label: 'Errors',           value: '0',             color: 'text-zinc-100'    },
             { label: 'Last Updated',     value: '2026-03-15',    color: 'text-zinc-500'    },
             { label: 'Engine',           value: 'n8n + Claude',  color: 'text-emerald-400' },

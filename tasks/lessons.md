@@ -86,3 +86,19 @@ The Arive webhook (`/api/arive-webhook/route.ts`) writes to the NEW columns. Any
 
 - Model string for new routes: `claude-sonnet-4-20250514` (used in refi-intake route.ts)
 - Note: MEMORY.md says use `claude-sonnet-4-5` — verify which is authoritative before changing existing routes
+
+---
+
+## 2026-03-16 Sprint Lessons
+
+### Table name: `activity_log` not `loan_activity`
+The activity logging table is `activity_log`, NOT `loan_activity`. Always verify table names against Supabase before creating migrations.
+
+### MCC already migrated
+The Marketing Command Center was already migrated to LoanOS in v1.16.0–v1.18.0. All 4 API routes exist (generate-newsletter, publish-newsletter, send-mailchimp, run-testimonials). Don't duplicate migration effort — read CONTEXT.md thoroughly.
+
+### Automation pre-selection pattern
+Actions dropdown buttons set both `activeTab` and `selectedAutomationId` state. AutomationsTab receives `highlightId` prop, auto-opens the modal for that workflow, and scrolls to the highlighted card. Keeps trigger logic in one place.
+
+### Dashboard links use stage names
+Stage cards in the dashboard use `/dashboard/loans?stage=StageName`. The loans page client component reads URL params with `useSearchParams()` and applies post-fetch filters.

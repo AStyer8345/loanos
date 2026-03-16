@@ -144,26 +144,26 @@ export default function DashboardClient(props: DashboardClientProps) {
         <div className="space-y-4">
           {/* Top-level KPI cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#3b82f6] rounded-lg p-3">
+            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#3b82f6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Loans</div>
               <div className="text-2xl font-mono font-bold text-zinc-100">{props.totalActive}</div>
               <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtK(props.totalActiveVolume)} volume</div>
-            </div>
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3">
+            </Link>
+            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Gross Commission</div>
               <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.totalActiveCommission)}</div>
               <div className="text-[10px] font-mono text-zinc-500 mt-0.5">In pipeline</div>
-            </div>
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#10b981] rounded-lg p-3">
+            </Link>
+            <Link href="/dashboard/loans?stage=funded&period=ytd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#10b981] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Commission YTD</div>
               <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
               <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedYTD} loans funded</div>
-            </div>
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3">
+            </Link>
+            <Link href="/dashboard/loans?stage=funded&period=mtd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">This Month</div>
               <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
               <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)}</div>
-            </div>
+            </Link>
           </div>
 
           {/* Stage pipeline cards */}
@@ -219,10 +219,11 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* Today's Focus + Stale Loans */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
+            <Link href="/dashboard/marketing" className="block bg-[#0f172a] border border-[#1e293b] rounded-lg p-4 hover:bg-[#1e293b]/50 transition-colors">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp size={14} className="text-[#C9A84C]" />
                 <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s Focus</span>
+                <ArrowRight size={11} className="text-[#C9A84C] ml-auto" />
               </div>
               <div className="mb-2">
                 <span className="inline-block px-2 py-0.5 rounded bg-[#C9A84C]/10 text-[#C9A84C] text-xs font-mono font-medium border border-[#C9A84C]/30">
@@ -230,13 +231,18 @@ export default function DashboardClient(props: DashboardClientProps) {
                 </span>
               </div>
               <p className="text-sm font-mono text-zinc-300">{todayFocus.description}</p>
-            </div>
+            </Link>
 
             <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Clock size={14} className="text-orange-400" />
                 <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Needs Attention</span>
                 <span className="text-[10px] font-mono text-zinc-600">3+ days no activity</span>
+                {props.staleLoans.length > 0 && (
+                  <Link href="/dashboard/loans?filter=no_activity_3days" className="ml-auto flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                    View all <ArrowRight size={9} />
+                  </Link>
+                )}
               </div>
               {props.staleLoans.length === 0 ? (
                 <p className="text-xs font-mono text-zinc-600">All loans are up to date</p>

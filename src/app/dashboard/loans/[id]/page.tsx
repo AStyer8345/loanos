@@ -64,6 +64,8 @@ interface Loan {
   closing_date: string | null
   funding_date: string | null
   rate_lock_expiration: string | null
+  rate_lock_date: string | null
+  rate_lock_days: number | null
   estimated_closing_date: string | null
   loan_created_date: string | null
   // Financials
@@ -135,6 +137,8 @@ interface ActivityRow {
   id: string
   created_at: string
   action: string
+  type: string | null
+  summary: string | null
   entity_type: string | null
   metadata: Record<string, unknown> | null
 }
@@ -316,7 +320,7 @@ export default function LoanDetailPage() {
     const [loanRes, docsRes, actRes, draftsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
-      supabase.from('activity_log').select('id, created_at, action, entity_type, metadata').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(50),
+      supabase.from('activity_log').select('id, created_at, action, type, summary, entity_type, metadata').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(50),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
     ])
 
@@ -554,7 +558,7 @@ export default function LoanDetailPage() {
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
         )}
         {activeTab === 'activity' && (
-          <div className="p-6"><ActivityTab activity={activity} loanId={loanId} onRefresh={fetchAll} /></div>
+          <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} loanId={loanId} onRefresh={fetchAll} /></div>
         )}
         {activeTab === 'emails' && (
           <div className="p-6"><EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} /></div>
@@ -1553,7 +1557,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
 // ── Activity tab ──────────────────────────────────────────────────────────────
 
-function ActivityTab({ activity, loanId, onRefresh }: { activity: ActivityRow[]; loanId: string; onRefresh: () => void }) {
+function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; loanId: string; onRefresh: () => void }) {
   const supabase = createClient()
   const [filter, setFilter] = useState<'all' | 'system' | 'manual'>('all')
   const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
@@ -1561,19 +1565,47 @@ function ActivityTab({ activity, loanId, onRefresh }: { activity: ActivityRow[];
   const [logSaving, setLogSaving] = useState(false)
 
   const handleLogActivity = async () => {
-    if (!logModal || !logNotes.trim()) return
+    if (!logModal) return
     setLogSaving(true)
-    await supabase.from('activity_log').insert({
+
+    // Get current user for user_id
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const newRow: ActivityRow = {
+      id: crypto.randomUUID(),
+      created_at: new Date().toISOString(),
+      action: `Logged ${logModal}`,
+      type: logModal,
+      summary: logNotes.trim() || null,
+      entity_type: 'loan',
+      metadata: { activity_type: logModal },
+    }
+
+    // Optimistic update — prepend to feed immediately
+    setActivity([newRow, ...activity])
+    setLogModal(null)
+    setLogNotes('')
+
+    // Persist to Supabase
+    const { error } = await supabase.from('activity_log').insert({
       loan_id: loanId,
       action: `Logged ${logModal}`,
       type: logModal,
-      summary: logNotes.trim(),
+      summary: logNotes.trim() || null,
       entity_type: 'loan',
       metadata: { activity_type: logModal },
+      user_id: user?.id ?? null,
     })
+
     setLogSaving(false)
-    setLogModal(null)
-    setLogNotes('')
+
+    if (error) {
+      // Rollback optimistic update on failure
+      setActivity(activity)
+      return
+    }
+
+    // Background re-fetch to get server-generated id
     onRefresh()
   }
 
@@ -1671,15 +1703,33 @@ function ActivityTab({ activity, loanId, onRefresh }: { activity: ActivityRow[];
         </div>
       ) : (
         <div className="space-y-0">
-          {visible.map((item, i) => (
+          {visible.map((item, i) => {
+            const typeIcon = item.type === 'call' ? '📞' : item.type === 'email' ? '📧' : item.type === 'text' ? '💬' : null
+            const typeLabel = item.type === 'call' ? 'Call' : item.type === 'email' ? 'Email' : item.type === 'text' ? 'Text' : null
+            const isManual = !isSystem(item)
+            return (
             <div key={item.id} className="flex gap-3">
               <div className="flex flex-col items-center">
-                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isSystem(item) ? 'bg-emerald-500' : 'bg-blue-400'}`} />
+                {typeIcon ? (
+                  <span className="text-sm mt-0.5 shrink-0">{typeIcon}</span>
+                ) : (
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isManual ? 'bg-blue-400' : 'bg-emerald-500'}`} />
+                )}
                 {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
               </div>
               <div className="pb-4">
-                <p className="text-sm font-mono text-zinc-200">{item.action}</p>
-                <p className="text-xs text-zinc-500 font-mono mt-0.5">{fmtRelative(item.created_at)}</p>
+                <div className="flex items-center gap-2">
+                  {typeLabel && <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400">{typeLabel}</span>}
+                  <p className="text-sm font-mono text-zinc-200">{item.action}</p>
+                </div>
+                <p className="text-xs text-zinc-500 font-mono mt-0.5">
+                  {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {' at '}
+                  {new Date(item.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                </p>
+                {item.summary && (
+                  <p className="text-xs font-mono text-zinc-300 mt-1">{item.summary}</p>
+                )}
                 {item.metadata && Object.keys(item.metadata).length > 0 && (
                   <div className="mt-1 bg-zinc-800 rounded px-2 py-1 text-xs text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-1 border border-zinc-700">
                     {Object.entries(item.metadata)
@@ -1692,7 +1742,8 @@ function ActivityTab({ activity, loanId, onRefresh }: { activity: ActivityRow[];
                 )}
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
       </>

@@ -7,11 +7,10 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X } from 'lucide-react'
 import {
   IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
-  LEAD_STATUSES, NEW_APP_STATUSES, INACTIVE_STATUSES,
+  LEAD_STATUSES, NEW_APP_STATUSES,
   PIPELINE_STAGES as PIPELINE_STAGE_DEFS,
   LOAN_STATUS_OPTIONS as STAGE_OPTIONS,
-  normalizeToStageKey, getStageLabel, rawStatusesForGroup,
-  STAGE_GROUPS,
+  rawStatusesForGroup,
 } from '@/lib/constants/loan-stages'
 
 // ── Types ────────────────────────────────────────────────────────────────────

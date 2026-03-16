@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import { toDashboardStage, isInStageGroup, STAGE_GROUPS, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
+import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-import { Home, RefreshCw } from 'lucide-react'
+import { Home, RefreshCw, ChevronRight, ChevronLeft, Check } from 'lucide-react'
 import type {
   ScenarioMode, ScenarioState, PurchaseScenarioInput, RefiScenarioInput,
   CurrentLoanInput, PurchaseCalculatedResult, RefiCalculatedResult,
-  ReinvestmentResult, LoanTerm,
+  ReinvestmentResult, LoanTerm, ClosingCostBreakdown,
 } from '@/lib/scenarios/types'
 import ScenarioCard from './ScenarioCard'
 import CurrentLoanCard from './CurrentLoanCard'
@@ -19,6 +19,40 @@ import StatementUpload from './StatementUpload'
 
 function makeId() { return crypto.randomUUID() }
 
+export const DEFAULT_CLOSING_COSTS: ClosingCostBreakdown = {
+  // Lender Fees
+  originationFee: 0,
+  underwritingFee: 1295,
+  processingFee: 995,
+  applicationFee: 0,
+  adminFee: 0,
+  // Third Party Fees
+  appraisal: 795,
+  creditReport: 110,
+  docPrepFee: 495,
+  floodCert: 15,
+  attorneyFee: 125,
+  settlementFee: 550,
+  titleSearch: 125,
+  titleEndorsements: 12,
+  recordingFee: 200,
+  lendersTitlePolicy: 2119,
+  // Prepaids
+  prepaidInterestDays: 15,
+  annualHazardInsurance: 0,
+  taxEscrowMonths: 0,
+  insuranceEscrowMonths: 0,
+}
+
+export function sumClosingCosts(b: ClosingCostBreakdown): number {
+  return (
+    b.originationFee + b.underwritingFee + b.processingFee + b.applicationFee + b.adminFee +
+    b.appraisal + b.creditReport + b.docPrepFee + b.floodCert + b.attorneyFee +
+    b.settlementFee + b.titleSearch + b.titleEndorsements + b.recordingFee + b.lendersTitlePolicy
+    // Prepaids excluded from this sum — they depend on rate/loan amount and are displayed separately
+  )
+}
+
 const DEFAULT_PURCHASE: () => PurchaseScenarioInput = () => ({
   id: makeId(),
   label: '',
@@ -29,12 +63,15 @@ const DEFAULT_PURCHASE: () => PurchaseScenarioInput = () => ({
   loanAmount: 0,
   interestRate: 0,
   loanTerm: 30 as LoanTerm,
+  pointsPercent: 0,
+  creditsPercent: 0,
   points: 0,
   propertyTaxes: 0,
   homeownersInsurance: 0,
   hoa: 0,
   pmi: 0,
-  totalClosingCosts: 0,
+  closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
+  totalClosingCosts: sumClosingCosts(DEFAULT_CLOSING_COSTS),
   sellerCredits: 0,
   buydownType: 'none',
   buydownYearRates: [],
@@ -48,8 +85,11 @@ const DEFAULT_REFI: () => RefiScenarioInput = () => ({
   newLoanAmount: 0,
   interestRate: 0,
   loanTerm: 30 as LoanTerm,
+  pointsPercent: 0,
+  creditsPercent: 0,
   points: 0,
-  closingCosts: 0,
+  closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
+  closingCosts: sumClosingCosts(DEFAULT_CLOSING_COSTS),
   cashOutAmount: 0,
   payOffDebts: false,
   propertyTaxes: 0,
@@ -195,101 +235,170 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
 
   const hasResults = mode === 'purchase' ? purchaseResults.length > 0 : refiResults.length > 0
 
+  // ─── Wizard Step Management ──────────────────────────────────
+  const [step, setStep] = useState(0)
+  const STEPS = [
+    { label: 'Setup', description: 'Borrower & property info' },
+    { label: 'Loan Options', description: mode === 'purchase' ? 'Configure scenarios' : 'Current loan & new options' },
+    { label: 'Results', description: 'Compare & export' },
+  ]
+
+  const canAdvance = step === 0
+    ? (borrowerName.length > 0 || propertyValue > 0) // at least some info entered
+    : step === 1
+    ? (mode === 'purchase' ? purchaseScenarios.some(s => s.loanAmount > 0) : refiScenarios.some(s => s.newLoanAmount > 0))
+    : true
+
+  const goNext = async () => {
+    if (step === 1) {
+      // Auto-calculate when advancing from Loan Options to Results
+      await runCalculation()
+    }
+    setStep(prev => Math.min(prev + 1, STEPS.length - 1))
+  }
+
+  const goBack = () => setStep(prev => Math.max(prev - 1, 0))
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
-      <div className="max-w-[1600px] mx-auto px-5 md:px-8 py-8">
+      <div className="max-w-[1100px] mx-auto px-5 md:px-8 py-8">
 
         {/* ─── Header ────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
               Scenario Builder
             </h1>
-            <p className="text-sm mt-2" style={{ color: 'var(--sc-muted)' }}>
-              Compare loan options side by side
-            </p>
           </div>
-          <MISMOUpload onImport={handleMISMOImport} />
+          <MISMOUpload onImport={(data) => { handleMISMOImport(data); setStep(1) }} />
         </div>
 
-        {/* ─── Mode Toggle ───────────────────────────────────────── */}
-        <div className="flex items-center gap-1 p-1.5 rounded-[14px] w-fit mb-8" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-          <button
-            onClick={() => setMode('purchase')}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
-            style={{
-              background: mode === 'purchase' ? 'var(--sc-accent)' : 'transparent',
-              color: mode === 'purchase' ? '#ffffff' : 'var(--sc-muted)',
-            }}
-          >
-            <Home size={16} />
-            Purchase
-          </button>
-          <button
-            onClick={() => setMode('refinance')}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
-            style={{
-              background: mode === 'refinance' ? 'var(--sc-accent)' : 'transparent',
-              color: mode === 'refinance' ? '#ffffff' : 'var(--sc-muted)',
-            }}
-          >
-            <RefreshCw size={16} />
-            Refinance
-          </button>
+        {/* ─── Step Indicator ─────────────────────────────────────── */}
+        <div className="flex items-center gap-3 mb-8">
+          {STEPS.map((s, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <button
+                onClick={() => i < step ? setStep(i) : undefined}
+                className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-sm transition-all"
+                style={{
+                  background: i === step ? 'var(--sc-accent)' : i < step ? 'var(--sc-card)' : 'transparent',
+                  color: i === step ? '#ffffff' : i < step ? 'var(--sc-accent)' : 'var(--sc-muted)',
+                  border: `1px solid ${i === step ? 'var(--sc-accent)' : i < step ? 'var(--sc-accent)' : 'var(--sc-border)'}`,
+                  cursor: i < step ? 'pointer' : 'default',
+                }}
+              >
+                {i < step ? (
+                  <Check size={14} />
+                ) : (
+                  <span className="w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold"
+                    style={{
+                      background: i === step ? 'rgba(255,255,255,0.2)' : 'var(--sc-border)',
+                      color: i === step ? '#fff' : 'var(--sc-muted)',
+                    }}>
+                    {i + 1}
+                  </span>
+                )}
+                <span className="font-medium">{s.label}</span>
+              </button>
+              {i < STEPS.length - 1 && (
+                <ChevronRight size={14} style={{ color: 'var(--sc-muted)' }} />
+              )}
+            </div>
+          ))}
         </div>
 
-        {/* ─── Borrower Info Row ──────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-          <InputField label="Borrower Name" value={borrowerName} onChange={setBorrowerName} placeholder="John & Jane Smith" />
-          <InputField label="Property Address" value={propertyAddress} onChange={setPropertyAddress} placeholder="123 Main St, Austin, TX" />
-          <CurrencyField label="Estimated Property Value" value={propertyValue} onChange={setPropertyValue} />
-        </div>
+        {/* ═══ Step 0: Setup ════════════════════════════════════════ */}
+        {step === 0 && (
+          <div className="space-y-6">
+            {/* Mode Toggle */}
+            <div className="rounded-[14px] p-6" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
+                Analysis Type
+              </label>
+              <div className="flex items-center gap-1 p-1.5 rounded-[14px] w-fit" style={{ background: 'var(--sc-bg)', border: '1px solid var(--sc-border)' }}>
+                <button
+                  onClick={() => setMode('purchase')}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: mode === 'purchase' ? 'var(--sc-accent)' : 'transparent',
+                    color: mode === 'purchase' ? '#ffffff' : 'var(--sc-muted)',
+                  }}
+                >
+                  <Home size={16} />
+                  Purchase
+                </button>
+                <button
+                  onClick={() => setMode('refinance')}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: mode === 'refinance' ? 'var(--sc-accent)' : 'transparent',
+                    color: mode === 'refinance' ? '#ffffff' : 'var(--sc-muted)',
+                  }}
+                >
+                  <RefreshCw size={16} />
+                  Refinance
+                </button>
+              </div>
+            </div>
 
-        {/* ═══ Side-by-Side Layout ═══════════════════════════════════ */}
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8">
+            {/* Borrower Info */}
+            <div className="rounded-[14px] p-6" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
+                Borrower & Property
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <InputField label="Borrower Name" value={borrowerName} onChange={setBorrowerName} placeholder="John & Jane Smith" />
+                <InputField label="Property Address" value={propertyAddress} onChange={setPropertyAddress} placeholder="123 Main St, Austin, TX" />
+                <CurrencyField label="Estimated Property Value" value={propertyValue} onChange={setPropertyValue} />
+              </div>
+            </div>
+          </div>
+        )}
 
-          {/* ─── LEFT: Scenario Inputs ─────────────────────────────── */}
+        {/* ═══ Step 1: Loan Options ════════════════════════════════ */}
+        {step === 1 && (
           <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
-              Loan Options
-            </h2>
-
             {mode === 'purchase' ? (
               <div className="space-y-5">
-                {purchaseScenarios.map((s, i) => (
-                  <ScenarioCard
-                    key={s.id}
-                    scenario={s}
-                    index={i}
-                    propertyValue={propertyValue}
-                    canRemove={purchaseScenarios.length > 2}
-                    onUpdate={(updates) => updatePurchaseScenario(i, updates)}
-                    onRemove={() => removePurchaseScenario(i)}
-                    copySource={i > 0 ? purchaseScenarios[0] : null}
-                    onCopyFrom={i > 0 ? () => {
-                      const src = purchaseScenarios[0]
-                      updatePurchaseScenario(i, {
-                        loanType: src.loanType,
-                        purchasePrice: src.purchasePrice,
-                        downPaymentAmount: src.downPaymentAmount,
-                        downPaymentPercent: src.downPaymentPercent,
-                        loanAmount: src.loanAmount,
-                        interestRate: src.interestRate,
-                        loanTerm: src.loanTerm,
-                        points: src.points,
-                        propertyTaxes: src.propertyTaxes,
-                        homeownersInsurance: src.homeownersInsurance,
-                        hoa: src.hoa,
-                        pmi: src.pmi,
-                        totalClosingCosts: src.totalClosingCosts,
-                        sellerCredits: src.sellerCredits,
-                        buydownType: src.buydownType,
-                        buydownYearRates: [...src.buydownYearRates],
-                        extraMonthlyPayment: src.extraMonthlyPayment,
-                      })
-                    } : undefined}
-                  />
-                ))}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                  {purchaseScenarios.map((s, i) => (
+                    <ScenarioCard
+                      key={s.id}
+                      scenario={s}
+                      index={i}
+                      propertyValue={propertyValue}
+                      canRemove={purchaseScenarios.length > 2}
+                      onUpdate={(updates) => updatePurchaseScenario(i, updates)}
+                      onRemove={() => removePurchaseScenario(i)}
+                      copySource={i > 0 ? purchaseScenarios[0] : null}
+                      onCopyFrom={i > 0 ? () => {
+                        const src = purchaseScenarios[0]
+                        updatePurchaseScenario(i, {
+                          loanType: src.loanType,
+                          purchasePrice: src.purchasePrice,
+                          downPaymentAmount: src.downPaymentAmount,
+                          downPaymentPercent: src.downPaymentPercent,
+                          loanAmount: src.loanAmount,
+                          interestRate: src.interestRate,
+                          loanTerm: src.loanTerm,
+                          pointsPercent: src.pointsPercent,
+                          creditsPercent: src.creditsPercent,
+                          points: src.points,
+                          propertyTaxes: src.propertyTaxes,
+                          homeownersInsurance: src.homeownersInsurance,
+                          hoa: src.hoa,
+                          pmi: src.pmi,
+                          closingCostBreakdown: { ...src.closingCostBreakdown },
+                          totalClosingCosts: src.totalClosingCosts,
+                          sellerCredits: src.sellerCredits,
+                          buydownType: src.buydownType,
+                          buydownYearRates: [...src.buydownYearRates],
+                          extraMonthlyPayment: src.extraMonthlyPayment,
+                        })
+                      } : undefined}
+                    />
+                  ))}
+                </div>
                 {purchaseScenarios.length < 4 && (
                   <button
                     onClick={addPurchaseScenario}
@@ -312,38 +421,43 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                     onUpdate={(updates) => setCurrentLoan(prev => ({ ...prev, ...updates }))}
                   />
                 </div>
-                {refiScenarios.map((s, i) => (
-                  <ScenarioCard
-                    key={s.id}
-                    refiScenario={s}
-                    index={i}
-                    propertyValue={propertyValue}
-                    canRemove={refiScenarios.length > 1}
-                    currentLoan={currentLoan}
-                    onUpdateRefi={(updates) => updateRefiScenario(i, updates)}
-                    onRemove={() => removeRefiScenario(i)}
-                    isRefi
-                    copySource={i > 0 ? refiScenarios[0] : null}
-                    onCopyFrom={i > 0 ? () => {
-                      const src = refiScenarios[0]
-                      updateRefiScenario(i, {
-                        loanType: src.loanType,
-                        newLoanAmount: src.newLoanAmount,
-                        interestRate: src.interestRate,
-                        loanTerm: src.loanTerm,
-                        points: src.points,
-                        closingCosts: src.closingCosts,
-                        cashOutAmount: src.cashOutAmount,
-                        payOffDebts: src.payOffDebts,
-                        propertyTaxes: src.propertyTaxes,
-                        insurance: src.insurance,
-                        hoa: src.hoa,
-                        pmi: src.pmi,
-                        extraMonthlyPayment: src.extraMonthlyPayment,
-                      })
-                    } : undefined}
-                  />
-                ))}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                  {refiScenarios.map((s, i) => (
+                    <ScenarioCard
+                      key={s.id}
+                      refiScenario={s}
+                      index={i}
+                      propertyValue={propertyValue}
+                      canRemove={refiScenarios.length > 1}
+                      currentLoan={currentLoan}
+                      onUpdateRefi={(updates) => updateRefiScenario(i, updates)}
+                      onRemove={() => removeRefiScenario(i)}
+                      isRefi
+                      copySource={i > 0 ? refiScenarios[0] : null}
+                      onCopyFrom={i > 0 ? () => {
+                        const src = refiScenarios[0]
+                        updateRefiScenario(i, {
+                          loanType: src.loanType,
+                          newLoanAmount: src.newLoanAmount,
+                          interestRate: src.interestRate,
+                          loanTerm: src.loanTerm,
+                          pointsPercent: src.pointsPercent,
+                          creditsPercent: src.creditsPercent,
+                          points: src.points,
+                          closingCostBreakdown: { ...src.closingCostBreakdown },
+                          closingCosts: src.closingCosts,
+                          cashOutAmount: src.cashOutAmount,
+                          payOffDebts: src.payOffDebts,
+                          propertyTaxes: src.propertyTaxes,
+                          insurance: src.insurance,
+                          hoa: src.hoa,
+                          pmi: src.pmi,
+                          extraMonthlyPayment: src.extraMonthlyPayment,
+                        })
+                      } : undefined}
+                    />
+                  ))}
+                </div>
                 {refiScenarios.length < 3 && (
                   <button
                     onClick={addRefiScenario}
@@ -355,37 +469,45 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                 )}
               </div>
             )}
-
-            {/* ─── Calculate Button ─────────────────────────────────── */}
-            <div className="mt-6">
-              <button
-                onClick={runCalculation}
-                disabled={calculating}
-                className="w-full py-3.5 rounded-[14px] text-sm font-semibold transition-all"
-                style={{
-                  background: calculating ? 'var(--sc-border)' : 'var(--sc-accent)',
-                  color: calculating ? 'var(--sc-muted)' : '#ffffff',
-                }}
-              >
-                {calculating ? 'Calculating...' : 'Calculate & Compare'}
-              </button>
-            </div>
           </div>
+        )}
 
-          {/* ─── RIGHT: Results Panel ──────────────────────────────── */}
+        {/* ═══ Step 2: Results ═════════════════════════════════════ */}
+        {step === 2 && (
           <div ref={resultsRef}>
-            <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--sc-muted)' }}>
-              Results
-            </h2>
-
             {!hasResults ? (
               <div className="rounded-[14px] p-12 text-center" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-                <p className="text-sm" style={{ color: 'var(--sc-muted)' }}>
-                  Enter loan options and click Calculate to see results
+                <p className="text-sm mb-4" style={{ color: 'var(--sc-muted)' }}>
+                  {calculating ? 'Calculating results...' : 'No results yet. Click Recalculate to generate.'}
                 </p>
+                {!calculating && (
+                  <button
+                    onClick={runCalculation}
+                    className="px-6 py-2.5 rounded-[10px] text-sm font-semibold"
+                    style={{ background: 'var(--sc-accent)', color: '#fff' }}
+                  >
+                    Calculate
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-6">
+                {/* Recalculate button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={runCalculation}
+                    disabled={calculating}
+                    className="px-5 py-2 rounded-[10px] text-xs font-semibold transition-all"
+                    style={{
+                      background: calculating ? 'var(--sc-border)' : 'var(--sc-card)',
+                      color: calculating ? 'var(--sc-muted)' : 'var(--sc-accent)',
+                      border: '1px solid var(--sc-accent)',
+                    }}
+                  >
+                    {calculating ? 'Calculating...' : '↻ Recalculate'}
+                  </button>
+                </div>
+
                 <ResultsTable
                   mode={mode}
                   purchaseScenarios={purchaseScenarios}
@@ -446,6 +568,45 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
               </div>
             )}
           </div>
+        )}
+
+        {/* ─── Navigation Buttons ─────────────────────────────────── */}
+        <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: '1px solid var(--sc-border)' }}>
+          <button
+            onClick={goBack}
+            disabled={step === 0}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-sm font-medium transition-all"
+            style={{
+              border: '1px solid var(--sc-border)',
+              color: step === 0 ? 'var(--sc-border)' : 'var(--sc-text)',
+              cursor: step === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <ChevronLeft size={16} />
+            Back
+          </button>
+
+          <span className="text-xs" style={{ color: 'var(--sc-muted)' }}>
+            Step {step + 1} of {STEPS.length} — {STEPS[step].description}
+          </span>
+
+          {step < STEPS.length - 1 ? (
+            <button
+              onClick={goNext}
+              disabled={!canAdvance}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-[10px] text-sm font-semibold transition-all"
+              style={{
+                background: canAdvance ? 'var(--sc-accent)' : 'var(--sc-border)',
+                color: canAdvance ? '#ffffff' : 'var(--sc-muted)',
+                cursor: canAdvance ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {step === 1 ? 'Calculate & Compare' : 'Next'}
+              <ChevronRight size={16} />
+            </button>
+          ) : (
+            <div /> // Empty spacer on last step
+          )}
         </div>
       </div>
     </div>
@@ -502,19 +663,38 @@ export function CurrencyField({ label, value, onChange, className, readOnly, acc
   )
 }
 
-export function PercentField({ label, value, onChange, decimals = 3 }: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function PercentField({ label, value, onChange, decimals: _decimals = 3 }: {
   label: string; value: number; onChange: (v: number) => void; decimals?: number
 }) {
+  const [localVal, setLocalVal] = useState(value > 0 ? String(value) : '')
+  const [focused, setFocused] = useState(false)
+
+  // Sync from parent when not focused
+  const displayed = focused ? localVal : (value > 0 ? String(value) : '')
+
   return (
     <div>
       <label className="block text-xs font-medium mb-2" style={{ color: 'var(--sc-muted)' }}>{label}</label>
       <div className="relative">
         <input
           type="text"
-          value={value > 0 ? value.toFixed(decimals) : ''}
+          inputMode="decimal"
+          value={displayed}
+          onFocus={() => {
+            setFocused(true)
+            setLocalVal(value > 0 ? String(value) : '')
+          }}
           onChange={e => {
             const raw = e.target.value.replace(/[^0-9.]/g, '')
-            onChange(parseFloat(raw) || 0)
+            setLocalVal(raw)
+            const parsed = parseFloat(raw)
+            if (!isNaN(parsed)) onChange(parsed)
+          }}
+          onBlur={() => {
+            setFocused(false)
+            const parsed = parseFloat(localVal)
+            onChange(!isNaN(parsed) ? parsed : 0)
           }}
           className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none focus:ring-1 pr-8"
           style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Mono', monospace" }}

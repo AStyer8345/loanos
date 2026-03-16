@@ -49,16 +49,15 @@ export default function TopNav() {
   return (
     <>
       <GlobalSearch />
-      <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-900 text-white shadow flex items-center px-3 md:px-6">
+      <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-[#060b18] border-b border-[#1e293b] text-white shadow-lg shadow-black/40 flex items-center px-3 md:px-6">
         {/* Logo → Pipeline Dashboard */}
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
           className="flex items-baseline gap-2 mr-4"
         >
-          <span className="text-2xl leading-none">🧠</span>
-          <span className="text-lg font-semibold tracking-tight leading-none">
-            Loan<span className="text-blue-400">OS</span>
+          <span className="text-lg font-bold tracking-tight leading-none font-mono">
+            Loan<span className="text-[#C9A84C]">OS</span>
           </span>
         </button>
 
@@ -171,14 +170,14 @@ export default function TopNav() {
           </button>
 
           <div className="hidden sm:flex flex-col items-end mr-1">
-            <span className="text-xs font-semibold tracking-widest text-blue-100/90">
+            <span className="text-xs font-semibold tracking-widest text-zinc-200">
               ADAM STYER
             </span>
-            <span className="text-[10px] text-blue-100/60 font-mono tracking-[0.18em] uppercase">
+            <span className="text-[10px] text-zinc-500 font-mono tracking-[0.18em] uppercase">
               Mortgage Solutions LP
             </span>
           </div>
-          <div className="hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 border border-blue-300/60 text-sm font-semibold">
+          <div className="hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 text-sm font-semibold text-[#C9A84C]">
             AS
           </div>
           <div className="ml-1">

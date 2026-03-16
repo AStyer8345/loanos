@@ -17,6 +17,7 @@ Deploy: Vercel
 ## Current Status
 
 Phase 1 complete. Phase 2 (Automation) ~90% complete — all major features built, several pending go-live steps.
+**Dashboard Rebuild v2.0 (2026-03-16)**: Major UI overhaul across 6 areas. (1) **Main Dashboard**: rebuilt with dark monochromatic theme (`bg-[#060b18]`), gold accent `#C9A84C`, IBM Plex Mono font. Pipeline KPI cards + stage cards (clickable to filter loans). Today's Focus panel with day-of-week marketing schedule. Needs Attention panel (loans stale 3+ days). Performance tab with Recharts (volume/commission/pipeline charts + monthly breakdown table). New `DashboardClient.tsx` component. (2) **Loans List**: header stats (Total Volume, Total Loans, Gross Commission), commission_amount in cards. (3) **Loan Detail**: expanded actions dropdown (8 n8n automations: PA Email, CD Email, Refi Intake, Refi Analysis, Referral Intro, Website Lead Follow-up, New App, Contract Received). Activity logging UI with Log Call/Email/Text buttons + modal. Borrower name links to contact. Commission in meta strip. (4) **TopNav**: updated to dark theme matching dashboard. (5) **Scenario Builder**: converted from side-by-side layout to 3-step wizard (Setup → Loan Options → Results). Auto-calculates on step advance. PercentField rate input fix (local string state for decimal typing). Closing costs already had full itemized template. (6) **PDF Output**: upgraded to branded multi-section layout matching refi-analysis skill style — NAVY `#0A1628` header/footer bars, gold accents, per-scenario cards with hero metrics + closing cost breakdown, bullet-format AI analysis rendering, CTA footer. (7) **AI Narrative**: prompt updated to output bullet format with bold section headers (Bottom Line, Monthly Impact, Long-Term View, Trade-Offs). Supabase migration 024: `commission_amount` decimal field on loans table.
 816 Arive loans imported and backfilled as of March 10, 2026. Salesforce CSV backfill complete (2026-03-12) — 532 loans updated with `arive_loan_id` + additional fields from Salesforce export.
 AI Chat fully live as of March 11, 2026 — contact context working, clear button fixed. Outlook Email integration built — needs manual deploy steps to go live (Azure env vars not set).
 Agent 5 (Loan Milestone Communication Agent): n8n workflow live (ID: 1hjOmS7inZcxEJQr), Zapier Zap published, auth middleware fixed (`/api/agents/*` excluded) — needs Vercel env vars (ZAPIER_DISPATCH_WEBHOOK_URL, DISPATCH_SECRET) to fully activate. Agent 1 (Daily Briefing): deployed to Vercel — reachable via "Briefing" nav link (added 2026-03-15).
@@ -487,11 +488,13 @@ User-defined Claude skills live at `/skills/user/`. Each subdirectory is one ski
 
 - Build tracker: /public/docs/loanos.html (served at /docs/loanos.html)
 - System map: /public/docs/loanos-system-map.html (served at /docs/loanos-system-map.html)
+- **UI theme spec**: /docs/THEME.md — single source of truth for colors, components, borders. For UI changes: edit THEME.md or say "[Page/component], [what], [detail]" (e.g. "Briefing stat cards, dark bg left gold bar"). Screenshots optional.
 - This file: /CONTEXT.md
 - Changelog: /CHANGELOG.md
 
 ## Rules For AI Sessions
 
+- **UI changes**: Prefer docs/THEME.md + text spec. Don't require screenshots. If the user describes a change (e.g. "contacts table header darker", "cards match THEME.md"), apply it using THEME.md and Tailwind classes from the spec.
 - Always read this file before starting
 - Always update this file when something significant changes
 - Always update CHANGELOG.md at end of session

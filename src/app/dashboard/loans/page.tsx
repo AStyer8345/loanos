@@ -22,6 +22,7 @@ interface Loan {
   contact_id: string | null
   contact_email?: string | null
   contact_phone?: string | null
+  commission_amount?: number | null
   doc_count?: number
 }
 
@@ -324,7 +325,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_address, property_city, property_state, contact_id, contacts!contact_id(email, phone)')
+      .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
@@ -714,6 +715,28 @@ export default function LoansPage() {
             </div>
           </div>
         )}
+
+        {/* Header stats — shown when not loading */}
+        {!loading && loans.length > 0 && (() => {
+          const totalVolume = loans.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
+          const totalCommission = loans.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
+          return (
+            <div className="px-4 pt-3 pb-2 border-b border-[#1e293b] bg-[#0a0f1a] flex items-center gap-6">
+              <div>
+                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Loans</p>
+                <p className="text-lg font-mono font-bold text-zinc-100">{loans.length}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Volume</p>
+                <p className="text-lg font-mono font-bold text-blue-400">{fmtCurrency(totalVolume)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Gross Commission</p>
+                <p className="text-lg font-mono font-bold text-[#C9A84C]">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</p>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Pipeline dashboard — shown only on Loans in Process tab */}
         {activeList === 'inprocess' && !loading && loans.length > 0 && (() => {

@@ -110,6 +110,8 @@ interface Loan {
   lead_source: string | null
   referral_source: string | null
   marketing_campaign: string | null
+  // Commission
+  commission_amount: number | null
   // Notes
   notes: string | null
   // System
@@ -325,7 +327,13 @@ export default function LoanDetailPage() {
           {/* Name row */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-xl font-mono font-bold text-zinc-100">{displayName}</h1>
+              <h1 className="text-xl font-mono font-bold text-zinc-100">
+                {loan.contact_id ? (
+                  <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-[#C9A84C] transition-colors">
+                    {displayName}
+                  </Link>
+                ) : displayName}
+              </h1>
               {(addressLine || loan.loan_number) && (
                 <p className="text-xs text-zinc-500 font-mono mt-0.5">
                   {addressLine}{loan.loan_number ? ` · #${loan.loan_number}` : ''}
@@ -343,19 +351,24 @@ export default function LoanDetailPage() {
                   Actions <ChevronDown size={11} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                 </button>
                 {actionsOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
                     <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
                     {[
                       { label: 'Send PA Email', tab: 'automations' as const },
                       { label: 'Send CD Email', tab: 'automations' as const },
-                      { label: 'Referral Intro', tab: 'automations' as const },
+                      { label: 'Refi Intake Email', tab: 'automations' as const },
+                      { label: 'Send Refi Analysis', tab: 'automations' as const },
+                      { label: 'Referral Intro Email', tab: 'automations' as const },
+                      { label: 'Website Lead Follow-up', tab: 'automations' as const },
+                      { label: 'New Application Received', tab: 'automations' as const },
+                      { label: 'Contract Received', tab: 'automations' as const },
                     ].map(({ label, tab }) => (
                       <button
                         key={label}
                         onClick={() => { setActiveTab(tab); setActionsOpen(false) }}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
                       >
-                        <Zap size={12} className="text-emerald-400 shrink-0" />
+                        <Zap size={12} className="text-[#C9A84C] shrink-0" />
                         {label}
                       </button>
                     ))}
@@ -366,7 +379,7 @@ export default function LoanDetailPage() {
                         onClick={() => setActionsOpen(false)}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
                       >
-                        <span className="text-amber-400 shrink-0">📐</span>
+                        <span className="text-[#C9A84C] shrink-0">📐</span>
                         Create Scenario
                       </Link>
                     </div>
@@ -423,6 +436,12 @@ export default function LoanDetailPage() {
               <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Officer</p>
               <p className="text-sm font-mono font-semibold text-zinc-100">Adam Styer</p>
             </div>
+            {loan.commission_amount && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Commission</p>
+                <p className="text-sm font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.commission_amount)}</p>
+              </div>
+            )}
             {loan.referring_agent_name && (
               <div>
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Realtor</p>
@@ -471,7 +490,7 @@ export default function LoanDetailPage() {
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} /></div>
         )}
         {activeTab === 'activity' && (
-          <div className="p-6"><ActivityTab activity={activity} /></div>
+          <div className="p-6"><ActivityTab activity={activity} loanId={loanId} onRefresh={fetchAll} /></div>
         )}
         {activeTab === 'emails' && (
           <div className="p-6"><EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} /></div>
@@ -1449,8 +1468,29 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
 // ── Activity tab ──────────────────────────────────────────────────────────────
 
-function ActivityTab({ activity }: { activity: ActivityRow[] }) {
+function ActivityTab({ activity, loanId, onRefresh }: { activity: ActivityRow[]; loanId: string; onRefresh: () => void }) {
+  const supabase = createClient()
   const [filter, setFilter] = useState<'all' | 'system' | 'manual'>('all')
+  const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
+  const [logNotes, setLogNotes] = useState('')
+  const [logSaving, setLogSaving] = useState(false)
+
+  const handleLogActivity = async () => {
+    if (!logModal || !logNotes.trim()) return
+    setLogSaving(true)
+    await supabase.from('activity_log').insert({
+      loan_id: loanId,
+      action: `Logged ${logModal}`,
+      type: logModal,
+      summary: logNotes.trim(),
+      entity_type: 'loan',
+      metadata: { activity_type: logModal },
+    })
+    setLogSaving(false)
+    setLogModal(null)
+    setLogNotes('')
+    onRefresh()
+  }
 
   const INTERNAL_KEYS = new Set(['loan_id', 'contact_id', 'user_id', 'id', 'created_at'])
   const isSystem = (item: ActivityRow) => item.action.includes('.')
@@ -1463,17 +1503,60 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
       ? activity.filter(isSystem)
       : activity.filter(i => !isSystem(i))
 
-  if (activity.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
-        <Activity size={24} />
-        <p className="text-sm">No activity yet</p>
-      </div>
-    )
-  }
-
   return (
     <div className="max-w-2xl">
+      {/* Log activity buttons */}
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-emerald-900/30 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/50 transition-colors">
+          <span className="text-sm">📞</span> Log Call
+        </button>
+        <button onClick={() => setLogModal('email')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-blue-900/30 text-blue-400 border border-blue-800 hover:bg-blue-900/50 transition-colors">
+          <span className="text-sm">📧</span> Log Email
+        </button>
+        <button onClick={() => setLogModal('text')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-violet-900/30 text-violet-400 border border-violet-800 hover:bg-violet-900/50 transition-colors">
+          <span className="text-sm">💬</span> Log Text
+        </button>
+      </div>
+
+      {/* Log modal */}
+      {logModal && (
+        <div className="mb-4 bg-zinc-800/80 border border-zinc-700 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-mono font-semibold text-zinc-100">Log {logModal}</h3>
+            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
+          </div>
+          <div className="mb-2">
+            <p className="text-[10px] font-mono text-zinc-500 mb-1">Date/Time: {new Date().toLocaleString()}</p>
+          </div>
+          <textarea
+            value={logNotes}
+            onChange={e => setLogNotes(e.target.value)}
+            placeholder={`Notes about this ${logModal}...`}
+            rows={3}
+            className="w-full bg-zinc-900 border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={handleLogActivity}
+              disabled={logSaving || !logNotes.trim()}
+              className="px-4 py-1.5 rounded text-xs font-mono font-medium bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
+            >
+              {logSaving ? 'Saving...' : 'Save'}
+            </button>
+            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="px-3 py-1.5 rounded text-xs font-mono text-zinc-400 hover:text-zinc-200">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activity.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
+          <Activity size={24} />
+          <p className="text-sm">No activity yet</p>
+        </div>
+      ) : (
+      <>
       <div className="flex gap-1 mb-4">
         {(['all', 'system', 'manual'] as const).map(f => {
           const label = f === 'all'
@@ -1526,6 +1609,8 @@ function ActivityTab({ activity }: { activity: ActivityRow[] }) {
             </div>
           ))}
         </div>
+      )}
+      </>
       )}
     </div>
   )

@@ -54,6 +54,12 @@ ${r?.debtsEliminated?.length ? `- Debts Eliminated: ${r.debtsEliminated.map((d: 
 
     const systemPrompt = `You are a mortgage scenario analysis writer. Write a clear, plain-English analysis comparing loan scenarios for ${borrowerName || 'the borrower'}.
 
+Format:
+- Use bullet points (•) for each key insight — NO flowing paragraphs
+- Group bullets under short bold headers: **Bottom Line**, **Monthly Impact**, **Long-Term View**, **Trade-Offs**${mode === 'refinance' ? ', **Break-Even**' : ''}
+- Each bullet should be one crisp sentence — no filler
+- 8-14 bullets total
+
 Rules:
 - Write in plain English any borrower can understand
 - Compare scenarios objectively — highlight key trade-offs
@@ -61,11 +67,9 @@ Rules:
 ${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether the refi makes sense given remaining term' : ''}
 - Address equity building differences between options
 - Mention reinvestment opportunity if data is provided
-- Keep under 400 words
 - NEVER reference protected classes (race, religion, gender, national origin, familial status, disability, age)
 - NEVER make lending decisions or recommendations — present trade-offs objectively
-- End with: "This analysis is for informational purposes only."
-- Do NOT add any headers or formatting — just write flowing paragraphs`
+- End with a single bullet: "• This analysis is for informational purposes only."`
 
     // Stream response using SSE
     const encoder = new TextEncoder()

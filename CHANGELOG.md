@@ -1,5 +1,51 @@
 # LoanOS Changelog
 
+## [3.0.0] — 2026-03-16 — Dashboard Rebuild + Scenario Wizard + Branded PDF
+
+### Theme
+- Dark monochromatic theme (`bg-[#060b18]`, `bg-[#0f172a]` cards) with gold accent `#C9A84C`
+- IBM Plex Mono for data, Inter for UI labels
+- Updated `--gold` CSS variable from blue to actual gold `#C9A84C`
+- TopNav restyled: dark background, gold "OS" text, zinc profile section
+
+### Dashboard
+- **New `DashboardClient.tsx`**: Pipeline tab with KPI cards (Pipeline Loans, Gross Commission, Commission YTD, This Month), clickable stage pipeline cards, urgent flags
+- **Today's Focus panel**: day-of-week marketing schedule (Mon=Realtor Outreach, Tue=Borrower Follow-up, etc.)
+- **Needs Attention panel**: loans with 3+ days no activity
+- **Performance tab**: Volume YTD, Commission YTD, Projected, Avg Per Loan KPIs + 3 Recharts (volume bar, commission line, pipeline bar) + monthly breakdown table
+- `dashboard/page.tsx` server component computes pipeline stats, commission aggregates, stale loans, monthly chart data
+
+### Loans List
+- Header stats: Total Volume, Total Loans, Gross Commission
+- `commission_amount` field in Supabase select + Loan interface
+
+### Loan Detail
+- Expanded actions dropdown: 8 n8n automations (PA Email, CD Email, Refi Intake, Refi Analysis, Referral Intro, Website Lead Follow-up, New App, Contract Received)
+- Activity logging: Log Call/Email/Text buttons with modal, writes to `activity_log` table
+- Borrower name clickable link to `/dashboard/contacts/${loan.contact_id}`
+- Commission display in meta strip
+
+### Scenario Builder
+- **Wizard flow**: 3-step (Setup → Loan Options → Results) replacing side-by-side layout
+- Step indicator with completed checkmarks, back/next navigation
+- Auto-calculates when advancing from step 2→3
+- Purchase scenarios displayed in 2-column grid on step 2
+- `PercentField` rate input fix: local string state during focus for decimal typing (6.25, 6.875)
+
+### PDF Output
+- Branded layout matching refi-analysis skill: NAVY `#0A1628` header/footer bars, gold `#C9A84C` accents
+- Per-scenario cards with hero metric, charcoal headers, light-bg bodies
+- Closing cost breakdown section (Lender Fees / Third Party / Prepaids) with totals
+- Markdown → HTML rendering for bullet-format AI analysis (bold headers, gold bullet markers)
+- CTA footer bar with contact info
+
+### AI Narrative
+- Prompt updated: bullet format with bold section headers (**Bottom Line**, **Monthly Impact**, **Long-Term View**, **Trade-Offs**)
+- 8-14 crisp bullets instead of flowing paragraphs
+
+### Database
+- Migration 024: `commission_amount DECIMAL(10,2)` on loans table
+
 ## [2.1.0] — 2026-03-15 — Scenario Builder UX Fixes + Loan Integration + Statement Upload
 
 ### Fixed

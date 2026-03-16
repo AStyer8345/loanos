@@ -168,6 +168,16 @@ interface EmailDraftRow {
   created_at: string
 }
 
+interface ContactEmailRow {
+  id: string
+  subject: string
+  body_html: string | null
+  body_text: string | null
+  automation_source: string | null
+  sent_at: string
+  created_at: string
+}
+
 // ── Workflow definitions ──────────────────────────────────────────────────────
 
 const WORKFLOWS = [
@@ -315,8 +325,9 @@ export default function LoanDetailPage() {
   const [docs, setDocs] = useState<DocRow[]>([])
   const [activity, setActivity] = useState<ActivityRow[]>([])
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
+  const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails' | 'notes'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
@@ -338,11 +349,12 @@ export default function LoanDetailPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const [loanRes, docsRes, actRes, draftsRes] = await Promise.all([
+    const [loanRes, docsRes, actRes, draftsRes, contactEmailsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
       supabase.from('activity_log').select('id, created_at, action, type, summary, entity_type, metadata').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(50),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
+      supabase.from('contact_emails').select('id, subject, body_html, body_text, automation_source, sent_at, created_at').eq('loan_id', loanId).order('sent_at', { ascending: false }).limit(100),
     ])
 
     if (loanRes.data) {
@@ -359,6 +371,7 @@ export default function LoanDetailPage() {
     setDocs(docsRes.data || [])
     setActivity(actRes.data || [])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
+    setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
   }, [loanId, supabase])
 
@@ -676,6 +689,7 @@ export default function LoanDetailPage() {
             { id: 'automations', label: 'Automations' },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length})` },
+            { id: 'notes',       label: 'Notes' },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -707,7 +721,10 @@ export default function LoanDetailPage() {
           <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} loanId={loanId} onRefresh={fetchAll} /></div>
         )}
         {activeTab === 'emails' && (
-          <div className="p-6"><EmailHistoryTab drafts={emailDrafts} onRefresh={fetchAll} /></div>
+          <div className="p-6"><EmailHistoryTab drafts={emailDrafts} contactEmails={contactEmails} onRefresh={fetchAll} /></div>
+        )}
+        {activeTab === 'notes' && (
+          <LoanNotesTab loanId={loanId} initialNotes={loan.notes} onSave={n => setLoan({ ...loan, notes: n })} />
         )}
       </div>
 
@@ -1929,7 +1946,7 @@ const STATUS_CLASSES: Record<string, string> = {
   discarded: 'bg-zinc-800 text-zinc-500 border-zinc-700',
 }
 
-function EmailHistoryTab({ drafts, onRefresh }: { drafts: EmailDraftRow[]; onRefresh: () => void }) {
+function EmailHistoryTab({ drafts, contactEmails, onRefresh }: { drafts: EmailDraftRow[]; contactEmails: ContactEmailRow[]; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const iframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({})
 
@@ -1955,17 +1972,20 @@ function EmailHistoryTab({ drafts, onRefresh }: { drafts: EmailDraftRow[]; onRef
     }
   }, [expanded, drafts])
 
-  if (drafts.length === 0) {
+  if (drafts.length === 0 && contactEmails.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
         <Inbox size={24} />
-        <p className="text-sm">No emails logged for this loan</p>
+        <p className="text-sm">No emails logged yet</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3 max-w-2xl">
+    <div className="space-y-6 max-w-2xl">
+      {drafts.length > 0 && (
+      <div className="space-y-3">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Draft Queue</p>
       {drafts.map(draft => {
         const colorClass = DRAFT_COLORS[draft.automation_name] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
         const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
@@ -2017,6 +2037,99 @@ function EmailHistoryTab({ drafts, onRefresh }: { drafts: EmailDraftRow[]; onRef
           </div>
         )
       })}
+      </div>
+      )}
+
+      {/* Permanent audit log from contact_emails */}
+      {contactEmails.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Email Log</p>
+          {contactEmails.map(ce => {
+            const src = ce.automation_source ?? 'unknown'
+            const colorClass = DRAFT_COLORS[src] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
+            const label = DRAFT_LABELS[src] || src.replace(/_/g, ' ')
+            const isOpen = expanded === ce.id
+            return (
+              <div key={ce.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+                <button onClick={() => setExpanded(isOpen ? null : ce.id)} className="w-full text-left p-4 focus:outline-none">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
+                      <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(ce.sent_at)}</span>
+                    </div>
+                    {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                  </div>
+                  <div className="text-sm font-medium text-zinc-100 truncate">{ce.subject}</div>
+                </button>
+                {isOpen && (ce.body_html || ce.body_text) && (
+                  <div className="border-t border-zinc-800 p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                    {ce.body_html
+                      ? <div dangerouslySetInnerHTML={{ __html: ce.body_html }} />
+                      : ce.body_text}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Loan notes tab ────────────────────────────────────────────────────────────
+
+function LoanNotesTab({ loanId, initialNotes, onSave }: {
+  loanId: string
+  initialNotes: string | null
+  onSave: (notes: string) => void
+}) {
+  const supabase = createClient()
+  const [notes, setNotes] = useState(initialNotes ?? '')
+  const [saving, setSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const save = useCallback(async (value: string) => {
+    setSaving(true)
+    await supabase.from('loans').update({ notes: value }).eq('id', loanId)
+    onSave(value)
+    setSaving(false)
+    setLastSaved(new Date())
+  }, [loanId, supabase, onSave])
+
+  const handleChange = (value: string) => {
+    setNotes(value)
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => save(value), 500)
+  }
+
+  const handleBlur = () => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    save(notes)
+  }
+
+  const lastSavedLabel = lastSaved
+    ? `Saved ${Math.round((Date.now() - lastSaved.getTime()) / 60000)} min ago`
+    : 'Not saved yet'
+
+  return (
+    <div className="flex flex-col h-full" style={{ height: 'calc(100vh - 260px)' }}>
+      <div className="flex flex-col flex-1 min-h-0 p-6">
+        <textarea
+          value={notes}
+          onChange={e => handleChange(e.target.value)}
+          onBlur={handleBlur}
+          placeholder="Add notes about this loan…"
+          className="flex-1 w-full p-4 text-sm text-zinc-200 bg-zinc-900 border border-zinc-700 rounded-lg placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none font-mono leading-relaxed"
+        />
+        <div className="flex justify-between items-center mt-2 px-1">
+          <span className="text-[10px] font-mono text-zinc-500">
+            {saving ? 'Saving…' : lastSaved ? `✓ ${lastSavedLabel}` : ''}
+          </span>
+          <span className="text-[10px] font-mono text-zinc-600">{notes.length.toLocaleString()} chars</span>
+        </div>
+      </div>
     </div>
   )
 }

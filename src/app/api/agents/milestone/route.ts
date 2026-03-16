@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
+import { logEmail } from '@/lib/logEmail'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -102,6 +103,14 @@ export async function POST(req: NextRequest) {
     const eventId = event.id
     const results: { borrower?: object; realtor?: object } = {}
 
+    // Look up contact_id so logEmail() can link to the contact record
+    const { data: loanRecord } = await supabase
+      .from('loans')
+      .select('contact_id')
+      .eq('id', loan_id)
+      .single()
+    const contactId = loanRecord?.contact_id ?? null
+
     // ── 2. Draft borrower email (if email provided) ───────────────────────────
     if (borrower_email) {
       const borrowerPrompt = `You are Adam Styer, a senior mortgage broker in Austin, TX. Write a short, warm email to a homebuyer about their loan milestone.
@@ -168,6 +177,15 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
         subject: borrowerSubject,
         body_html: borrowerBody,
         loan_id: loan_id ?? undefined,
+      })
+
+      // Log to contact_emails for permanent audit trail
+      await logEmail({
+        contact_id: contactId,
+        loan_id: loan_id ?? null,
+        subject: borrowerSubject,
+        body_text: borrowerBody,
+        automation_source: 'milestone',
       })
 
       results.borrower = { subject: borrowerSubject, pushed }
@@ -240,6 +258,15 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
         subject: realtorSubject,
         body_html: realtorBody,
         loan_id: loan_id ?? undefined,
+      })
+
+      // Log to contact_emails for permanent audit trail
+      await logEmail({
+        contact_id: contactId,
+        loan_id: loan_id ?? null,
+        subject: realtorSubject,
+        body_text: realtorBody,
+        automation_source: 'milestone',
       })
 
       results.realtor = { subject: realtorSubject, pushed }

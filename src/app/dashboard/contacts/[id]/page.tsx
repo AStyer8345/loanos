@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
-import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow } from './ContactRecordView'
+import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow } from './ContactRecordView'
 
 export default function ContactRecordPage() {
   const params = useParams()
@@ -21,6 +21,7 @@ export default function ContactRecordPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'notes' | 'emails'>('overview')
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
+  const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
 
@@ -121,7 +122,7 @@ export default function ContactRecordPage() {
       if (c) {
         await Promise.all([fetchLoans(), fetchActivity(), fetchContactActivity()])
         await resolveReferrer(c.referred_by)
-        const [{ data: drafts }, { data: inbound }] = await Promise.all([
+        const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
             .from('email_drafts')
             .select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at')
@@ -135,9 +136,16 @@ export default function ContactRecordPage() {
             .eq('type', 'email_inbound')
             .order('occurred_at', { ascending: false })
             .limit(100),
+          supabase
+            .from('contact_emails')
+            .select('id, subject, body_html, body_text, automation_source, sent_at, created_at')
+            .eq('contact_id', id)
+            .order('sent_at', { ascending: false })
+            .limit(100),
         ])
         setEmailDrafts((drafts ?? []) as EmailDraftRow[])
         setInboundEmails((inbound ?? []) as InboundEmailRow[])
+        setContactEmails((ceRows ?? []) as ContactEmailRow[])
       }
       setLoading(false)
     }
@@ -233,6 +241,7 @@ export default function ContactRecordPage() {
       contactActivity={contactActivity}
       emailDrafts={emailDrafts}
       inboundEmails={inboundEmails}
+      contactEmails={contactEmails}
       referrerContactId={referrerContactId}
       activeTab={activeTab}
       setActiveTab={setActiveTab}

@@ -14,8 +14,9 @@ import {
   X,
   ChevronRight,
   ExternalLink,
+  StickyNote,
+  Plus,
 } from 'lucide-react'
-import ActivityTimeline from '@/components/ActivityTimeline'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 
 export type Contact = {
@@ -41,6 +42,8 @@ export type Contact = {
   title: string | null
   created_date: string | null
   last_activity_date: string | null
+  last_activity_type: string | null
+  last_activity_notes: string | null
 }
 
 export type ContactLoan = {
@@ -72,7 +75,16 @@ export type ActivityEntry = {
   external_id?: string | null
   // Cross-entity fields
   loan_id?: string | null
-  _source?: string        // e.g. 'Contact' | 'Loan: 123 Main St' — set client-side when merging
+  _source?: string
+}
+
+export type ContactActivityRow = {
+  id: string
+  activity_type: 'call' | 'email' | 'text' | 'note'
+  notes: string | null
+  logged_at: string
+  created_by: string | null
+  loan_id: string | null
 }
 
 export type EmailDraftRow = {
@@ -84,6 +96,16 @@ export type EmailDraftRow = {
   body_html: string
   body_preview: string | null
   status: string
+  created_at: string
+}
+
+export type ContactEmailRow = {
+  id: string
+  subject: string
+  body_html: string | null
+  body_text: string | null
+  automation_source: string | null
+  sent_at: string
   created_at: string
 }
 
@@ -108,6 +130,7 @@ function initials(c: Contact) {
   return (first + last) || '?'
 }
 
+// Stage badge for contacts (uses contact stage labels)
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   const map: Record<string, string> = {
     Lead: 'rgba(201,168,76,0.15)',
@@ -126,6 +149,36 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
     fontSize: 11,
     background: stage ? (map[stage] ?? 'rgba(255,255,255,0.06)') : 'transparent',
   }
+}
+
+// Loan status badge — matches the DashboardClient StageBadge pattern
+function LoanStageBadge({ status }: { status: string | null }) {
+  if (!status) return <span style={{ color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>—</span>
+  const s = status.toLowerCase()
+  let bg = 'rgba(255,255,255,0.06)'
+  let color = 'var(--fg)'
+  let border = 'var(--border)'
+  if (['closed', 'funded'].some(v => s.includes(v))) {
+    bg = 'rgba(16,185,129,0.12)'; color = '#6ee7b7'; border = 'rgba(16,185,129,0.3)'
+  } else if (['clear to close', 'ctc'].some(v => s.includes(v))) {
+    bg = 'rgba(99,102,241,0.12)'; color = '#a5b4fc'; border = 'rgba(99,102,241,0.3)'
+  } else if (['underwriting', 'conditional', 'approved'].some(v => s.includes(v))) {
+    bg = 'rgba(245,158,11,0.12)'; color = '#fbbf24'; border = 'rgba(245,158,11,0.3)'
+  } else if (['processing', 'submitted', 'loan setup', 'disclosed'].some(v => s.includes(v))) {
+    bg = 'rgba(249,115,22,0.12)'; color = '#fb923c'; border = 'rgba(249,115,22,0.3)'
+  } else if (['pre-app', 'pre-approved', 'lead', 'application'].some(v => s.includes(v))) {
+    bg = 'rgba(59,130,246,0.12)'; color = '#60a5fa'; border = 'rgba(59,130,246,0.3)'
+  }
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '2px 8px', borderRadius: 12,
+      fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600,
+      background: bg, color, border: `1px solid ${border}`,
+    }}>
+      {status}
+    </span>
+  )
 }
 
 function isActiveLoan(status: string | null) {
@@ -151,17 +204,20 @@ const labelStyle: React.CSSProperties = {
 
 const LEFT_TABS = [
   { id: 'overview' as const, label: 'Overview' },
-  { id: 'loans'    as const, label: 'Loans' },
   { id: 'emails'   as const, label: 'Emails' },
+  { id: 'notes'    as const, label: 'Notes' },
 ]
 
-type LeftTab = 'overview' | 'loans' | 'emails'
+type LeftTab = 'overview' | 'emails' | 'notes'
 
 type Props = {
   contact: Contact
   loans: ContactLoan[]
   activity: ActivityEntry[]
+  contactActivity: ContactActivityRow[]
   emailDrafts: EmailDraftRow[]
+  inboundEmails: InboundEmailRow[]
+  contactEmails?: ContactEmailRow[]
   referrerContactId: string | null
   activeTab: 'overview' | 'loans' | 'activity' | 'notes' | 'emails'
   setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'notes' | 'emails') => void
@@ -171,6 +227,7 @@ type Props = {
   onAddNote: () => void
   onSaveNotes?: (notes: string) => Promise<void>
   onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
+  onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
 }
 
 // Inline-editable text field — click to edit, blur/Enter to save
@@ -241,8 +298,8 @@ function EditableContactField({ label, value, field, onSave }: {
   )
 }
 
-// ── Active loan card ──────────────────────────────────────────────────────────
-function ActiveLoanCard({ loan }: { loan: ContactLoan }) {
+// ── Loan card (used in Overview tab) ─────────────────────────────────────────
+function LoanCard({ loan }: { loan: ContactLoan }) {
   const address = loan.property_address
     || [loan.property_city, loan.property_state].filter(Boolean).join(', ')
     || loan.loan_name
@@ -271,11 +328,9 @@ function ActiveLoanCard({ loan }: { loan: ContactLoan }) {
               color: 'var(--muted)',
               textTransform: 'uppercase',
             }}>
-              Active Loan
+              {isActiveLoan(loan.status) ? 'Active Loan' : 'Loan'}
             </span>
-            {loan.status && (
-              <span style={{ ...getStageBadgeStyle(loan.status) }}>{loan.status}</span>
-            )}
+            <LoanStageBadge status={loan.status} />
           </div>
           <ExternalLink size={12} style={{ color: 'var(--muted)' }} />
         </div>
@@ -309,27 +364,96 @@ function ActiveLoanCard({ loan }: { loan: ContactLoan }) {
   )
 }
 
+// ── Activity type config ─────────────────────────────────────────────────────
+const ACTIVITY_TYPE_CONFIG: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
+  call:  { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
+  text:  { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
+  email: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
+  note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
+}
+
+// ── Activity feed item ───────────────────────────────────────────────────────
+function ActivityFeedItem({ item }: { item: ContactActivityRow }) {
+  const cfg = ACTIVITY_TYPE_CONFIG[item.activity_type] ?? ACTIVITY_TYPE_CONFIG.note
+  const Icon = cfg.icon
+  const ts = new Date(item.logged_at)
+  const now = new Date()
+  const diffMs = now.getTime() - ts.getTime()
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  let timeLabel: string
+  if (diffDays === 0) {
+    timeLabel = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  } else if (diffDays === 1) {
+    timeLabel = 'Yesterday'
+  } else if (diffDays < 7) {
+    timeLabel = `${diffDays}d ago`
+  } else {
+    timeLabel = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+      <div style={{
+        width: 28, height: 28, borderRadius: '50%',
+        background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <Icon size={13} style={{ color: cfg.color }} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: cfg.color }}>
+            {cfg.label}
+          </span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+            {timeLabel}
+          </span>
+        </div>
+        {item.notes && (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', marginTop: 3, lineHeight: 1.5 }}>
+            {item.notes}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 export function ContactRecordView(props: Props) {
   const {
     contact,
     loans,
-    activity,
+    contactActivity,
     emailDrafts,
+    inboundEmails,
+    contactEmails = [],
     referrerContactId,
-    newNote,
-    setNewNote,
-    savingNote,
-    onAddNote,
     onSaveNotes,
     onSaveField,
+    onLogActivity,
   } = props
 
-  // Map parent activeTab to our three-tab left rail
   const [leftTab, setLeftTab] = useState<LeftTab>('overview')
 
   const [notesVal, setNotesVal] = useState(contact.notes ?? '')
+  const [fullNotesVal, setFullNotesVal] = useState(contact.notes ?? '')
+  const [fullNotesSaving, setFullNotesSaving] = useState(false)
+  const [fullNotesLastSaved, setFullNotesLastSaved] = useState<Date | null>(null)
+  const fullNotesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [notesSaving, setNotesSaving] = useState(false)
   const [notesSaved, setNotesSaved] = useState(false)
+
+  // Activity form state
+  const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
+  const [activityNotes, setActivityNotes] = useState('')
+  const [activitySaving, setActivitySaving] = useState(false)
+  const [activityError, setActivityError] = useState<string | null>(null)
+
+  // Log prompt after Call/Text/Email click
+  const [logPromptType, setLogPromptType] = useState<'call' | 'text' | 'email' | null>(null)
+
+  const activityNotesRef = useRef<HTMLTextAreaElement>(null)
 
   const handleNotesBlur = async () => {
     if (!onSaveNotes) return
@@ -341,12 +465,65 @@ export function ContactRecordView(props: Props) {
     setTimeout(() => setNotesSaved(false), 2000)
   }
 
+  const handleFullNotesChange = (value: string) => {
+    setFullNotesVal(value)
+    if (fullNotesSaveTimer.current) clearTimeout(fullNotesSaveTimer.current)
+    fullNotesSaveTimer.current = setTimeout(async () => {
+      if (!onSaveNotes) return
+      setFullNotesSaving(true)
+      await onSaveNotes(value)
+      setFullNotesSaving(false)
+      setFullNotesLastSaved(new Date())
+    }, 500)
+  }
+
+  const handleFullNotesBlur = async () => {
+    if (!onSaveNotes) return
+    if (fullNotesSaveTimer.current) clearTimeout(fullNotesSaveTimer.current)
+    setFullNotesSaving(true)
+    await onSaveNotes(fullNotesVal)
+    setFullNotesSaving(false)
+    setFullNotesLastSaved(new Date())
+  }
+
   const phone = contact.phone || contact.phone_mobile || null
   const cityState = [contact.mailing_city, contact.mailing_state].filter(Boolean).join(', ')
   const mailingParts = [contact.mailing_street, cityState, contact.mailing_zip].filter(Boolean)
   const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
 
-  const activeLoan = loans.find(l => isActiveLoan(l.status)) ?? null
+  // Focus textarea when activity form opens
+  useEffect(() => {
+    if (activityFormType && activityNotesRef.current) {
+      activityNotesRef.current.focus()
+    }
+  }, [activityFormType])
+
+  const handleLogActivity = async () => {
+    if (!activityFormType || !onLogActivity) return
+    setActivitySaving(true)
+    setActivityError(null)
+    try {
+      await onLogActivity(activityFormType, activityNotes)
+      setActivityFormType(null)
+      setActivityNotes('')
+    } catch (err) {
+      setActivityError((err as Error).message || 'Failed to save')
+    }
+    setActivitySaving(false)
+  }
+
+  const handleActionClick = (type: 'call' | 'text' | 'email') => {
+    // Show log prompt after a brief delay to let the native app open
+    setTimeout(() => setLogPromptType(type), 500)
+  }
+
+  const handleLogPromptAccept = () => {
+    if (logPromptType) {
+      setActivityFormType(logPromptType)
+      setActivityNotes('')
+      setLogPromptType(null)
+    }
+  }
 
   // Shared action button base
   const actionBtnBase: React.CSSProperties = {
@@ -381,34 +558,20 @@ export function ContactRecordView(props: Props) {
         {/* Avatar + Name + Badges */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 16 }}>
           <div style={{
-            width: 52,
-            height: 52,
-            borderRadius: '50%',
-            background: 'rgba(201,168,76,0.18)',
-            color: '#c9a84c',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-display)',
-            fontSize: 18,
-            fontWeight: 700,
-            flexShrink: 0,
-            border: '1px solid rgba(201,168,76,0.3)',
+            width: 52, height: 52, borderRadius: '50%',
+            background: 'rgba(201,168,76,0.18)', color: '#c9a84c',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700,
+            flexShrink: 0, border: '1px solid rgba(201,168,76,0.3)',
           }}>
             {initials(contact)}
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 24,
-              fontWeight: 700,
-              letterSpacing: '0.03em',
-              margin: 0,
-              lineHeight: 1.2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700,
+              letterSpacing: '0.03em', margin: 0, lineHeight: 1.2,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {fullName(contact)}
             </h1>
@@ -436,11 +599,12 @@ export function ContactRecordView(props: Props) {
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons: Call, Text, Email */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {phone && (
             <a
               href={`tel:${phone.replace(/\D/g, '')}`}
+              onClick={() => handleActionClick('call')}
               style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)' }}
             >
               <Phone size={13} />
@@ -450,6 +614,7 @@ export function ContactRecordView(props: Props) {
           {phone && (
             <a
               href={`sms:${phone.replace(/\D/g, '')}`}
+              onClick={() => handleActionClick('text')}
               style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)' }}
             >
               <MessageSquare size={13} />
@@ -459,6 +624,7 @@ export function ContactRecordView(props: Props) {
           {contact.email && (
             <a
               href={`mailto:${contact.email}`}
+              onClick={() => handleActionClick('email')}
               style={{ ...actionBtnBase, background: '#c9a84c', color: '#000', border: 'none' }}
             >
               <Mail size={13} />
@@ -466,17 +632,43 @@ export function ContactRecordView(props: Props) {
             </a>
           )}
         </div>
+
+        {/* Log prompt after Call/Text/Email */}
+        {logPromptType && (
+          <div style={{
+            marginTop: 10, padding: '10px 14px',
+            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 6,
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)' }}>
+              Log this {logPromptType}?
+            </span>
+            <button
+              onClick={handleLogPromptAccept}
+              style={{
+                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                background: '#c9a84c', color: '#000', border: 'none',
+                padding: '4px 12px', borderRadius: 4, cursor: 'pointer',
+              }}
+            >
+              Log it
+            </button>
+            <button
+              onClick={() => setLogPromptType(null)}
+              style={{
+                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
+                padding: '4px 12px', borderRadius: 4, cursor: 'pointer',
+              }}
+            >
+              Skip
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ── Active loan card ─────────────────────────────────────────────────── */}
-      {activeLoan && (
-        <div style={{ flexShrink: 0, padding: '14px 28px 0' }}>
-          <ActiveLoanCard loan={activeLoan} />
-        </div>
-      )}
-
       {/* ── Two-column body ──────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', marginTop: 14 }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', marginTop: 0 }}>
 
         {/* ── Left column: tabs + content ── */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
@@ -488,18 +680,12 @@ export function ContactRecordView(props: Props) {
                 key={t.id}
                 onClick={() => setLeftTab(t.id)}
                 style={{
-                  padding: '8px 16px',
-                  fontSize: 11,
-                  fontFamily: 'var(--font-mono)',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  background: 'none',
-                  border: 'none',
+                  padding: '8px 16px', fontSize: 11,
+                  fontFamily: 'var(--font-mono)', fontWeight: 600,
+                  letterSpacing: '0.08em', background: 'none', border: 'none',
                   borderBottom: leftTab === t.id ? '2px solid #c9a84c' : '2px solid transparent',
                   color: leftTab === t.id ? '#c9a84c' : 'var(--muted)',
-                  cursor: 'pointer',
-                  textTransform: 'uppercase',
-                  marginBottom: -1,
+                  cursor: 'pointer', textTransform: 'uppercase', marginBottom: -1,
                 }}
               >
                 {t.label}
@@ -512,6 +698,33 @@ export function ContactRecordView(props: Props) {
 
             {leftTab === 'overview' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* ── Active Loans section (moved from separate tab) ── */}
+                <div style={cardStyle}>
+                  <div style={labelStyle}>ACTIVE LOAN(S)</div>
+                  {loans.length === 0 ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 0', color: 'var(--muted)' }}>
+                      <AlertCircle size={16} />
+                      <span style={{ fontSize: 12 }}>No active loans</span>
+                      <Link
+                        href="/dashboard/loans"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          fontFamily: 'var(--font-mono)', fontSize: 11, color: '#c9a84c',
+                          textDecoration: 'none', marginLeft: 8,
+                        }}
+                      >
+                        <Plus size={12} /> New Loan
+                      </Link>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {loans.map(loan => (
+                        <LoanCard key={loan.id} loan={loan} />
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Contact info */}
                 <div style={cardStyle}>
@@ -572,7 +785,7 @@ export function ContactRecordView(props: Props) {
                     </div>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                       <span style={{ color: 'var(--muted)' }}>Last activity </span>
-                      {contact.last_touch ? fmtDate(contact.last_touch) : '-'}
+                      {contact.last_activity_date ? fmtDate(contact.last_activity_date) : (contact.last_touch ? fmtDate(contact.last_touch) : '-')}
                     </div>
                     {contact.closing_date && (
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
@@ -600,17 +813,10 @@ export function ContactRecordView(props: Props) {
                     placeholder="Add notes…"
                     rows={5}
                     style={{
-                      width: '100%',
-                      background: 'var(--bg)',
-                      color: 'var(--fg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 4,
-                      padding: '10px 12px',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      resize: 'vertical',
-                      boxSizing: 'border-box',
-                      lineHeight: 1.6,
+                      width: '100%', background: 'var(--bg)', color: 'var(--fg)',
+                      border: '1px solid var(--border)', borderRadius: 4,
+                      padding: '10px 12px', fontFamily: 'var(--font-mono)', fontSize: 12,
+                      resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6,
                     }}
                   />
                 </div>
@@ -618,48 +824,63 @@ export function ContactRecordView(props: Props) {
               </div>
             )}
 
-            {leftTab === 'loans' && (
-              <div style={cardStyle}>
-                <div style={labelStyle}>LOANS</div>
-                {loans.length === 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '32px 0', color: 'var(--muted)' }}>
-                    <AlertCircle size={20} />
-                    <span style={{ fontSize: 13 }}>No loans linked to this contact yet.</span>
-                  </div>
-                ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        {['Address', 'Type', 'Amount', 'Rate', 'Status', 'Date'].map(h => (
-                          <th key={h} style={{ ...labelStyle, textAlign: 'left', padding: '8px 12px 8px 0' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loans.map(l => (
-                        <tr key={l.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                          <td style={{ padding: '10px 12px 10px 0' }}>
-                            <Link href={`/dashboard/loans/${l.id}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
-                              {l.property_address || [l.property_city, l.property_state].filter(Boolean).join(', ') || '-'}
-                            </Link>
-                          </td>
-                          <td style={{ padding: '10px 12px 10px 0', color: 'var(--muted)' }}>{l.loan_type || l.loan_purpose || '-'}</td>
-                          <td style={{ padding: '10px 12px 10px 0' }}>{fmtCurrency(l.loan_amount)}</td>
-                          <td style={{ padding: '10px 12px 10px 0', color: 'var(--muted)' }}>
-                            {l.interest_rate != null ? `${Number(l.interest_rate).toFixed(3)}%` : '-'}
-                          </td>
-                          <td style={{ padding: '10px 12px 10px 0', color: 'var(--muted)' }}>{l.status ?? '-'}</td>
-                          <td style={{ padding: '10px 12px 10px 0', color: 'var(--muted)', whiteSpace: 'nowrap' }}>{fmtDate(l.closing_date)}</td>
-                        </tr>
+            {leftTab === 'emails' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <InboundEmailFeed emails={inboundEmails} />
+                <ContactEmailHistory drafts={emailDrafts} />
+                {contactEmails.length > 0 && (
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 10, textTransform: 'uppercase' }}>Email Log</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {contactEmails.map(ce => (
+                        <ContactEmailLogRow key={ce.id} email={ce} />
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
 
-            {leftTab === 'emails' && (
-              <ContactEmailHistory drafts={emailDrafts} />
+            {leftTab === 'notes' && (
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Notes</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: fullNotesSaving ? 'var(--muted)' : fullNotesLastSaved ? '#80c080' : 'transparent' }}>
+                    {fullNotesSaving ? 'Saving…' : fullNotesLastSaved ? `✓ Saved ${Math.round((Date.now() - fullNotesLastSaved.getTime()) / 60000)} min ago` : ''}
+                  </span>
+                </div>
+                <textarea
+                  value={fullNotesVal}
+                  onChange={e => handleFullNotesChange(e.target.value)}
+                  onBlur={handleFullNotesBlur}
+                  placeholder="Add notes about this contact…"
+                  style={{
+                    flex: 1,
+                    width: '100%',
+                    minHeight: 'calc(100vh - 360px)',
+                    background: 'var(--bg)',
+                    color: 'var(--fg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    padding: '14px 16px',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 13,
+                    resize: 'none',
+                    boxSizing: 'border-box',
+                    lineHeight: 1.7,
+                    outline: 'none',
+                    caretColor: '#c9a84c',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#c9a84c' }}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onBlurCapture={e => { e.target.style.borderColor = 'var(--border)' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                    {fullNotesVal.length.toLocaleString()} chars
+                  </span>
+                </div>
+              </div>
             )}
 
           </div>
@@ -667,69 +888,116 @@ export function ContactRecordView(props: Props) {
 
         {/* ── Right column: activity feed ── */}
         <div style={{
-          width: 340,
-          flexShrink: 0,
+          width: 360, flexShrink: 0,
           borderLeft: '1px solid var(--border)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
 
-          {/* Sticky header */}
+          {/* Sticky header with count */}
           <div style={{
-            flexShrink: 0,
-            padding: '12px 20px',
-            borderBottom: '1px solid var(--border)',
-            background: 'var(--bg)',
+            flexShrink: 0, padding: '12px 20px',
+            borderBottom: '1px solid var(--border)', background: 'var(--bg)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <div style={{ ...labelStyle, marginBottom: 0 }}>ACTIVITY FEED</div>
+            <div style={{ ...labelStyle, marginBottom: 0 }}>
+              ACTIVITY {contactActivity.length > 0 && `(${contactActivity.length})`}
+            </div>
           </div>
 
-          {/* Log a note */}
-          <div style={{ flexShrink: 0, padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-            <textarea
-              value={newNote}
-              onChange={e => setNewNote(e.target.value)}
-              placeholder="Log a note or call…"
-              rows={2}
-              style={{
-                width: '100%',
-                background: 'var(--bg)',
-                color: 'var(--fg)',
-                border: '1px solid var(--border)',
-                borderRadius: 4,
-                padding: '8px 10px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                resize: 'none',
-                boxSizing: 'border-box',
-                marginBottom: 8,
-              }}
-            />
-            <button
-              onClick={onAddNote}
-              disabled={savingNote || !newNote.trim()}
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10,
-                letterSpacing: '0.08em',
-                background: savingNote || !newNote.trim() ? 'var(--surface)' : '#c9a84c',
-                color: savingNote || !newNote.trim() ? 'var(--muted)' : '#000',
-                border: '1px solid var(--border)',
-                padding: '5px 14px',
-                borderRadius: 4,
-                cursor: savingNote || !newNote.trim() ? 'default' : 'pointer',
-                fontWeight: 600,
-                transition: 'background 0.15s, color 0.15s',
-              }}
-            >
-              {savingNote ? 'Saving…' : 'Log Note'}
-            </button>
+          {/* Activity action buttons */}
+          <div style={{ flexShrink: 0, padding: '10px 16px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {(['call', 'text', 'email', 'note'] as const).map(type => {
+                const cfg = ACTIVITY_TYPE_CONFIG[type]
+                const Icon = cfg.icon
+                const isActive = activityFormType === type
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      if (isActive) { setActivityFormType(null); setActivityNotes('') }
+                      else { setActivityFormType(type); setActivityNotes(''); setActivityError(null) }
+                    }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                      letterSpacing: '0.06em',
+                      padding: '6px 12px', borderRadius: 4, cursor: 'pointer',
+                      background: isActive ? cfg.bg : 'var(--bg)',
+                      color: isActive ? cfg.color : 'var(--muted)',
+                      border: isActive ? `1px solid ${cfg.color}` : '1px solid var(--border)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <Icon size={11} />
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Inline activity form */}
+            {activityFormType && (
+              <div style={{ marginTop: 10 }}>
+                <textarea
+                  ref={activityNotesRef}
+                  value={activityNotes}
+                  onChange={e => setActivityNotes(e.target.value)}
+                  placeholder="Add notes..."
+                  rows={2}
+                  style={{
+                    width: '100%', background: 'var(--bg)', color: 'var(--fg)',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11,
+                    resize: 'none', boxSizing: 'border-box', marginBottom: 8,
+                  }}
+                />
+                {activityError && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#fca5a5', marginBottom: 6 }}>
+                    {activityError}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={handleLogActivity}
+                    disabled={activitySaving}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                      background: activitySaving ? 'var(--surface)' : '#c9a84c',
+                      color: activitySaving ? 'var(--muted)' : '#000',
+                      border: 'none', padding: '5px 14px', borderRadius: 4,
+                      cursor: activitySaving ? 'default' : 'pointer',
+                    }}
+                  >
+                    {activitySaving ? 'Saving…' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => { setActivityFormType(null); setActivityNotes(''); setActivityError(null) }}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                      background: 'transparent', color: 'var(--muted)',
+                      border: '1px solid var(--border)', padding: '5px 14px', borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Scrollable timeline */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 40px' }}>
-            <ActivityTimeline rows={activity} />
+          {/* Scrollable activity feed */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 40px' }}>
+            {contactActivity.length === 0 ? (
+              <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                No activity yet — log a call, text, or email above.
+              </div>
+            ) : (
+              contactActivity.map(item => (
+                <ActivityFeedItem key={item.id} item={item} />
+              ))
+            )}
           </div>
 
         </div>
@@ -769,6 +1037,140 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`
   const days = Math.floor(hours / 24)
   return `${days}d ago`
+}
+
+// ── Inbound email feed for a contact ─────────────────────────────────────────
+export type InboundEmailRow = {
+  id: string
+  subject: string | null
+  from_address: string | null
+  body_snippet: string | null
+  occurred_at: string | null
+  metadata: Record<string, unknown> | null
+}
+
+function InboundEmailFeed({ emails }: { emails: InboundEmailRow[] }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  if (emails.length === 0) return null
+
+  return (
+    <div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 8 }}>
+        INBOUND EMAILS ({emails.length})
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {emails.map(email => {
+          const isOpen = expandedId === email.id
+          const fromName = (email.metadata?.from_name as string) || null
+          const ts = email.occurred_at
+            ? new Date(email.occurred_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+              ' at ' +
+              new Date(email.occurred_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+            : '\u2014'
+
+          return (
+            <div
+              key={email.id}
+              style={{
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 6, overflow: 'hidden',
+              }}
+            >
+              <button
+                onClick={() => setExpandedId(isOpen ? null : email.id)}
+                style={{
+                  width: '100%', textAlign: 'left', background: 'none',
+                  border: 'none', cursor: 'pointer', padding: '12px 16px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{
+                    background: 'rgba(201,168,76,0.15)', color: '#C9A84C',
+                    fontSize: 10, fontFamily: 'var(--font-mono)', padding: '2px 8px',
+                    borderRadius: 12, fontWeight: 600, letterSpacing: '0.05em',
+                  }}>
+                    INBOUND
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                    {ts}
+                  </span>
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2,
+                }}>
+                  {email.subject || '\u2014'}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '\u2014')}
+                </div>
+              </button>
+              {isOpen && email.body_snippet && (
+                <div style={{
+                  borderTop: '1px solid var(--border)', padding: '12px 16px',
+                  fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)',
+                  lineHeight: 1.6, whiteSpace: 'pre-wrap',
+                }}>
+                  {email.body_snippet}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ContactEmailLogRow({ email }: { email: ContactEmailRow }) {
+  const [open, setOpen] = useState(false)
+  const src = email.automation_source ?? 'unknown'
+  const label = src.replace(/_/g, ' ')
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden', background: 'var(--surface)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', textAlign: 'left', padding: '10px 14px',
+          background: 'none', border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}
+      >
+        <span style={{
+          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          padding: '2px 8px', borderRadius: 10,
+          background: 'rgba(201,168,76,0.12)', color: '#c9a84c',
+          border: '1px solid rgba(201,168,76,0.3)', flexShrink: 0,
+        }}>{label}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {email.subject}
+        </span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', flexShrink: 0 }}>
+          {new Date(email.sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
+      </button>
+      {open && (email.body_html || email.body_text) && (
+        <div style={{
+          borderTop: '1px solid var(--border)',
+          padding: '12px 14px',
+          fontFamily: 'var(--font-mono)', fontSize: 12,
+          color: 'var(--fg)', lineHeight: 1.6,
+          whiteSpace: 'pre-wrap', maxHeight: 240, overflowY: 'auto',
+          background: 'var(--bg)',
+        }}>
+          {email.body_html
+            ? <div dangerouslySetInnerHTML={{ __html: email.body_html }} />
+            : email.body_text}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ContactEmailHistory({ drafts }: { drafts: EmailDraftRow[] }) {

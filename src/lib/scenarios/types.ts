@@ -2,6 +2,33 @@
 
 export type ScenarioMode = 'purchase' | 'refinance'
 
+// ─── Closing Cost Breakdown ────────────────────────────────────────
+
+export interface ClosingCostBreakdown {
+  // Lender Fees
+  originationFee: number
+  underwritingFee: number
+  processingFee: number
+  applicationFee: number
+  adminFee: number
+  // Third Party Fees
+  appraisal: number
+  creditReport: number
+  docPrepFee: number
+  floodCert: number
+  attorneyFee: number
+  settlementFee: number
+  titleSearch: number
+  titleEndorsements: number
+  recordingFee: number
+  lendersTitlePolicy: number
+  // Prepaids
+  prepaidInterestDays: number
+  annualHazardInsurance: number
+  taxEscrowMonths: number
+  insuranceEscrowMonths: number
+}
+
 export type LoanType = 'conventional' | 'fha' | 'va' | 'usda' | 'non-qm'
 
 export type BuydownType = 'none' | '2-1' | '3-2-1' | '1-0'
@@ -20,14 +47,17 @@ export interface PurchaseScenarioInput {
   loanAmount: number
   interestRate: number
   loanTerm: LoanTerm
-  points: number // negative = lender credits
+  pointsPercent: number // percentage of loan amount (e.g., 1.0 = 1 point)
+  creditsPercent: number // lender credits as percentage of loan amount
+  points: number // computed dollar amount (kept for calc compatibility)
   // Monthly costs
   propertyTaxes: number
   homeownersInsurance: number
   hoa: number
   pmi: number
   // Closing costs
-  totalClosingCosts: number
+  closingCostBreakdown: ClosingCostBreakdown
+  totalClosingCosts: number // auto-computed from breakdown
   sellerCredits: number
   // Buydown
   buydownType: BuydownType
@@ -68,8 +98,11 @@ export interface RefiScenarioInput {
   newLoanAmount: number
   interestRate: number
   loanTerm: LoanTerm
-  points: number
-  closingCosts: number
+  pointsPercent: number
+  creditsPercent: number
+  points: number // computed dollar amount
+  closingCostBreakdown: ClosingCostBreakdown
+  closingCosts: number // auto-computed from breakdown
   cashOutAmount: number
   payOffDebts: boolean // toggle to include listed debts in cash-out
   propertyTaxes: number

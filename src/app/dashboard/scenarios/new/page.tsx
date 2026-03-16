@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import ScenarioBuilder from './ScenarioBuilder'
+import { DEFAULT_CLOSING_COSTS, sumClosingCosts } from './ScenarioBuilder'
 import type { ScenarioState, LoanTerm, LoanType, CurrentLoanInput } from '@/lib/scenarios/types'
 
 export const dynamic = 'force-dynamic'
@@ -77,12 +78,15 @@ export default async function NewScenarioPage({
               loanAmount: loan.loan_amount || 0,
               interestRate: loan.interest_rate || 0,
               loanTerm,
+              pointsPercent: 0,
+              creditsPercent: 0,
               points: loan.points || 0,
-              propertyTaxes: 0, // not individually stored in loans
+              propertyTaxes: 0,
               homeownersInsurance: 0,
               hoa: 0,
               pmi: loan.mi_monthly || 0,
-              totalClosingCosts: loan.total_closing_costs || 0,
+              closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
+              totalClosingCosts: loan.total_closing_costs || sumClosingCosts(DEFAULT_CLOSING_COSTS),
               sellerCredits: loan.seller_credits || 0,
               buydownType: 'none',
               buydownYearRates: [],
@@ -98,12 +102,15 @@ export default async function NewScenarioPage({
               loanAmount: loan.loan_amount || 0,
               interestRate: 0,
               loanTerm,
+              pointsPercent: 0,
+              creditsPercent: 0,
               points: 0,
               propertyTaxes: 0,
               homeownersInsurance: 0,
               hoa: 0,
               pmi: loan.mi_monthly || 0,
-              totalClosingCosts: loan.total_closing_costs || 0,
+              closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
+              totalClosingCosts: loan.total_closing_costs || sumClosingCosts(DEFAULT_CLOSING_COSTS),
               sellerCredits: loan.seller_credits || 0,
               buydownType: 'none',
               buydownYearRates: [],
@@ -141,8 +148,11 @@ export default async function NewScenarioPage({
               newLoanAmount: 0,
               interestRate: 0,
               loanTerm: 30,
+              pointsPercent: 0,
+              creditsPercent: 0,
               points: 0,
-              closingCosts: 0,
+              closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
+              closingCosts: sumClosingCosts(DEFAULT_CLOSING_COSTS),
               cashOutAmount: 0,
               payOffDebts: false,
               propertyTaxes: 0,

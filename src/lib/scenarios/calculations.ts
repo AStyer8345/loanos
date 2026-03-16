@@ -178,8 +178,10 @@ export function calculatePurchaseScenario(
   const totalMonthly = pi + scenario.propertyTaxes + scenario.homeownersInsurance + scenario.hoa + scenario.pmi
   const ltv = pv > 0 ? (loanAmount / pv) * 100 : 0
 
-  // Lender credits from negative points
-  const lenderCredits = points < 0 ? Math.abs(points) : 0
+  // Credits from creditsPercent (new) or negative points (legacy)
+  const lenderCredits = scenario.creditsPercent > 0
+    ? Math.round(loanAmount * (scenario.creditsPercent / 100))
+    : (points < 0 ? Math.abs(points) : 0)
   const pointsCost = points > 0 ? points : 0
   const upfrontCosts = pointsCost + totalClosingCosts - sellerCredits - lenderCredits
   const apr = estimateAPR(loanAmount, interestRate, loanTerm, Math.max(upfrontCosts, 0))
@@ -344,9 +346,12 @@ export function calculateRefiScenario(
   const eq5 = currentEquity + (newSchedule[59]?.cumulativePrincipal ?? newSchedule[newSchedule.length - 1]?.cumulativePrincipal ?? 0)
   const eq10 = currentEquity + (newSchedule[119]?.cumulativePrincipal ?? newSchedule[newSchedule.length - 1]?.cumulativePrincipal ?? 0)
 
-  // APR
-  const upfront = (points > 0 ? points : 0) + closingCosts
-  const apr = estimateAPR(actualLoanAmount, interestRate, loanTerm, upfront)
+  // APR — include lender credits offset
+  const refiLenderCredits = scenario.creditsPercent > 0
+    ? Math.round(actualLoanAmount * (scenario.creditsPercent / 100))
+    : 0
+  const upfront = (points > 0 ? points : 0) + closingCosts - refiLenderCredits
+  const apr = estimateAPR(actualLoanAmount, interestRate, loanTerm, Math.max(upfront, 0))
 
   // Extra payment impact
   let adjustedPayoffMonths: number | undefined

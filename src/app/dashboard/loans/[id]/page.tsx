@@ -10,6 +10,8 @@ import {
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
+import { normalizeToStageKey } from '@/lib/constants/loan-stages'
+import type { StageKey } from '@/lib/constants/loan-stages'
 
 const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
 
@@ -271,17 +273,32 @@ function fmtPct(n: number | null) {
   return `${parseFloat(n.toFixed(3))}%`
 }
 
-// ── Pipeline helpers ──────────────────────────────────────────────────────────
+// ── Pipeline helpers (canonical stage ordering) ──────────────────────────────
 
 const PIPELINE_STAGES = ['Application', 'Processing', 'Underwriting', 'CTC', 'Funding']
 
+// Ordered stage keys from earliest to latest in the pipeline
+const STAGE_ORDER: StageKey[] = [
+  'lead', 'new_application', 'pre_approval',
+  'setup', 'disclosed', 'processing',
+  'submitted', 'underwriting', 'approved', 'resubmit',
+  'clear_to_close',
+  'funded',
+]
+
 function getStageIndex(status: string | null): number {
-  const s = (status || '').toLowerCase()
-  if (['closed', 'funded'].some(v => s.includes(v))) return 4
-  if (['clear to close', 'ctc'].some(v => s.includes(v))) return 3
-  if (['submitted to uw', 'underwriting', 'approved', 'conditional', 'resubmit', 'in process', 'loan in process'].some(v => s.includes(v))) return 2
-  if (['processing', 'submitted', 'pre-approved', 'disclosure', 'pre_approved'].some(v => s.includes(v))) return 1
+  const key = normalizeToStageKey(status)
+  if (key === 'funded') return 4
+  if (key === 'clear_to_close') return 3
+  if (['submitted', 'underwriting', 'approved', 'resubmit'].includes(key)) return 2
+  if (['setup', 'disclosed', 'processing', 'pre_approval'].includes(key)) return 1
   return 0
+}
+
+// Milestone completion: a milestone is complete when the loan has reached or passed the target stage
+function hasReachedStage(status: string | null, target: StageKey): boolean {
+  const key = normalizeToStageKey(status)
+  return STAGE_ORDER.indexOf(key) >= STAGE_ORDER.indexOf(target)
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -907,20 +924,21 @@ function DocumentsPreview({ loanId, docs, onRefresh }: { loanId: string; docs: D
 // ── Milestone timeline ────────────────────────────────────────────────────────
 
 function MilestoneTimeline({ loan }: { loan: Loan }) {
-  const currentIdx = getStageIndex(loan.status)
+  const currentKey = normalizeToStageKey(loan.status)
 
-  // targetStage: milestone is "complete" when currentIdx > targetStage, "active" when currentIdx === targetStage
-  const milestones = [
-    { label: 'Application Received',      date: loan.application_date,                     targetStage: 0 },
-    { label: 'Disclosures Sent (LE)',      date: null as string | null,                     targetStage: 0 },
-    { label: 'Submitted to Processing',   date: loan.submission_date,                      targetStage: 1 },
-    { label: 'Submitted to Underwriting', date: null as string | null,                     targetStage: 2 },
-    { label: 'CTC Issued',                date: loan.approval_date,                        targetStage: 3 },
-    { label: 'Closing Docs Drawn',        date: null as string | null,
-      est: loan.estimated_closing_date,                                                    targetStage: 4 },
+  // Each milestone maps to a canonical StageKey — complete when loan has reached or passed that stage
+  const milestones: { label: string; date: string | null; est?: string | null; reachedAt: StageKey; activeAt: StageKey }[] = [
+    { label: 'Application Received',      date: loan.application_date,      reachedAt: 'new_application', activeAt: 'new_application' },
+    { label: 'Disclosures Sent (LE)',      date: null,                       reachedAt: 'disclosed',       activeAt: 'setup' },
+    { label: 'Submitted to Processing',   date: loan.submission_date,       reachedAt: 'processing',      activeAt: 'disclosed' },
+    { label: 'Submitted to Underwriting', date: null,                       reachedAt: 'submitted',       activeAt: 'processing' },
+    { label: 'Approved w/ Conditions',    date: loan.approval_date,         reachedAt: 'approved',        activeAt: 'submitted' },
+    { label: 'CTC Issued',               date: null,                       reachedAt: 'clear_to_close',  activeAt: 'approved' },
+    { label: 'Closing Docs Drawn',        date: null,                       reachedAt: 'clear_to_close',  activeAt: 'clear_to_close',
+      est: loan.estimated_closing_date },
     { label: 'Funded',
-      date: loan.funding_date || loan.closing_date,
-      est: loan.closing_date || loan.estimated_closing_date,                               targetStage: 4 },
+      date: loan.funding_date || loan.closing_date,                         reachedAt: 'funded',          activeAt: 'clear_to_close',
+      est: loan.closing_date || loan.estimated_closing_date },
   ]
 
   return (
@@ -930,10 +948,10 @@ function MilestoneTimeline({ loan }: { loan: Loan }) {
       </div>
       <div className="p-4 space-y-3">
         {milestones.map((m, i) => {
-          const isComplete = m.date != null || currentIdx > m.targetStage
-          const isActive = !isComplete && currentIdx === m.targetStage
+          const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
+          const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
           const isPending = !isComplete && !isActive
-          const estDate = 'est' in m ? m.est : null
+          const estDate = m.est ?? null
 
           return (
             <div key={m.label} className="flex items-start gap-3">

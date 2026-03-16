@@ -855,8 +855,8 @@ function DocumentsPreview({ loanId, docs, onRefresh }: { loanId: string; docs: D
     setUploading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { alert('Not authenticated'); setUploading(false); return }
-    const storagePath = `${user.id}/${loanId}/${file.name}`
-    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file, { upsert: true })
+    const storagePath = `${user.id}/${loanId}/${Date.now()}_${file.name}`
+    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
     if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
     const { error: insertError } = await supabase.from('documents').insert({ user_id: user.id, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
     if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }

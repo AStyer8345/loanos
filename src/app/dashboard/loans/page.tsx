@@ -5,6 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X } from 'lucide-react'
+import {
+  IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
+  LEAD_STATUSES, NEW_APP_STATUSES, INACTIVE_STATUSES,
+  PIPELINE_STAGES as PIPELINE_STAGE_DEFS,
+  LOAN_STATUS_OPTIONS as STAGE_OPTIONS,
+  normalizeToStageKey, getStageLabel, rawStatusesForGroup,
+  STAGE_GROUPS,
+} from '@/lib/constants/loan-stages'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,36 +41,14 @@ interface SmartList {
   statuses: string[] | null // null = all
 }
 
-// ── Smart lists ──────────────────────────────────────────────────────────────
-// Each list maps to a set of status strings stored in the DB.
-// Arive sends statuses verbatim (e.g. RESUBMIT, DISCLOSURE_SENT) — include all
-// known variants here so webhook-updated loans always land in the right tab.
+// ── Smart lists (powered by loan-stages constants) ───────────────────────────
 
 const SMART_LISTS: SmartList[] = [
-  { id: 'all',        label: 'All Loans',         statuses: null },
-  {
-    id: 'inprocess',
-    label: 'Loans in Process',
-    statuses: [
-      // Canonical LoanOS statuses
-      'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
-      'Resubmitted', 'Clear to Close', 'Loan in Process',
-      // Arive raw status variants (stored verbatim from webhook)
-      'LOAN_SETUP', 'In Process', 'Processing', 'processing',
-      'DISCLOSURE_SENT',
-      'SUBMITTED', 'Submitted', 'Submitted to Underwriting',
-      'CONDITIONAL_APPROVAL', 'Conditional Approval', 'Approved', 'APPROVED_WITH_CONDITIONS',
-      'RESUBMIT', 'Resubmit', 'resubmit', 'RESUBMITTED',
-      'CLEAR_TO_CLOSE', 'CTC', 'Clear To Close',
-    ],
-  },
-  { id: 'closed',      label: 'Closed',       statuses: ['Closed', 'Funded', 'Closed/Funded'] },
-  {
-    id: 'preapproval',
-    label: 'Pre-Approval',
-    statuses: ['Pre-Approved', 'Started', 'Started App', 'lead', 'Lead', 'Pre-App', 'Application', 'APPLICATION_INTAKE', 'QUALIFICATION'],
-  },
-  { id: 'cancelled',   label: 'Other',        statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
+  { id: 'all',          label: 'All Loans',       statuses: null },
+  { id: 'inprocess',    label: 'Loans in Process', statuses: IN_PROCESS_STATUSES },
+  { id: 'closed',       label: 'Closed',          statuses: FUNDED_STATUSES },
+  { id: 'preapproval',  label: 'Pre-Approval',    statuses: [...PRE_APPROVAL_STATUSES, ...LEAD_STATUSES, ...NEW_APP_STATUSES] },
+  { id: 'cancelled',    label: 'Other',           statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
 ]
 
 // ── Quick filter options (maps to smart list IDs) ──────────────────────────────
@@ -74,54 +60,14 @@ const LOAN_QUICK_FILTERS = [
   { id: 'cancelled',   label: 'Other' },
 ] as const
 
-// Status options for manual inline edit + bulk update dropdowns
-const LOAN_STATUS_OPTIONS = [
-  'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
-  'Resubmitted', 'Clear to Close',
-  'Pre-Approved', 'Pre-App', 'Application', 'Lead',
-  'Closed', 'Funded', 'On Hold', 'Cancelled', 'Denied', 'Dead',
-] as const
+// Status options from constants (used for inline edit + bulk update dropdowns)
+const LOAN_STATUS_OPTIONS = STAGE_OPTIONS
 
-// ── Pipeline stage definitions (used by in-process dashboard bar) ────────────
-// These group raw DB status values into the 6 canonical in-process stages.
-const PIPELINE_STAGES: { label: string; short: string; statuses: string[]; hex: string }[] = [
-  {
-    label: 'Loan Setup',
-    short: 'Setup',
-    statuses: ['Loan Setup', 'LOAN_SETUP', 'In Process', 'Loan in Process', 'Processing', 'processing'],
-    hex: '#52525b',
-  },
-  {
-    label: 'Disclosed',
-    short: 'Disclosed',
-    statuses: ['Disclosed', 'DISCLOSURE_SENT'],
-    hex: '#2563eb',
-  },
-  {
-    label: 'Submitted to UW',
-    short: 'Submitted',
-    statuses: ['Submitted to UW', 'SUBMITTED', 'Submitted', 'Submitted to Underwriting'],
-    hex: '#7c3aed',
-  },
-  {
-    label: 'Approved w/ Cond.',
-    short: 'Approved',
-    statuses: ['Approved with Conditions', 'Conditional Approval', 'CONDITIONAL_APPROVAL', 'Approved', 'APPROVED_WITH_CONDITIONS'],
-    hex: '#059669',
-  },
-  {
-    label: 'Resubmitted',
-    short: 'Resubmit',
-    statuses: ['Resubmitted', 'RESUBMIT', 'Resubmit', 'resubmit', 'RESUBMITTED'],
-    hex: '#d97706',
-  },
-  {
-    label: 'Clear to Close',
-    short: 'CTC',
-    statuses: ['Clear to Close', 'CLEAR_TO_CLOSE', 'CTC', 'Clear To Close'],
-    hex: '#C9A84C',
-  },
-]
+// Pipeline stage definitions from constants (used by in-process dashboard bar)
+const PIPELINE_STAGES = PIPELINE_STAGE_DEFS.map(s => ({
+  ...s,
+  statuses: rawStatusesForGroup([s.key]),
+}))
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -237,7 +183,7 @@ function flattenLoans(data: Record<string, unknown>[]): Loan[] {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-// Map dashboard stage query param to smart list ID or custom filter
+// Map dashboard stage query param to smart list ID
 const STAGE_TO_LIST: Record<string, string> = {
   'Pre-Approval': 'preapproval',
   'Processing': 'inprocess',
@@ -249,6 +195,7 @@ const STAGE_TO_LIST: Record<string, string> = {
   'underwriting': 'inprocess',
   'clear_to_close': 'inprocess',
   'funded': 'closed',
+  'Funded': 'closed',
 }
 
 export default function LoansPage() {
@@ -259,6 +206,7 @@ export default function LoansPage() {
   const urlFilter = searchParams.get('filter')
   const urlPeriod = searchParams.get('period')
 
+  const [userId, setUserId] = useState<string | null>(null)
   const [loans, setLoans] = useState<Loan[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -282,6 +230,13 @@ export default function LoansPage() {
   const [hasMore, setHasMore] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const loansOffsetRef = useRef(0)
+
+  // Get authenticated user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id)
+    })
+  }, [supabase])
 
   // Restore column visibility from localStorage
   useEffect(() => {
@@ -327,21 +282,22 @@ export default function LoansPage() {
 
   // ── Fetch counts ───────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
+    if (!userId) return
     const map: Record<string, number> = {}
     for (const list of SMART_LISTS) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('user_id', userId)
       if (list.statuses) q = q.in('status', list.statuses)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     for (const list of customLists) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('user_id', userId)
       if (list.rules?.length) q = applyCustomListRulesLoan(q, list.rules)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     setCounts(map)
-  }, [customLists, supabase])
+  }, [customLists, supabase, userId])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
   const buildLoansQuery = useCallback((listId: string) => {
@@ -349,6 +305,7 @@ export default function LoansPage() {
       .from('loans')
       .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
+    if (userId) q = q.eq('user_id', userId)
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
       if (custom?.rules?.length) q = applyCustomListRulesLoan(q, custom.rules)
@@ -357,7 +314,7 @@ export default function LoansPage() {
       if (list?.statuses) q = q.in('status', list.statuses)
     }
     return q
-  }, [customLists, supabase])
+  }, [customLists, supabase, userId])
 
   const fetchLoans = useCallback(async (listId: string) => {
     setLoading(true)
@@ -385,8 +342,9 @@ export default function LoansPage() {
     setLoadingMore(false)
   }, [buildLoansQuery, activeList])
 
-  // URL param-based filtering on initial load
+  // URL param-based filtering on initial load (wait for userId)
   useEffect(() => {
+    if (!userId) return
     fetchCounts()
 
     if (urlStage || urlFilter || urlPeriod) {
@@ -411,7 +369,7 @@ export default function LoansPage() {
       fetchLoans('inprocess')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [userId])
 
   const handleListChange = (listId: string) => {
     setActiveList(listId)
@@ -487,13 +445,14 @@ export default function LoansPage() {
     // Apply URL-based stage filter (from dashboard stage cards)
     if (urlFilterActive?.stage) {
       const stageName = urlFilterActive.stage
-      // Stage-specific status sets matching DashboardClient STAGE_MAP
+      // Stage-specific status sets from constants
       const STAGE_STATUSES: Record<string, string[]> = {
-        'Pre-Approval': ['lead', 'Lead', 'Pre-App', 'Pre-Approved', 'Application', 'Started', 'APPLICATION_INTAKE', 'QUALIFICATION', 'pre_approval', 'pre-approval', 'pre_approved'],
-        'Processing': ['processing', 'Processing', 'Loan Setup', 'Disclosed', 'In Process', 'Loan in Process', 'LOAN_SETUP', 'DISCLOSURE_SENT', 'Submitted'],
-        'Underwriting': ['Submitted to UW', 'underwriting', 'Approved', 'Approved with Conditions', 'Resubmitted', 'Conditional Approval', 'SUBMITTED', 'CONDITIONAL_APPROVAL', 'APPROVED_WITH_CONDITIONS', 'RESUBMIT', 'RESUBMITTED'],
-        'Clear to Close': ['Clear to Close', 'CTC', 'CLEAR_TO_CLOSE', 'Clear To Close', 'clear_to_close'],
-        'funded': ['Closed', 'Funded', 'Closed/Funded'],
+        'Pre-Approval': [...PRE_APPROVAL_STATUSES, ...LEAD_STATUSES],
+        'Processing': rawStatusesForGroup(['setup', 'disclosed', 'processing']),
+        'Underwriting': rawStatusesForGroup(['submitted', 'underwriting', 'approved', 'resubmit']),
+        'Clear to Close': rawStatusesForGroup(['clear_to_close']),
+        'funded': FUNDED_STATUSES,
+        'Funded': FUNDED_STATUSES,
       }
       const validStatuses = STAGE_STATUSES[stageName]
       if (validStatuses) {
@@ -940,9 +899,10 @@ export default function LoansPage() {
                   const days = activeList === 'inprocess' ? daysUntilClose(loan.closing_date) : null
                   return (
                   <tr key={loan.id}
-                    className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
-                    style={urgencyStyle}>
-                    <td className="w-8 px-2 py-3">
+                    className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
+                    style={urgencyStyle}
+                    onClick={() => router.push(`/dashboard/loans/${loan.id}`)}>
+                    <td className="w-8 px-2 py-3" onClick={e => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={selected.has(loan.id)}
@@ -953,17 +913,23 @@ export default function LoansPage() {
                     {colDefs.map(col => {
                       if (col.id === 'borrower_name') {
                         return (
-                          <td key={col.id} className="px-4 py-3 font-medium">
-                            <Link
-                              href={loan.contact_id ? `/dashboard/contacts?id=${loan.contact_id}` : `/dashboard/loans/${loan.id}`}
-                              className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono"
-                            >
-                              {loan.borrower_name || loan.loan_name || '(unnamed)'}
-                            </Link>
-                            {loan.loan_name && loan.borrower_name && (
-                              <Link href={`/dashboard/loans/${loan.id}`} className="block text-xs font-mono text-[#666666] hover:text-[#C9A84C] mt-0.5">
-                                {loan.loan_name}
+                          <td key={col.id} className="px-4 py-3 font-medium" onClick={e => e.stopPropagation()}>
+                            {loan.contact_id ? (
+                              <Link
+                                href={`/dashboard/contacts/${loan.contact_id}`}
+                                className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono"
+                              >
+                                {loan.borrower_name || loan.loan_name || '(unnamed)'}
                               </Link>
+                            ) : (
+                              <span className="text-[#F0F0F0] font-mono">
+                                {loan.borrower_name || loan.loan_name || '(unnamed)'}
+                              </span>
+                            )}
+                            {loan.loan_name && loan.borrower_name && (
+                              <span className="block text-xs font-mono text-[#666666] mt-0.5">
+                                {loan.loan_name}
+                              </span>
                             )}
                           </td>
                         )

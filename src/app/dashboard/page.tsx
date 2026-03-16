@@ -1,35 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
+import { toDashboardStage, isInStageGroup, STAGE_GROUPS, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 
 export const dynamic = 'force-dynamic'
 
-// ─── status → pipeline stage mapping ────────────────────────────────────────
-const STAGE_MAP: Record<string, string> = {
-  lead: 'Pre-Approval', pre_approval: 'Pre-Approval', 'pre-approval': 'Pre-Approval',
-  pre_approved: 'Pre-Approval', 'pre-approved': 'Pre-Approval', 'pre-app': 'Pre-Approval',
-  application: 'Pre-Approval', application_intake: 'Pre-Approval', 'application intake': 'Pre-Approval',
-  started: 'Pre-Approval', qualification: 'Pre-Approval',
-  processing: 'Processing', loan_setup: 'Processing', 'loan setup': 'Processing',
-  disclosed: 'Processing', submitted: 'Processing', 'in process': 'Processing',
-  'loan in process': 'Processing',
-  underwriting: 'Underwriting', submitted_to_uw: 'Underwriting', 'submitted to uw': 'Underwriting',
-  resubmitted: 'Underwriting', approved: 'Underwriting',
-  approved_with_conditions: 'Underwriting', 'approved with conditions': 'Underwriting',
-  conditional_approval: 'Underwriting', 'conditional-approval': 'Underwriting',
-  'approved w/ conditions': 'Underwriting',
-  clear_to_close: 'Clear to Close', 'clear-to-close': 'Clear to Close',
-  'clear to close': 'Clear to Close', ctc: 'Clear to Close', closing: 'Clear to Close',
-  closed: 'Funded', funded: 'Funded',
-  cancelled: 'Cancelled', canceled: 'Cancelled', dead: 'Cancelled',
-  denied: 'Cancelled', withdrawn: 'Cancelled', 'on hold': 'Cancelled', on_hold: 'Cancelled',
-}
-
-const INACTIVE = new Set([
-  'closed', 'funded', 'cancelled', 'canceled', 'dead', 'denied', 'withdrawn', 'on hold', 'on_hold',
-])
-
-const ACTIVE_STAGES = ['Pre-Approval', 'Processing', 'Underwriting', 'Clear to Close']
+const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -56,7 +32,7 @@ export default async function DashboardPage() {
 
   for (const loan of loans ?? []) {
     const rawStatus = (loan.status ?? 'unknown').toLowerCase()
-    const stageName = STAGE_MAP[rawStatus] ?? loan.status ?? 'Other'
+    const stageName = toDashboardStage(loan.status)
     const amount = loan.loan_amount ?? 0
     const commission = loan.commission_amount ?? 0
 
@@ -110,7 +86,7 @@ export default async function DashboardPage() {
     }
   }
 
-  const stageData = ACTIVE_STAGES.map(stage => ({
+  const stageData = DASHBOARD_STAGES.map(stage => ({
     stage,
     count: stageCounts[stage]?.count ?? 0,
     volume: stageCounts[stage]?.volume ?? 0,

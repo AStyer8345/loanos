@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [3.3.0] — 2026-03-16 — Loan Detail Page Fixes + Activity Log
+
+### New
+- **Header row 2**: Est. Close Date, Rate Lock Date, Lock Expiry, Days Locked — all inline-editable
+- **Rate lock expiry warnings**: automatic yellow badge within 5 days, red badge when expired
+- **Milestone: Approved w/ Conditions** added to milestone timeline (was missing)
+- **Key Loan Details expanded**: Est. Close Date, Rate Lock Expiry, Commission added to dashboard card
+- Schema: `rate_lock_date` (DATE) and `rate_lock_days` (INTEGER) columns added to loans table
+
+### Fixed
+- **Activity log root cause**: ActivityRow interface was missing `type` and `summary` — notes saved but never displayed. Fixed interface, select query, and insert (now includes `user_id`). Optimistic update with rollback on failure.
+- **Activity feed display**: type-specific icons (phone/email/text), full timestamps, notes shown in full
+- **Commission bug**: bad test data (Priya Nair $1M, Derek Cho $10K, Maria Gutierrez $100K) corrected to 1% of loan amount
+- **Milestones**: replaced hardcoded string matching with `normalizeToStageKey()` from canonical constants. `hasReachedStage()` helper uses ordered STAGE_ORDER array.
+
+### Changed
+- Test data: 8 in-process loans now have estimated close dates + rate lock data. Scott Tillman and Travis Coleman locks trigger warning badges.
+
 ## [3.2.0] — 2026-03-16 — Loans + Contacts Sync Fix + UI Fixes
 
 ### New

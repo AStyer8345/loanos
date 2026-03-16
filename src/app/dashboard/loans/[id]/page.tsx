@@ -101,6 +101,8 @@ interface Loan {
   buyers_agent_phone: string | null
   buyer_agent_name: string | null
   buyer_agent_email: string | null
+  buyer_agent_contact_id: string | null
+  listing_agent_contact_id: string | null
   title_company: string | null
   title_contact: string | null
   title_email: string | null
@@ -1442,17 +1444,17 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
         {/* 6 — Parties */}
         <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
-          { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
+          { label: 'Referring Agent',   displayValue: loan.buyer_agent_contact_id && loan.referring_agent_name ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.referring_agent_name}</Link> : loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
           { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
           { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
-          { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
+          { label: 'Listing Agent',     displayValue: loan.listing_agent_contact_id && loan.listing_agent_name ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.listing_agent_name}</Link> : loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
           { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
           { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
-          { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name,   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
+          { label: "Buyer's Agent",     displayValue: loan.buyer_agent_contact_id && (loan.buyers_agent_name || loan.buyer_agent_name) ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link> : (loan.buyers_agent_name || loan.buyer_agent_name),   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
           { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
           { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone,    field: 'buyers_agent_phone',    rawValue: loan.buyers_agent_phone,    labelColor: 'text-emerald-400/70' },
           { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
-          { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },
+          { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact,    searchContacts: true, relatedFields: { email: 'title_email' } },
           { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
           { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
           { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },

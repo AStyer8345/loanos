@@ -146,7 +146,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
   const resultsRef = useRef<HTMLDivElement>(null)
 
   // ─── Calculation ────────────────────────────────────────────────
-  const runCalculation = useCallback(async () => {
+  const runCalculation = useCallback(async (): Promise<boolean> => {
     setCalculating(true)
     try {
       const res = await fetch('/api/scenarios/calculate', {
@@ -161,7 +161,15 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
           reinvestment: reinvestmentSettings,
         }),
       })
+      if (!res.ok) {
+        console.error('Calculation API error:', res.status)
+        return false
+      }
       const data = await res.json()
+      if (data.error) {
+        console.error('Calculation error:', data.error)
+        return false
+      }
       if (mode === 'purchase') {
         setPurchaseResults(data.purchaseResults ?? [])
       } else {
@@ -170,8 +178,10 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
       if (data.reinvestmentResult) setReinvestmentResult(data.reinvestmentResult)
       // Scroll to results
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' }), 200)
+      return true
     } catch (e) {
       console.error('Calculation failed:', e)
+      return false
     } finally {
       setCalculating(false)
     }
@@ -250,11 +260,16 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
     : true
 
   const goNext = async () => {
-    if (step === 1) {
-      // Auto-calculate when advancing from Loan Options to Results
-      await runCalculation()
+    try {
+      if (step === 1) {
+        // Auto-calculate when advancing from Loan Options to Results
+        const success = await runCalculation()
+        if (!success) return // Don't advance if calculation failed
+      }
+      setStep(prev => Math.min(prev + 1, STEPS.length - 1))
+    } catch (e) {
+      console.error('goNext error:', e)
     }
-    setStep(prev => Math.min(prev + 1, STEPS.length - 1))
   }
 
   const goBack = () => setStep(prev => Math.max(prev - 1, 0))

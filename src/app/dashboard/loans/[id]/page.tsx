@@ -164,6 +164,15 @@ interface EmailDraftRow {
 
 const WORKFLOWS = [
   {
+    id: 'pre-approval',
+    name: 'Pre-Approval Email',
+    description: 'Upload a Pre-Approval letter — Claude extracts details and drafts a congratulations email.',
+    triggerLabel: 'Upload PA Letter PDF',
+    triggerType: 'pdf' as const,
+    webhookPath: 'loanos-pre-approval',
+    icon: '✅',
+  },
+  {
     id: 'final-cd',
     name: 'Final CD Email',
     description: 'Upload a Closing Disclosure PDF — Claude extracts 10 fields and generates a personalized closing email draft.',
@@ -173,13 +182,22 @@ const WORKFLOWS = [
     icon: '📄',
   },
   {
-    id: 'pre-approval',
-    name: 'Pre-Approval Email',
-    description: 'Upload a Pre-Approval letter — Claude extracts details and drafts a congratulations email.',
-    triggerLabel: 'Upload PA Letter PDF',
+    id: 'refi-intake',
+    name: 'Refi Intake Email',
+    description: 'Upload an Initial Fees Worksheet — Claude extracts loan details and drafts the refinance kickoff email.',
+    triggerLabel: 'Upload IFW PDF',
     triggerType: 'pdf' as const,
-    webhookPath: 'loanos-pre-approval',
-    icon: '✅',
+    webhookPath: 'loanos-refi-intake',
+    icon: '🔄',
+  },
+  {
+    id: 'refi-analysis',
+    name: 'Refi Analysis',
+    description: 'Upload an IFW PDF — builds a branded multi-page refinance analysis PDF and drafts the accompanying email.',
+    triggerLabel: 'Upload IFW PDF',
+    triggerType: 'pdf' as const,
+    webhookPath: 'loanos-refi-analysis',
+    icon: '📊',
   },
   {
     id: 'referral-intro',
@@ -191,6 +209,15 @@ const WORKFLOWS = [
     icon: '🤝',
   },
   {
+    id: 'website-lead',
+    name: 'Website Lead Follow-up',
+    description: 'Process a new inbound lead from styermortgage.com — creates Salesforce contact and drafts a personalized follow-up email.',
+    triggerLabel: 'Enter Lead Details',
+    triggerType: 'form' as const,
+    webhookPath: 'loanos-website-lead',
+    icon: '🌐',
+  },
+  {
     id: 'new-application',
     name: 'New Application Received',
     description: '1003 PDF — Claude extracts borrower info, creates contacts, and drafts a welcome email.',
@@ -198,6 +225,15 @@ const WORKFLOWS = [
     triggerType: 'pdf' as const,
     webhookPath: 'loanos-new-application',
     icon: '📋',
+  },
+  {
+    id: 'contract-received',
+    name: 'Contract Received',
+    description: 'Upload an executed purchase contract — Claude extracts all key fields, drafts reply-all to transaction parties.',
+    triggerLabel: 'Upload Contract PDF',
+    triggerType: 'pdf' as const,
+    webhookPath: 'loanos-contract-received',
+    icon: '📝',
   },
 ]
 
@@ -259,6 +295,8 @@ export default function LoanDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -354,18 +392,18 @@ export default function LoanDetailPage() {
                   <div className="absolute right-0 top-full mt-1 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
                     <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
                     {[
-                      { label: 'Send PA Email', tab: 'automations' as const },
-                      { label: 'Send CD Email', tab: 'automations' as const },
-                      { label: 'Refi Intake Email', tab: 'automations' as const },
-                      { label: 'Send Refi Analysis', tab: 'automations' as const },
-                      { label: 'Referral Intro Email', tab: 'automations' as const },
-                      { label: 'Website Lead Follow-up', tab: 'automations' as const },
-                      { label: 'New Application Received', tab: 'automations' as const },
-                      { label: 'Contract Received', tab: 'automations' as const },
-                    ].map(({ label, tab }) => (
+                      { label: 'Send PA Email', automationId: 'pre-approval' },
+                      { label: 'Send CD Email', automationId: 'final-cd' },
+                      { label: 'Refi Intake Email', automationId: 'refi-intake' },
+                      { label: 'Send Refi Analysis', automationId: 'refi-analysis' },
+                      { label: 'Referral Intro Email', automationId: 'referral-intro' },
+                      { label: 'Website Lead Follow-up', automationId: 'website-lead' },
+                      { label: 'New Application Received', automationId: 'new-application' },
+                      { label: 'Contract Received', automationId: 'contract-received' },
+                    ].map(({ label, automationId }) => (
                       <button
                         key={label}
-                        onClick={() => { setActiveTab(tab); setActionsOpen(false) }}
+                        onClick={() => { setActiveTab('automations'); setSelectedAutomationId(automationId); setActionsOpen(false) }}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
                       >
                         <Zap size={12} className="text-[#C9A84C] shrink-0" />
@@ -487,7 +525,7 @@ export default function LoanDetailPage() {
           <DetailsTab loan={loan} setLoan={l => setLoan(l)} contact={contact} loanId={loanId} />
         )}
         {activeTab === 'automations' && (
-          <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} /></div>
+          <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
         )}
         {activeTab === 'activity' && (
           <div className="p-6"><ActivityTab activity={activity} loanId={loanId} onRefresh={fetchAll} /></div>
@@ -1301,8 +1339,22 @@ function DetailsTab({ loan, setLoan, contact, loanId }: {
 
 // ── Automations tab ───────────────────────────────────────────────────────────
 
-function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCreated: () => void }) {
+function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight }: { loan: Loan; onActivityCreated: () => void; highlightId?: string | null; onClearHighlight?: () => void }) {
   const [activeModal, setActiveModal] = useState<typeof WORKFLOWS[0] | null>(null)
+  const highlightRef = useRef<HTMLDivElement>(null)
+
+  // Auto-open modal when an automation is pre-selected from Actions dropdown
+  useEffect(() => {
+    if (highlightId) {
+      const wf = WORKFLOWS.find(w => w.id === highlightId)
+      if (wf) {
+        setActiveModal(wf)
+        onClearHighlight?.()
+      }
+      // Scroll to the highlighted card
+      setTimeout(() => highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+    }
+  }, [highlightId, onClearHighlight])
 
   return (
     <div>
@@ -1311,7 +1363,13 @@ function AutomationsTab({ loan, onActivityCreated }: { loan: Loan; onActivityCre
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {WORKFLOWS.map(wf => (
-          <div key={wf.id} className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 p-4 hover:border-indigo-500/50 transition-colors">
+          <div
+            key={wf.id}
+            ref={wf.id === highlightId ? highlightRef : undefined}
+            className={`bg-zinc-900/80 border rounded-lg shadow-lg shadow-black/50 p-4 transition-colors ${
+              wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-zinc-700 hover:border-indigo-500/50'
+            }`}
+          >
             <div className="flex items-start gap-3">
               <span className="text-2xl">{wf.icon}</span>
               <div className="flex-1">

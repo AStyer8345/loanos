@@ -9,6 +9,13 @@ import type {
   BuydownType,
 } from './types'
 
+// ─── Helpers ──────────────────────────────────────────────────────
+
+/** Sanitize a number — replace NaN/Infinity with 0 */
+function safe(v: number): number {
+  return isFinite(v) ? v : 0
+}
+
 // ─── Core Amortization ─────────────────────────────────────────────
 
 /** Monthly P&I payment: M = P[r(1+r)^n]/[(1+r)^n-1] */
@@ -98,25 +105,31 @@ export function estimateAPR(
   upfrontCosts: number
 ): number {
   if (loanAmount <= 0 || termYears <= 0) return 0
+  if (annualRate <= 0) return 0 // Can't compute APR without a rate
   const netProceeds = loanAmount - upfrontCosts
   if (netProceeds <= 0) return annualRate
   const payment = monthlyPayment(loanAmount, annualRate, termYears)
+  if (payment <= 0) return annualRate
   const n = termYears * 12
   // Newton-Raphson to find monthly rate where PV of payments = netProceeds
   let guess = annualRate / 100 / 12
+  if (guess <= 0) return 0
   for (let i = 0; i < 100; i++) {
     const factor = Math.pow(1 + guess, n)
+    if (factor === 0 || !isFinite(factor)) break
     const pv = payment * (factor - 1) / (guess * factor)
     const dpv = payment * (
       ((n * Math.pow(1 + guess, n - 1) * guess * factor - (factor - 1) * (factor + guess * n * Math.pow(1 + guess, n - 1))) /
       (guess * factor) ** 2)
     )
+    if (!isFinite(pv) || !isFinite(dpv) || dpv === 0) break
     const diff = pv - netProceeds
     if (Math.abs(diff) < 0.01) break
     guess = guess - diff / dpv
-    if (guess <= 0) { guess = annualRate / 100 / 12; break }
+    if (guess <= 0 || !isFinite(guess)) { guess = annualRate / 100 / 12; break }
   }
-  return round3(guess * 12 * 100)
+  const result = guess * 12 * 100
+  return isFinite(result) ? round3(result) : round3(annualRate)
 }
 
 // ─── Buydown ────────────────────────────────────────────────────────
@@ -237,18 +250,18 @@ export function calculatePurchaseScenario(
 
   return {
     scenarioId: scenario.id,
-    monthlyPI: round2(pi),
-    totalMonthlyPayment: round2(totalMonthly),
-    ltv: round1(ltv),
-    apr: round3(apr),
-    cashToClose: round2(Math.max(cashToClose, 0)),
-    totalInterest: round2(totalInterest),
-    totalCostLifetime: round2(totalCostLifetime),
-    totalCost5Year: round2(cost5),
-    totalCost10Year: round2(cost10),
-    equityYear1: round2(eq1),
-    equityYear5: round2(eq5),
-    equityYear10: round2(eq10),
+    monthlyPI: safe(round2(pi)),
+    totalMonthlyPayment: safe(round2(totalMonthly)),
+    ltv: safe(round1(ltv)),
+    apr: safe(round3(apr)),
+    cashToClose: safe(round2(Math.max(cashToClose, 0))),
+    totalInterest: safe(round2(totalInterest)),
+    totalCostLifetime: safe(round2(totalCostLifetime)),
+    totalCost5Year: safe(round2(cost5)),
+    totalCost10Year: safe(round2(cost10)),
+    equityYear1: safe(round2(eq1)),
+    equityYear5: safe(round2(eq5)),
+    equityYear10: safe(round2(eq10)),
     amortizationSchedule: schedule,
     buydownPayments,
     buydownCost,
@@ -369,30 +382,30 @@ export function calculateRefiScenario(
 
   return {
     scenarioId: scenario.id,
-    currentMonthlyPayment: currentCalc.totalMonthlyPayment,
-    newMonthlyPI: round2(newPI),
-    newTotalMonthlyPayment: round2(newTotalMonthly),
-    monthlySavings: round2(monthlySavings),
-    annualSavings: round2(monthlySavings * 12),
-    netMonthlyCashFlowImprovement: round2(netCashFlowImprovement),
-    breakEvenMonth: breakEven,
-    totalSavings3Year: round2(savings3),
-    totalSavings5Year: round2(savings5),
-    totalSavings10Year: round2(savings10),
-    remainingInterestCurrent: round2(remainingInterestCurrent),
-    totalInterestNew: round2(totalInterestNew),
-    lifetimeInterestSavings: round2(remainingInterestCurrent - totalInterestNew),
-    cashOutReceived: round2(cashOutAmount),
+    currentMonthlyPayment: safe(currentCalc.totalMonthlyPayment),
+    newMonthlyPI: safe(round2(newPI)),
+    newTotalMonthlyPayment: safe(round2(newTotalMonthly)),
+    monthlySavings: safe(round2(monthlySavings)),
+    annualSavings: safe(round2(monthlySavings * 12)),
+    netMonthlyCashFlowImprovement: safe(round2(netCashFlowImprovement)),
+    breakEvenMonth: safe(breakEven),
+    totalSavings3Year: safe(round2(savings3)),
+    totalSavings5Year: safe(round2(savings5)),
+    totalSavings10Year: safe(round2(savings10)),
+    remainingInterestCurrent: safe(round2(remainingInterestCurrent)),
+    totalInterestNew: safe(round2(totalInterestNew)),
+    lifetimeInterestSavings: safe(round2(remainingInterestCurrent - totalInterestNew)),
+    cashOutReceived: safe(round2(cashOutAmount)),
     debtsEliminated: scenario.payOffDebts
       ? currentLoan.debts.map(d => ({ description: d.description, monthlyPayment: d.monthlyPayment }))
       : [],
-    newLtv: round1(newLtv),
-    equityYear1: round2(eq1),
-    equityYear5: round2(eq5),
-    equityYear10: round2(eq10),
+    newLtv: safe(round1(newLtv)),
+    equityYear1: safe(round2(eq1)),
+    equityYear5: safe(round2(eq5)),
+    equityYear10: safe(round2(eq10)),
     amortizationSchedule: newSchedule,
     currentLoanSchedule: currentCalc.remainingSchedule,
-    apr: round3(apr),
+    apr: safe(round3(apr)),
     adjustedPayoffMonths,
     yearsSaved,
     monthsSaved,

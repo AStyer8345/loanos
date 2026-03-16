@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ScenarioBuilder from '../new/ScenarioBuilder'
-import type { ScenarioState } from '@/lib/scenarios/types'
+import { ensureClosingCosts, sumClosingCosts, DEFAULT_CLOSING_COSTS } from '../new/ScenarioBuilder'
+import type { ScenarioState, RefiScenarioInput, PurchaseScenarioInput } from '@/lib/scenarios/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,10 +31,23 @@ export default async function ViewScenarioPage({ params }: { params: { id: strin
   }
 
   if (scenario.scenario_type === 'purchase') {
-    initialState.purchaseScenarios = scenario.scenarios_data
+    // Ensure closingCostBreakdown exists on each loaded purchase scenario
+    initialState.purchaseScenarios = (scenario.scenarios_data as PurchaseScenarioInput[]).map(s => ({
+      ...s,
+      closingCostBreakdown: ensureClosingCosts(s.closingCostBreakdown),
+      totalClosingCosts: s.totalClosingCosts ?? sumClosingCosts(s.closingCostBreakdown ?? DEFAULT_CLOSING_COSTS),
+      buydownYearRates: s.buydownYearRates ?? [],
+    }))
   } else {
     initialState.currentLoan = scenario.current_loan_data
-    initialState.refiScenarios = scenario.scenarios_data
+      ? { ...scenario.current_loan_data, debts: scenario.current_loan_data.debts ?? [] }
+      : undefined
+    // Ensure closingCostBreakdown exists on each loaded refi scenario
+    initialState.refiScenarios = (scenario.scenarios_data as RefiScenarioInput[]).map(s => ({
+      ...s,
+      closingCostBreakdown: ensureClosingCosts(s.closingCostBreakdown),
+      closingCosts: s.closingCosts ?? sumClosingCosts(s.closingCostBreakdown ?? DEFAULT_CLOSING_COSTS),
+    }))
   }
 
   return <ScenarioBuilder initialState={initialState} />

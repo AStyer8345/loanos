@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { X, ChevronDown, ChevronRight } from 'lucide-react'
 import type { PurchaseScenarioInput, RefiScenarioInput, CurrentLoanInput, LoanType, LoanTerm, BuydownType, ClosingCostBreakdown } from '@/lib/scenarios/types'
-import { CurrencyField, PercentField, SelectField } from './ScenarioBuilder'
+import { CurrencyField, PercentField, SelectField } from './FormFields'
 import { sumClosingCosts } from './ScenarioBuilder'
 
 const LOAN_TYPES: { value: string; label: string }[] = [

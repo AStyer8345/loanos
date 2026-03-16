@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import type { CurrentLoanInput, DebtItem, LoanTerm } from '@/lib/scenarios/types'
 import { monthlyPayment, remainingBalance, monthsElapsed } from '@/lib/scenarios/calculations'
-import { CurrencyField, PercentField, SelectField } from './ScenarioBuilder'
+import { CurrencyField, PercentField, SelectField } from './FormFields'
 
 const LOAN_TERMS = [
   { value: '30', label: '30 Year' },

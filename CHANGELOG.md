@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [3.5.5] — 2026-03-17 — Dashboard Daily Schedule Widget
+
+### New
+- **`src/lib/marketing/schedule.ts`**: Shared module exporting `DAYS`, `TCOLS`, `DayTask`, `DayDef` — extracted from `marketing/page.tsx` to a plain TS module (no `'use client'`) so it's importable by both server components and client widgets without circular imports.
+- **`src/components/dashboard/DailyScheduleWidget.tsx`**: Self-contained client widget showing today's marketing task checklist on the main dashboard. Fetches `mcc_state` from Supabase on mount. Checking a task writes to `marketing_activity_log` + updates `mcc_state` log. Gold checkbox + progress bar + day/focus badge. "Full hub →" link to `/dashboard/marketing`. Returns `null` on weekends for a clean dashboard.
+
+### Changed
+- **`DashboardClient.tsx`**: `<DailyScheduleWidget />` inserted between Needs Attention panel and the Recent Loans + Activity grid in the Pipeline tab.
+- **`marketing/page.tsx`**: Refactored to import `DAYS`/`TCOLS`/`DayTask`/`DayDef` from `@/lib/marketing/schedule` (removed duplicate inline definitions).
+
+---
+
 ## [3.5.4] — 2026-03-17 — Loan Record Sprint: 2-Col Layout, Inline Details, Notes/Docs Sidebar
 
 ### Changed

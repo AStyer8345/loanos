@@ -13,6 +13,7 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts'
 import DailyBriefingPanel from './DailyBriefingPanel'
+import DailyScheduleWidget from './DailyScheduleWidget'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 
@@ -235,6 +236,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               </div>
             )}
           </div>
+
+          {/* Daily Schedule */}
+          <DailyScheduleWidget />
 
           {/* Recent Loans + Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

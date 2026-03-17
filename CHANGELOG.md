@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [3.5.3] — 2026-03-17 — Marketing Sprint: Checkbox Logging, Content Dashboard, Social/Rate Nav
+
+### New
+- **`marketing_activity_log` Supabase table**: Stores completed daily schedule task rows (`user_id`, `task_name`, `day_of_week`, `logged_at`, `source`). RLS enabled — users see only their own rows. Indexed on `user_id` and `logged_at`.
+- **`/dashboard/marketing/social`**: Standalone Social Media Posts page — platform filter tabs (LinkedIn/Facebook/Instagram/etc.), stats bar (total posts, this week, LinkedIn count, last post date), add form, post history table. Reads/writes `mcc_state`.
+- **`/dashboard/marketing/rate-updates`**: Standalone Rate Updates page — rate log with 30yr/15yr/ARM fields, audience, channel. Cadence health indicator (red/gold/green based on days since last send). Syncs `last['rate-update']` to `mcc_state`.
+
+### Changed
+- **Daily Schedule Widget** (`/dashboard/marketing`): Checking a task now (a) writes a row to `marketing_activity_log` and (b) appends an entry to `mcc_state` activity log so it appears in the LOG tab. Progress bar added under the done/total count — animates gold → green when all tasks complete.
+- **Content Dashboard** (`/dashboard/marketing/content`): Replaced kanban ideas board with the Newsletter Generator (AI draft → Mailchimp → publish to website) + newsletter history log. Label stays "Content Dashboard", content is now the generator. Data merges into the `mcc_state` blob.
+- **TopNav Marketing dropdown**: "Social Media Posts" → `/marketing/social`, "Rate Updates" → `/marketing/rate-updates` (dedicated pages fix the "does nothing" bug — the previous `?tab=` query param approach didn't re-trigger tab state since marketing/page.tsx reads searchParams only at mount). Removed duplicate "Newsletter Generator" item. Added "Marketing Hub" to reach the full daily schedule view.
+
+---
+
 ## [3.5.2] — 2026-03-17 — Scenario Builder Server Component Crash Fix
 
 ### Fixed

@@ -197,6 +197,7 @@ export async function POST(request: NextRequest) {
       approval_date: nDate(body.approvalDate),
       closing_date: nDate(body.closingDate),
       funding_date: nDate(body.fundingDate),
+      rate_lock_date: nDate(body.rateLockDate),
       rate_lock_expiration: nDate(body.rateLockExpiration),
       estimated_closing_date: nDate(body.estimatedClosingDate),
 

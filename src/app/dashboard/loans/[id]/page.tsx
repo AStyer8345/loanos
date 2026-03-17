@@ -327,7 +327,7 @@ export default function LoanDetailPage() {
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'details' | 'automations' | 'activity' | 'emails' | 'notes'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
@@ -653,28 +653,27 @@ export default function LoanDetailPage() {
               </div>
             </div>
 
-            {/* Days Locked */}
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
-              {editingHeader === 'rate_lock_days' ? (
-                <input
-                  autoFocus
-                  type="number"
-                  value={headerInput}
-                  onChange={e => setHeaderInput(e.target.value)}
-                  onBlur={() => saveHeaderField('rate_lock_days', headerInput ? parseInt(headerInput) : null)}
-                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-20 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
-                />
-              ) : (
-                <p
-                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
-                  onClick={() => { setHeaderInput(loan.rate_lock_days?.toString() ?? ''); setEditingHeader('rate_lock_days') }}
-                >
-                  {loan.rate_lock_days ? `${loan.rate_lock_days} days` : '—'}
-                </p>
-              )}
-            </div>
+            {/* Days Locked — calculated from lock expiry */}
+            {(() => {
+              if (!loan.rate_lock_expiration) return (
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
+                  <p className="text-sm font-mono font-semibold text-zinc-500">—</p>
+                </div>
+              )
+              const today = new Date(); today.setHours(0,0,0,0)
+              const exp = new Date(loan.rate_lock_expiration + 'T00:00:00')
+              const days = Math.ceil((exp.getTime() - today.getTime()) / 86400000)
+              const expired = days < 0
+              return (
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
+                  <p className={`text-sm font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
+                    {expired ? `${Math.abs(days)} days ago` : `${days} days`}
+                  </p>
+                </div>
+              )
+            })()}
           </div>
 
           {/* Pipeline progress bar */}
@@ -685,11 +684,9 @@ export default function LoanDetailPage() {
         <div className="px-6 flex gap-0">
           {([
             { id: 'dashboard',   label: 'Dashboard' },
-            { id: 'details',     label: 'Details' },
             { id: 'automations', label: 'Automations' },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length})` },
-            { id: 'notes',       label: 'Notes' },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -709,10 +706,7 @@ export default function LoanDetailPage() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'dashboard' && (
-          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} onRefresh={fetchAll} />
-        )}
-        {activeTab === 'details' && (
-          <DetailsTab loan={loan} setLoan={l => setLoan(l)} contact={contact} loanId={loanId} />
+          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} contact={contact} onRefresh={fetchAll} />
         )}
         {activeTab === 'automations' && (
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
@@ -722,9 +716,6 @@ export default function LoanDetailPage() {
         )}
         {activeTab === 'emails' && (
           <div className="p-6"><EmailHistoryTab drafts={emailDrafts} contactEmails={contactEmails} onRefresh={fetchAll} /></div>
-        )}
-        {activeTab === 'notes' && (
-          <LoanNotesTab loanId={loanId} initialNotes={loan.notes} onSave={n => setLoan({ ...loan, notes: n })} />
         )}
       </div>
 
@@ -769,26 +760,344 @@ function PipelineProgressBar({ status }: { status: string | null }) {
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, activity, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string
   docs: DocRow[]
   activity: ActivityRow[]
+  contact: ContactRow | null
   onRefresh: () => void
 }) {
+  const supabase = createClient()
+
+  const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
+    const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
+    if (!error) setLoan({ ...loan, [field]: value } as Loan)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loanId, loan])
+
+  const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
+    const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
+    if (!error) setLoan({ ...loan, ...fields } as Loan)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loanId, loan])
+
   return (
-    <div className="p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
-      {/* Left — 3/5 */}
-      <div className="lg:col-span-3 space-y-5">
-        <KeyDetailsCard loan={loan} />
-        <DocumentsPreview loanId={loanId} docs={docs} onRefresh={onRefresh} />
-      </div>
-      {/* Right — 2/5 */}
-      <div className="lg:col-span-2 space-y-5">
+    <div className="flex gap-6 p-6 min-h-0">
+      {/* ── Left main column ── */}
+      <div className="flex-1 min-w-0 space-y-5">
+        {/* Milestone timeline */}
         <MilestoneTimeline loan={loan} />
-        <ActivityNotesPanel loan={loan} setLoan={setLoan} loanId={loanId} activity={activity} />
+
+        {/* Key metrics grid */}
+        <KeyDetailsCard loan={loan} />
+
+        {/* Recent activity (compact) */}
+        {activity.length > 0 && (
+          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h2>
+            </div>
+            <div className="p-3 space-y-2.5">
+              {activity.slice(0, 6).map(item => (
+                <div key={item.id} className="flex gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${item.action.includes('.') ? 'bg-emerald-500' : 'bg-blue-400'}`} />
+                  <div className="min-w-0">
+                    <p className="text-xs font-mono text-zinc-300 truncate">{item.action}</p>
+                    <p className="text-[10px] font-mono text-zinc-600">
+                      {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Details sections (formerly Details tab) ── */}
+        <div className="space-y-5">
+          {/* Loan Terms */}
+          <EditableSectionCard title="Loan Terms" onSave={handleSaveField} fields={[
+            { label: 'Loan Number',   displayValue: loan.loan_number,   field: 'loan_number',   rawValue: loan.loan_number },
+            { label: 'Arive Loan ID', displayValue: loan.arive_loan_id, field: 'arive_loan_id', rawValue: loan.arive_loan_id },
+            { label: 'Status',        displayValue: <StatusBadge status={loan.status} />, field: 'status', rawValue: loan.status, type: 'select', options: LOAN_STATUS_OPTS },
+            { label: 'Milestone',     displayValue: loan.milestone,     field: 'milestone',     rawValue: loan.milestone },
+            { label: 'Loan Amount',   displayValue: fmtCurrency(loan.loan_amount),   field: 'loan_amount',   rawValue: loan.loan_amount,   type: 'number' },
+            { label: 'Loan Purpose',  displayValue: loan.loan_purpose,  field: 'loan_purpose',  rawValue: loan.loan_purpose },
+            { label: 'Loan Type',     displayValue: loan.loan_type,     field: 'loan_type',     rawValue: loan.loan_type },
+            { label: 'Loan Program',  displayValue: loan.loan_program,  field: 'loan_program',  rawValue: loan.loan_program },
+            { label: 'Loan Term',     displayValue: loan.loan_term ? `${loan.loan_term} months` : null, field: 'loan_term', rawValue: loan.loan_term, type: 'number' },
+            { label: 'Interest Rate', displayValue: fmtPct(loan.interest_rate), field: 'interest_rate', rawValue: loan.interest_rate, type: 'percent' },
+            { label: 'APR',           displayValue: fmtPct(loan.apr),   field: 'apr',   rawValue: loan.apr,   type: 'percent' },
+            { label: 'Points',        displayValue: loan.points != null ? String(loan.points) : null, field: 'points', rawValue: loan.points, type: 'number' },
+            { label: 'Down Payment',  displayValue: fmtCurrency(loan.down_payment),  field: 'down_payment',  rawValue: loan.down_payment,  type: 'number' },
+            { label: 'Down Pmt %',    displayValue: fmtPct(loan.down_payment_pct),   field: 'down_payment_pct', rawValue: loan.down_payment_pct, type: 'percent' },
+            { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
+            { label: 'CLTV',          displayValue: fmtPct(loan.cltv),  field: 'cltv',  rawValue: loan.cltv,  type: 'percent' },
+          ]} />
+
+          {/* Property */}
+          <EditableSectionCard title="Property" onSave={handleSaveField} fields={[
+            { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
+            { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
+            { label: 'State',          displayValue: loan.property_state,   field: 'property_state',   rawValue: loan.property_state },
+            { label: 'Zip',            displayValue: loan.property_zip,     field: 'property_zip',     rawValue: loan.property_zip },
+            { label: 'County',         displayValue: loan.property_county,  field: 'property_county',  rawValue: loan.property_county },
+            { label: 'Property Type',  displayValue: loan.property_type,    field: 'property_type',    rawValue: loan.property_type },
+            { label: 'Occupancy',      displayValue: loan.occupancy_type || loan.occupancy, field: 'occupancy_type', rawValue: loan.occupancy_type || loan.occupancy },
+            { label: 'Purchase Price', displayValue: fmtCurrency(loan.purchase_price),  field: 'purchase_price',  rawValue: loan.purchase_price,  type: 'number' },
+            { label: 'Appraised Value',displayValue: fmtCurrency(loan.appraised_value), field: 'appraised_value', rawValue: loan.appraised_value, type: 'number' },
+          ]} />
+
+          {/* Borrower */}
+          <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
+            { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
+            { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
+            { label: 'Email',          displayValue: loan.borrower_email,      field: 'borrower_email',      rawValue: loan.borrower_email },
+            { label: 'Phone',          displayValue: loan.borrower_phone,      field: 'borrower_phone',      rawValue: loan.borrower_phone },
+            { label: 'Co-Borrower',    displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
+            { label: 'Co-Borr Email',  displayValue: loan.co_borrower_email,   field: 'co_borrower_email',   rawValue: loan.co_borrower_email },
+            { label: 'Co-Borr Phone',  displayValue: loan.co_borrower_phone,   field: 'co_borrower_phone',   rawValue: loan.co_borrower_phone },
+            { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
+            { label: 'Middle Score',   displayValue: loan.middle_score != null ? String(loan.middle_score) : null, field: 'middle_score', rawValue: loan.middle_score, type: 'number' },
+            { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' },
+            { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
+            { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
+            { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
+          ]} />
+
+          {/* Key Dates */}
+          <EditableSectionCard title="Key Dates" onSave={handleSaveField} fields={[
+            { label: 'Loan Created',  displayValue: fmtDate(loan.loan_created_date) },
+            { label: 'Application',  displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
+            { label: 'Submission',   displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
+            { label: 'Approval',     displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
+            { label: 'Est. Closing', displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
+            { label: 'Closing',      displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
+            { label: 'Funding',      displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
+            { label: 'Rate Lock',    displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
+            { label: 'Lock Expiry',  displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
+          ]} />
+
+          {/* Financials */}
+          <EditableSectionCard title="Financials" onSave={handleSaveField} fields={[
+            { label: 'Commission',       displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
+            { label: 'Monthly Payment',  displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
+            { label: 'PITI',             displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
+            { label: 'Cash to Close',    displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },
+            { label: 'Seller Credits',   displayValue: fmtCurrency(loan.seller_credits),      field: 'seller_credits',      rawValue: loan.seller_credits,      type: 'number' },
+            { label: 'Lender Credits',   displayValue: fmtCurrency(loan.lender_credits),      field: 'lender_credits',      rawValue: loan.lender_credits,      type: 'number' },
+            { label: 'Loan Costs',       displayValue: fmtCurrency(loan.loan_costs),          field: 'loan_costs',          rawValue: loan.loan_costs,          type: 'number' },
+            { label: 'Total Closing',    displayValue: fmtCurrency(loan.total_closing_costs), field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' },
+            { label: 'Prepaid Items',    displayValue: fmtCurrency(loan.prepaid_items),       field: 'prepaid_items',       rawValue: loan.prepaid_items,       type: 'number' },
+            { label: 'Escrow Impounds',  displayValue: fmtCurrency(loan.escrow_impounds),     field: 'escrow_impounds',     rawValue: loan.escrow_impounds,     type: 'number' },
+            { label: 'MI Monthly',       displayValue: fmtCurrency(loan.mi_monthly),          field: 'mi_monthly',          rawValue: loan.mi_monthly,          type: 'number' },
+            { label: 'MI Upfront',       displayValue: fmtCurrency(loan.mi_upfront),          field: 'mi_upfront',          rawValue: loan.mi_upfront,          type: 'number' },
+          ]} />
+
+          {/* Parties */}
+          <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
+            { label: 'Referring Agent',   displayValue: loan.buyer_agent_contact_id && loan.referring_agent_name ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.referring_agent_name}</Link> : loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
+            { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
+            { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
+            { label: 'Listing Agent',     displayValue: loan.listing_agent_contact_id && loan.listing_agent_name ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.listing_agent_name}</Link> : loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
+            { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
+            { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
+            { label: "Buyer's Agent",     displayValue: loan.buyer_agent_contact_id && (loan.buyers_agent_name || loan.buyer_agent_name) ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link> : (loan.buyers_agent_name || loan.buyer_agent_name),   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
+            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
+            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone,    field: 'buyers_agent_phone',    rawValue: loan.buyers_agent_phone,    labelColor: 'text-emerald-400/70' },
+            { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
+            { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact,    searchContacts: true, relatedFields: { email: 'title_email' } },
+            { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
+            { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
+            { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },
+            { label: 'Underwriter',       displayValue: loan.underwriter_name, field: 'underwriter_name', rawValue: loan.underwriter_name },
+            { label: 'Lender',            displayValue: loan.lender_name,      field: 'lender_name',      rawValue: loan.lender_name },
+            { label: 'Investor',          displayValue: loan.investor_name,    field: 'investor_name',    rawValue: loan.investor_name },
+            { label: 'Channel',           displayValue: loan.channel,          field: 'channel',          rawValue: loan.channel },
+          ]} />
+
+          {/* Attribution */}
+          <EditableSectionCard title="Attribution" onSave={handleSaveField} fields={[
+            { label: 'Lead Source',        displayValue: loan.lead_source,        field: 'lead_source',        rawValue: loan.lead_source },
+            { label: 'Referral Source',    displayValue: loan.referral_source,    field: 'referral_source',    rawValue: loan.referral_source },
+            { label: 'Marketing Campaign', displayValue: loan.marketing_campaign, field: 'marketing_campaign', rawValue: loan.marketing_campaign },
+          ]} />
+
+          {/* Linked Contact */}
+          {contact && (
+            <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+              <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+                <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
+              </div>
+              <div className="p-4">
+                <Link
+                  href={`/dashboard/contacts?id=${contact.id}`}
+                  className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors"
+                >
+                  {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
+                </Link>
+                {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
+                {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
+                {contact.referred_by && (
+                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                    <p className="text-xs text-zinc-500 font-mono">Referred by</p>
+                    <Link
+                      href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
+                      className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5"
+                    >
+                      {contact.referred_by}
+                      <ChevronRight size={12} />
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* ── Right sidebar — 320px fixed ── */}
+      <div className="w-80 shrink-0 space-y-4">
+        <NotesSidebarPanel loanId={loanId} loan={loan} setLoan={setLoan} />
+        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+      </div>
+    </div>
+  )
+}
+
+// ── Notes sidebar panel ───────────────────────────────────────────────────────
+
+function NotesSidebarPanel({ loanId, loan, setLoan }: { loanId: string; loan: Loan; setLoan: (l: Loan) => void }) {
+  const supabase = createClient()
+  const [notes, setNotes] = useState(loan.notes ?? '')
+  const [saving, setSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const save = useCallback(async (value: string) => {
+    setSaving(true)
+    await supabase.from('loans').update({ notes: value }).eq('id', loanId)
+    setLoan({ ...loan, notes: value })
+    setSaving(false)
+    setLastSaved(new Date())
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loanId, loan])
+
+  const handleChange = (value: string) => {
+    setNotes(value)
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => save(value), 500)
+  }
+
+  const handleBlur = () => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    save(notes)
+  }
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
+        <span className="text-[10px] font-mono text-zinc-600">
+          {saving ? 'Saving…' : lastSaved ? '✓ Saved' : ''}
+        </span>
+      </div>
+      <textarea
+        value={notes}
+        onChange={e => handleChange(e.target.value)}
+        onBlur={handleBlur}
+        placeholder="Add notes about this loan…"
+        rows={10}
+        className="w-full p-3 text-xs text-zinc-200 bg-zinc-800/50 placeholder-zinc-600 focus:outline-none resize-y font-mono border-0 focus:ring-1 focus:ring-[#C9A84C]/40"
+      />
+    </div>
+  )
+}
+
+// ── Documents sidebar panel ───────────────────────────────────────────────────
+
+function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
+  const supabase = createClient()
+  const [signingId, setSigningId] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { alert('Not authenticated'); setUploading(false); return }
+    const storagePath = `${user.id}/${loanId}/${Date.now()}_${file.name}`
+    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
+    if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
+    const { error: insertError } = await supabase.from('documents').insert({ user_id: user.id, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    onRefresh()
+  }
+
+  const handleDownload = async (doc: DocRow) => {
+    setSigningId(doc.id)
+    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 120)
+    setSigningId(null)
+    if (error || !data?.signedUrl) { alert('Could not generate download link.'); return }
+    window.open(data.signedUrl, '_blank')
+  }
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
+          <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860] disabled:opacity-50 transition-colors"
+          >
+            <Upload size={10} /> {uploading ? 'Uploading…' : 'Upload'}
+          </button>
+        </div>
+      </div>
+      {docs.length === 0 ? (
+        <div className="py-8 text-center space-y-3">
+          <p className="text-xs text-zinc-500 font-mono">No documents uploaded</p>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono border border-zinc-700 text-zinc-400 hover:border-[#C9A84C] hover:text-[#C9A84C] rounded transition-colors disabled:opacity-50"
+          >
+            <Upload size={10} /> Upload Document
+          </button>
+        </div>
+      ) : (
+        <div>
+          {docs.map((doc, i) => (
+            <div
+              key={doc.id}
+              className={`flex items-center justify-between px-3 py-2 hover:bg-zinc-800/40 transition-colors ${i > 0 ? 'border-t border-zinc-700/50' : ''}`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText size={11} className="text-zinc-500 shrink-0" />
+                <span className="text-xs font-mono text-zinc-200 truncate">{doc.file_name}</span>
+              </div>
+              <button
+                onClick={() => handleDownload(doc)}
+                disabled={signingId === doc.id}
+                className="text-zinc-500 hover:text-zinc-300 disabled:opacity-50 transition-colors ml-2 shrink-0"
+                title="Download"
+              >
+                {signingId === doc.id ? <span className="text-[10px] font-mono">…</span> : <Download size={11} />}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -860,88 +1169,6 @@ function KeyDetailsCard({ loan }: { loan: Loan }) {
   )
 }
 
-// ── Documents preview ─────────────────────────────────────────────────────────
-
-function DocumentsPreview({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
-  const supabase = createClient()
-  const [signingId, setSigningId] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { alert('Not authenticated'); setUploading(false); return }
-    const storagePath = `${user.id}/${loanId}/${Date.now()}_${file.name}`
-    const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
-    if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
-    const { error: insertError } = await supabase.from('documents').insert({ user_id: user.id, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
-    if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }
-    setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    onRefresh()
-  }
-
-  const handleDownload = async (doc: DocRow) => {
-    setSigningId(doc.id)
-    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 120)
-    setSigningId(null)
-    if (error || !data?.signedUrl) { alert('Could not generate download link.'); return }
-    window.open(data.signedUrl, '_blank')
-  }
-
-  return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
-          <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 hover:text-emerald-400 disabled:opacity-50 transition-colors"
-          >
-            <Upload size={10} /> {uploading ? 'Uploading…' : 'Upload'}
-          </button>
-        </div>
-      </div>
-      {docs.length === 0 ? (
-        <div className="py-8 text-center text-xs text-zinc-500 font-mono">No documents attached</div>
-      ) : (
-        <div>
-          {docs.map((doc, i) => (
-            <div
-              key={doc.id}
-              className={`flex items-center justify-between px-4 py-2.5 hover:bg-zinc-800/40 transition-colors ${i > 0 ? 'border-t border-zinc-700/50' : ''}`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <FileText size={12} className="text-zinc-500 shrink-0" />
-                <span className="text-xs font-mono text-zinc-200 truncate">{doc.file_name}</span>
-              </div>
-              <div className="flex items-center gap-3 shrink-0 ml-3">
-                <span className="text-[10px] text-zinc-500 font-mono">
-                  {new Date(doc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/40 text-emerald-400 border border-emerald-800/60 font-mono">Received</span>
-                <button
-                  onClick={() => handleDownload(doc)}
-                  disabled={signingId === doc.id}
-                  className="text-zinc-500 hover:text-zinc-300 disabled:opacity-50 transition-colors"
-                  title="Download"
-                >
-                  {signingId === doc.id ? <span className="text-[10px] font-mono">…</span> : <Download size={12} />}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ── Milestone timeline ────────────────────────────────────────────────────────
 
@@ -1026,74 +1253,8 @@ function MilestoneTimeline({ loan }: { loan: Loan }) {
   )
 }
 
-// ── Activity & Notes panel ────────────────────────────────────────────────────
 
-function ActivityNotesPanel({ loan, setLoan, loanId, activity }: {
-  loan: Loan
-  setLoan: (l: Loan) => void
-  loanId: string
-  activity: ActivityRow[]
-}) {
-  const supabase = createClient()
-  const [notesVal, setNotesVal] = useState(loan.notes ?? '')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  const handleNotesBlur = async () => {
-    if (notesVal === (loan.notes ?? '')) return
-    setSaving(true)
-    await supabase.from('loans').update({ notes: notesVal }).eq('id', loanId)
-    setLoan({ ...loan, notes: notesVal })
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  const recent = activity.slice(0, 8)
-
-  return (
-    <div className="space-y-4">
-      {/* Notes */}
-      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-        <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
-          {saving && <span className="text-[10px] text-zinc-500 font-mono">Saving…</span>}
-          {!saving && saved && <span className="text-[10px] text-emerald-400 font-mono">Saved ✓</span>}
-        </div>
-        <textarea
-          value={notesVal}
-          onChange={e => setNotesVal(e.target.value)}
-          onBlur={handleNotesBlur}
-          rows={4}
-          placeholder="Add notes about this loan…"
-          className="w-full p-3 text-xs text-zinc-200 bg-zinc-800/50 placeholder-zinc-600 focus:outline-none resize-y font-mono border-0"
-        />
-      </div>
-
-      {/* Recent activity */}
-      {recent.length > 0 && (
-        <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-          <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-            <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h2>
-          </div>
-          <div className="p-3 space-y-2.5">
-            {recent.map(item => (
-              <div key={item.id} className="flex gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${item.action.includes('.') ? 'bg-emerald-500' : 'bg-blue-400'}`} />
-                <div className="min-w-0">
-                  <p className="text-xs font-mono text-zinc-300 truncate">{item.action}</p>
-                  <p className="text-[10px] font-mono text-zinc-600">{fmtRelative(item.created_at)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Details tab (full editable field cards) ───────────────────────────────────
+// ── Editable field helpers ────────────────────────────────────────────────────
 
 const LOAN_STATUS_OPTS = [
   'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved with Conditions',
@@ -1348,197 +1509,6 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   )
 }
 
-function DetailsTab({ loan, setLoan, contact, loanId }: {
-  loan: Loan
-  setLoan: (l: Loan) => void
-  contact: ContactRow | null
-  loanId: string
-}) {
-  const supabase = createClient()
-  const [notesVal, setNotesVal] = useState(loan.notes ?? '')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
-    const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
-    if (!error) setLoan({ ...loan, [field]: value } as Loan)
-  }, [supabase, loanId, loan, setLoan])
-
-  const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
-    const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
-    if (!error) setLoan({ ...loan, ...fields } as Loan)
-  }, [supabase, loanId, loan, setLoan])
-
-  const handleNotesBlur = async () => {
-    if (notesVal === (loan.notes ?? '')) return
-    setSaving(true)
-    await supabase.from('loans').update({ notes: notesVal }).eq('id', loanId)
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  return (
-    <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 1 — Loan Terms */}
-        <EditableSectionCard title="Loan Terms" onSave={handleSaveField} fields={[
-          { label: 'Loan Number',   displayValue: loan.loan_number,   field: 'loan_number',   rawValue: loan.loan_number },
-          { label: 'Arive Loan ID', displayValue: loan.arive_loan_id, field: 'arive_loan_id', rawValue: loan.arive_loan_id },
-          { label: 'Status',        displayValue: <StatusBadge status={loan.status} />, field: 'status', rawValue: loan.status, type: 'select', options: LOAN_STATUS_OPTS },
-          { label: 'Milestone',     displayValue: loan.milestone,     field: 'milestone',     rawValue: loan.milestone },
-          { label: 'Loan Amount',   displayValue: fmtCurrency(loan.loan_amount),   field: 'loan_amount',   rawValue: loan.loan_amount,   type: 'number' },
-          { label: 'Loan Purpose',  displayValue: loan.loan_purpose,  field: 'loan_purpose',  rawValue: loan.loan_purpose },
-          { label: 'Loan Type',     displayValue: loan.loan_type,     field: 'loan_type',     rawValue: loan.loan_type },
-          { label: 'Loan Program',  displayValue: loan.loan_program,  field: 'loan_program',  rawValue: loan.loan_program },
-          { label: 'Loan Term',     displayValue: loan.loan_term ? `${loan.loan_term} months` : null, field: 'loan_term', rawValue: loan.loan_term, type: 'number' },
-          { label: 'Interest Rate', displayValue: fmtPct(loan.interest_rate), field: 'interest_rate', rawValue: loan.interest_rate, type: 'percent' },
-          { label: 'APR',           displayValue: fmtPct(loan.apr),   field: 'apr',   rawValue: loan.apr,   type: 'percent' },
-          { label: 'Points',        displayValue: loan.points != null ? String(loan.points) : null, field: 'points', rawValue: loan.points, type: 'number' },
-          { label: 'Down Payment',  displayValue: fmtCurrency(loan.down_payment),  field: 'down_payment',  rawValue: loan.down_payment,  type: 'number' },
-          { label: 'Down Pmt %',    displayValue: fmtPct(loan.down_payment_pct),   field: 'down_payment_pct', rawValue: loan.down_payment_pct, type: 'percent' },
-          { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
-          { label: 'CLTV',          displayValue: fmtPct(loan.cltv),  field: 'cltv',  rawValue: loan.cltv,  type: 'percent' },
-        ]} />
-
-        {/* 2 — Property */}
-        <EditableSectionCard title="Property" onSave={handleSaveField} fields={[
-          { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
-          { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
-          { label: 'State',          displayValue: loan.property_state,   field: 'property_state',   rawValue: loan.property_state },
-          { label: 'Zip',            displayValue: loan.property_zip,     field: 'property_zip',     rawValue: loan.property_zip },
-          { label: 'County',         displayValue: loan.property_county,  field: 'property_county',  rawValue: loan.property_county },
-          { label: 'Property Type',  displayValue: loan.property_type,    field: 'property_type',    rawValue: loan.property_type },
-          { label: 'Occupancy',      displayValue: loan.occupancy_type || loan.occupancy, field: 'occupancy_type', rawValue: loan.occupancy_type || loan.occupancy },
-          { label: 'Purchase Price', displayValue: fmtCurrency(loan.purchase_price),  field: 'purchase_price',  rawValue: loan.purchase_price,  type: 'number' },
-          { label: 'Appraised Value',displayValue: fmtCurrency(loan.appraised_value), field: 'appraised_value', rawValue: loan.appraised_value, type: 'number' },
-        ]} />
-
-        {/* 3 — Borrower */}
-        <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
-          { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
-          { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
-          { label: 'Email',          displayValue: loan.borrower_email,      field: 'borrower_email',      rawValue: loan.borrower_email },
-          { label: 'Phone',          displayValue: loan.borrower_phone,      field: 'borrower_phone',      rawValue: loan.borrower_phone },
-          { label: 'Co-Borrower',    displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
-          { label: 'Co-Borr Email',  displayValue: loan.co_borrower_email,   field: 'co_borrower_email',   rawValue: loan.co_borrower_email },
-          { label: 'Co-Borr Phone',  displayValue: loan.co_borrower_phone,   field: 'co_borrower_phone',   rawValue: loan.co_borrower_phone },
-          { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
-          { label: 'Middle Score',   displayValue: loan.middle_score != null ? String(loan.middle_score) : null, field: 'middle_score', rawValue: loan.middle_score, type: 'number' },
-          { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' },
-          { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
-          { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
-          { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
-        ]} />
-
-        {/* 4 — Key Dates */}
-        <EditableSectionCard title="Key Dates" onSave={handleSaveField} fields={[
-          { label: 'Application',  displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
-          { label: 'Submission',   displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
-          { label: 'Approval',     displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
-          { label: 'Est. Closing', displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
-          { label: 'Closing',      displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
-          { label: 'Funding',      displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
-          { label: 'Rate Lock Exp',displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
-          { label: 'Loan Created', displayValue: fmtDate(loan.loan_created_date) },
-        ]} />
-
-        {/* 5 — Financials */}
-        <EditableSectionCard title="Financials" onSave={handleSaveField} fields={[
-          { label: 'Commission',       displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
-          { label: 'Monthly Payment',  displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
-          { label: 'PITI',             displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
-          { label: 'Cash to Close',    displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },
-          { label: 'Seller Credits',   displayValue: fmtCurrency(loan.seller_credits),      field: 'seller_credits',      rawValue: loan.seller_credits,      type: 'number' },
-          { label: 'Lender Credits',   displayValue: fmtCurrency(loan.lender_credits),      field: 'lender_credits',      rawValue: loan.lender_credits,      type: 'number' },
-          { label: 'Loan Costs',       displayValue: fmtCurrency(loan.loan_costs),          field: 'loan_costs',          rawValue: loan.loan_costs,          type: 'number' },
-          { label: 'Total Closing',    displayValue: fmtCurrency(loan.total_closing_costs), field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' },
-          { label: 'Prepaid Items',    displayValue: fmtCurrency(loan.prepaid_items),       field: 'prepaid_items',       rawValue: loan.prepaid_items,       type: 'number' },
-          { label: 'Escrow Impounds',  displayValue: fmtCurrency(loan.escrow_impounds),     field: 'escrow_impounds',     rawValue: loan.escrow_impounds,     type: 'number' },
-          { label: 'MI Monthly',       displayValue: fmtCurrency(loan.mi_monthly),          field: 'mi_monthly',          rawValue: loan.mi_monthly,          type: 'number' },
-          { label: 'MI Upfront',       displayValue: fmtCurrency(loan.mi_upfront),          field: 'mi_upfront',          rawValue: loan.mi_upfront,          type: 'number' },
-        ]} />
-
-        {/* 6 — Parties */}
-        <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
-          { label: 'Referring Agent',   displayValue: loan.buyer_agent_contact_id && loan.referring_agent_name ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.referring_agent_name}</Link> : loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
-          { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
-          { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
-          { label: 'Listing Agent',     displayValue: loan.listing_agent_contact_id && loan.listing_agent_name ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.listing_agent_name}</Link> : loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
-          { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
-          { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
-          { label: "Buyer's Agent",     displayValue: loan.buyer_agent_contact_id && (loan.buyers_agent_name || loan.buyer_agent_name) ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link> : (loan.buyers_agent_name || loan.buyer_agent_name),   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
-          { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
-          { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone,    field: 'buyers_agent_phone',    rawValue: loan.buyers_agent_phone,    labelColor: 'text-emerald-400/70' },
-          { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
-          { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact,    searchContacts: true, relatedFields: { email: 'title_email' } },
-          { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
-          { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
-          { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },
-          { label: 'Underwriter',       displayValue: loan.underwriter_name, field: 'underwriter_name', rawValue: loan.underwriter_name },
-          { label: 'Lender',            displayValue: loan.lender_name,      field: 'lender_name',      rawValue: loan.lender_name },
-          { label: 'Investor',          displayValue: loan.investor_name,    field: 'investor_name',    rawValue: loan.investor_name },
-          { label: 'Channel',           displayValue: loan.channel,          field: 'channel',          rawValue: loan.channel },
-        ]} />
-
-        {/* 7 — Attribution */}
-        <EditableSectionCard title="Attribution" onSave={handleSaveField} fields={[
-          { label: 'Lead Source',        displayValue: loan.lead_source,        field: 'lead_source',        rawValue: loan.lead_source },
-          { label: 'Referral Source',    displayValue: loan.referral_source,    field: 'referral_source',    rawValue: loan.referral_source },
-          { label: 'Marketing Campaign', displayValue: loan.marketing_campaign, field: 'marketing_campaign', rawValue: loan.marketing_campaign },
-        ]} />
-
-        {/* Linked Contact */}
-        {contact && (
-          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
-            </div>
-            <div className="p-4">
-              <Link
-                href={`/dashboard/contacts?id=${contact.id}`}
-                className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors"
-              >
-                {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-              </Link>
-              {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
-              {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
-              {contact.referred_by && (
-                <div className="mt-3 pt-3 border-t border-zinc-700">
-                  <p className="text-xs text-zinc-500 font-mono">Referred by</p>
-                  <Link
-                    href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
-                    className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5"
-                  >
-                    {contact.referred_by}
-                    <ChevronRight size={12} />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Notes */}
-      <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-        <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
-          {saving && <span className="text-xs text-zinc-500 font-mono">Saving…</span>}
-          {!saving && saved && <span className="text-xs text-[#4ADE80] font-mono">Saved ✓</span>}
-        </div>
-        <textarea
-          value={notesVal}
-          onChange={e => setNotesVal(e.target.value)}
-          onBlur={handleNotesBlur}
-          rows={6}
-          placeholder="Add notes about this loan…"
-          className="w-full p-4 text-sm text-zinc-200 bg-zinc-800/50 placeholder-zinc-500 focus:outline-none resize-y font-mono border-0"
-        />
-      </div>
-    </div>
-  )
-}
 
 // ── Automations tab ───────────────────────────────────────────────────────────
 
@@ -2077,62 +2047,6 @@ function EmailHistoryTab({ drafts, contactEmails, onRefresh }: { drafts: EmailDr
   )
 }
 
-// ── Loan notes tab ────────────────────────────────────────────────────────────
-
-function LoanNotesTab({ loanId, initialNotes, onSave }: {
-  loanId: string
-  initialNotes: string | null
-  onSave: (notes: string) => void
-}) {
-  const supabase = createClient()
-  const [notes, setNotes] = useState(initialNotes ?? '')
-  const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const save = useCallback(async (value: string) => {
-    setSaving(true)
-    await supabase.from('loans').update({ notes: value }).eq('id', loanId)
-    onSave(value)
-    setSaving(false)
-    setLastSaved(new Date())
-  }, [loanId, supabase, onSave])
-
-  const handleChange = (value: string) => {
-    setNotes(value)
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = setTimeout(() => save(value), 500)
-  }
-
-  const handleBlur = () => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    save(notes)
-  }
-
-  const lastSavedLabel = lastSaved
-    ? `Saved ${Math.round((Date.now() - lastSaved.getTime()) / 60000)} min ago`
-    : 'Not saved yet'
-
-  return (
-    <div className="flex flex-col h-full" style={{ height: 'calc(100vh - 260px)' }}>
-      <div className="flex flex-col flex-1 min-h-0 p-6">
-        <textarea
-          value={notes}
-          onChange={e => handleChange(e.target.value)}
-          onBlur={handleBlur}
-          placeholder="Add notes about this loan…"
-          className="flex-1 w-full p-4 text-sm text-zinc-200 bg-zinc-900 border border-zinc-700 rounded-lg placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none font-mono leading-relaxed"
-        />
-        <div className="flex justify-between items-center mt-2 px-1">
-          <span className="text-[10px] font-mono text-zinc-500">
-            {saving ? 'Saving…' : lastSaved ? `✓ ${lastSavedLabel}` : ''}
-          </span>
-          <span className="text-[10px] font-mono text-zinc-600">{notes.length.toLocaleString()} chars</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 

@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [3.5.2] — 2026-03-17 — Scenario Builder Server Component Crash Fix
+
+### Fixed
+- **Scenario "Create" crash** (`/dashboard/scenarios/new?loan_id=X`): Server component was importing `DEFAULT_CLOSING_COSTS` and `sumClosingCosts` from `ScenarioBuilder.tsx` which has `'use client'` — violates Next.js module boundary rules, causing a server render crash with "Something went wrong / An error occurred in the Server Components render".
+- **Scenario view crash** (`/dashboard/scenarios/[id]`): Same root cause — `ensureClosingCosts`, `sumClosingCosts`, `DEFAULT_CLOSING_COSTS` imported from the `'use client'` ScenarioBuilder module. No `error.tsx` existed for this route, causing Next.js to show a raw "An application error" page instead of a handled error UI.
+
+### New
+- **`src/lib/scenarios/utils.ts`**: Extracted `DEFAULT_CLOSING_COSTS`, `ensureClosingCosts`, and `sumClosingCosts` into a plain module with no `'use client'` directive. Both server pages now import from here directly.
+- **`src/app/dashboard/scenarios/[id]/error.tsx`**: Added missing error boundary — graceful "Something went wrong" UI with Try Again + Back to Scenarios buttons.
+
+### Changed
+- `ScenarioBuilder.tsx`: Now imports utilities from `@/lib/scenarios/utils` and re-exports them (backwards compat).
+- `scenarios/[id]/page.tsx`: Data reconstruction wrapped in try-catch with redirect fallback on corrupt scenario data.
+
+---
+
 ## [3.5.1] — 2026-03-17 — Morning Audit: Arive Status Update Fix
 
 ### Fixed

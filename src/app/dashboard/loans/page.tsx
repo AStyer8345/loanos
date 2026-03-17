@@ -19,12 +19,19 @@ import {
 interface Loan {
   id: string
   loan_name: string | null
+  loan_number: string | null
   borrower_name: string | null
+  borrower_email: string | null
+  borrower_phone: string | null
   status: string | null
   loan_amount: number | null
   loan_purpose: string | null
   loan_program: string | null
+  interest_rate: number | null
+  lender: string | null
+  lender_name: string | null
   closing_date: string | null
+  rate_lock_expiration: string | null
   property_address: string | null
   property_city: string | null
   property_state: string | null
@@ -115,18 +122,27 @@ type SortDir = 'asc' | 'desc'
 
 // ── Column definitions (toggleable) ───────────────────────────────────────────
 const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
-  { id: 'borrower_name', label: 'Borrower', key: 'borrower_name' },
-  { id: 'loan_amount',   label: 'Amount',   key: 'loan_amount' },
-  { id: 'status',        label: 'Status',   key: 'status' },
-  { id: 'loan_purpose',  label: 'Purpose',  key: null },
-  { id: 'closing_date',  label: 'Closing',  key: 'closing_date' },
-  { id: 'location',      label: 'Location', key: null },
-  { id: 'loan_program',  label: 'Program',  key: null },
-  { id: 'contact_email', label: 'Email',    key: null },
-  { id: 'contact_phone', label: 'Phone',    key: null },
+  { id: 'borrower_name',        label: 'Borrower',            key: 'borrower_name' },
+  { id: 'loan_name',            label: 'Loan Name',           key: null },
+  { id: 'loan_amount',          label: 'Amount',              key: 'loan_amount' },
+  { id: 'status',               label: 'Status',              key: 'status' },
+  { id: 'loan_purpose',         label: 'Purpose',             key: null },
+  { id: 'loan_program',         label: 'Program',             key: null },
+  { id: 'closing_date',         label: 'Closing',             key: 'closing_date' },
+  { id: 'interest_rate',        label: 'Rate',                key: null },
+  { id: 'lender',               label: 'Lender',              key: null },
+  { id: 'rate_lock_expiration', label: 'Lock Exp',            key: null },
+  { id: 'loan_number',          label: 'Loan #',              key: null },
+  { id: 'location',             label: 'Location',            key: null },
+  { id: 'property_state',       label: 'State',               key: null },
+  { id: 'contact_email',        label: 'Email',               key: null },
+  { id: 'contact_phone',        label: 'Phone',               key: null },
+  { id: 'borrower_email',       label: 'Borrower Email',      key: null },
+  { id: 'borrower_phone',       label: 'Borrower Phone',      key: null },
+  { id: 'commission_amount',    label: 'Commission',          key: null },
 ]
 
-const DEFAULT_LOAN_COLUMNS = LOAN_COLUMNS.map(c => c.id)
+const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'loan_purpose', 'closing_date', 'location', 'loan_program', 'contact_email', 'contact_phone']
 const LS_LOAN_COLUMNS_KEY = 'loanos_loans_columns_v1'
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
 
@@ -173,8 +189,10 @@ function flattenLoans(data: Record<string, unknown>[]): Loan[] {
     const contact = Array.isArray(raw) ? raw[0] : raw
     const rest = { ...row }
     delete rest.contacts
+    const loan = rest as unknown as Loan & { lender?: string | null; lender_name?: string | null }
     return {
-      ...rest,
+      ...loan,
+      lender: loan.lender || loan.lender_name || null,
       contact_email: (contact as { email?: string } | null)?.email ?? null,
       contact_phone: (contact as { phone?: string } | null)?.phone ?? null,
     } as Loan
@@ -229,12 +247,20 @@ export default function LoansPage() {
   const [bulkStatus, setBulkStatus] = useState('')
   const [hasMore, setHasMore] = useState(false)
   // Advanced filters
-  const [filterType, setFilterType] = useState<string>('')     // Loan type: Conventional, FHA, etc.
-  const [filterPurpose, setFilterPurpose] = useState<string>('')  // Purchase, Refinance
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([])
+  const [filterPurpose, setFilterPurpose] = useState<string>('')   // Purchase, Refinance, HELOC
+  const [filterProgram, setFilterProgram] = useState<string>('')   // FHA, Conventional, etc.
+  const [filterLender, setFilterLender] = useState<string>('')
+  const [filterState, setFilterState] = useState<string>('')
+  const [filterRateMin, setFilterRateMin] = useState<string>('')   // interest rate >
   const [filterDateFrom, setFilterDateFrom] = useState<string>('')
   const [filterDateTo, setFilterDateTo] = useState<string>('')
   const [filterPreset, setFilterPreset] = useState<string>('')
   const [showFilters, setShowFilters] = useState(false)
+  const [colSearch, setColSearch] = useState('')
+  const [deletingLoanId, setDeletingLoanId] = useState<string | null>(null)
+  const [distinctLenders, setDistinctLenders] = useState<string[]>([])
+  const [distinctStatuses, setDistinctStatuses] = useState<string[]>([])
   const [loadingMore, setLoadingMore] = useState(false)
   const loansOffsetRef = useRef(0)
 
@@ -242,6 +268,24 @@ export default function LoansPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id)
+    })
+  }, [supabase])
+
+  // Fetch distinct status + lender values for filter dropdowns
+  useEffect(() => {
+    supabase.from('loans').select('status').then(({ data }) => {
+      if (data) {
+        const vals = [...new Set(data.map(r => r.status).filter(Boolean) as string[])].sort()
+        setDistinctStatuses(vals)
+      }
+    })
+    supabase.from('loans').select('lender, lender_name').then(({ data }) => {
+      if (data) {
+        const vals = [...new Set(
+          data.flatMap(r => [r.lender, r.lender_name]).filter(Boolean) as string[]
+        )].sort()
+        setDistinctLenders(vals)
+      }
     })
   }, [supabase])
 
@@ -310,7 +354,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (userId) q = q.eq('user_id', userId)
     if (listId.startsWith('custom-')) {
@@ -440,6 +484,16 @@ export default function LoansPage() {
     }
   }, [selected, supabase, fetchCounts])
 
+  // ── Single loan delete ────────────────────────────────────────────────
+  const handleDeleteLoan = useCallback(async (loanId: string) => {
+    const { error } = await supabase.from('loans').delete().eq('id', loanId)
+    if (!error) {
+      setLoans(prev => prev.filter(l => l.id !== loanId))
+      setDeletingLoanId(null)
+      await fetchCounts()
+    }
+  }, [supabase, fetchCounts])
+
   // ── Sort + search ──────────────────────────────────────────────────────
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -496,11 +550,24 @@ export default function LoansPage() {
     }
 
     // Advanced filters
-    if (filterType) {
-      list = list.filter(l => (l.loan_purpose || '').toLowerCase().includes(filterType.toLowerCase()))
+    if (filterStatuses.length > 0) {
+      list = list.filter(l => filterStatuses.includes(l.status ?? ''))
     }
     if (filterPurpose) {
-      list = list.filter(l => (l.loan_program || '').toLowerCase().includes(filterPurpose.toLowerCase()))
+      list = list.filter(l => (l.loan_purpose || '').toLowerCase().includes(filterPurpose.toLowerCase()))
+    }
+    if (filterProgram) {
+      list = list.filter(l => (l.loan_program || '').toLowerCase().includes(filterProgram.toLowerCase()))
+    }
+    if (filterLender) {
+      list = list.filter(l => (l.lender || '').toLowerCase().includes(filterLender.toLowerCase()))
+    }
+    if (filterState) {
+      list = list.filter(l => (l.property_state || '').toLowerCase().includes(filterState.toLowerCase()))
+    }
+    if (filterRateMin) {
+      const minRate = parseFloat(filterRateMin)
+      if (!isNaN(minRate)) list = list.filter(l => l.interest_rate != null && l.interest_rate > minRate)
     }
     if (filterDateFrom) {
       list = list.filter(l => (l.closing_date ?? '') >= filterDateFrom)
@@ -534,7 +601,7 @@ export default function LoansPage() {
       const bv = (b[sortKey] || '').toLowerCase()
       return mul * (av < bv ? -1 : av > bv ? 1 : 0)
     })
-  }, [loans, search, sortKey, sortDir, urlFilterActive, filterType, filterPurpose, filterDateFrom, filterDateTo])
+  }, [loans, search, sortKey, sortDir, urlFilterActive, filterStatuses, filterPurpose, filterProgram, filterLender, filterState, filterRateMin, filterDateFrom, filterDateTo])
 
   // ── Sort icon ──────────────────────────────────────────────────────────
   const SortIcon = ({ k }: { k: SortKey }) => {
@@ -550,11 +617,15 @@ export default function LoansPage() {
     return parts.length ? parts.join(', ') : l.property_address || '—'
   }
 
-  const hasAdvancedFilters = !!(filterType || filterPurpose || filterDateFrom || filterDateTo)
+  const hasAdvancedFilters = !!(filterStatuses.length || filterPurpose || filterProgram || filterLender || filterState || filterRateMin || filterDateFrom || filterDateTo)
 
   const clearAllFilters = () => {
-    setFilterType('')
+    setFilterStatuses([])
     setFilterPurpose('')
+    setFilterProgram('')
+    setFilterLender('')
+    setFilterState('')
+    setFilterRateMin('')
     setFilterDateFrom('')
     setFilterDateTo('')
     setFilterPreset('')
@@ -782,23 +853,37 @@ export default function LoansPage() {
             {showColPicker && (
               <div
                 role="listbox"
-                className="absolute right-0 top-full mt-1 z-[100] min-w-[180px] py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl"
+                className="absolute right-0 top-full mt-1 z-[100] w-[220px] bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
               >
-                {LOAN_COLUMNS.map(col => (
-                  <label
-                    key={col.id}
-                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[#F0F0F0] cursor-pointer hover:bg-[#2A2A2A]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={visibleColumns.includes(col.id)}
-                      onChange={() => toggleColumn(col.id)}
-                      onClick={e => e.stopPropagation()}
-                      className="rounded cursor-pointer accent-[#C9A84C]"
-                    />
-                    {col.label}
-                  </label>
-                ))}
+                <div className="p-2 border-b border-[#2A2A2A]">
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Search fields…"
+                    value={colSearch}
+                    onChange={e => setColSearch(e.target.value)}
+                    className="w-full px-2 py-1 text-xs font-mono bg-[#0A0A0A] border border-[#2A2A2A] rounded text-[#F0F0F0] placeholder:text-[#555] outline-none focus:ring-1 focus:ring-[#C9A84C]"
+                  />
+                </div>
+                <div className="max-h-[280px] overflow-y-auto py-1">
+                  {LOAN_COLUMNS.filter(col =>
+                    !colSearch || col.label.toLowerCase().includes(colSearch.toLowerCase())
+                  ).map(col => (
+                    <label
+                      key={col.id}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[#F0F0F0] cursor-pointer hover:bg-[#2A2A2A]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.id)}
+                        onChange={() => toggleColumn(col.id)}
+                        className="rounded cursor-pointer accent-[#C9A84C]"
+                      />
+                      {col.label}
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -849,80 +934,140 @@ export default function LoansPage() {
             </button>
 
             {/* Active filter chips */}
-            {filterType && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[10px] font-mono text-violet-400">
-                Purpose: {filterType}
-                <button onClick={() => setFilterType('')} className="hover:text-white"><X size={10} /></button>
+            {filterStatuses.length > 0 && filterStatuses.map(s => (
+              <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[10px] font-mono text-violet-400">
+                {s}
+                <button onClick={() => setFilterStatuses(prev => prev.filter(x => x !== s))} className="hover:text-white"><X size={10} /></button>
               </span>
-            )}
+            ))}
             {filterPurpose && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-900/30 border border-sky-700 text-[10px] font-mono text-sky-400">
-                Type: {filterPurpose}
+                Purpose: {filterPurpose}
                 <button onClick={() => setFilterPurpose('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {filterProgram && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-900/30 border border-indigo-700 text-[10px] font-mono text-indigo-400">
+                Program: {filterProgram}
+                <button onClick={() => setFilterProgram('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {filterLender && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/30 border border-amber-700 text-[10px] font-mono text-amber-400">
+                Lender: {filterLender}
+                <button onClick={() => setFilterLender('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {filterState && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-900/30 border border-teal-700 text-[10px] font-mono text-teal-400">
+                State: {filterState}
+                <button onClick={() => setFilterState('')} className="hover:text-white"><X size={10} /></button>
+              </span>
+            )}
+            {filterRateMin && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[10px] font-mono text-orange-400">
+                Rate &gt; {filterRateMin}%
+                <button onClick={() => setFilterRateMin('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {(filterDateFrom || filterDateTo) && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-[10px] font-mono text-emerald-400">
-                Date: {filterDateFrom || '…'} → {filterDateTo || '…'}
+                Close: {filterDateFrom || '…'} → {filterDateTo || '…'}
                 <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {hasAdvancedFilters && (
-              <button
-                onClick={clearAllFilters}
-                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline"
-              >Clear all</button>
+              <button onClick={clearAllFilters} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
             )}
           </div>
 
           {/* Expanded filter controls */}
           {showFilters && (
-            <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <div>
-                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Purpose</label>
-                <select
-                  value={filterType}
-                  onChange={e => setFilterType(e.target.value)}
-                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[110px]"
-                >
-                  <option value="">All</option>
-                  <option value="Purchase">Purchase</option>
-                  <option value="Refinance">Refinance</option>
-                </select>
+            <div className="mt-3 p-3 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg">
+              <div className="flex items-start gap-4 flex-wrap">
+                {/* Status multi-select */}
+                <div className="min-w-[180px]">
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Status</label>
+                  <div className="max-h-[140px] overflow-y-auto border border-[#2A2A2A] rounded bg-[#1A1A1A] py-1">
+                    {distinctStatuses.map(s => (
+                      <label key={s} className="flex items-center gap-2 px-2 py-0.5 hover:bg-[#2A2A2A] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filterStatuses.includes(s)}
+                          onChange={() => setFilterStatuses(prev =>
+                            prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
+                          )}
+                          className="accent-[#C9A84C] rounded"
+                        />
+                        <span className="text-[10px] font-mono text-zinc-300 truncate">{s}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Purpose */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Purpose</label>
+                  <select value={filterPurpose} onChange={e => setFilterPurpose(e.target.value)}
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[120px]">
+                    <option value="">All</option>
+                    <option value="Purchase">Purchase</option>
+                    <option value="Refinance">Refinance</option>
+                    <option value="HELOC">HELOC</option>
+                  </select>
+                </div>
+                {/* Program */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Program</label>
+                  <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)}
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[120px]">
+                    <option value="">All</option>
+                    <option value="Conventional">Conventional</option>
+                    <option value="FHA">FHA</option>
+                    <option value="VA">VA</option>
+                    <option value="USDA">USDA</option>
+                    <option value="Jumbo">Jumbo</option>
+                  </select>
+                </div>
+                {/* Lender */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Lender</label>
+                  <select value={filterLender} onChange={e => setFilterLender(e.target.value)}
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[140px]">
+                    <option value="">All</option>
+                    {distinctLenders.map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+                {/* State */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">State</label>
+                  <input type="text" value={filterState} onChange={e => setFilterState(e.target.value)}
+                    placeholder="e.g. TX"
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-zinc-600"
+                  />
+                </div>
+                {/* Rate > */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Rate &gt;</label>
+                  <input type="number" step="0.125" value={filterRateMin} onChange={e => setFilterRateMin(e.target.value)}
+                    placeholder="6.5"
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-zinc-600"
+                  />
+                </div>
+                {/* Closing date range */}
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Close From</label>
+                  <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Close To</label>
+                  <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)}
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Loan Type</label>
-                <select
-                  value={filterPurpose}
-                  onChange={e => setFilterPurpose(e.target.value)}
-                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[110px]"
-                >
-                  <option value="">All</option>
-                  <option value="Conventional">Conventional</option>
-                  <option value="FHA">FHA</option>
-                  <option value="VA">VA</option>
-                  <option value="USDA">USDA</option>
-                  <option value="Jumbo">Jumbo</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Close From</label>
-                <input
-                  type="date"
-                  value={filterDateFrom}
-                  onChange={e => setFilterDateFrom(e.target.value)}
-                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Close To</label>
-                <input
-                  type="date"
-                  value={filterDateTo}
-                  onChange={e => setFilterDateTo(e.target.value)}
-                  className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
-                />
-              </div>
+              <button onClick={clearAllFilters} className="mt-3 text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear All Filters</button>
             </div>
           )}
         </div>
@@ -1092,7 +1237,7 @@ export default function LoansPage() {
                   const days = activeList === 'inprocess' ? daysUntilClose(loan.closing_date) : null
                   return (
                   <tr key={loan.id}
-                    className={`border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
+                    className={`group/row border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
                     style={urgencyStyle}
                     onClick={() => router.push(`/dashboard/loans/${loan.id}`)}>
                     <td className="w-8 px-2 py-3" onClick={e => e.stopPropagation()}>
@@ -1107,23 +1252,58 @@ export default function LoansPage() {
                       if (col.id === 'borrower_name') {
                         return (
                           <td key={col.id} className="px-4 py-3 font-medium" onClick={e => e.stopPropagation()}>
-                            {loan.contact_id ? (
-                              <Link
-                                href={`/dashboard/contacts/${loan.contact_id}`}
-                                className="text-[#F0F0F0] hover:text-[#C9A84C] hover:underline font-mono"
+                            <div className="flex items-center gap-2">
+                              {/* Borrower name → contact */}
+                              {loan.contact_id ? (
+                                <Link
+                                  href={`/dashboard/contacts/${loan.contact_id}`}
+                                  className="text-[#F0F0F0] hover:text-[#C9A84C] font-mono text-sm"
+                                  style={{ textDecoration: 'none' }}
+                                  onMouseEnter={e => (e.currentTarget.style.textDecorationColor = '#C9A84C', e.currentTarget.style.textDecoration = 'underline')}
+                                  onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+                                >
+                                  {loan.borrower_name || '(unnamed)'}
+                                </Link>
+                              ) : (
+                                <span className="text-[#F0F0F0] font-mono text-sm">{loan.borrower_name || '(unnamed)'}</span>
+                              )}
+                              {/* Delete button */}
+                              <button
+                                onClick={e => { e.stopPropagation(); setDeletingLoanId(loan.id) }}
+                                className="opacity-0 group-hover/row:opacity-100 text-zinc-600 hover:text-red-400 transition-all ml-auto"
+                                title="Delete loan"
                               >
-                                {loan.borrower_name || loan.loan_name || '(unnamed)'}
-                              </Link>
-                            ) : (
-                              <span className="text-[#F0F0F0] font-mono">
-                                {loan.borrower_name || loan.loan_name || '(unnamed)'}
-                              </span>
-                            )}
-                            {loan.loan_name && loan.borrower_name && (
-                              <span className="block text-xs font-mono text-[#666666] mt-0.5">
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                            {/* Loan name → loan detail */}
+                            {loan.loan_name && (
+                              <Link
+                                href={`/dashboard/loans/${loan.id}`}
+                                className="block text-xs font-mono text-[#C9A84C]/70 mt-0.5 hover:text-[#C9A84C]"
+                                style={{ textDecoration: 'none' }}
+                                onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = '#C9A84C')}
+                                onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+                                onClick={e => e.stopPropagation()}
+                              >
                                 {loan.loan_name}
-                              </span>
+                              </Link>
                             )}
+                          </td>
+                        )
+                      }
+                      if (col.id === 'loan_name') {
+                        return (
+                          <td key={col.id} className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                            <Link
+                              href={`/dashboard/loans/${loan.id}`}
+                              className="text-[#C9A84C]/80 hover:text-[#C9A84C] font-mono text-sm"
+                              style={{ textDecoration: 'none' }}
+                              onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = '#C9A84C')}
+                              onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+                            >
+                              {loan.loan_name || '—'}
+                            </Link>
                           </td>
                         )
                       }
@@ -1164,8 +1344,16 @@ export default function LoansPage() {
                           )}
                         </td>
                       )
+                      if (col.id === 'interest_rate') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{loan.interest_rate != null ? `${loan.interest_rate}%` : '—'}</td>
+                      if (col.id === 'lender') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.lender || '—'}</td>
+                      if (col.id === 'rate_lock_expiration') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{fmtDate(loan.rate_lock_expiration)}</td>
+                      if (col.id === 'loan_number') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_number || '—'}</td>
                       if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loanLocation(loan)}</td>
+                      if (col.id === 'property_state') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.property_state || '—'}</td>
                       if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
+                      if (col.id === 'borrower_email') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_email || '—'}</td>
+                      if (col.id === 'borrower_phone') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_phone || '—'}</td>
+                      if (col.id === 'commission_amount') return <td key={col.id} className="px-4 py-3 font-mono text-[#C9A84C]">{fmtCurrency(loan.commission_amount ?? null)}</td>
                       if (col.id === 'contact_email') {
                         const href = mailtoHref(loan.contact_email)
                         const val = loan.contact_email ?? '—'
@@ -1283,41 +1471,118 @@ export default function LoansPage() {
       {showColPicker && (
         <div
           className="fixed inset-0 z-[50]"
-          onClick={() => setShowColPicker(false)}
+          onClick={() => { setShowColPicker(false); setColSearch('') }}
           aria-hidden
         />
+      )}
+
+      {/* Single loan delete confirmation */}
+      {deletingLoanId && (
+        <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setDeletingLoanId(null)}>
+          <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-sm font-mono text-[#F0F0F0] mb-1">Delete this loan?</div>
+            <div className="text-xs font-mono text-[#666666] mb-4">
+              {loans.find(l => l.id === deletingLoanId)?.loan_name || loans.find(l => l.id === deletingLoanId)?.borrower_name || 'This loan'} will be permanently removed. This cannot be undone.
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setDeletingLoanId(null)} className="px-3 py-1.5 text-xs font-mono border border-[#2A2A2A] rounded text-[#666666] hover:bg-[#2A2A2A] transition-colors">Cancel</button>
+              <button onClick={() => handleDeleteLoan(deletingLoanId)} className="px-3 py-1.5 text-xs font-mono bg-red-700 text-white rounded hover:bg-red-600 transition-colors flex items-center gap-1.5">
+                <Trash2 size={11} /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
-// ── Status badge (dark-theme color map) ──────────────────────────────────────
+// ── Status badge color system ─────────────────────────────────────────────────
+// Raw status string → hex color. Each status gets a unique color.
 
-const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  'Lead':           { bg: 'rgba(255,255,255,0.06)',  text: '#888888' },
-  'Pre-App':        { bg: 'rgba(76,126,201,0.2)',    text: '#7AABEE' },
-  'Application':    { bg: 'rgba(123,76,201,0.2)',    text: '#A97EEE' },
-  'In Process':     { bg: 'rgba(76,201,138,0.15)',   text: '#5CC99A' },
-  'Clear to Close': { bg: 'rgba(46,204,113,0.15)',   text: '#4ECC80' },
-  'Closed':         { bg: 'rgba(201,168,76,0.15)',   text: '#C9A84C' },
-  'On Hold':        { bg: 'rgba(230,126,34,0.15)',   text: '#E8944A' },
-  'Dead':           { bg: 'rgba(100,100,100,0.2)',   text: '#666666' },
+const STATUS_HEX: Record<string, string> = {
+  // Spec-defined
+  'LOAN_SETUP':               '#64748B',
+  'Loan Setup':               '#64748B',
+  'DISCLOSURE_SENT':          '#7C3AED',
+  'Disclosed':                '#7C3AED',
+  'UNDERWRITING_SUBMITTED':   '#2563EB',
+  'Submitted to UW':          '#2563EB',
+  'Submitted to Underwriting':'#2563EB',
+  'Submitted':                '#2563EB',
+  'Loan in Process':          '#D97706',
+  'In Process':               '#D97706',
+  'processing':               '#D97706',
+  'Processing':               '#D97706',
+  'RE_SUBMITTAL':             '#DC2626',
+  'RESUBMIT':                 '#DC2626',
+  'Resubmit':                 '#DC2626',
+  'Resubmitted':              '#DC2626',
+  'CLEAR_TO_CLOSE':           '#16A34A',
+  'clear_to_close':           '#16A34A',
+  'Clear to Close':           '#16A34A',
+  'Clear To Close':           '#16A34A',
+  'CTC':                      '#16A34A',
+  'APPROVED':                 '#0891B2',
+  'Approved':                 '#0891B2',
+  'APPROVED_WITH_CONDITIONS': '#0891B2',
+  'CONDITIONAL_APPROVAL':     '#0891B2',
+  'Approved with Conditions': '#0891B2',
+  'Approved w/ Conditions':   '#0891B2',
+  'Conditional Approval':     '#0891B2',
+  'underwriting':             '#0E7490',
+  'Underwriting':             '#0E7490',
+  'UNDERWRITING':             '#0E7490',
+  'Closed':                   '#C9A84C',
+  'closed':                   '#C9A84C',
+  'funded':                   '#C9A84C',
+  'Funded':                   '#C9A84C',
+  'Closed/Funded':            '#C9A84C',
+  'LOAN_FUNDED':              '#C9A84C',
+  'Closed Client':            '#C9A84C',
+  // Pre-approval / lead family
+  'Started':                  '#A855F7',
+  'Started App':              '#A855F7',
+  'Pre-Approved':             '#818CF8',
+  'pre_approved':             '#818CF8',
+  'pre-approval':             '#818CF8',
+  'Application':              '#6366F1',
+  'application_intake':       '#6366F1',
+  'APPLICATION_INTAKE':       '#6366F1',
+  'QUALIFICATION':            '#6366F1',
+  'New Application':          '#60A5FA',
+  'new_application':          '#60A5FA',
+  'under_contract':           '#34D399',
+  'Lead':                     '#6B7280',
+  'lead':                     '#6B7280',
+  'Lead - New':               '#6B7280',
+  'Lead - Contacted':         '#6B7280',
+  'Lead - Cold / Inactive':   '#6B7280',
+  'Long Term':                '#6B7280',
+  // Inactive
+  'On Hold':                  '#F59E0B',
+  'on_hold':                  '#F59E0B',
+  'Suspended':                '#F59E0B',
+  'Cancelled':                '#71717A',
+  'canceled':                 '#71717A',
+  'Dead':                     '#52525B',
+  'Denied':                   '#EF4444',
+  'Withdrawn':                '#9CA3AF',
+}
+
+function statusHex(status: string | null): string {
+  if (!status) return '#52525B'
+  return STATUS_HEX[status] ?? STATUS_HEX[status.toLowerCase()] ?? '#52525B'
 }
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-[#666666] font-mono">—</span>
-
-  const s = status.toLowerCase()
-  let style = STATUS_STYLES[status] ?? { bg: 'rgba(100,100,100,0.2)', text: '#666666' }
-  if (!STATUS_STYLES[status]) {
-    if (['closed', 'funded', 'closed/funded'].some(v => s.includes(v))) style = STATUS_STYLES['Closed'] ?? style
-    else if (['in process', 'processing', 'clear to close', 'submitted', 'conditional', 'approved', 'pre-approved'].some(v => s.includes(v))) style = STATUS_STYLES['In Process'] ?? style
-    else if (['lead', 'pre-app', 'application', 'started'].some(v => s.includes(v))) style = STATUS_STYLES['Lead'] ?? style
-    else if (['on hold', 'dead', 'cancelled', 'denied', 'withdrawn', 'suspended'].some(v => s.includes(v))) style = STATUS_STYLES['Dead'] ?? style
-  }
-
+  if (!status) return <span className="text-[#666666] font-mono text-xs">—</span>
+  const hex = statusHex(status)
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium" style={{ background: style.bg, color: style.text }}>
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium whitespace-nowrap"
+      style={{ background: `${hex}22`, color: hex, border: `1px solid ${hex}44` }}
+    >
       {status}
     </span>
   )

@@ -2136,14 +2136,34 @@ function LoanNotesTab({ loanId, initialNotes, onSave }: {
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 
+const STATUS_HEX_DETAIL: Record<string, string> = {
+  'LOAN_SETUP': '#64748B', 'Loan Setup': '#64748B',
+  'DISCLOSURE_SENT': '#7C3AED', 'Disclosed': '#7C3AED',
+  'UNDERWRITING_SUBMITTED': '#2563EB', 'Submitted to UW': '#2563EB', 'Submitted': '#2563EB',
+  'Loan in Process': '#D97706', 'In Process': '#D97706', 'processing': '#D97706', 'Processing': '#D97706',
+  'RE_SUBMITTAL': '#DC2626', 'Resubmitted': '#DC2626', 'Resubmit': '#DC2626',
+  'CLEAR_TO_CLOSE': '#16A34A', 'clear_to_close': '#16A34A', 'Clear to Close': '#16A34A', 'CTC': '#16A34A',
+  'APPROVED': '#0891B2', 'Approved': '#0891B2', 'APPROVED_WITH_CONDITIONS': '#0891B2',
+  'Approved with Conditions': '#0891B2', 'Approved w/ Conditions': '#0891B2', 'Conditional Approval': '#0891B2',
+  'underwriting': '#0E7490', 'Underwriting': '#0E7490',
+  'Closed': '#C9A84C', 'closed': '#C9A84C', 'funded': '#C9A84C', 'Funded': '#C9A84C',
+  'Started': '#A855F7', 'Pre-Approved': '#818CF8', 'pre_approved': '#818CF8',
+  'Application': '#6366F1', 'application_intake': '#6366F1', 'New Application': '#60A5FA',
+  'under_contract': '#34D399', 'Lead': '#6B7280', 'lead': '#6B7280',
+  'On Hold': '#F59E0B', 'Suspended': '#F59E0B',
+  'Cancelled': '#71717A', 'Dead': '#52525B', 'Denied': '#EF4444', 'Withdrawn': '#9CA3AF',
+}
+
 function StatusBadge({ status }: { status: string | null }) {
   if (!status) return <span className="text-zinc-500 text-xs font-mono">—</span>
-  const s = status.toLowerCase()
-  let cls = 'bg-zinc-800 text-zinc-400 border border-zinc-600'
-  if (['closed', 'funded'].some(v => s.includes(v))) cls = 'bg-[#4ADE80]/10 text-[#4ADE80] border-[#4ADE80]/40'
-  else if (['process', 'submitted', 'conditional', 'clear to close', 'approved'].some(v => s.includes(v))) cls = 'bg-amber-500/10 text-amber-400 border-amber-500/40'
-  else if (['started'].some(v => s.includes(v))) cls = 'bg-amber-500/10 text-amber-400 border-amber-500/40'
-  else if (['cancelled', 'denied', 'withdrawn'].some(v => s.includes(v))) cls = 'bg-red-900/30 text-red-400 border-red-800'
-  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{status}</span>
+  const hex = STATUS_HEX_DETAIL[status] ?? STATUS_HEX_DETAIL[status.toLowerCase()] ?? '#52525B'
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium whitespace-nowrap"
+      style={{ background: `${hex}22`, color: hex, border: `1px solid ${hex}44` }}
+    >
+      {status}
+    </span>
+  )
 }
 

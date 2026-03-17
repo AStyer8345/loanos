@@ -478,7 +478,17 @@ function TodayTab({
               >
                 {done}/{day.tasks.length}
               </div>
-              <div className="font-mono text-[9px] tracking-widest" style={{ color: '#71717a' }}>COMPLETE</div>
+              <div className="font-mono text-[9px] tracking-widest mb-2" style={{ color: '#71717a' }}>COMPLETE</div>
+              {/* Progress bar */}
+              <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: '#3f3f46' }}>
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${day.tasks.length > 0 ? Math.round((done / day.tasks.length) * 100) : 0}%`,
+                    background: done === day.tasks.length ? '#4CAF82' : '#C9A84C',
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -1861,11 +1871,41 @@ export default function MarketingPage() {
   }
 
   function toggle(taskId: string, tracker?: string) {
-    const dayTasks = { ...todayTasks, [taskId]: !todayTasks[taskId] }
+    const isNowChecked = !todayTasks[taskId]
+    const dayTasks     = { ...todayTasks, [taskId]: isNowChecked }
+    const day          = DAYS[todayDow]
+    const task         = day?.tasks.find(t => t.id === taskId)
+
+    let newLog = s.log
+
+    if (isNowChecked && task) {
+      // Append to in-memory activity log
+      const logEntry: LogEntry = {
+        id:       uid(),
+        date:     new Date().toISOString(),
+        activity: task.label,
+        channel:  'Task',
+        notes:    `Daily schedule — ${day.name}`,
+      }
+      newLog = [...s.log, logEntry]
+
+      // Persist to dedicated Supabase table
+      if (userId) {
+        supabase.from('marketing_activity_log').insert({
+          user_id:     userId,
+          task_name:   task.label,
+          day_of_week: day.name,
+          logged_at:   new Date().toISOString(),
+          source:      'daily_schedule',
+        })
+      }
+    }
+
     save({
       ...s,
       tasks: { ...s.tasks, [todayKey]: dayTasks },
-      last: tracker ? { ...s.last, [tracker]: isoDate() } : s.last,
+      last:  tracker ? { ...s.last, [tracker]: isoDate() } : s.last,
+      log:   newLog,
     })
   }
 

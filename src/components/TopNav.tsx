@@ -117,16 +117,16 @@ export default function TopNav() {
                 onClick: () => navigate('/dashboard/marketing/content'),
               },
               {
-                label: 'Newsletter Generator',
-                onClick: () => navigate('/dashboard/marketing?tab=NEWSLETTERS'),
-              },
-              {
                 label: 'Social Media Posts',
-                onClick: () => navigate('/dashboard/marketing?tab=SOCIAL'),
+                onClick: () => navigate('/dashboard/marketing/social'),
               },
               {
                 label: 'Rate Updates',
-                onClick: () => navigate('/dashboard/marketing?tab=TRACKER'),
+                onClick: () => navigate('/dashboard/marketing/rate-updates'),
+              },
+              {
+                label: 'Marketing Hub',
+                onClick: () => navigate('/dashboard/marketing'),
               },
               {
                 label: 'Automations (n8n, Zapier)',
@@ -295,17 +295,24 @@ export default function TopNav() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing?tab=NEWSLETTERS')}
+                onClick={() => navigate('/dashboard/marketing/social')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
-                <span>Newsletter Generator</span>
+                <span>Social Media Posts</span>
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing?tab=SOCIAL')}
+                onClick={() => navigate('/dashboard/marketing/rate-updates')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
-                <span>Social Media</span>
+                <span>Rate Updates</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/marketing')}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
+              >
+                <span>Marketing Hub</span>
               </button>
               <button
                 type="button"

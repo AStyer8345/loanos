@@ -2,236 +2,169 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Pencil, X, ArrowRight, ArrowLeft } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type ContentType = 'blog' | 'video' | 'social' | 'email' | 'guide'
-type Column = 'ideas' | 'wip' | 'pub'
-
-interface ContentItem {
-  id: string
-  title: string
-  type: ContentType
-  notes: string
-  date: string
+type Newsletter = {
+  id: string; audience: string; subject: string; date: string
+  mailchimpUrl: string; openRate: string; notes: string
 }
 
-interface BoardState {
-  ideas: ContentItem[]
-  wip: ContentItem[]
-  pub: ContentItem[]
+type GeneratedNewsletter = {
+  subject: string
+  teaserHtml: string
+  webTitle: string
+  webHtml: string
+  slug: string
 }
 
-const BLANK_BOARD: BoardState = { ideas: [], wip: [], pub: [] }
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const TYPE_STYLES: Record<ContentType, string> = {
-  blog:   'bg-blue-900/40 text-blue-300',
-  video:  'bg-orange-900/40 text-orange-300',
-  social: 'bg-purple-900/40 text-purple-300',
-  email:  'bg-emerald-900/40 text-emerald-300',
-  guide:  'bg-yellow-900/40 text-yellow-300',
+type UserMarketingSettings = {
+  anthropic_api_key?: string
+  mailchimp_api_key?: string
+  mailchimp_server_prefix?: string
+  mailchimp_realtor_list_id?: string
+  mailchimp_borrower_list_id?: string
+  dispatch_webhook_url?: string
+  dispatch_secret?: string
 }
 
-const TYPE_LABELS: Record<ContentType, string> = {
-  blog: 'Blog', video: 'Video', social: 'Social', email: 'Email', guide: 'Guide',
+// Minimal MCCState slice — only what this page needs
+type MCCNewsletterState = {
+  newsletters: Newsletter[]
+  log: { id: string; date: string; activity: string; channel: string; notes: string }[]
+  last: Record<string, string>
 }
 
-const COL_META: Record<Column, { label: string; sub: string }> = {
-  ideas: { label: 'Ideas',       sub: 'Topics to create' },
-  wip:   { label: 'In Progress', sub: 'Being worked on'  },
-  pub:   { label: 'Published',   sub: 'Live / sent'      },
+type AudienceFilter = 'all' | 'Realtors' | 'Borrowers' | 'Both'
+type GenAudience    = 'Realtors' | 'Borrowers' | 'Both'
+
+const AUDIENCE_BADGE: Record<string, string> = {
+  Realtors: '#5B8FD4', Borrowers: '#4CAF82', Both: '#C9A84C',
 }
+
+const BLANK_NL_STATE: MCCNewsletterState = { newsletters: [], log: [], last: {} }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function uid(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
+function isoDate() { return new Date().toISOString().slice(0, 10) }
+
+// ── Shared UI ─────────────────────────────────────────────────────────────────
+
+function Card({ children, className = '', style }: {
+  children: React.ReactNode; className?: string; style?: React.CSSProperties
+}) {
+  return (
+    <div
+      className={`border rounded-sm p-4 ${className}`}
+      style={{ background: '#18181b', borderColor: '#3f3f46', ...style }}
+    >
+      {children}
+    </div>
+  )
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="font-mono text-[10px] tracking-widest mb-3" style={{ color: '#71717a' }}>
+      {children}
+    </div>
+  )
 }
 
-// ── Supabase ──────────────────────────────────────────────────────────────────
+function Input({ value, onChange, placeholder, type = 'text' }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; type?: string
+}) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+      style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
+    />
+  )
+}
+
+function Btn({ onClick, children, variant = 'default', disabled = false, className = '' }: {
+  onClick: () => void; children: React.ReactNode
+  variant?: 'default' | 'gold' | 'danger' | 'green'
+  disabled?: boolean; className?: string
+}) {
+  const colors = {
+    default: { color: '#71717a', border: '#3f3f46' },
+    gold:    { color: '#C9A84C', border: '#C9A84C' },
+    danger:  { color: '#E05252', border: '#E05252' },
+    green:   { color: '#4CAF82', border: '#4CAF82' },
+  }[variant]
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`font-mono text-[10px] tracking-widest border px-2 py-1 transition-opacity hover:opacity-70 disabled:opacity-40 ${className}`}
+      style={{ color: colors.color, borderColor: colors.border }}
+    >
+      {children}
+    </button>
+  )
+}
+
+// ── Hooks ─────────────────────────────────────────────────────────────────────
 
 function useSupabase() {
   return useMemo(() => createClient(), [])
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
-
-interface ModalProps {
-  targetCol: Column
-  initial?: ContentItem | null
-  onSave: (item: ContentItem) => void
-  onClose: () => void
-}
-
-function ItemModal({ targetCol, initial, onSave, onClose }: ModalProps) {
-  const [title, setTitle] = useState(initial?.title ?? '')
-  const [type, setType]   = useState<ContentType>(initial?.type ?? 'blog')
-  const [notes, setNotes] = useState(initial?.notes ?? '')
-
-  function handleSave() {
-    if (!title.trim()) return
-    onSave({
-      id:    initial?.id ?? uid(),
-      title: title.trim(),
-      type,
-      notes: notes.trim(),
-      date:  new Date().toISOString(),
-    })
-  }
-
-  const colLabel = COL_META[targetCol].label
-  const isEdit   = !!initial
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-100 font-mono">
-              {isEdit ? 'Edit Item' : `Add to ${colLabel}`}
-            </h2>
-            <p className="text-xs text-zinc-500 mt-0.5">{isEdit ? '' : COL_META[targetCol].sub}</p>
-          </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">Title / Topic</label>
-            <input
-              autoFocus
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSave()}
-              placeholder="e.g. How to read a Closing Disclosure"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">Type</label>
-            <select
-              value={type}
-              onChange={e => setType(e.target.value as ContentType)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-yellow-500 transition-colors"
-            >
-              <option value="blog">Blog Post</option>
-              <option value="video">Video</option>
-              <option value="social">Social Series</option>
-              <option value="email">Email / Newsletter</option>
-              <option value="guide">Guide / Lead Magnet</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">Notes (optional)</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Outline, links, ideas, next steps…"
-              rows={3}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 transition-colors resize-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end gap-2 mt-5">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-mono text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!title.trim()}
-            className="px-4 py-2 text-xs font-mono text-zinc-900 bg-yellow-500 hover:bg-yellow-400 rounded-lg font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            {isEdit ? 'Save' : 'Add'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Card ──────────────────────────────────────────────────────────────────────
-
-interface CardProps {
-  item: ContentItem
-  col: Column
-  onEdit: () => void
-  onDelete: () => void
-  onMoveLeft: (() => void) | null
-  onMoveRight: (() => void) | null
-}
-
-function ContentCard({ item, onEdit, onDelete, onMoveLeft, onMoveRight }: CardProps) {
-  return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 group">
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <p className="text-sm text-zinc-100 leading-snug flex-1">{item.title}</p>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          {onMoveLeft && (
-            <button onClick={onMoveLeft} title="Move left" className="p-1 rounded text-zinc-500 hover:text-zinc-200 transition-colors">
-              <ArrowLeft size={12} />
-            </button>
-          )}
-          {onMoveRight && (
-            <button onClick={onMoveRight} title="Move right" className="p-1 rounded text-zinc-500 hover:text-zinc-200 transition-colors">
-              <ArrowRight size={12} />
-            </button>
-          )}
-          <button onClick={onEdit} title="Edit" className="p-1 rounded text-zinc-500 hover:text-zinc-200 transition-colors">
-            <Pencil size={12} />
-          </button>
-          <button onClick={onDelete} title="Delete" className="p-1 rounded text-zinc-500 hover:text-red-400 transition-colors">
-            <X size={12} />
-          </button>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${TYPE_STYLES[item.type]}`}>
-          {TYPE_LABELS[item.type]}
-        </span>
-        <span className="text-xs text-zinc-600 font-mono">{fmtDate(item.date)}</span>
-      </div>
-      {item.notes && (
-        <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{item.notes}</p>
-      )}
-    </div>
-  )
-}
-
-// ── Main page ─────────────────────────────────────────────────────────────────
-
-export default function ContentBoardPage() {
+function useMarketingSettings(): UserMarketingSettings {
   const supabase = useSupabase()
-  const [board, setBoard] = useState<BoardState>(BLANK_BOARD)
+  const [settings, setSettings] = useState<UserMarketingSettings>({})
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      Promise.all([
+        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'integrations').single(),
+        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'website').single(),
+      ]).then(([integ, site]) => {
+        setSettings({
+          ...((integ.data?.value as Record<string, string>) ?? {}),
+          ...((site.data?.value  as Record<string, string>) ?? {}),
+        })
+      })
+    })
+  }, [supabase])
+  return settings
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function ContentDashboardPage() {
+  const supabase = useSupabase()
+  const settings = useMarketingSettings()
+
+  const [state, setState]   = useState<MCCNewsletterState>(BLANK_NL_STATE)
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Modal state: null = closed, { col, item? } = open
-  const [modal, setModal] = useState<{ col: Column; item?: ContentItem; idx?: number } | null>(null)
+  // Filter + log form
+  const [filter, setFilter]   = useState<AudienceFilter>('all')
+  const [showAdd, setShowAdd] = useState(false)
+  const BLANK_FORM: Omit<Newsletter, 'id'> = {
+    audience: 'Realtors', subject: '', date: isoDate(), mailchimpUrl: '', openRate: '', notes: '',
+  }
+  const [form, setForm] = useState({ ...BLANK_FORM })
 
-  const COLS: Column[] = ['ideas', 'wip', 'pub']
+  // Generator state
+  const [showGen, setShowGen]         = useState(false)
+  const [genAudience, setGenAud]      = useState<GenAudience>('Realtors')
+  const [genNotes, setGenNotes]       = useState('')
+  const [generating, setGenerating]   = useState(false)
+  const [preview, setPreview]         = useState<GeneratedNewsletter | null>(null)
+  const [sendingMC, setSendingMC]     = useState(false)
+  const [publishing, setPublishing]   = useState(false)
+  const [statusMsg, setStatusMsg]     = useState('')
 
-  // ── Load ──
+  // Load MCC state from Supabase
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { setLoading(false); return }
@@ -240,151 +173,434 @@ export default function ContentBoardPage() {
         .from('mcc_state')
         .select('value')
         .eq('user_id', user.id)
-        .eq('key', 'content_board')
+        .eq('key', 'mcc')
         .single()
         .then(({ data }) => {
-          if (data) setBoard(data.value as BoardState)
+          if (data?.value) {
+            const v = data.value as Record<string, unknown>
+            setState({
+              newsletters: (v.newsletters as Newsletter[]) ?? [],
+              log:         (v.log as MCCNewsletterState['log']) ?? [],
+              last:        (v.last as Record<string, string>) ?? {},
+            })
+          }
           setLoading(false)
         })
     })
   }, [supabase])
 
-  // ── Persist ──
-  function save(next: BoardState) {
-    setBoard(next)
+  // Persist back to MCC blob (merges newsletter/log/last into existing mcc_state)
+  async function save(next: MCCNewsletterState) {
+    setState(next)
     if (!userId) return
-    supabase
+    // Read current full state to merge
+    const { data } = await supabase
       .from('mcc_state')
-      .upsert({ user_id: userId, key: 'content_board', value: next }, { onConflict: 'user_id,key' })
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single()
+    const current = (data?.value as Record<string, unknown>) ?? {}
+    await supabase
+      .from('mcc_state')
+      .upsert(
+        { user_id: userId, key: 'mcc', value: { ...current, newsletters: next.newsletters, log: next.log, last: next.last } },
+        { onConflict: 'user_id,key' }
+      )
   }
 
-  // ── Card actions ──
-  function addItem(item: ContentItem, col: Column) {
-    const next = { ...board, [col]: [...board[col], item] }
-    save(next)
+  // ── Log manual newsletter ──
+  function addNL() {
+    if (!form.subject.trim()) { alert('Subject line is required.'); return }
+    const nl: Newsletter = { ...form, id: uid() }
+    const now = new Date().toISOString()
+    const lastUpd = { ...state.last }
+    if (form.audience === 'Realtors'  || form.audience === 'Both') lastUpd['realtor-nl']  = now
+    if (form.audience === 'Borrowers' || form.audience === 'Both') lastUpd['borrower-nl'] = now
+    const logEntry = {
+      id: uid(), date: now,
+      activity: `Newsletter sent — ${form.subject}`,
+      channel: 'Email', notes: form.audience,
+    }
+    save({ ...state, newsletters: [...state.newsletters, nl], log: [...state.log, logEntry], last: lastUpd })
+    setForm({ ...BLANK_FORM })
+    setShowAdd(false)
   }
 
-  function updateItem(item: ContentItem, col: Column, idx: number) {
-    const updated = [...board[col]]
-    updated[idx] = item
-    save({ ...board, [col]: updated })
+  // ── Generator functions ──
+  async function generateNewsletter() {
+    setGenerating(true)
+    setStatusMsg('')
+    setPreview(null)
+    try {
+      const res = await fetch('/api/marketing/generate-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audience: genAudience,
+          notes:    genNotes,
+          apiKey:   settings.anthropic_api_key,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setStatusMsg(`Error: ${data.error}`); return }
+      setPreview(data as GeneratedNewsletter)
+    } catch {
+      setStatusMsg('Generation failed — check Anthropic API key in Settings.')
+    } finally {
+      setGenerating(false)
+    }
   }
 
-  function deleteItem(col: Column, idx: number) {
-    if (!confirm('Delete this item?')) return
-    const updated = [...board[col]]
-    updated.splice(idx, 1)
-    save({ ...board, [col]: updated })
+  async function sendMailchimp() {
+    if (!preview) return
+    if (!settings.mailchimp_api_key || !settings.mailchimp_server_prefix) {
+      setStatusMsg('Mailchimp credentials not configured. Go to Settings → Integrations.')
+      return
+    }
+    const listId = genAudience === 'Realtors'
+      ? settings.mailchimp_realtor_list_id
+      : settings.mailchimp_borrower_list_id
+    if (!listId) {
+      setStatusMsg(`Mailchimp ${genAudience} list ID not configured in Settings.`)
+      return
+    }
+    setSendingMC(true)
+    setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/send-mailchimp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key:       settings.mailchimp_api_key,
+          server_prefix: settings.mailchimp_server_prefix,
+          list_id:       listId,
+          subject:       preview.subject,
+          html_body:     preview.teaserHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`✓ Mailchimp campaign sent! Campaign ID: ${data.campaignId}`)
+      else setStatusMsg(`Mailchimp error: ${data.error}`)
+    } finally {
+      setSendingMC(false)
+    }
   }
 
-  function moveItem(fromCol: Column, idx: number, toCol: Column) {
-    const item = { ...board[fromCol][idx], date: new Date().toISOString() }
-    const fromArr = [...board[fromCol]]
-    fromArr.splice(idx, 1)
-    const toArr = [...board[toCol], item]
-    save({ ...board, [fromCol]: fromArr, [toCol]: toArr })
+  async function publishToWebsite() {
+    if (!preview) return
+    if (!settings.dispatch_webhook_url) {
+      setStatusMsg('Dispatch webhook URL not configured. Go to Settings → Website.')
+      return
+    }
+    setPublishing(true)
+    setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/publish-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dispatch_url:    settings.dispatch_webhook_url,
+          dispatch_secret: settings.dispatch_secret,
+          audience:        genAudience,
+          slug:            preview.slug,
+          title:           preview.webTitle,
+          html:            preview.webHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`✓ Published to website! ${data.url ? `URL: ${data.url}` : 'Check your site.'}`)
+      else setStatusMsg(`Publish error: ${data.error}`)
+    } finally {
+      setPublishing(false)
+    }
   }
 
-  const totalCount = board.ideas.length + board.wip.length + board.pub.length
+  function logGeneratedNewsletter() {
+    if (!preview) return
+    const now = new Date().toISOString()
+    const nl: Newsletter = {
+      id: uid(), audience: genAudience, subject: preview.subject,
+      date: isoDate(), mailchimpUrl: '', openRate: '', notes: genNotes,
+    }
+    const lastUpd = { ...state.last }
+    if (genAudience === 'Realtors'  || genAudience === 'Both') lastUpd['realtor-nl']  = now
+    if (genAudience === 'Borrowers' || genAudience === 'Both') lastUpd['borrower-nl'] = now
+    const logEntry = {
+      id: uid(), date: now,
+      activity: `Newsletter generated & sent — ${preview.subject}`,
+      channel: 'Email', notes: genAudience,
+    }
+    save({ ...state, newsletters: [...state.newsletters, nl], log: [...state.log, logEntry], last: lastUpd })
+    setPreview(null)
+    setShowGen(false)
+    setGenNotes('')
+    setStatusMsg('')
+  }
+
+  const filtered = filter === 'all' ? state.newsletters : state.newsletters.filter(n => n.audience === filter)
+  const sorted   = [...filtered].reverse()
 
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <p className="text-xs font-mono text-zinc-500">LOADING…</p>
+        <p className="text-xs font-mono" style={{ color: '#71717a' }}>LOADING…</p>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 lg:p-6">
+
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-lg font-mono font-bold text-zinc-100">Content Board</h1>
-          <p className="text-xs font-mono text-zinc-500 mt-0.5">
-            Track ideas through drafting to published
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-zinc-500">{totalCount} items</span>
-          <span className="text-xs font-mono text-zinc-600">
-            {board.pub.length} published · {board.wip.length} in progress · {board.ideas.length} ideas
-          </span>
-        </div>
+      <div className="mb-6">
+        <h1 className="font-mono text-lg font-bold" style={{ color: '#f4f4f5' }}>Content Dashboard</h1>
+        <p className="font-mono text-[10px] mt-0.5" style={{ color: '#71717a' }}>
+          Generate newsletters · send via Mailchimp · publish to website
+        </p>
       </div>
 
-      {/* Kanban columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {COLS.map(col => {
-          const items = board[col]
-          const prevCol = col === 'wip' ? 'ideas' : col === 'pub' ? 'wip' : null
-          const nextCol = col === 'ideas' ? 'wip' : col === 'wip' ? 'pub' : null
+      {/* ── Generator Panel ── */}
+      <Card className="mb-4" style={{ borderColor: showGen ? '#C9A84C' : '#3f3f46' }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="font-mono text-xs font-semibold" style={{ color: '#C9A84C' }}>
+              🚀 NEWSLETTER GENERATOR
+            </div>
+            <div className="font-mono text-[9px] mt-0.5" style={{ color: '#71717a' }}>
+              AI drafts → Mailchimp campaign → publish to website
+            </div>
+          </div>
+          <Btn
+            onClick={() => { setShowGen(v => !v); setPreview(null); setStatusMsg('') }}
+            variant="gold"
+          >
+            {showGen ? 'COLLAPSE' : 'GENERATE NEW'}
+          </Btn>
+        </div>
 
-          return (
-            <div key={col} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-              {/* Column header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-                <div>
-                  <span className="text-xs font-mono font-semibold text-zinc-300 uppercase tracking-wider">
-                    {COL_META[col].label}
-                  </span>
-                  <span className="ml-2 text-xs font-mono text-zinc-600">{items.length}</span>
-                </div>
-                <span className="text-xs text-zinc-600">{COL_META[col].sub}</span>
-              </div>
-
-              {/* Cards */}
-              <div className="p-3 space-y-2 min-h-[120px]">
-                {items.length === 0 && (
-                  <p className="text-xs text-zinc-700 font-mono py-2">Nothing here yet.</p>
-                )}
-                {[...items].reverse().map((item, ri) => {
-                  const idx = items.length - 1 - ri
-                  return (
-                    <ContentCard
-                      key={item.id}
-                      item={item}
-                      col={col}
-                      onEdit={() => setModal({ col, item, idx })}
-                      onDelete={() => deleteItem(col, idx)}
-                      onMoveLeft={prevCol ? () => moveItem(col, idx, prevCol as Column) : null}
-                      onMoveRight={nextCol ? () => moveItem(col, idx, nextCol as Column) : null}
-                    />
-                  )
-                })}
-              </div>
-
-              {/* Add button */}
-              <div className="px-3 pb-3">
-                <button
-                  onClick={() => setModal({ col })}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 border border-dashed border-zinc-700 hover:border-yellow-500/60 rounded-lg text-xs font-mono text-zinc-600 hover:text-yellow-500 transition-colors"
+        {showGen && (
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
+                <select
+                  value={genAudience}
+                  onChange={e => setGenAud(e.target.value as GenAudience)}
+                  className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                  style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
                 >
-                  <Plus size={12} />
-                  Add {col === 'pub' ? 'published' : col === 'wip' ? 'draft' : 'idea'}
-                </button>
+                  {(['Realtors', 'Borrowers', 'Both'] as const).map(a => (
+                    <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>
+                  RATE / MARKET CONTEXT (optional)
+                </div>
+                <Input
+                  value={genNotes}
+                  onChange={setGenNotes}
+                  placeholder="e.g. 30yr at 6.875%, Austin inventory up 12% MOM"
+                />
               </div>
             </div>
-          )
-        })}
+
+            <div className="flex gap-2 flex-wrap">
+              <Btn onClick={generateNewsletter} variant="gold" disabled={generating}>
+                {generating ? '⟳ GENERATING…' : '✦ GENERATE DRAFT'}
+              </Btn>
+              {preview && (
+                <>
+                  <Btn onClick={sendMailchimp} disabled={sendingMC}>
+                    {sendingMC ? '⟳ SENDING…' : '📧 SEND MAILCHIMP'}
+                  </Btn>
+                  <Btn onClick={publishToWebsite} disabled={publishing}>
+                    {publishing ? '⟳ PUBLISHING…' : '🌐 PUBLISH TO WEBSITE'}
+                  </Btn>
+                  <Btn onClick={logGeneratedNewsletter} variant="green">✓ LOG THIS</Btn>
+                </>
+              )}
+            </div>
+
+            {statusMsg && (
+              <div
+                className="font-mono text-[10px] px-3 py-2 rounded-sm"
+                style={{
+                  background: statusMsg.startsWith('✓') ? 'rgba(76,175,130,0.1)' : 'rgba(224,82,82,0.1)',
+                  color:      statusMsg.startsWith('✓') ? '#4CAF82' : '#E05252',
+                  border:     `1px solid ${statusMsg.startsWith('✓') ? '#4CAF8233' : '#E0525233'}`,
+                }}
+              >
+                {statusMsg}
+              </div>
+            )}
+
+            {/* Preview */}
+            {preview && (
+              <div className="flex flex-col gap-3 mt-1">
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#C9A84C' }}>SUBJECT LINE</div>
+                  <div
+                    className="font-mono text-xs px-3 py-2 rounded-sm"
+                    style={{ background: 'rgba(201,168,76,0.08)', color: '#f4f4f5' }}
+                  >
+                    {preview.subject}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>TEASER EMAIL (Mailchimp)</div>
+                  <div
+                    className="text-xs rounded-sm p-3 overflow-auto max-h-40 font-mono leading-relaxed"
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', fontSize: 10 }}
+                    dangerouslySetInnerHTML={{ __html: preview.teaserHtml }}
+                  />
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>WEB PAGE CONTENT</div>
+                  <div
+                    className="font-mono text-[9px] px-3 py-2 rounded-sm leading-snug"
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', whiteSpace: 'pre-wrap', maxHeight: 160, overflow: 'auto' }}
+                  >
+                    {preview.webTitle} — slug: /{preview.slug}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* ── Newsletter Log ── */}
+      <div className="flex flex-wrap gap-2 items-center justify-between mb-3">
+        <div className="flex gap-1">
+          {(['all', 'Realtors', 'Borrowers', 'Both'] as const).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className="font-mono text-[9px] tracking-widest px-2.5 py-1 border rounded-sm transition-colors"
+              style={{
+                borderColor: filter === f ? '#C9A84C' : '#3f3f46',
+                color:       filter === f ? '#C9A84C' : '#71717a',
+                background:  filter === f ? 'rgba(201,168,76,0.08)' : 'transparent',
+              }}
+            >
+              {f.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <Btn onClick={() => setShowAdd(v => !v)} variant="gold">+ LOG NEWSLETTER</Btn>
       </div>
 
-      {/* Modal */}
-      {modal && (
-        <ItemModal
-          targetCol={modal.col}
-          initial={modal.item ?? null}
-          onSave={item => {
-            if (modal.item !== undefined && modal.idx !== undefined) {
-              updateItem(item, modal.col, modal.idx)
-            } else {
-              addItem(item, modal.col)
-            }
-            setModal(null)
-          }}
-          onClose={() => setModal(null)}
-        />
+      {showAdd && (
+        <Card className="mb-3">
+          <SectionLabel>LOG NEWSLETTER</SectionLabel>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
+              <select
+                value={form.audience}
+                onChange={e => setForm(p => ({ ...p, audience: e.target.value }))}
+                className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
+              >
+                {['Realtors', 'Borrowers', 'Both'].map(a => (
+                  <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>DATE SENT</div>
+              <Input type="date" value={form.date} onChange={v => setForm(p => ({ ...p, date: v }))} />
+            </div>
+            <div className="md:col-span-2">
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>SUBJECT LINE *</div>
+              <Input
+                value={form.subject}
+                onChange={v => setForm(p => ({ ...p, subject: v }))}
+                placeholder="Austin Market Update — Feb 2026"
+              />
+            </div>
+            <div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>OPEN RATE</div>
+              <Input value={form.openRate} onChange={v => setForm(p => ({ ...p, openRate: v }))} placeholder="42%" />
+            </div>
+            <div>
+              <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>MAILCHIMP URL</div>
+              <Input value={form.mailchimpUrl} onChange={v => setForm(p => ({ ...p, mailchimpUrl: v }))} placeholder="https://mailchi.mp/…" />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <Btn onClick={addNL} variant="gold">SAVE</Btn>
+            <Btn onClick={() => setShowAdd(false)}>CANCEL</Btn>
+          </div>
+        </Card>
       )}
+
+      {/* Table */}
+      <div className="border rounded-sm overflow-hidden" style={{ borderColor: '#3f3f46' }}>
+        <div
+          className="grid font-mono text-[9px] tracking-widest px-3 py-2"
+          style={{
+            gridTemplateColumns: '90px 1fr 90px 70px 80px',
+            background: '#09090b', color: '#71717a', borderBottom: '1px solid #3f3f46',
+          }}
+        >
+          <span>DATE</span><span>SUBJECT</span><span>AUDIENCE</span><span>OPEN %</span><span>ACTIONS</span>
+        </div>
+        {sorted.length === 0 && (
+          <div className="font-mono text-[10px] px-3 py-4" style={{ color: '#71717a' }}>
+            No newsletters logged yet.
+          </div>
+        )}
+        {sorted.map(n => (
+          <div
+            key={n.id}
+            className="grid items-center px-3 py-2.5 border-b font-mono"
+            style={{ gridTemplateColumns: '90px 1fr 90px 70px 80px', borderColor: '#3f3f46', background: '#18181b' }}
+          >
+            <span className="text-[9px]" style={{ color: '#71717a' }}>
+              {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+            </span>
+            <div>
+              <div className="text-[10px]" style={{ color: '#f4f4f5' }}>{n.subject}</div>
+              {n.notes && <div className="text-[9px]" style={{ color: '#71717a' }}>{n.notes}</div>}
+            </div>
+            <span>
+              <span
+                className="text-[8px] px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: (AUDIENCE_BADGE[n.audience] ?? '#888') + '22',
+                  color: AUDIENCE_BADGE[n.audience] ?? '#888',
+                }}
+              >
+                {n.audience.toUpperCase()}
+              </span>
+            </span>
+            <span className="text-[10px]" style={{ color: n.openRate ? '#4CAF82' : '#71717a' }}>
+              {n.openRate || '—'}
+            </span>
+            <div className="flex gap-1">
+              {n.mailchimpUrl && (
+                <a
+                  href={n.mailchimpUrl} target="_blank" rel="noopener noreferrer"
+                  className="font-mono text-[8px] px-1.5 py-0.5 border rounded-sm"
+                  style={{ color: '#5B8FD4', borderColor: '#5B8FD433' }}
+                >
+                  VIEW
+                </a>
+              )}
+              <Btn
+                onClick={() => save({ ...state, newsletters: state.newsletters.filter(x => x.id !== n.id) })}
+                variant="danger"
+              >
+                ✕
+              </Btn>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

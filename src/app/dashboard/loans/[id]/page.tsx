@@ -70,6 +70,8 @@ interface Loan {
   rate_lock_days: number | null
   estimated_closing_date: string | null
   loan_created_date: string | null
+  appraisal_ordered_date: string | null
+  first_payment_date: string | null
   // Financials
   monthly_payment: number | null
   piti: number | null
@@ -82,6 +84,10 @@ interface Loan {
   escrow_impounds: number | null
   mi_monthly: number | null
   mi_upfront: number | null
+  hoi_monthly: number | null
+  property_taxes_monthly: number | null
+  hoa_dues: number | null
+  flood_insurance_monthly: number | null
   // Qualifying
   credit_score: number | null
   middle_score: number | null
@@ -89,6 +95,8 @@ interface Loan {
   monthly_debts: number | null
   front_end_dti: number | null
   back_end_dti: number | null
+  // Borrower employment
+  employer_name: string | null
   // Parties
   referring_agent_name: string | null
   referring_agent_email: string | null
@@ -550,6 +558,20 @@ export default function LoanDetailPage() {
                 <p className="text-sm font-mono font-semibold text-zinc-100">{fmtPct(loan.interest_rate)}</p>
               </div>
             )}
+            {loan.ltv && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">LTV</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
+              </div>
+            )}
+            {(loan.front_end_dti || loan.back_end_dti) && (
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">DTI</p>
+                <p className="text-sm font-mono font-semibold text-zinc-100">
+                  {fmtPct(loan.front_end_dti)} / {fmtPct(loan.back_end_dti)}
+                </p>
+              </div>
+            )}
             {(loan.closing_date || loan.estimated_closing_date) && (
               <div>
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Close Date</p>
@@ -892,19 +914,22 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
             { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
             { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
             { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
+            { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
           ]} />
 
           {/* Key Dates */}
           <EditableSectionCard title="Key Dates" onSave={handleSaveField} fields={[
-            { label: 'Loan Created',  displayValue: fmtDate(loan.loan_created_date) },
-            { label: 'Application',  displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
-            { label: 'Submission',   displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
-            { label: 'Approval',     displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
-            { label: 'Est. Closing', displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
-            { label: 'Closing',      displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
-            { label: 'Funding',      displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
-            { label: 'Rate Lock',    displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
-            { label: 'Lock Expiry',  displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
+            { label: 'Loan Created',       displayValue: fmtDate(loan.loan_created_date) },
+            { label: 'Application',        displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
+            { label: 'Submission',         displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
+            { label: 'Approval',           displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
+            { label: 'Est. Closing',       displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
+            { label: 'Closing',            displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
+            { label: 'Funding',            displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
+            { label: 'First Payment',      displayValue: fmtDate(loan.first_payment_date),     field: 'first_payment_date',     rawValue: loan.first_payment_date,     type: 'date' },
+            { label: 'Rate Lock',          displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
+            { label: 'Lock Expiry',        displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
+            { label: 'Appraisal Ordered',  displayValue: fmtDate(loan.appraisal_ordered_date), field: 'appraisal_ordered_date', rawValue: loan.appraisal_ordered_date, type: 'date' },
           ]} />
 
           {/* Financials */}
@@ -921,6 +946,10 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
             { label: 'Escrow Impounds',  displayValue: fmtCurrency(loan.escrow_impounds),     field: 'escrow_impounds',     rawValue: loan.escrow_impounds,     type: 'number' },
             { label: 'MI Monthly',       displayValue: fmtCurrency(loan.mi_monthly),          field: 'mi_monthly',          rawValue: loan.mi_monthly,          type: 'number' },
             { label: 'MI Upfront',       displayValue: fmtCurrency(loan.mi_upfront),          field: 'mi_upfront',          rawValue: loan.mi_upfront,          type: 'number' },
+            { label: 'HOI Monthly',      displayValue: fmtCurrency(loan.hoi_monthly),         field: 'hoi_monthly',         rawValue: loan.hoi_monthly,         type: 'number' },
+            { label: 'Property Taxes',   displayValue: fmtCurrency(loan.property_taxes_monthly), field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' },
+            { label: 'HOA Dues',         displayValue: fmtCurrency(loan.hoa_dues),            field: 'hoa_dues',            rawValue: loan.hoa_dues,            type: 'number' },
+            { label: 'Flood Insurance',  displayValue: fmtCurrency(loan.flood_insurance_monthly), field: 'flood_insurance_monthly', rawValue: loan.flood_insurance_monthly, type: 'number' },
           ]} />
 
           {/* Parties */}

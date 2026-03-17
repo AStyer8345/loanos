@@ -9,7 +9,7 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'contacts' | 'loans' | 'scenarios' | 'reports' | 'marketing' | 'settings'
+type Section = 'dashboard' | 'contacts' | 'loans' | 'scenarios' | 'reports' | 'marketing' | 'emails' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
@@ -18,6 +18,7 @@ function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/loans')) return 'loans'
   if (pathname.startsWith('/dashboard/scenarios')) return 'scenarios'
   if (pathname.startsWith('/dashboard/performance')) return 'reports'
+  if (pathname.startsWith('/dashboard/emails')) return 'emails'
   if (
     pathname.startsWith('/dashboard/marketing') ||
     pathname.startsWith('/dashboard/automations')
@@ -71,13 +72,6 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Briefing"
-            icon="🧠"
-            isActive={pathname?.startsWith('/dashboard/briefing') ?? false}
-            onClick={() => navigate('/dashboard/briefing')}
-          />
-
-          <NavItem
             label="Loans"
             icon="📋"
             isActive={currentSection === 'loans'}
@@ -89,6 +83,13 @@ export default function TopNav() {
             icon="👥"
             isActive={currentSection === 'contacts'}
             onClick={() => navigate('/dashboard/contacts')}
+          />
+
+          <NavItem
+            label="Inbox Review"
+            icon="📧"
+            isActive={currentSection === 'emails'}
+            onClick={() => navigate('/dashboard/emails/unmatched')}
           />
 
           <NavItem
@@ -218,19 +219,6 @@ export default function TopNav() {
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/briefing')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                pathname?.startsWith('/dashboard/briefing')
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
-              }`}
-            >
-              <span className="text-base">🧠</span>
-              <span>Daily Briefing</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => navigate('/dashboard/loans')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'loans'
@@ -253,6 +241,19 @@ export default function TopNav() {
             >
               <span className="text-base">👥</span>
               <span>Contacts</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/emails/unmatched')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'emails'
+                  ? 'bg-white/10 text-white'
+                  : 'text-blue-50/90'
+              }`}
+            >
+              <span className="text-base">📧</span>
+              <span>Inbox Review</span>
             </button>
 
             <button

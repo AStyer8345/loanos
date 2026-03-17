@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Brain, CheckCircle2, Circle, ChevronRight, Loader2 } from 'lucide-react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { Brain, CheckCircle2, Circle, Loader2, RefreshCw } from 'lucide-react'
 
 interface ActionItem {
   rank: number
@@ -18,6 +17,7 @@ interface BriefingData {
   top7: ActionItem[]
   staleLeads: object[]
   activeLoans: object[]
+  realtorTouches: object[]
   pendingDrafts: object[]
 }
 
@@ -43,54 +43,34 @@ export default function DailyBriefingPanel() {
     }
   }
 
-  const top3 = data?.top7?.slice(0, 3) ?? []
+  // Auto-fetch on mount
+  useEffect(() => { runBriefing() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const checkedCount = checked.length
+  const totalItems = data?.top7?.length ?? 0
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Brain className="w-4 h-4 text-yellow-500" />
-          <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Daily Briefing</span>
+          <Brain className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Daily Briefing</span>
           {data && (
             <span className="text-xs font-mono text-zinc-600">
-              — {new Date(data.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              — generated {new Date(data.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {data && (
-            <Link
-              href="/dashboard/briefing"
-              className="text-xs font-mono text-zinc-500 hover:text-yellow-400 flex items-center gap-1 transition-colors"
-            >
-              Full briefing <ChevronRight className="w-3 h-3" />
-            </Link>
-          )}
-          <button
-            onClick={runBriefing}
-            disabled={loading}
-            className="text-xs font-mono bg-zinc-800 border border-zinc-600 hover:border-yellow-600 text-zinc-300 hover:text-yellow-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50 flex items-center gap-1.5"
-          >
-            {loading ? <><Loader2 className="w-3 h-3 animate-spin" /> Running...</> : 'Run Briefing'}
-          </button>
-        </div>
+        <button
+          onClick={runBriefing}
+          disabled={loading}
+          className="flex items-center gap-1.5 text-xs font-mono bg-[#0f172a] border border-zinc-700 hover:border-amber-600/50 text-zinc-400 hover:text-amber-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? 'Generating…' : data ? 'Refresh' : 'Run Briefing'}
+        </button>
       </div>
-
-      {!data && !loading && !error && (
-        <div className="flex flex-col items-center justify-center py-8 text-zinc-600">
-          <Brain className="w-8 h-8 mb-2 text-zinc-700" />
-          <div className="font-mono text-sm">No briefing generated today</div>
-          <div className="font-mono text-xs mt-1 text-zinc-700">Click Run Briefing for your daily action plan</div>
-        </div>
-      )}
-
-      {loading && (
-        <div className="space-y-2">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-10 bg-zinc-800 rounded animate-pulse" />
-          ))}
-        </div>
-      )}
 
       {error && (
         <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-800 rounded px-3 py-2">
@@ -98,37 +78,101 @@ export default function DailyBriefingPanel() {
         </div>
       )}
 
+      {loading && (
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            <div key={i} className="h-14 bg-[#0f172a] border border-[#1e293b] rounded-lg border-l-[3px] border-l-amber-800/40 animate-pulse" />
+          ))}
+        </div>
+      )}
+
       {data && !loading && (
-        <div className="space-y-3">
-          {/* Summary */}
-          <div className="text-sm font-mono text-zinc-300 bg-zinc-800 rounded px-3 py-2 leading-relaxed border-l-2 border-yellow-600">
-            {data.summary}
+        <>
+          {/* Stats row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Stale Leads', count: data.staleLeads.length },
+              { label: 'Active Loans', count: data.activeLoans.length },
+              { label: 'Realtor Touches', count: data.realtorTouches?.length ?? 0 },
+              { label: 'Pending Drafts', count: data.pendingDrafts.length },
+            ].map(s => (
+              <div key={s.label} className="bg-[#0f172a] border border-[#1e293b] border-l-[3px] border-l-amber-600/50 rounded-lg p-3">
+                <div className="text-xl font-mono font-bold text-zinc-100">{s.count}</div>
+                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mt-0.5">{s.label}</div>
+              </div>
+            ))}
           </div>
 
-          {/* Top 3 actions */}
-          {top3.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="text-xs font-mono text-zinc-600 uppercase tracking-wider">Top Actions</div>
-              {top3.map((item) => (
-                <div
-                  key={item.rank}
-                  className="flex items-start gap-2 bg-zinc-800 rounded px-3 py-2 cursor-pointer group"
-                  onClick={() => setChecked(c => c.includes(item.rank) ? c.filter(x => x !== item.rank) : [...c, item.rank])}
-                >
-                  {checked.includes(item.rank) ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <Circle className="w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0 group-hover:text-zinc-400" />
-                  )}
-                  <div className={checked.includes(item.rank) ? 'opacity-50' : ''}>
-                    <div className="text-sm font-mono text-zinc-200">{item.contact}</div>
-                    <div className="text-xs font-mono text-zinc-500">{item.action}</div>
-                  </div>
-                </div>
-              ))}
+          {/* AI Summary */}
+          {data.summary && (
+            <div className="bg-[#0f172a] border border-[#1e293b] border-l-[3px] border-l-amber-600 rounded-lg px-4 py-3">
+              <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
             </div>
           )}
-        </div>
+
+          {/* Progress */}
+          {totalItems > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s Actions</span>
+                <span className="text-xs font-mono text-zinc-500">{checkedCount}/{totalItems} done</span>
+              </div>
+              <div className="h-1 bg-[#1e293b] rounded-full overflow-hidden mb-3">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                  style={{ width: `${(checkedCount / totalItems) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Action checklist */}
+          <div className="space-y-2">
+            {data.top7.map(item => {
+              const done = checked.includes(item.rank)
+              return (
+                <div
+                  key={item.rank}
+                  onClick={() => setChecked(c => c.includes(item.rank) ? c.filter(x => x !== item.rank) : [...c, item.rank])}
+                  className={`bg-[#0f172a] border rounded-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all ${
+                    done
+                      ? 'border-[#1e293b] border-l-zinc-700 opacity-60'
+                      : 'border-[#1e293b] border-l-amber-600/70 hover:border-amber-600/40'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {done
+                        ? <CheckCircle2 size={16} className="text-emerald-500" />
+                        : <Circle size={16} className="text-zinc-600" />
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wide">#{item.rank}</span>
+                        <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
+                          {item.contact}
+                        </span>
+                      </div>
+                      <p className={`text-xs font-mono ${done ? 'text-zinc-600' : 'text-zinc-400'}`}>{item.action}</p>
+                      {item.reason && <p className="text-[10px] font-mono text-zinc-600 mt-0.5">{item.reason}</p>}
+                      {item.snippet && !done && (
+                        <p className="text-[10px] font-mono text-amber-500/80 mt-1 italic">&ldquo;{item.snippet}&rdquo;</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {checkedCount === totalItems && totalItems > 0 && (
+            <div className="flex flex-col items-center py-6 text-zinc-600">
+              <CheckCircle2 size={28} className="text-emerald-500 mb-2" />
+              <p className="text-sm font-mono">All done for today.</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

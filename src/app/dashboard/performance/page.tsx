@@ -171,7 +171,8 @@ export default function PerformancePage() {
     setOie(prev => ({ ...prev, [month]: { ...prev[month], [field]: Number(val)||0 } }))
 
   const resetData = () => {
-    if (!confirm('Reset all data to original values? Cannot be undone.')) return
+    const input = prompt('Type RESET to confirm. This will erase all data and cannot be undone.')
+    if (input?.trim().toUpperCase() !== 'RESET') return
     setLoans([...SEED_LOANS]); setOie(seedOIE()); setNextId(12)
   }
 

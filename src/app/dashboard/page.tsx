@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
+import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,7 @@ export default async function DashboardPage() {
 
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
     .eq('user_id', user.id)
     .order('estimated_closing_date', { ascending: true })
 
@@ -97,6 +98,45 @@ export default async function DashboardPage() {
     .filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
     .slice(0, 8)
 
+  // ── Smart Action Queue: last human touch per active loan ─────────────────
+  const activeLoans = (loans ?? []).filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
+  const activeLoanIds = activeLoans.map(l => l.id)
+
+  const lastActivityMap = new Map<string, string>() // loan_id → occurred_at ISO string
+  if (activeLoanIds.length > 0) {
+    const { data: activityRows = [] } = await supabase
+      .from('activity_log')
+      .select('loan_id, occurred_at')
+      .in('loan_id', activeLoanIds)
+      .not('loan_id', 'is', null)
+      .order('occurred_at', { ascending: false })
+      .limit(500)
+
+    for (const row of activityRows ?? []) {
+      if (row.loan_id && !lastActivityMap.has(row.loan_id)) {
+        lastActivityMap.set(row.loan_id, row.occurred_at)
+      }
+    }
+  }
+
+  const loansForScoring: LoanForScoring[] = activeLoans.map(l => ({
+    id: l.id,
+    loan_name: l.loan_name,
+    borrower_first_name: l.borrower_first_name,
+    borrower_last_name: l.borrower_last_name,
+    status: l.status,
+    loan_amount: l.loan_amount,
+    loan_program: l.loan_program,
+    lender_name: l.lender_name ?? null,
+    closing_date: l.closing_date,
+    estimated_closing_date: l.estimated_closing_date,
+    updated_at: l.updated_at ?? null,
+    lastActivityAt: lastActivityMap.get(l.id) ?? null,
+  }))
+
+  const scoredLoans = rankLoans(loansForScoring)
+
+  // ── Activity feed ─────────────────────────────────────────────────────────
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   const { data: rawActivity = [] } = await supabase
     .from('activity_log')
@@ -149,6 +189,7 @@ export default async function DashboardPage() {
       recentLoans={recentLoans}
       activityEntries={activityEntries}
       chartData={chartData}
+      scoredLoans={scoredLoans}
     />
   )
 }

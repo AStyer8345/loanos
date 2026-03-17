@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [3.5.4] — 2026-03-17 — Loan Record Sprint: 2-Col Layout, Inline Details, Notes/Docs Sidebar
+
+### Changed
+- **Loan record layout**: Removed Details and Notes tabs. New tab order: Dashboard | Automations | Activity (N) | Emails (N).
+- **Dashboard tab — 2-column layout**: flex layout with scrollable main column (left) + fixed 320px right sidebar. Left col: MilestoneTimeline → KeyDetailsCard → Recent Activity → all 7 detail sections (Loan Terms, Property, Borrower, Key Dates, Financials, Parties, Attribution + Linked Contact). Right sidebar: Notes panel (auto-save) + Documents panel (upload/download).
+- **Key Dates section**: now displays all 9 dates — Loan Created (read-only), Application, Submission, Approval, Est. Closing, Closing, Funding, Rate Lock Date, Lock Expiry.
+- **Days Locked header field**: changed from manually-stored integer to dynamic calculation `rate_lock_expiration - today`. Displays "N days" remaining, or "N days ago" in red if expired.
+
+### Fixed
+- **Webhook**: added `rate_lock_date: nDate(body.rateLockDate)` mapping — was the only key date field missing from the Arive webhook handler.
+
+### Removed
+- `DetailsTab`, `ActivityNotesPanel`, `DocumentsPreview`, `LoanNotesTab` components (functionality absorbed into DashboardTab).
+
+---
+
 ## [3.5.3] — 2026-03-17 — Marketing Sprint: Checkbox Logging, Content Dashboard, Social/Rate Nav
 
 ### New

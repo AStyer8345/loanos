@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Brain, CheckCircle2, Circle, Loader2, RefreshCw } from 'lucide-react'
+import { Brain, CheckCircle2, Circle, RefreshCw } from 'lucide-react'
 
 interface ActionItem {
   rank: number

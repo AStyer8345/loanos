@@ -548,7 +548,7 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
       supabase.from('contacts').select('*', h).or(
-        'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' ||
+        'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
         'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
       ),
     ]

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Search, Link2, X, Inbox } from 'lucide-react'
+import { Search, Link2, X, Inbox, FileText } from 'lucide-react'
 
 type UnmatchedEmail = {
   id: string
@@ -22,6 +22,14 @@ type ContactResult = {
   contact_type: string | null
 }
 
+type LoanResult = {
+  id: string
+  loan_name: string | null
+  borrower_name: string | null
+  property_address: string | null
+  status: string | null
+}
+
 function fmtDate(s: string | null) {
   if (!s) return '—'
   const d = new Date(s)
@@ -36,8 +44,10 @@ export default function UnmatchedEmailsPage() {
   const [emails, setEmails] = useState<UnmatchedEmail[]>([])
   const [loading, setLoading] = useState(true)
   const [linkingId, setLinkingId] = useState<string | null>(null)
+  const [linkMode, setLinkMode] = useState<'contact' | 'loan'>('contact')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<ContactResult[]>([])
+  const [loanResults, setLoanResults] = useState<LoanResult[]>([])
   const [searching, setSearching] = useState(false)
 
   const fetchEmails = useCallback(async () => {
@@ -68,24 +78,43 @@ export default function UnmatchedEmailsPage() {
     setSearching(false)
   }
 
+  const searchLoans = async (query: string) => {
+    if (!query.trim()) { setLoanResults([]); return }
+    setSearching(true)
+    const q = query.trim()
+    const { data } = await supabase
+      .from('loans')
+      .select('id, loan_name, borrower_name, property_address, status')
+      .or(`loan_name.ilike.%${q}%,borrower_name.ilike.%${q}%,property_address.ilike.%${q}%`)
+      .not('status', 'in', '("Closed","Cancelled","Denied","Withdrawn")')
+      .limit(10)
+    setLoanResults((data ?? []) as LoanResult[])
+    setSearching(false)
+  }
+
   const linkToContact = async (emailId: string, contactId: string) => {
     await supabase
       .from('activity_log')
-      .update({
-        contact_id: contactId,
-        metadata: { needs_review: false },
-      })
+      .update({ contact_id: contactId, metadata: { needs_review: false } })
       .eq('id', emailId)
-
-    // Update contact last_touch_at
     await supabase
       .from('contacts')
       .update({ last_touch_at: new Date().toISOString() })
       .eq('id', contactId)
-
     setLinkingId(null)
     setSearchQuery('')
     setSearchResults([])
+    setEmails(prev => prev.filter(e => e.id !== emailId))
+  }
+
+  const linkToLoan = async (emailId: string, loanId: string) => {
+    await supabase
+      .from('activity_log')
+      .update({ loan_id: loanId, metadata: { needs_review: false } })
+      .eq('id', emailId)
+    setLinkingId(null)
+    setSearchQuery('')
+    setLoanResults([])
     setEmails(prev => prev.filter(e => e.id !== emailId))
   }
 
@@ -186,7 +215,7 @@ export default function UnmatchedEmailsPage() {
 
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
-                      onClick={() => { setLinkingId(email.id); setSearchQuery(''); setSearchResults([]) }}
+                      onClick={() => { setLinkingId(email.id); setLinkMode('contact'); setSearchQuery(''); setSearchResults([]); setLoanResults([]) }}
                       title="Link to Contact"
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -213,23 +242,34 @@ export default function UnmatchedEmailsPage() {
                   </div>
                 </div>
 
-                {/* Link-to-contact modal */}
+                {/* Link modal */}
                 {linkingId === email.id && (
                   <div style={{
                     position: 'absolute', top: 0, right: 0, zIndex: 10,
-                    width: 340, background: 'var(--surface)',
+                    width: 360, background: 'var(--surface)',
                     border: '1px solid var(--border)', borderRadius: 6,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                     padding: 16,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', letterSpacing: '0.1em' }}>
-                        LINK TO CONTACT
-                      </span>
-                      <button
-                        onClick={() => setLinkingId(null)}
-                        style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
-                      >
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {(['contact', 'loan'] as const).map(mode => (
+                          <button
+                            key={mode}
+                            onClick={() => { setLinkMode(mode); setSearchQuery(''); setSearchResults([]); setLoanResults([]) }}
+                            style={{
+                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                              letterSpacing: '0.1em', padding: '3px 10px', borderRadius: 4, cursor: 'pointer',
+                              background: linkMode === mode ? 'rgba(201,168,76,0.15)' : 'transparent',
+                              color: linkMode === mode ? '#C9A84C' : 'var(--muted)',
+                              border: `1px solid ${linkMode === mode ? 'rgba(201,168,76,0.4)' : 'var(--border)'}`,
+                            }}
+                          >
+                            {mode === 'contact' ? 'CONTACT' : 'LOAN'}
+                          </button>
+                        ))}
+                      </div>
+                      <button onClick={() => setLinkingId(null)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
                         <X size={14} />
                       </button>
                     </div>
@@ -238,9 +278,13 @@ export default function UnmatchedEmailsPage() {
                       <Search size={13} style={{ position: 'absolute', left: 8, top: 8, color: 'var(--muted)' }} />
                       <input
                         autoFocus
-                        placeholder="Search by name or email..."
+                        placeholder={linkMode === 'contact' ? 'Search by name or email...' : 'Search by borrower, address, loan name...'}
                         value={searchQuery}
-                        onChange={e => { setSearchQuery(e.target.value); searchContacts(e.target.value) }}
+                        onChange={e => {
+                          setSearchQuery(e.target.value)
+                          if (linkMode === 'contact') searchContacts(e.target.value)
+                          else searchLoans(e.target.value)
+                        }}
                         style={{
                           width: '100%', boxSizing: 'border-box',
                           fontFamily: 'var(--font-mono)', fontSize: 12,
@@ -255,7 +299,7 @@ export default function UnmatchedEmailsPage() {
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>Searching...</p>
                     )}
 
-                    {searchResults.map(c => (
+                    {linkMode === 'contact' && searchResults.map(c => (
                       <button
                         key={c.id}
                         onClick={() => linkToContact(email.id, c.id)}
@@ -283,20 +327,51 @@ export default function UnmatchedEmailsPage() {
                           </div>
                           <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {c.email || '\u2014'}
-                            {c.contact_type && (
-                              <span style={{ marginLeft: 6, color: '#C9A84C' }}>
-                                {c.contact_type}
-                              </span>
-                            )}
+                            {c.contact_type && <span style={{ marginLeft: 6, color: '#C9A84C' }}>{c.contact_type}</span>}
                           </div>
                         </div>
                       </button>
                     ))}
 
-                    {searchQuery && !searching && searchResults.length === 0 && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>
-                        No contacts found
-                      </p>
+                    {linkMode === 'loan' && loanResults.map(loan => (
+                      <button
+                        key={loan.id}
+                        onClick={() => linkToLoan(email.id, loan.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          width: '100%', textAlign: 'left',
+                          padding: '8px 10px', borderRadius: 4, cursor: 'pointer',
+                          background: 'transparent', border: 'none',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.08)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                      >
+                        <div style={{
+                          width: 28, height: 28, borderRadius: 4,
+                          background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <FileText size={12} color="#818CF8" />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {loan.borrower_name || loan.loan_name || '\u2014'}
+                          </div>
+                          <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {loan.property_address || loan.loan_name || '\u2014'}
+                            {loan.status && <span style={{ marginLeft: 6, color: '#818CF8' }}>{loan.status}</span>}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+
+                    {searchQuery && !searching && linkMode === 'contact' && searchResults.length === 0 && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>No contacts found</p>
+                    )}
+                    {searchQuery && !searching && linkMode === 'loan' && loanResults.length === 0 && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>No active loans found</p>
                     )}
                   </div>
                 )}

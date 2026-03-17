@@ -178,6 +178,18 @@ interface ContactEmailRow {
   created_at: string
 }
 
+interface InboundEmailRow {
+  id: string
+  subject: string | null
+  from_address: string | null
+  body_snippet: string | null
+  occurred_at: string | null
+  created_at: string
+  metadata: Record<string, unknown> | null
+  contact_id: string | null
+  loan_id: string | null
+}
+
 // ── Workflow definitions ──────────────────────────────────────────────────────
 
 const WORKFLOWS = [
@@ -326,6 +338,7 @@ export default function LoanDetailPage() {
   const [activity, setActivity] = useState<ActivityRow[]>([])
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
+  const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
@@ -359,13 +372,27 @@ export default function LoanDetailPage() {
 
     if (loanRes.data) {
       setLoan(loanRes.data)
-      if (loanRes.data.contact_id) {
-        const { data: c } = await supabase
-          .from('contacts')
-          .select('id, first_name, last_name, email, phone, referred_by')
-          .eq('id', loanRes.data.contact_id)
-          .single()
+      const contactId = loanRes.data.contact_id
+      if (contactId) {
+        const [{ data: c }, { data: inbound }] = await Promise.all([
+          supabase.from('contacts').select('id, first_name, last_name, email, phone, referred_by').eq('id', contactId).single(),
+          supabase.from('activity_log')
+            .select('id, subject, from_address, body_snippet, occurred_at, created_at, metadata, contact_id, loan_id')
+            .eq('type', 'email_inbound')
+            .or(`loan_id.eq.${loanId},contact_id.eq.${contactId}`)
+            .order('occurred_at', { ascending: false })
+            .limit(100),
+        ])
         setContact(c)
+        setInboundEmails((inbound || []) as InboundEmailRow[])
+      } else {
+        const { data: inbound } = await supabase.from('activity_log')
+          .select('id, subject, from_address, body_snippet, occurred_at, created_at, metadata, contact_id, loan_id')
+          .eq('type', 'email_inbound')
+          .eq('loan_id', loanId)
+          .order('occurred_at', { ascending: false })
+          .limit(100)
+        setInboundEmails((inbound || []) as InboundEmailRow[])
       }
     }
     setDocs(docsRes.data || [])
@@ -686,7 +713,7 @@ export default function LoanDetailPage() {
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
             { id: 'activity',    label: `Activity (${activity.length})` },
-            { id: 'emails',      label: `Emails (${emailDrafts.length})` },
+            { id: 'emails',      label: `Emails (${emailDrafts.length + inboundEmails.length})` },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -715,7 +742,7 @@ export default function LoanDetailPage() {
           <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} loanId={loanId} onRefresh={fetchAll} /></div>
         )}
         {activeTab === 'emails' && (
-          <div className="p-6"><EmailHistoryTab drafts={emailDrafts} contactEmails={contactEmails} onRefresh={fetchAll} /></div>
+          <div className="p-6"><EmailHistoryTab drafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={fetchAll} /></div>
         )}
       </div>
 
@@ -1916,7 +1943,7 @@ const STATUS_CLASSES: Record<string, string> = {
   discarded: 'bg-zinc-800 text-zinc-500 border-zinc-700',
 }
 
-function EmailHistoryTab({ drafts, contactEmails, onRefresh }: { drafts: EmailDraftRow[]; contactEmails: ContactEmailRow[]; onRefresh: () => void }) {
+function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { drafts: EmailDraftRow[]; contactEmails: ContactEmailRow[]; inboundEmails: InboundEmailRow[]; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const iframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({})
 
@@ -1942,7 +1969,7 @@ function EmailHistoryTab({ drafts, contactEmails, onRefresh }: { drafts: EmailDr
     }
   }, [expanded, drafts])
 
-  if (drafts.length === 0 && contactEmails.length === 0) {
+  if (drafts.length === 0 && contactEmails.length === 0 && inboundEmails.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
         <Inbox size={24} />
@@ -2008,6 +2035,40 @@ function EmailHistoryTab({ drafts, contactEmails, onRefresh }: { drafts: EmailDr
         )
       })}
       </div>
+      )}
+
+      {/* Inbound emails from n8n / Outlook sync */}
+      {inboundEmails.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Inbound</p>
+          {inboundEmails.map(email => {
+            const fromName = (email.metadata?.from_name as string) || null
+            const isOpen = expanded === email.id
+            return (
+              <div key={email.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+                <button onClick={() => setExpanded(isOpen ? null : email.id)} className="w-full text-left p-4 focus:outline-none">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-amber-900/30 text-amber-400 border-amber-800">INBOUND</span>
+                      <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(email.occurred_at || email.created_at)}</span>
+                    </div>
+                    {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                  </div>
+                  <div className="text-sm font-medium text-zinc-100 truncate mb-1">{email.subject || '(no subject)'}</div>
+                  <div className="text-xs text-zinc-400 truncate">From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '—')}</div>
+                  {!isOpen && email.body_snippet && (
+                    <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{email.body_snippet}</div>
+                  )}
+                </button>
+                {isOpen && email.body_snippet && (
+                  <div className="border-t border-zinc-800 p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                    {email.body_snippet}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       )}
 
       {/* Permanent audit log from contact_emails */}

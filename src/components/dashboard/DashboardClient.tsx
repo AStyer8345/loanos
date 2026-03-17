@@ -170,7 +170,7 @@ export default function DashboardClient(props: DashboardClientProps) {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {props.stageData.map(s => {
                 const barPct = props.totalActiveVolume > 0 ? Math.min(100, (s.volume / props.totalActiveVolume) * 100) : 0
-                const color = STAGE_COLORS[s.stage] ?? '#64748b'
+                const color = statusHex(s.stage)
                 return (
                   <Link
                     key={s.stage}

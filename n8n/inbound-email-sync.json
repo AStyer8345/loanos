@@ -1,0 +1,263 @@
+{
+  "name": "LoanOS — Inbound Email → Supabase Log",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "messageReceived",
+        "folderId": "inbox",
+        "pollTimes": {
+          "item": [{ "mode": "everyX", "value": 5, "unit": "minutes" }]
+        }
+      },
+      "id": "trigger",
+      "name": "On Email Received",
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "from_address",
+              "name": "from_address",
+              "value": "={{ ($json.from?.emailAddress?.address || $json.sender?.emailAddress?.address || '').toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "from_name",
+              "name": "from_name",
+              "value": "={{ $json.from?.emailAddress?.name || $json.sender?.emailAddress?.name || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "subject",
+              "name": "subject",
+              "value": "={{ $json.subject || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "body_snippet",
+              "name": "body_snippet",
+              "value": "={{ ($json.body?.content || $json.bodyPreview || '').replace(/<[^>]*>/g, '').substring(0, 500) }}",
+              "type": "string"
+            },
+            {
+              "id": "received_at",
+              "name": "received_at",
+              "value": "={{ $json.receivedDateTime || new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "message_id",
+              "name": "message_id",
+              "value": "={{ $json.internetMessageId || $json.id || '' }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "extract_fields",
+      "name": "Extract Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter out noise: bulk mail, system notifications, lender auto-emails\n// Extend this list as needed. Goal is to ignore bulk/system mail.\n\nconst from = $input.item.json.from_address || '';\n\n// Block patterns in the local part (before @)\nconst blockedPrefixes = [\n  'noreply', 'no-reply', 'donotreply', 'do-not-reply',\n  'notifications', 'alerts', 'support', 'info', 'hello',\n  'mailer-daemon', 'postmaster'\n];\n\n// Block patterns in the domain\nconst blockedDomains = [\n  'mailchimp.com', 'constantcontact.com', 'hubspot.com',\n  'fanniemae.com', 'freddiemac.com', 'uhm.com',\n  'sendgrid.net', 'mailgun.org', 'amazonses.com',\n  'bounce.google.com', 'linkedin.com', 'facebookmail.com'\n];\n\nconst [localPart, domain] = from.split('@');\n\nconst isBlockedPrefix = blockedPrefixes.some(p => localPart?.startsWith(p));\nconst isBlockedDomain = blockedDomains.some(d => domain?.endsWith(d));\n\nif (isBlockedPrefix || isBlockedDomain) {\n  return []; // Drop — returns 0 items, stops workflow on this branch\n}\n\nreturn [$input.item];"
+      },
+      "id": "filter_noise",
+      "name": "Filter Noise",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300],
+      "notes": "Extend blockedPrefixes and blockedDomains as needed. Goal is to ignore bulk/system mail."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/contacts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "id,first_name,last_name,email,contact_type" },
+            { "name": "email", "value": "=ilike.{{ encodeURIComponent($json.from_address) }}" },
+            { "name": "limit", "value": "1" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "find_contact",
+      "name": "Find Contact by Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if contact was found\n// n8n unwraps single-element arrays, so handle both cases\nconst result = $input.item.json;\nconst hasContact = result && result.id;\n\nconst extract = $('Extract Fields').first().json;\n\nif (hasContact) {\n  return [{\n    json: {\n      matched: true,\n      contact_id: result.id,\n      contact_type: result.contact_type || 'borrower',\n      full_name: `${result.first_name || ''} ${result.last_name || ''}`.trim(),\n      ...extract\n    }\n  }];\n} else {\n  return [{\n    json: {\n      matched: false,\n      contact_id: null,\n      contact_type: null,\n      ...extract\n    }\n  }];\n}"
+      },
+      "id": "check_contact",
+      "name": "Check Contact Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "matched",
+              "leftValue": "={{ $json.matched }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "if_contact_found",
+      "name": "Contact Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ action: 'email.received', type: 'email_inbound', entity_type: 'contact', contact_id: $json.contact_id, loan_id: null, subject: $json.subject, body_snippet: $json.body_snippet, from_address: $json.from_address, occurred_at: $json.received_at, external_id: $json.message_id, metadata: { from_name: $json.from_name, message_id: $json.message_id, contact_type: $json.contact_type } }) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        }
+      },
+      "id": "log_matched",
+      "name": "Log to Activity (Matched)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 160]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/contacts?id=eq.{{ $('Check Contact Result').first().json.contact_id }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ last_touch_at: new Date().toISOString(), updated_at: new Date().toISOString() }) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        }
+      },
+      "id": "update_last_touch",
+      "name": "Update Contact last_touch_at",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if unmatched email looks transactional (mortgage-related)\nconst subject = ($input.item.json.subject || '').toLowerCase();\nconst body = ($input.item.json.body_snippet || '').toLowerCase();\nconst text = subject + ' ' + body;\n\n// Dollar amounts\nconst hasDollar = /\\$[\\d,]+(\\.\\d{2})?/.test(text);\n\n// Mortgage keywords\nconst mortgageKeywords = [\n  'loan', 'mortgage', 'closing', 'escrow', 'title',\n  'application', 'pre-approval', 'approval', 'preapproval',\n  'rate', 'lock', 'commitment', 'appraisal', 'underwriting',\n  'disclosure', 'settlement', 'deed', 'lien'\n];\nconst hasKeyword = mortgageKeywords.some(kw => text.includes(kw));\n\n// Street address pattern (number + street name)\nconst hasAddress = /\\d+\\s+[a-z]+\\s+(st|street|ave|avenue|blvd|boulevard|dr|drive|ln|lane|rd|road|ct|court|way|pl|place|cir|circle)/i.test(text);\n\nconst isTransactional = hasDollar || hasKeyword || hasAddress;\n\nif (isTransactional) {\n  return [{ json: { ...($input.item.json), is_transactional: true } }];\n}\n\n// Not transactional — stop, do not log\nreturn [];"
+      },
+      "id": "check_transactional",
+      "name": "Is Transactional?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 440]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/activity_log",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ action: 'email.received', type: 'email_inbound', entity_type: null, contact_id: null, loan_id: null, subject: $json.subject, body_snippet: $json.body_snippet, from_address: $json.from_address, occurred_at: $json.received_at, external_id: $json.message_id, metadata: { from_name: $json.from_name, message_id: $json.message_id, unmatched: true, needs_review: true } }) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        }
+      },
+      "id": "log_unmatched",
+      "name": "Log to Activity (Unmatched)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 440]
+    }
+  ],
+  "connections": {
+    "On Email Received": {
+      "main": [
+        [{ "node": "Extract Fields", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract Fields": {
+      "main": [
+        [{ "node": "Filter Noise", "type": "main", "index": 0 }]
+      ]
+    },
+    "Filter Noise": {
+      "main": [
+        [{ "node": "Find Contact by Email", "type": "main", "index": 0 }]
+      ]
+    },
+    "Find Contact by Email": {
+      "main": [
+        [{ "node": "Check Contact Result", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Contact Result": {
+      "main": [
+        [{ "node": "Contact Found?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Contact Found?": {
+      "main": [
+        [{ "node": "Log to Activity (Matched)", "type": "main", "index": 0 }],
+        [{ "node": "Is Transactional?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Log to Activity (Matched)": {
+      "main": [
+        [{ "node": "Update Contact last_touch_at", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Transactional?": {
+      "main": [
+        [{ "node": "Log to Activity (Unmatched)", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

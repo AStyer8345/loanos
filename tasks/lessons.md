@@ -65,7 +65,7 @@ Supabase migrations in `/supabase/migrations/` are local files only. They must b
 ### Light/dark theme mismatch
 `EmailDraftPreview` was built with light Tailwind colors (bg-emerald-100, text-slate-900) while the dashboard uses a dark zinc-950 theme. Fixed 2026-03-14: all `slate-*`/`white` → `zinc-900`/`zinc-800`; AUTOMATION_COLORS → dark variants (`bg-*-900/40`, `text-*-400`, `border-*-800`). Visual inconsistency goes undetected without live preview — always check target page theme before writing Tailwind classes.
 
-**Briefing page** (`/dashboard/briefing/page.tsx`) still uses light theme (bg-slate-50, bg-white) — not yet fixed.
+**Briefing page** (`/dashboard/briefing/page.tsx`) — dark theme confirmed as of 2026-03-17. Uses `bg-[#050505]` and `zinc-900`. This note is resolved.
 
 ### Column name drift between migrations (2026-03-15)
 `loans` table has TWO generations of column names that both exist in production:
@@ -105,6 +105,12 @@ Stage cards in the dashboard use `/dashboard/loans?stage=StageName`. The loans p
 
 ### validateAgentSecret blocks browser-facing routes (2026-03-16)
 `validateAgentSecret` is for server-to-server calls only. Any route called from the browser must use Supabase session auth (`createClient().auth.getUser()`). Mixing them breaks browser-facing pages — they return 401 because the browser never sends the secret header. Pattern for routes that need to support both: check agent secret first, fall back to session auth.
+
+### `fetch` is not available in n8n Code nodes (2026-03-17)
+n8n's JavaScript sandbox does not have access to the native `fetch()` API. Code nodes that call `fetch()` will fail with `ReferenceError: fetch is not defined`. Use HTTP Request nodes instead of `fetch` for all external calls from n8n Code nodes.
+
+### Arive sends null `currentLoanStatus_status` (2026-03-17)
+Arive webhooks sometimes fire with `currentLoanStatus_status: null` — this happens when only non-status fields changed (dates, rates, etc.). Any Supabase table with a NOT NULL constraint on `new_status` will fail. Pattern: always use a null fallback in the body expression: `status || oldStatus || 'unknown'`.
 
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
 The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

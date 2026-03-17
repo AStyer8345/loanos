@@ -1,39 +1,38 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-16 (morning audit)_
+_Last updated: 2026-03-17 (morning audit)_
 
 ---
 
 ## 🔴 High Priority
 
-- [ ] **Fix pipeline/stats route** — `/api/pipeline/stats/route.ts` uses old columns `est_closing_date` and `borrower_name`. Route is currently unused by UI but will break if wired. Fix to `estimated_closing_date` / `borrower_first_name`+`borrower_last_name`.
+- [ ] **Fix Contract Received `fetch is not defined`** — `Upsert Contacts` Code node in workflow `UfNcdpoVKQZqy0fj` uses native `fetch()` which is not available in n8n's JS sandbox. Replace `fetch` calls with HTTP Request nodes or `$helpers.request()`. Workflow is active and erroring.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
-- [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed.
-- [ ] **Add auth to /api/agents/* routes** — currently no API key or secret validation. Anyone who discovers the URL can trigger daily briefing or milestone agent. Add `LOANOS_AGENT_SECRET` env var + `Authorization: Bearer` header check.
+- [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 - [ ] **Fix chat_sessions RLS** — `USING (true)` policy means any authenticated user can read all chat sessions. Add `user_id` column, backfill from record owner, scope policy to `auth.uid() = user_id`. Critical before multi-tenant.
 
 ---
 
 ## 🟡 Medium Priority
 
-- [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` calls Claude but doesn't log to `email_drafts`. Add after n8n webhook call.
-- [ ] **Wire logEmailDraft to final-cd** — same pattern as refi-intake.
+- [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` extracts PDF fields but doesn't log email drafts — that happens in the n8n workflow `yCTydQ7RfZK4DyUg`. Wire logEmailDraft there.
+- [ ] **Wire logEmailDraft to final-cd** — same pattern — n8n workflow `SkzrWeR0bHZs8kWX`.
 - [ ] **E2E test WF1 + WF2** — all migrations confirmed applied: trigger test webhook, verify loan row in Supabase, verify loan_status_history row.
-- [ ] **Extract getServiceClient() to shared util** — identical 4-line function copy-pasted in 7 API routes. Export from `src/lib/supabase/server.ts` as `createServiceClient()`.
-- [ ] **Consolidate STAGE_MAP** — `dashboard/page.tsx` has inline 30-entry STAGE_MAP; `lib/stageNormalization.ts` exists but is dead code (not imported anywhere). Pick one, delete the other.
-- [ ] **Remove Netlify leftovers** — `netlify.toml` + `@netlify/plugin-nextjs` in devDependencies are from pre-Vercel era. Delete both.
 
 ---
 
 ## 🟢 Low Priority / Cleanup
 
-- [ ] **Remove console.log statements** — audit all API routes for leftover debug logs
-- [ ] **Briefing page dark theme** — uses light bg-white/slate-200 while rest of app is dark. Consider unifying.
-- [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 - [ ] **Migration file numbering** — files 001–015 use 3-digit prefix, 0016/0017 use 4-digit. Rename to 016/017 for consistency.
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
+- [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 
 ---
+
+## ✅ Completed (session 6 — 2026-03-17 morning audit)
+
+- [x] **Arive Status Update null new_status fixed** — n8n workflow `9JyzzwKac8v3uQ7d` `Log Status History` node was failing with NOT NULL constraint when Arive sent `currentLoanStatus_status: null`. Fixed: body now uses `status || oldStatus || 'unknown'` fallback.
+- [x] **Stale todos cleared** — Marked done: pipeline/stats fix (v3.5.0), auth on /api/agents/* (already had validateAgentSecret), STAGE_MAP consolidation (already on constants), netlify removal (v3.5.0), createServiceClient extraction (already in service.ts), briefing dark theme (already dark), console.log cleanup (only 1 innocuous log found in mismo/parse).
 
 ## ✅ Completed (session 5 — 2026-03-16 morning audit)
 

@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## [3.5.1] — 2026-03-17 — Morning Audit: Arive Status Update Fix
+
+### Fixed
+- **Arive Status Update n8n workflow** (`9JyzzwKac8v3uQ7d`): `Log Status History` node was failing with NOT NULL constraint violation when Arive sent `currentLoanStatus_status: null` (happens when only non-status fields like dates/rates changed). Body expression now uses `status || oldStatus || 'unknown'` fallback — prevents crash and records a no-op history entry.
+
+### Audit Findings
+- Contract Received workflow (`UfNcdpoVKQZqy0fj`) `Upsert Contacts` node failing with `fetch is not defined` — added to todo.md as 🔴 High Priority.
+- Multiple 🔴 todo items confirmed already resolved: pipeline/stats, agent auth, STAGE_MAP, netlify removal, createServiceClient, briefing dark theme. Cleared from backlog.
+
 ## [3.5.0] — 2026-03-17 — Daily Audit Fixes + Design System Cleanup
 
 ### Fixed

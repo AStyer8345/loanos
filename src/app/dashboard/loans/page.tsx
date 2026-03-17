@@ -264,6 +264,8 @@ export default function LoansPage() {
   const [distinctStatuses, setDistinctStatuses] = useState<string[]>([])
   const [loadingMore, setLoadingMore] = useState(false)
   const loansOffsetRef = useRef(0)
+  const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null)
+  const [editingCommissionValue, setEditingCommissionValue] = useState<string>('')
 
   // Get authenticated user
   useEffect(() => {
@@ -393,6 +395,19 @@ export default function LoansPage() {
     }
     setLoadingMore(false)
   }, [buildLoansQuery, activeList])
+
+  const handleCommissionChange = useCallback(async (loanId: string, rawValue: string) => {
+    const value = rawValue.trim()
+    const amount = value ? Number(value.replace(/[^0-9.]/g, '')) : 0
+    if (Number.isNaN(amount)) return
+    setEditingCommissionId(null)
+    setEditingCommissionValue('')
+    const { error } = await supabase.from('loans').update({ commission_amount: amount }).eq('id', loanId)
+    if (!error) {
+      setLoans(prev => prev.map(l => l.id === loanId ? { ...l, commission_amount: amount } : l))
+      await fetchCounts()
+    }
+  }, [supabase, fetchCounts])
 
   // URL param-based filtering on initial load (wait for userId)
   useEffect(() => {
@@ -1354,7 +1369,36 @@ export default function LoansPage() {
                       if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
                       if (col.id === 'borrower_email') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_email || '—'}</td>
                       if (col.id === 'borrower_phone') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_phone || '—'}</td>
-                      if (col.id === 'commission_amount') return <td key={col.id} className="px-4 py-3 font-mono text-[#C9A84C]">{fmtCurrency(loan.commission_amount ?? null)}</td>
+                      if (col.id === 'commission_amount') {
+                        const isEditing = editingCommissionId === loan.id
+                        return (
+                          <td
+                            key={col.id}
+                            className="px-4 py-3 font-mono text-[#C9A84C]"
+                            onClick={e => { e.stopPropagation(); if (!isEditing) { setEditingCommissionId(loan.id); setEditingCommissionValue((loan.commission_amount ?? 0).toString()); } }}
+                          >
+                            {isEditing ? (
+                              <input
+                                autoFocus
+                                type="number"
+                                step="100"
+                                value={editingCommissionValue}
+                                onChange={e => setEditingCommissionValue(e.target.value)}
+                                onBlur={() => handleCommissionChange(loan.id, editingCommissionValue)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleCommissionChange(loan.id, editingCommissionValue)
+                                  if (e.key === 'Escape') { setEditingCommissionId(null); setEditingCommissionValue('') }
+                                }}
+                                className="w-24 bg-[#0A0A0A] border border-[#2A2A2A] rounded px-2 py-1 text-xs text-[#F0F0F0] outline-none focus:ring-1 focus:ring-[#C9A84C]"
+                              />
+                            ) : (
+                              <span className="cursor-text underline-offset-2 hover:underline decoration-dotted">
+                                {fmtCurrency(loan.commission_amount ?? null)}
+                              </span>
+                            )}
+                          </td>
+                        )
+                      }
                       if (col.id === 'contact_email') {
                         const href = mailtoHref(loan.contact_email)
                         const val = loan.contact_email ?? '—'

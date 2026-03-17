@@ -7,7 +7,6 @@ import type { ScoredLoan, UrgencyLabel } from '@/lib/scoreLoans'
 // ── Design tokens ──────────────────────────────────────────────────────────
 // Non-negotiable per spec. Keep these in one place.
 
-const BG_MAIN  = '#0a0a0c'
 const BG_CARD  = '#111114'
 const BG_HOVER = '#1a1a1f'
 const BORDER   = '#ffffff14'

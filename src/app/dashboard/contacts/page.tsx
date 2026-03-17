@@ -323,7 +323,10 @@ function applySmartList(query: any, listId: string): any {
     case 'top-realtors':
       return query.eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true')
     case 'unassigned':
-      return query.or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)')
+      return query.or(
+        'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
+        'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
+      )
     default:
       return query
   }
@@ -399,6 +402,7 @@ function SortableColumnHeader({
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ContactsPage() {
   const supabase = useMemo(() => createClient(), [])
+  const [userId, setUserId] = useState<string | null>(null)
 
   // list state
   const [contacts, setContacts]     = useState<Contact[]>([])
@@ -423,8 +427,8 @@ export default function ContactsPage() {
   // new contact modal
   const [showNewContact, setShowNewContact] = useState(false)
   const [newContact, setNewContact]     = useState({ ...BLANK_CONTACT })
-  const [, setCreating]         = useState(false)
-  const [, setCreateError]   = useState<string | null>(null)
+  const [creating, setCreating]         = useState(false)
+  const [createError, setCreateError]   = useState<string | null>(null)
 
   // column picker + order
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
@@ -474,6 +478,15 @@ export default function ContactsPage() {
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
   }, [sidebarCollapsedUser])
+
+  // get authenticated user id for inserts
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id)
+    }).catch(() => {
+      setUserId(null)
+    })
+  }, [supabase])
 
   // init columns + column order from localStorage
   useEffect(() => {
@@ -534,7 +547,10 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
-      supabase.from('contacts').select('*', h).or('contact_type.eq.other,contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'),
+      supabase.from('contacts').select('*', h).or(
+        'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' ||
+        'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
+      ),
     ]
     const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned']
     const results = await Promise.all(base)
@@ -744,7 +760,27 @@ export default function ContactsPage() {
 
   async function handleCreate() {
     setCreating(true); setCreateError(null)
-    const { error } = await supabase.from('contacts').insert([{ ...newContact, stage: normalizeStage(newContact.stage) }])
+    const first = (newContact.first_name ?? '').trim()
+    const last = (newContact.last_name ?? '').trim()
+    if (!last) {
+      setCreateError('Last name is required.')
+      setCreating(false)
+      return
+    }
+    if (!userId) {
+      setCreateError('You are not signed in. Please refresh and log in again.')
+      setCreating(false)
+      return
+    }
+    const payload = {
+      ...newContact,
+      first_name: first,
+      last_name: last,
+      contact_type: newContact.contact_type || 'other',
+      stage: normalizeStage(newContact.stage),
+      user_id: userId,
+    }
+    const { error } = await supabase.from('contacts').insert([payload])
     if (error) {
       setCreateError(error.message)
     } else {
@@ -1830,18 +1866,28 @@ export default function ContactsPage() {
               <option value="">— Type —</option>
               <option value="borrower">Borrower</option>
               <option value="realtor">Realtor</option>
+              <option value="advisor">Financial Advisor</option>
+              <option value="title">Title</option>
+              <option value="insurance">Insurance</option>
               <option value="other">Other</option>
             </select>
+            {createError && (
+              <div style={{ color: '#f97373', fontSize: 11, fontFamily: 'var(--font-mono)', marginBottom: 12 }}>
+                {createError}
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setShowNewContact(false)}
                 style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)',
                          borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                 CANCEL
               </button>
-              <button onClick={handleCreate}
+              <button onClick={handleCreate} disabled={creating}
                 style={{ background: 'var(--accent)', border: 'none', color: '#000',
-                         borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                CREATE
+                         borderRadius: 4, padding: '6px 14px', cursor: creating ? 'not-allowed' : 'pointer',
+                         opacity: creating ? 0.6 : 1,
+                         fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                {creating ? 'CREATING…' : 'CREATE'}
               </button>
             </div>
           </div>

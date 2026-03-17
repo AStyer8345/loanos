@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 import DailyBriefingPanel from './DailyBriefingPanel'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
+import { statusHex } from '@/lib/constants/loan-stages'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -47,13 +48,6 @@ interface DashboardClientProps {
 
 // ── Formatters ──────────────────────────────────────────────────────────
 const fmt = fmtCurrency
-
-const STAGE_COLORS: Record<string, string> = {
-  'Pre-Approval': '#3b82f6',
-  'Processing': '#f59e0b',
-  'Underwriting': '#8b5cf6',
-  'Clear to Close': '#10b981',
-}
 
 // ── Tooltip ─────────────────────────────────────────────────────────────
 interface TTProps { active?: boolean; payload?: Array<{ value: number; name: string; color?: string }>; label?: string }
@@ -400,7 +394,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                 <Bar dataKey="count" name="Loans" radius={[3, 3, 0, 0]}>
                   {props.stageData.map((s, i) => (
-                    <Cell key={i} fill={STAGE_COLORS[s.stage] ?? '#64748b'} />
+                    <Cell key={i} fill={statusHex(s.stage)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -461,15 +455,20 @@ export default function DashboardClient(props: DashboardClientProps) {
   )
 }
 
-// ── Stage badge ──────────────────────────────────────────────────────────
+// ── Stage badge (uses global statusHex map) ─────────────────────────────
 function StageBadge({ status }: { status: string | null }) {
   if (!status) return <span className="text-zinc-600 text-[10px] font-mono">—</span>
-  const s = status.toLowerCase()
-  let cls = 'bg-zinc-800 text-zinc-400 border-zinc-600'
-  if (['closed', 'funded'].some(v => s.includes(v))) cls = 'bg-emerald-900/30 text-emerald-400 border-emerald-800'
-  else if (['clear to close', 'ctc'].some(v => s.includes(v))) cls = 'bg-indigo-900/30 text-indigo-300 border-indigo-700'
-  else if (['underwriting', 'conditional', 'approved'].some(v => s.includes(v))) cls = 'bg-amber-900/20 text-amber-400 border-amber-800'
-  else if (['processing', 'submitted', 'loan setup', 'disclosed'].some(v => s.includes(v))) cls = 'bg-orange-900/20 text-orange-400 border-orange-800'
-  else if (['pre-app', 'pre-approved', 'lead', 'application'].some(v => s.includes(v))) cls = 'bg-blue-900/20 text-blue-400 border-blue-800'
-  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium border ${cls}`}>{status}</span>
+  const hex = statusHex(status)
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium border"
+      style={{
+        background: `${hex}22`,
+        color: hex,
+        borderColor: `${hex}44`,
+      }}
+    >
+      {status}
+    </span>
+  )
 }

@@ -255,7 +255,7 @@ export function contactStageFromLoanKey(key: StageKey): string {
   return 'Lead'
 }
 
-// ── Stage colors (for badges + charts) ───────────────────────────────────────
+// ── Stage colors (for dashboard charts + summaries) ──────────────────────────
 
 export const STAGE_COLORS: Record<string, string> = {
   'Pre-Approval': '#3b82f6',
@@ -263,4 +263,85 @@ export const STAGE_COLORS: Record<string, string> = {
   'Underwriting': '#8b5cf6',
   'Clear to Close': '#10b981',
   'Funded': '#059669',
+}
+
+// ── Status colors (single source of truth for badges) ────────────────────────
+// These hex codes are used everywhere a loan "status" string is rendered,
+// including the Loans table, Dashboard "Active Loans", and contact loan cards.
+
+export const STATUS_HEX: Record<string, string> = {
+  // Spec-defined / in-process flow
+  'LOAN_SETUP':               '#64748B',
+  'Loan Setup':               '#64748B',
+  'DISCLOSURE_SENT':          '#7C3AED',
+  'Disclosed':                '#7C3AED',
+  'UNDERWRITING_SUBMITTED':   '#2563EB',
+  'Submitted to UW':          '#2563EB',
+  'Submitted to Underwriting':'#2563EB',
+  'Submitted':                '#2563EB',
+  'Loan in Process':          '#D97706',
+  'In Process':               '#D97706',
+  'processing':               '#D97706',
+  'Processing':               '#D97706',
+  'RE_SUBMITTAL':             '#DC2626',
+  'RESUBMIT':                 '#DC2626',
+  'Resubmit':                 '#DC2626',
+  'Resubmitted':              '#DC2626',
+  'CLEAR_TO_CLOSE':           '#16A34A',
+  'clear_to_close':           '#16A34A',
+  'Clear to Close':           '#16A34A',
+  'Clear To Close':           '#16A34A',
+  'CTC':                      '#16A34A',
+  'APPROVED':                 '#0891B2',
+  'Approved':                 '#0891B2',
+  'APPROVED_WITH_CONDITIONS': '#0891B2',
+  'CONDITIONAL_APPROVAL':     '#0891B2',
+  'Approved with Conditions': '#0891B2',
+  'Approved w/ Conditions':   '#0891B2',
+  'Conditional Approval':     '#0891B2',
+  'underwriting':             '#0E7490',
+  'Underwriting':             '#0E7490',
+  'UNDERWRITING':             '#0E7490',
+  'Closed':                   '#C9A84C',
+  'closed':                   '#C9A84C',
+  'funded':                   '#C9A84C',
+  'Funded':                   '#C9A84C',
+  'Closed/Funded':            '#C9A84C',
+  'LOAN_FUNDED':              '#C9A84C',
+  'Closed Client':            '#C9A84C',
+
+  // Pre-approval / lead family
+  'Started':                  '#A855F7',
+  'Started App':              '#A855F7',
+  'Pre-Approved':             '#818CF8',
+  'pre_approved':             '#818CF8',
+  'pre-approval':             '#818CF8',
+  'Application':              '#6366F1',
+  'application_intake':       '#6366F1',
+  'APPLICATION_INTAKE':       '#6366F1',
+  'QUALIFICATION':            '#6366F1',
+  'New Application':          '#60A5FA',
+  'new_application':          '#60A5FA',
+  'under_contract':           '#34D399',
+  'Lead':                     '#6B7280',
+  'lead':                     '#6B7280',
+  'Lead - New':               '#6B7280',
+  'Lead - Contacted':         '#6B7280',
+  'Lead - Cold / Inactive':   '#6B7280',
+  'Long Term':                '#6B7280',
+
+  // Inactive
+  'On Hold':                  '#F59E0B',
+  'on_hold':                  '#F59E0B',
+  'Suspended':                '#F59E0B',
+  'Cancelled':                '#71717A',
+  'canceled':                 '#71717A',
+  'Dead':                     '#52525B',
+  'Denied':                   '#EF4444',
+  'Withdrawn':                '#9CA3AF',
+}
+
+export function statusHex(status: string | null): string {
+  if (!status) return '#52525B'
+  return STATUS_HEX[status] ?? STATUS_HEX[status.toLowerCase()] ?? '#52525B'
 }

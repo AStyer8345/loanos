@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 import { fmtCurrency, fmtDate } from '@/lib/formatters'
+import { statusHex } from '@/lib/constants/loan-stages'
 
 export type Contact = {
   id: string
@@ -143,30 +144,18 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   }
 }
 
-// Loan status badge — matches the DashboardClient StageBadge pattern
+// Loan status badge — uses global statusHex map to match Loans table + dashboard
 function LoanStageBadge({ status }: { status: string | null }) {
   if (!status) return <span style={{ color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>—</span>
-  const s = status.toLowerCase()
-  let bg = 'rgba(255,255,255,0.06)'
-  let color = 'var(--fg)'
-  let border = 'var(--border)'
-  if (['closed', 'funded'].some(v => s.includes(v))) {
-    bg = 'rgba(16,185,129,0.12)'; color = '#6ee7b7'; border = 'rgba(16,185,129,0.3)'
-  } else if (['clear to close', 'ctc'].some(v => s.includes(v))) {
-    bg = 'rgba(99,102,241,0.12)'; color = '#a5b4fc'; border = 'rgba(99,102,241,0.3)'
-  } else if (['underwriting', 'conditional', 'approved'].some(v => s.includes(v))) {
-    bg = 'rgba(245,158,11,0.12)'; color = '#fbbf24'; border = 'rgba(245,158,11,0.3)'
-  } else if (['processing', 'submitted', 'loan setup', 'disclosed'].some(v => s.includes(v))) {
-    bg = 'rgba(249,115,22,0.12)'; color = '#fb923c'; border = 'rgba(249,115,22,0.3)'
-  } else if (['pre-app', 'pre-approved', 'lead', 'application'].some(v => s.includes(v))) {
-    bg = 'rgba(59,130,246,0.12)'; color = '#60a5fa'; border = 'rgba(59,130,246,0.3)'
-  }
+  const hex = statusHex(status)
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
       padding: '2px 8px', borderRadius: 12,
       fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600,
-      background: bg, color, border: `1px solid ${border}`,
+      background: `${hex}22`,
+      color: hex,
+      border: `1px solid ${hex}44`,
     }}>
       {status}
     </span>

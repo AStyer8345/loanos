@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { createServiceClient } from '@/lib/supabase/service'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 export async function POST(req: NextRequest) {
   try {
@@ -72,6 +70,7 @@ ${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether t
 - End with a single bullet: "• This analysis is for informational purposes only."`
 
     // Stream response using SSE
+    const anthropic = await getAnthropicClient()
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
       async start(controller) {
@@ -109,8 +108,9 @@ ${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether t
             console.error('[narrative] activity log error:', logErr)
           }
         } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Generation failed'
           console.error('[narrative] stream error:', err)
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Generation failed' })}\n\n`))
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: msg })}\n\n`))
           controller.close()
         }
       },
@@ -124,8 +124,9 @@ ${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether t
       },
     })
   } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Narrative generation failed'
     console.error('[scenarios/generate-narrative] error:', error)
-    return new Response(JSON.stringify({ error: 'Narrative generation failed' }), {
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

@@ -75,11 +75,17 @@ export default function NarrativeSection({
                 if (parsed.text) {
                   accumulated += parsed.text
                   onNarrativeGenerated(accumulated)
+                } else if (parsed.error) {
+                  throw new Error(parsed.error)
                 }
-              } catch {
-                // Non-JSON data, append directly
-                accumulated += data
-                onNarrativeGenerated(accumulated)
+              } catch (parseErr) {
+                if (parseErr instanceof SyntaxError) {
+                  // Non-JSON data, append directly
+                  accumulated += data
+                  onNarrativeGenerated(accumulated)
+                } else {
+                  throw parseErr
+                }
               }
             }
           }

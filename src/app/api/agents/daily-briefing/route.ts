@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 export async function GET(request: NextRequest) {
   // Allow server-to-server calls with agent secret, or browser calls with session auth
@@ -123,6 +121,7 @@ Rules:
 - No filler words, no inspiration, no therapy tone
 - If pendingDrafts exist, those should typically appear in top7`
 
+    const anthropic = await getAnthropicClient()
     const claudeMsg = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2048,
@@ -157,7 +156,8 @@ Rules:
       pendingDrafts,
     })
   } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal server error'
     console.error('[daily-briefing] Unhandled error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

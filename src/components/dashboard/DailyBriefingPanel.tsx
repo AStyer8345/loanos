@@ -32,8 +32,8 @@ export default function DailyBriefingPanel() {
     setError(null)
     try {
       const res = await fetch('/api/agents/daily-briefing')
-      if (!res.ok) throw new Error('Failed to fetch briefing')
       const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Failed to fetch briefing')
       setData(json)
       setChecked([])
     } catch (e) {

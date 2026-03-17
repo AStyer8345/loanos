@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const { pdfBase64 } = await req.json()
     if (!pdfBase64) return NextResponse.json({ error: 'Missing PDF data' }, { status: 400 })
 
-    const client = new Anthropic()
+    const client = await getAnthropicClient()
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 1024,

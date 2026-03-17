@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 import { logEmail } from '@/lib/logEmail'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 // ── Milestone → human-readable label ─────────────────────────────────────────
 const MILESTONE_LABELS: Record<string, string> = {
@@ -102,6 +100,8 @@ export async function POST(req: NextRequest) {
 
     const eventId = event.id
     const results: { borrower?: object; realtor?: object } = {}
+
+    const anthropic = await getAnthropicClient()
 
     // Look up contact_id so logEmail() can link to the contact record
     const { data: loanRecord } = await supabase

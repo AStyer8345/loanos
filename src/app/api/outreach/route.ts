@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
-
-const anthropic = new Anthropic()
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 function buildSystemPrompt(contactNames?: string[]): string {
   const base = `You are Adam Styer's outreach assistant for his mortgage business (Adam Styer | Mortgage Solutions LP, NMLS #513013). You help draft emails, text messages, and manage contacts.
@@ -45,6 +43,7 @@ export async function POST(req: NextRequest) {
       systemPrompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
     }
 
+    const anthropic = await getAnthropicClient()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 1024,
@@ -60,10 +59,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: text })
   } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Internal server error'
     console.error('[outreach] error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

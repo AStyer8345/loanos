@@ -27,17 +27,38 @@ export default function LoginPage() {
     }
   }
 
+  const ready = !loading && !!email && !!password
+
   return (
-    <main className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <main
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: 'var(--bg)', fontFamily: "'IBM Plex Mono', monospace" }}
+    >
       <div className="w-full max-w-sm">
+        {/* Logo */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-white tracking-tight">LoanOS</h1>
-          <p className="text-gray-400 text-sm mt-1">Mortgage operations platform</p>
+          <div className="text-2xl font-bold tracking-tight font-mono mb-1" style={{ color: 'var(--text)' }}>
+            Loan<span style={{ color: 'var(--gold)' }}>OS</span>
+          </div>
+          <p className="text-xs font-mono tracking-widest uppercase" style={{ color: 'var(--muted)' }}>
+            Mortgage Operations Platform
+          </p>
         </div>
 
-        <form onSubmit={handleSignIn} className="bg-gray-900 border border-gray-800 rounded-lg p-6 space-y-4">
+        <form
+          onSubmit={handleSignIn}
+          className="rounded-lg p-6 space-y-4"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+          }}
+        >
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1.5">
+            <label
+              htmlFor="email"
+              className="block text-xs font-mono mb-1.5 uppercase tracking-wider"
+              style={{ color: 'var(--muted)' }}
+            >
               Email
             </label>
             <input
@@ -47,12 +68,21 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
-              className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded px-3 py-2 text-sm font-mono outline-none transition-colors"
+              style={{
+                background: 'var(--surface2)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+              }}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1.5">
+            <label
+              htmlFor="password"
+              className="block text-xs font-mono mb-1.5 uppercase tracking-wider"
+              style={{ color: 'var(--muted)' }}
+            >
               Password
             </label>
             <input
@@ -62,18 +92,30 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded px-3 py-2 text-sm font-mono outline-none transition-colors"
+              style={{
+                background: 'var(--surface2)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+              }}
             />
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-xs font-mono" style={{ color: 'var(--red)' }}>{error}</p>
           )}
 
           <button
             type="submit"
-            disabled={loading || !email || !password}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
+            disabled={!ready}
+            className="w-full font-mono font-semibold py-2 px-4 rounded text-sm tracking-wider transition-colors"
+            style={{
+              background: ready ? 'var(--gold)' : 'var(--surface2)',
+              color: ready ? '#050505' : 'var(--muted)',
+              border: '1px solid var(--border)',
+              cursor: ready ? 'pointer' : 'not-allowed',
+              opacity: ready ? 1 : 0.5,
+            }}
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>

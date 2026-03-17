@@ -9,7 +9,7 @@ export async function GET() {
   // Get all active loans
   const { data: loans, error } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, est_closing_date, funding_date, pre_approval_expiry_date, borrower_name, loan_name, created_at')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, created_at')
     .eq('user_id', user.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -81,7 +81,7 @@ export async function GET() {
     }
 
     // Est closing in next 30 days
-    const estClose = loan.est_closing_date
+    const estClose = loan.estimated_closing_date
     if (estClose) {
       const ec = new Date(estClose)
       if (ec >= now && ec <= next30Days) {
@@ -90,13 +90,15 @@ export async function GET() {
       }
     }
 
+    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.loan_name || 'Unknown'
+
     // Urgent: pre-approval expiring in 7 days
     if (loan.pre_approval_expiry_date) {
       const exp = new Date(loan.pre_approval_expiry_date)
       if (exp >= now && exp <= next7Days) {
         urgentFlags.push({
           id: loan.id,
-          name: loan.borrower_name || loan.loan_name || 'Unknown',
+          name: borrowerName,
           flag: 'Pre-approval expiring',
           date: loan.pre_approval_expiry_date,
         })
@@ -104,14 +106,14 @@ export async function GET() {
     }
 
     // Urgent: loan past est closing date and not closed
-    if (loan.est_closing_date && !['closed', 'funded'].includes(status)) {
-      const ec = new Date(loan.est_closing_date)
+    if (loan.estimated_closing_date && !['closed', 'funded'].includes(status)) {
+      const ec = new Date(loan.estimated_closing_date)
       if (ec < now) {
         urgentFlags.push({
           id: loan.id,
-          name: loan.borrower_name || loan.loan_name || 'Unknown',
+          name: borrowerName,
           flag: 'Past est. closing date',
-          date: loan.est_closing_date,
+          date: loan.estimated_closing_date,
         })
       }
     }

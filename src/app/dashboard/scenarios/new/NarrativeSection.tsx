@@ -98,7 +98,7 @@ export default function NarrativeSection({
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2.5">
           <Sparkles size={16} style={{ color: 'var(--sc-accent)' }} />
-          <h3 className="text-sm font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>AI Analysis</h3>
+          <h3 className="text-sm font-semibold" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>AI Analysis</h3>
         </div>
         <div className="flex items-center gap-2">
           {narrative && (
@@ -150,14 +150,14 @@ export default function NarrativeSection({
               borderColor: 'var(--sc-border)',
               color: 'var(--sc-text)',
               background: 'var(--sc-card-alt)',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'IBM Plex Mono', monospace",
               lineHeight: '1.6',
             }}
           />
         ) : (
           <div
             className="text-sm leading-relaxed whitespace-pre-wrap"
-            style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
+            style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
           >
             {narrative || (generating ? 'Generating analysis...' : '')}
             {generating && <span className="inline-block w-2 h-4 ml-0.5 animate-pulse" style={{ background: 'var(--sc-accent)' }} />}

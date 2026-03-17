@@ -35,7 +35,7 @@ export default function ReinvestmentAnalysis({ mode, purchaseResults, refiResult
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2.5 w-full px-5 py-4 text-sm font-semibold"
-        style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
+        style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
       >
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         <TrendingUp size={16} style={{ color: 'var(--sc-accent)' }} />
@@ -65,7 +65,7 @@ export default function ReinvestmentAnalysis({ mode, purchaseResults, refiResult
                 value={settings.horizonYears}
                 onChange={e => onSettingsChange({ ...settings, horizonYears: parseInt(e.target.value) })}
                 className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none"
-                style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'Inter', sans-serif" }}
+                style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Mono', monospace" }}
               >
                 {[5, 10, 15, 20, 30].map(y => <option key={y} value={y}>{y} years</option>)}
               </select>
@@ -82,7 +82,7 @@ export default function ReinvestmentAnalysis({ mode, purchaseResults, refiResult
           {result && result.futureValue > 0 && (
             <>
               <div className="p-4 rounded-[10px] mb-5" style={{ background: 'var(--sc-accent-dim)' }}>
-                <p className="text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <p className="text-sm" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
                   If you invest the <span className="font-semibold" style={{ color: 'var(--sc-accent)', fontFamily: "'IBM Plex Mono', monospace" }}>
                     ${monthlySavings.toLocaleString('en-US', { minimumFractionDigits: 2 })}/month
                   </span> savings at {settings.returnRate}% for {settings.horizonYears} years, it grows to{' '}

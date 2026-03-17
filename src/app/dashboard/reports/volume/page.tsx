@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { fmtCurrency, fmtK, fmtDate } from '@/lib/formatters'
 
 export const dynamic = 'force-dynamic'
 
-const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-const fmtK = (n: number) => { if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(1)}M`; if (Math.abs(n) >= 1e3) return `$${(n / 1e3).toFixed(0)}K`; return fmt(n) }
+const fmt = fmtCurrency
 
 export default async function VolumeReportPage() {
   const supabase = createClient()
@@ -57,7 +57,7 @@ export default async function VolumeReportPage() {
                   </td>
                   <td className="px-4 py-2.5 text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</td>
                   <td className="px-4 py-2.5 text-emerald-400">{loan.status}</td>
-                  <td className="px-4 py-2.5 text-right text-zinc-500">{cd ? new Date(cd + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                  <td className="px-4 py-2.5 text-right text-zinc-500">{fmtDate(cd)}</td>
                 </tr>
               )
             })}

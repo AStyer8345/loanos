@@ -18,6 +18,7 @@ import {
   Plus,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
+import { fmtCurrency, fmtDate } from '@/lib/formatters'
 
 export type Contact = {
   id: string
@@ -109,16 +110,7 @@ export type ContactEmailRow = {
   created_at: string
 }
 
-function fmtCurrency(n: number | null) {
-  if (n == null) return '-'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
-
-function fmtDate(s: string | null) {
-  if (!s) return '-'
-  const d = new Date(s.includes('T') ? s : s + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
+// fmtCurrency and fmtDate imported from @/lib/formatters
 
 function fullName(c: Contact) {
   return `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '-'

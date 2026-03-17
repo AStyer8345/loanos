@@ -1,5 +1,34 @@
 # LoanOS Changelog
 
+## [3.5.0] — 2026-03-17 — Daily Audit Fixes + Design System Cleanup
+
+### Fixed
+- **`/api/pipeline/stats`**: Dead column names `est_closing_date` and `borrower_name` replaced with `estimated_closing_date` and `borrower_first_name`/`borrower_last_name` — matches Arive-expanded schema
+- **Login page redesigned**: Brought fully onto LoanOS design system — `var(--bg)`, `var(--surface)`, `var(--gold)` accent, IBM Plex Mono font. Was using generic gray/blue Next.js starter styles.
+
+### Improved
+- **Scenario Builder fonts**: All 18 hardcoded `'Inter', sans-serif` inline style declarations replaced with `'IBM Plex Mono', monospace`. Inter was never loaded; text was silently falling back to OS default.
+- **`src/lib/formatters.ts` created**: Shared module with `fmtCurrency`, `fmtK`, `fmtDate`, `fmtDateOnly`, `fmtPct`, `fmtRelative`. Updated `DashboardClient`, `ContactRecordView`, `referral/[referrerName]`, `reports/commission`, `reports/volume` to import from shared module.
+
+### Removed
+- **`netlify/functions/`**: Deleted 5 dead JS files (`arive-webhook.js`, `outlook-auth.js`, `outlook-callback.js`, `outlook-refresh.js`, `outlook-sync.js`) — pre-Vercel era dead code. All functionality lives in `src/app/api/`.
+
+## [3.4.0] — 2026-03-16 — Inbound Email Sync
+
+### New
+- **Inbound email sync workflow**: n8n workflow (`qgb99Eh2ziy0INMk`) polls Outlook inbox every 5 min, matches senders to contacts, logs to `activity_log`
+- **Migration 025**: `subject`, `body_snippet`, `from_address`, `to_address`, `occurred_at` columns on `activity_log`; `last_touch_at` on `contacts`; partial index on `needs_review`
+- **Contact Emails tab**: inbound emails now appear above outbound drafts with gold INBOUND badge, collapsible body snippet
+- **Unmatched email review** (`/dashboard/emails/unmatched`): table of unmatched transactional emails with "Link to Contact" search modal and dismiss
+- **Emails nav item**: added to TopNav (desktop + mobile)
+- **Noise filter**: blocks bulk mail (noreply, mailchimp, fanniemae.com, etc.) before processing
+- **Transactional detection**: unmatched emails only logged if subject/body contains mortgage keywords, dollar amounts, or street addresses
+
+### Technical
+- n8n workflow deployed inactive — needs Microsoft Outlook credential connected to activate
+- Contact `last_touch_at` updated on every matched inbound email
+- Deduplication via `external_id` (internetMessageId) + unique partial index from migration 008
+
 ## [3.3.0] — 2026-03-16 — Loan Detail Page Fixes + Activity Log
 
 ### New

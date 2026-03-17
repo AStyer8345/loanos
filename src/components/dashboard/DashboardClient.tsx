@@ -3,13 +3,17 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  AlertTriangle, TrendingUp, Clock,
+  AlertTriangle, Clock, Brain, ListChecks,
   Phone, Mail, MessageSquare, FileText, Zap, ArrowRight,
 } from 'lucide-react'
+import SmartActionQueue from '@/components/SmartActionQueue'
+import type { ScoredLoan } from '@/lib/scoreLoans'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell,
 } from 'recharts'
+import DailyBriefingPanel from './DailyBriefingPanel'
+import { fmtCurrency, fmtK } from '@/lib/formatters'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -38,22 +42,11 @@ interface DashboardClientProps {
   urgentFlags: UrgentFlag[]; staleLoans: StaleLoan[]
   recentLoans: LoanRow[]; activityEntries: ActivityEntry[]
   chartData: ChartPoint[]
+  scoredLoans: ScoredLoan[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
-const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-const fmtK = (n: number) => { if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(1)}M`; if (Math.abs(n) >= 1e3) return `$${(n / 1e3).toFixed(0)}K`; return fmt(n) }
-
-// ── Marketing focus schedule ────────────────────────────────────────────
-const MARKETING_FOCUS: Record<number, { label: string; description: string }> = {
-  0: { label: 'Week Planning', description: 'Review pipeline, set weekly goals, schedule outreach' },
-  1: { label: 'Realtor Outreach', description: 'Call top 5 realtor partners, share rate updates' },
-  2: { label: 'Borrower Follow-up', description: 'Follow up with pre-approved borrowers, check on active loans' },
-  3: { label: 'Content Creation', description: 'Write newsletter, create social media posts' },
-  4: { label: 'Rate Update Day', description: 'Send weekly rate update, reach out to fence-sitters' },
-  5: { label: 'Admin & Pipeline', description: 'Clean up pipeline, update loan statuses, file conditions' },
-  6: { label: 'Rest & Reset', description: 'Recharge for next week' },
-}
+const fmt = fmtCurrency
 
 const STAGE_COLORS: Record<string, string> = {
   'Pre-Approval': '#3b82f6',
@@ -104,9 +97,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function DashboardClient(props: DashboardClientProps) {
-  const [tab, setTab] = useState<'pipeline' | 'performance'>('pipeline')
-  const dayOfWeek = new Date().getDay()
-  const todayFocus = MARKETING_FOCUS[dayOfWeek]
+  const [tab, setTab] = useState<'pipeline' | 'performance' | 'briefing' | 'queue'>('pipeline')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   return (
@@ -135,6 +126,14 @@ export default function DashboardClient(props: DashboardClientProps) {
               onClick={() => setTab('performance')}
               className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'performance' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
             >Performance</button>
+            <button
+              onClick={() => setTab('briefing')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'briefing' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+            ><Brain size={11} />Briefing</button>
+            <button
+              onClick={() => setTab('queue')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'queue' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+            ><ListChecks size={11} />Queue</button>
           </div>
         </div>
       </div>
@@ -217,46 +216,30 @@ export default function DashboardClient(props: DashboardClientProps) {
             </div>
           )}
 
-          {/* Today's Focus + Stale Loans */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Link href="/dashboard/marketing" className="block bg-[#0f172a] border border-[#1e293b] rounded-lg p-4 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp size={14} className="text-[#C9A84C]" />
-                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s Focus</span>
-                <ArrowRight size={11} className="text-[#C9A84C] ml-auto" />
-              </div>
-              <div className="mb-2">
-                <span className="inline-block px-2 py-0.5 rounded bg-[#C9A84C]/10 text-[#C9A84C] text-xs font-mono font-medium border border-[#C9A84C]/30">
-                  {todayFocus.label}
-                </span>
-              </div>
-              <p className="text-sm font-mono text-zinc-300">{todayFocus.description}</p>
-            </Link>
-
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Clock size={14} className="text-orange-400" />
-                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Needs Attention</span>
-                <span className="text-[10px] font-mono text-zinc-600">3+ days no activity</span>
-                {props.staleLoans.length > 0 && (
-                  <Link href="/dashboard/loans?filter=no_activity_3days" className="ml-auto flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                    View all <ArrowRight size={9} />
-                  </Link>
-                )}
-              </div>
-              {props.staleLoans.length === 0 ? (
-                <p className="text-xs font-mono text-zinc-600">All loans are up to date</p>
-              ) : (
-                <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                  {props.staleLoans.slice(0, 8).map(l => (
-                    <Link key={l.id} href={`/dashboard/loans/${l.id}`} className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1 -mx-2 transition-colors">
-                      <span className="text-zinc-300">{l.name}</span>
-                      <span className="text-orange-400">{l.daysSinceActivity}d idle</span>
-                    </Link>
-                  ))}
-                </div>
+          {/* Needs Attention — full width */}
+          <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock size={14} className="text-orange-400" />
+              <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Needs Attention</span>
+              <span className="text-[10px] font-mono text-zinc-600">3+ days no activity</span>
+              {props.staleLoans.length > 0 && (
+                <Link href="/dashboard/loans?filter=no_activity_3days" className="ml-auto flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                  View all <ArrowRight size={9} />
+                </Link>
               )}
             </div>
+            {props.staleLoans.length === 0 ? (
+              <p className="text-xs font-mono text-zinc-600">All loans are up to date</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+                {props.staleLoans.slice(0, 12).map(l => (
+                  <Link key={l.id} href={`/dashboard/loans/${l.id}`} className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors">
+                    <span className="text-zinc-300 truncate">{l.name}</span>
+                    <span className="text-orange-400 ml-2 flex-shrink-0">{l.daysSinceActivity}d idle</span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Recent Loans + Activity */}
@@ -316,8 +299,13 @@ export default function DashboardClient(props: DashboardClientProps) {
                     const type = (entry.type || entry.action || 'task').toLowerCase()
                     const icon = TYPE_ICONS[type] ?? <Clock className="w-3.5 h-3.5" />
                     const summary = entry.summary || entry.action || 'Activity logged'
-                    return (
-                      <div key={entry.id} className="flex items-start gap-2.5 px-4 py-3">
+                    const href = entry.loan_id
+                      ? `/dashboard/loans/${entry.loan_id}`
+                      : entry.contact_id
+                      ? `/dashboard/contacts/${entry.contact_id}`
+                      : null
+                    const Inner = (
+                      <>
                         <span className="p-1 rounded text-zinc-400 bg-[#1e293b] flex-shrink-0 mt-0.5">{icon}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
@@ -325,6 +313,15 @@ export default function DashboardClient(props: DashboardClientProps) {
                             <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{timeAgo(entry.created_at)}</span>
                           </div>
                         </div>
+                      </>
+                    )
+                    return href ? (
+                      <Link key={entry.id} href={href} className="flex items-start gap-2.5 px-4 py-3 hover:bg-[#1e293b]/40 transition-colors">
+                        {Inner}
+                      </Link>
+                    ) : (
+                      <div key={entry.id} className="flex items-start gap-2.5 px-4 py-3">
+                        {Inner}
                       </div>
                     )
                   })}
@@ -447,6 +444,18 @@ export default function DashboardClient(props: DashboardClientProps) {
             </div>
           )}
         </div>
+      )}
+
+      {/* ═══ BRIEFING TAB ═══ */}
+      {tab === 'briefing' && (
+        <div className="max-w-3xl">
+          <DailyBriefingPanel />
+        </div>
+      )}
+
+      {/* ═══ QUEUE TAB ═══ */}
+      {tab === 'queue' && (
+        <SmartActionQueue scoredLoans={props.scoredLoans} />
       )}
     </div>
   )

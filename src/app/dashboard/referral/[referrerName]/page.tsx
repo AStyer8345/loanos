@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft, Users, TrendingUp, DollarSign, AlertCircle } from 'lucide-react'
+import { fmtCurrency, fmtDate } from '@/lib/formatters'
 
 const supabase = createClient()
 
@@ -32,19 +33,6 @@ interface ReferralLoan {
   closing_date: string | null
   property_city: string | null
   property_state: string | null
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmtCurrency(n: number | null) {
-  if (n == null) return '—'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
-
-function fmtDate(s: string | null) {
-  if (!s) return '—'
-  const d = new Date(s + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function isClosedLoan(status: string | null) {

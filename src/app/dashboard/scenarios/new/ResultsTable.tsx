@@ -148,7 +148,7 @@ function ScenarioCards({ title, heroLabel, heroGetValue, heroBest, labels, loanT
 
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>{title}</h3>
+      <h3 className="text-sm font-semibold mb-4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{title}</h3>
 
       <div className="grid gap-5" style={{ gridTemplateColumns: `repeat(${Math.min(results.length, 4)}, 1fr)` }}>
         {results.map((r, idx) => {
@@ -167,7 +167,7 @@ function ScenarioCards({ title, heroLabel, heroGetValue, heroBest, labels, loanT
               {/* Card Header */}
               <div className="px-5 pt-5 pb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
                     {labels[idx]}
                   </span>
                   <span
@@ -232,7 +232,7 @@ function ScenarioCards({ title, heroLabel, heroGetValue, heroBest, labels, loanT
                         background: mi % 2 === 0 ? 'transparent' : 'var(--sc-card-alt)',
                       }}
                     >
-                      <span className="text-[11px] font-medium" style={{ color: 'var(--sc-muted)', fontFamily: "'Inter', sans-serif" }}>
+                      <span className="text-[11px] font-medium" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
                         {m.label}
                       </span>
                       <span

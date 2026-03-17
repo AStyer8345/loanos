@@ -20,7 +20,7 @@ export function InputField({ label, value, onChange, placeholder, className }: {
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none focus:ring-1"
-        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'Inter', sans-serif" }}
+        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-bg)', fontFamily: "'IBM Plex Mono', monospace" }}
       />
     </div>
   )
@@ -108,7 +108,7 @@ export function SelectField({ label, value, onChange, options }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         className="w-full px-3.5 py-2.5 rounded-[10px] text-sm border outline-none"
-        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-card)', fontFamily: "'Inter', sans-serif" }}
+        style={{ borderColor: 'var(--sc-border)', color: 'var(--sc-text)', background: 'var(--sc-card)', fontFamily: "'IBM Plex Mono', monospace" }}
       >
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>

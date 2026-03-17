@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { fmtCurrency } from '@/lib/formatters'
 
 export const dynamic = 'force-dynamic'
 
-const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+const fmt = fmtCurrency
 
 export default async function CommissionReportPage() {
   const supabase = createClient()

@@ -302,13 +302,13 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
   const goBack = () => setStep(prev => Math.max(prev - 1, 0))
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
       <div className="max-w-[1100px] mx-auto px-5 md:px-8 py-8">
 
         {/* ─── Header ────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
               Scenario Builder
             </h1>
           </div>

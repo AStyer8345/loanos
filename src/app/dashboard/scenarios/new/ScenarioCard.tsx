@@ -230,7 +230,7 @@ function Collapsible({ title, defaultOpen = false, children }: { title: string; 
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 w-full text-xs font-semibold py-1 transition-colors"
-        style={{ color: 'var(--sc-muted)', fontFamily: "'Inter', sans-serif" }}
+        style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}
       >
         {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         {title}
@@ -311,10 +311,10 @@ export default function ScenarioCard({
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
               {label}
             </button>
           )}
@@ -460,10 +460,10 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
               {label}
             </button>
           )}

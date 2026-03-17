@@ -21,7 +21,7 @@ const fmtTooltipK = (value: any) => typeof value === 'number' ? (value >= 1000 ?
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[14px] p-5" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-      <h4 className="text-sm font-semibold mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>{title}</h4>
+      <h4 className="text-sm font-semibold mb-5" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{title}</h4>
       {children}
     </div>
   )

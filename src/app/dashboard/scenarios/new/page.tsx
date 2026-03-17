@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import ScenarioBuilder from './ScenarioBuilder'
-import { DEFAULT_CLOSING_COSTS, sumClosingCosts } from './ScenarioBuilder'
+import { DEFAULT_CLOSING_COSTS, sumClosingCosts } from '@/lib/scenarios/utils'
 import type { ScenarioState, LoanTerm, LoanType, CurrentLoanInput } from '@/lib/scenarios/types'
 
 export const dynamic = 'force-dynamic'

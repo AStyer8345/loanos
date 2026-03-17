@@ -5,8 +5,9 @@ import { Home, RefreshCw, ChevronRight, ChevronLeft, Check } from 'lucide-react'
 import type {
   ScenarioMode, ScenarioState, PurchaseScenarioInput, RefiScenarioInput,
   CurrentLoanInput, PurchaseCalculatedResult, RefiCalculatedResult,
-  ReinvestmentResult, LoanTerm, ClosingCostBreakdown,
+  ReinvestmentResult, LoanTerm,
 } from '@/lib/scenarios/types'
+import { DEFAULT_CLOSING_COSTS, ensureClosingCosts, sumClosingCosts } from '@/lib/scenarios/utils'
 import ScenarioCard from './ScenarioCard'
 import CurrentLoanCard from './CurrentLoanCard'
 import ResultsTable from './ResultsTable'
@@ -18,67 +19,9 @@ import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
 import { InputField, CurrencyField, PercentField, SelectField } from './FormFields'
 
+export { DEFAULT_CLOSING_COSTS, ensureClosingCosts, sumClosingCosts }
+
 function makeId() { return crypto.randomUUID() }
-
-export const DEFAULT_CLOSING_COSTS: ClosingCostBreakdown = {
-  // Lender Fees
-  originationFee: 0,
-  underwritingFee: 1295,
-  processingFee: 995,
-  applicationFee: 0,
-  adminFee: 0,
-  // Third Party Fees
-  appraisal: 795,
-  creditReport: 110,
-  docPrepFee: 495,
-  floodCert: 15,
-  attorneyFee: 125,
-  settlementFee: 550,
-  titleSearch: 125,
-  titleEndorsements: 12,
-  recordingFee: 200,
-  lendersTitlePolicy: 2119,
-  // Prepaids
-  prepaidInterestDays: 15,
-  annualHazardInsurance: 0,
-  taxEscrowMonths: 0,
-  insuranceEscrowMonths: 0,
-}
-
-/** Ensure closingCostBreakdown exists — guards against DB-loaded scenarios saved before this field existed */
-export function ensureClosingCosts(b: ClosingCostBreakdown | undefined | null): ClosingCostBreakdown {
-  if (!b || typeof b !== 'object') return { ...DEFAULT_CLOSING_COSTS }
-  return {
-    originationFee: b.originationFee ?? 0,
-    underwritingFee: b.underwritingFee ?? 0,
-    processingFee: b.processingFee ?? 0,
-    applicationFee: b.applicationFee ?? 0,
-    adminFee: b.adminFee ?? 0,
-    appraisal: b.appraisal ?? 0,
-    creditReport: b.creditReport ?? 0,
-    docPrepFee: b.docPrepFee ?? 0,
-    floodCert: b.floodCert ?? 0,
-    attorneyFee: b.attorneyFee ?? 0,
-    settlementFee: b.settlementFee ?? 0,
-    titleSearch: b.titleSearch ?? 0,
-    titleEndorsements: b.titleEndorsements ?? 0,
-    recordingFee: b.recordingFee ?? 0,
-    lendersTitlePolicy: b.lendersTitlePolicy ?? 0,
-    prepaidInterestDays: b.prepaidInterestDays ?? 15,
-    annualHazardInsurance: b.annualHazardInsurance ?? 0,
-    taxEscrowMonths: b.taxEscrowMonths ?? 0,
-    insuranceEscrowMonths: b.insuranceEscrowMonths ?? 0,
-  }
-}
-
-export function sumClosingCosts(b: ClosingCostBreakdown): number {
-  return (
-    b.originationFee + b.underwritingFee + b.processingFee + b.applicationFee + b.adminFee +
-    b.appraisal + b.creditReport + b.docPrepFee + b.floodCert + b.attorneyFee +
-    b.settlementFee + b.titleSearch + b.titleEndorsements + b.recordingFee + b.lendersTitlePolicy
-    // Prepaids excluded from this sum — they depend on rate/loan amount and are displayed separately
-  )
-}
 
 const DEFAULT_PURCHASE: () => PurchaseScenarioInput = () => ({
   id: makeId(),

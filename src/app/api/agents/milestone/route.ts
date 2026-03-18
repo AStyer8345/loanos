@@ -78,6 +78,15 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient()
     const milestoneLabel = MILESTONE_LABELS[milestone]
 
+    // ── 0. Look up org and contact BEFORE any inserts ─────────────────────────
+    const { data: loanRecord } = await supabase
+      .from('loans')
+      .select('contact_id, organization_id')
+      .eq('id', loan_id)
+      .single()
+    const contactId = loanRecord?.contact_id ?? null
+    const organizationId = loanRecord?.organization_id ?? null
+
     // ── 1. Insert milestone event ──────────────────────────────────────────────
     const { data: event, error: eventError } = await supabase
       .from('loan_milestone_events')
@@ -102,15 +111,6 @@ export async function POST(req: NextRequest) {
     const results: { borrower?: object; realtor?: object } = {}
 
     const anthropic = await getAnthropicClient()
-
-    // Look up contact_id and organization_id so we can scope inserts correctly
-    const { data: loanRecord } = await supabase
-      .from('loans')
-      .select('contact_id, organization_id')
-      .eq('id', loan_id)
-      .single()
-    const contactId = loanRecord?.contact_id ?? null
-    const organizationId = loanRecord?.organization_id ?? null
 
     // ── 2. Draft borrower email (if email provided) ───────────────────────────
     if (borrower_email) {
@@ -157,6 +157,7 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
           recipient_email: borrower_email,
           subject: borrowerSubject,
           body:    borrowerBody,
+          ...(organizationId ? { organization_id: organizationId } : {}),
         })
         .select('id')
         .single()
@@ -239,6 +240,7 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
           recipient_email: realtor_email,
           subject: realtorSubject,
           body:    realtorBody,
+          ...(organizationId ? { organization_id: organizationId } : {}),
         })
         .select('id')
         .single()

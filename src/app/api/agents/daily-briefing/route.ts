@@ -27,6 +27,23 @@ export async function GET(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+  } else {
+    // Agent-secret path: no user session — look up the primary org.
+    // Single-tenant fallback: use the first profile with a non-null org.
+    // TODO: replace with proper multi-tenant routing if needed.
+    try {
+      const svcClient = createServiceClient()
+      const { data: sysProfile } = await svcClient
+        .from('profiles')
+        .select('organization_id, id')
+        .not('organization_id', 'is', null)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+      organizationId = sysProfile?.organization_id ?? null
+    } catch {
+      console.warn('[daily-briefing] Could not resolve org for agent-secret path — queries will be unscoped')
+    }
   }
 
   try {

@@ -9,7 +9,11 @@
  *   SUPABASE_URL              https://...
  *   SUPABASE_SERVICE_ROLE_KEY sb-service-role-...
  *   ARIVE_WEBHOOK_SECRET      your-shared-secret-string
- *   LOANOS_SYSTEM_USER_ID     UUID of Adam's auth.users record
+ *
+ * Org resolution: reads user_id from the webhook payload body. If the Arive
+ * payload does not include a user_id field, falls back to a single-tenant
+ * lookup (first profile with a non-null organization_id).
+ * TODO: implement proper multi-tenant routing once Arive sends a user_id field.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -18,7 +22,6 @@ import { createServiceClient } from '@/lib/supabase/service'
 const SUPABASE_URL = process.env.SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const ARIVE_WEBHOOK_SECRET = process.env.ARIVE_WEBHOOK_SECRET
-const SYSTEM_USER_ID = process.env.LOANOS_SYSTEM_USER_ID
 
 // ─── Supabase helpers ─────────────────────────────────────────────────────────
 
@@ -123,29 +126,48 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
-  if (!SYSTEM_USER_ID) {
-    console.error('[arive-webhook] LOANOS_SYSTEM_USER_ID not set')
-    return NextResponse.json(
-      { error: 'Server misconfiguration: LOANOS_SYSTEM_USER_ID missing' },
-      { status: 500 }
-    )
+
+  // Resolve organization_id and system user from the webhook payload or fallback lookup
+  const serviceClient = createServiceClient()
+
+  // Prefer user_id from the payload body (for future multi-tenant Arive routing)
+  const bodyUserId = n(body.user_id) ? String(body.user_id) : null
+
+  let organizationId: string | null = null
+  let resolvedUserId: string | null = bodyUserId
+
+  if (bodyUserId) {
+    // Payload includes a user_id — look up that user's org
+    const { data: profile } = await serviceClient
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', bodyUserId)
+      .single()
+    organizationId = profile?.organization_id ?? null
+    if (!organizationId) {
+      console.error('[arive-webhook] No org for payload user_id', bodyUserId)
+    }
   }
 
-  // Look up organization_id for the system user
-  const serviceClient = createServiceClient()
-  const { data: profile } = await serviceClient
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', SYSTEM_USER_ID)
-    .single()
-  const organizationId = profile?.organization_id ?? null
-
   if (!organizationId) {
-    console.error('[arive-webhook] Could not resolve organization_id for LOANOS_SYSTEM_USER_ID')
-    return NextResponse.json(
-      { error: 'Server misconfiguration: organization_id not found for system user' },
-      { status: 500 }
-    )
+    // Fallback: single-tenant — find the first profile with an org assigned.
+    // TODO: replace with proper multi-tenant routing once Arive sends user_id.
+    const { data: fallbackProfile } = await serviceClient
+      .from('profiles')
+      .select('organization_id, id')
+      .not('organization_id', 'is', null)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single()
+    organizationId = fallbackProfile?.organization_id ?? null
+    if (!resolvedUserId) resolvedUserId = fallbackProfile?.id ?? null
+    if (!organizationId) {
+      console.error('[arive-webhook] Could not resolve organization_id — no profiles with org found')
+      return NextResponse.json(
+        { error: 'Server misconfiguration: no organization found' },
+        { status: 500 }
+      )
+    }
   }
 
   const now = new Date().toISOString()
@@ -161,7 +183,7 @@ export async function POST(request: NextRequest) {
       stage: 'Lead',
       source: 'arive_webhook',
       contact_type: 'borrower',
-      user_id: SYSTEM_USER_ID,
+      user_id: resolvedUserId,
       organization_id: organizationId,
       updated_at: now,
     }) as { id: string } | null
@@ -252,7 +274,7 @@ export async function POST(request: NextRequest) {
       arive_updated_at: n(body.updatedAt),
 
       raw_payload: body,
-      user_id: SYSTEM_USER_ID,
+      user_id: resolvedUserId,
       organization_id: organizationId,
       updated_at: now,
       synced_at: now,
@@ -276,7 +298,7 @@ export async function POST(request: NextRequest) {
         milestone: n(body.milestone),
         source: 'arive_webhook',
       },
-      user_id: SYSTEM_USER_ID,
+      user_id: resolvedUserId,
       organization_id: organizationId,
     })
 

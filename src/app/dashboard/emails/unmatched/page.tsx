@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Search, Link2, X, Inbox, FileText } from 'lucide-react'
+import { Search, Link2, X, Inbox, FileText, Sparkles } from 'lucide-react'
 
 type UnmatchedEmail = {
   id: string
@@ -20,6 +20,7 @@ type ContactResult = {
   last_name: string | null
   email: string | null
   contact_type: string | null
+  _suggested?: boolean
 }
 
 type LoanResult = {
@@ -28,6 +29,7 @@ type LoanResult = {
   borrower_name: string | null
   property_address: string | null
   status: string | null
+  _suggested?: boolean
 }
 
 function fmtDate(s: string | null) {
@@ -37,6 +39,18 @@ function fmtDate(s: string | null) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
     ' at ' +
     d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+}
+
+// Extract a plausible name from an email subject line.
+// e.g. "Re: Preston Couch Introduction - 2621..." → "Preston Couch"
+function extractNameFromSubject(subject: string | null): string {
+  if (!subject) return ''
+  // Strip Re:/Fwd:/FW: prefixes
+  const clean = subject.replace(/^(re:|fwd:|fw:)\s*/gi, '').trim()
+  // Look for "FirstName LastName" pattern — two consecutive capitalized words
+  const match = clean.match(/\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,20})\b/)
+  if (match) return `${match[1]} ${match[2]}`
+  return ''
 }
 
 export default function UnmatchedEmailsPage() {
@@ -56,7 +70,9 @@ export default function UnmatchedEmailsPage() {
       .from('activity_log')
       .select('id, from_address, subject, body_snippet, occurred_at, created_at, metadata')
       .eq('type', 'email_inbound')
-      .filter('metadata->>needs_review', 'eq', 'true')
+      .is('contact_id', null)
+      .is('loan_id', null)
+      .not('dismissed', 'eq', true)
       .order('occurred_at', { ascending: false })
       .limit(200)
     setEmails((data ?? []) as UnmatchedEmail[])
@@ -64,6 +80,47 @@ export default function UnmatchedEmailsPage() {
   }, [supabase])
 
   useEffect(() => { fetchEmails() }, [fetchEmails])
+
+  // When the link panel opens, auto-suggest by sender email + subject name
+  const openLinkPanel = useCallback(async (email: UnmatchedEmail) => {
+    setLinkingId(email.id)
+    setLinkMode('contact')
+    setSearchQuery('')
+    setSearchResults([])
+    setLoanResults([])
+
+    // Try to find a contact by exact sender email address
+    if (email.from_address) {
+      setSearching(true)
+      const { data: byEmail } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, email, contact_type')
+        .ilike('email', email.from_address)
+        .limit(5)
+
+      if (byEmail && byEmail.length > 0) {
+        setSearchResults((byEmail as ContactResult[]).map(c => ({ ...c, _suggested: true })))
+        setSearching(false)
+        return
+      }
+      setSearching(false)
+    }
+
+    // Fallback: extract a name from subject and pre-search
+    const name = extractNameFromSubject(email.subject)
+    if (name) {
+      setSearchQuery(name)
+      setSearching(true)
+      const parts = name.split(' ')
+      const { data: byName } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, email, contact_type')
+        .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
+        .limit(8)
+      setSearchResults((byName ?? []) as ContactResult[])
+      setSearching(false)
+    }
+  }, [supabase])
 
   const searchContacts = async (query: string) => {
     if (!query.trim()) { setSearchResults([]); return }
@@ -92,11 +149,14 @@ export default function UnmatchedEmailsPage() {
     setSearching(false)
   }
 
-  const linkToContact = async (emailId: string, contactId: string) => {
+  const linkToContact = async (email: UnmatchedEmail, contactId: string) => {
     await supabase
       .from('activity_log')
-      .update({ contact_id: contactId, metadata: { needs_review: false } })
-      .eq('id', emailId)
+      .update({
+        contact_id: contactId,
+        summary: email.subject || email.body_snippet?.slice(0, 120) || 'Inbound email',
+      })
+      .eq('id', email.id)
     await supabase
       .from('contacts')
       .update({ last_touch_at: new Date().toISOString() })
@@ -104,24 +164,27 @@ export default function UnmatchedEmailsPage() {
     setLinkingId(null)
     setSearchQuery('')
     setSearchResults([])
-    setEmails(prev => prev.filter(e => e.id !== emailId))
+    setEmails(prev => prev.filter(e => e.id !== email.id))
   }
 
-  const linkToLoan = async (emailId: string, loanId: string) => {
+  const linkToLoan = async (email: UnmatchedEmail, loanId: string) => {
     await supabase
       .from('activity_log')
-      .update({ loan_id: loanId, metadata: { needs_review: false } })
-      .eq('id', emailId)
+      .update({
+        loan_id: loanId,
+        summary: email.subject || email.body_snippet?.slice(0, 120) || 'Inbound email',
+      })
+      .eq('id', email.id)
     setLinkingId(null)
     setSearchQuery('')
     setLoanResults([])
-    setEmails(prev => prev.filter(e => e.id !== emailId))
+    setEmails(prev => prev.filter(e => e.id !== email.id))
   }
 
   const dismissEmail = async (emailId: string) => {
     await supabase
       .from('activity_log')
-      .update({ metadata: { needs_review: false, dismissed: true } })
+      .update({ dismissed: true })
       .eq('id', emailId)
     setEmails(prev => prev.filter(e => e.id !== emailId))
   }
@@ -215,8 +278,8 @@ export default function UnmatchedEmailsPage() {
 
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
-                      onClick={() => { setLinkingId(email.id); setLinkMode('contact'); setSearchQuery(''); setSearchResults([]); setLoanResults([]) }}
-                      title="Link to Contact"
+                      onClick={() => openLinkPanel(email)}
+                      title="Link to Contact or Loan"
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 4,
                         fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
@@ -242,7 +305,7 @@ export default function UnmatchedEmailsPage() {
                   </div>
                 </div>
 
-                {/* Link modal */}
+                {/* Link panel */}
                 {linkingId === email.id && (
                   <div style={{
                     position: 'absolute', top: 0, right: 0, zIndex: 10,
@@ -302,7 +365,7 @@ export default function UnmatchedEmailsPage() {
                     {linkMode === 'contact' && searchResults.map(c => (
                       <button
                         key={c.id}
-                        onClick={() => linkToContact(email.id, c.id)}
+                        onClick={() => linkToContact(email, c.id)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
                           width: '100%', textAlign: 'left',
@@ -321,9 +384,14 @@ export default function UnmatchedEmailsPage() {
                         }}>
                           {(c.first_name ?? '').slice(0, 1).toUpperCase()}{(c.last_name ?? '').slice(0, 1).toUpperCase()}
                         </div>
-                        <div style={{ minWidth: 0 }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '\u2014'}
+                            {c._suggested && (
+                              <span style={{ marginLeft: 6, fontSize: 9, color: '#C9A84C', letterSpacing: '0.08em' }}>
+                                <Sparkles size={9} style={{ display: 'inline', marginRight: 2 }} />SUGGESTED
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {c.email || '\u2014'}
@@ -336,7 +404,7 @@ export default function UnmatchedEmailsPage() {
                     {linkMode === 'loan' && loanResults.map(loan => (
                       <button
                         key={loan.id}
-                        onClick={() => linkToLoan(email.id, loan.id)}
+                        onClick={() => linkToLoan(email, loan.id)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
                           width: '100%', textAlign: 'left',
@@ -355,9 +423,14 @@ export default function UnmatchedEmailsPage() {
                         }}>
                           <FileText size={12} color="#818CF8" />
                         </div>
-                        <div style={{ minWidth: 0 }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {loan.borrower_name || loan.loan_name || '\u2014'}
+                            {loan._suggested && (
+                              <span style={{ marginLeft: 6, fontSize: 9, color: '#818CF8', letterSpacing: '0.08em' }}>
+                                <Sparkles size={9} style={{ display: 'inline', marginRight: 2 }} />SUGGESTED
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {loan.property_address || loan.loan_name || '\u2014'}

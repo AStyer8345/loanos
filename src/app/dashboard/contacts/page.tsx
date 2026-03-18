@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 import Papa from 'papaparse'
@@ -402,7 +403,7 @@ function SortableColumnHeader({
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ContactsPage() {
   const supabase = useMemo(() => createClient(), [])
-  const [userId, setUserId] = useState<string | null>(null)
+  const { organizationId, userId } = useOrg()
 
   // list state
   const [contacts, setContacts]     = useState<Contact[]>([])
@@ -479,14 +480,6 @@ export default function ContactsPage() {
     return () => mq.removeEventListener('change', sync)
   }, [sidebarCollapsedUser])
 
-  // get authenticated user id for inserts
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id)
-    }).catch(() => {
-      setUserId(null)
-    })
-  }, [supabase])
 
   // init columns + column order from localStorage
   useEffect(() => {
@@ -779,6 +772,7 @@ export default function ContactsPage() {
       contact_type: newContact.contact_type || 'other',
       stage: normalizeStage(newContact.stage),
       user_id: userId,
+      organization_id: organizationId,
     }
     const { error } = await supabase.from('contacts').insert([payload])
     if (error) {

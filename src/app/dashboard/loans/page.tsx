@@ -232,7 +232,6 @@ export default function LoansPage() {
   const urlFilter = searchParams.get('filter')
   const urlPeriod = searchParams.get('period')
 
-  const [userId, setUserId] = useState<string | null>(null)
   const [loans, setLoans] = useState<Loan[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -273,13 +272,6 @@ export default function LoansPage() {
   const loansOffsetRef = useRef(0)
   const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null)
   const [editingCommissionValue, setEditingCommissionValue] = useState<string>('')
-
-  // Get authenticated user
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id)
-    })
-  }, [supabase])
 
   // Fetch distinct status + lender values for filter dropdowns
   useEffect(() => {
@@ -343,22 +335,21 @@ export default function LoansPage() {
 
   // ── Fetch counts ───────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
-    if (!userId) return
     const map: Record<string, number> = {}
     for (const list of SMART_LISTS) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
       if (list.statuses) q = q.in('status', list.statuses)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     for (const list of customLists) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
       if (list.rules?.length) q = applyCustomListRulesLoan(q, list.rules)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     setCounts(map)
-  }, [customLists, supabase, userId])
+  }, [customLists, supabase])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
   const buildLoansQuery = useCallback((listId: string) => {
@@ -366,7 +357,6 @@ export default function LoansPage() {
       .from('loans')
       .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
-    if (userId) q = q.eq('user_id', userId)
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
       if (custom?.rules?.length) q = applyCustomListRulesLoan(q, custom.rules)
@@ -375,7 +365,7 @@ export default function LoansPage() {
       if (list?.statuses) q = q.in('status', list.statuses)
     }
     return q
-  }, [customLists, supabase, userId])
+  }, [customLists, supabase])
 
   const fetchLoans = useCallback(async (listId: string) => {
     setLoading(true)
@@ -416,9 +406,8 @@ export default function LoansPage() {
     }
   }, [supabase, fetchCounts])
 
-  // URL param-based filtering on initial load (wait for userId)
+  // URL param-based filtering on initial load
   useEffect(() => {
-    if (!userId) return
     fetchCounts()
 
     if (urlStage || urlFilter || urlPeriod) {
@@ -443,7 +432,7 @@ export default function LoansPage() {
       fetchLoans('inprocess')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId])
+  }, [])
 
   const handleListChange = (listId: string) => {
     setActiveList(listId)

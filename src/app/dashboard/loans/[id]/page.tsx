@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
@@ -1076,6 +1077,7 @@ function NotesSidebarPanel({ loanId, loan, setLoan }: { loanId: string; loan: Lo
 
 function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const supabase = createClient()
+  const { userId } = useOrg()
   const [signingId, setSigningId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -1084,12 +1086,11 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { alert('Not authenticated'); setUploading(false); return }
-    const storagePath = `${user.id}/${loanId}/${Date.now()}_${file.name}`
+    if (!userId) { alert('Not authenticated'); setUploading(false); return }
+    const storagePath = `${userId}/${loanId}/${Date.now()}_${file.name}`
     const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
     if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
-    const { error: insertError } = await supabase.from('documents').insert({ user_id: user.id, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    const { error: insertError } = await supabase.from('documents').insert({ user_id: userId, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
     if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -1757,6 +1758,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
 function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; loanId: string; onRefresh: () => void }) {
   const supabase = createClient()
+  const { userId } = useOrg()
   const [filter, setFilter] = useState<'all' | 'system' | 'manual'>('all')
   const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
   const [logNotes, setLogNotes] = useState('')
@@ -1765,9 +1767,6 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
   const handleLogActivity = async () => {
     if (!logModal) return
     setLogSaving(true)
-
-    // Get current user for user_id
-    const { data: { user } } = await supabase.auth.getUser()
 
     const newRow: ActivityRow = {
       id: crypto.randomUUID(),
@@ -1792,7 +1791,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
       summary: logNotes.trim() || null,
       entity_type: 'loan',
       metadata: { activity_type: logModal },
-      user_id: user?.id ?? null,
+      user_id: userId ?? null,
     })
 
     setLogSaving(false)

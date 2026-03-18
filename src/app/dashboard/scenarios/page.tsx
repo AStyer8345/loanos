@@ -1,19 +1,25 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import Link from 'next/link'
 import ScenarioList from './ScenarioList'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ScenariosPage() {
+  let organizationId: string
+  try {
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+  } catch {
+    redirect('/auth/login')
+  }
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
   const { data: scenarios } = await supabase
     .from('scenarios')
     .select('id, scenario_type, borrower_name, property_address, created_at, updated_at, view_count, share_token')
-    .eq('user_id', user.id)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false })
 
   return (

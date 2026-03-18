@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import ScenarioBuilder from '../new/ScenarioBuilder'
 import { ensureClosingCosts, sumClosingCosts, DEFAULT_CLOSING_COSTS } from '@/lib/scenarios/utils'
 import type { ScenarioState, RefiScenarioInput, PurchaseScenarioInput } from '@/lib/scenarios/types'
@@ -7,15 +8,20 @@ import type { ScenarioState, RefiScenarioInput, PurchaseScenarioInput } from '@/
 export const dynamic = 'force-dynamic'
 
 export default async function ViewScenarioPage({ params }: { params: { id: string } }) {
+  let organizationId: string
+  try {
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+  } catch {
+    redirect('/auth/login')
+  }
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
   const { data: scenario, error } = await supabase
     .from('scenarios')
     .select('*')
     .eq('id', params.id)
-    .eq('user_id', user.id)
+    .eq('organization_id', organizationId)
     .single()
 
   if (error || !scenario) redirect('/dashboard/scenarios')

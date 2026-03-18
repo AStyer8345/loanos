@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { fmtCurrency, fmtK, fmtDate } from '@/lib/formatters'
@@ -8,14 +9,19 @@ export const dynamic = 'force-dynamic'
 const fmt = fmtCurrency
 
 export default async function VolumeReportPage() {
+  let organizationId: string
+  try {
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+  } catch {
+    redirect('/auth/login')
+  }
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
   const { data: loans = [] } = await supabase
     .from('loans')
     .select('id, borrower_name, borrower_first_name, borrower_last_name, loan_name, loan_amount, status, closing_date, funding_date, estimated_closing_date')
-    .eq('user_id', user.id)
+    .eq('organization_id', organizationId)
     .order('closing_date', { ascending: false })
 
   const now = new Date()

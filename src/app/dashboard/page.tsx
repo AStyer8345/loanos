@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
@@ -9,14 +10,19 @@ export const dynamic = 'force-dynamic'
 const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
 
 export default async function DashboardPage() {
+  let organizationId: string
+  try {
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+  } catch {
+    redirect('/auth/login')
+  }
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
   const { data: loans = [] } = await supabase
     .from('loans')
     .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
-    .eq('user_id', user.id)
+    .eq('organization_id', organizationId)
     .order('estimated_closing_date', { ascending: true })
 
   const now = new Date()
@@ -141,7 +147,6 @@ export default async function DashboardPage() {
   const { data: rawActivity = [] } = await supabase
     .from('activity_log')
     .select('id, created_at, type, action, summary, contact_id, loan_id, metadata')
-    .eq('user_id', user.id)
     .gte('created_at', sevenDaysAgo.toISOString())
     .order('created_at', { ascending: false })
     .limit(100)

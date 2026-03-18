@@ -169,7 +169,7 @@ function SectionCard({
 export default function SettingsPage() {
   const supabase = useSupabase()
   const searchParams = useSearchParams()
-  const { userId, loading: orgLoading } = useOrg()
+  const { userId, loading: orgLoading, role: myRole, organizationId } = useOrg()
 
   // ── Outlook ──
   const [status, setStatus] = useState<OutlookStatus | null>(null)
@@ -200,6 +200,15 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState<Record<SectionKey, boolean>>({
     integrations: false, website: false, social: false, identity: false,
   })
+
+  // ── Org members ──
+  const [members, setMembers] = useState<Array<{id: string, full_name: string | null, email: string | null, role: string, created_at: string}>>([])
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('member')
+  const [inviting, setInviting] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState(false)
+  const canManageMembers = myRole === 'owner' || myRole === 'admin'
 
   // ── OAuth flash ──
   useEffect(() => {
@@ -306,6 +315,44 @@ export default function SettingsPage() {
 
   const expiryLabel = status?.expires_at ? new Date(status.expires_at).toLocaleString() : null
 
+  // ── Load org members ──
+  useEffect(() => {
+    fetch('/api/org/members')
+      .then(r => r.ok ? r.json() : [])
+      .then(setMembers)
+      .catch(() => {})
+  }, [organizationId])
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault()
+    setInviting(true)
+    setInviteError(null)
+    setInviteSuccess(false)
+    const res = await fetch('/api/org/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+    })
+    if (res.ok) {
+      setInviteSuccess(true)
+      setInviteEmail('')
+      fetch('/api/org/members').then(r => r.json()).then(setMembers).catch(() => {})
+    } else {
+      const d = await res.json()
+      setInviteError(d.error || 'Failed to invite')
+    }
+    setInviting(false)
+  }
+
+  async function handleRoleChange(userId: string, newRole: string) {
+    await fetch('/api/org/members', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, role: newRole }),
+    })
+    setMembers(prev => prev.map(m => m.id === userId ? { ...m, role: newRole } : m))
+  }
+
   return (
     <div className="max-w-2xl mx-auto py-10 px-4 space-y-6">
       <div>
@@ -404,6 +451,79 @@ export default function SettingsPage() {
         <SecretField label="Facebook Page Access Token" value={social.facebook_page_access_token} onChange={v => setSocial(p => ({ ...p, facebook_page_access_token: v }))} />
         <TextField label="Facebook Page ID" value={social.facebook_page_id} onChange={v => setSocial(p => ({ ...p, facebook_page_id: v }))} placeholder="123456789" />
       </SectionCard>
+
+      {/* ── ORGANIZATION MEMBERS ── */}
+      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <h2 className="text-sm font-mono font-semibold text-zinc-100 uppercase tracking-wider">Organization Members</h2>
+          <span className="text-xs text-zinc-500 font-mono lowercase">{myRole}</span>
+        </div>
+
+        {/* Members list */}
+        <div className="mb-6 flex flex-col gap-2">
+          {members.map(m => (
+            <div key={m.id} className="flex items-center justify-between px-3 py-2 bg-zinc-800 border border-zinc-700 rounded">
+              <div>
+                <span className="text-sm text-zinc-200 font-mono">{m.full_name || m.email}</span>
+                {m.full_name && <span className="text-xs text-zinc-500 font-mono ml-2">{m.email}</span>}
+              </div>
+              {canManageMembers && m.role !== 'owner' ? (
+                <select
+                  value={m.role}
+                  onChange={e => handleRoleChange(m.id, e.target.value)}
+                  className="bg-zinc-900 border border-zinc-600 text-zinc-300 px-2 py-1 rounded text-xs font-mono focus:outline-none focus:border-amber-500"
+                >
+                  <option value="admin">admin</option>
+                  <option value="member">member</option>
+                </select>
+              ) : (
+                <span className={`text-xs font-mono px-2 py-1 border rounded ${m.role === 'owner' ? 'text-amber-400 border-amber-500/40' : 'text-zinc-500 border-zinc-700'}`}>{m.role}</span>
+              )}
+            </div>
+          ))}
+          {members.length === 0 && (
+            <p className="text-xs text-zinc-500 font-mono">No members loaded.</p>
+          )}
+        </div>
+
+        {/* Invite form — only for owner/admin */}
+        {canManageMembers && (
+          <form onSubmit={handleInvite} className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">Invite by Email</label>
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="janie@example.com"
+                required
+                className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">Role</label>
+              <select
+                value={inviteRole}
+                onChange={e => setInviteRole(e.target.value)}
+                className="bg-zinc-800 border border-zinc-600 text-zinc-200 px-3 py-2 rounded text-sm font-mono focus:outline-none focus:border-amber-500"
+              >
+                <option value="member">member</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={inviting || !inviteEmail.trim()}
+              className="inline-flex items-center px-3 py-2 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            >
+              {inviting ? 'Inviting\u2026' : 'Send Invite'}
+            </button>
+          </form>
+        )}
+
+        {inviteError && <p className="text-red-400 text-xs font-mono mt-2">{inviteError}</p>}
+        {inviteSuccess && <p className="text-[#4ADE80] text-xs font-mono mt-2">Invite sent successfully.</p>}
+      </div>
 
       {/* ── OUTLOOK ── */}
       <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">

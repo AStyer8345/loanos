@@ -1,21 +1,44 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const response = await updateSession(request)
+
+  // Only guard dashboard routes
+  const { pathname } = request.nextUrl
+  if (!pathname.startsWith('/dashboard')) return response
+
+  // Check logged-in user has a profile with org assignment
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll() },
+        setAll() {},
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return response // updateSession already redirects to login
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.organization_id) {
+    return NextResponse.redirect(new URL('/onboarding', request.url))
+  }
+
+  return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico
-     * - public folder assets
-     * - api/agents/* (webhook endpoints — auth handled by X-Webhook-Secret header)
-     * - api/marketing/log-social-post (called by n8n — auth handled by X-Webhook-Secret header)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/agents/.*|api/marketing/log-social-post).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/agents/.*|api/marketing/log-social-post|onboarding).*)',
   ],
 }

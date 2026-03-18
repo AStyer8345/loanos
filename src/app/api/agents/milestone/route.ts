@@ -4,6 +4,7 @@ import { logEmail } from '@/lib/logEmail'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
+import { logSecurityEvent } from '@/lib/audit'
 
 // ── Milestone → human-readable label ─────────────────────────────────────────
 const MILESTONE_LABELS: Record<string, string> = {
@@ -50,6 +51,13 @@ async function pushDraftToOutlook(
 export async function POST(req: NextRequest) {
   const authError = validateAgentSecret(req)
   if (authError) return authError
+
+  await logSecurityEvent({
+    eventType: 'api_access',
+    resource: 'agents',
+    resourceId: 'milestone',
+    ipAddress: req.headers.get('x-forwarded-for') ?? undefined,
+  })
 
   try {
     const body = await req.json()

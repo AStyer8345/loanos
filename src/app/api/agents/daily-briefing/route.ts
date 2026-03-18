@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
+import { logSecurityEvent } from '@/lib/audit'
 
 export async function GET(request: NextRequest) {
   // Allow server-to-server calls with agent secret, or browser calls with session auth
@@ -45,6 +46,13 @@ export async function GET(request: NextRequest) {
       console.warn('[daily-briefing] Could not resolve org for agent-secret path — queries will be unscoped')
     }
   }
+
+  await logSecurityEvent({
+    eventType: 'api_access',
+    resource: 'agents',
+    resourceId: 'daily-briefing',
+    ipAddress: request.headers.get('x-forwarded-for') ?? undefined,
+  })
 
   try {
     const supabase = createServiceClient()

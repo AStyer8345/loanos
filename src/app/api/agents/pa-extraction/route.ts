@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
+import { logSecurityEvent } from '@/lib/audit'
 
 // ── POST /api/agents/pa-extraction ───────────────────────────────────────────
 // Called by n8n after extracting Pre-Approval letter fields via Claude.
@@ -9,6 +10,13 @@ import { createServiceClient } from '@/lib/supabase/service'
 export async function POST(req: NextRequest) {
   const authError = validateAgentSecret(req)
   if (authError) return authError
+
+  await logSecurityEvent({
+    eventType: 'api_access',
+    resource: 'agents',
+    resourceId: 'pa-extraction',
+    ipAddress: req.headers.get('x-forwarded-for') ?? undefined,
+  })
 
   try {
     const body = await req.json()

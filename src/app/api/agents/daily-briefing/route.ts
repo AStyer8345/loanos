@@ -11,18 +11,20 @@ export async function GET(request: NextRequest) {
   const hasValidSecret = agentSecret && authHeader === `Bearer ${agentSecret}`
 
   let organizationId: string | null = null
+  let user: { id: string; email?: string } | null = null
 
   if (!hasValidSecret) {
     try {
       const sessionClient = createClient()
-      const { data: { user } } = await sessionClient.auth.getUser()
-      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      const { data: { user: sessionUser } } = await sessionClient.auth.getUser()
+      if (!sessionUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      user = sessionUser
 
       // Resolve organization for session-based callers
       const { data: profile } = await sessionClient
         .from('profiles')
         .select('organization_id')
-        .eq('id', user.id)
+        .eq('id', sessionUser.id)
         .single()
       organizationId = profile?.organization_id ?? null
     } catch {
@@ -52,6 +54,8 @@ export async function GET(request: NextRequest) {
     resource: 'agents',
     resourceId: 'daily-briefing',
     ipAddress: request.headers.get('x-forwarded-for') ?? undefined,
+    actorId: user?.id ?? undefined,
+    actorEmail: user?.email ?? undefined,
   })
 
   try {

@@ -112,5 +112,8 @@ n8n's JavaScript sandbox does not have access to the native `fetch()` API. Code 
 ### Arive sends null `currentLoanStatus_status` (2026-03-17)
 Arive webhooks sometimes fire with `currentLoanStatus_status: null` — this happens when only non-status fields changed (dates, rates, etc.). Any Supabase table with a NOT NULL constraint on `new_status` will fail. Pattern: always use a null fallback in the body expression: `status || oldStatus || 'unknown'`.
 
+### Loans page borrower_name column drift (2026-03-18)
+`/dashboard/loans/page.tsx` `buildLoansQuery` selected only `borrower_name` (old schema column). Arive webhook writes to `borrower_first_name`/`borrower_last_name` (new columns, introduced in migration 011). Result: all Arive-synced loans showed `(unnamed)` in the table. Fix: add both new columns to select, add a `borrowerDisplayName()` helper with the fallback chain `first+last → borrower_name → loan_name → '(unnamed)'`, use it for display, search, and sort. **Pattern:** always include both old + new column names in any query that touches borrower names until the old column is formally retired.
+
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
 The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

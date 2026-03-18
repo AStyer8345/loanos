@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-17 (morning audit)_
+_Last updated: 2026-03-18 (morning audit)_
 
 ---
 
@@ -23,11 +23,17 @@ _Last updated: 2026-03-17 (morning audit)_
 
 ## 🟢 Low Priority / Cleanup
 
+- [ ] **Wire TodoList to dashboard** — `src/components/dashboard/TodoList.tsx` is fully built (reads/writes `todo_items` via `/api/todos`) but is never imported or rendered anywhere. Add to DashboardClient Pipeline tab (Queue tab or below Daily Schedule Widget).
 - [ ] **Migration file numbering** — files 001–015 use 3-digit prefix, 0016/0017 use 4-digit. Rename to 016/017 for consistency.
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
+- [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (session 7 — 2026-03-18 morning audit)
+
+- [x] **Loans page borrower name fixed** — `buildLoansQuery` was selecting only `borrower_name` (old column, null for all Arive loans). Added `borrower_first_name` + `borrower_last_name` to the select. Added `borrowerDisplayName()` helper with fallback chain: `first+last → borrower_name → loan_name → '(unnamed)'`. Updated display, search, and sort to use the helper. Arive-synced loans now show real names in the loans table.
 
 ## ✅ Completed (session 6 — 2026-03-17 morning audit)
 

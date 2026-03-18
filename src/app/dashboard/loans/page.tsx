@@ -22,6 +22,8 @@ interface Loan {
   loan_name: string | null
   loan_number: string | null
   borrower_name: string | null
+  borrower_first_name: string | null
+  borrower_last_name: string | null
   borrower_email: string | null
   borrower_phone: string | null
   status: string | null
@@ -99,6 +101,11 @@ function telHref(phone: string | null | undefined): string | null {
 function mailtoHref(email: string | null | undefined): string | null {
   if (!email || !String(email).trim() || !String(email).includes('@')) return null
   return `mailto:${String(email).trim()}`
+}
+
+function borrowerDisplayName(loan: Pick<Loan, 'borrower_first_name' | 'borrower_last_name' | 'borrower_name' | 'loan_name'>): string {
+  const full = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+  return full || loan.borrower_name || loan.loan_name || '(unnamed)'
 }
 
 function daysUntilClose(dateStr: string | null): number | null {
@@ -357,7 +364,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (userId) q = q.eq('user_id', userId)
     if (listId.startsWith('custom-')) {
@@ -595,7 +602,7 @@ export default function LoansPage() {
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(l =>
-        (l.borrower_name || '').toLowerCase().includes(q) ||
+        borrowerDisplayName(l).toLowerCase().includes(q) ||
         (l.loan_name || '').toLowerCase().includes(q) ||
         (l.property_address || '').toLowerCase().includes(q) ||
         (l.property_city || '').toLowerCase().includes(q) ||
@@ -611,6 +618,11 @@ export default function LoansPage() {
       if (sortKey === 'closing_date') {
         const av = a.closing_date ?? ''
         const bv = b.closing_date ?? ''
+        return mul * (av < bv ? -1 : av > bv ? 1 : 0)
+      }
+      if (sortKey === 'borrower_name') {
+        const av = borrowerDisplayName(a).toLowerCase()
+        const bv = borrowerDisplayName(b).toLowerCase()
         return mul * (av < bv ? -1 : av > bv ? 1 : 0)
       }
       const av = (a[sortKey] || '').toLowerCase()
@@ -1278,10 +1290,10 @@ export default function LoansPage() {
                                   onMouseEnter={e => (e.currentTarget.style.textDecorationColor = '#C9A84C', e.currentTarget.style.textDecoration = 'underline')}
                                   onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
                                 >
-                                  {loan.borrower_name || '(unnamed)'}
+                                  {borrowerDisplayName(loan)}
                                 </Link>
                               ) : (
-                                <span className="text-[#F0F0F0] font-mono text-sm">{loan.borrower_name || '(unnamed)'}</span>
+                                <span className="text-[#F0F0F0] font-mono text-sm">{borrowerDisplayName(loan)}</span>
                               )}
                               {/* Delete button */}
                               <button
@@ -1527,7 +1539,7 @@ export default function LoansPage() {
           <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="text-sm font-mono text-[#F0F0F0] mb-1">Delete this loan?</div>
             <div className="text-xs font-mono text-[#666666] mb-4">
-              {loans.find(l => l.id === deletingLoanId)?.loan_name || loans.find(l => l.id === deletingLoanId)?.borrower_name || 'This loan'} will be permanently removed. This cannot be undone.
+              {(() => { const l = loans.find(l => l.id === deletingLoanId); return l ? (l.loan_name || borrowerDisplayName(l)) : 'This loan' })()} will be permanently removed. This cannot be undone.
             </div>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setDeletingLoanId(null)} className="px-3 py-1.5 text-xs font-mono border border-[#2A2A2A] rounded text-[#666666] hover:bg-[#2A2A2A] transition-colors">Cancel</button>

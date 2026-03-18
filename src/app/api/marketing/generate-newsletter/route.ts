@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getOrganization } from '@/lib/getOrganization'
 
 const MONTH_YEAR = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 const TODAY      = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 const SLUG_DATE  = new Date().toISOString().slice(0, 10) // 2026-03-14
 
 export async function POST(req: NextRequest) {
+  try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { audience, notes, apiKey } = await req.json()
 
   if (!audience) {

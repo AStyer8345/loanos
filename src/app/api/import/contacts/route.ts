@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import { normalizeStage } from '@/lib/stageNormalization'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -13,7 +14,7 @@ interface ImportResult {
 
 // ── Field mapping — Salesforce export column names → contacts columns ──────
 // Handles both Salesforce export headers and generic CSV headers gracefully.
-function mapRow(raw: RawRow): Record<string, unknown> {
+function mapRow(raw: RawRow, userId: string, organizationId: string): Record<string, unknown> {
   const g = (key: string) => raw[key]?.trim() || null
   const parseDate = (v: string | null) => {
     if (!v) return null
@@ -27,6 +28,8 @@ function mapRow(raw: RawRow): Record<string, unknown> {
     v ? ['true','1','yes','checked'].includes(v.toLowerCase()) : null
 
   return {
+    user_id:                userId,
+    organization_id:        organizationId,
     salesforce_id:          g('Contact ID') ?? g('salesforce_id'),
     first_name:             g('First Name') ?? g('first_name'),
     last_name:              g('Last Name')  ?? g('last_name'),
@@ -63,12 +66,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
     }
 
+    let organizationId: string
+    let userId: string
+    try {
+      const org = await getOrganization()
+      organizationId = org.organizationId
+      userId = org.userId
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const supabase = createClient()
 
     // Fetch existing contacts for dedup (id + key fields only)
     const { data: existing, error: fetchErr } = await supabase
       .from('contacts')
       .select('id, salesforce_id, email, first_name, last_name')
+      .eq('organization_id', organizationId)
       .limit(10000)
 
     if (fetchErr) {
@@ -89,7 +103,7 @@ export async function POST(req: NextRequest) {
     const result: ImportResult = { imported: 0, skipped: 0, errors: [] }
 
     for (let i = 0; i < body.rows.length; i++) {
-      const mapped = mapRow(body.rows[i])
+      const mapped = mapRow(body.rows[i], userId, organizationId)
       const nameDisplay = `${mapped.first_name ?? ''} ${mapped.last_name ?? ''}`.trim() || `Row ${i + 1}`
 
       // Dedup

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getOrganization } from '@/lib/getOrganization'
 
 /**
  * Publishes a generated newsletter page to styermortgage.com via the
@@ -9,6 +10,12 @@ import { NextRequest, NextResponse } from 'next/server'
  * Authorization: Bearer {dispatch_secret}
  */
 export async function POST(req: NextRequest) {
+  try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { dispatch_url, dispatch_secret, audience, slug, title, html } = await req.json()
 
   if (!dispatch_url) {

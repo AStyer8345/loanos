@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type RawRow = Record<string, string>
@@ -12,7 +13,7 @@ interface ImportResult {
 
 // ── Field mapping — common loan export column names → loans columns ────────
 // Handles Salesforce exports and generic CSVs.
-function mapRow(raw: RawRow, userId: string): Record<string, unknown> {
+function mapRow(raw: RawRow, userId: string, organizationId: string): Record<string, unknown> {
   const g = (key: string) => raw[key]?.trim() || null
 
   const parseDate = (v: string | null) => {
@@ -45,6 +46,7 @@ function mapRow(raw: RawRow, userId: string): Record<string, unknown> {
 
   return {
     user_id:          userId,
+    organization_id:  organizationId,
     loan_number:      g('Loan Number')       ?? g('loan_number'),
     borrower_name:    borrowerName,
     status:           g('Status')            ?? g('status')            ?? 'lead',
@@ -73,16 +75,22 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
-    // Must be authenticated — loans require user_id
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !user) {
+    // Must be authenticated — loans require user_id and organization_id
+    let organizationId: string
+    let userId: string
+    try {
+      const org = await getOrganization()
+      organizationId = org.organizationId
+      userId = org.userId
+    } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch existing loans for dedup (current user only — RLS enforces this)
+    // Fetch existing loans for dedup (current org only — RLS enforces this)
     const { data: existing, error: fetchErr } = await supabase
       .from('loans')
       .select('id, loan_number, borrower_name, closing_date')
+      .eq('organization_id', organizationId)
       .limit(10000)
 
     if (fetchErr) {
@@ -108,7 +116,7 @@ export async function POST(req: NextRequest) {
     const result: ImportResult = { imported: 0, skipped: 0, errors: [] }
 
     for (let i = 0; i < body.rows.length; i++) {
-      const mapped = mapRow(body.rows[i], user.id)
+      const mapped = mapRow(body.rows[i], userId, organizationId)
       const nameDisplay = (mapped.borrower_name as string | null) ?? `Row ${i + 1}`
 
       // Two-tier dedup

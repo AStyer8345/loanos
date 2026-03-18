@@ -103,13 +103,14 @@ export async function POST(req: NextRequest) {
 
     const anthropic = await getAnthropicClient()
 
-    // Look up contact_id so logEmail() can link to the contact record
+    // Look up contact_id and organization_id so we can scope inserts correctly
     const { data: loanRecord } = await supabase
       .from('loans')
-      .select('contact_id')
+      .select('contact_id, organization_id')
       .eq('id', loan_id)
       .single()
     const contactId = loanRecord?.contact_id ?? null
+    const organizationId = loanRecord?.organization_id ?? null
 
     // ── 2. Draft borrower email (if email provided) ───────────────────────────
     if (borrower_email) {
@@ -177,6 +178,7 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
         subject: borrowerSubject,
         body_html: borrowerBody,
         loan_id: loan_id ?? undefined,
+        ...(organizationId ? { organization_id: organizationId } : {}),
       })
 
       // Log to contact_emails for permanent audit trail
@@ -258,6 +260,7 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
         subject: realtorSubject,
         body_html: realtorBody,
         loan_id: loan_id ?? undefined,
+        ...(organizationId ? { organization_id: organizationId } : {}),
       })
 
       // Log to contact_emails for permanent audit trail

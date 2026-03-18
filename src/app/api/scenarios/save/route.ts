@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 
 export async function POST(req: NextRequest) {
   try {
+    const { organizationId, userId } = await getOrganization()
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await req.json()
     const {
@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     } = body
 
     const record = {
-      user_id: user.id,
+      user_id: userId,
+      organization_id: organizationId,
       scenario_type,
       borrower_name: borrower_name || null,
       property_address: property_address || null,
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
         .from('scenarios')
         .update(record)
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('organization_id', organizationId)
         .select('id, share_token')
         .single()
 
@@ -55,15 +56,14 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error('[scenarios/save] error:', error)
-    return NextResponse.json({ error: 'Failed to save scenario' }, { status: 500 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    const { organizationId } = await getOrganization()
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { id } = await req.json()
     if (!id) return NextResponse.json({ error: 'Missing scenario id' }, { status: 400 })
@@ -72,12 +72,12 @@ export async function DELETE(req: NextRequest) {
       .from('scenarios')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('organization_id', organizationId)
 
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[scenarios/delete] error:', error)
-    return NextResponse.json({ error: 'Failed to delete scenario' }, { status: 500 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
+import { getOrganization } from '@/lib/getOrganization'
 
 async function buildSystemPrompt(
   recordId: string,
@@ -160,6 +161,12 @@ ${loan ? `
 // POST /api/chat — send a message
 export async function POST(req: NextRequest) {
   try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
     const { messages, recordId, recordType, sessionId } = await req.json()
 
     if (!messages || !recordId || !recordType) {
@@ -208,6 +215,12 @@ export async function POST(req: NextRequest) {
 
 // GET /api/chat?recordId=&recordType= — load most recent session
 export async function GET(req: NextRequest) {
+  try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(req.url)
     const recordId = searchParams.get('recordId')

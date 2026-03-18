@@ -9,6 +9,7 @@ interface EmailDraftPayload {
   contact_id?: string
   loan_id?: string
   outlook_draft_id?: string
+  organization_id?: string
 }
 
 export async function logEmailDraft(payload: EmailDraftPayload) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-parser'
 import { normalizeStage } from '@/lib/stageNormalization'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getOrganization } from '@/lib/getOrganization'
 
 /**
  * POST /api/contacts/quick-add
@@ -12,6 +13,7 @@ import { createServiceClient } from '@/lib/supabase/service'
  */
 export async function POST(req: NextRequest) {
   try {
+    const { organizationId, userId } = await getOrganization()
     const body = await req.json()
     const supabase = createServiceClient()
 
@@ -51,6 +53,7 @@ export async function POST(req: NextRequest) {
       const { data: dups } = await supabase
         .from('contacts')
         .select('id, first_name, last_name, email, phone')
+        .eq('organization_id', organizationId)
         .or(dupConditions.join(','))
         .limit(1)
 
@@ -78,6 +81,7 @@ export async function POST(req: NextRequest) {
       let query = supabase
         .from('contacts')
         .select('id, first_name, last_name')
+        .eq('organization_id', organizationId)
 
       if (parts.length >= 2) {
         query = query
@@ -107,6 +111,8 @@ export async function POST(req: NextRequest) {
       lead_source: extracted.source || (referredByResolved ? 'Realtor Referral' : null),
       company_name: extracted.company_name,
       notes: extracted.notes,
+      user_id: userId,
+      organization_id: organizationId,
     }
 
     // Remove null values — let DB defaults handle them
@@ -131,6 +137,7 @@ export async function POST(req: NextRequest) {
       record_type: 'contact',
       action: 'contact_created',
       details: `Quick-added via AI chat: ${newContact.first_name} ${newContact.last_name || ''}`.trim(),
+      organization_id: organizationId,
     }).then(({ error }) => {
       if (error) console.error('[quick-add] activity log error:', error)
     })
@@ -143,6 +150,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[quick-add] error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAnthropicClient } from '@/lib/anthropic/client'
+import { getOrganization } from '@/lib/getOrganization'
 
 function buildSystemPrompt(contactNames?: string[]): string {
   const base = `You are Adam Styer's outreach assistant for his mortgage business (Adam Styer | Mortgage Solutions LP, NMLS #513013). You help draft emails, text messages, and manage contacts.
@@ -23,6 +24,12 @@ When drafting emails or texts for these contacts, personalize where possible. Ke
 }
 
 export async function POST(req: NextRequest) {
+  try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { messages, selectedContacts, generateType } = await req.json()
 

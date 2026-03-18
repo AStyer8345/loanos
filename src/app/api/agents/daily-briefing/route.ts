@@ -9,10 +9,24 @@ export async function GET(request: NextRequest) {
   const agentSecret = process.env.LOANOS_AGENT_SECRET
   const hasValidSecret = agentSecret && authHeader === `Bearer ${agentSecret}`
 
+  let organizationId: string | null = null
+
   if (!hasValidSecret) {
-    const sessionClient = createClient()
-    const { data: { user } } = await sessionClient.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
+      const sessionClient = createClient()
+      const { data: { user } } = await sessionClient.auth.getUser()
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+      // Resolve organization for session-based callers
+      const { data: profile } = await sessionClient
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single()
+      organizationId = profile?.organization_id ?? null
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   try {
@@ -21,6 +35,11 @@ export async function GET(request: NextRequest) {
     const threeDaysAgo  = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
     const sevenDaysAgo  = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const twentyFourHrsAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+
+    // Helper to add org filter if available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const withOrg = (query: any) =>
+      organizationId ? query.eq('organization_id', organizationId) : query
 
     // ── Parallel data fetch ──────────────────────────────────────────────────
     const [
@@ -32,22 +51,22 @@ export async function GET(request: NextRequest) {
     ] = await Promise.allSettled([
 
       // Stale leads: contacts tagged as Client, stage = Lead, updated > 3 days ago
-      supabase
+      withOrg(supabase
         .from('contacts')
         .select('id, first_name, last_name, email, phone, stage, updated_at')
         .eq('group_tag', 'Client')
         .eq('stage', 'Lead')
         .lt('updated_at', threeDaysAgo)
         .order('updated_at', { ascending: true })
-        .limit(20),
+        .limit(20)),
 
       // Active loans: not funded/closed
-      supabase
+      withOrg(supabase
         .from('loans')
         .select('id, loan_name, status, loan_amount, property_address, estimated_closing_date, arive_loan_id')
         .not('status', 'in', '("funded","closed","withdrawn","denied")')
         .order('estimated_closing_date', { ascending: true })
-        .limit(20),
+        .limit(20)),
 
       // Milestone events from last 24 hours
       supabase
@@ -58,13 +77,13 @@ export async function GET(request: NextRequest) {
         .limit(20),
 
       // Realtors not touched in 7+ days
-      supabase
+      withOrg(supabase
         .from('contacts')
         .select('id, first_name, last_name, email, phone, last_touch')
         .eq('contact_type', 'realtor')
         .or(`last_touch.is.null,last_touch.lt.${sevenDaysAgo}`)
         .order('last_touch', { ascending: true, nullsFirst: true })
-        .limit(20),
+        .limit(20)),
 
       // Unsent milestone communication drafts
       supabase

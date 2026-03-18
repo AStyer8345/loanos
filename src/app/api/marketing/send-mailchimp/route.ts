@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getOrganization } from '@/lib/getOrganization'
 
 export async function POST(req: NextRequest) {
+  try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { api_key, server_prefix, list_id, subject, html_body, from_email } = await req.json()
 
   if (!api_key || !server_prefix || !list_id || !subject || !html_body) {

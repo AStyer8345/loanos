@@ -13,6 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const SUPABASE_URL = process.env.SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -130,6 +131,23 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // Look up organization_id for the system user
+  const serviceClient = createServiceClient()
+  const { data: profile } = await serviceClient
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', SYSTEM_USER_ID)
+    .single()
+  const organizationId = profile?.organization_id ?? null
+
+  if (!organizationId) {
+    console.error('[arive-webhook] Could not resolve organization_id for LOANOS_SYSTEM_USER_ID')
+    return NextResponse.json(
+      { error: 'Server misconfiguration: organization_id not found for system user' },
+      { status: 500 }
+    )
+  }
+
   const now = new Date().toISOString()
 
   try {
@@ -144,6 +162,7 @@ export async function POST(request: NextRequest) {
       source: 'arive_webhook',
       contact_type: 'borrower',
       user_id: SYSTEM_USER_ID,
+      organization_id: organizationId,
       updated_at: now,
     }) as { id: string } | null
 
@@ -234,6 +253,7 @@ export async function POST(request: NextRequest) {
 
       raw_payload: body,
       user_id: SYSTEM_USER_ID,
+      organization_id: organizationId,
       updated_at: now,
       synced_at: now,
     }
@@ -257,6 +277,7 @@ export async function POST(request: NextRequest) {
         source: 'arive_webhook',
       },
       user_id: SYSTEM_USER_ID,
+      organization_id: organizationId,
     })
 
     return NextResponse.json(

@@ -32,6 +32,14 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceClient()
 
+    // Look up organization_id from the loan record
+    const { data: loan } = await supabase
+      .from('loans')
+      .select('organization_id, user_id')
+      .eq('id', loan_id)
+      .single()
+    const organizationId = loan?.organization_id ?? null
+
     // Build update payload — only include fields that were provided
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (closing_date)            updates.closing_date             = closing_date
@@ -67,6 +75,7 @@ export async function POST(req: NextRequest) {
       entity_type: 'loan',
       loan_id,
       metadata: { updated_fields: updatedFields, source: 'n8n' },
+      ...(organizationId ? { organization_id: organizationId } : {}),
     })
 
     return NextResponse.json({ ok: true, loan_id, updated_fields: updatedFields })

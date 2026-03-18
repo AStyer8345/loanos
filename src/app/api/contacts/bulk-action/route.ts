@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { normalizeStage } from '@/lib/stageNormalization'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getOrganization } from '@/lib/getOrganization'
 
 type BulkActionBody = {
   contactIds: string[]
@@ -10,6 +11,7 @@ type BulkActionBody = {
 
 export async function POST(req: NextRequest) {
   try {
+    const { organizationId } = await getOrganization()
     const body: BulkActionBody = await req.json()
     const { contactIds, action, value } = body
 
@@ -32,6 +34,7 @@ export async function POST(req: NextRequest) {
         .from('contacts')
         .update({ stage: normalizeStage(value) })
         .in('id', contactIds)
+        .eq('organization_id', organizationId)
 
       if (error) {
         console.error('[bulk-action] update_stage error:', error)
@@ -45,6 +48,7 @@ export async function POST(req: NextRequest) {
           record_type: 'contact',
           action: 'stage_updated',
           details: `Bulk update: stage → "${value}"`,
+          organization_id: organizationId,
         }))
       )
 
@@ -63,6 +67,7 @@ export async function POST(req: NextRequest) {
         .from('contacts')
         .update({ contact_type: value })
         .in('id', contactIds)
+        .eq('organization_id', organizationId)
 
       if (error) {
         console.error('[bulk-action] update_type error:', error)
@@ -75,6 +80,7 @@ export async function POST(req: NextRequest) {
           record_type: 'contact',
           action: 'type_updated',
           details: `Bulk update: type → "${value}"`,
+          organization_id: organizationId,
         }))
       )
 
@@ -89,6 +95,7 @@ export async function POST(req: NextRequest) {
         .from('contacts')
         .delete()
         .in('id', contactIds)
+        .eq('organization_id', organizationId)
 
       if (error) {
         console.error('[bulk-action] delete error:', error)
@@ -104,6 +111,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
   } catch (error) {
     console.error('[bulk-action] error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }

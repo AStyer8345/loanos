@@ -1,78 +1,80 @@
-# LoanOS Daily Report — 2026-03-16
+# LoanOS Daily Report — 2026-03-17
 
 ## 🔴 Action Required
 
-### Workflow Failures — Needs Fix
+### Activity Gaps — Loans in Active Statuses, No Updates in 5+ Days
+These are real files that need attention — not seed records:
 
-**Arive Status Update → Supabase** (`9JyzzwKac8v3uQ7d`) — 3 errors today
-- Error: `null value in column "new_status" of relation "loan_status_history" violates not-null constraint`
-- Arive is sending status updates where the status field is blank/null. The `loan_status_history` INSERT needs a null guard or the workflow needs to skip the history insert when new_status is empty.
+| Borrower | Status | Action Needed |
+|----------|--------|---------------|
+| Patrick Rademacher | Loan in Process | Check file status in Arive |
+| Dhaval Poladia | DISCLOSURE_SENT | Follow up — disclosures sent, awaiting signature? |
+| Drew Benac | Loan in Process | Check file status in Arive |
+| Chelsea Wise | RE_SUBMITTAL | Check UW re-submittal status |
+| Unknown borrower (7f3ce5a8) | under_contract | No borrower name — check Arive |
 
-**Contract Received** (`UfNcdpoVKQZqy0fj`) — 1 error today
-- Error: `fetch is not defined [line 19]`
-- A Code node in this workflow uses `fetch()` which is not available in n8n's node environment. Needs to be replaced with the HTTP Request node or `$http` helper.
-
-### Stale Loans (not updated in 3+ days, active status)
-
-| Borrower | Status | Last Updated |
-|----------|--------|-------------|
-| David Kloster | Started | 2026-03-12 |
-| Jackson Harris | Started | 2026-03-12 |
-| Drew Benac | Loan in Process | 2026-03-12 |
-| David Annen | Started | 2026-03-10 (4 duplicate records) |
-| Colin Recko | Started | 2026-03-10 |
-
-Note: David Annen has 4 separate loan records in the DB — possible duplicate issue worth cleaning up.
-
-### Active Pipeline — No Activity in 5+ Days
-
-These loans are in active/in-process statuses but have zero activity log entries in the last 5 days:
-
-| Borrower | Status |
-|----------|--------|
-| (unnamed) | under_contract |
-| Dhaval Poladia | DISCLOSURE_SENT |
-| Kyle Jennings | UNDERWRITING_SUBMITTED |
-| Chelsea Wise | RE_SUBMITTAL |
-| Drew Benac | Loan in Process |
-| Patrick Rademacher | Loan in Process |
-
-(49 of 73 active loans have no recent activity — most are "Started"/"On Hold" pre-pipeline leads, but the 6 above are in active processing stages and need attention.)
+### n8n Workflow Error — Arive Status Update → Supabase
+- Workflow `9JyzzwKac8v3uQ7d` had a **webhook error on 2026-03-16 at 20:28 UTC**
+- This means a status update from Arive may have failed to sync to Supabase
+- Check n8n execution logs for details: https://styer.app.n8n.cloud
+- Potentially affected: any loan whose Arive status changed around that time
 
 ---
 
 ## 🟡 Watch Items
 
-### Inactive Workflows (unexpected)
+### Unexpected Inactive Workflows
+| Workflow | ID | Note |
+|----------|----|------|
+| LoanOS — Outlook Email Sync | `JMmstRl2C5ylmuIY` | Needs env vars before activation |
+| LoanOS — Contract Received (duplicate) | `w7hZLmIcQ4izmndb` | Appears to be a duplicate — `UfNcdpoVKQZqy0fj` is the active version. Safe to delete? |
 
-- **LoanOS — Contract Received** (`w7hZLmIcQ4izmndb`) — INACTIVE. Appears to be an old/duplicate version of the Contract Received workflow. The active version is `UfNcdpoVKQZqy0fj`. Safe to archive if confirmed.
-- **LoanOS — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — INACTIVE (known: needs Outlook credential env vars)
-
-### Code Quality
-
-**console.log in API routes (1):**
+### console.log in API Routes (1 file)
 - `src/app/api/mismo/parse/route.ts`
 
-**Dark theme violations — bg-white/bg-gray-100/text-gray-900 in dashboard (3 files):**
+### Dark Theme Violations — bg-white / bg-gray-100 / text-gray-900 in Dashboard
 - `src/app/dashboard/scenarios/ScenarioList.tsx`
 - `src/app/dashboard/scenarios/new/StatementUpload.tsx`
 - `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
 
-**Unused components (16 unique):**
-- `ActivityFeed.tsx`, `ActivityTimeline.tsx`, `EmailDraftPreview.tsx`, `GlobalSearch.tsx`, `NavDropdown.tsx`, `NavItem.tsx`
-- `dashboard/DailyBriefingPanel.tsx`, `PipelineCharts.tsx`, `PipelineKPIs.tsx`, `PipelineSummary.tsx`, `RecentActivity.tsx`, `RecentLoans.tsx`, `TodoList.tsx`, `UrgentFlags.tsx`
-- `outreach/BulkActionPreview.tsx`, `QuickAddConfirmation.tsx`
+### Unused Components (16 files)
+These are defined but never imported in `src/app/`:
+- `src/components/SmartActionQueue.tsx`
+- `src/components/EmailDraftPreview.tsx`
+- `src/components/NavDropdown.tsx`
+- `src/components/dashboard/PipelineCharts.tsx`
+- `src/components/dashboard/RecentActivity.tsx`
+- `src/components/dashboard/RecentLoans.tsx`
+- `src/components/dashboard/DailyBriefingPanel.tsx`
+- `src/components/dashboard/DailyScheduleWidget.tsx`
+- `src/components/dashboard/TodoList.tsx`
+- `src/components/dashboard/UrgentFlags.tsx`
+- `src/components/dashboard/PipelineKPIs.tsx`
+- `src/components/dashboard/PipelineSummary.tsx`
+- `src/components/ActivityTimeline.tsx`
+- `src/components/GlobalSearch.tsx`
+- `src/components/outreach/QuickAddConfirmation.tsx`
+- `src/components/outreach/BulkActionPreview.tsx`
 
 ---
 
 ## 🟢 All Clear
 
-- **Pending email drafts** — 0 stuck drafts
-- **TypeScript build** — PASS, no errors
-- **Core workflows active** — Milestone Agent, Arive New Loan, Referral Intro, Pre-Approval, Final CD, New Application, Refi Intake, Inbound Email Sync all active
+- **Stale loans**: None — all non-closed/funded loans updated within 3 days
+- **Pending email drafts**: None sitting unsent 24h+
+- **Active workflow coverage**: All core workflows active
+  - Milestone Communication Agent ✅
+  - Arive New Loan → Supabase ✅
+  - Referral Intro Email ✅
+  - Pre-Approval Email ✅
+  - Final CD Email ✅
+  - Contract Received ✅
+  - Refi Intake Email ✅
+  - New Application Received ✅
+- **n8n manual test errors**: eJG4wckrj6SmSpm1 and AK1fBcaX1cPcdlGx showed errors today but both are intentionally inactive — errors were from manual tests, not live triggers
 
 ---
 
 ## Build
 
-**Pass** — `npx tsc --noEmit` returned 0 errors
+**Pass** — `npx tsc --noEmit` produced no errors.

@@ -1,5 +1,39 @@
 # LoanOS Changelog
 
+## [4.0.0] — 2026-03-18 — Multi-Tenancy Completion
+
+### New
+- **`supabase/migrations/032`**: `organization_id` column + index on `documents`, `email_drafts`, `scenarios`
+- **`supabase/migrations/033`**: Org-scoped RLS (4 policies per table) on `documents`, `email_drafts`, `scenarios`
+- **`supabase/migrations/033b`**: Drop legacy user-scoped policies on `email_drafts` + `scenarios`
+- **`supabase/migrations/033c`**: Fix `scenarios` SELECT policy (removed `OR share_token IS NOT NULL` cross-org hole; share route uses service client bypassing RLS)
+- **`supabase/migrations/034`**: Drop legacy `org_id` column from `scenarios` (all 14 rows were NULL; superseded by `organization_id`)
+- **`src/app/api/me/route.ts`**: Returns `{ organizationId, role, userId }` — used by client components for org context
+- **`src/components/OrgProvider.tsx`**: React context provider; fetches `/api/me` on dashboard mount; exposes `{ organizationId, role, userId, loading }`
+- **`src/hooks/useOrg.ts`**: Re-exports `useOrg` from OrgProvider for clean imports
+- **`src/app/onboarding/page.tsx`**: Org creation form — captures org name + full name, POSTs to `/api/org/create`
+- **`src/app/api/org/create/route.ts`**: Creates `organizations` row + upserts profile as `owner`
+- **`src/app/api/org/members/route.ts`**: GET lists org members; PATCH changes role (owner/admin only)
+- **`src/app/api/org/invite/route.ts`**: Sends Supabase auth invite + pre-creates profile with org + role
+
+### Changed
+- **`src/middleware.ts`**: Guards `/dashboard` routes — redirects to `/onboarding` if `profiles.organization_id` is null. Fixed `setAll()` to write cookies to response object (was empty — session rotation wasn't persisting)
+- **`src/app/dashboard/layout.tsx`**: Wraps children in `<OrgProvider>`
+- **All 20 API routes**: `getOrganization()` replaces `getUser()`; `organization_id` added to all INSERTs; queries scoped to org
+- **`src/app/api/arive-webhook/route.ts`**: Org lookup from payload `user_id` → profiles (no more `LOANOS_SYSTEM_USER_ID` env dependency)
+- **`src/app/api/agents/milestone/route.ts`**: Org lookup moved before first INSERT; `organization_id` stamped on `milestone_communications`
+- **`src/app/api/agents/daily-briefing/route.ts`**: Agent-secret path now resolves org from profiles before running queries
+- **All server pages** (`/dashboard`, `/dashboard/scenarios`, reports): `getOrganization()` replaces `getUser()`
+- **`/dashboard/loans/page.tsx`**: Removed `.eq('user_id', userId)` from SELECT queries — RLS handles org scoping
+- **`/dashboard/contacts/page.tsx`**: `useOrg()` for userId; contact INSERT includes `organization_id`
+- **`/dashboard/marketing/page.tsx`**, **`rate-updates`**, **`social`**, **`content`**: `useOrg().userId` replaces `supabase.auth.getUser()`
+- **`/dashboard/settings/page.tsx`**: Organization Members section added (member list, inline role selects, invite form); `handleRoleChange` now checks `res.ok` before updating UI
+- **n8n WF1** (`1tagvoU0UXtdDiMY`): Added `Get Org ID` node → stamps `organization_id` on contacts, loans, activity_log writes
+- **n8n WF2** (`9JyzzwKac8v3uQ7d`): Added `Get Org ID` node → stamps `organization_id` on loans, activity_log, loan_status_history writes
+- **`ARCHITECTURE.md`**: Created comprehensive architecture reference (stack, DB schema, data flow, n8n inventory, API route map, multi-tenancy status)
+
+---
+
 ## [3.5.5] — 2026-03-17 — Dashboard Daily Schedule Widget
 
 ### New

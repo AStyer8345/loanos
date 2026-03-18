@@ -7,6 +7,7 @@ import {
   Eye, EyeOff, Save, Zap, Globe, Share2, User,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -168,7 +169,7 @@ function SectionCard({
 export default function SettingsPage() {
   const supabase = useSupabase()
   const searchParams = useSearchParams()
-  const [userId, setUserId] = useState<string | null>(null)
+  const { userId, loading: orgLoading } = useOrg()
 
   // ── Outlook ──
   const [status, setStatus] = useState<OutlookStatus | null>(null)
@@ -223,25 +224,22 @@ export default function SettingsPage() {
   // ── Load all settings ──
   useEffect(() => {
     fetchOutlookStatus()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      setUserId(user.id)
-      supabase
-        .from('user_settings')
-        .select('key, value, updated_at')
-        .eq('user_id', user.id)
-        .then(({ data }) => {
-          for (const row of data ?? []) {
-            const key = row.key as SectionKey
-            if (key === 'integrations') setIntegrations(row.value as Integrations)
-            if (key === 'website')      setWebsite(row.value as WebsiteSettings)
-            if (key === 'social')       setSocial(row.value as SocialSettings)
-            if (key === 'identity')     setIdentity(row.value as IdentitySettings)
-            setTimestamps(prev => ({ ...prev, [key]: row.updated_at }))
-          }
-        })
-    })
-  }, [fetchOutlookStatus, supabase])
+    if (orgLoading || !userId) return
+    supabase
+      .from('user_settings')
+      .select('key, value, updated_at')
+      .eq('user_id', userId)
+      .then(({ data }) => {
+        for (const row of data ?? []) {
+          const key = row.key as SectionKey
+          if (key === 'integrations') setIntegrations(row.value as Integrations)
+          if (key === 'website')      setWebsite(row.value as WebsiteSettings)
+          if (key === 'social')       setSocial(row.value as SocialSettings)
+          if (key === 'identity')     setIdentity(row.value as IdentitySettings)
+          setTimestamps(prev => ({ ...prev, [key]: row.updated_at }))
+        }
+      })
+  }, [fetchOutlookStatus, supabase, userId, orgLoading])
 
   // ── Save section ──
   async function saveSection(key: SectionKey, value: object) {

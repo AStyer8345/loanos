@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -96,7 +97,7 @@ function saveUpdates(updates: RateUpdate[]) {
 
 export default function RateUpdatesPage() {
   const supabase  = useMemo(() => createClient(), [])
-  const [userId, setUserId]   = useState<string | null>(null)
+  const { userId, loading: orgLoading } = useOrg()
   const [mccLast, setMccLast] = useState<Record<string, string>>({})
   const [updates, setUpdates] = useState<RateUpdate[]>([])
   const [loading, setLoading] = useState(true)
@@ -108,24 +109,22 @@ export default function RateUpdatesPage() {
   // Load
   useEffect(() => {
     setUpdates(loadUpdates())
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setLoading(false); return }
-      setUserId(user.id)
-      supabase
-        .from('mcc_state')
-        .select('value')
-        .eq('user_id', user.id)
-        .eq('key', 'mcc')
-        .single()
-        .then(({ data }) => {
-          if (data?.value) {
-            const v = data.value as Record<string, unknown>
-            setMccLast((v.last as Record<string, string>) ?? {})
-          }
-          setLoading(false)
-        })
-    })
-  }, [supabase])
+    if (orgLoading) return
+    if (!userId) { setLoading(false); return }
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          const v = data.value as Record<string, unknown>
+          setMccLast((v.last as Record<string, string>) ?? {})
+        }
+        setLoading(false)
+      })
+  }, [supabase, userId, orgLoading])
 
   async function addUpdate() {
     if (!form.rate_30yr.trim()) { alert('30yr rate is required.'); return }

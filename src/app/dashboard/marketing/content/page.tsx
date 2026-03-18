@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -118,21 +119,20 @@ function useSupabase() {
 
 function useMarketingSettings(): UserMarketingSettings {
   const supabase = useSupabase()
+  const { userId, loading: orgLoading } = useOrg()
   const [settings, setSettings] = useState<UserMarketingSettings>({})
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      Promise.all([
-        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'integrations').single(),
-        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'website').single(),
-      ]).then(([integ, site]) => {
-        setSettings({
-          ...((integ.data?.value as Record<string, string>) ?? {}),
-          ...((site.data?.value  as Record<string, string>) ?? {}),
-        })
+    if (orgLoading || !userId) return
+    Promise.all([
+      supabase.from('user_settings').select('value').eq('user_id', userId).eq('key', 'integrations').single(),
+      supabase.from('user_settings').select('value').eq('user_id', userId).eq('key', 'website').single(),
+    ]).then(([integ, site]) => {
+      setSettings({
+        ...((integ.data?.value as Record<string, string>) ?? {}),
+        ...((site.data?.value  as Record<string, string>) ?? {}),
       })
     })
-  }, [supabase])
+  }, [supabase, userId, orgLoading])
   return settings
 }
 
@@ -141,9 +141,9 @@ function useMarketingSettings(): UserMarketingSettings {
 export default function ContentDashboardPage() {
   const supabase = useSupabase()
   const settings = useMarketingSettings()
+  const { userId, loading: orgLoading } = useOrg()
 
   const [state, setState]   = useState<MCCNewsletterState>(BLANK_NL_STATE)
-  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Filter + log form
@@ -166,28 +166,26 @@ export default function ContentDashboardPage() {
 
   // Load MCC state from Supabase
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setLoading(false); return }
-      setUserId(user.id)
-      supabase
-        .from('mcc_state')
-        .select('value')
-        .eq('user_id', user.id)
-        .eq('key', 'mcc')
-        .single()
-        .then(({ data }) => {
-          if (data?.value) {
-            const v = data.value as Record<string, unknown>
-            setState({
-              newsletters: (v.newsletters as Newsletter[]) ?? [],
-              log:         (v.log as MCCNewsletterState['log']) ?? [],
-              last:        (v.last as Record<string, string>) ?? {},
-            })
-          }
-          setLoading(false)
-        })
-    })
-  }, [supabase])
+    if (orgLoading) return
+    if (!userId) { setLoading(false); return }
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          const v = data.value as Record<string, unknown>
+          setState({
+            newsletters: (v.newsletters as Newsletter[]) ?? [],
+            log:         (v.log as MCCNewsletterState['log']) ?? [],
+            last:        (v.last as Record<string, string>) ?? {},
+          })
+        }
+        setLoading(false)
+      })
+  }, [supabase, userId, orgLoading])
 
   // Persist back to MCC blob (merges newsletter/log/last into existing mcc_state)
   async function save(next: MCCNewsletterState) {

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -86,8 +87,8 @@ function Btn({ onClick, children, variant = 'default', disabled = false }: {
 
 export default function SocialMediaPage() {
   const supabase  = useMemo(() => createClient(), [])
+  const { userId, loading: orgLoading } = useOrg()
   const [state, setState]     = useState<MCCSocialState>({ socialPosts: [], last: {} })
-  const [userId, setUserId]   = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const [platFilter, setPlatFilter] = useState('All')
@@ -97,27 +98,25 @@ export default function SocialMediaPage() {
 
   // Load MCC state
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setLoading(false); return }
-      setUserId(user.id)
-      supabase
-        .from('mcc_state')
-        .select('value')
-        .eq('user_id', user.id)
-        .eq('key', 'mcc')
-        .single()
-        .then(({ data }) => {
-          if (data?.value) {
-            const v = data.value as Record<string, unknown>
-            setState({
-              socialPosts: (v.socialPosts as SocialPost[]) ?? [],
-              last:        (v.last as Record<string, string>) ?? {},
-            })
-          }
-          setLoading(false)
-        })
-    })
-  }, [supabase])
+    if (orgLoading) return
+    if (!userId) { setLoading(false); return }
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          const v = data.value as Record<string, unknown>
+          setState({
+            socialPosts: (v.socialPosts as SocialPost[]) ?? [],
+            last:        (v.last as Record<string, string>) ?? {},
+          })
+        }
+        setLoading(false)
+      })
+  }, [supabase, userId, orgLoading])
 
   async function save(next: MCCSocialState) {
     setState(next)

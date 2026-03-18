@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/hooks/useOrg'
 import { DAYS, TCOLS } from '@/lib/marketing/schedule'
 // DayTask, DayDef imported for type reference in schedule lib
 
@@ -1085,21 +1086,20 @@ const AUDIENCE_BADGE: Record<string, string> = { Realtors: '#5B8FD4', Borrowers:
 
 function useMarketingSettings() {
   const supabase = useSupabase()
+  const { userId, loading: orgLoading } = useOrg()
   const [settings, setSettings] = useState<UserMarketingSettings>({})
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      Promise.all([
-        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'integrations').single(),
-        supabase.from('user_settings').select('value').eq('user_id', user.id).eq('key', 'website').single(),
-      ]).then(([integ, site]) => {
-        setSettings({
-          ...((integ.data?.value as Record<string, string>) ?? {}),
-          ...((site.data?.value  as Record<string, string>) ?? {}),
-        })
+    if (orgLoading || !userId) return
+    Promise.all([
+      supabase.from('user_settings').select('value').eq('user_id', userId).eq('key', 'integrations').single(),
+      supabase.from('user_settings').select('value').eq('user_id', userId).eq('key', 'website').single(),
+    ]).then(([integ, site]) => {
+      setSettings({
+        ...((integ.data?.value as Record<string, string>) ?? {}),
+        ...((site.data?.value  as Record<string, string>) ?? {}),
       })
     })
-  }, [supabase])
+  }, [supabase, userId, orgLoading])
   return settings
 }
 
@@ -1789,13 +1789,13 @@ function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void
 export default function MarketingPage() {
   const supabase      = useSupabase()
   const searchParams  = useSearchParams()
+  const { userId, loading: orgLoading } = useOrg()
   const [s, setState] = useState<MCCState>(BLANK_STATE)
   const [tab, setTab] = useState<Tab>(() => {
     const p = searchParams?.get('tab')?.toUpperCase() as Tab | undefined
     return p && (TABS as readonly string[]).includes(p) ? p : 'TODAY'
   })
   const [loading, setLoading] = useState(true)
-  const [userId, setUserId]   = useState<string | null>(null)
 
   // Global log modal — shared by overdue banner, tracker "Log Now", and today quick-log buttons
   const [logModal, setLogModal] = useState<{ open: boolean; trackerId: string | null }>({
@@ -1809,21 +1809,19 @@ export default function MarketingPage() {
   const todayTasks = s.tasks[todayKey] ?? {}
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setLoading(false); return }
-      setUserId(user.id)
-      supabase
-        .from('mcc_state')
-        .select('value')
-        .eq('user_id', user.id)
-        .eq('key', 'mcc')
-        .single()
-        .then(({ data }) => {
-          if (data) setState(data.value as MCCState)
-          setLoading(false)
-        })
-    })
-  }, [supabase])
+    if (orgLoading) return
+    if (!userId) { setLoading(false); return }
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single()
+      .then(({ data }) => {
+        if (data) setState(data.value as MCCState)
+        setLoading(false)
+      })
+  }, [supabase, userId, orgLoading])
 
   function save(next: MCCState) {
     setState(next)

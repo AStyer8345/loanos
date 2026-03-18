@@ -345,12 +345,23 @@ export default function SettingsPage() {
   }
 
   async function handleRoleChange(userId: string, newRole: string) {
-    await fetch('/api/org/members', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, role: newRole }),
-    })
-    setMembers(prev => prev.map(m => m.id === userId ? { ...m, role: newRole } : m))
+    try {
+      const res = await fetch('/api/org/members', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: newRole }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setFlashMsg(`✗ Failed to update role: ${data.error || 'Unknown error'}`)
+        return
+      }
+      setMembers(prev => prev.map(m => m.id === userId ? { ...m, role: newRole } : m))
+      setFlashMsg('✓ Role updated successfully.')
+    } catch (err) {
+      console.error('[handleRoleChange] network error', err)
+      setFlashMsg('✗ Network error — check console.')
+    }
   }
 
   return (

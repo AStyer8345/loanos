@@ -1,8 +1,19 @@
 import { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 export async function POST(req: NextRequest) {
+  // 20 requests per minute per IP (no auth on this route)
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const { allowed } = checkRateLimit(`scenarios:${ip}`, 20, 60_000)
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   try {
     const body = await req.json()
     const {

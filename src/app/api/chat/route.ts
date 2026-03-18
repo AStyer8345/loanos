@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 async function buildSystemPrompt(
   recordId: string,
@@ -160,10 +161,18 @@ ${loan ? `
 
 // POST /api/chat — send a message
 export async function POST(req: NextRequest) {
+  let userId: string
   try {
-    await getOrganization()
+    const ctx = await getOrganization()
+    userId = ctx.userId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // 30 requests per minute per user
+  const { allowed } = checkRateLimit(`chat:${userId}`, 30, 60_000)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
   try {

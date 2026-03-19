@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [4.2.0] — 2026-03-19 — Audit Quick Wins
+
+### New
+- **`tasks/audit-reports/AUDIT-2026-03-19.md`**: Full audit report — architecture, UI/UX, feature gaps, simplification opportunities, quick wins.
+
+### Changed
+- **`src/components/dashboard/DashboardClient.tsx`**: Wire `TodoList` into Queue tab (side-by-side with SmartActionQueue). Replace local `timeAgo()` with `fmtRelative` from `formatters.ts`. Replace local `fmtDate()` with `fmtDateShort` (compact Mon DD format).
+- **`src/app/dashboard/contacts/page.tsx`**: Replace inline `fmtCurrency`, `fmtDate`, `fmtDateOnly` with imports from `@/lib/formatters`. Removes ~30 lines of duplicate code.
+- **`src/app/dashboard/page.tsx`**: Raise stale-loan threshold from 3 days to 7 days. Reduces "Needs Attention" section noise significantly.
+
+### Deleted
+- `src/components/dashboard/PipelineCharts.tsx` — orphaned, never imported
+- `src/components/dashboard/PipelineKPIs.tsx` — orphaned, never imported
+- `src/components/dashboard/PipelineSummary.tsx` — orphaned, never imported
+- `src/components/dashboard/RecentActivity.tsx` — orphaned, never imported
+- `src/components/dashboard/RecentLoans.tsx` — orphaned, never imported
+- `src/components/dashboard/UrgentFlags.tsx` — orphaned, never imported
+
+---
+
 ## [4.1.0] — 2026-03-18 — Scenario Builder Output Rebuild
 
 ### New

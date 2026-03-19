@@ -96,7 +96,7 @@ const LIST_META: Record<ListKey, { label: string }> = {
   hotleads:     { label: 'Hot Lead' },
 }
 
-const TABS = ['TODAY', 'WEEK', 'CONTACTS', 'SOCIAL', 'NEWSLETTERS', 'TRACKER', 'LOG', 'BRAIN DUMP'] as const
+const TABS = ['THIS WEEK', 'TODAY', 'WEEK', 'CONTACTS', 'SOCIAL', 'NEWSLETTERS', 'TRACKER', 'LOG', 'BRAIN DUMP'] as const
 type Tab = typeof TABS[number]
 
 const BLANK_STATE: MCCState = {
@@ -1714,6 +1714,486 @@ function LogTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
   )
 }
 
+// ── THIS WEEK tab — Rate Update + Newsletter cadence summary ─────────────────
+
+function ThisWeekTab({ s, save, onLogTracker }: {
+  s: MCCState
+  save: (next: MCCState) => void
+  onLogTracker: (id: string) => void
+}) {
+  const settings = useMarketingSettings()
+
+  // ── Rate Update inline logger ─────────────────────────────────────
+  const [showRateForm, setShowRateForm] = useState(false)
+  const RATE_BLANK = {
+    date: isoDate(), rate_30yr: '', rate_15yr: '', rate_arm: '',
+    audience: 'Realtors', notes: '', channel: 'Email + Text',
+  }
+  const [rateForm, setRateForm] = useState({ ...RATE_BLANK })
+
+  function saveRateUpdate() {
+    if (!rateForm.rate_30yr.trim()) { alert('30yr rate is required.'); return }
+    const now = new Date().toISOString()
+    const logEntry: LogEntry = {
+      id: uid(), date: now,
+      activity: `Rate Update sent — 30yr ${rateForm.rate_30yr} · ${rateForm.audience}`,
+      channel: rateForm.channel, notes: rateForm.notes,
+    }
+    save({
+      ...s,
+      log:  [...s.log, logEntry],
+      last: { ...s.last, 'rate-update': now },
+    })
+    // Persist to localStorage for rate-updates standalone page
+    if (typeof window !== 'undefined') {
+      const LS_KEY = 'loanos_rate_updates'
+      const existing: unknown[] = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] } })()
+      const entry = { ...rateForm, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
+      localStorage.setItem(LS_KEY, JSON.stringify([entry, ...existing]))
+    }
+    setRateForm({ ...RATE_BLANK })
+    setShowRateForm(false)
+  }
+
+  // ── Newsletter inline generator ───────────────────────────────────
+  const [showNLForm, setShowNLForm]       = useState(false)
+  const [genAudience, setGenAud]          = useState<GenAudience>('Realtors')
+  const [genNotes, setGenNotes]           = useState('')
+  const [generating, setGenerating]       = useState(false)
+  const [preview, setPreview]             = useState<GeneratedNewsletter | null>(null)
+  const [sendingMC, setSendingMC]         = useState(false)
+  const [publishing, setPublishing]       = useState(false)
+  const [statusMsg, setStatusMsg]         = useState('')
+
+  async function generateNewsletter() {
+    setGenerating(true); setStatusMsg(''); setPreview(null)
+    try {
+      const res = await fetch('/api/marketing/generate-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audience: genAudience, notes: genNotes, apiKey: settings.anthropic_api_key }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setStatusMsg(`Error: ${data.error}`); return }
+      setPreview(data as GeneratedNewsletter)
+    } catch { setStatusMsg('Generation failed — check Anthropic API key in Settings.') }
+    finally { setGenerating(false) }
+  }
+
+  async function sendMailchimp() {
+    if (!preview) return
+    if (!settings.mailchimp_api_key || !settings.mailchimp_server_prefix) {
+      setStatusMsg('Mailchimp credentials not configured. Go to Settings → Integrations.')
+      return
+    }
+    const listId = genAudience === 'Realtors' ? settings.mailchimp_realtor_list_id : settings.mailchimp_borrower_list_id
+    if (!listId) { setStatusMsg(`Mailchimp ${genAudience} list ID not configured.`); return }
+    setSendingMC(true); setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/send-mailchimp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: settings.mailchimp_api_key, server_prefix: settings.mailchimp_server_prefix,
+          list_id: listId, subject: preview.subject, html_body: preview.teaserHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`Mailchimp sent — Campaign ID: ${data.campaignId}`)
+      else setStatusMsg(`Mailchimp error: ${data.error}`)
+    } finally { setSendingMC(false) }
+  }
+
+  async function publishToWebsite() {
+    if (!preview) return
+    if (!settings.dispatch_webhook_url) {
+      setStatusMsg('Dispatch webhook not configured. Go to Settings → Website.')
+      return
+    }
+    setPublishing(true); setStatusMsg('')
+    try {
+      const res = await fetch('/api/marketing/publish-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dispatch_url: settings.dispatch_webhook_url, dispatch_secret: settings.dispatch_secret,
+          audience: genAudience, slug: preview.slug, title: preview.webTitle, html: preview.webHtml,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) setStatusMsg(`Published to website${data.url ? ` — ${data.url}` : ''}`)
+      else setStatusMsg(`Publish error: ${data.error}`)
+    } finally { setPublishing(false) }
+  }
+
+  function logNewsletter() {
+    if (!preview) return
+    const now = new Date().toISOString()
+    const nl: Newsletter = {
+      id: uid(), audience: genAudience, subject: preview.subject,
+      date: isoDate(), mailchimpUrl: '', openRate: '', notes: genNotes,
+    }
+    const lastUpd = { ...s.last }
+    if (genAudience === 'Realtors'  || genAudience === 'Both') lastUpd['realtor-nl']  = now
+    if (genAudience === 'Borrowers' || genAudience === 'Both') lastUpd['borrower-nl'] = now
+    const logEntry: LogEntry = {
+      id: uid(), date: now,
+      activity: `Newsletter generated & sent — ${preview.subject}`,
+      channel: 'Email', notes: genAudience,
+    }
+    save({ ...s, newsletters: [...s.newsletters, nl], log: [...s.log, logEntry], last: lastUpd })
+    setPreview(null); setShowNLForm(false); setGenNotes(''); setStatusMsg('')
+  }
+
+  // ── Computed values ───────────────────────────────────────────────
+  const rateLastSent    = s.last['rate-update']
+  const realtorNLLast   = s.last['realtor-nl']
+  const borrowerNLLast  = s.last['borrower-nl']
+
+  function cadenceLabel(iso: string | undefined | null, freq: number): { label: string; color: string } {
+    const d = daysSince(iso)
+    if (d === null)  return { label: 'Never sent', color: '#E05252' }
+    if (d === 0)     return { label: 'Sent today', color: '#4CAF82' }
+    if (d <= freq)   return { label: `${d}d ago`, color: '#4CAF82' }
+    if (d <= freq * 1.5) return { label: `${d}d ago — due soon`, color: '#C9A84C' }
+    return { label: `${d}d ago — overdue`, color: '#E05252' }
+  }
+
+  const rateCadence    = cadenceLabel(rateLastSent,   7)
+  const realtorCad     = cadenceLabel(realtorNLLast,  7)
+  const borrowerCad    = cadenceLabel(borrowerNLLast, 7)
+
+  const mailchimpConfigured = !!(settings.mailchimp_api_key && settings.mailchimp_server_prefix)
+  const dispatchConfigured  = !!settings.dispatch_webhook_url
+  const aiConfigured        = !!settings.anthropic_api_key
+
+  return (
+    <div className="flex flex-col gap-4 max-w-4xl">
+
+      {/* ── Section Label ── */}
+      <div className="font-mono text-[9px] tracking-widest" style={{ color: '#71717a' }}>
+        A — THIS WEEK · HIGH-FREQUENCY ACTIONS
+      </div>
+
+      {/* ── Section A: Rate Update ── */}
+      <Card style={{ borderColor: showRateForm ? '#C9A84C' : '#3f3f46' }}>
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="font-mono text-xs font-semibold" style={{ color: '#C9A84C' }}>RATE UPDATE</div>
+              <span
+                className="font-mono text-[8px] px-2 py-0.5 rounded-full"
+                style={{
+                  background: rateCadence.color + '22',
+                  color: rateCadence.color,
+                }}
+              >
+                {rateCadence.label}
+              </span>
+              {rateLastSent && (
+                <span className="font-mono text-[8px]" style={{ color: '#52525b' }}>
+                  {fmtDate(rateLastSent)}
+                </span>
+              )}
+            </div>
+            <div className="font-mono text-[9px]" style={{ color: '#71717a' }}>
+              Weekly rate communication to realtors and borrowers · every Friday
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Btn onClick={() => { setShowRateForm(v => !v) }} variant="gold">
+              {showRateForm ? 'COLLAPSE' : '+ LOG RATE UPDATE'}
+            </Btn>
+            <Btn onClick={() => onLogTracker('rate-update')}>QUICK LOG</Btn>
+          </div>
+        </div>
+
+        {showRateForm && (
+          <div className="border-t pt-3" style={{ borderColor: '#3f3f46' }}>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>DATE</div>
+                <Input type="date" value={rateForm.date} onChange={v => setRateForm(p => ({ ...p, date: v }))} />
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>30-YR FIXED *</div>
+                <Input value={rateForm.rate_30yr} onChange={v => setRateForm(p => ({ ...p, rate_30yr: v }))} placeholder="6.875%" />
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>15-YR FIXED</div>
+                <Input value={rateForm.rate_15yr} onChange={v => setRateForm(p => ({ ...p, rate_15yr: v }))} placeholder="6.125%" />
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>ARM</div>
+                <Input value={rateForm.rate_arm} onChange={v => setRateForm(p => ({ ...p, rate_arm: v }))} placeholder="5.875% (5/1)" />
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
+                <select
+                  value={rateForm.audience}
+                  onChange={e => setRateForm(p => ({ ...p, audience: e.target.value }))}
+                  className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                  style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
+                >
+                  {['Realtors', 'Borrowers', 'Both'].map(a => (
+                    <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>CHANNEL</div>
+                <select
+                  value={rateForm.channel}
+                  onChange={e => setRateForm(p => ({ ...p, channel: e.target.value }))}
+                  className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                  style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
+                >
+                  {['Email + Text', 'Email', 'Text', 'Mailchimp', 'Website'].map(c => (
+                    <option key={c} value={c} style={{ background: '#1a1a1a' }}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2 md:col-span-3">
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>NOTES (optional)</div>
+                <Input value={rateForm.notes} onChange={v => setRateForm(p => ({ ...p, notes: v }))} placeholder="Market context, lock advice…" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Btn onClick={saveRateUpdate} variant="gold">SAVE</Btn>
+              <Btn onClick={() => setShowRateForm(false)}>CANCEL</Btn>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* ── Section A: Newsletter ── */}
+      <Card style={{ borderColor: showNLForm ? '#C9A84C' : '#3f3f46' }}>
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <div className="font-mono text-xs font-semibold" style={{ color: '#C9A84C' }}>WEEKLY NEWSLETTER</div>
+              <span className="font-mono text-[8px] px-2 py-0.5 rounded-full" style={{ background: realtorCad.color + '22', color: realtorCad.color }}>
+                Realtors: {realtorCad.label}
+              </span>
+              <span className="font-mono text-[8px] px-2 py-0.5 rounded-full" style={{ background: borrowerCad.color + '22', color: borrowerCad.color }}>
+                Borrowers: {borrowerCad.label}
+              </span>
+            </div>
+            <div className="font-mono text-[9px] flex flex-wrap gap-3" style={{ color: '#71717a' }}>
+              <span>AI drafts · Mailchimp · website publish</span>
+              {!aiConfigured && (
+                <span style={{ color: '#E05252' }}>⚠ Anthropic key not configured</span>
+              )}
+              {!mailchimpConfigured && (
+                <span style={{ color: '#C9A84C' }}>⚠ Mailchimp not configured</span>
+              )}
+              {!dispatchConfigured && (
+                <span style={{ color: '#52525b' }}>Website publish not configured</span>
+              )}
+            </div>
+          </div>
+          <Btn onClick={() => { setShowNLForm(v => !v); setPreview(null); setStatusMsg('') }} variant="gold">
+            {showNLForm ? 'COLLAPSE' : 'GENERATE NEW'}
+          </Btn>
+        </div>
+
+        {showNLForm && (
+          <div className="border-t pt-3 flex flex-col gap-3" style={{ borderColor: '#3f3f46' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>AUDIENCE</div>
+                <select
+                  value={genAudience}
+                  onChange={e => setGenAud(e.target.value as GenAudience)}
+                  className="bg-transparent border-b font-mono text-xs px-1 py-0.5 outline-none w-full"
+                  style={{ borderColor: '#3f3f46', color: '#f4f4f5' }}
+                >
+                  {(['Realtors', 'Borrowers', 'Both'] as const).map(a => (
+                    <option key={a} value={a} style={{ background: '#1a1a1a' }}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>RATE / MARKET CONTEXT (optional)</div>
+                <Input value={genNotes} onChange={setGenNotes} placeholder="e.g. 30yr at 6.875%, Austin inventory up 12% MOM" />
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              <Btn onClick={generateNewsletter} variant="gold" disabled={generating}>
+                {generating ? 'GENERATING...' : 'GENERATE DRAFT'}
+              </Btn>
+              {preview && (
+                <>
+                  <Btn onClick={sendMailchimp} disabled={sendingMC || !mailchimpConfigured}>
+                    {sendingMC ? 'SENDING...' : 'SEND MAILCHIMP'}
+                  </Btn>
+                  <Btn onClick={publishToWebsite} disabled={publishing || !dispatchConfigured}>
+                    {publishing ? 'PUBLISHING...' : 'PUBLISH TO WEBSITE'}
+                  </Btn>
+                  <Btn onClick={logNewsletter} variant="green">LOG THIS</Btn>
+                </>
+              )}
+            </div>
+
+            {statusMsg && (
+              <div
+                className="font-mono text-[10px] px-3 py-2 rounded-sm"
+                style={{
+                  background: statusMsg.startsWith('✓') || statusMsg.includes('sent') || statusMsg.includes('Published') ? 'rgba(76,175,130,0.1)' : 'rgba(224,82,82,0.1)',
+                  color: statusMsg.startsWith('✓') || statusMsg.includes('sent') || statusMsg.includes('Published') ? '#4CAF82' : '#E05252',
+                  border: `1px solid ${statusMsg.startsWith('✓') || statusMsg.includes('sent') || statusMsg.includes('Published') ? '#4CAF8233' : '#E0525233'}`,
+                }}
+              >
+                {statusMsg}
+              </div>
+            )}
+
+            {preview && (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#C9A84C' }}>SUBJECT LINE</div>
+                  <div className="font-mono text-xs px-3 py-2 rounded-sm" style={{ background: 'rgba(201,168,76,0.08)', color: '#f4f4f5' }}>
+                    {preview.subject}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>TEASER EMAIL (Mailchimp)</div>
+                  <div
+                    className="text-xs rounded-sm p-3 overflow-auto max-h-40 font-mono leading-relaxed"
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', fontSize: 10 }}
+                    dangerouslySetInnerHTML={{ __html: preview.teaserHtml }}
+                  />
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] mb-1" style={{ color: '#71717a' }}>WEB PAGE</div>
+                  <div
+                    className="font-mono text-[9px] px-3 py-2 rounded-sm"
+                    style={{ background: '#0D0D0D', color: '#71717a', border: '1px solid #3f3f46', whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }}
+                  >
+                    {preview.webTitle} — slug: /{preview.slug}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* ── Section B: Email Tools ── */}
+      <div className="font-mono text-[9px] tracking-widest mt-2" style={{ color: '#71717a' }}>
+        B — EMAIL TOOLS
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {[
+          { label: 'Newsletter Generator', sub: 'AI drafts · Mailchimp · website', href: '/dashboard/marketing/content', configured: aiConfigured },
+          { label: 'Template Builder', sub: 'Pre-approval · CD · referral intro', href: '/dashboard/emails', configured: true },
+          { label: 'Campaign Builder', sub: 'Compose + send to Mailchimp list', href: '/dashboard/marketing/content', configured: mailchimpConfigured },
+        ].map((item, i) => (
+          <a
+            key={i}
+            href={item.href}
+            className="border rounded-sm px-4 py-3 flex flex-col gap-1 transition-colors hover:border-zinc-500"
+            style={{ background: '#18181b', borderColor: '#3f3f46', textDecoration: 'none' }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="font-mono text-[10px] font-semibold" style={{ color: '#f4f4f5' }}>{item.label}</div>
+              <div
+                className="font-mono text-[8px] px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: item.configured ? 'rgba(76,175,130,0.15)' : 'rgba(201,168,76,0.15)',
+                  color: item.configured ? '#4CAF82' : '#C9A84C',
+                }}
+              >
+                {item.configured ? 'READY' : 'CONFIGURE'}
+              </div>
+            </div>
+            <div className="font-mono text-[9px]" style={{ color: '#71717a' }}>{item.sub}</div>
+          </a>
+        ))}
+      </div>
+
+      {/* ── Section C: Reach ── */}
+      <div className="font-mono text-[9px] tracking-widest mt-2" style={{ color: '#71717a' }}>
+        C — REACH · CALL LISTS + DISTRIBUTION
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {[
+          {
+            label: 'Call Lists',
+            sub: `${s.contacts.realtors.length} Realtors · ${s.contacts.preapprovals.length} Pre-Approvals · ${s.contacts.inprocess.length} Active Files · ${s.contacts.hotleads.length} Hot Leads`,
+            action: 'OPEN',
+            color: '#4CAF82',
+            tab: 'CONTACTS' as Tab,
+          },
+          {
+            label: 'Mailchimp Sync',
+            sub: mailchimpConfigured ? 'Connected — Realtor + Borrower lists' : 'Not configured — add keys in Settings',
+            action: mailchimpConfigured ? 'READY' : 'CONFIGURE',
+            color: mailchimpConfigured ? '#4CAF82' : '#C9A84C',
+            href: mailchimpConfigured ? undefined : '/dashboard/settings',
+          },
+        ].map((item, i) => {
+          const handleClick = () => {
+            if ('tab' in item && item.tab) {
+              // Will be handled by parent — for now just navigate to contacts
+              window.location.href = '/dashboard/marketing?tab=contacts'
+            } else if ('href' in item && item.href) {
+              window.location.href = item.href
+            }
+          }
+          return (
+            <div
+              key={i}
+              onClick={handleClick}
+              className="border rounded-sm px-4 py-3 flex flex-col gap-1 cursor-pointer transition-colors hover:border-zinc-500"
+              style={{ background: '#18181b', borderColor: '#3f3f46' }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-[10px] font-semibold" style={{ color: '#f4f4f5' }}>{item.label}</div>
+                <div
+                  className="font-mono text-[8px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: item.color + '22', color: item.color }}
+                >
+                  {item.action}
+                </div>
+              </div>
+              <div className="font-mono text-[9px]" style={{ color: '#71717a' }}>{item.sub}</div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── Section D: Analytics ── */}
+      <div className="font-mono text-[9px] tracking-widest mt-2" style={{ color: '#71717a' }}>
+        D — ANALYTICS · CADENCE + ACTIVITY LOG
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {TRACKERS.slice(0, 4).map(t => {
+          const d = daysSince(s.last[t.id])
+          const color = statusColor(d, t.freq)
+          return (
+            <div
+              key={t.id}
+              className="border rounded-sm px-3 py-3 cursor-pointer hover:border-zinc-500 transition-colors"
+              style={{ background: '#18181b', borderColor: '#3f3f46' }}
+              onClick={() => onLogTracker(t.id)}
+            >
+              <div className="font-mono text-[9px] tracking-widest mb-1" style={{ color: '#71717a' }}>{t.name.toUpperCase()}</div>
+              <div className="font-mono text-lg font-semibold" style={{ color }}>
+                {d === null ? 'Never' : d === 0 ? 'Today' : `${d}d`}
+              </div>
+              <div className="font-mono text-[8px] mt-0.5" style={{ color: '#52525b' }}>
+                {s.last[t.id] ? fmtDate(s.last[t.id]) : '—'} · every {t.freq}d
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── BRAIN DUMP tab ────────────────────────────────────────────────────────────
 
 function BrainDumpTab({ s, save }: { s: MCCState; save: (next: MCCState) => void }) {
@@ -1793,7 +2273,7 @@ export default function MarketingPage() {
   const [s, setState] = useState<MCCState>(BLANK_STATE)
   const [tab, setTab] = useState<Tab>(() => {
     const p = searchParams?.get('tab')?.toUpperCase() as Tab | undefined
-    return p && (TABS as readonly string[]).includes(p) ? p : 'TODAY'
+    return p && (TABS as readonly string[]).includes(p) ? p : 'THIS WEEK'
   })
   const [loading, setLoading] = useState(true)
 
@@ -1893,6 +2373,16 @@ export default function MarketingPage() {
   return (
     <div className="flex flex-col gap-3">
 
+      {/* ── Page Header ── */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="font-mono text-lg font-bold" style={{ color: '#f4f4f5' }}>Marketing Hub</h1>
+          <p className="font-mono text-[10px] mt-0.5" style={{ color: '#71717a' }}>
+            Weekly cadence · rate updates · newsletters · calls · social · activity log
+          </p>
+        </div>
+      </div>
+
       {/* ── Stat Row ── */}
       <StatRow todayDow={todayDow} todayTasks={todayTasks} s={s} isWeekend={isWeekend} />
 
@@ -1901,23 +2391,29 @@ export default function MarketingPage() {
 
       {/* ── Tab nav ── */}
       <div className="flex flex-wrap gap-1">
-        {TABS.map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className="font-mono text-[10px] tracking-widest px-3 py-1.5 rounded-sm transition-colors"
-            style={{
-              background: tab === t ? '#C9A84C' : '#09090b',
-              color:      tab === t ? '#000000' : '#71717a',
-              border:     `1px solid ${tab === t ? '#C9A84C' : '#3f3f46'}`,
-            }}
-          >
-            {t}
-          </button>
-        ))}
+        {TABS.map(t => {
+          const isThisWeek = t === 'THIS WEEK'
+          const isActive   = tab === t
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="font-mono text-[10px] tracking-widest px-3 py-1.5 rounded-sm transition-colors"
+              style={{
+                background: isActive ? '#C9A84C' : isThisWeek ? 'rgba(201,168,76,0.08)' : '#09090b',
+                color:      isActive ? '#000000' : isThisWeek ? '#C9A84C' : '#71717a',
+                border:     `1px solid ${isActive ? '#C9A84C' : isThisWeek ? 'rgba(201,168,76,0.4)' : '#3f3f46'}`,
+                fontWeight: isThisWeek ? 600 : 400,
+              }}
+            >
+              {t}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── Tab content ── */}
+      {tab === 'THIS WEEK'   && <ThisWeekTab s={s} save={save} onLogTracker={openLogModal} />}
       {tab === 'TODAY' && (isWeekend
         ? <div className="font-mono text-xs max-w-sm" style={{ color: '#71717a' }}>
             No tasks today — it&apos;s the weekend. Come back Monday.

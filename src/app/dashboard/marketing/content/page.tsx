@@ -138,7 +138,7 @@ function useMarketingSettings(): UserMarketingSettings {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function ContentDashboardPage() {
+export default function NewsletterGeneratorPage() {
   const supabase = useSupabase()
   const settings = useMarketingSettings()
   const { userId, loading: orgLoading } = useOrg()
@@ -352,9 +352,9 @@ export default function ContentDashboardPage() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="font-mono text-lg font-bold" style={{ color: '#f4f4f5' }}>Content Dashboard</h1>
+        <h1 className="font-mono text-lg font-bold" style={{ color: '#f4f4f5' }}>Newsletter Generator</h1>
         <p className="font-mono text-[10px] mt-0.5" style={{ color: '#71717a' }}>
-          Generate newsletters · send via Mailchimp · publish to website
+          AI drafts weekly newsletter · send via Mailchimp · publish to website
         </p>
       </div>
 

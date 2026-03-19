@@ -140,7 +140,7 @@ function renderSVGBarChart(
 function renderSummaryTable(rows: ScenarioDisplayRow[], mode: 'purchase' | 'refinance'): string {
   const hasPurchasePrice = mode === 'purchase' && rows.some(r => r.purchasePrice)
 
-  const headerCells = rows.map((r, i) => {
+  const headerCells = rows.map((r) => {
     const isRec = r.isRecommended
     return `<th style="${isRec ? 'background:#0A1628;color:#fff;border:2px solid #C9A84C;' : 'background:#f5f5f5;color:#333;'} padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">
       ${r.label}${isRec ? '<br><span style="font-size:9px;color:#C9A84C;font-weight:600;">★ Recommended</span>' : ''}

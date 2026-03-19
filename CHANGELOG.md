@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [4.1.0] — 2026-03-18 — Scenario Builder Output Rebuild
+
+### New
+- **`src/lib/scenarios/displayData.ts`**: Shared `DisplayData` utility — single source of truth for all scenario output values. Exports `buildPurchaseDisplayData()` and `buildRefiDisplayData()`. Used by in-app output, PDF, and share page.
+- **`src/app/dashboard/scenarios/new/ScenarioSummaryTable.tsx`**: Comparison table component. Recommended column gets navy bg + gold border + "★ Recommended" badge. Accepts `{ data: DisplayData }`.
+- **`src/app/dashboard/scenarios/new/KeyMetricsGrid.tsx`**: 4 stat cards — Monthly Savings, 5yr, 15yr, Total Interest. Green highlight when positive.
+- **`src/app/dashboard/scenarios/new/BreakEvenTable.tsx`**: Break-even analysis table. Gold break-even months column. Returns null when no rows.
+
+### Changed
+- **`src/app/api/scenarios/generate-narrative/route.ts`**: Prompt changed to 4-paragraph plain English (no bullets). Auth errors return sanitized message. Server-side logging of `isAuthError` + `hasApiKey` for diagnostics.
+- **`src/app/dashboard/scenarios/new/NarrativeSection.tsx`**: Client error handling shows sanitized text in red. Removed dead ternary.
+- **`src/app/dashboard/scenarios/new/ScenarioCharts.tsx`**: Completely rebuilt — 3 charts driven by `{ data: DisplayData }`. Bar charts use `Cell` (gold for recommended) + `LabelList` with custom `BarTopLabel` SVG renderer. Cumulative savings `LineChart` with `ReferenceDot` break-even annotations.
+- **`src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`**: Step 2 renders 7-section output via shared `DisplayData`. `ScenarioSummaryTable → KeyMetricsGrid → BreakEvenTable → ScenarioCharts`. Removed old `ResultsTable` reference.
+- **`src/app/api/scenarios/generate-pdf/route.ts`**: 7-section HTML layout. Inline SVG bar charts (print-perfect). Sections: summary table, key metrics, break-even table, monthly payment chart, total interest chart, AI analysis, closing costs appendix.
+- **`src/app/share/[token]/page.tsx`**: 7-section layout using shared display components. CSS variables injected via dark-theme wrapper. Calculations re-run from raw `scenarios_data` on every load.
+
+---
+
 ## [4.0.0] — 2026-03-18 — Multi-Tenancy Completion
 
 ### New

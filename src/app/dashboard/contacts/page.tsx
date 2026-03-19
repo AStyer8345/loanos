@@ -8,6 +8,7 @@ import { useOutreachChat, type SelectedContact } from '@/components/outreach/Out
 import Papa from 'papaparse'
 import { normalizeStage } from '@/lib/stageNormalization'
 import { updateLastTouch } from '@/lib/updateLastTouch'
+import { fmtCurrency, fmtDate, fmtDateOnly } from '@/lib/formatters'
 import { Trash2, Pencil, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import {
@@ -83,30 +84,7 @@ const STAGE_TO_LIST: Record<string, string> = {
   'Other':        'unassigned',
 }
 
-function fmtCurrency(n: number | null) {
-  if (n == null) return '—'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
-
-function fmtDate(s: string | null) {
-  if (!s) return '—'
-  // If it looks like a date-only string (YYYY-MM-DD), append T00:00 to avoid timezone shift
-  const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s)
-  if (isNaN(d.getTime())) return '—'
-  const mo = String(d.getMonth() + 1).padStart(2, '0')
-  const da = String(d.getDate()).padStart(2, '0')
-  return `${mo}/${da}/${d.getFullYear()}`
-}
-
-/** Format any ISO timestamp or date string as MM/DD/YYYY, date only. */
-function fmtDateOnly(s: string | null): string {
-  if (!s) return '—'
-  const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s)
-  if (isNaN(d.getTime())) return '—'
-  const mo = String(d.getMonth() + 1).padStart(2, '0')
-  const da = String(d.getDate()).padStart(2, '0')
-  return `${mo}/${da}/${d.getFullYear()}`
-}
+// fmtCurrency, fmtDate, fmtDateOnly imported from '@/lib/formatters'
 
 /** Normalize for tel: href (digits and + only) */
 function telHref(phone: string | null): string | null {

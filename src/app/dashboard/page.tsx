@@ -87,7 +87,7 @@ export default async function DashboardPage() {
     }
     if (isActive && loan.updated_at) {
       const daysSince = Math.floor((now.getTime() - new Date(loan.updated_at).getTime()) / (1000 * 60 * 60 * 24))
-      if (daysSince >= 3) {
+      if (daysSince >= 7) {
         staleLoans.push({ id: loan.id, name: borrowerName, daysSinceActivity: daysSince })
       }
     }

@@ -14,7 +14,8 @@ import {
 } from 'recharts'
 import DailyBriefingPanel from './DailyBriefingPanel'
 import DailyScheduleWidget from './DailyScheduleWidget'
-import { fmtCurrency, fmtK } from '@/lib/formatters'
+import TodoList from './TodoList'
+import { fmtCurrency, fmtK, fmtRelative } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -64,18 +65,7 @@ const ChartTooltip = ({ active, payload, label }: TTProps) => {
   )
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(mins / 60)
-  const days = Math.floor(hours / 24)
-  if (days > 0) return `${days}d ago`
-  if (hours > 0) return `${hours}h ago`
-  if (mins > 0) return `${mins}m ago`
-  return 'just now'
-}
-
-function fmtDate(s: string | null): string {
+function fmtDateShort(s: string | null): string {
   if (!s) return '—'
   return new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
@@ -204,7 +194,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                 {props.urgentFlags.map(f => (
                   <Link key={f.id + f.flag} href={`/dashboard/loans/${f.id}`} className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-2 py-1.5 -mx-2 transition-colors">
                     <span className="text-zinc-200">{f.name}</span>
-                    <span className="text-amber-400">{f.flag} — {fmtDate(f.date)}</span>
+                    <span className="text-amber-400">{f.flag} — {fmtDateShort(f.date)}</span>
                   </Link>
                 ))}
               </div>
@@ -274,7 +264,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                             <td className="px-4 py-2.5 text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</td>
                             <td className="px-4 py-2.5"><StageBadge status={loan.status} /></td>
                             <td className="px-4 py-2.5 text-right text-[#C9A84C] hidden md:table-cell">{loan.commission_amount ? fmt(loan.commission_amount) : '—'}</td>
-                            <td className="px-4 py-2.5 text-right text-zinc-500 hidden md:table-cell">{fmtDate(loan.estimated_closing_date || loan.closing_date)}</td>
+                            <td className="px-4 py-2.5 text-right text-zinc-500 hidden md:table-cell">{fmtDateShort(loan.estimated_closing_date || loan.closing_date)}</td>
                           </tr>
                         )
                       })}
@@ -308,7 +298,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="text-xs font-mono text-zinc-200 leading-snug">{summary}</div>
-                            <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{timeAgo(entry.created_at)}</span>
+                            <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{fmtRelative(entry.created_at)}</span>
                           </div>
                         </div>
                       </>
@@ -453,7 +443,14 @@ export default function DashboardClient(props: DashboardClientProps) {
 
       {/* ═══ QUEUE TAB ═══ */}
       {tab === 'queue' && (
-        <SmartActionQueue scoredLoans={props.scoredLoans} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <SmartActionQueue scoredLoans={props.scoredLoans} />
+          </div>
+          <div>
+            <TodoList />
+          </div>
+        </div>
       )}
     </div>
   )

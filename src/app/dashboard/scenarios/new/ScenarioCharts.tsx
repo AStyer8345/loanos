@@ -85,7 +85,8 @@ function MonthlyPaymentChart({ data }: { data: DisplayData }) {
           <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
           <Tooltip
             {...tooltipStyle}
-            formatter={(v: number) => [`$${Number(v).toLocaleString()}`, 'Monthly Payment']}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Monthly Payment']}
           />
           <Bar dataKey="payment" radius={[6, 6, 0, 0]} maxBarSize={80}>
             {chartData.map((entry, i) => (
@@ -122,7 +123,7 @@ function TotalInterestChart({ data }: { data: DisplayData }) {
           <Tooltip
             {...tooltipStyle}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(v: number, _: string, props: any) => {
+            formatter={(v: any, _: any, props: any) => {
               const diff = props?.payload?.diff ?? 0
               const suffix = diff > 0 ? ` (saves ${fmtK(diff)} vs. first)` : diff < 0 ? ` (costs ${fmtK(-diff)} more)` : ''
               return [`$${Number(v).toLocaleString()}${suffix}`, 'Total Interest']
@@ -167,8 +168,10 @@ function CumulativeSavingsChart({ data }: { data: DisplayData }) {
           <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 10 }} />
           <Tooltip
             {...tooltipStyle}
-            formatter={(v: number, name: string) => [fmtK(v), name]}
-            labelFormatter={(month: number) => `Month ${month}`}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter={(v: any, name: any) => [fmtK(Number(v)), name]}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            labelFormatter={(month: any) => `Month ${month}`}
           />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
           {chartLabels.map((label, i) => (

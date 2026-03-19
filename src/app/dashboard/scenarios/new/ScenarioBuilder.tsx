@@ -8,9 +8,12 @@ import type {
   ReinvestmentResult, LoanTerm,
 } from '@/lib/scenarios/types'
 import { DEFAULT_CLOSING_COSTS, ensureClosingCosts, sumClosingCosts } from '@/lib/scenarios/utils'
+import { buildPurchaseDisplayData, buildRefiDisplayData } from '@/lib/scenarios/displayData'
 import ScenarioCard from './ScenarioCard'
 import CurrentLoanCard from './CurrentLoanCard'
-import ResultsTable from './ResultsTable'
+import ScenarioSummaryTable from './ScenarioSummaryTable'
+import KeyMetricsGrid from './KeyMetricsGrid'
+import BreakEvenTable from './BreakEvenTable'
 import ScenarioCharts from './ScenarioCharts'
 import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
@@ -493,21 +496,19 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                   </button>
                 </div>
 
-                <ResultsTable
-                  mode={mode}
-                  purchaseScenarios={purchaseScenarios}
-                  purchaseResults={purchaseResults}
-                  refiScenarios={refiScenarios}
-                  refiResults={refiResults}
-                />
-
-                <ScenarioCharts
-                  mode={mode}
-                  purchaseScenarios={purchaseScenarios}
-                  purchaseResults={purchaseResults}
-                  refiScenarios={refiScenarios}
-                  refiResults={refiResults}
-                />
+                {(() => {
+                  const displayData = mode === 'purchase'
+                    ? buildPurchaseDisplayData(purchaseScenarios, purchaseResults)
+                    : buildRefiDisplayData(currentLoan, refiScenarios, refiResults)
+                  return (
+                    <>
+                      <ScenarioSummaryTable data={displayData} />
+                      <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} />
+                      <BreakEvenTable rows={displayData.breakEvenRows} mode={displayData.mode} />
+                      <ScenarioCharts data={displayData} />
+                    </>
+                  )
+                })()}
 
                 <ReinvestmentAnalysis
                   mode={mode}

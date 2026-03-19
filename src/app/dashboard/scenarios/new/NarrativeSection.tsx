@@ -52,7 +52,10 @@ export default function NarrativeSection({
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to generate narrative')
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(errBody.error || `Request failed (${res.status})`)
+      }
 
       // Stream response
       const reader = res.body?.getReader()
@@ -92,8 +95,9 @@ export default function NarrativeSection({
         }
       }
     } catch (e) {
-      console.error('Narrative generation failed:', e)
-      onNarrativeGenerated('Failed to generate analysis. Please try again.')
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      console.error('[NarrativeSection] generation failed:', msg)
+      onNarrativeGenerated('Error: AI generation failed. Please try again.')
     } finally {
       setGenerating(false)
     }
@@ -163,9 +167,12 @@ export default function NarrativeSection({
         ) : (
           <div
             className="text-sm leading-relaxed whitespace-pre-wrap"
-            style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+            style={{
+              color: narrative.startsWith('Error:') ? '#C0392B' : 'var(--sc-text)',
+              fontFamily: "'IBM Plex Mono', monospace",
+            }}
           >
-            {narrative || (generating ? 'Generating analysis...' : '')}
+            {narrative}
             {generating && <span className="inline-block w-2 h-4 ml-0.5 animate-pulse" style={{ background: 'var(--sc-accent)' }} />}
           </div>
         )}

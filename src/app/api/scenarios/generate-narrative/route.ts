@@ -61,24 +61,22 @@ ${r?.debtsEliminated?.length ? `- Debts Eliminated: ${r.debtsEliminated.map((d: 
       dataContext += `\n\n**Reinvestment:** If the $${Number(reinvestmentResult.monthlySavings).toLocaleString()}/month savings is invested at ${reinvestmentResult.returnRate}% for ${reinvestmentResult.horizonYears} years, it grows to $${Number(reinvestmentResult.futureValue).toLocaleString()}.`
     }
 
-    const systemPrompt = `You are a mortgage scenario analysis writer. Write a clear, plain-English analysis comparing loan scenarios for ${borrowerName || 'the borrower'}.
+    const systemPrompt = `You are a senior mortgage advisor. Write a clear analysis of these loan scenarios for ${borrowerName || 'the borrower'}.
 
-Format:
-- Use bullet points (•) for each key insight — NO flowing paragraphs
-- Group bullets under short bold headers: **Bottom Line**, **Monthly Impact**, **Long-Term View**, **Trade-Offs**${mode === 'refinance' ? ', **Break-Even**' : ''}
-- Each bullet should be one crisp sentence — no filler
-- 8-14 bullets total
+Format: Plain paragraphs only — no bullet points, no headers, no bold text. Write in paragraph form.
+Length: Exactly 4 paragraphs, maximum 5 sentences each.
+
+Paragraph 1 — Which scenario wins and why: Name the best option specifically. Include the exact dollar difference in monthly payment and total interest.
+Paragraph 2 — Break-even timing in plain English: For refinance, explain when the borrower recoups closing costs. For purchase, compare when each option becomes more expensive than the other.
+Paragraph 3 — When each scenario makes sense: Short-term hold vs long-term hold, income stability, risk tolerance.
+Paragraph 4 — One clear recommendation with reasoning, plus any risks or trade-offs worth flagging.
 
 Rules:
-- Write in plain English any borrower can understand
-- Compare scenarios objectively — highlight key trade-offs
-- Frame around the borrower's situation: "If you plan to stay less than 7 years..." / "If you want payment certainty..."
-${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether the refi makes sense given remaining term' : ''}
-- Address equity building differences between options
-- Mention reinvestment opportunity if data is provided
-- NEVER reference protected classes (race, religion, gender, national origin, familial status, disability, age)
-- NEVER make lending decisions or recommendations — present trade-offs objectively
-- End with a single bullet: "• This analysis is for informational purposes only."`
+- Write in plain English — no jargon
+- Be specific with dollar amounts and months
+- Never reference protected classes (race, religion, gender, national origin, familial status, disability, age)
+- Never make a lending decision — present trade-offs only
+- End last paragraph with: "This analysis is for informational purposes only."`
 
     // Stream response using SSE
     const anthropic = await getAnthropicClient()
@@ -120,8 +118,16 @@ ${mode === 'refinance' ? '- Emphasize break-even, monthly savings, and whether t
           }
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Generation failed'
-          console.error('[narrative] stream error:', err)
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: msg })}\n\n`))
+          const isAuthError = msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthorized')
+          console.error('[narrative] stream error:', {
+            message: msg,
+            isAuthError,
+            hasApiKey: !!process.env.ANTHROPIC_API_KEY,
+          })
+          const clientMsg = isAuthError
+            ? 'AI generation is not configured. Contact your administrator.'
+            : 'AI generation failed. Please try again.'
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: clientMsg })}\n\n`))
           controller.close()
         }
       },

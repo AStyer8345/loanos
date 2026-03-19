@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
     } else {
       const { data } = await supabase
         .from('chat_sessions')
-        .insert({ record_id: recordId, record_type: recordType, messages: updatedMessages })
+        .insert({ record_id: recordId, record_type: recordType, messages: updatedMessages, user_id: userId })
         .select('id')
         .single()
       newSessionId = data?.id

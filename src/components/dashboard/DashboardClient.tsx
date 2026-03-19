@@ -206,7 +206,7 @@ export default function DashboardClient(props: DashboardClientProps) {
             <div className="flex items-center gap-2 mb-3">
               <Clock size={14} className="text-orange-400" />
               <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Needs Attention</span>
-              <span className="text-[10px] font-mono text-zinc-600">3+ days no activity</span>
+              <span className="text-[10px] font-mono text-zinc-600">7+ days no activity</span>
               {props.staleLoans.length > 0 && (
                 <Link href="/dashboard/loans?filter=no_activity_3days" className="ml-auto flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
                   View all <ArrowRight size={9} />

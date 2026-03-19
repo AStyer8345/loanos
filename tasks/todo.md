@@ -1,15 +1,13 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-18 (morning audit)_
+_Last updated: 2026-03-19 (morning audit)_
 
 ---
 
 ## 🔴 High Priority
 
-- [ ] **Fix Contract Received `fetch is not defined`** — `Upsert Contacts` Code node in workflow `UfNcdpoVKQZqy0fj` uses native `fetch()` which is not available in n8n's JS sandbox. Replace `fetch` calls with HTTP Request nodes or `$helpers.request()`. Workflow is active and erroring.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
-- [ ] **Fix chat_sessions RLS** — `USING (true)` policy means any authenticated user can read all chat sessions. Add `user_id` column, backfill from record owner, scope policy to `auth.uid() = user_id`. Critical before multi-tenant.
 
 ---
 
@@ -23,13 +21,20 @@ _Last updated: 2026-03-18 (morning audit)_
 
 ## 🟢 Low Priority / Cleanup
 
-- [ ] **Wire TodoList to dashboard** — `src/components/dashboard/TodoList.tsx` is fully built (reads/writes `todo_items` via `/api/todos`) but is never imported or rendered anywhere. Add to DashboardClient Pipeline tab (Queue tab or below Daily Schedule Widget).
 - [ ] **Migration file numbering** — files 001–015 use 3-digit prefix, 0016/0017 use 4-digit. Rename to 016/017 for consistency.
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (session 8 — 2026-03-19 morning audit)
+
+- [x] **chat_sessions missing user_id on insert** — `/api/chat/route.ts` was inserting new sessions without `user_id`. After migration 020 scoped RLS to `auth.uid() = user_id`, any browser-direct query would fail to see new sessions. Fixed: added `user_id: userId` to the insert payload.
+- [x] **Dashboard "Needs Attention" label mismatch** — UI said "3+ days no activity" but threshold was 7 days. Fixed label to "7+ days no activity".
+- [x] **Contract Received `fetch is not defined`** — Confirmed already fixed. `Upsert Contacts` node uses `this.helpers.httpRequest()` in current workflow (last updated 2026-03-16). Last successful execution: run 306. Todo was stale.
+- [x] **Fix chat_sessions RLS** — Migration 020 was already applied. `user_id` column exists and policies are scoped to `auth.uid() = user_id`. Todo was stale.
+- [x] **Wire TodoList to dashboard** — `TodoList` is already imported and rendered in Queue tab of `DashboardClient.tsx` (line 451). Todo was stale.
 
 ## ✅ Completed (session 7 — 2026-03-18 morning audit)
 

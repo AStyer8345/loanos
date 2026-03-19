@@ -6,8 +6,6 @@ import { TRACKERS } from '@/lib/marketing/schedule'
 import { currentWeekBoundaries, channelToType, formatWeekLabel } from '@/lib/marketing/utils'
 import { SectionLabel, FieldLabel, Input, Textarea, Btn, TypeBadge, CadenceBadge } from './shared'
 
-const GOLD = '#C9A84C'
-
 type Props = {
   mccState: MCCState
   onSave:   (next: MCCState) => Promise<void>

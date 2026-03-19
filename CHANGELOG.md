@@ -1,5 +1,44 @@
 # LoanOS Changelog
 
+## [4.4.0] — 2026-03-19 — Marketing Tab Redesign (3-Tab Command Center)
+
+### New
+- **`src/lib/marketing/types.ts`**: MCCContact, LogEntry, MCCState, BLANK_STATE, APR_OFFSETS, RateRow, DEFAULT_RATE_ROWS, LOG_CHANNELS, LogChannel types and constants
+- **`src/lib/marketing/utils.ts`**: aprForProduct, cadenceColor, channelToType, buildRatesString, currentWeekBoundaries, formatDaysAgo, formatWeekLabel, todayString utilities (34 Vitest tests)
+- **`src/app/dashboard/marketing/_components/shared.tsx`**: Card, SectionLabel, FieldLabel, Input, Textarea, Btn (4 variants), CadenceBadge, Banner, Spinner, TypeBadge UI atoms
+- **`src/app/dashboard/marketing/_components/useMCCState.ts`**: Supabase mcc_state read/write hook + mergedState helper; PGRST116 handled as first-time user
+- **`src/app/dashboard/marketing/_components/RateUpdateForm.tsx`**: 6-row rates table with APR auto-calc, preview/publish/schedule flow wired to `generate-rate-update` Netlify function, auto-logs to HISTORY
+- **`src/app/dashboard/marketing/_components/NewsletterForm.tsx`**: Structured fields + custom prompt modes, wired to `generate-newsletter` Netlify function, auto-logs to HISTORY
+- **`src/app/dashboard/marketing/_components/SendTab.tsx`**: Inner toggle (Rate Update / Newsletter), cadence badges
+- **`src/app/dashboard/marketing/_components/ContactCard.tsx`**: Mark Called inline flow; calledToday computed at render from lastTouch vs todayString(); tracker updates for realtors/preapprovals lists; timezone-safe date math
+- **`src/app/dashboard/marketing/_components/CallsTab.tsx`**: 4 contact lists (Realtors, Pre-Approvals, Active Files, Hot Leads), add form, CSV import with deduplication, delete confirm
+- **`src/app/dashboard/marketing/_components/HistoryTab.tsx`**: Week navigation (Monday–Sunday), 6-chip cadence health strip with showDaysAgo, log table (DATE/ACTIVITY/TYPE/CHANNEL), manual log entry with social tracker update
+
+### Changed
+- **`src/app/dashboard/marketing/page.tsx`**: Full rewrite — 2440-line monolith → 83-line 3-tab shell (SEND / CALLS / HISTORY). IBM Plex Mono font, gold header, loading/error states
+- **`src/lib/marketing/schedule.ts`**: Stripped to 6-entry TRACKERS constant only (removed DAYS, TCOLS, DayTask, DayDef exports)
+- **`src/components/dashboard/DailyScheduleWidget.tsx`**: Inlined DAYS/TCOLS constants (no longer imports from schedule.ts)
+
+### Deleted
+- `src/app/dashboard/marketing/content/page.tsx`
+- `src/app/dashboard/marketing/social/page.tsx`
+- `src/app/dashboard/marketing/rate-updates/page.tsx`
+- `src/app/api/marketing/generate-newsletter/route.ts`
+- `src/app/api/marketing/publish-newsletter/route.ts`
+- `src/app/api/marketing/run-testimonials/route.ts`
+- `src/app/api/marketing/send-mailchimp/route.ts`
+- `src/app/api/marketing/log-social-post/route.ts`
+
+### Notes
+- All marketing state in existing `mcc_state` Supabase table (no schema changes)
+- TYPE badge derived from channel at render — never stored
+- `calledToday` computed at render — never stored
+- `todayString()` uses local date components (not UTC toISOString) to avoid timezone off-by-one
+- Cadence health uses `cadenceColor()` with Math.floor for integer-day boundary stability
+- Log entry dates use noon-UTC anchor (`T12:00:00`) for correct week-filter behavior in all US timezones
+
+---
+
 ## [4.3.0] — 2026-03-19 — Scenario Output Layout Restructure
 
 ### Changed

@@ -13,9 +13,10 @@ export type UseMCCStateReturn = {
 
 /**
  * Reads and writes the mcc_state JSON blob in Supabase.
- * Table schema: id (uuid), user_id (uuid FK auth.users), state (jsonb), updated_at (timestamptz)
- * Read:  SELECT state FROM mcc_state WHERE user_id = auth.uid() LIMIT 1
- * Write: Upsert on (user_id) conflict — sets state + updated_at
+ * Table schema: user_id (uuid), key (text), value (jsonb), updated_at (timestamptz)
+ * The marketing command center uses key = 'mcc'.
+ * Read:  SELECT value FROM mcc_state WHERE user_id = auth.uid() AND key = 'mcc'
+ * Write: Upsert on (user_id, key) conflict — sets value + updated_at
  *
  * First-time user: if no record exists, state is null until first save.
  * First save writes BLANK_STATE merged with the new changes.
@@ -36,9 +37,9 @@ export function useMCCState(): UseMCCStateReturn {
 
         const { data, error: dbErr } = await supabase
           .from('mcc_state')
-          .select('state')
+          .select('value')
           .eq('user_id', user.id)
-          .limit(1)
+          .eq('key', 'mcc')
           .single()
 
         if (cancelled) return
@@ -46,8 +47,8 @@ export function useMCCState(): UseMCCStateReturn {
         if (dbErr && dbErr.code !== 'PGRST116') {
           // PGRST116 = no rows found — that's fine (first-time user)
           setError(dbErr.message)
-        } else if (data?.state) {
-          setState(data.state as MCCState)
+        } else if (data?.value) {
+          setState(data.value as MCCState)
         }
         // else: first-time user — state stays null
       } catch (e) {
@@ -68,8 +69,8 @@ export function useMCCState(): UseMCCStateReturn {
     const { error: upsertErr } = await supabase
       .from('mcc_state')
       .upsert(
-        { user_id: user.id, state: next, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' }
+        { user_id: user.id, key: 'mcc', value: next, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,key' }
       )
 
     if (upsertErr) throw new Error(upsertErr.message)

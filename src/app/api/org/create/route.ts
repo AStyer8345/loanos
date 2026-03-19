@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     if (profileError) throw profileError
 
     // Create default org_settings row (best-effort — table exists after migration 039)
-    await service.from('org_settings').insert({ organization_id: org.id }).then(() => null).catch(() => null)
+    await service.from('org_settings').insert({ organization_id: org.id }).then(() => null, () => null)
 
     return NextResponse.json({ organizationId: org.id })
   } catch (err) {

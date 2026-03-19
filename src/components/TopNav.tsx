@@ -113,19 +113,7 @@ export default function TopNav() {
             onToggle={() => toggleDropdown('marketing')}
             items={[
               {
-                label: 'Rate Update',
-                onClick: () => navigate('/dashboard/marketing/rate-updates'),
-              },
-              {
-                label: 'Newsletter Generator',
-                onClick: () => navigate('/dashboard/marketing/content'),
-              },
-              {
-                label: 'Social Posts',
-                onClick: () => navigate('/dashboard/marketing/social'),
-              },
-              {
-                label: 'Marketing Hub',
+                label: 'Marketing Command Center',
                 onClick: () => navigate('/dashboard/marketing'),
               },
               {
@@ -288,31 +276,10 @@ export default function TopNav() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/marketing/rate-updates')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Rate Update</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/marketing/content')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Newsletter Generator</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/marketing/social')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
-              >
-                <span>Social Posts</span>
-              </button>
-              <button
-                type="button"
                 onClick={() => navigate('/dashboard/marketing')}
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
               >
-                <span>Marketing Hub</span>
+                <span>Marketing Command Center</span>
               </button>
               <button
                 type="button"

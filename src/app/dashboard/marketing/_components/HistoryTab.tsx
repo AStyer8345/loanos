@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { type MCCState, type LogEntry, LOG_CHANNELS } from '@/lib/marketing/types'
+import { type MCCState, type LogEntry, LOG_CHANNELS, type LogChannel } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
 import { currentWeekBoundaries, channelToType, formatWeekLabel } from '@/lib/marketing/utils'
 import { SectionLabel, FieldLabel, Input, Textarea, Btn, TypeBadge, CadenceBadge } from './shared'
@@ -16,8 +16,13 @@ type Props = {
 export default function HistoryTab({ mccState, onSave }: Props) {
   const [weekOffset, setWeekOffset] = useState(0)
   const [showLogForm, setShowLogForm] = useState(false)
-  const [logForm, setLogForm]   = useState({
-    activity: '', channel: 'Task' as string, date: new Date().toISOString().slice(0, 10), notes: '',
+  const [logForm, setLogForm] = useState<{
+    activity: string
+    channel:  LogChannel
+    date:     string
+    notes:    string
+  }>({
+    activity: '', channel: 'Task', date: new Date().toISOString().slice(0, 10), notes: '',
   })
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -28,6 +33,8 @@ export default function HistoryTab({ mccState, onSave }: Props) {
   const isCurrentWeek = weekOffset === 0
 
   // ── Filter log entries for selected week ───────────────────────────────────
+  // entry.date is stored as UTC-noon anchor (T12:00:00) which keeps it
+  // within the correct local day for UTC-12 through UTC+12 timezones.
   const weekEntries = (mccState.log ?? []).filter(entry => {
     const d = new Date(entry.date)
     return d >= start && d <= end
@@ -55,7 +62,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
 
       const nextState: MCCState = {
         ...mccState,
-        log:  [entry, ...mccState.log],
+        log:  [entry, ...(mccState.log ?? [])],
         last: { ...mccState.last, ...trackerUpdates },
       }
       await onSave(nextState)
@@ -97,7 +104,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
       {/* Manual log button + section label */}
       <div className="flex justify-between items-center">
         <SectionLabel>ACTIVITY LOG</SectionLabel>
-        <Btn variant="ghost" size="xs" onClick={() => setShowLogForm(!showLogForm)}>
+        <Btn variant="ghost" size="xs" onClick={() => { setShowLogForm(s => !s); setSaveError('') }}>
           + LOG ACTIVITY
         </Btn>
       </div>
@@ -119,7 +126,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
               <FieldLabel>CHANNEL</FieldLabel>
               <select
                 value={logForm.channel}
-                onChange={e => setLogForm(p => ({ ...p, channel: e.target.value }))}
+                onChange={e => setLogForm(p => ({ ...p, channel: e.target.value as LogChannel }))}
                 className="w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-1.5 focus:outline-none"
                 style={{ fontFamily: 'inherit' }}
               >

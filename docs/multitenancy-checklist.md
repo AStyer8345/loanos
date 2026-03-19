@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-19 (session 9 — daily audit)_
+_Last updated: 2026-03-19 (session 9 — migration 039 applied)_
 
 ---
 
@@ -16,11 +16,11 @@ _Last updated: 2026-03-19 (session 9 — daily audit)_
 | `email_drafts` has `organization_id` | ✅ | Migration 032/033 |
 | `scenarios` has `organization_id` | ✅ | Migration 032/033 |
 | `contact_emails` org scoping | ✅ | Join-based RLS via loan_id/contact_id → 037 |
-| `chat_sessions` has `organization_id` | ⚠️ | Migration 039 written, **needs apply** |
-| `mcc_state` has `organization_id` | ⚠️ | Migration 039 written, **needs apply** |
-| `user_settings` has `organization_id` | ⚠️ | Migration 039 written, **needs apply** |
-| `marketing_activity_log` has `organization_id` | ⚠️ | Migration 039 written, **needs apply** |
-| `marketing_activity_log` RLS enabled | ⚠️ | No prior migration — 039 enables RLS, **needs apply** |
+| `chat_sessions` has `organization_id` | ✅ | Migration 039 — 10/10 rows backfilled |
+| `mcc_state` has `organization_id` | ✅ | Migration 039 — backfilled |
+| `user_settings` has `organization_id` | ✅ | Migration 039 — backfilled |
+| `marketing_activity_log` has `organization_id` | ✅ | Migration 039 — backfilled |
+| `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies applied |
 | 0 loans with null `organization_id` | ✅ | Verified 2026-03-19 |
 | 0 contacts with null `organization_id` | ✅ | Verified 2026-03-19 |
 
@@ -54,16 +54,16 @@ _Last updated: 2026-03-19 (session 9 — daily audit)_
 | Item | Status | Notes |
 |------|--------|-------|
 | `organizations` table exists | ✅ | Migration 029 |
-| `organizations.nmls` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `organizations.logo_url` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `organizations.brand_color` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `organizations.plan` column | ⚠️ | Migration 039 adds it, **needs apply** |
+| `organizations.nmls` column | ✅ | Migration 039 |
+| `organizations.logo_url` column | ✅ | Migration 039 |
+| `organizations.brand_color` column | ✅ | Migration 039 |
+| `organizations.plan` column | ✅ | Migration 039 |
 | `organizations.slug` column | ✅ | Migration 029 |
-| `profiles.nmls_individual` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `profiles.phone` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `profiles.states_licensed` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `profiles.email_signature` column | ⚠️ | Migration 039 adds it, **needs apply** |
-| `org_settings` table exists | ⚠️ | Migration 039 creates it, **needs apply** |
+| `profiles.nmls_individual` column | ✅ | Migration 039 |
+| `profiles.phone` column | ✅ | Migration 039 |
+| `profiles.states_licensed` column | ✅ | Migration 039 |
+| `profiles.email_signature` column | ✅ | Migration 039 |
+| `org_settings` table exists | ✅ | Migration 039 — 2 rows seeded (one per org) |
 
 ---
 
@@ -104,23 +104,6 @@ _Last updated: 2026-03-19 (session 9 — daily audit)_
 | 0 contacts with null org_id | ✅ | Verified 2026-03-19 |
 
 ---
-
-## Pending: Apply Migration 039
-
-Migration `039_expand_org_schema.sql` is written and idempotent. Paste into Supabase SQL Editor to apply:
-
-```
-supabase/migrations/039_expand_org_schema.sql
-```
-
-This migration:
-1. Adds `organization_id` to `chat_sessions`, `mcc_state`, `user_settings`, `marketing_activity_log`
-2. Backfills existing rows from `profiles.organization_id`
-3. Enables RLS on `marketing_activity_log` (was unprotected)
-4. Adds `nmls`, `logo_url`, `brand_color`, `plan` to `organizations`
-5. Adds `nmls_individual`, `phone`, `states_licensed`, `email_signature` to `profiles`
-6. Creates `org_settings` table with RLS
-7. Seeds `org_settings` rows for existing orgs
 
 ---
 

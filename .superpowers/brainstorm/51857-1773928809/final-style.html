@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Tab — Final Style</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09090b;
+    color: #f4f4f5;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 24px;
+    max-width: 760px;
+  }
+
+  /* ── Outer tabs */
+  .outer-tabs { display: flex; border-bottom: 1px solid #3f3f46; margin-bottom: 24px; }
+  .outer-tab {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    padding: 10px 22px; border-bottom: 2px solid transparent; color: #71717a; cursor: pointer;
+  }
+  .outer-tab.active { color: #C9A84C; border-bottom-color: #C9A84C; }
+
+  /* ── Inner toggle */
+  .inner-toggle { display: flex; gap: 6px; margin-bottom: 20px; }
+  .inner-btn {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 7px 16px;
+    border: 1px solid #3f3f46; background: transparent; color: #a1a1aa; cursor: pointer; border-radius: 2px;
+  }
+  .inner-btn.active { border-color: #C9A84C; color: #C9A84C; background: rgba(201,168,76,0.1); }
+
+  /* ── Cadence badge */
+  .cadence-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .cadence-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    padding: 4px 12px; border-radius: 999px;
+  }
+  .badge-red   { background: rgba(224,82,82,0.12);  color: #E05252; border: 1px solid rgba(224,82,82,0.35); }
+  .badge-green { background: rgba(76,175,130,0.12); color: #4CAF82; border: 1px solid rgba(76,175,130,0.35); }
+  .cadence-sub { font-size: 10px; font-weight: 600; color: #71717a; }
+
+  /* ── Form section */
+  .form-section {
+    background: #18181b; border: 1px solid #3f3f46;
+    border-radius: 3px; padding: 20px; margin-bottom: 14px;
+  }
+  .form-section-title {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.2em;
+    color: #C9A84C; margin-bottom: 18px; text-transform: uppercase;
+  }
+
+  /* ── Fields */
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: #f4f4f5; margin-bottom: 7px; display: block;
+  }
+  .field-label .req { color: #E05252; margin-left: 3px; }
+  .field-hint { font-size: 10px; font-weight: 500; color: #71717a; margin-top: 5px; line-height: 1.5; }
+
+  .field-input {
+    width: 100%; background: #09090b; border: 1px solid #52525b;
+    color: #f4f4f5; font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 9px 12px; border-radius: 2px; outline: none; transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: #C9A84C; }
+  .field-input::placeholder { color: #52525b; font-weight: 400; }
+
+  .field-textarea {
+    width: 100%; background: #09090b; border: 1px solid #52525b;
+    color: #f4f4f5; font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 9px 12px; border-radius: 2px; outline: none; resize: vertical;
+    min-height: 80px; line-height: 1.6; transition: border-color 0.15s;
+  }
+  .field-textarea:focus { border-color: #C9A84C; }
+  .field-textarea::placeholder { color: #52525b; font-weight: 400; }
+  .field-textarea.large { min-height: 130px; }
+
+  .field-select {
+    width: 100%; background: #09090b; border: 1px solid #52525b;
+    color: #f4f4f5; font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 9px 12px; border-radius: 2px; outline: none; transition: border-color 0.15s;
+  }
+  .field-select:focus { border-color: #C9A84C; }
+
+  /* ── Audience chips */
+  .audience-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .aud-chip {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 5px 14px;
+    border: 1px solid #C9A84C; color: #C9A84C; background: rgba(201,168,76,0.1);
+    border-radius: 2px; cursor: pointer;
+  }
+  .aud-chip.off { border-color: #3f3f46; color: #71717a; background: transparent; }
+
+  /* ── Rates table */
+  .rates-table { width: 100%; border-collapse: collapse; }
+  .rates-table th {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.18em; color: #71717a;
+    text-align: left; padding: 0 10px 10px 0; border-bottom: 1px solid #3f3f46;
+  }
+  .rates-table td {
+    padding: 8px 10px 8px 0; border-bottom: 1px solid #27272a; vertical-align: middle;
+  }
+  .rates-table td:first-child {
+    font-size: 11px; font-weight: 600; color: #d4d4d8; width: 40%;
+  }
+  .rate-input {
+    background: #09090b; border: 1px solid #52525b; border-radius: 2px;
+    color: #C9A84C; font-family: inherit; font-size: 12px; font-weight: 700;
+    width: 90px; padding: 5px 8px; outline: none; transition: border-color 0.15s;
+  }
+  .rate-input:focus { border-color: #C9A84C; }
+  .rate-input::placeholder { color: #3f3f46; font-weight: 400; }
+  .apr-input {
+    background: transparent; border: none;
+    border-bottom: 1px dashed #3f3f46;
+    color: #71717a; font-family: inherit; font-size: 11px; font-weight: 500;
+    width: 85px; padding: 5px 4px; outline: none;
+  }
+  .apr-auto-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.1em;
+    color: #3f3f46; margin-left: 4px; vertical-align: middle;
+  }
+
+  /* ── Mode pills */
+  .mode-pills { display: flex; gap: 6px; }
+  .mode-pill {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 14px;
+    border: 1px solid #3f3f46; background: transparent; color: #71717a; cursor: pointer; border-radius: 2px;
+  }
+  .mode-pill.active { border-color: #C9A84C; color: #C9A84C; background: rgba(201,168,76,0.1); }
+
+  /* ── Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 580px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── Action row */
+  .action-row { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  .btn-preview {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 10px 20px;
+    border: 1px solid #52525b; background: transparent; color: #d4d4d8; cursor: pointer; border-radius: 2px;
+  }
+  .btn-send {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em; padding: 10px 24px;
+    border: 1px solid #C9A84C; background: #C9A84C; color: #09090b; cursor: pointer; border-radius: 2px;
+  }
+  .btn-schedule {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 10px 18px;
+    border: 1px solid #3f3f46; background: transparent; color: #71717a; cursor: pointer; border-radius: 2px;
+  }
+
+  .footnote { margin-top: 12px; font-size: 10px; font-weight: 500; color: #52525b; line-height: 1.6; }
+
+  /* APR auto-calc note */
+  .apr-note {
+    font-size: 10px; font-weight: 600; color: #71717a; margin-top: 10px;
+  }
+</style>
+
+<script>
+  const APR_OFFSETS = { 0: 0.07, 1: 0.10, 2: 0.06, 3: 0.18, 4: 0.58, 5: 0.12 };
+
+  function calcAPR(rowIdx, rateVal) {
+    const rate = parseFloat(rateVal);
+    const el = document.getElementById('apr-' + rowIdx);
+    if (!el) return;
+    if (isNaN(rate) || rateVal.trim() === '') { el.value = ''; return; }
+    el.value = (rate + (APR_OFFSETS[rowIdx] ?? 0.08)).toFixed(3) + '%';
+    el.style.color = '#C9A84C';
+  }
+
+  function switchMode(mode) {
+    document.getElementById('fields-mode').style.display = mode === 'fields' ? 'block' : 'none';
+    document.getElementById('prompt-mode').style.display = mode === 'prompt' ? 'block' : 'none';
+    document.querySelectorAll('.mode-pill').forEach(p => p.classList.toggle('active', p.dataset.mode === mode));
+  }
+
+  function showPanel(panel) {
+    document.getElementById('nl-panel').style.display   = panel === 'nl'   ? 'block' : 'none';
+    document.getElementById('rate-panel').style.display = panel === 'rate' ? 'block' : 'none';
+    document.querySelectorAll('.inner-btn').forEach((b, i) =>
+      b.classList.toggle('active', (panel === 'rate' && i === 0) || (panel === 'nl' && i === 1))
+    );
+  }
+</script>
+</head>
+<body>
+
+<!-- Outer tabs -->
+<div class="outer-tabs">
+  <div class="outer-tab active">SEND</div>
+  <div class="outer-tab">TODAY</div>
+  <div class="outer-tab">HISTORY</div>
+</div>
+
+<!-- Inner toggle -->
+<div class="inner-toggle">
+  <div class="inner-btn" onclick="showPanel('rate')">📈 RATE UPDATE</div>
+  <div class="inner-btn active" onclick="showPanel('nl')">✉ NEWSLETTER</div>
+</div>
+
+<!-- ══════════════ NEWSLETTER ══════════════ -->
+<div id="nl-panel">
+  <div class="cadence-row">
+    <span class="cadence-badge badge-green">SENT MON MAR 17</span>
+    <span class="cadence-sub">Realtor + Borrower · On track</span>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="form-section">
+    <div class="form-section-title">Content Mode</div>
+    <div class="mode-pills">
+      <div class="mode-pill active" data-mode="fields" onclick="switchMode('fields')">STRUCTURED FIELDS</div>
+      <div class="mode-pill" data-mode="prompt" onclick="switchMode('prompt')">CUSTOM PROMPT</div>
+    </div>
+  </div>
+
+  <!-- Structured fields -->
+  <div id="fields-mode">
+    <div class="form-section">
+      <div class="form-section-title">Audience + Topic</div>
+
+      <div class="field">
+        <label class="field-label">Who is this for?</label>
+        <div class="audience-row">
+          <div class="aud-chip">Borrowers / Past Clients</div>
+          <div class="aud-chip">Realtors / Partners</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">This Week's Topic / Theme <span class="req">*</span></label>
+        <input class="field-input" placeholder="e.g. Rates dropped this week, spring market heating up, new FHA changes..." />
+        <div class="field-hint">What's the main thing you want to talk about this week?</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Articles / Links to Reference</label>
+        <textarea class="field-textarea" placeholder="Paste URLs or article text you want summarized or referenced..."></textarea>
+        <div class="field-hint">News articles, market data, anything you want included.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Personal Touch</div>
+
+      <div class="field">
+        <label class="field-label">Personal Story / Anecdote</label>
+        <textarea class="field-textarea large" placeholder="e.g. Had a client close this week who almost gave up. Bullet points are fine:&#10;— Client was nervous about rates&#10;— Locked at the right time&#10;— Saved $200/mo vs waiting"></textarea>
+        <div class="field-hint">A story, client win, or personal moment. Bullet points work great.</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label class="field-label">AI Tool Tip for Realtors</label>
+          <textarea class="field-textarea" style="min-height:65px" placeholder="e.g. How to use ChatGPT for property descriptions..."></textarea>
+          <div class="field-hint">For the "AI Edge" section in the realtor version.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Anything Else</label>
+          <textarea class="field-textarea" style="min-height:65px" placeholder="Tone preferences, things to mention or avoid, CTA ideas..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom prompt mode -->
+  <div id="prompt-mode" style="display:none">
+    <div class="form-section">
+      <div class="form-section-title">Custom Prompt</div>
+      <div class="field">
+        <label class="field-label">Who is this for?</label>
+        <div class="audience-row">
+          <div class="aud-chip">Borrowers / Past Clients</div>
+          <div class="aud-chip">Realtors / Partners</div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px">
+        <label class="field-label">Full Prompt <span class="req">*</span></label>
+        <textarea class="field-textarea" style="min-height:220px" placeholder="Write everything the AI needs — topic, voice, stories, data, what to cover for each audience. Be specific.&#10;&#10;Example:&#10;Topic: Spring market in Austin. Rates at 6.875%. Inventory up 12% MOM.&#10;Story: Client closed last week after a 6-month search. First-time buyer, FHA, 3.5% down.&#10;For realtors: include a tip on using Zillow comps for pricing conversations."></textarea>
+        <div class="field-hint">More context = better output. Include tone, audience notes, and talking points.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-preview">👁 Preview</button>
+    <button class="btn-send">▶ Publish + Send Emails</button>
+    <button class="btn-schedule">📅 Schedule</button>
+  </div>
+  <div class="footnote">
+    Publishes blog post to styermortgage.com/blog/ · Sends Mailchimp emails to selected audiences · Posts to LinkedIn + Facebook
+  </div>
+</div>
+
+<!-- ══════════════ RATE UPDATE ══════════════ -->
+<div id="rate-panel" style="display:none">
+  <div class="cadence-row">
+    <span class="cadence-badge badge-red">6D AGO — OVERDUE</span>
+    <span class="cadence-sub">Last sent Mar 13 · Weekly cadence</span>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Current Rates</div>
+    <table class="rates-table">
+      <thead>
+        <tr>
+          <th>PRODUCT</th>
+          <th>RATE</th>
+          <th>APR <span style="font-weight:500;color:#3f3f46;font-size:8px">(auto · editable)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>30-Yr Fixed (Primary)</td>
+          <td><input class="rate-input" placeholder="6.875%" oninput="calcAPR(0,this.value)" /></td>
+          <td><input class="apr-input" id="apr-0" placeholder="—" /></td>
+        </tr>
+        <tr>
+          <td>15-Yr Fixed</td>
+          <td><input class="rate-input" placeholder="6.25%" oninput="calcAPR(1,this.value)" /></td>
+          <td><input class="apr-input" id="apr-1" placeholder="—" /></td>
+        </tr>
+        <tr>
+          <td>30-Yr Jumbo</td>
+          <td><input class="rate-input" placeholder="6.875%" oninput="calcAPR(2,this.value)" /></td>
+          <td><input class="apr-input" id="apr-2" placeholder="—" /></td>
+        </tr>
+        <tr>
+          <td>VA 30-Yr</td>
+          <td><input class="rate-input" placeholder="6.25%" oninput="calcAPR(3,this.value)" /></td>
+          <td><input class="apr-input" id="apr-3" placeholder="—" /></td>
+        </tr>
+        <tr>
+          <td>FHA 30-Yr</td>
+          <td><input class="rate-input" placeholder="6.375%" oninput="calcAPR(4,this.value)" /></td>
+          <td><input class="apr-input" id="apr-4" placeholder="—" /></td>
+        </tr>
+        <tr>
+          <td>FHA 5-Yr ARM</td>
+          <td><input class="rate-input" placeholder="5.875%" oninput="calcAPR(5,this.value)" /></td>
+          <td><input class="apr-input" id="apr-5" placeholder="—" /></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="apr-note">APR auto-fills when you enter a rate. Click any APR to override.</div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Context</div>
+
+    <div class="field">
+      <label class="field-label">Audience</label>
+      <div class="audience-row">
+        <div class="aud-chip">Borrowers</div>
+        <div class="aud-chip">Realtors</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="field-label">Rate Direction</label>
+        <select class="field-select">
+          <option value="">— select —</option>
+          <option>Rates dropped</option>
+          <option>Rates went up</option>
+          <option>Rates flat / unchanged</option>
+          <option>Rates volatile / mixed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Content Depth</label>
+        <select class="field-select">
+          <option>Short &amp; Sweet</option>
+          <option selected>Standard</option>
+          <option>In-Depth</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Blurb / Talking Points</label>
+      <textarea class="field-textarea" placeholder="e.g. Rates dipped after Fed meeting. Good time to lock. Spring inventory picking up in Austin..."></textarea>
+      <div class="field-hint">Quick context for the AI. What should people know about rates this week?</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Anything Else</label>
+      <textarea class="field-textarea" style="min-height:55px" placeholder="Special offers, events, anything to mention..."></textarea>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-preview">👁 Preview</button>
+    <button class="btn-send">▶ Publish + Send Emails</button>
+    <button class="btn-schedule">📅 Schedule</button>
+  </div>
+  <div class="footnote">
+    Publishes rate page to styermortgage.com/rates/ · Sends Mailchimp emails to selected audiences
+  </div>
+</div>
+
+</body>
+</html>

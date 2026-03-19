@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calls + History Tabs</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09090b; color: #f4f4f5;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13px; padding: 24px; max-width: 820px;
+  }
+
+  /* ── Outer tabs */
+  .outer-tabs { display: flex; border-bottom: 1px solid #3f3f46; margin-bottom: 24px; }
+  .outer-tab {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    padding: 10px 22px; border-bottom: 2px solid transparent; color: #71717a; cursor: pointer;
+  }
+  .outer-tab.active { color: #C9A84C; border-bottom-color: #C9A84C; }
+
+  /* ── List selector pills */
+  .list-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .list-pill {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 14px;
+    border: 1px solid #3f3f46; color: #71717a; background: transparent; cursor: pointer; border-radius: 2px;
+  }
+  .list-pill.active { border-color: #C9A84C; color: #C9A84C; background: rgba(201,168,76,0.1); }
+
+  /* ── Search bar */
+  .search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .search-input {
+    flex: 1; background: #18181b; border: 1px solid #52525b; color: #f4f4f5;
+    font-family: inherit; font-size: 12px; font-weight: 500; padding: 8px 12px;
+    border-radius: 2px; outline: none;
+  }
+  .search-input::placeholder { color: #52525b; font-weight: 400; }
+  .btn-add {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 8px 14px;
+    border: 1px solid #C9A84C; color: #C9A84C; background: rgba(201,168,76,0.1);
+    cursor: pointer; border-radius: 2px;
+  }
+
+  /* ── Contact cards */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 580px) { .contact-grid { grid-template-columns: 1fr; } }
+
+  .contact-card {
+    background: #18181b; border: 1px solid #3f3f46; border-radius: 3px; padding: 14px;
+  }
+  .contact-card.called { opacity: 0.55; }
+
+  .contact-name { font-size: 13px; font-weight: 700; color: #f4f4f5; margin-bottom: 2px; }
+  .contact-company { font-size: 10px; font-weight: 500; color: #71717a; margin-bottom: 8px; }
+  .contact-meta { font-size: 10px; font-weight: 500; color: #71717a; margin-bottom: 4px; }
+  .contact-meta a { color: #d4d4d8; text-decoration: none; }
+
+  .last-touch {
+    font-size: 10px; font-weight: 700; margin-bottom: 10px;
+  }
+  .touch-fresh  { color: #4CAF82; }
+  .touch-stale  { color: #E05252; }
+  .touch-ok     { color: #C9A84C; }
+
+  .called-badge {
+    display: inline-block; font-size: 8px; font-weight: 800; letter-spacing: 0.12em;
+    padding: 2px 8px; border-radius: 999px; margin-bottom: 8px;
+    background: rgba(76,175,130,0.15); color: #4CAF82; border: 1px solid rgba(76,175,130,0.3);
+  }
+
+  .card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .btn-called {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 5px 12px;
+    border: 1px solid #4CAF82; color: #4CAF82; background: rgba(76,175,130,0.1);
+    cursor: pointer; border-radius: 2px;
+  }
+  .btn-called.done {
+    border-color: #3f3f46; color: #52525b; background: transparent; cursor: default;
+  }
+  .call-history { font-size: 9px; font-weight: 500; color: #52525b; margin-top: 6px; }
+
+  /* ── HISTORY TAB ── */
+  .week-nav {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .week-nav-btn {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 12px;
+    border: 1px solid #3f3f46; color: #a1a1aa; background: transparent; cursor: pointer; border-radius: 2px;
+  }
+  .week-label {
+    font-size: 12px; font-weight: 700; color: #f4f4f5; flex: 1; text-align: center; letter-spacing: 0.06em;
+  }
+
+  /* Cadence health strip */
+  .health-strip {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+    background: #18181b; border: 1px solid #3f3f46; border-radius: 3px; padding: 12px 16px;
+  }
+  .health-chip {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 10px;
+    border-radius: 999px; white-space: nowrap;
+  }
+  .h-green { background: rgba(76,175,130,0.12); color: #4CAF82; border: 1px solid rgba(76,175,130,0.3); }
+  .h-red   { background: rgba(224,82,82,0.12);  color: #E05252; border: 1px solid rgba(224,82,82,0.3); }
+  .h-gold  { background: rgba(201,168,76,0.12); color: #C9A84C; border: 1px solid rgba(201,168,76,0.3); }
+
+  /* Activity log */
+  .log-header {
+    display: grid; grid-template-columns: 70px 1fr 110px 90px;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.16em; color: #71717a;
+    padding: 8px 12px; background: #09090b; border: 1px solid #3f3f46;
+    border-radius: 3px 3px 0 0; border-bottom: none;
+  }
+  .log-row {
+    display: grid; grid-template-columns: 70px 1fr 110px 90px;
+    font-size: 11px; padding: 11px 12px; border: 1px solid #3f3f46; border-top: none;
+    background: #18181b; align-items: center;
+  }
+  .log-row:last-child { border-radius: 0 0 3px 3px; }
+  .log-row:nth-child(even) { background: #141416; }
+
+  .log-date  { font-size: 10px; font-weight: 600; color: #71717a; }
+  .log-act   { font-size: 11px; font-weight: 700; color: #f4f4f5; }
+  .log-sub   { font-size: 10px; font-weight: 500; color: #71717a; margin-top: 2px; }
+  .log-channel { font-size: 10px; font-weight: 600; color: #a1a1aa; }
+
+  .channel-badge {
+    display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .ch-email  { background: rgba(91,143,212,0.15);  color: #5B8FD4; }
+  .ch-call   { background: rgba(76,175,130,0.15);  color: #4CAF82; }
+  .ch-social { background: rgba(155,114,207,0.15); color: #9B72CF; }
+  .ch-rate   { background: rgba(201,168,76,0.15);  color: #C9A84C; }
+
+  .section-title {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.2em; color: #C9A84C;
+    margin-bottom: 12px; margin-top: 20px;
+  }
+  .section-title:first-child { margin-top: 0; }
+</style>
+<script>
+  function showTab(t) {
+    ['calls','history'].forEach(id => document.getElementById(id+'-panel').style.display = id===t ? 'block' : 'none');
+    document.querySelectorAll('.outer-tab').forEach((el,i) => el.classList.toggle('active', i===['send','calls','history'].indexOf(t)));
+  }
+  function showList(l) {
+    document.querySelectorAll('.list-pill').forEach(p => p.classList.toggle('active', p.dataset.list===l));
+  }
+</script>
+</head>
+<body>
+
+<!-- Outer tabs -->
+<div class="outer-tabs">
+  <div class="outer-tab" onclick="showTab('send')">SEND</div>
+  <div class="outer-tab active" onclick="showTab('calls')">CALLS</div>
+  <div class="outer-tab" onclick="showTab('history')">HISTORY</div>
+</div>
+
+<!-- ══════════ CALLS TAB ══════════ -->
+<div id="calls-panel">
+
+  <!-- List selector -->
+  <div class="list-pills">
+    <div class="list-pill active" data-list="realtors" onclick="showList('realtors')">REALTORS (12)</div>
+    <div class="list-pill" data-list="preapprovals" onclick="showList('preapprovals')">PRE-APPROVALS (6)</div>
+    <div class="list-pill" data-list="inprocess" onclick="showList('inprocess')">ACTIVE FILES (4)</div>
+    <div class="list-pill" data-list="hotleads" onclick="showList('hotleads')">HOT LEADS (3)</div>
+  </div>
+
+  <!-- Search + Add -->
+  <div class="search-row">
+    <input class="search-input" placeholder="Search contacts..." />
+    <button class="btn-add">+ ADD</button>
+    <button class="btn-add" style="border-color:#52525b;color:#71717a;background:transparent">CSV</button>
+  </div>
+
+  <!-- Contact cards -->
+  <div class="contact-grid">
+
+    <div class="contact-card">
+      <div class="contact-name">Sarah Hutchins</div>
+      <div class="contact-company">Compass Real Estate</div>
+      <div class="contact-meta">📞 <a href="#">(512) 867-5309</a></div>
+      <div class="contact-meta">✉ <a href="#">shuchins@compass.com</a></div>
+      <div class="last-touch touch-stale">⏱ Last touch: 18d ago — overdue</div>
+      <div class="call-history">Previous: Mar 1, Feb 14</div>
+      <div class="card-actions">
+        <button class="btn-called">📞 Mark Called</button>
+      </div>
+    </div>
+
+    <div class="contact-card called">
+      <div class="called-badge">✓ CALLED TODAY</div>
+      <div class="contact-name">Mike Bernstein</div>
+      <div class="contact-company">Kuper Sotheby's</div>
+      <div class="contact-meta">📞 <a href="#">(512) 444-1122</a></div>
+      <div class="contact-meta">✉ <a href="#">mike@kupersir.com</a></div>
+      <div class="last-touch touch-fresh">⏱ Last touch: Today</div>
+      <div class="call-history">Previous: Mar 12, Mar 5</div>
+      <div class="card-actions">
+        <button class="btn-called done">✓ Called</button>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-name">Jennifer Castillo</div>
+      <div class="contact-company">Realty Austin</div>
+      <div class="contact-meta">📞 <a href="#">(512) 301-4455</a></div>
+      <div class="contact-meta">✉ <a href="#">jcastillo@realtyaustin.com</a></div>
+      <div class="last-touch touch-ok">⏱ Last touch: 6d ago</div>
+      <div class="call-history">Previous: Mar 13, Mar 6</div>
+      <div class="card-actions">
+        <button class="btn-called">📞 Mark Called</button>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-name">David Park</div>
+      <div class="contact-company">Moreland Properties</div>
+      <div class="contact-meta">📞 <a href="#">(512) 777-9900</a></div>
+      <div class="last-touch touch-stale">⏱ Last touch: 22d ago — overdue</div>
+      <div class="call-history">Previous: Feb 25</div>
+      <div class="card-actions">
+        <button class="btn-called">📞 Mark Called</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ HISTORY TAB ══════════ -->
+<div id="history-panel" style="display:none">
+
+  <!-- Week nav -->
+  <div class="week-nav">
+    <button class="week-nav-btn">← PREV</button>
+    <div class="week-label">Mar 17 – Mar 19, 2026 · This Week</div>
+    <button class="week-nav-btn" style="color:#3f3f46;cursor:default">NEXT →</button>
+  </div>
+
+  <!-- Cadence health -->
+  <div class="health-strip">
+    <span class="health-chip h-red">RATE UPDATE — 6d ago</span>
+    <span class="health-chip h-green">NEWSLETTER — Mon</span>
+    <span class="health-chip h-green">REALTOR CALLS — Today</span>
+    <span class="health-chip h-gold">SOCIAL — 3d ago</span>
+    <span class="health-chip h-red">PAST CLIENT CALLS — 9d ago</span>
+    <span class="health-chip h-green">PRE-APPROVAL CALLS — Thu</span>
+  </div>
+
+  <!-- This week log -->
+  <div class="section-title">THIS WEEK</div>
+  <div class="log-header">
+    <span>DATE</span><span>ACTIVITY</span><span>TYPE</span><span>CHANNEL</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 19</span>
+    <div><div class="log-act">Realtor Calls — 4 contacts</div><div class="log-sub">Sarah Hutchins, Mike Bernstein + 2 others</div></div>
+    <span><span class="channel-badge ch-call">Call</span></span>
+    <span class="log-channel">Phone</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 17</span>
+    <div><div class="log-act">Newsletter sent — Spring Market in Austin</div><div class="log-sub">Borrowers + Realtors · Mailchimp</div></div>
+    <span><span class="channel-badge ch-email">Email</span></span>
+    <span class="log-channel">Mailchimp</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 17</span>
+    <div><div class="log-act">Social Post — LinkedIn + Facebook</div><div class="log-sub">Spring buying tips for first-time buyers</div></div>
+    <span><span class="channel-badge ch-social">Social</span></span>
+    <span class="log-channel">LinkedIn/FB</span>
+  </div>
+
+  <!-- Previous week -->
+  <div class="section-title" style="margin-top:28px">MAR 10 – MAR 16</div>
+  <div class="log-header">
+    <span>DATE</span><span>ACTIVITY</span><span>TYPE</span><span>CHANNEL</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 14</span>
+    <div><div class="log-act">Rate Update — 30yr @ 6.875%</div><div class="log-sub">Realtors + Borrowers · Published to site</div></div>
+    <span><span class="channel-badge ch-rate">Rate</span></span>
+    <span class="log-channel">Email</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 13</span>
+    <div><div class="log-act">Pre-Approval Calls — 3 contacts</div><div class="log-sub">Johnson, Williams, Torres</div></div>
+    <span><span class="channel-badge ch-call">Call</span></span>
+    <span class="log-channel">Phone</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 10</span>
+    <div><div class="log-act">Newsletter sent — Fed Decision Breakdown</div><div class="log-sub">Borrowers + Realtors · Mailchimp</div></div>
+    <span><span class="channel-badge ch-email">Email</span></span>
+    <span class="log-channel">Mailchimp</span>
+  </div>
+  <div class="log-row">
+    <span class="log-date">Mar 10</span>
+    <div><div class="log-act">Realtor Calls — 6 contacts</div><div class="log-sub">Full Monday call block</div></div>
+    <span><span class="channel-badge ch-call">Call</span></span>
+    <span class="log-channel">Phone</span>
+  </div>
+
+</div>
+
+</body>
+</html>

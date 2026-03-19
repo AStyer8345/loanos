@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color contrast options</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09090b;
+    color: #f4f4f5;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 24px;
+  }
+  h2 { font-size: 14px; color: #f4f4f5; margin-bottom: 6px; letter-spacing: 0.05em; }
+  .subtitle { font-size: 11px; color: #71717a; margin-bottom: 28px; }
+
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .options { grid-template-columns: 1fr; } }
+
+  .opt {
+    border: 2px solid #3f3f46;
+    border-radius: 3px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .opt:hover { border-color: #C9A84C; }
+  .opt.selected { border-color: #C9A84C; }
+  .opt.selected::after {
+    content: '✓ SELECTED';
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 8px; letter-spacing: 0.15em;
+    color: #C9A84C;
+  }
+
+  .opt-label {
+    font-size: 9px; letter-spacing: 0.18em; color: #71717a;
+    margin-bottom: 16px;
+  }
+
+  /* ── OPTION A: Minimal dark — current style cleaned up */
+  .a-field { margin-bottom: 14px; }
+  .a-label { font-size: 9px; letter-spacing: 0.14em; color: #a1a1aa; margin-bottom: 5px; display: block; }
+  .a-input {
+    width: 100%; background: #09090b; border: none;
+    border-bottom: 1px solid #52525b; color: #e4e4e7;
+    font-family: inherit; font-size: 11px; padding: 5px 2px;
+  }
+  .a-input::placeholder { color: #52525b; }
+  .a-textarea {
+    width: 100%; background: #09090b; border: 1px solid #3f3f46;
+    color: #d4d4d8; font-family: inherit; font-size: 10px;
+    padding: 7px 8px; min-height: 60px; resize: none; border-radius: 1px;
+  }
+  .a-textarea::placeholder { color: #52525b; }
+  .a-hint { font-size: 8px; color: #52525b; margin-top: 3px; }
+
+  /* ── OPTION B: Higher contrast labels + bordered inputs */
+  .b-field { margin-bottom: 14px; }
+  .b-label { font-size: 9px; letter-spacing: 0.14em; color: #C9A84C; margin-bottom: 5px; display: block; }
+  .b-input {
+    width: 100%; background: #18181b; border: 1px solid #52525b;
+    color: #f4f4f5; font-family: inherit; font-size: 11px;
+    padding: 6px 8px; border-radius: 1px;
+  }
+  .b-input::placeholder { color: #52525b; }
+  .b-textarea {
+    width: 100%; background: #18181b; border: 1px solid #52525b;
+    color: #f4f4f5; font-family: inherit; font-size: 10px;
+    padding: 7px 8px; min-height: 60px; resize: none; border-radius: 1px;
+  }
+  .b-textarea::placeholder { color: #52525b; }
+  .b-hint { font-size: 8px; color: #71717a; margin-top: 3px; }
+
+  /* ── OPTION C: White labels, neutral inputs, subtle borders */
+  .c-field { margin-bottom: 14px; }
+  .c-label { font-size: 10px; letter-spacing: 0.08em; color: #f4f4f5; margin-bottom: 5px; display: block; font-weight: 500; }
+  .c-input {
+    width: 100%; background: #18181b; border: 1px solid #3f3f46;
+    color: #f4f4f5; font-family: inherit; font-size: 11px;
+    padding: 7px 10px; border-radius: 2px;
+  }
+  .c-input:focus { border-color: #C9A84C; outline: none; }
+  .c-input::placeholder { color: #52525b; }
+  .c-textarea {
+    width: 100%; background: #18181b; border: 1px solid #3f3f46;
+    color: #f4f4f5; font-family: inherit; font-size: 10px;
+    padding: 8px 10px; min-height: 60px; resize: none; border-radius: 2px; line-height: 1.6;
+  }
+  .c-textarea::placeholder { color: #52525b; }
+  .c-hint { font-size: 9px; color: #71717a; margin-top: 4px; }
+
+  /* ── OPTION D: High contrast, near-white inputs */
+  .d-field { margin-bottom: 14px; }
+  .d-label { font-size: 9px; letter-spacing: 0.14em; color: #d4d4d8; margin-bottom: 5px; display: block; }
+  .d-input {
+    width: 100%; background: #1c1c1f; border: 1px solid #71717a;
+    color: #fafafa; font-family: inherit; font-size: 11px;
+    padding: 7px 10px; border-radius: 2px;
+  }
+  .d-input::placeholder { color: #52525b; }
+  .d-textarea {
+    width: 100%; background: #1c1c1f; border: 1px solid #71717a;
+    color: #fafafa; font-family: inherit; font-size: 10px;
+    padding: 8px 10px; min-height: 60px; resize: none; border-radius: 2px; line-height: 1.6;
+  }
+  .d-textarea::placeholder { color: #52525b; }
+  .d-hint { font-size: 9px; color: #a1a1aa; margin-top: 4px; }
+
+  .divider { height: 1px; background: #27272a; margin: 12px 0; }
+</style>
+<script>
+  function toggleSelect(el) {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    if (window.__events) window.__events.push({ type: 'click', choice: el.dataset.choice, text: el.querySelector('.opt-label').textContent, timestamp: Date.now() / 1000 | 0 });
+  }
+</script>
+</head>
+<body>
+
+<h2>Which contrast level is easiest to read?</h2>
+<p class="subtitle">Same form fields, four different contrast styles. All keep the dark background.</p>
+
+<div class="options">
+
+  <!-- A -->
+  <div class="opt" data-choice="a" onclick="toggleSelect(this)">
+    <div class="opt-label">A — SUBTLE (current style, cleaned up)</div>
+    <div class="a-field">
+      <label class="a-label">THIS WEEK'S TOPIC</label>
+      <input class="a-input" placeholder="e.g. Spring market heating up..." />
+    </div>
+    <div class="a-field">
+      <label class="a-label">PERSONAL STORY</label>
+      <textarea class="a-textarea" placeholder="Client win, bullet points fine..."></textarea>
+      <div class="a-hint">Underline inputs, very dark palette, labels in mid-gray</div>
+    </div>
+    <div class="divider"></div>
+    <div class="a-field">
+      <label class="a-label">RATE DIRECTION</label>
+      <input class="a-input" placeholder="Rates dropped" />
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="opt" data-choice="b" onclick="toggleSelect(this)">
+    <div class="opt-label">B — GOLD LABELS + BORDERED INPUTS</div>
+    <div class="b-field">
+      <label class="b-label">THIS WEEK'S TOPIC</label>
+      <input class="b-input" placeholder="e.g. Spring market heating up..." />
+    </div>
+    <div class="b-field">
+      <label class="b-label">PERSONAL STORY</label>
+      <textarea class="b-textarea" placeholder="Client win, bullet points fine..."></textarea>
+      <div class="b-hint">All labels in gold, inputs on slightly lighter background</div>
+    </div>
+    <div class="divider"></div>
+    <div class="b-field">
+      <label class="b-label">RATE DIRECTION</label>
+      <input class="b-input" placeholder="Rates dropped" />
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="opt" data-choice="c" onclick="toggleSelect(this)">
+    <div class="opt-label">C — WHITE LABELS + CLEAN INPUTS</div>
+    <div class="c-field">
+      <label class="c-label">This Week's Topic</label>
+      <input class="c-input" placeholder="e.g. Spring market heating up..." />
+    </div>
+    <div class="c-field">
+      <label class="c-label">Personal Story</label>
+      <textarea class="c-textarea" placeholder="Client win, bullet points fine..."></textarea>
+      <div class="c-hint">Labels in white, bordered inputs with gold focus ring, hint text in mid-gray</div>
+    </div>
+    <div class="divider"></div>
+    <div class="c-field">
+      <label class="c-label">Rate Direction</label>
+      <input class="c-input" placeholder="Rates dropped" />
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="opt" data-choice="d" onclick="toggleSelect(this)">
+    <div class="opt-label">D — MAXIMUM CONTRAST</div>
+    <div class="d-field">
+      <label class="d-label">THIS WEEK'S TOPIC</label>
+      <input class="d-input" placeholder="e.g. Spring market heating up..." />
+    </div>
+    <div class="d-field">
+      <label class="d-label">PERSONAL STORY</label>
+      <textarea class="d-textarea" placeholder="Client win, bullet points fine..."></textarea>
+      <div class="d-hint">Brighter borders, near-white text, labels in light gray</div>
+    </div>
+    <div class="divider"></div>
+    <div class="d-field">
+      <label class="d-label">RATE DIRECTION</label>
+      <input class="d-input" placeholder="Rates dropped" />
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

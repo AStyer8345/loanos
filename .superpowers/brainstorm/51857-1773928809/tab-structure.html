@@ -1,0 +1,217 @@
+<style>
+  body { background: #09090b !important; }
+  .mock-tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #3f3f46;
+    margin-bottom: 16px;
+  }
+  .mock-tab {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    border-bottom: 2px solid transparent;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .mock-tab.active {
+    color: #C9A84C;
+    border-bottom-color: #C9A84C;
+  }
+  .mock-section {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 2px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+  }
+  .mock-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #71717a;
+    margin-bottom: 6px;
+  }
+  .mock-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #C9A84C;
+    margin-bottom: 4px;
+  }
+  .mock-section-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #52525b;
+  }
+  .mock-badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-green { background: rgba(76,175,130,0.15); color: #4CAF82; }
+  .badge-red   { background: rgba(224,82,82,0.15);  color: #E05252; }
+  .badge-gold  { background: rgba(201,168,76,0.15); color: #C9A84C; }
+  .mock-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    border: 1px solid #C9A84C;
+    color: #C9A84C;
+    background: transparent;
+    border-radius: 1px;
+    float: right;
+    margin-top: -4px;
+  }
+  .mock-divider {
+    border: none;
+    border-top: 1px solid #27272a;
+    margin: 12px 0;
+  }
+  .layout-frame {
+    background: #09090b;
+    border: 1px solid #3f3f46;
+    border-radius: 3px;
+    padding: 16px;
+    min-height: 200px;
+  }
+  .stat-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .stat-cell {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    padding: 8px 10px;
+    border-radius: 2px;
+  }
+  .stat-label { font-family: monospace; font-size: 8px; color: #71717a; letter-spacing: 0.1em; }
+  .stat-val   { font-family: monospace; font-size: 16px; font-weight: 700; color: #C9A84C; margin-top: 2px; }
+  .scroll-section { margin-bottom: 16px; }
+  .section-header {
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: #71717a;
+    border-bottom: 1px solid #27272a;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+</style>
+
+<h2>How should the Marketing tab be structured?</h2>
+<p class="subtitle">Three approaches — all show the same actions, different navigation patterns</p>
+
+<div class="options">
+
+  <!-- Option A: 3 Tabs -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>3 Focused Tabs</h3>
+      <p><strong>SEND · TODAY · HISTORY</strong></p>
+      <p>SEND = Rate Update + Newsletter (the two "publish something" actions). TODAY = day-specific task checklist. HISTORY = cadence health + activity log.</p>
+      <div class="layout-frame" style="margin-top:10px">
+        <div class="mock-tab-bar">
+          <div class="mock-tab active">SEND</div>
+          <div class="mock-tab">TODAY</div>
+          <div class="mock-tab">HISTORY</div>
+        </div>
+        <div class="mock-section">
+          <div class="mock-btn">▶ SEND NOW</div>
+          <div class="mock-section-title">RATE UPDATE <span class="mock-badge badge-red">6d ago — overdue</span></div>
+          <div class="mock-section-sub">Calls Netlify → generates email → Mailchimp → published</div>
+        </div>
+        <div class="mock-section">
+          <div class="mock-btn">▶ GENERATE</div>
+          <div class="mock-section-title">NEWSLETTER <span class="mock-badge badge-green">Sent Mon</span></div>
+          <div class="mock-section-sub">AI draft → Mailchimp + blog post on styermortgage.com</div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Clearest separation of concerns</li><li>SEND tab is what you open every week</li><li>TODAY + HISTORY rarely needed — out of the way</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>TODAY tab may feel redundant with the main Dashboard</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Single scrolling page, sectioned -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Single Page, Anchored Sections</h3>
+      <p><strong>No tabs — scroll down through sections</strong></p>
+      <p>Rate Update at top (always visible), Newsletter below it, then call list, then history at bottom. Anchor links jump to sections.</p>
+      <div class="layout-frame" style="margin-top:10px">
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="stat-label">RATE UPDATE</div><div class="stat-val" style="font-size:11px;color:#E05252">6d overdue</div></div>
+          <div class="stat-cell"><div class="stat-label">NEWSLETTER</div><div class="stat-val" style="font-size:11px;color:#4CAF82">Sent Mon</div></div>
+          <div class="stat-cell"><div class="stat-label">SOCIAL</div><div class="stat-val" style="font-size:11px;color:#C9A84C">3d ago</div></div>
+          <div class="stat-cell"><div class="stat-label">CALLS</div><div class="stat-val" style="font-size:11px;color:#4CAF82">Today</div></div>
+        </div>
+        <div class="scroll-section">
+          <div class="section-header">── RATE UPDATE ──────────────────</div>
+          <div class="mock-section" style="padding:8px 12px">
+            <div class="mock-section-sub">Paste rates → preview → send emails</div>
+          </div>
+        </div>
+        <div class="scroll-section">
+          <div class="section-header">── NEWSLETTER ───────────────────</div>
+          <div class="mock-section" style="padding:8px 12px">
+            <div class="mock-section-sub">AI generate → Mailchimp + publish to site</div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Everything visible without clicking tabs</li><li>Status strip shows all cadence health at a glance</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Long page, more scrolling</li><li>Less structure — harder to "get to" things fast</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: 2-pane split -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Command + Detail Split</h3>
+      <p><strong>Left rail = what to do. Right panel = do it.</strong></p>
+      <p>Left shows this week's tasks + cadence health. Right panel opens the active tool (Rate Update or Newsletter generator).</p>
+      <div class="layout-frame" style="margin-top:10px">
+        <div class="split">
+          <div class="mockup" style="flex:0 0 180px;min-width:0">
+            <div class="mockup-header">THIS WEEK</div>
+            <div class="mockup-body" style="padding:8px">
+              <div style="font-family:monospace;font-size:9px;color:#E05252;margin-bottom:6px">⚠ RATE UPDATE — 6d ago</div>
+              <div style="font-family:monospace;font-size:9px;color:#4CAF82;margin-bottom:6px">✓ NEWSLETTER — Mon</div>
+              <div style="font-family:monospace;font-size:9px;color:#C9A84C;margin-bottom:6px">○ CALLS — 2d ago</div>
+              <div style="font-family:monospace;font-size:9px;color:#71717a">○ SOCIAL — 3d ago</div>
+            </div>
+          </div>
+          <div class="mockup" style="flex:1;min-width:0">
+            <div class="mockup-header" style="color:#C9A84C">→ RATE UPDATE</div>
+            <div class="mockup-body" style="padding:8px">
+              <div style="font-family:monospace;font-size:9px;color:#71717a;margin-bottom:4px">RATES</div>
+              <div style="height:20px;background:#09090b;border:1px solid #3f3f46;border-radius:1px;margin-bottom:6px"></div>
+              <div style="font-family:monospace;font-size:9px;color:#71717a;margin-bottom:4px">NOTES</div>
+              <div style="height:20px;background:#09090b;border:1px solid #3f3f46;border-radius:1px;margin-bottom:8px"></div>
+              <div style="font-family:monospace;font-size:9px;padding:4px 10px;border:1px solid #C9A84C;color:#C9A84C;display:inline-block">▶ PREVIEW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Left rail always shows what's overdue</li><li>Clicking an item loads it in the right panel — no navigation</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More complex layout — tight on mobile</li><li>Left rail competes with the dashboard's existing overview</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

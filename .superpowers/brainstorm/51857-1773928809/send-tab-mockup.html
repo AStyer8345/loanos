@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Tab — SEND mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09090b;
+    color: #f4f4f5;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 24px;
+  }
+  h2 {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #71717a;
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+
+  /* ── Top tab bar (outer tabs: SEND / TODAY / HISTORY) */
+  .outer-tabs {
+    display: flex;
+    border-bottom: 1px solid #3f3f46;
+    margin-bottom: 20px;
+  }
+  .outer-tab {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 8px 20px;
+    border-bottom: 2px solid transparent;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .outer-tab.active { color: #C9A84C; border-bottom-color: #C9A84C; }
+
+  /* ── Inner toggle: Rate Update / Newsletter */
+  .inner-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  .inner-btn {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border: 1px solid #3f3f46;
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+    border-radius: 1px;
+  }
+  .inner-btn.active {
+    border-color: #C9A84C;
+    color: #C9A84C;
+    background: rgba(201,168,76,0.08);
+  }
+
+  /* ── Cadence badge */
+  .cadence-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .cadence-badge {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .badge-red   { background: rgba(224,82,82,0.12);  color: #E05252; border: 1px solid rgba(224,82,82,0.3); }
+  .badge-green { background: rgba(76,175,130,0.12); color: #4CAF82; border: 1px solid rgba(76,175,130,0.3); }
+  .badge-gold  { background: rgba(201,168,76,0.12); color: #C9A84C; border: 1px solid rgba(201,168,76,0.3); }
+  .cadence-label { font-size: 9px; color: #52525b; letter-spacing: 0.08em; }
+
+  /* ── Form */
+  .form-section {
+    background: #18181b;
+    border: 1px solid #3f3f46;
+    border-radius: 2px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .form-section-title {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: #71717a;
+    margin-bottom: 16px;
+  }
+  .field { margin-bottom: 16px; }
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #71717a;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .field-label span { color: #E05252; margin-left: 2px; }
+  .mock-input {
+    width: 100%;
+    background: #09090b;
+    border: none;
+    border-bottom: 1px solid #3f3f46;
+    color: #f4f4f5;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 4px;
+    outline: none;
+  }
+  .mock-textarea {
+    width: 100%;
+    background: #09090b;
+    border: 1px solid #3f3f46;
+    border-radius: 1px;
+    color: #71717a;
+    font-family: inherit;
+    font-size: 10px;
+    padding: 8px 10px;
+    resize: vertical;
+    min-height: 70px;
+    outline: none;
+  }
+  .mock-select {
+    width: 100%;
+    background: #09090b;
+    border: none;
+    border-bottom: 1px solid #3f3f46;
+    color: #f4f4f5;
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 4px;
+    outline: none;
+  }
+  .field-hint { font-size: 9px; color: #3f3f46; margin-top: 4px; letter-spacing: 0.06em; }
+
+  /* ── Rates table */
+  .rates-table { width: 100%; border-collapse: collapse; }
+  .rates-table th {
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    color: #71717a;
+    text-align: left;
+    padding: 0 8px 8px 0;
+    border-bottom: 1px solid #27272a;
+  }
+  .rates-table td {
+    padding: 7px 8px 7px 0;
+    border-bottom: 1px solid #1c1c1f;
+    vertical-align: middle;
+  }
+  .rates-table td:first-child {
+    font-size: 10px;
+    color: #a1a1aa;
+    width: 40%;
+  }
+  .rate-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #3f3f46;
+    color: #C9A84C;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    width: 80px;
+    padding: 2px 4px;
+    outline: none;
+  }
+  .apr-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #27272a;
+    color: #71717a;
+    font-family: inherit;
+    font-size: 10px;
+    width: 75px;
+    padding: 2px 4px;
+    outline: none;
+  }
+  .apr-input::placeholder { color: #3f3f46; }
+
+  /* ── Audience checkboxes */
+  .audience-row { display: flex; gap: 10px; }
+  .aud-chip {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 4px 12px;
+    border: 1px solid #C9A84C;
+    color: #C9A84C;
+    background: rgba(201,168,76,0.1);
+    border-radius: 1px;
+    cursor: pointer;
+  }
+
+  /* ── Action buttons */
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    align-items: center;
+  }
+  .btn-preview {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 8px 18px;
+    border: 1px solid #3f3f46;
+    background: transparent;
+    color: #a1a1aa;
+    cursor: pointer;
+    border-radius: 1px;
+  }
+  .btn-send {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 8px 22px;
+    border: 1px solid #C9A84C;
+    background: #C9A84C;
+    color: #09090b;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 1px;
+  }
+  .btn-schedule {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 8px 16px;
+    border: 1px solid #3f3f46;
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+    border-radius: 1px;
+  }
+
+  /* ── Two-col grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── Section title */
+  .page-title {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #52525b;
+    margin-bottom: 20px;
+  }
+  .section-note {
+    font-size: 10px;
+    color: #52525b;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- Outer tab bar -->
+<div class="outer-tabs">
+  <div class="outer-tab active">SEND</div>
+  <div class="outer-tab">TODAY</div>
+  <div class="outer-tab">HISTORY</div>
+</div>
+
+<!-- Page title -->
+<div class="page-title">MARKETING · SEND</div>
+
+<!-- Inner toggle -->
+<div class="inner-toggle">
+  <div class="inner-btn active">📈 RATE UPDATE</div>
+  <div class="inner-btn">✉ NEWSLETTER</div>
+</div>
+
+<!-- ═══ RATE UPDATE FORM ═══════════════════════════════════════ -->
+
+<!-- Cadence status -->
+<div class="cadence-row">
+  <span class="cadence-badge badge-red">6D AGO — OVERDUE</span>
+  <span class="cadence-label">Last sent Mar 13 · Weekly cadence</span>
+</div>
+
+<!-- Rates table -->
+<div class="form-section">
+  <div class="form-section-title">CURRENT RATES</div>
+  <table class="rates-table">
+    <thead>
+      <tr>
+        <th>PRODUCT</th>
+        <th>RATE</th>
+        <th>APR (optional)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>30-Yr Fixed (Primary)</td>
+        <td><input class="rate-input" placeholder="6.875%" /></td>
+        <td><input class="apr-input" placeholder="6.95%" /></td>
+      </tr>
+      <tr>
+        <td>15-Yr Fixed</td>
+        <td><input class="rate-input" placeholder="6.25%" /></td>
+        <td><input class="apr-input" placeholder="6.35%" /></td>
+      </tr>
+      <tr>
+        <td>30-Yr Jumbo</td>
+        <td><input class="rate-input" placeholder="6.875%" /></td>
+        <td><input class="apr-input" placeholder="" /></td>
+      </tr>
+      <tr>
+        <td>VA 30-Yr</td>
+        <td><input class="rate-input" placeholder="6.25%" /></td>
+        <td><input class="apr-input" placeholder="" /></td>
+      </tr>
+      <tr>
+        <td>FHA 30-Yr</td>
+        <td><input class="rate-input" placeholder="6.375%" /></td>
+        <td><input class="apr-input" placeholder="" /></td>
+      </tr>
+      <tr>
+        <td>FHA 5-Yr ARM</td>
+        <td><input class="rate-input" placeholder="5.875%" /></td>
+        <td><input class="apr-input" placeholder="" /></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Context + audience -->
+<div class="form-section">
+  <div class="form-section-title">CONTEXT</div>
+
+  <div class="field">
+    <label class="field-label">AUDIENCE</label>
+    <div class="audience-row">
+      <div class="aud-chip">BORROWERS</div>
+      <div class="aud-chip">REALTORS</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">RATE DIRECTION</label>
+    <select class="mock-select">
+      <option value="">— select —</option>
+      <option>Rates dropped</option>
+      <option>Rates went up</option>
+      <option>Rates flat / unchanged</option>
+      <option>Rates volatile / mixed</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field-label">BLURB / TALKING POINTS</label>
+    <textarea class="mock-textarea" placeholder="e.g. Rates dipped after Fed meeting. Good time to lock. Spring inventory picking up in Austin..."></textarea>
+    <div class="field-hint">Quick context for the AI. What should people know about rates this week?</div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">ANYTHING ELSE</label>
+    <textarea class="mock-textarea" style="min-height:50px" placeholder="Special offers, events, anything to mention..."></textarea>
+  </div>
+
+  <div class="field">
+    <label class="field-label">CONTENT DEPTH</label>
+    <select class="mock-select">
+      <option>Short &amp; Sweet — quick teaser, minimal commentary</option>
+      <option selected>Standard — normal length</option>
+      <option>In-Depth — more context, longer commentary</option>
+    </select>
+  </div>
+</div>
+
+<!-- Action buttons -->
+<div class="action-row">
+  <button class="btn-preview">👁 PREVIEW</button>
+  <button class="btn-send">▶ PUBLISH + SEND EMAILS</button>
+  <button class="btn-schedule">📅 SCHEDULE</button>
+</div>
+
+<div style="margin-top:16px; font-size:9px; color:#3f3f46; letter-spacing:0.08em">
+  Publishes rate page to styermortgage.com/rates/ and sends Mailchimp emails to selected audiences
+</div>
+
+</body>
+</html>

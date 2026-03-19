@@ -118,15 +118,20 @@ Rules:
           }
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Generation failed'
-          const isAuthError = msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthorized')
+          const msgLc = msg.toLowerCase()
+          const isAuthError = msgLc.includes('api key') || msgLc.includes('401') || msgLc.includes('unauthorized')
+          const isBillingError = msgLc.includes('credit') || msgLc.includes('billing') || msgLc.includes('quota') || msgLc.includes('402') || msgLc.includes('insufficient')
           console.error('[narrative] stream error:', {
             message: msg,
             isAuthError,
+            isBillingError,
             hasApiKey: !!process.env.ANTHROPIC_API_KEY,
           })
           const clientMsg = isAuthError
             ? 'AI generation is not configured. Contact your administrator.'
-            : 'AI generation failed. Please try again.'
+            : isBillingError
+              ? 'AI generation is unavailable — API account needs credits. Contact your administrator.'
+              : 'AI generation failed. Please try again.'
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: clientMsg })}\n\n`))
           controller.close()
         }

@@ -6,6 +6,8 @@ import {
   buildRatesString,
   currentWeekBoundaries,
   formatDaysAgo,
+  formatWeekLabel,
+  todayString,
 } from './utils'
 
 describe('aprForProduct', () => {
@@ -133,5 +135,30 @@ describe('formatDaysAgo', () => {
   it('returns "3d ago" for 3 days ago', () => {
     const ts = new Date(Date.now() - 3 * 86400000).toISOString()
     expect(formatDaysAgo(ts)).toBe('3d ago')
+  })
+})
+
+describe('formatWeekLabel', () => {
+  it('formats a week range correctly', () => {
+    const start = new Date(2026, 2, 17)  // Mar 17, 2026
+    const end   = new Date(2026, 2, 23)  // Mar 23, 2026
+    expect(formatWeekLabel(start, end)).toBe('Mar 17 – Mar 23, 2026')
+  })
+  it('handles month boundary', () => {
+    const start = new Date(2026, 2, 30)  // Mar 30
+    const end   = new Date(2026, 3, 5)   // Apr 5, 2026
+    expect(formatWeekLabel(start, end)).toBe('Mar 30 – Apr 5, 2026')
+  })
+})
+
+describe('todayString', () => {
+  it('returns a YYYY-MM-DD string', () => {
+    const result = todayString()
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+  it('returns today in local time (matches new Date() local components)', () => {
+    const d = new Date()
+    const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    expect(todayString()).toBe(expected)
   })
 })

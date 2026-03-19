@@ -199,6 +199,10 @@ export default function CallsTab({ mccState, onSave }: Props) {
               <FieldLabel>EMAIL</FieldLabel>
               <Input type="email" value={newContact.email} onChange={e => setNewContact(p => ({ ...p, email: e.target.value }))} />
             </div>
+            <div className="col-span-2">
+              <FieldLabel>NOTE</FieldLabel>
+              <Input value={newContact.note} onChange={e => setNewContact(p => ({ ...p, note: e.target.value }))} />
+            </div>
           </div>
           <div className="flex gap-2">
             <Btn onClick={handleAdd}>Save Contact</Btn>
@@ -215,7 +219,11 @@ export default function CallsTab({ mccState, onSave }: Props) {
           <p className="text-sm">
             {search
               ? `No contacts match "${search}"`
-              : `No ${LIST_CONFIG.find(l => l.key === activeList)?.label.toLowerCase()} yet. Add manually or import a CSV.`}
+              : (() => {
+                  const rawLabel = LIST_CONFIG.find(l => l.key === activeList)?.label ?? ''
+                  const friendlyLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1).toLowerCase()
+                  return `No ${friendlyLabel} yet. Add manually or import a CSV.`
+                })()}
           </p>
           {!search && (
             <div className="mt-3">

@@ -30,6 +30,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
   const [showAdd, setShowAdd]       = useState(false)
   const [newContact, setNewContact] = useState(emptyContact())
   const [addError, setAddError]     = useState('')
+  const [mutateError, setMutateError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const contacts = mccState.contacts[activeList] ?? []
@@ -57,10 +58,16 @@ export default function CallsTab({ mccState, onSave }: Props) {
         [activeList]: [contact, ...mccState.contacts[activeList]],
       },
     }
-    await onSave(nextState)
+    try {
+      await onSave(nextState)
+    } catch {
+      setMutateError('Save failed. Please try again.')
+      return
+    }
     setNewContact(emptyContact())
     setShowAdd(false)
     setAddError('')
+    setMutateError('')
   }
 
   // ── Delete contact ─────────────────────────────────────────────────────────
@@ -73,7 +80,13 @@ export default function CallsTab({ mccState, onSave }: Props) {
         [activeList]: mccState.contacts[activeList].filter(c => c.id !== id),
       },
     }
-    await onSave(nextState)
+    try {
+      await onSave(nextState)
+    } catch {
+      setMutateError('Save failed. Please try again.')
+      return
+    }
+    setMutateError('')
   }
 
   // ── CSV import ─────────────────────────────────────────────────────────────
@@ -110,7 +123,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
         company:     cols[idxOf('company')]   ?? '',
         phone:       cols[idxOf('phone')]      ?? '',
         email:       cols[idxOf('email')]      ?? '',
-        lastTouch:   cols[idxOf('lasttouch')]  ?? null,
+        lastTouch:   cols[idxOf('lasttouch')]  || null,
         note:        '',
         callHistory: [],
       })
@@ -127,9 +140,16 @@ export default function CallsTab({ mccState, onSave }: Props) {
         [activeList]: [...imported, ...mccState.contacts[activeList]],
       },
     }
-    await onSave(nextState)
+    try {
+      await onSave(nextState)
+    } catch {
+      setMutateError('Save failed. Please try again.')
+      return
+    } finally {
+      if (fileRef.current) fileRef.current.value = ''
+    }
+    setMutateError('')
     alert(`Imported ${added} contact(s).${skipped ? ` ${skipped} duplicate(s) skipped.` : ''}`)
-    if (fileRef.current) fileRef.current.value = ''
   }
 
   return (
@@ -155,6 +175,9 @@ export default function CallsTab({ mccState, onSave }: Props) {
           )
         })}
       </div>
+
+      {/* Mutate error */}
+      {mutateError && <p className="text-red-400 text-xs">{mutateError}</p>}
 
       {/* Search + actions */}
       <div className="flex gap-2">

@@ -21,13 +21,14 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
   const [showNoteInput, setShowNoteInput] = useState(false)
   const [callNote, setCallNote]           = useState('')
   const [saving, setSaving]               = useState(false)
+  const [saveError, setSaveError]         = useState('')
 
   const calledToday = contact.lastTouch === todayString()
 
   // Last touch color
   const lastTouchColor = (() => {
     if (!contact.lastTouch) return RED
-    const days = Math.floor((Date.now() - new Date(contact.lastTouch).getTime()) / 86400000)
+    const days = Math.floor((Date.now() - new Date(contact.lastTouch + 'T12:00:00').getTime()) / 86400000)
     if (days <= 14) return GREEN
     if (days <= 21) return GOLD
     return RED
@@ -78,8 +79,11 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
       }
 
       await onSave(nextState)
+      setSaveError('')
       setShowNoteInput(false)
       setCallNote('')
+    } catch {
+      setSaveError('Failed to save call. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -134,8 +138,8 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
       </div>
 
       {/* Call history (last 2) */}
-      {contact.callHistory?.slice(0, 2).map((h, i) => (
-        <div key={i} className="text-xs text-zinc-600 mt-0.5">
+      {contact.callHistory?.slice(0, 2).map((h) => (
+        <div key={h.date} className="text-xs text-zinc-600 mt-0.5">
           {h.date}: {h.note || 'No note'}
         </div>
       ))}
@@ -155,11 +159,14 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
             onChange={e => setCallNote(e.target.value)}
             autoFocus
           />
+          {saveError && (
+            <p className="text-red-400 text-xs">{saveError}</p>
+          )}
           <div className="flex gap-2">
             <Btn size="xs" onClick={handleSaveCall} disabled={saving}>
               {saving ? 'Saving...' : 'Save Call'}
             </Btn>
-            <Btn size="xs" variant="ghost" onClick={() => { setShowNoteInput(false); setCallNote('') }}>
+            <Btn size="xs" variant="ghost" onClick={() => { setShowNoteInput(false); setCallNote(''); setSaveError('') }}>
               Cancel
             </Btn>
           </div>

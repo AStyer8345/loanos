@@ -1,5 +1,16 @@
 # LoanOS Changelog
 
+## [4.3.0] — 2026-03-19 — Scenario Output Layout Restructure
+
+### Changed
+- **`src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`**: Removed `max-w-[1100px] mx-auto` container — page now uses `w-full` (left-aligned, fills available width). Step 2 results section restructured into 4 rows: (1) `ScenarioSummaryTable` (left, `overflow-x-auto`) + `KeyMetricsGrid` (right, fixed `w-72` sidebar) side-by-side in a flex row; (2) `BreakEvenTable` full-width; (3) `TotalInterestChart` full-width; (4) `MonthlyPaymentChart` + `CumulativeSavingsChart` in a 2-col grid.
+- **`src/app/dashboard/scenarios/new/ScenarioCharts.tsx`**: Added named exports `MonthlyPaymentChart`, `TotalInterestChart`, `CumulativeSavingsChart` so `ScenarioBuilder` can place individual charts at precise layout positions. Default `ScenarioCharts` export retained.
+
+### Notes
+- AI Analysis (`generate-narrative`) will fail with a billing error if `ANTHROPIC_API_KEY` has no credits. Add credits at console.anthropic.com → Billing to resolve.
+
+---
+
 ## [4.2.0] — 2026-03-19 — Audit Quick Wins
 
 ### New

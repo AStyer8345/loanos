@@ -1,11 +1,12 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-19 (morning audit)_
+_Last updated: 2026-03-19 (session 9 — multi-tenancy audit)_
 
 ---
 
 ## 🔴 High Priority
 
+- [ ] **Apply migration 039** — `supabase/migrations/039_expand_org_schema.sql` written, needs Supabase SQL Editor. Adds: org_id to chat_sessions/mcc_state/user_settings/marketing_activity_log, RLS on marketing_activity_log, new columns on organizations/profiles, creates org_settings table.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 

@@ -14,7 +14,7 @@ import CurrentLoanCard from './CurrentLoanCard'
 import ScenarioSummaryTable from './ScenarioSummaryTable'
 import KeyMetricsGrid from './KeyMetricsGrid'
 import BreakEvenTable from './BreakEvenTable'
-import ScenarioCharts from './ScenarioCharts'
+import { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart } from './ScenarioCharts'
 import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
 import ActionsBar from './ActionsBar'
@@ -249,7 +249,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
-      <div className="max-w-[1100px] mx-auto px-5 md:px-8 py-8">
+      <div className="w-full px-5 md:px-8 py-8">
 
         {/* ─── Header ────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">
@@ -501,12 +501,33 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                     ? buildPurchaseDisplayData(purchaseScenarios, purchaseResults)
                     : buildRefiDisplayData(currentLoan, refiScenarios, refiResults)
                   return (
-                    <>
-                      <ScenarioSummaryTable data={displayData} />
-                      <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} />
+                    <div className="space-y-5">
+
+                      {/* ── Row 1: Scenario table (left) + Key Metrics (right) ── */}
+                      <div className="flex gap-5 items-start">
+                        <div className="overflow-x-auto">
+                          <ScenarioSummaryTable data={displayData} />
+                        </div>
+                        <div className="flex-shrink-0 w-72">
+                          <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} />
+                        </div>
+                      </div>
+
+                      {/* ── Row 2: Break-Even Analysis ──────────────────────── */}
                       <BreakEvenTable rows={displayData.breakEvenRows} mode={displayData.mode} />
-                      <ScenarioCharts data={displayData} />
-                    </>
+
+                      {/* ── Row 3: Total Interest Paid ──────────────────────── */}
+                      <TotalInterestChart data={displayData} />
+
+                      {/* ── Row 4: Monthly Payment + Cumulative Savings ─────── */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <MonthlyPaymentChart data={displayData} />
+                        <div className="lg:col-span-2">
+                          <CumulativeSavingsChart data={displayData} />
+                        </div>
+                      </div>
+
+                    </div>
                   )
                 })()}
 

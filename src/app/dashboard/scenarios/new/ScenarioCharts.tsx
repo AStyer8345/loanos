@@ -55,6 +55,8 @@ function BarTopLabel(props: any) {
   )
 }
 
+export { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart }
+
 export default function ScenarioCharts({ data }: { data: DisplayData }) {
   if (!data.rows.length) return null
   return (

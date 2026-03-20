@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-20 (session 11 — multi-tenancy policy cleanup)_
+_Last updated: 2026-03-20 (morning audit — session 12)_
 
 ---
 
@@ -29,6 +29,11 @@ _Last updated: 2026-03-20 (session 11 — multi-tenancy policy cleanup)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (morning audit — 2026-03-20)
+
+- [x] **Arive New Loan null first_name fixed** — n8n workflow `1tagvoU0UXtdDiMY` was crashing when Arive sent a webhook with null `firstName`. The "HTTP Request" (contact upsert) node body had `first_name: $json.firstName` — JSON.stringify serializes null as a literal null, which violated the NOT NULL constraint on `contacts.first_name`. Fixed: added `|| ''` fallback for both `first_name` and `last_name`. Pushed to n8n (workflow active).
+- [x] **chat_sessions RLS verified correct** — Migration 035 confirmed applied. All 4 policies scoped to `auth.uid() = user_id`. Stale todo removed.
 
 ## ✅ Completed (session 11 — 2026-03-20 multi-tenancy policy audit)
 

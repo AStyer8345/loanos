@@ -1,21 +1,20 @@
-# LoanOS Daily Report — 2026-03-18
+# LoanOS Daily Report — 2026-03-19
 
 ## 🔴 Action Required
 
-### n8n Production Workflow Error
-- **Workflow:** `9JyzzwKac8v3uQ7d` — LoanOS — Arive Status Update → Supabase
-- **Execution #313** failed via webhook on 2026-03-16 (yesterday)
-- This is a live production webhook (not a manual test) — investigate what Arive payload triggered it
+### n8n Execution Errors — Arive New Loan → Supabase (`1tagvoU0UXtdDiMY`)
+4 errors fired today in rapid succession:
+- Execution 572 — 19:36:14 UTC
+- Execution 568 — 19:31:13 UTC
+- Execution 566 — 19:31:01 UTC
+- Execution 564 — 19:29:15 UTC
 
-### Activity Gaps — Active Pipeline Loans (5+ days, no log entries)
-These are real loans in mid-process states with no activity_log entry in the last 5 days:
+All 4 errored within a ~7-minute window. Likely a bad Arive webhook payload or Supabase schema mismatch. Workflow is still active but failing on every trigger. **Check the n8n execution log for the error message.**
 
-| Borrower | Status | Loan ID |
-|----------|--------|---------|
-| Patrick Rademacher | Loan in Process | b3ad0f2c |
-| Dhaval Poladia | DISCLOSURE_SENT | 2e8f14c4 |
-| Chelsea Wise | RE_SUBMITTAL | 348ea1c1 |
-| (no name) | under_contract | 7f3ce5a8 |
+### n8n Execution Error — Pre-Approval Email (`utMvZpkdRwIRZ51u`)
+- Execution 559 — 19:35:37 UTC (today)
+
+Single error. May be a bad payload or missing field. **Review execution 559 in n8n.**
 
 ---
 
@@ -24,7 +23,7 @@ These are real loans in mid-process states with no activity_log entry in the las
 ### n8n — Unexpected Inactive Workflows
 | Workflow ID | Name | Notes |
 |-------------|------|-------|
-| `JMmstRl2C5ylmuIY` | LoanOS — Outlook Email Sync | Known — needs env vars configured |
+| `JMmstRl2C5ylmuIY` | LoanOS — Outlook Email Sync | Known — needs Outlook env vars configured |
 | `w7hZLmIcQ4izmndb` | LoanOS — Contract Received (duplicate) | Old/stale version — `UfNcdpoVKQZqy0fj` is the active one. Safe to archive. |
 
 ### Code Quality
@@ -34,20 +33,18 @@ These are real loans in mid-process states with no activity_log entry in the las
   - `src/app/dashboard/scenarios/new/StatementUpload.tsx`
   - `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
 
-### Unused Components (7 files — never imported in `src/app/`)
-`ActivityFeed`, `ActivityTimeline`, `EmailDraftPreview`, `GlobalSearch`, `NavDropdown`, `NavItem`, `SmartActionQueue`
-
-### Seed Loan Activity Gaps
-40+ loans in "Started" / "On Hold" status with no activity in 5+ days — mostly seed/test data (identifiable by `a0000000-...` ID pattern). Low urgency, but worth periodically pruning test data.
+### Unused Components (never imported in `src/app/`)
+`ActivityTimeline`, `EmailDraftPreview`, `GlobalSearch`, `NavDropdown`, `NavItem`, `SmartActionQueue`, `dashboard/DailyBriefingPanel`, `dashboard/DailyScheduleWidget`, `dashboard/TodoList`, `outreach/BulkActionPreview`, `outreach/QuickAddConfirmation`
 
 ---
 
 ## 🟢 All Clear
 
-- **Stale loans:** 0 — no active loans stuck without an update in 3+ days
+- **Stale loans:** 0 — all 93 active loans updated within the last 2 days
 - **Pending email drafts:** 0 — no drafts sitting unsent 24h+
-- **n8n core workflows:** 8 of 8 expected workflows active (`Milestone Agent`, `Arive New Loan → Supabase`, `Pre-Approval Email`, `Referral Intro`, `Final CD Email`, `Contract Received`, `New Application Received`, `Refi Intake Email`)
-- **Execution errors from `eJG4wckrj6SmSpm1` and `AK1fBcaX1cPcdlGx`** are manual test runs on intentionally-inactive workflows — not production issues
+- **Activity log:** Pisheh, Rademacher, Mcneese all have entries in the last 5 days
+- **TypeScript build:** PASS — 0 errors
+- **Weekly Social Post** (`eJG4wckrj6SmSpm1`): Now showing as active (memory had it as "Fixed, inactive" — update memory if this was intentional)
 
 ---
 

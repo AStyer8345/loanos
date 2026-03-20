@@ -427,7 +427,6 @@ export default function LoanDetailPage() {
   )
 
   const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
-  const addressLine = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
   const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
 
   // Header inline edit save helper
@@ -833,7 +832,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
         )}
 
         {/* ── Full editable details (collapsible) ── */}
-        <CollapsibleDetails loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
+        <CollapsibleDetails loan={loan} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
           {/* Placeholder — CollapsibleDetails renders itself */}
       </div>
 
@@ -1101,9 +1100,8 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
 
 // ── CollapsibleDetails — wraps all EditableSectionCards ───────────────────────
 
-function CollapsibleDetails({ loan, loanId, onSave, onSaveMultiple, contact }: {
+function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
   loan: Loan
-  loanId: string
   onSave: (field: string, value: string | number | null) => Promise<void>
   onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
   contact: ContactRow | null
@@ -1256,72 +1254,6 @@ function CollapsibleDetails({ loan, loanId, onSave, onSaveMultiple, contact }: {
   )
 }
 
-// ── Key details card ──────────────────────────────────────────────────────────
-
-function KeyDetailsCard({ loan }: { loan: Loan }) {
-  const miPct = loan.mi_monthly && loan.loan_amount
-    ? ((loan.mi_monthly * 12) / loan.loan_amount * 100).toFixed(2)
-    : null
-  const miLabel = miPct ? `Yes — ${miPct}%` : (loan.mi_monthly ? 'Yes' : 'No')
-
-  const downLabel = loan.down_payment
-    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
-    : '—'
-
-  const rateApr = loan.interest_rate && loan.apr
-    ? `${fmtPct(loan.interest_rate)} / ${fmtPct(loan.apr)}`
-    : fmtPct(loan.interest_rate)
-
-  const termLabel = loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : '—'
-
-  const rows = [
-    [
-      { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
-      { label: 'Down Payment', value: downLabel },
-      { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
-    ],
-    [
-      { label: 'Rate / APR', value: rateApr },
-      { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
-      { label: 'Term', value: termLabel },
-    ],
-    [
-      { label: 'LTV', value: fmtPct(loan.ltv) },
-      { label: 'CLTV', value: fmtPct(loan.cltv) },
-      { label: 'DTI', value: fmtPct(loan.back_end_dti) },
-    ],
-    [
-      { label: 'Loan Type', value: loan.loan_type || loan.loan_program || '—' },
-      { label: 'AUS Result', value: loan.milestone || '—' },
-      { label: 'MI Required', value: miLabel },
-    ],
-    [
-      { label: 'Est. Close Date', value: fmtDate(loan.estimated_closing_date) },
-      { label: 'Rate Lock Expiry', value: fmtDate(loan.rate_lock_expiration) },
-      { label: 'Commission', value: fmtCurrency(loan.commission_amount) },
-    ],
-  ]
-
-  return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Key Loan Details</h2>
-      </div>
-      <div className="p-4 divide-y divide-zinc-700/40">
-        {rows.map((row, ri) => (
-          <div key={ri} className={`grid grid-cols-3 gap-4 ${ri > 0 ? 'pt-3 mt-0' : ''} pb-3`}>
-            {row.map(cell => (
-              <div key={cell.label}>
-                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">{cell.label}</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100 leading-tight">{cell.value}</p>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 
 // ── Milestone timeline ────────────────────────────────────────────────────────

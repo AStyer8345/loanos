@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
 
       loan_amount: n(body.loanAmount),
       loan_purpose: n(body.loanPurpose),
-      loan_type: n(body.loanType),
+      loan_type: n(body.mortgageType) ?? n(body.loanType),
       loan_program: n(body.loanProgram) ?? n(body.lenderProductName),
       loan_term: n(body.loanTerm),
       interest_rate: n(body.interestRate),
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
       property_city: n(body.propertyCity),
       property_state: n(body.propertyState),
       property_zip: n(body.propertyZip),
-      property_county: n(body.propertyCounty),
+      property_county: n(body['subjectProperty_county']) ?? n(body.propertyCounty),
       property_type: n(body.propertyType),
       occupancy_type: n(body.occupancyType),
       purchase_price: n(body.purchasePrice),
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
       funding_date: nDate(body.fundingDate),
       rate_lock_date: nDate(body.rateLockDate) ?? nDate(body.lockDate),
       rate_lock_expiration: nDate(body.rateLockExpiration) ?? nDate(body.lockExpirationDate),
-      estimated_closing_date: nDate(body.estimatedClosingDate) ?? nDate(body['keyDates_closingContingency']),
+      estimated_closing_date: nDate(body['keyDates_estimatedFundingDate']) ?? nDate(body.estimatedClosingDate) ?? nDate(body['keyDates_closingContingency']),
       appraisal_ordered_date: nDate(body.appraisalOrderedDate) ?? nDate(body['keyDates_appraisalOrderedDate']),
       first_payment_date: nDate(body.firstPaymentDate) ?? nDate(body['keyDates_estFirstPaymentDate']) ?? nDate(body['keyDates_firstPaymentDate']),
 

@@ -1005,6 +1005,56 @@ function InfoCard({ title, fields }: {
   )
 }
 
+function PartiesCard({
+  buyerAgentDisplay, buyerPhone, buyerEmail,
+  listingAgentDisplay, listingPhone, listingEmail,
+  titleCompany, titleContact, titleEmail,
+}: {
+  buyerAgentDisplay: React.ReactNode
+  buyerPhone: string | null
+  buyerEmail: string | null
+  listingAgentDisplay: React.ReactNode
+  listingPhone: string | null
+  listingEmail: string | null
+  titleCompany: string | null
+  titleContact: string | null
+  titleEmail: string | null
+}) {
+  const row = (label: string, value: React.ReactNode, color: string) => (
+    <div className="flex items-baseline justify-between gap-3 min-w-0">
+      <span className="text-[10px] font-mono uppercase tracking-wide shrink-0" style={{ color: 'rgb(113 113 122)' }}>{label}</span>
+      <span className={`text-xs font-mono text-right truncate ${color}`}>{value ?? '—'}</span>
+    </div>
+  )
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-zinc-700/70">
+        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Parties</h3>
+      </div>
+      <div className="p-4 space-y-3">
+        {/* Buyer's Agent — emerald */}
+        <div className="pl-2 border-l-2 border-emerald-600 space-y-1.5">
+          {row("Buyer's Agent", buyerAgentDisplay, 'text-emerald-400')}
+          {row('BA Phone', buyerPhone, 'text-emerald-400')}
+          {row('BA Email', buyerEmail, 'text-emerald-400')}
+        </div>
+        {/* Listing Agent — sky */}
+        <div className="pl-2 border-l-2 border-sky-600 space-y-1.5">
+          {row('Listing Agent', listingAgentDisplay, 'text-sky-400')}
+          {row('LA Phone', listingPhone, 'text-sky-400')}
+          {row('LA Email', listingEmail, 'text-sky-400')}
+        </div>
+        {/* Title — amber */}
+        <div className="pl-2 border-l-2 border-amber-600 space-y-1.5">
+          {row('Title Company', titleCompany, 'text-amber-400')}
+          {row('Title Contact', titleContact, 'text-amber-400')}
+          {row('Title Email', titleEmail, 'text-amber-400')}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
   loan: Loan
   loanId: string
@@ -1086,14 +1136,17 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
       ]} />
 
       {/* Card 6 — Parties */}
-      <InfoCard title="Parties" fields={[
-        { label: "Buyer's Agent",   value: buyerAgentDisplay },
-        { label: 'BA Phone',        value: loan.buyers_agent_phone },
-        { label: 'Listing Agent',   value: listingAgentDisplay },
-        { label: 'LA Phone',        value: loan.listing_agent_phone },
-        { label: 'Title Company',   value: loan.title_company },
-        { label: 'Title Contact',   value: loan.title_contact },
-      ]} />
+      <PartiesCard
+        buyerAgentDisplay={buyerAgentDisplay}
+        buyerPhone={loan.buyers_agent_phone}
+        buyerEmail={loan.buyers_agent_email || loan.buyer_agent_email}
+        listingAgentDisplay={listingAgentDisplay}
+        listingPhone={loan.listing_agent_phone}
+        listingEmail={loan.listing_agent_email}
+        titleCompany={loan.title_company}
+        titleContact={loan.title_contact}
+        titleEmail={loan.title_email}
+      />
     </div>
   )
 }

@@ -136,8 +136,9 @@ export async function POST(req: NextRequest) {
   // ── 6. Insert contact ─────────────────────────────────────────────────────────
   const insertData: Record<string, unknown> = {
     organization_id,
+    user_id: systemUserId,
     first_name,
-    last_name:    last_name    || null,
+    last_name:    last_name    || '',
     email:        email        || null,
     phone:        phone        || null,
     stage:        stage        || 'Lead',

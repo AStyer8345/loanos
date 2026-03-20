@@ -101,6 +101,7 @@ export async function POST(req: NextRequest) {
   }
 
   let duplicate = null
+  let emailDuplicate = false
   if (dupConditions.length > 0) {
     const { data: dups } = await supabase
       .from('contacts')
@@ -111,7 +112,19 @@ export async function POST(req: NextRequest) {
 
     if (dups && dups.length > 0) {
       duplicate = dups[0]
+      // Email match = hard duplicate — DB unique constraint prevents re-insert
+      emailDuplicate = !!(email && dups[0].email?.toLowerCase() === email.toLowerCase())
     }
+  }
+
+  // If email duplicate, return existing contact — don't attempt insert
+  if (emailDuplicate && duplicate) {
+    const fullName = [first_name, last_name].filter(Boolean).join(' ')
+    return NextResponse.json({
+      contact:   duplicate,
+      duplicate: duplicate,
+      message:   `Contact already exists for ${fullName} — returned existing record.`,
+    })
   }
 
   // ── 5. Build structured notes string ─────────────────────────────────────────

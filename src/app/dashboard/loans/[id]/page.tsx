@@ -309,6 +309,26 @@ function fmtPct(n: number | null) {
   return `${parseFloat(n.toFixed(3))}%`
 }
 
+function fmtPhone(val: string | null | undefined): string | null {
+  if (!val) return null
+  const d = val.replace(/\D/g, '')
+  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`
+  if (d.length === 11 && d[0] === '1') return `${d.slice(1, 4)}-${d.slice(4, 7)}-${d.slice(7)}`
+  return val
+}
+
+function PhoneLink({ phone }: { phone: string | null | undefined }) {
+  const fmt = fmtPhone(phone)
+  if (!fmt) return <span className="text-zinc-600">—</span>
+  const digits = (phone ?? '').replace(/\D/g, '')
+  return <a href={`tel:${digits}`} className="hover:underline">{fmt}</a>
+}
+
+function EmailLink({ email }: { email: string | null | undefined }) {
+  if (!email) return <span className="text-zinc-600">—</span>
+  return <a href={`mailto:${email}`} className="hover:underline">{email}</a>
+}
+
 // ── Pipeline helpers (canonical stage ordering) ──────────────────────────────
 
 const PIPELINE_STAGES = ['Application', 'Processing', 'Underwriting', 'CTC', 'Funding']
@@ -1006,49 +1026,58 @@ function InfoCard({ title, fields }: {
 }
 
 function PartiesCard({
-  buyerAgentDisplay, buyerPhone, buyerEmail,
-  listingAgentDisplay, listingPhone, listingEmail,
+  buyerName, buyerContactId, buyerPhone, buyerEmail,
+  listingName, listingContactId, listingPhone, listingEmail,
   titleCompany, titleContact, titleEmail,
 }: {
-  buyerAgentDisplay: React.ReactNode
+  buyerName: string | null
+  buyerContactId: string | null
   buyerPhone: string | null
   buyerEmail: string | null
-  listingAgentDisplay: React.ReactNode
+  listingName: string | null
+  listingContactId: string | null
   listingPhone: string | null
   listingEmail: string | null
   titleCompany: string | null
   titleContact: string | null
   titleEmail: string | null
 }) {
-  const row = (label: string, value: React.ReactNode, color: string) => (
+  const row = (label: string, value: React.ReactNode) => (
     <div className="flex items-baseline justify-between gap-3 min-w-0">
-      <span className="text-[10px] font-mono uppercase tracking-wide shrink-0" style={{ color: 'rgb(113 113 122)' }}>{label}</span>
-      <span className={`text-xs font-mono text-right truncate ${color}`}>{value ?? '—'}</span>
+      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{label}</span>
+      <span className="text-xs font-mono text-zinc-200 text-right truncate">{value}</span>
     </div>
   )
+  const nameLink = (name: string | null, contactId: string | null) =>
+    name
+      ? contactId
+        ? <Link href={`/dashboard/contacts/${contactId}`} className="hover:underline text-zinc-200">{name}</Link>
+        : name
+      : <span className="text-zinc-600">—</span>
+
   return (
     <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 border-b border-zinc-700/70">
         <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Parties</h3>
       </div>
       <div className="p-4 space-y-3">
-        {/* Buyer's Agent — emerald */}
-        <div className="pl-2 border-l-2 border-emerald-600 space-y-1.5">
-          {row("Buyer's Agent", buyerAgentDisplay, 'text-emerald-400')}
-          {row('BA Phone', buyerPhone, 'text-emerald-400')}
-          {row('BA Email', buyerEmail, 'text-emerald-400')}
+        {/* Buyer's Agent — emerald tint */}
+        <div className="rounded p-2.5 space-y-1.5 bg-emerald-950/50 border border-emerald-900/40">
+          {row("Buyer's Agent", nameLink(buyerName, buyerContactId))}
+          {row('BA Phone', <PhoneLink phone={buyerPhone} />)}
+          {row('BA Email', <EmailLink email={buyerEmail} />)}
         </div>
-        {/* Listing Agent — sky */}
-        <div className="pl-2 border-l-2 border-sky-600 space-y-1.5">
-          {row('Listing Agent', listingAgentDisplay, 'text-sky-400')}
-          {row('LA Phone', listingPhone, 'text-sky-400')}
-          {row('LA Email', listingEmail, 'text-sky-400')}
+        {/* Listing Agent — sky tint */}
+        <div className="rounded p-2.5 space-y-1.5 bg-sky-950/50 border border-sky-900/40">
+          {row('Listing Agent', nameLink(listingName, listingContactId))}
+          {row('LA Phone', <PhoneLink phone={listingPhone} />)}
+          {row('LA Email', <EmailLink email={listingEmail} />)}
         </div>
-        {/* Title — amber */}
-        <div className="pl-2 border-l-2 border-amber-600 space-y-1.5">
-          {row('Title Company', titleCompany, 'text-amber-400')}
-          {row('Title Contact', titleContact, 'text-amber-400')}
-          {row('Title Email', titleEmail, 'text-amber-400')}
+        {/* Title — amber tint */}
+        <div className="rounded p-2.5 space-y-1.5 bg-amber-950/50 border border-amber-900/40">
+          {row('Title Company', titleCompany ?? <span className="text-zinc-600">—</span>)}
+          {row('Title Contact', titleContact ?? <span className="text-zinc-600">—</span>)}
+          {row('Title Email', <EmailLink email={titleEmail} />)}
         </div>
       </div>
     </div>
@@ -1069,31 +1098,16 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
     ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
     : null
 
-  const buyerAgentDisplay = loan.buyers_agent_name || loan.buyer_agent_name
-    ? (
-        loan.buyer_agent_contact_id
-          ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} className="text-indigo-400 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link>
-          : (loan.buyers_agent_name || loan.buyer_agent_name)
-      )
-    : null
-
-  const listingAgentDisplay = loan.listing_agent_name
-    ? (
-        loan.listing_agent_contact_id
-          ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} className="text-indigo-400 hover:underline">{loan.listing_agent_name}</Link>
-          : loan.listing_agent_name
-      )
-    : null
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {/* Card 1 — Borrower */}
       <InfoCard title="Borrower" fields={[
         { label: 'Name',        value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
         { label: 'Co-Borrower', value: loan.co_borrower_name },
-        { label: 'Email',       value: loan.borrower_email },
-        { label: 'Phone',       value: loan.borrower_phone },
-        { label: 'Address',     value: null },
+        { label: 'Email',       value: <EmailLink email={loan.borrower_email} /> },
+        { label: 'Phone',       value: <PhoneLink phone={loan.borrower_phone} /> },
+        { label: 'Co-Borr Email', value: <EmailLink email={loan.co_borrower_email} /> },
+        { label: 'Co-Borr Phone', value: <PhoneLink phone={loan.co_borrower_phone} /> },
       ]} />
 
       {/* Card 2 — Loan Terms */}
@@ -1137,10 +1151,12 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
 
       {/* Card 6 — Parties */}
       <PartiesCard
-        buyerAgentDisplay={buyerAgentDisplay}
+        buyerName={loan.buyers_agent_name || loan.buyer_agent_name}
+        buyerContactId={loan.buyer_agent_contact_id}
         buyerPhone={loan.buyers_agent_phone}
         buyerEmail={loan.buyers_agent_email || loan.buyer_agent_email}
-        listingAgentDisplay={listingAgentDisplay}
+        listingName={loan.listing_agent_name}
+        listingContactId={loan.listing_agent_contact_id}
         listingPhone={loan.listing_agent_phone}
         listingEmail={loan.listing_agent_email}
         titleCompany={loan.title_company}

@@ -18,7 +18,7 @@ import {
   Plus,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
-import { fmtCurrency, fmtDate } from '@/lib/formatters'
+import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 
 export type Contact = {
@@ -800,7 +800,7 @@ export function ContactRecordView(props: Props) {
                       {phone && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <Phone size={14} style={{ color: 'var(--muted)' }} />
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>{phone}</span>
+                          <a href={`tel:${phone.replace(/\D/g, '')}`} style={{ color: '#c9a84c', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{fmtPhone(phone) ?? phone}</a>
                         </div>
                       )}
                     </div>

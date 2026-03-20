@@ -194,6 +194,7 @@ type LeftTab = 'overview' | 'emails' | 'notes'
 type Props = {
   contact: Contact
   loans: ContactLoan[]
+  referredLoans?: ContactLoan[]
   activity: ActivityEntry[]
   contactActivity: ContactActivityRow[]
   emailDrafts: EmailDraftRow[]
@@ -405,6 +406,7 @@ export function ContactRecordView(props: Props) {
   const {
     contact,
     loans,
+    referredLoans = [],
     contactActivity,
     emailDrafts,
     inboundEmails,
@@ -706,6 +708,72 @@ export function ContactRecordView(props: Props) {
                     </div>
                   )}
                 </div>
+
+                {/* ── Referred Borrowers (realtors only) ── */}
+                {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (
+                  <div style={cardStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div style={labelStyle}>REFERRED BORROWERS</div>
+                      <span style={{
+                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+                        background: referredLoans.length > 0 ? '#c9a84c22' : 'transparent',
+                        color: referredLoans.length > 0 ? '#c9a84c' : 'var(--muted)',
+                        border: `1px solid ${referredLoans.length > 0 ? '#c9a84c44' : 'transparent'}`,
+                        borderRadius: 4, padding: '2px 6px',
+                      }}>
+                        {referredLoans.length} loan{referredLoans.length !== 1 ? 's' : ''} referred
+                      </span>
+                    </div>
+                    {referredLoans.length === 0 ? (
+                      <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '8px 0' }}>
+                        No referrals yet
+                      </div>
+                    ) : (
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                              {['Borrower', 'Loan Amount', 'Status', 'Close Date'].map(h => (
+                                <th key={h} style={{ textAlign: 'left', padding: '4px 8px 8px 0', fontSize: 9, color: '#c9a84c', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {referredLoans.map(loan => {
+                              const borrowerName = (loan as { borrower_first_name?: string | null; borrower_last_name?: string | null }).borrower_first_name
+                                ? `${(loan as { borrower_first_name?: string | null }).borrower_first_name ?? ''} ${(loan as { borrower_last_name?: string | null }).borrower_last_name ?? ''}`.trim()
+                                : loan.borrower_name || loan.loan_name || '—'
+                              const closeDate = (loan as { estimated_closing_date?: string | null }).estimated_closing_date || loan.closing_date
+                              return (
+                                <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, #2a2a2a)' }}>
+                                  <td style={{ padding: '8px 8px 8px 0' }}>
+                                    <Link href={`/dashboard/loans/${loan.id}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                                      {borrowerName}
+                                    </Link>
+                                  </td>
+                                  <td style={{ padding: '8px 8px 8px 0', color: 'var(--fg)' }}>
+                                    {loan.loan_amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(loan.loan_amount) : '—'}
+                                  </td>
+                                  <td style={{ padding: '8px 8px 8px 0' }}>
+                                    <span style={{
+                                      fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                                      background: loan.status?.toLowerCase().includes('fund') ? '#10b98122' : loan.status?.toLowerCase().includes('clear') ? '#3b82f622' : '#ffffff11',
+                                      color: loan.status?.toLowerCase().includes('fund') ? '#10b981' : loan.status?.toLowerCase().includes('clear') ? '#60a5fa' : 'var(--muted)',
+                                      border: '1px solid currentColor',
+                                    }}>{loan.status || '—'}</span>
+                                  </td>
+                                  <td style={{ padding: '8px 0', color: 'var(--muted)' }}>
+                                    {closeDate ? new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Contact info */}
                 <div style={cardStyle}>

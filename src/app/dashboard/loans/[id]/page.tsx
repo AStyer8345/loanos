@@ -127,6 +127,9 @@ interface Loan {
   marketing_campaign: string | null
   // Commission
   commission_amount: number | null
+  // Origination
+  aus_result: string | null
+  originator_comp: number | null
   // Notes
   notes: string | null
   // System
@@ -353,8 +356,7 @@ export default function LoanDetailPage() {
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
-  const [editingCommission, setEditingCommission] = useState(false)
-  const [commissionInput, setCommissionInput] = useState('')
+  // commission editing moved to CollapsibleDetails > Financials section
   const [editingHeader, setEditingHeader] = useState<string | null>(null)
   const [headerInput, setHeaderInput] = useState('')
   const actionsRef = useRef<HTMLDivElement>(null)
@@ -460,18 +462,17 @@ export default function LoanDetailPage() {
           {/* Name row */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-xl font-mono font-bold text-zinc-100">
+              <h1 className="text-2xl font-mono font-bold text-zinc-100 tracking-tight">
+                {loan.loan_name || displayName}
+              </h1>
+              <p className="text-xs text-zinc-500 font-mono mt-0.5">
                 {loan.contact_id ? (
                   <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-[#C9A84C] transition-colors">
                     {displayName}
                   </Link>
                 ) : displayName}
-              </h1>
-              {(addressLine || loan.loan_number) && (
-                <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                  {addressLine}{loan.loan_number ? ` · #${loan.loan_number}` : ''}
-                </p>
-              )}
+                {loan.loan_number ? ` · #${loan.loan_number}` : ''}
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <StatusBadge status={loan.status} />
@@ -579,40 +580,6 @@ export default function LoanDetailPage() {
                 <p className="text-sm font-mono font-semibold text-zinc-100">{fmtDate(loan.closing_date || loan.estimated_closing_date)}</p>
               </div>
             )}
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Officer</p>
-              <p className="text-sm font-mono font-semibold text-zinc-100">Adam Styer</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Commission</p>
-              {editingCommission ? (
-                <input
-                  autoFocus
-                  type="number"
-                  step="0.01"
-                  value={commissionInput}
-                  onChange={e => setCommissionInput(e.target.value)}
-                  onBlur={async () => {
-                    const val = commissionInput.trim() ? parseFloat(commissionInput) : null
-                    await supabase.from('loans').update({ commission_amount: val }).eq('id', loanId)
-                    setLoan({ ...loan, commission_amount: val })
-                    setEditingCommission(false)
-                  }}
-                  onKeyDown={async e => {
-                    if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-                    if (e.key === 'Escape') setEditingCommission(false)
-                  }}
-                  className="w-28 text-sm font-mono font-semibold text-[#C9A84C] bg-transparent border-b border-[#C9A84C] outline-none"
-                />
-              ) : (
-                <p
-                  className="text-sm font-mono font-semibold text-[#C9A84C] cursor-pointer hover:underline"
-                  onClick={() => { setCommissionInput(loan.commission_amount?.toString() ?? ''); setEditingCommission(true) }}
-                >
-                  {loan.commission_amount ? fmtCurrency(loan.commission_amount) : '—'}
-                </p>
-              )}
-            </div>
             {loan.referring_agent_name && (
               <div>
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Realtor</p>
@@ -840,8 +807,8 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
         {/* Milestone timeline */}
         <MilestoneTimeline loan={loan} />
 
-        {/* Key metrics grid */}
-        <KeyDetailsCard loan={loan} />
+        {/* ── 6-card info grid ── */}
+        <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
 
         {/* Recent activity (compact) */}
         {activity.length > 0 && (
@@ -865,154 +832,9 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
           </div>
         )}
 
-        {/* ── Details sections (formerly Details tab) ── */}
-        <div className="space-y-5">
-          {/* Loan Terms */}
-          <EditableSectionCard title="Loan Terms" onSave={handleSaveField} fields={[
-            { label: 'Loan Number',   displayValue: loan.loan_number,   field: 'loan_number',   rawValue: loan.loan_number },
-            { label: 'Arive Loan ID', displayValue: loan.arive_loan_id, field: 'arive_loan_id', rawValue: loan.arive_loan_id },
-            { label: 'Status',        displayValue: <StatusBadge status={loan.status} />, field: 'status', rawValue: loan.status, type: 'select', options: LOAN_STATUS_OPTS },
-            { label: 'Milestone',     displayValue: loan.milestone,     field: 'milestone',     rawValue: loan.milestone },
-            { label: 'Loan Amount',   displayValue: fmtCurrency(loan.loan_amount),   field: 'loan_amount',   rawValue: loan.loan_amount,   type: 'number' },
-            { label: 'Loan Purpose',  displayValue: loan.loan_purpose,  field: 'loan_purpose',  rawValue: loan.loan_purpose },
-            { label: 'Loan Type',     displayValue: loan.loan_type,     field: 'loan_type',     rawValue: loan.loan_type },
-            { label: 'Loan Program',  displayValue: loan.loan_program,  field: 'loan_program',  rawValue: loan.loan_program },
-            { label: 'Loan Term',     displayValue: loan.loan_term ? `${loan.loan_term} months` : null, field: 'loan_term', rawValue: loan.loan_term, type: 'number' },
-            { label: 'Interest Rate', displayValue: fmtPct(loan.interest_rate), field: 'interest_rate', rawValue: loan.interest_rate, type: 'percent' },
-            { label: 'APR',           displayValue: fmtPct(loan.apr),   field: 'apr',   rawValue: loan.apr,   type: 'percent' },
-            { label: 'Points',        displayValue: loan.points != null ? String(loan.points) : null, field: 'points', rawValue: loan.points, type: 'number' },
-            { label: 'Down Payment',  displayValue: fmtCurrency(loan.down_payment),  field: 'down_payment',  rawValue: loan.down_payment,  type: 'number' },
-            { label: 'Down Pmt %',    displayValue: fmtPct(loan.down_payment_pct),   field: 'down_payment_pct', rawValue: loan.down_payment_pct, type: 'percent' },
-            { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
-            { label: 'CLTV',          displayValue: fmtPct(loan.cltv),  field: 'cltv',  rawValue: loan.cltv,  type: 'percent' },
-          ]} />
-
-          {/* Property */}
-          <EditableSectionCard title="Property" onSave={handleSaveField} fields={[
-            { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
-            { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
-            { label: 'State',          displayValue: loan.property_state,   field: 'property_state',   rawValue: loan.property_state },
-            { label: 'Zip',            displayValue: loan.property_zip,     field: 'property_zip',     rawValue: loan.property_zip },
-            { label: 'County',         displayValue: loan.property_county,  field: 'property_county',  rawValue: loan.property_county },
-            { label: 'Property Type',  displayValue: loan.property_type,    field: 'property_type',    rawValue: loan.property_type },
-            { label: 'Occupancy',      displayValue: loan.occupancy_type || loan.occupancy, field: 'occupancy_type', rawValue: loan.occupancy_type || loan.occupancy },
-            { label: 'Purchase Price', displayValue: fmtCurrency(loan.purchase_price),  field: 'purchase_price',  rawValue: loan.purchase_price,  type: 'number' },
-            { label: 'Appraised Value',displayValue: fmtCurrency(loan.appraised_value), field: 'appraised_value', rawValue: loan.appraised_value, type: 'number' },
-          ]} />
-
-          {/* Borrower */}
-          <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
-            { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
-            { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
-            { label: 'Email',          displayValue: loan.borrower_email,      field: 'borrower_email',      rawValue: loan.borrower_email },
-            { label: 'Phone',          displayValue: loan.borrower_phone,      field: 'borrower_phone',      rawValue: loan.borrower_phone },
-            { label: 'Co-Borrower',    displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
-            { label: 'Co-Borr Email',  displayValue: loan.co_borrower_email,   field: 'co_borrower_email',   rawValue: loan.co_borrower_email },
-            { label: 'Co-Borr Phone',  displayValue: loan.co_borrower_phone,   field: 'co_borrower_phone',   rawValue: loan.co_borrower_phone },
-            { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
-            { label: 'Middle Score',   displayValue: loan.middle_score != null ? String(loan.middle_score) : null, field: 'middle_score', rawValue: loan.middle_score, type: 'number' },
-            { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' },
-            { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
-            { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
-            { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
-            { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
-          ]} />
-
-          {/* Key Dates */}
-          <EditableSectionCard title="Key Dates" onSave={handleSaveField} fields={[
-            { label: 'Loan Created',       displayValue: fmtDate(loan.loan_created_date) },
-            { label: 'Application',        displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
-            { label: 'Submission',         displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
-            { label: 'Approval',           displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
-            { label: 'Est. Closing',       displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
-            { label: 'Closing',            displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
-            { label: 'Funding',            displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
-            { label: 'First Payment',      displayValue: fmtDate(loan.first_payment_date),     field: 'first_payment_date',     rawValue: loan.first_payment_date,     type: 'date' },
-            { label: 'Rate Lock',          displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
-            { label: 'Lock Expiry',        displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
-            { label: 'Appraisal Ordered',  displayValue: fmtDate(loan.appraisal_ordered_date), field: 'appraisal_ordered_date', rawValue: loan.appraisal_ordered_date, type: 'date' },
-          ]} />
-
-          {/* Financials */}
-          <EditableSectionCard title="Financials" onSave={handleSaveField} fields={[
-            { label: 'Commission',       displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
-            { label: 'Monthly Payment',  displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
-            { label: 'PITI',             displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
-            { label: 'Cash to Close',    displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },
-            { label: 'Seller Credits',   displayValue: fmtCurrency(loan.seller_credits),      field: 'seller_credits',      rawValue: loan.seller_credits,      type: 'number' },
-            { label: 'Lender Credits',   displayValue: fmtCurrency(loan.lender_credits),      field: 'lender_credits',      rawValue: loan.lender_credits,      type: 'number' },
-            { label: 'Loan Costs',       displayValue: fmtCurrency(loan.loan_costs),          field: 'loan_costs',          rawValue: loan.loan_costs,          type: 'number' },
-            { label: 'Total Closing',    displayValue: fmtCurrency(loan.total_closing_costs), field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' },
-            { label: 'Prepaid Items',    displayValue: fmtCurrency(loan.prepaid_items),       field: 'prepaid_items',       rawValue: loan.prepaid_items,       type: 'number' },
-            { label: 'Escrow Impounds',  displayValue: fmtCurrency(loan.escrow_impounds),     field: 'escrow_impounds',     rawValue: loan.escrow_impounds,     type: 'number' },
-            { label: 'MI Monthly',       displayValue: fmtCurrency(loan.mi_monthly),          field: 'mi_monthly',          rawValue: loan.mi_monthly,          type: 'number' },
-            { label: 'MI Upfront',       displayValue: fmtCurrency(loan.mi_upfront),          field: 'mi_upfront',          rawValue: loan.mi_upfront,          type: 'number' },
-            { label: 'HOI Monthly',      displayValue: fmtCurrency(loan.hoi_monthly),         field: 'hoi_monthly',         rawValue: loan.hoi_monthly,         type: 'number' },
-            { label: 'Property Taxes',   displayValue: fmtCurrency(loan.property_taxes_monthly), field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' },
-            { label: 'HOA Dues',         displayValue: fmtCurrency(loan.hoa_dues),            field: 'hoa_dues',            rawValue: loan.hoa_dues,            type: 'number' },
-            { label: 'Flood Insurance',  displayValue: fmtCurrency(loan.flood_insurance_monthly), field: 'flood_insurance_monthly', rawValue: loan.flood_insurance_monthly, type: 'number' },
-          ]} />
-
-          {/* Parties */}
-          <EditableSectionCard title="Parties" onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} fields={[
-            { label: 'Referring Agent',   displayValue: loan.buyer_agent_contact_id && loan.referring_agent_name ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.referring_agent_name}</Link> : loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
-            { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
-            { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
-            { label: 'Listing Agent',     displayValue: loan.listing_agent_contact_id && loan.listing_agent_name ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.listing_agent_name}</Link> : loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
-            { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
-            { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
-            { label: "Buyer's Agent",     displayValue: loan.buyer_agent_contact_id && (loan.buyers_agent_name || loan.buyer_agent_name) ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} onClick={e => e.stopPropagation()} className="text-indigo-400 hover:text-indigo-300 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link> : (loan.buyers_agent_name || loan.buyer_agent_name),   field: 'buyers_agent_name',  rawValue: loan.buyers_agent_name || loan.buyer_agent_name,  searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
-            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
-            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone,    field: 'buyers_agent_phone',    rawValue: loan.buyers_agent_phone,    labelColor: 'text-emerald-400/70' },
-            { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
-            { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact,    searchContacts: true, relatedFields: { email: 'title_email' } },
-            { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
-            { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
-            { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },
-            { label: 'Underwriter',       displayValue: loan.underwriter_name, field: 'underwriter_name', rawValue: loan.underwriter_name },
-            { label: 'Lender',            displayValue: loan.lender_name,      field: 'lender_name',      rawValue: loan.lender_name },
-            { label: 'Investor',          displayValue: loan.investor_name,    field: 'investor_name',    rawValue: loan.investor_name },
-            { label: 'Channel',           displayValue: loan.channel,          field: 'channel',          rawValue: loan.channel },
-          ]} />
-
-          {/* Attribution */}
-          <EditableSectionCard title="Attribution" onSave={handleSaveField} fields={[
-            { label: 'Lead Source',        displayValue: loan.lead_source,        field: 'lead_source',        rawValue: loan.lead_source },
-            { label: 'Referral Source',    displayValue: loan.referral_source,    field: 'referral_source',    rawValue: loan.referral_source },
-            { label: 'Marketing Campaign', displayValue: loan.marketing_campaign, field: 'marketing_campaign', rawValue: loan.marketing_campaign },
-          ]} />
-
-          {/* Linked Contact */}
-          {contact && (
-            <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-              <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-                <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
-              </div>
-              <div className="p-4">
-                <Link
-                  href={`/dashboard/contacts?id=${contact.id}`}
-                  className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors"
-                >
-                  {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-                </Link>
-                {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
-                {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
-                {contact.referred_by && (
-                  <div className="mt-3 pt-3 border-t border-zinc-700">
-                    <p className="text-xs text-zinc-500 font-mono">Referred by</p>
-                    <Link
-                      href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`}
-                      className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5"
-                    >
-                      {contact.referred_by}
-                      <ChevronRight size={12} />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* ── Full editable details (collapsible) ── */}
+        <CollapsibleDetails loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
+          {/* Placeholder — CollapsibleDetails renders itself */}
       </div>
 
       {/* ── Right sidebar — 320px fixed ── */}
@@ -1153,6 +975,281 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
               </button>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── LoanInfoGrid — 6-card 2-column grid ──────────────────────────────────────
+
+function InfoCard({ title, fields }: {
+  title: string
+  fields: { label: string; value: React.ReactNode }[]
+}) {
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-zinc-700/70">
+        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">{title}</h3>
+      </div>
+      <div className="p-4 space-y-2.5">
+        {fields.map(f => (
+          <div key={f.label} className="flex items-baseline justify-between gap-3 min-w-0">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{f.label}</span>
+            <span className="text-xs font-mono text-zinc-200 text-right truncate">
+              {f.value ?? '—'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
+  loan: Loan
+  loanId: string
+  onSave: (field: string, value: string | number | null) => Promise<void>
+  onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
+}) {
+  void loanId; void onSave; void onSaveMultiple // available for future inline editing
+
+  const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
+
+  const downPayment = loan.down_payment
+    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
+    : null
+
+  const buyerAgentDisplay = loan.buyers_agent_name || loan.buyer_agent_name
+    ? (
+        loan.buyer_agent_contact_id
+          ? <Link href={`/dashboard/contacts/${loan.buyer_agent_contact_id}`} className="text-indigo-400 hover:underline">{loan.buyers_agent_name || loan.buyer_agent_name}</Link>
+          : (loan.buyers_agent_name || loan.buyer_agent_name)
+      )
+    : null
+
+  const listingAgentDisplay = loan.listing_agent_name
+    ? (
+        loan.listing_agent_contact_id
+          ? <Link href={`/dashboard/contacts/${loan.listing_agent_contact_id}`} className="text-indigo-400 hover:underline">{loan.listing_agent_name}</Link>
+          : loan.listing_agent_name
+      )
+    : null
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Card 1 — Borrower */}
+      <InfoCard title="Borrower" fields={[
+        { label: 'Name',        value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
+        { label: 'Co-Borrower', value: loan.co_borrower_name },
+        { label: 'Email',       value: loan.borrower_email },
+        { label: 'Phone',       value: loan.borrower_phone },
+        { label: 'Address',     value: null },
+      ]} />
+
+      {/* Card 2 — Loan Terms */}
+      <InfoCard title="Loan Terms" fields={[
+        { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
+        { label: 'Loan Type',   value: loan.loan_type },
+        { label: 'Program',     value: loan.loan_program },
+        { label: 'Rate / APR',  value: loan.interest_rate ? `${fmtPct(loan.interest_rate)}${loan.apr ? ` / ${fmtPct(loan.apr)}` : ''}` : null },
+        { label: 'Term',        value: loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : null },
+        { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
+      ]} />
+
+      {/* Card 3 — Property */}
+      <InfoCard title="Property" fields={[
+        { label: 'Address',       value: fullAddress || loan.property_address },
+        { label: 'County',        value: loan.property_county },
+        { label: 'Type',          value: loan.property_type },
+        { label: 'Purchase Price',value: fmtCurrency(loan.purchase_price) },
+        { label: 'Appraised',     value: fmtCurrency(loan.appraised_value) },
+        { label: 'Down Payment',  value: downPayment },
+        { label: 'LTV',           value: fmtPct(loan.ltv) },
+      ]} />
+
+      {/* Card 4 — Key Dates */}
+      <InfoCard title="Key Dates" fields={[
+        { label: 'Application',  value: fmtDate(loan.application_date) },
+        { label: 'Est. Close',   value: fmtDate(loan.estimated_closing_date) },
+        { label: 'Rate Lock',    value: fmtDate(loan.rate_lock_date) },
+        { label: 'Lock Expiry',  value: fmtDate(loan.rate_lock_expiration) },
+        { label: 'Actual Close', value: fmtDate(loan.closing_date) },
+      ]} />
+
+      {/* Card 5 — Origination */}
+      <InfoCard title="Origination" fields={[
+        { label: 'AUS Result',            value: loan.aus_result || loan.milestone },
+        { label: 'Originator Compensation', value: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : null },
+        { label: 'Credit Score',          value: loan.credit_score != null ? String(loan.credit_score) : null },
+        { label: 'DTI (F/B)',             value: (loan.front_end_dti || loan.back_end_dti) ? `${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}` : null },
+        { label: 'Lender',                value: loan.lender_name },
+      ]} />
+
+      {/* Card 6 — Parties */}
+      <InfoCard title="Parties" fields={[
+        { label: "Buyer's Agent",   value: buyerAgentDisplay },
+        { label: 'BA Phone',        value: loan.buyers_agent_phone },
+        { label: 'Listing Agent',   value: listingAgentDisplay },
+        { label: 'LA Phone',        value: loan.listing_agent_phone },
+        { label: 'Title Company',   value: loan.title_company },
+        { label: 'Title Contact',   value: loan.title_contact },
+      ]} />
+    </div>
+  )
+}
+
+// ── CollapsibleDetails — wraps all EditableSectionCards ───────────────────────
+
+function CollapsibleDetails({ loan, loanId, onSave, onSaveMultiple, contact }: {
+  loan: Loan
+  loanId: string
+  onSave: (field: string, value: string | number | null) => Promise<void>
+  onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
+  contact: ContactRow | null
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-zinc-800/60 transition-colors"
+      >
+        <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Full Details &amp; Edit</span>
+        <ChevronDown size={14} className={`text-zinc-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="border-t border-zinc-700 space-y-5 p-5">
+          <EditableSectionCard title="Loan Terms" onSave={onSave} fields={[
+            { label: 'Loan Number',   displayValue: loan.loan_number,   field: 'loan_number',   rawValue: loan.loan_number },
+            { label: 'Arive Loan ID', displayValue: loan.arive_loan_id, field: 'arive_loan_id', rawValue: loan.arive_loan_id },
+            { label: 'Status',        displayValue: <StatusBadge status={loan.status} />, field: 'status', rawValue: loan.status, type: 'select', options: LOAN_STATUS_OPTS },
+            { label: 'Milestone',     displayValue: loan.milestone,     field: 'milestone',     rawValue: loan.milestone },
+            { label: 'Loan Amount',   displayValue: fmtCurrency(loan.loan_amount),   field: 'loan_amount',   rawValue: loan.loan_amount,   type: 'number' },
+            { label: 'Loan Purpose',  displayValue: loan.loan_purpose,  field: 'loan_purpose',  rawValue: loan.loan_purpose },
+            { label: 'Loan Type',     displayValue: loan.loan_type,     field: 'loan_type',     rawValue: loan.loan_type },
+            { label: 'Loan Program',  displayValue: loan.loan_program,  field: 'loan_program',  rawValue: loan.loan_program },
+            { label: 'Loan Term',     displayValue: loan.loan_term ? `${loan.loan_term} months` : null, field: 'loan_term', rawValue: loan.loan_term, type: 'number' },
+            { label: 'Interest Rate', displayValue: fmtPct(loan.interest_rate), field: 'interest_rate', rawValue: loan.interest_rate, type: 'percent' },
+            { label: 'APR',           displayValue: fmtPct(loan.apr),   field: 'apr',   rawValue: loan.apr,   type: 'percent' },
+            { label: 'Points',        displayValue: loan.points != null ? String(loan.points) : null, field: 'points', rawValue: loan.points, type: 'number' },
+            { label: 'Down Payment',  displayValue: fmtCurrency(loan.down_payment),  field: 'down_payment',  rawValue: loan.down_payment,  type: 'number' },
+            { label: 'Down Pmt %',    displayValue: fmtPct(loan.down_payment_pct),   field: 'down_payment_pct', rawValue: loan.down_payment_pct, type: 'percent' },
+            { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
+            { label: 'CLTV',          displayValue: fmtPct(loan.cltv),  field: 'cltv',  rawValue: loan.cltv,  type: 'percent' },
+          ]} />
+
+          <EditableSectionCard title="Property" onSave={onSave} fields={[
+            { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
+            { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
+            { label: 'State',          displayValue: loan.property_state,   field: 'property_state',   rawValue: loan.property_state },
+            { label: 'Zip',            displayValue: loan.property_zip,     field: 'property_zip',     rawValue: loan.property_zip },
+            { label: 'County',         displayValue: loan.property_county,  field: 'property_county',  rawValue: loan.property_county },
+            { label: 'Property Type',  displayValue: loan.property_type,    field: 'property_type',    rawValue: loan.property_type },
+            { label: 'Occupancy',      displayValue: loan.occupancy_type || loan.occupancy, field: 'occupancy_type', rawValue: loan.occupancy_type || loan.occupancy },
+            { label: 'Purchase Price', displayValue: fmtCurrency(loan.purchase_price),  field: 'purchase_price',  rawValue: loan.purchase_price,  type: 'number' },
+            { label: 'Appraised Value',displayValue: fmtCurrency(loan.appraised_value), field: 'appraised_value', rawValue: loan.appraised_value, type: 'number' },
+          ]} />
+
+          <EditableSectionCard title="Borrower" onSave={onSave} fields={[
+            { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
+            { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
+            { label: 'Email',          displayValue: loan.borrower_email,      field: 'borrower_email',      rawValue: loan.borrower_email },
+            { label: 'Phone',          displayValue: loan.borrower_phone,      field: 'borrower_phone',      rawValue: loan.borrower_phone },
+            { label: 'Co-Borrower',    displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
+            { label: 'Co-Borr Email',  displayValue: loan.co_borrower_email,   field: 'co_borrower_email',   rawValue: loan.co_borrower_email },
+            { label: 'Co-Borr Phone',  displayValue: loan.co_borrower_phone,   field: 'co_borrower_phone',   rawValue: loan.co_borrower_phone },
+            { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
+            { label: 'Middle Score',   displayValue: loan.middle_score != null ? String(loan.middle_score) : null, field: 'middle_score', rawValue: loan.middle_score, type: 'number' },
+            { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' },
+            { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
+            { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
+            { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
+            { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
+          ]} />
+
+          <EditableSectionCard title="Key Dates" onSave={onSave} fields={[
+            { label: 'Loan Created',      displayValue: fmtDate(loan.loan_created_date) },
+            { label: 'Application',       displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
+            { label: 'Submission',        displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
+            { label: 'Approval',          displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
+            { label: 'Est. Closing',      displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
+            { label: 'Closing',           displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
+            { label: 'Funding',           displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
+            { label: 'First Payment',     displayValue: fmtDate(loan.first_payment_date),     field: 'first_payment_date',     rawValue: loan.first_payment_date,     type: 'date' },
+            { label: 'Rate Lock',         displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
+            { label: 'Lock Expiry',       displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
+            { label: 'Appraisal Ordered', displayValue: fmtDate(loan.appraisal_ordered_date), field: 'appraisal_ordered_date', rawValue: loan.appraisal_ordered_date, type: 'date' },
+          ]} />
+
+          <EditableSectionCard title="Origination" onSave={onSave} fields={[
+            { label: 'AUS Result',              displayValue: loan.aus_result,     field: 'aus_result',     rawValue: loan.aus_result },
+            { label: 'Originator Compensation', displayValue: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : '—', field: 'originator_comp', rawValue: loan.originator_comp, type: 'number', labelColor: 'text-[#C9A84C]' },
+          ]} />
+
+          <EditableSectionCard title="Financials" onSave={onSave} fields={[
+            { label: 'Commission',      displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
+            { label: 'Monthly Payment', displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
+            { label: 'PITI',            displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
+            { label: 'Cash to Close',   displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },
+            { label: 'Seller Credits',  displayValue: fmtCurrency(loan.seller_credits),      field: 'seller_credits',      rawValue: loan.seller_credits,      type: 'number' },
+            { label: 'Lender Credits',  displayValue: fmtCurrency(loan.lender_credits),      field: 'lender_credits',      rawValue: loan.lender_credits,      type: 'number' },
+            { label: 'Loan Costs',      displayValue: fmtCurrency(loan.loan_costs),          field: 'loan_costs',          rawValue: loan.loan_costs,          type: 'number' },
+            { label: 'Total Closing',   displayValue: fmtCurrency(loan.total_closing_costs), field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' },
+            { label: 'HOI Monthly',     displayValue: fmtCurrency(loan.hoi_monthly),         field: 'hoi_monthly',         rawValue: loan.hoi_monthly,         type: 'number' },
+            { label: 'Property Taxes',  displayValue: fmtCurrency(loan.property_taxes_monthly), field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' },
+            { label: 'HOA Dues',        displayValue: fmtCurrency(loan.hoa_dues),            field: 'hoa_dues',            rawValue: loan.hoa_dues,            type: 'number' },
+          ]} />
+
+          <EditableSectionCard title="Parties" onSave={onSave} onSaveMultiple={onSaveMultiple} fields={[
+            { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
+            { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
+            { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
+            { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
+            { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
+            { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
+            { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name, field: 'buyers_agent_name', rawValue: loan.buyers_agent_name || loan.buyer_agent_name, searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
+            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
+            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone, field: 'buyers_agent_phone', rawValue: loan.buyers_agent_phone, labelColor: 'text-emerald-400/70' },
+            { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
+            { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },
+            { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
+            { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
+            { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },
+            { label: 'Underwriter',       displayValue: loan.underwriter_name, field: 'underwriter_name', rawValue: loan.underwriter_name },
+            { label: 'Lender',            displayValue: loan.lender_name,      field: 'lender_name',      rawValue: loan.lender_name },
+          ]} />
+
+          <EditableSectionCard title="Attribution" onSave={onSave} fields={[
+            { label: 'Lead Source',        displayValue: loan.lead_source,        field: 'lead_source',        rawValue: loan.lead_source },
+            { label: 'Referral Source',    displayValue: loan.referral_source,    field: 'referral_source',    rawValue: loan.referral_source },
+            { label: 'Marketing Campaign', displayValue: loan.marketing_campaign, field: 'marketing_campaign', rawValue: loan.marketing_campaign },
+          ]} />
+
+          {/* Linked Contact */}
+          {contact && (
+            <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+              <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
+                <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
+              </div>
+              <div className="p-4">
+                <Link href={`/dashboard/contacts?id=${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors">
+                  {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
+                </Link>
+                {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
+                {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
+                {contact.referred_by && (
+                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                    <p className="text-xs text-zinc-500 font-mono">Referred by</p>
+                    <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5">
+                      {contact.referred_by}<ChevronRight size={12} />
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

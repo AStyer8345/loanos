@@ -24,6 +24,7 @@ export default function ContactRecordPage() {
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
+  const [referredLoans, setReferredLoans] = useState<ContactLoan[]>([])
 
   const supabase = createClient()
 
@@ -44,6 +45,16 @@ export default function ContactRecordPage() {
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setLoans((data as ContactLoan[]) ?? [])
+  }, [id, supabase])
+
+  // Fetch loans referred by this agent (buyer_agent or listing_agent on the loan)
+  const fetchReferredLoans = useCallback(async () => {
+    const { data } = await supabase
+      .from('loans')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date')
+      .or(`buyer_agent_contact_id.eq.${id},listing_agent_contact_id.eq.${id}`)
+      .order('closing_date', { ascending: false, nullsFirst: false })
+    setReferredLoans((data ?? []) as unknown as ContactLoan[])
   }, [id, supabase])
 
   const fetchActivity = useCallback(async () => {
@@ -120,7 +131,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchActivity(), fetchContactActivity()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(), fetchActivity(), fetchContactActivity()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -151,7 +162,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [fetchContact, fetchLoans, fetchActivity, fetchContactActivity, resolveReferrer])
+  }, [fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -250,6 +261,7 @@ export default function ContactRecordPage() {
       savingNote={savingNote}
       onAddNote={handleAddNote}
       onSaveNotes={handleSaveNotes}
+      referredLoans={referredLoans}
       onSaveField={handleSaveField}
       onLogActivity={handleLogActivity}
     />

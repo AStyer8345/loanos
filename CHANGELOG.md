@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [4.5.0] — 2026-03-20 — Loan Detail Redesign + Auto Loan Names
+
+### New
+- **`supabase/migrations/041_loan_name_and_missing_arive_fields.sql`**: Adds `aus_result` and `originator_comp` columns; backfills `loan_name` for all existing loans using `{last_name}-{street_address}` formula
+- **`LoanInfoGrid`** (in loan detail page): 6-card 2-column responsive grid — Borrower, Loan Terms, Property, Key Dates, Origination, Parties. Replaces the previous `KeyDetailsCard` + dense EditableSectionCard stack
+- **`CollapsibleDetails`** (in loan detail page): Collapsible panel containing all EditableSectionCards (preserved for editing), including new Origination card with aus_result + originator_comp
+- **Referred Borrowers section** on realtor contact pages: queries `buyer_agent_contact_id` and `listing_agent_contact_id` on loans table, shows table with borrower name / loan amount / status / close date, count badge, empty state
+
+### Changed
+- **Arive webhook** (`/api/arive-webhook`): auto-generates `loan_name` from last name + property address when Arive doesn't send it; maps `aus_result` + `originator_comp` from multiple possible Arive key names; logs raw payload for field auditing
+- **Loan detail header**: `loan_name` shown as primary title (h1, large), borrower name demoted to subtitle; commission removed from header meta strip
+- **Loan interface**: added `aus_result: string | null`, `originator_comp: number | null`
+- **Contact page**: added `fetchReferredLoans` callback, passes `referredLoans` to ContactRecordView
+- **ContactRecordView**: accepts optional `referredLoans` prop, renders Referred Borrowers section for realtor contacts
+
 ## [4.4.0] — 2026-03-19 — Marketing Tab Redesign (3-Tab Command Center)
 
 ### New

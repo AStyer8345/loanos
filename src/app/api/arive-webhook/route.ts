@@ -86,6 +86,23 @@ function nDate(val: unknown): string | null {
   return String(s).slice(0, 10)
 }
 
+// Auto-generate loan name: {LastName}-{StreetAddress}
+// Strips unit/suite suffix and city/state/zip (everything after first comma).
+function generateLoanName(lastName: unknown, propertyAddress: unknown): string | null {
+  const last = n(lastName) ? String(n(lastName)).trim() : null
+  let street = n(propertyAddress) ? String(n(propertyAddress)).trim() : null
+  if (street) {
+    // Keep only the street portion (before first comma)
+    street = street.split(',')[0].trim()
+    // Strip suite/unit suffixes
+    street = street.replace(/\s+(apt|suite|ste|unit|#\s*\w*|bldg|fl|floor|lot|rm|room)\s*\w*/gi, '').trim()
+  }
+  if (last && street) return `${last}-${street}`
+  if (street) return street
+  if (last) return last
+  return null
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
@@ -170,6 +187,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Log raw payload for field auditing (helps verify Arive key names)
+  console.log('[arive-webhook] raw payload keys:', Object.keys(body))
+  console.log('[arive-webhook] raw payload:', JSON.stringify(body, null, 2))
+
   const now = new Date().toISOString()
 
   try {
@@ -199,7 +220,7 @@ export async function POST(request: NextRequest) {
     const loanRecord: Record<string, unknown> = {
       arive_loan_id: ariveLoanId,
       loan_number: loanNumber,
-      loan_name: n(body.loanName),
+      loan_name: n(body.loanName) ?? generateLoanName(body.borrowerLastName, body.propertyAddress),
       contact_id: contact.id,
 
       borrower_first_name: n(body.borrowerFirstName),
@@ -268,6 +289,10 @@ export async function POST(request: NextRequest) {
       referring_agent_email: n(body.referringAgentEmail),
       lender_name: n(body.lenderName),
       lead_source: n(body.leadSource),
+
+      // AUS + compensation — not reliably sent by Arive; null-safe
+      aus_result: n(body.ausResult) ?? n(body.ausRecommendation) ?? n(body.aus_recommendation) ?? null,
+      originator_comp: n(body.originatorCompensation) ?? n(body.originatorComp) ?? n(body.originator_compensation) ?? null,
 
       loan_created_date: createdAtDate,
       arive_created_at: n(body.createdAt),

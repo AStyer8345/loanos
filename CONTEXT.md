@@ -222,6 +222,10 @@ These tools are working and must NOT be broken during LoanOS build:
 ### Phase 2 — Automation (~80% complete)
 
 **Built & Live ✅**
+- ✅ **Web Lead API route** (`/api/contacts/web-lead`) — machine-facing POST route for n8n.
+  Accepts structured form data from styermortgage.com, creates contact with org scoping,
+  dedup check, activity log entry. Auth: Bearer LOANOS_AGENT_SECRET.
+  Endpoint: https://loanos.vercel.app/api/contacts/web-lead
 - ✅ Contract automation pipeline (n8n → Claude extraction → Outlook drafts)
 - ✅ Automations dashboard with trigger buttons + loan picker
 - ✅ Marketing Command Center (8-tab MCC port)

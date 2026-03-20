@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-19 (session 9 — migration 039 applied)_
+_Last updated: 2026-03-20 (session 11 — migration 040 applied, isolation script built)_
 
 ---
 
@@ -20,7 +20,7 @@ _Last updated: 2026-03-19 (session 9 — migration 039 applied)_
 | `mcc_state` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `user_settings` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` has `organization_id` | ✅ | Migration 039 — backfilled |
-| `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies applied |
+| `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies; redundant ALL policy dropped in 040 |
 | 0 loans with null `organization_id` | ✅ | Verified 2026-03-19 |
 | 0 contacts with null `organization_id` | ✅ | Verified 2026-03-19 |
 
@@ -31,8 +31,8 @@ _Last updated: 2026-03-19 (session 9 — migration 039 applied)_
 | Table | SELECT | INSERT | UPDATE | DELETE |
 |-------|--------|--------|--------|--------|
 | `loans` | ✅ | ✅ | ✅ | ✅ |
-| `contacts` | ✅ | ✅ | ✅ | ✅ |
-| `activity_log` | ✅ | ✅ | n/a (immutable) | n/a (immutable) |
+| `contacts` | ✅ | ✅ | ✅ | ✅ (stale user_id policies dropped in 040) |
+| `activity_log` | ✅ | ✅ | n/a (immutable — UPDATE policy dropped in 040) | n/a (immutable) |
 | `todo_items` | ✅ | ✅ | ✅ | ✅ |
 | `documents` | ✅ | ✅ | ✅ | ✅ |
 | `email_drafts` | ✅ | ✅ | ✅ | ✅ |
@@ -40,11 +40,11 @@ _Last updated: 2026-03-19 (session 9 — migration 039 applied)_
 | `contact_emails` | ✅ | ✅ | ✅ | ✅ |
 | `profiles` | ✅ | ✅ | ✅ | n/a |
 | `organizations` | ✅ | — | — | — |
-| `chat_sessions` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | — |
+| `chat_sessions` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) |
 | `mcc_state` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | — |
 | `user_settings` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | — |
-| `marketing_activity_log` | ⚠️ | ⚠️ | ⚠️ | ⚠️ | Migration 039 adds RLS, **needs apply** |
-| `org_settings` | ⚠️ | ⚠️ | ⚠️ | — | Migration 039 creates table + RLS, **needs apply** |
+| `marketing_activity_log` | ✅ | ✅ | ✅ | ✅ (redundant ALL policy dropped in 040) |
+| `org_settings` | ✅ | ✅ | ✅ | — |
 | `security_audit_log` | ✅ | service only | — | — |
 
 ---
@@ -91,7 +91,7 @@ _Last updated: 2026-03-19 (session 9 — migration 039 applied)_
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Isolation test script | ❌ | Not yet built — `scripts/verify-tenant-isolation.ts` |
+| Isolation test script | ⚠️ | Built — `scripts/verify-tenant-isolation.ts`. Tests data-layer isolation via service role. Full RLS enforcement test requires real auth sessions (service role bypasses RLS). |
 
 ---
 

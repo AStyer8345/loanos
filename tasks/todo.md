@@ -1,10 +1,12 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-19 (session 9 — multi-tenancy audit)_
+_Last updated: 2026-03-20 (session 11 — multi-tenancy policy cleanup)_
 
 ---
 
 ## 🔴 High Priority
+
+- [ ] **daily-briefing unscoped fallback** — `/api/agents/daily-briefing/route.ts` line 71: `organizationId ? query.eq('organization_id', organizationId) : query` — if the agent-secret path fails to resolve an org, all queries run unscoped against the full table. Safe for now (single tenant) but must be fixed before multi-tenant launch. Fix: return 500 if org lookup fails instead of falling through unscoped.
 
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
@@ -27,6 +29,11 @@ _Last updated: 2026-03-19 (session 9 — multi-tenancy audit)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (session 11 — 2026-03-20 multi-tenancy policy audit)
+
+- [x] **Migration 040 applied** — Dropped 3 sets of stale/incorrect RLS policies: (1) 4 legacy user_id policies on `contacts` (coexisted with org policies, creating OR-expanded access), (2) UPDATE policy on `activity_log` (audit logs are immutable by design), (3) redundant catch-all ALL policy on `marketing_activity_log`. All 3 issues were data-isolation risks in a multi-tenant context.
+- [x] **Isolation verification script** — `scripts/verify-tenant-isolation.ts` built. Creates two test orgs, inserts one loan + one contact per org, verifies org_id assignment and cross-org exclusion at the data layer, cleans up all test records. Note: service role bypasses RLS — full policy-level test requires real auth session simulation.
 
 ## ✅ Completed (session 8 — 2026-03-19 morning audit)
 

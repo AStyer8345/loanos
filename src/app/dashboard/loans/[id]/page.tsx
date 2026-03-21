@@ -471,7 +471,7 @@ export default function LoanDetailPage() {
   return (
     <div className="flex flex-col h-full">
       {/* ── Header ── */}
-      <div className="border-b border-zinc-800 bg-zinc-900/50 shrink-0">
+      <div className="border-b border-zinc-800 shrink-0" style={{ background: 'linear-gradient(160deg, #0a0a0c 0%, #0d111e 100%)' }}>
         <div className="px-6 pt-4 pb-0">
           {/* Breadcrumb */}
           <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 font-mono mb-3 transition-colors">
@@ -481,7 +481,7 @@ export default function LoanDetailPage() {
           {/* Name row */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-mono font-bold text-zinc-100 tracking-tight">
+              <h1 className="font-bold text-zinc-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '30px', lineHeight: '1.15', letterSpacing: '-0.01em' }}>
                 {loan.loan_name || displayName}
               </h1>
               <p className="text-xs text-zinc-500 font-mono mt-0.5">
@@ -499,7 +499,7 @@ export default function LoanDetailPage() {
               <div className="relative" ref={actionsRef}>
                 <button
                   onClick={() => setActionsOpen(prev => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors font-mono"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#C9A84C] hover:bg-[#B89340] text-zinc-900 rounded transition-colors font-mono font-semibold"
                 >
                   Actions <ChevronDown size={11} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                 </button>
@@ -559,59 +559,58 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Meta strip */}
-          <div className="flex items-end gap-6 mt-3 pb-3 flex-wrap border-b border-zinc-800/60">
+          {/* Meta chips — unified row */}
+          <div className="flex flex-wrap gap-8 mt-3 pb-4">
+
+            {/* Loan Amount — gold highlight */}
             {loan.loan_amount && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Loan Amount</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtCurrency(loan.loan_amount)}</p>
+              <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Loan Amount</p>
+                <p className="text-base font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.loan_amount)}</p>
               </div>
             )}
+
             {productLabel && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Product</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{productLabel}</p>
+              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Product</p>
+                <p className="text-base font-mono font-semibold text-zinc-100">{productLabel}</p>
               </div>
             )}
+
+            {/* Rate — gold highlight */}
             {loan.interest_rate && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Rate</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtPct(loan.interest_rate)}</p>
+              <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate</p>
+                <p className="text-base font-mono font-semibold text-[#C9A84C]">{fmtPct(loan.interest_rate)}</p>
               </div>
             )}
+
             {loan.ltv && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">LTV</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
+              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">LTV</p>
+                <p className="text-base font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
               </div>
             )}
+
             {(loan.front_end_dti || loan.back_end_dti) && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">DTI</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">
+              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">DTI</p>
+                <p className="text-base font-mono font-semibold text-zinc-100">
                   {fmtPct(loan.front_end_dti)} / {fmtPct(loan.back_end_dti)}
                 </p>
               </div>
             )}
-            {(loan.closing_date || loan.estimated_closing_date) && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Close Date</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{fmtDate(loan.closing_date || loan.estimated_closing_date)}</p>
-              </div>
-            )}
-            {loan.referring_agent_name && (
-              <div>
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Realtor</p>
-                <p className="text-sm font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
-              </div>
-            )}
-          </div>
 
-          {/* Meta strip — row 2: dates & rate lock */}
-          <div className="flex items-end gap-6 mt-0 pb-3 flex-wrap">
-            {/* Est. Close Date */}
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Est. Close Date</p>
+            {loan.referring_agent_name && (
+              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Realtor</p>
+                <p className="text-base font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
+              </div>
+            )}
+
+            {/* Est. Close Date — editable */}
+            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Est. Close</p>
               {editingHeader === 'estimated_closing_date' ? (
                 <input
                   autoFocus
@@ -620,11 +619,11 @@ export default function LoanDetailPage() {
                   onChange={e => setHeaderInput(e.target.value)}
                   onBlur={() => saveHeaderField('estimated_closing_date', headerInput || null)}
                   onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                  className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                 />
               ) : (
                 <p
-                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                   onClick={() => { setHeaderInput(loan.estimated_closing_date ?? ''); setEditingHeader('estimated_closing_date') }}
                 >
                   {fmtDate(loan.estimated_closing_date)}
@@ -632,9 +631,9 @@ export default function LoanDetailPage() {
               )}
             </div>
 
-            {/* Rate Lock Date */}
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Rate Lock Date</p>
+            {/* Rate Lock Date — editable */}
+            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate Lock Date</p>
               {editingHeader === 'rate_lock_date' ? (
                 <input
                   autoFocus
@@ -643,11 +642,11 @@ export default function LoanDetailPage() {
                   onChange={e => setHeaderInput(e.target.value)}
                   onBlur={() => saveHeaderField('rate_lock_date', headerInput || null)}
                   onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                  className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                 />
               ) : (
                 <p
-                  className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                   onClick={() => { setHeaderInput(loan.rate_lock_date ?? ''); setEditingHeader('rate_lock_date') }}
                 >
                   {fmtDate(loan.rate_lock_date)}
@@ -655,9 +654,9 @@ export default function LoanDetailPage() {
               )}
             </div>
 
-            {/* Lock Expiry */}
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Lock Expiry</p>
+            {/* Lock Expiry — editable */}
+            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Lock Expiry</p>
               <div className="flex items-center gap-2">
                 {editingHeader === 'rate_lock_expiration' ? (
                   <input
@@ -667,11 +666,11 @@ export default function LoanDetailPage() {
                     onChange={e => setHeaderInput(e.target.value)}
                     onBlur={() => saveHeaderField('rate_lock_expiration', headerInput || null)}
                     onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                    className="w-36 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                    className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                   />
                 ) : (
                   <p
-                    className="text-sm font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                    className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                     onClick={() => { setHeaderInput(loan.rate_lock_expiration ?? ''); setEditingHeader('rate_lock_expiration') }}
                   >
                     {fmtDate(loan.rate_lock_expiration)}
@@ -689,12 +688,12 @@ export default function LoanDetailPage() {
               </div>
             </div>
 
-            {/* Days Locked — calculated from lock expiry */}
+            {/* Days Locked */}
             {(() => {
               if (!loan.rate_lock_expiration) return (
-                <div>
-                  <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
-                  <p className="text-sm font-mono font-semibold text-zinc-500">—</p>
+                <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
+                  <p className="text-base font-mono font-semibold text-zinc-500">—</p>
                 </div>
               )
               const today = new Date(); today.setHours(0,0,0,0)
@@ -702,14 +701,15 @@ export default function LoanDetailPage() {
               const days = Math.ceil((exp.getTime() - today.getTime()) / 86400000)
               const expired = days < 0
               return (
-                <div>
-                  <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Days Locked</p>
-                  <p className={`text-sm font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
+                <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
+                  <p className={`text-base font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
                     {expired ? `${Math.abs(days)} days ago` : `${days} days`}
                   </p>
                 </div>
               )
             })()}
+
           </div>
 
           {/* Pipeline progress bar */}
@@ -729,7 +729,7 @@ export default function LoanDetailPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2.5 text-sm font-mono font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-emerald-500 text-emerald-400'
+                  ? 'border-[#C9A84C] text-[#C9A84C]'
                   : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -764,31 +764,42 @@ export default function LoanDetailPage() {
 
 function PipelineProgressBar({ status }: { status: string | null }) {
   const currentIdx = getStageIndex(status)
-  const pct = (currentIdx / (PIPELINE_STAGES.length - 1)) * 100
 
   return (
     <div className="py-3">
-      <div className="flex justify-between mb-1.5">
-        {PIPELINE_STAGES.map((stage, i) => (
-          <span
-            key={stage}
-            className={`text-[10px] font-mono ${
-              i === currentIdx
-                ? 'text-emerald-400 font-semibold'
-                : i < currentIdx
-                ? 'text-zinc-400'
-                : 'text-zinc-600'
-            }`}
-          >
-            {stage}
-          </span>
-        ))}
-      </div>
-      <div className="h-1 bg-zinc-700/60 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="flex items-center">
+        {PIPELINE_STAGES.map((stage, i) => {
+          const done = i < currentIdx
+          const active = i === currentIdx
+          return (
+            <div key={stage} className="flex items-center" style={{ flex: i < PIPELINE_STAGES.length - 1 ? '1' : 'none' }}>
+              <div className="flex flex-col items-center gap-1.5">
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-300"
+                  style={
+                    active
+                      ? { background: '#C9A84C', boxShadow: '0 0 8px rgba(201,168,76,0.55)' }
+                      : done
+                      ? { background: 'rgba(201,168,76,0.5)' }
+                      : { background: '#3f3f46' }
+                  }
+                />
+                <span
+                  className="text-[9px] font-mono whitespace-nowrap"
+                  style={{ color: active ? '#C9A84C' : done ? '#71717a' : '#52525b', fontWeight: active ? 700 : 400 }}
+                >
+                  {stage}
+                </span>
+              </div>
+              {i < PIPELINE_STAGES.length - 1 && (
+                <div
+                  className="h-px flex-1 mx-1 mb-3"
+                  style={{ background: done ? 'rgba(201,168,76,0.4)' : '#3f3f46' }}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

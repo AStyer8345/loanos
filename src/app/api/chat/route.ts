@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
-import { DEFAULT_SYSTEM_PROMPT } from '@/app/api/settings/system-prompt/route'
+import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
 
 async function buildSystemPrompt(
   recordId: string,

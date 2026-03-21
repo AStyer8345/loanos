@@ -886,11 +886,12 @@ function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
     <div className="p-6 space-y-8">
 
       {/* ── 3-column command grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
 
-        {/* ── Col 1 — Identity ── */}
-        <div className="space-y-4">
+        {/* ── Col 1 — Dark Identity Sidebar ── */}
+        <div className="bg-zinc-900 rounded-xl overflow-hidden flex flex-col">
           <BorrowerProfileCard loan={loan} contact={contact} />
+          <LoanEssentialsPanel loan={loan} />
           <PropertySummaryCard loan={loan} />
         </div>
 
@@ -944,39 +945,85 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
   const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   return (
-    <div className="bg-zinc-900/60 rounded-lg p-4 space-y-3">
-      {/* Avatar + name */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center shrink-0">
-          <span className="text-sm font-mono font-bold text-[#C9A84C]">{initials}</span>
+    <div className="p-5 space-y-4">
+      {/* Avatar + name + quick actions */}
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-[#C9A84C]/20 border-2 border-[#C9A84C]/50 flex items-center justify-center shrink-0">
+          <span className="text-xl font-mono font-bold text-[#C9A84C]">{initials}</span>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
+        <div className="min-w-0 w-full">
+          <p className="text-base font-mono font-semibold text-white truncate">{fullName}</p>
           {loan.contact_id && contact && (
             <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-500 hover:text-[#C9A84C] transition-colors">
               View Contact →
             </Link>
           )}
         </div>
-      </div>
-
-      {/* Contact rows */}
-      <div className="divide-y divide-zinc-800/60">
-        <IconContactRow icon={<Mail size={11} />} value={loan.borrower_email} href={loan.borrower_email ? `mailto:${loan.borrower_email}` : undefined} />
-        <IconContactRow icon={<Phone size={11} />} value={fmtPhone(loan.borrower_phone)} href={loan.borrower_phone ? `tel:${loan.borrower_phone.replace(/\D/g, '')}` : undefined} />
+        {/* Quick-action icons */}
+        <div className="flex items-center gap-3">
+          {loan.borrower_phone && (
+            <a
+              href={`tel:${loan.borrower_phone.replace(/\D/g, '')}`}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-[#C9A84C] hover:border-[#C9A84C]/50 transition-colors"
+              title={fmtPhone(loan.borrower_phone) ?? 'Call'}
+            >
+              <Phone size={13} />
+            </a>
+          )}
+          {loan.borrower_email && (
+            <a
+              href={`mailto:${loan.borrower_email}`}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-[#C9A84C] hover:border-[#C9A84C]/50 transition-colors"
+              title={loan.borrower_email}
+            >
+              <Mail size={13} />
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Co-borrower */}
       {loan.co_borrower_name && (
-        <div className="pt-2 border-t border-zinc-800/60 space-y-0">
+        <div className="pt-3 border-t border-zinc-800 space-y-1">
           <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Co-Borrower</p>
-          <p className="text-xs font-mono text-zinc-200 mb-1">{loan.co_borrower_name}</p>
-          <div className="divide-y divide-zinc-800/60">
-            <IconContactRow icon={<Mail size={11} />} value={loan.co_borrower_email} href={loan.co_borrower_email ? `mailto:${loan.co_borrower_email}` : undefined} />
-            <IconContactRow icon={<Phone size={11} />} value={fmtPhone(loan.co_borrower_phone)} href={loan.co_borrower_phone ? `tel:${loan.co_borrower_phone.replace(/\D/g, '')}` : undefined} />
+          <p className="text-xs font-mono text-zinc-200">{loan.co_borrower_name}</p>
+          <div className="flex items-center gap-2 mt-1">
+            {loan.co_borrower_phone && (
+              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                <Phone size={11} />
+              </a>
+            )}
+            {loan.co_borrower_email && (
+              <a href={`mailto:${loan.co_borrower_email}`} className="text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                <Mail size={11} />
+              </a>
+            )}
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ── LoanEssentialsPanel — key numbers in the dark sidebar ────────────────────
+
+function LoanEssentialsPanel({ loan }: { loan: Loan }) {
+  const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
+  const items = [
+    { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount), gold: true },
+    { label: 'Rate',        value: loan.interest_rate ? fmtPct(loan.interest_rate) : '—', gold: true },
+    { label: 'Program',     value: productLabel || '—', gold: false },
+    { label: 'LTV',         value: loan.ltv ? fmtPct(loan.ltv) : '—', gold: false },
+  ]
+
+  return (
+    <div className="border-t border-zinc-800 px-5 py-4 space-y-3">
+      {items.map(item => (
+        <div key={item.label} className="flex items-baseline justify-between gap-2">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider shrink-0">{item.label}</span>
+          <span className={`text-sm font-mono font-semibold ${item.gold ? 'text-[#C9A84C]' : 'text-white'}`}>{item.value}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -1000,14 +1047,14 @@ function PropertySummaryCard({ loan }: { loan: Loan }) {
   ]
 
   return (
-    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
+    <div className="border-t border-zinc-800">
+      <div className="px-5 py-3 flex items-center gap-2 border-b border-zinc-800/60">
         <MapPin size={11} className="text-[#C9A84C]" />
         <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Property</h3>
       </div>
-      <div className="divide-y divide-zinc-800/60">
+      <div className="divide-y divide-zinc-800/40">
         {fields.map(f => (
-          <div key={f.label} className="flex items-baseline justify-between gap-3 px-4 py-2 min-w-0">
+          <div key={f.label} className="flex items-baseline justify-between gap-3 px-5 py-2 min-w-0">
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{f.label}</span>
             <span className="text-xs font-mono text-zinc-200 text-right truncate">{f.value}</span>
           </div>
@@ -1029,7 +1076,7 @@ function LoanVitalCards({ loan }: { loan: Loan }) {
   return (
     <div className="space-y-3">
       {/* Days to Close */}
-      <div className="border-l-[3px] border-l-amber-500 rounded-r-lg bg-zinc-900/80 px-4 py-3">
+      <div className="border-l-4 border-l-[#C9A84C] rounded-r-lg bg-zinc-900/80 px-4 py-4">
         <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Days to Close</p>
         <p className={`text-3xl font-mono font-bold ${
           daysToClose == null ? 'text-zinc-600'
@@ -1047,9 +1094,15 @@ function LoanVitalCards({ loan }: { loan: Loan }) {
       </div>
 
       {/* Loan Stage */}
-      <div className="border-l-[3px] border-l-amber-500 rounded-r-lg bg-zinc-900/80 px-4 py-3">
+      <div className="border-l-4 border-l-[#C9A84C] rounded-r-lg bg-zinc-900/80 px-4 py-4">
         <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">Loan Stage</p>
-        <StatusBadge status={loan.status} />
+        {loan.status ? (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-semibold bg-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/30">
+            {loan.status}
+          </span>
+        ) : (
+          <span className="text-zinc-600 text-xs font-mono">—</span>
+        )}
         {loan.milestone && (
           <p className="text-[10px] font-mono text-zinc-500 mt-2 truncate">{loan.milestone}</p>
         )}
@@ -1079,8 +1132,11 @@ function KeyDatesPanel({ loan }: { loan: Loan }) {
       </div>
       <div className="divide-y divide-zinc-800/60">
         {dates.map(d => (
-          <div key={d.label} className="flex items-center justify-between gap-3 px-4 py-2">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{d.label}</span>
+          <div key={d.label} className="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Calendar size={9} className="text-zinc-600" />
+              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{d.label}</span>
+            </div>
             <span className="text-xs font-mono text-zinc-200">{d.value}</span>
           </div>
         ))}
@@ -1182,7 +1238,7 @@ function LoanTodoList({ loanId }: { loanId: string }) {
 
       <div className="divide-y divide-zinc-800/60">
         {todos.map(t => (
-          <div key={t.id} className="flex items-center gap-2.5 px-4 py-2.5 group hover:bg-zinc-800/20 transition-colors">
+          <div key={t.id} className="flex items-center gap-3 px-6 py-3.5 group hover:bg-zinc-800/30 transition-colors">
             <button
               onClick={() => persist(todos.map(x => x.id === t.id ? { ...x, done: !x.done } : x))}
               className="shrink-0 text-zinc-500 hover:text-[#C9A84C] transition-colors"
@@ -1204,7 +1260,7 @@ function LoanTodoList({ loanId }: { loanId: string }) {
       </div>
 
       {adding ? (
-        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-800/60">
+        <div className="flex items-center gap-2 px-6 py-3.5 border-t border-zinc-800/60">
           <input
             autoFocus
             value={newText}
@@ -1233,7 +1289,7 @@ function LoanTodoList({ loanId }: { loanId: string }) {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="w-full px-4 py-2 text-left text-[10px] font-mono text-zinc-600 hover:text-zinc-400 border-t border-zinc-800/60 transition-colors"
+          className="w-full px-6 py-3 text-left text-[10px] font-mono text-zinc-600 hover:text-zinc-400 border-t border-zinc-800/60 transition-colors"
         >
           + Add task
         </button>

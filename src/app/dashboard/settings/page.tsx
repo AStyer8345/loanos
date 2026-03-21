@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Mail, CheckCircle, XCircle, RefreshCw, Loader2, Unplug,
-  Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw,
+  Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -46,7 +46,7 @@ interface IdentitySettings {
   phone_number: string
 }
 
-type SectionKey = 'integrations' | 'website' | 'social' | 'identity' | 'ai'
+type SectionKey = 'integrations' | 'website' | 'social' | 'identity' | 'ai' | 'outreach'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -195,15 +195,19 @@ export default function SettingsPage() {
 
   // ── Per-section metadata ──
   const [timestamps, setTimestamps] = useState<Record<SectionKey, string | null>>({
-    integrations: null, website: null, social: null, identity: null, ai: null,
+    integrations: null, website: null, social: null, identity: null, ai: null, outreach: null,
   })
   const [saving, setSaving] = useState<Record<SectionKey, boolean>>({
-    integrations: false, website: false, social: false, identity: false, ai: false,
+    integrations: false, website: false, social: false, identity: false, ai: false, outreach: false,
   })
 
   // ── AI prompt state ──
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiIsCustom, setAiIsCustom] = useState(false)
+
+  // ── Outreach prompt state ──
+  const [outreachPrompt, setOutreachPrompt] = useState('')
+  const [outreachIsCustom, setOutreachIsCustom] = useState(false)
 
   // ── Org members ──
   const [members, setMembers] = useState<Array<{id: string, full_name: string | null, email: string | null, role: string, created_at: string}>>([])
@@ -261,6 +265,15 @@ export default function SettingsPage() {
         if (d.updatedAt) setTimestamps(prev => ({ ...prev, ai: d.updatedAt }))
       })
       .catch(() => {})
+    // Load outreach prompt
+    fetch('/api/settings/outreach-prompt')
+      .then(r => r.json())
+      .then(d => {
+        setOutreachPrompt(d.content ?? '')
+        setOutreachIsCustom(d.isCustom ?? false)
+        if (d.updatedAt) setTimestamps(prev => ({ ...prev, outreach: d.updatedAt }))
+      })
+      .catch(() => {})
   }, [fetchOutlookStatus, supabase, userId, orgLoading])
 
   // ── Save AI prompt ──
@@ -297,6 +310,45 @@ export default function SettingsPage() {
       setAiIsCustom(false)
       setTimestamps(prev => ({ ...prev, ai: null }))
       setFlashMsg('✓ Reset to default prompt.')
+    } catch {
+      setFlashMsg('✗ Reset failed.')
+    }
+  }
+
+  // ── Save outreach prompt ──
+  async function saveOutreachPrompt() {
+    setSaving(prev => ({ ...prev, outreach: true }))
+    try {
+      const res = await fetch('/api/settings/outreach-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: outreachPrompt }),
+      })
+      if (res.ok) {
+        setOutreachIsCustom(true)
+        setTimestamps(prev => ({ ...prev, outreach: new Date().toISOString() }))
+        setFlashMsg('✓ Outreach prompt saved.')
+      } else {
+        setFlashMsg('✗ Failed to save outreach prompt.')
+      }
+    } catch {
+      setFlashMsg('✗ Failed to save outreach prompt.')
+    } finally {
+      setSaving(prev => ({ ...prev, outreach: false }))
+    }
+  }
+
+  // ── Reset outreach prompt to default ──
+  async function resetOutreachPrompt() {
+    if (!confirm('Reset to the default outreach prompt? Your custom prompt will be deleted.')) return
+    try {
+      await fetch('/api/settings/outreach-prompt', { method: 'DELETE' })
+      const res = await fetch('/api/settings/outreach-prompt')
+      const d = await res.json()
+      setOutreachPrompt(d.content ?? '')
+      setOutreachIsCustom(false)
+      setTimestamps(prev => ({ ...prev, outreach: null }))
+      setFlashMsg('✓ Reset to default outreach prompt.')
     } catch {
       setFlashMsg('✗ Reset failed.')
     }
@@ -548,6 +600,43 @@ export default function SettingsPage() {
           />
           <p className="mt-2 text-[11px] font-mono text-zinc-600">
             The loan or contact record data is always appended automatically — you don&apos;t need to include it here.
+          </p>
+        </div>
+      </SectionCard>
+
+      {/* ── OUTREACH BOT PROMPT ── */}
+      <SectionCard
+        icon={Send}
+        title="Outreach Bot Prompt"
+        subtitle="Controls how the Outreach Bot drafts emails and texts. It always receives your live pipeline — active loans, contact counts, and selected contacts — as context."
+        updatedAt={timestamps.outreach}
+        saving={saving.outreach}
+        onSave={saveOutreachPrompt}
+      >
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-mono text-zinc-500">
+              {outreachIsCustom ? 'Custom prompt active' : 'Using default prompt'}
+            </span>
+            {outreachIsCustom && (
+              <button
+                onClick={resetOutreachPrompt}
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <RotateCcw size={11} /> Reset to default
+              </button>
+            )}
+          </div>
+          <textarea
+            value={outreachPrompt}
+            onChange={e => setOutreachPrompt(e.target.value)}
+            rows={12}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2.5 text-xs font-mono text-zinc-200 resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
+            placeholder="You are Adam Styer&apos;s outreach assistant…"
+            spellCheck={false}
+          />
+          <p className="mt-2 text-[11px] font-mono text-zinc-600">
+            Pipeline data (active loans, contact counts, selected contacts) is always appended automatically.
           </p>
         </div>
       </SectionCard>

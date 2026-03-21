@@ -1,31 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
+import { createServiceClient } from '@/lib/supabase/service'
+import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
 
-function buildSystemPrompt(contactNames?: string[]): string {
-  const base = `You are Adam Styer's outreach assistant for his mortgage business (Adam Styer | Mortgage Solutions LP, NMLS #513013). You help draft emails, text messages, and manage contacts.
+async function buildSystemPrompt(
+  organizationId: string,
+  contactNames?: string[]
+): Promise<string> {
+  const supabase = createServiceClient()
 
-Style: Professional but warm. Short sentences. Conversational tone. Never salesy or pushy.
+  // Load custom prompt from DB, fall back to default
+  const { data: promptRow } = await supabase
+    .from('system_prompts')
+    .select('content')
+    .eq('org_id', organizationId)
+    .eq('name', 'outreach')
+    .maybeSingle()
 
-Adam's details:
-- Senior Loan Officer, Austin TX
-- Calendly: https://calendly.com/adamstyer/15minutes
-- Application link: https://mslp.my1003app.com/513013/register
-- NMLS: 513013`
+  const base = promptRow?.content ?? DEFAULT_OUTREACH_PROMPT
 
-  if (contactNames && contactNames.length > 0) {
-    return `${base}
+  // Fetch pipeline context in parallel
+  const [loansRes, contactsRes] = await Promise.all([
+    supabase
+      .from('loans')
+      .select('loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date, property_city, property_state, loan_type')
+      .eq('organization_id', organizationId)
+      .not('status', 'in', '("Closed","Funded","Cancelled","Withdrawn")')
+      .order('closing_date', { ascending: true })
+      .limit(20),
+    supabase
+      .from('contacts')
+      .select('contact_type, stage')
+      .eq('organization_id', organizationId),
+  ])
 
-Currently selected contacts: ${contactNames.join(', ')}
-When drafting emails or texts for these contacts, personalize where possible. Keep messages concise.`
+  const loans = loansRes.data ?? []
+  const contacts = contactsRes.data ?? []
+
+  // Summarize contacts by type
+  const contactCounts: Record<string, number> = {}
+  for (const c of contacts) {
+    const t = c.contact_type || 'Unknown'
+    contactCounts[t] = (contactCounts[t] ?? 0) + 1
+  }
+  const contactSummary = Object.entries(contactCounts)
+    .map(([type, count]) => `${count} ${type}`)
+    .join(', ')
+
+  // Build pipeline section
+  let pipelineSection = `\n\n## Pipeline Context\n- Total contacts: ${contacts.length}${contactSummary ? ` (${contactSummary})` : ''}\n- Active loans in process: ${loans.length}`
+
+  if (loans.length > 0) {
+    const loanLines = loans.map(l => {
+      const name = l.loan_name
+        || [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ')
+        || l.borrower_name
+        || 'Unknown'
+      const location = [l.property_city, l.property_state].filter(Boolean).join(', ')
+      const close = l.closing_date || l.estimated_closing_date
+      const amount = l.loan_amount ? `$${Number(l.loan_amount).toLocaleString()}` : null
+      const parts = [l.status, l.loan_type, location, amount, close ? `closes ${close}` : null].filter(Boolean)
+      return `  - ${name}${parts.length ? ` — ${parts.join(', ')}` : ''}`
+    })
+    pipelineSection += '\n' + loanLines.join('\n')
   }
 
-  return base
+  const fullBase = `${base}${pipelineSection}`
+
+  if (contactNames && contactNames.length > 0) {
+    return `${fullBase}\n\nCurrently selected contacts: ${contactNames.join(', ')}\nWhen drafting emails or texts for these contacts, personalize where possible. Keep messages concise.`
+  }
+
+  return fullBase
 }
 
 export async function POST(req: NextRequest) {
+  let organizationId: string
   try {
-    await getOrganization()
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -42,8 +96,8 @@ export async function POST(req: NextRequest) {
         [c.first_name, c.last_name].filter(Boolean).join(' ') || 'Unknown'
     )
 
-    // For content generation, add specific instructions
-    let systemPrompt = buildSystemPrompt(contactNames)
+    let systemPrompt = await buildSystemPrompt(organizationId, contactNames)
+
     if (generateType === 'email') {
       systemPrompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "Adam Styer | Mortgage Solutions LP | NMLS #513013"`
     } else if (generateType === 'text') {

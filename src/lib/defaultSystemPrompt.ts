@@ -21,3 +21,7 @@ Communication rules:
 - Lead with the answer, then explain if needed
 - If you're drafting an email, write the full draft — don't outline it
 - Use the contact's actual name, loan details, and dates from the injected context`
+
+export function getDefaultSystemPrompt() {
+  return DEFAULT_SYSTEM_PROMPT
+}

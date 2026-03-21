@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
-import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
+import { getDefaultSystemPrompt } from '@/lib/defaultSystemPrompt'
 
 export async function GET() {
   try {
@@ -16,7 +16,7 @@ export async function GET() {
       .maybeSingle()
 
     return NextResponse.json({
-      content: data?.content ?? DEFAULT_SYSTEM_PROMPT,
+      content: data?.content ?? getDefaultSystemPrompt(),
       isCustom: !!data,
       updatedAt: data?.updated_at ?? null,
     })

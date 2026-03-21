@@ -1508,64 +1508,80 @@ function MilestoneTimeline({ loan }: { loan: Loan }) {
       est: loan.closing_date || loan.estimated_closing_date },
   ]
 
+  const gold = '#C9A84C'
+  const goldMuted = 'rgba(201,168,76,0.35)'
+
   return (
     <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Milestones</h2>
+      <div className="px-3 py-2 bg-zinc-800/80 border-b border-zinc-700">
+        <h2 className="text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">Milestones</h2>
       </div>
-      <div className="p-4 space-y-3">
-        {milestones.map((m, i) => {
-          const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
-          const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
-          const isPending = !isComplete && !isActive
-          const estDate = m.est ?? null
+      <div className="px-2 py-2 overflow-x-auto">
+        <div className="flex flex-nowrap items-start min-w-min">
+          {milestones.map((m, i) => {
+            const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
+            const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
+            const isPending = !isComplete && !isActive
+            const estDate = m.est ?? null
 
-          return (
-            <div key={m.label} className="flex items-start gap-3">
-              {/* Icon + connector */}
-              <div className="flex flex-col items-center">
-                {isComplete ? (
-                  <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                    <Check size={10} className="text-white" strokeWidth={3} />
-                  </div>
-                ) : isActive ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-emerald-500 flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  </div>
-                ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-zinc-600 shrink-0" />
-                )}
-                {i < milestones.length - 1 && (
-                  <div className={`w-px flex-1 mt-1 ${isComplete ? 'bg-emerald-500/40' : 'bg-zinc-700/60'}`} style={{ minHeight: '12px' }} />
-                )}
-              </div>
+            const sub =
+              isComplete && m.date
+                ? fmtDate(m.date)
+                : isComplete && !m.date
+                  ? 'Completed'
+                  : isActive
+                    ? (m.date ? `${fmtDate(m.date)} · active` : 'In progress')
+                    : isPending && estDate
+                      ? `Est. ${fmtDate(estDate)}`
+                      : null
 
-              {/* Label + date */}
-              <div className="flex-1 pb-2">
-                <p className={`text-xs font-mono font-medium leading-tight ${
-                  isComplete ? 'text-zinc-200' : isActive ? 'text-zinc-200' : 'text-zinc-500'
-                }`}>
-                  {m.label}
-                </p>
-                {isComplete && m.date && (
-                  <p className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtDate(m.date)}</p>
-                )}
-                {isComplete && !m.date && (
-                  <p className="text-[10px] font-mono text-zinc-600 mt-0.5">Completed</p>
-                )}
-                {isActive && (
-                  <p className="text-[10px] font-mono text-zinc-400 mt-0.5">
-                    {m.date ? fmtDate(m.date) : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    {' — In progress'}
+            const lineDone = isComplete
+
+            return (
+              <div key={m.label} className="contents">
+                <div className="flex flex-col items-center shrink-0 w-[4.75rem] sm:w-[5.25rem] px-0.5">
+                  <div className="flex justify-center mb-1">
+                    {isComplete ? (
+                      <div
+                        className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                        style={{ background: gold }}
+                      >
+                        <Check size={9} className="text-zinc-900" strokeWidth={3} />
+                      </div>
+                    ) : isActive ? (
+                      <div
+                        className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                        style={{ borderColor: gold }}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: gold }} />
+                      </div>
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-zinc-600 shrink-0 bg-zinc-900/80" />
+                    )}
+                  </div>
+                  <p
+                    className={`text-[9px] sm:text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
+                      isComplete || isActive ? 'text-zinc-200' : 'text-zinc-500'
+                    }`}
+                  >
+                    {m.label}
                   </p>
-                )}
-                {isPending && estDate && (
-                  <p className="text-[10px] font-mono text-zinc-600 mt-0.5">Est. {fmtDate(estDate)}</p>
+                  {sub && (
+                    <p className="text-[8px] font-mono text-zinc-500 text-center leading-tight mt-0.5 line-clamp-2 w-full">
+                      {sub}
+                    </p>
+                  )}
+                </div>
+                {i < milestones.length - 1 && (
+                  <div
+                    className="shrink-0 self-start mt-[7px] h-0.5 w-2 sm:w-3 rounded-full"
+                    style={{ background: lineDone ? goldMuted : '#3f3f46' }}
+                  />
                 )}
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

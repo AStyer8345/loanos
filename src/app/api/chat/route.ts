@@ -3,38 +3,27 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { DEFAULT_SYSTEM_PROMPT } from '@/app/api/settings/system-prompt/route'
 
 async function buildSystemPrompt(
   recordId: string,
-  recordType: 'contact' | 'loan'
+  recordType: 'contact' | 'loan',
+  organizationId: string
 ): Promise<string> {
   const supabase = createServiceClient()
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-  const base = `You are LoanOS AI — the operations brain for Adam Styer, a producing mortgage loan officer at Adam Styer | Mortgage Solutions LP in Austin, TX (NMLS #513013).
 
-Today's date: ${todayStr}
+  // Load custom prompt from DB, fall back to default
+  const { data: promptRow } = await supabase
+    .from('system_prompts')
+    .select('content')
+    .eq('org_id', organizationId)
+    .eq('name', 'base')
+    .maybeSingle()
 
-Your job: help Adam close more loans faster by eliminating non-revenue tasks.
+  const base = `${promptRow?.content ?? DEFAULT_SYSTEM_PROMPT}
 
-Adam's revenue-generating activities: realtor relationship calls, borrower conversion, pre-approval consults, referral meetings, solving file problems.
-Everything else should be automated or delegated. When Adam asks you to do something that falls outside revenue-generating work, execute it efficiently.
-
-You have access to Adam's loan pipeline and contact database. When a contact or loan record is injected below, use every field to give specific, contextual answers — never respond with generic advice.
-
-Capabilities you excel at:
-- Draft borrower emails (status updates, doc requests, pre-approval notifications, closing checklists)
-- Draft realtor emails and texts (referral follow-up, pipeline updates, market updates, win announcements)
-- Analyze loan files and flag issues, next steps, or missing items
-- Create prioritized action lists and daily game plans
-- Write internal notes, summaries, and condition responses
-- Generate scripts for difficult borrower or realtor conversations
-
-Communication rules:
-- Always be direct, specific, and actionable
-- Short punchy sentences — never bloated corporate language
-- Lead with the answer, then explain if needed
-- If you're drafting an email, write the full draft — don't outline it
-- Use the contact's actual name, loan details, and dates from the injected context`
+Today's date: ${todayStr}`
 
   if (recordType === 'contact') {
     const { data, error } = await supabase
@@ -162,9 +151,11 @@ ${loan ? `
 // POST /api/chat — send a message
 export async function POST(req: NextRequest) {
   let userId: string
+  let organizationId: string
   try {
     const ctx = await getOrganization()
     userId = ctx.userId
+    organizationId = ctx.organizationId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -182,7 +173,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const systemPrompt = await buildSystemPrompt(recordId, recordType)
+    const systemPrompt = await buildSystemPrompt(recordId, recordType, organizationId)
 
     const anthropic = await getAnthropicClient()
     const response = await anthropic.messages.create({

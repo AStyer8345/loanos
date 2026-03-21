@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Mail, CheckCircle, XCircle, RefreshCw, Loader2, Unplug,
-  Eye, EyeOff, Save, Zap, Globe, Share2, User,
+  Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -46,7 +46,7 @@ interface IdentitySettings {
   phone_number: string
 }
 
-type SectionKey = 'integrations' | 'website' | 'social' | 'identity'
+type SectionKey = 'integrations' | 'website' | 'social' | 'identity' | 'ai'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -195,11 +195,15 @@ export default function SettingsPage() {
 
   // ── Per-section metadata ──
   const [timestamps, setTimestamps] = useState<Record<SectionKey, string | null>>({
-    integrations: null, website: null, social: null, identity: null,
+    integrations: null, website: null, social: null, identity: null, ai: null,
   })
   const [saving, setSaving] = useState<Record<SectionKey, boolean>>({
-    integrations: false, website: false, social: false, identity: false,
+    integrations: false, website: false, social: false, identity: false, ai: false,
   })
+
+  // ── AI prompt state ──
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiIsCustom, setAiIsCustom] = useState(false)
 
   // ── Org members ──
   const [members, setMembers] = useState<Array<{id: string, full_name: string | null, email: string | null, role: string, created_at: string}>>([])
@@ -248,7 +252,55 @@ export default function SettingsPage() {
           setTimestamps(prev => ({ ...prev, [key]: row.updated_at }))
         }
       })
+    // Load AI system prompt
+    fetch('/api/settings/system-prompt')
+      .then(r => r.json())
+      .then(d => {
+        setAiPrompt(d.content ?? '')
+        setAiIsCustom(d.isCustom ?? false)
+        if (d.updatedAt) setTimestamps(prev => ({ ...prev, ai: d.updatedAt }))
+      })
+      .catch(() => {})
   }, [fetchOutlookStatus, supabase, userId, orgLoading])
+
+  // ── Save AI prompt ──
+  async function saveAiPrompt() {
+    setSaving(prev => ({ ...prev, ai: true }))
+    try {
+      const res = await fetch('/api/settings/system-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: aiPrompt }),
+      })
+      if (res.ok) {
+        setAiIsCustom(true)
+        setTimestamps(prev => ({ ...prev, ai: new Date().toISOString() }))
+        setFlashMsg('✓ AI prompt saved.')
+      } else {
+        setFlashMsg('✗ Failed to save prompt.')
+      }
+    } catch {
+      setFlashMsg('✗ Failed to save prompt.')
+    } finally {
+      setSaving(prev => ({ ...prev, ai: false }))
+    }
+  }
+
+  // ── Reset AI prompt to default ──
+  async function resetAiPrompt() {
+    if (!confirm('Reset to the default system prompt? Your custom prompt will be deleted.')) return
+    try {
+      await fetch('/api/settings/system-prompt', { method: 'DELETE' })
+      const res = await fetch('/api/settings/system-prompt')
+      const d = await res.json()
+      setAiPrompt(d.content ?? '')
+      setAiIsCustom(false)
+      setTimestamps(prev => ({ ...prev, ai: null }))
+      setFlashMsg('✓ Reset to default prompt.')
+    } catch {
+      setFlashMsg('✗ Reset failed.')
+    }
+  }
 
   // ── Save section ──
   async function saveSection(key: SectionKey, value: object) {
@@ -461,6 +513,43 @@ export default function SettingsPage() {
         <SecretField label="LinkedIn Access Token" value={social.linkedin_access_token} onChange={v => setSocial(p => ({ ...p, linkedin_access_token: v }))} />
         <SecretField label="Facebook Page Access Token" value={social.facebook_page_access_token} onChange={v => setSocial(p => ({ ...p, facebook_page_access_token: v }))} />
         <TextField label="Facebook Page ID" value={social.facebook_page_id} onChange={v => setSocial(p => ({ ...p, facebook_page_id: v }))} placeholder="123456789" />
+      </SectionCard>
+
+      {/* ── AI SYSTEM PROMPT ── */}
+      <SectionCard
+        icon={Bot}
+        title="AI System Prompt"
+        subtitle="Controls how LoanOS AI behaves on every loan and contact record. Edit to customize its persona, priorities, and communication style."
+        updatedAt={timestamps.ai}
+        saving={saving.ai}
+        onSave={saveAiPrompt}
+      >
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-mono text-zinc-500">
+              {aiIsCustom ? 'Custom prompt active' : 'Using default prompt'}
+            </span>
+            {aiIsCustom && (
+              <button
+                onClick={resetAiPrompt}
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <RotateCcw size={11} /> Reset to default
+              </button>
+            )}
+          </div>
+          <textarea
+            value={aiPrompt}
+            onChange={e => setAiPrompt(e.target.value)}
+            rows={16}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2.5 text-xs font-mono text-zinc-200 resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
+            placeholder="You are LoanOS AI…"
+            spellCheck={false}
+          />
+          <p className="mt-2 text-[11px] font-mono text-zinc-600">
+            The loan or contact record data is always appended automatically — you don't need to include it here.
+          </p>
+        </div>
       </SectionCard>
 
       {/* ── ORGANIZATION MEMBERS ── */}

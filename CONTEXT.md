@@ -16,7 +16,27 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11).**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13).**
+
+## Multi-Tenancy Status (2026-03-21 — session 13)
+
+**Audited today:**
+- All 14 tables with `organization_id`/`org_id` confirmed present. All key tables (loans, contacts, documents, email_drafts, scenarios, todo_items, chat_sessions) have org-scoped RLS.
+- Null org row counts: 78 `activity_log` + 2 `contacts` + 2 `chat_sessions` — all backfilled to Adam's org via migration 043.
+- `chat_sessions` RLS was still user_id-scoped despite having `organization_id` column — fixed in migration 044.
+- `daily-briefing` API route had a `withOrg` fallback that could silently run unscoped queries if org lookup failed — fixed (hard 500 return now).
+- Organizations table: ✅ all required columns including `slug`. Profiles: ✅ `nmls_individual`, `phone`, `states_licensed`, `email_signature`. org_settings: ✅ all required integration fields.
+- Onboarding: ✅ `/onboarding` collects all Tier 1 fields. `/api/org/create` creates org, links profile as owner, seeds org_settings. Middleware redirects to /onboarding if no org assigned.
+
+**Built/fixed this session:**
+- Migration 043: backfilled 82 null `organization_id` rows across 3 tables
+- Migration 044: replaced user_id-scoped chat_sessions RLS with org-scoped policies
+- daily-briefing: removed unscoped fallback, now hard-fails if org cannot be resolved
+
+**Outstanding (not blocking today):**
+- `mcc_state`, `user_settings`, `marketing_activity_log` still user_id-scoped — acceptable for now (per-user data, not shared across org members)
+- `chat_sessions.organization_id` now org-scoped but column is still nullable — add NOT NULL in a future migration after confirming no new null rows appear
+- Plan selection UI in onboarding deferred (defaults to 'starter')
 
 **Marketing Tab Redesign (2026-03-19 session 10)**: Full rebuild of `/dashboard/marketing` from a 9-tab 2440-line monolith into a 3-tab command center (SEND / CALLS / HISTORY). (1) **Dead code deleted**: 8 files removed — 3 sub-page routes (`content/`, `social/`, `rate-updates/`) and 5 API routes (`generate-newsletter`, `publish-newsletter`, `run-testimonials`, `send-mailchimp`, `log-social-post`) — all replaced by direct Netlify function calls. (2) **`schedule.ts` replaced**: stripped to 6-entry TRACKERS constant (removed DAYS, TCOLS, DayTask, DayDef). DailyScheduleWidget inlines those constants directly. (3) **New lib files**: `src/lib/marketing/types.ts` (MCCContact, LogEntry, MCCState, BLANK_STATE, APR_OFFSETS, RateRow, DEFAULT_RATE_ROWS, LOG_CHANNELS, LogChannel) + `src/lib/marketing/utils.ts` (aprForProduct, cadenceColor, channelToType, buildRatesString, currentWeekBoundaries, formatDaysAgo, formatWeekLabel, todayString) + 34 passing Vitest tests. (4) **New components** (all in `_components/`): `shared.tsx` (Card, SectionLabel, FieldLabel, Input, Textarea, Btn, CadenceBadge, Banner, Spinner, TypeBadge), `useMCCState.ts` (Supabase read/write hook + mergedState helper), `RateUpdateForm.tsx` (6-row rates table, APR auto-calc, preview/publish/schedule, logs to HISTORY), `NewsletterForm.tsx` (structured + custom prompt modes, preview/publish/schedule), `SendTab.tsx` (Rate Update / Newsletter inner toggle), `ContactCard.tsx` (Mark Called inline flow, calledToday at render time, tracker updates), `CallsTab.tsx` (4 lists, add form, CSV import, delete confirm), `HistoryTab.tsx` (week nav, cadence health strip, log table, manual log entry). (5) **`page.tsx` rewritten**: 83-line 3-tab shell replacing 2440-line monolith — uses useMCCState + mergedState, IBM Plex Mono font, gold header, loading/error states. (6) **Key patterns**: calledToday computed at render (not stored), TYPE badge derived from channel at render (not stored), `todayString()` uses local date components (not UTC toISOString), `cadenceColor()` uses Math.floor for stable integer-day boundaries, `PGRST116` handled as first-time user, noon-UTC anchor on saved log dates. TypeScript: 0 marketing errors, 34/34 utils tests pass. All commits on main, deployed to Vercel. Spec: `docs/superpowers/specs/2026-03-19-marketing-tab-redesign.md`. Plan: `docs/superpowers/plans/2026-03-19-marketing-tab-redesign.md`.
 

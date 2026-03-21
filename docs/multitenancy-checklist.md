@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-20 (session 11 — migration 040 applied, isolation script built)_
+_Last updated: 2026-03-21 (session 13 — migrations 043/044 applied, daily-briefing unscoped fallback fixed)_
 
 ---
 
@@ -21,8 +21,10 @@ _Last updated: 2026-03-20 (session 11 — migration 040 applied, isolation scrip
 | `user_settings` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies; redundant ALL policy dropped in 040 |
-| 0 loans with null `organization_id` | ✅ | Verified 2026-03-19 |
-| 0 contacts with null `organization_id` | ✅ | Verified 2026-03-19 |
+| 0 loans with null `organization_id` | ✅ | Verified 2026-03-21 (0 null rows) |
+| 0 contacts with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
+| 0 activity_log with null `organization_id` | ✅ | 78 legacy nulls backfilled — migration 043 |
+| 0 chat_sessions with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
 
 ---
 
@@ -40,7 +42,7 @@ _Last updated: 2026-03-20 (session 11 — migration 040 applied, isolation scrip
 | `contact_emails` | ✅ | ✅ | ✅ | ✅ |
 | `profiles` | ✅ | ✅ | ✅ | n/a |
 | `organizations` | ✅ | — | — | — |
-| `chat_sessions` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) |
+| `chat_sessions` | ✅ (org-scoped) | ✅ (org-scoped) | ✅ (org-scoped) | ✅ (org-scoped) |
 | `mcc_state` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | — |
 | `user_settings` | ✅ (user_id) | ✅ (user_id) | ✅ (user_id) | — |
 | `marketing_activity_log` | ✅ | ✅ | ✅ | ✅ (redundant ALL policy dropped in 040) |
@@ -100,8 +102,11 @@ _Last updated: 2026-03-20 (session 11 — migration 040 applied, isolation scrip
 | Item | Status | Notes |
 |------|--------|-------|
 | Adam's org ID | ✅ | `18613f82-fdd9-42dd-a09e-f3c577328258` |
-| 0 loans with null org_id | ✅ | Verified 2026-03-19 |
-| 0 contacts with null org_id | ✅ | Verified 2026-03-19 |
+| 0 loans with null org_id | ✅ | Verified 2026-03-21 |
+| 0 contacts with null org_id | ✅ | Backfilled 2026-03-21 (migration 043) |
+| 0 activity_log with null org_id | ✅ | Backfilled 2026-03-21 (migration 043, 78 rows) |
+| 0 chat_sessions with null org_id | ✅ | Backfilled 2026-03-21 (migration 043, 2 rows) |
+| No unscoped API fallbacks | ✅ | daily-briefing `withOrg` fallback removed 2026-03-21 |
 
 ---
 

@@ -69,10 +69,14 @@ export async function GET(request: NextRequest) {
     const sevenDaysAgo  = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const twentyFourHrsAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-    // Helper to add org filter if available
+    // Hard-fail if org not resolved — never run unscoped queries in multi-tenant context
+    if (!organizationId) {
+      console.error('[daily-briefing] organizationId is null at query time — aborting')
+      return NextResponse.json({ error: 'Could not resolve organization' }, { status: 500 })
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const withOrg = (query: any) =>
-      organizationId ? query.eq('organization_id', organizationId) : query
+    const withOrg = (query: any) => query.eq('organization_id', organizationId)
 
     // ── Parallel data fetch ──────────────────────────────────────────────────
     const [

@@ -1,12 +1,12 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-20 (morning audit — session 12)_
+_Last updated: 2026-03-21 (session 13 — multi-tenancy audit + fixes)_
 
 ---
 
 ## 🔴 High Priority
 
-- [ ] **daily-briefing unscoped fallback** — `/api/agents/daily-briefing/route.ts` line 71: `organizationId ? query.eq('organization_id', organizationId) : query` — if the agent-secret path fails to resolve an org, all queries run unscoped against the full table. Safe for now (single tenant) but must be fixed before multi-tenant launch. Fix: return 500 if org lookup fails instead of falling through unscoped.
+- [x] **daily-briefing unscoped fallback** — Fixed 2026-03-21. Replaced `withOrg` ternary fallback with hard 500 check before any queries. `organizationId` must be non-null before any data fetch runs.
 
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
@@ -29,6 +29,12 @@ _Last updated: 2026-03-20 (morning audit — session 12)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (session 13 — 2026-03-21 multi-tenancy audit)
+
+- [x] **Migration 043 applied** — Backfilled null `organization_id` on legacy rows: 78 `activity_log` rows + 2 `contacts` rows + 2 `chat_sessions` rows. All pre-migration records that had null org were assigned to Adam's org (`18613f82-fdd9-42dd-a09e-f3c577328258`). All three tables now have 0 null org rows.
+- [x] **Migration 044 applied** — Replaced user_id-scoped RLS on `chat_sessions` with org-scoped policies. `chat_sessions` already had `organization_id` column from migration 039 but policies still checked `auth.uid() = user_id`. All 4 policies (SELECT/INSERT/UPDATE/DELETE) now use `organization_id = get_my_organization_id()`.
+- [x] **daily-briefing unscoped fallback fixed** — `withOrg` helper was `organizationId ? query.eq() : query` — the fallback path let all queries run without org filter if org lookup failed. Replaced with a hard 500 return before any data fetches. `withOrg` now always applies the filter unconditionally.
 
 ## ✅ Completed (morning audit — 2026-03-20)
 

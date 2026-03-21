@@ -924,19 +924,6 @@ function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
 
 // ── BorrowerProfileCard ───────────────────────────────────────────────────────
 
-function IconContactRow({ icon, value, href }: { icon: React.ReactNode; value: string | null | undefined; href?: string }) {
-  if (!value) return null
-  return (
-    <div className="flex items-center gap-2 py-2">
-      <span className="text-zinc-500 shrink-0">{icon}</span>
-      {href ? (
-        <a href={href} className="text-xs font-mono text-zinc-300 hover:text-[#C9A84C] transition-colors truncate">{value}</a>
-      ) : (
-        <span className="text-xs font-mono text-zinc-300 truncate">{value}</span>
-      )}
-    </div>
-  )
-}
 
 function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRow | null }) {
   const firstName = loan.borrower_first_name ?? ''

@@ -859,7 +859,7 @@ function PipelineProgressBar({ status }: { status: string | null }) {
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, activity: _activity, contact, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string

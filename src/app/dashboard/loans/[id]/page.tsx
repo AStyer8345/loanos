@@ -17,6 +17,7 @@ import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
   GripVertical, EyeOff, Eye, Settings2,
+  Mail, Phone, MapPin, Calendar, Users,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
@@ -882,47 +883,361 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
   }, [loanId, loan])
 
   return (
-    <div className="flex gap-6 p-6 min-h-0">
-      {/* ── Left main column ── */}
-      <div className="flex-1 min-w-0 space-y-5">
-        {/* Milestone timeline */}
-        <MilestoneTimeline loan={loan} />
+    <div className="p-6 space-y-8">
 
-        {/* ── 6-card info grid ── */}
-        <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
+      {/* ── 3-column command grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-8">
 
-        {/* Recent activity (compact) */}
-        {activity.length > 0 && (
-          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Recent Activity</h2>
-            </div>
-            <div className="p-3 space-y-2.5">
-              {activity.slice(0, 6).map(item => (
-                <div key={item.id} className="flex gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${item.action.includes('.') ? 'bg-emerald-500' : 'bg-blue-400'}`} />
-                  <div className="min-w-0">
-                    <p className="text-xs font-mono text-zinc-300 truncate">{item.action}</p>
-                    <p className="text-[10px] font-mono text-zinc-600">
-                      {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* ── Col 1 — Identity ── */}
+        <div className="space-y-4">
+          <BorrowerProfileCard loan={loan} contact={contact} />
+          <PropertySummaryCard loan={loan} />
+        </div>
+
+        {/* ── Col 2 — Execution (primary focus) ── */}
+        <div className="space-y-6">
+          <MilestoneTimeline loan={loan} />
+          <LoanTodoList loanId={loanId} loan={loan} />
+        </div>
+
+        {/* ── Col 3 — The Pulse ── */}
+        <div className="space-y-4">
+          <LoanVitalCards loan={loan} />
+          <KeyDatesPanel loan={loan} />
+          <PartnerContactsPanel loan={loan} />
+          <NotesSidebarPanel loanId={loanId} loan={loan} setLoan={setLoan} />
+          <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+        </div>
+
+      </div>
+
+      {/* ── Full info grid (draggable cards) ── */}
+      <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
+
+      {/* ── Full editable details (collapsible) ── */}
+      <CollapsibleDetails loan={loan} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
+
+    </div>
+  )
+}
+
+// ── BorrowerProfileCard ───────────────────────────────────────────────────────
+
+function IconContactRow({ icon, value, href }: { icon: React.ReactNode; value: string | null | undefined; href?: string }) {
+  if (!value) return null
+  return (
+    <div className="flex items-center gap-2 py-2">
+      <span className="text-zinc-500 shrink-0">{icon}</span>
+      {href ? (
+        <a href={href} className="text-xs font-mono text-zinc-300 hover:text-[#C9A84C] transition-colors truncate">{value}</a>
+      ) : (
+        <span className="text-xs font-mono text-zinc-300 truncate">{value}</span>
+      )}
+    </div>
+  )
+}
+
+function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRow | null }) {
+  const firstName = loan.borrower_first_name ?? ''
+  const lastName = loan.borrower_last_name ?? ''
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || loan.borrower_name || '—'
+  const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
+
+  return (
+    <div className="bg-zinc-900/60 rounded-lg p-4 space-y-3">
+      {/* Avatar + name */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center shrink-0">
+          <span className="text-sm font-mono font-bold text-[#C9A84C]">{initials}</span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
+          {loan.contact_id && contact && (
+            <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-500 hover:text-[#C9A84C] transition-colors">
+              View Contact →
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Contact rows */}
+      <div className="divide-y divide-zinc-800/60">
+        <IconContactRow icon={<Mail size={11} />} value={loan.borrower_email} href={loan.borrower_email ? `mailto:${loan.borrower_email}` : undefined} />
+        <IconContactRow icon={<Phone size={11} />} value={fmtPhone(loan.borrower_phone)} href={loan.borrower_phone ? `tel:${loan.borrower_phone.replace(/\D/g, '')}` : undefined} />
+      </div>
+
+      {/* Co-borrower */}
+      {loan.co_borrower_name && (
+        <div className="pt-2 border-t border-zinc-800/60 space-y-0">
+          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Co-Borrower</p>
+          <p className="text-xs font-mono text-zinc-200 mb-1">{loan.co_borrower_name}</p>
+          <div className="divide-y divide-zinc-800/60">
+            <IconContactRow icon={<Mail size={11} />} value={loan.co_borrower_email} href={loan.co_borrower_email ? `mailto:${loan.co_borrower_email}` : undefined} />
+            <IconContactRow icon={<Phone size={11} />} value={fmtPhone(loan.co_borrower_phone)} href={loan.co_borrower_phone ? `tel:${loan.co_borrower_phone.replace(/\D/g, '')}` : undefined} />
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── PropertySummaryCard ───────────────────────────────────────────────────────
+
+function PropertySummaryCard({ loan }: { loan: Loan }) {
+  const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
+  const downPayment = loan.down_payment
+    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
+    : '—'
+
+  const fields = [
+    { label: 'Address', value: fullAddress || '—' },
+    { label: 'Type', value: loan.property_type || '—' },
+    { label: 'Occupancy', value: loan.occupancy_type || loan.occupancy || '—' },
+    { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
+    { label: 'Appraised', value: fmtCurrency(loan.appraised_value) },
+    { label: 'Down Payment', value: downPayment },
+    { label: 'LTV', value: fmtPct(loan.ltv) },
+  ]
+
+  return (
+    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
+        <MapPin size={11} className="text-[#C9A84C]" />
+        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Property</h3>
+      </div>
+      <div className="divide-y divide-zinc-800/60">
+        {fields.map(f => (
+          <div key={f.label} className="flex items-baseline justify-between gap-3 px-4 py-2 min-w-0">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{f.label}</span>
+            <span className="text-xs font-mono text-zinc-200 text-right truncate">{f.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── LoanVitalCards — stat cards per THEME.md ─────────────────────────────────
+
+function LoanVitalCards({ loan }: { loan: Loan }) {
+  const daysToClose = (() => {
+    const target = loan.estimated_closing_date || loan.closing_date
+    if (!target) return null
+    return Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000)
+  })()
+
+  return (
+    <div className="space-y-3">
+      {/* Days to Close */}
+      <div className="border-l-[3px] border-l-amber-500 rounded-r-lg bg-zinc-900/80 px-4 py-3">
+        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Days to Close</p>
+        <p className={`text-3xl font-mono font-bold ${
+          daysToClose == null ? 'text-zinc-600'
+          : daysToClose < 0 ? 'text-red-400'
+          : daysToClose <= 7 ? 'text-amber-300'
+          : 'text-amber-400'
+        }`}>
+          {daysToClose == null ? '—' : Math.abs(daysToClose)}
+        </p>
+        {daysToClose != null && (
+          <p className="text-[10px] font-mono text-zinc-500 mt-0.5">
+            {daysToClose < 0 ? 'days past est. close' : daysToClose === 0 ? 'closes today' : 'days remaining'}
+          </p>
         )}
-
-        {/* ── Full editable details (collapsible) ── */}
-        <CollapsibleDetails loan={loan} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
-          {/* Placeholder — CollapsibleDetails renders itself */}
       </div>
 
-      {/* ── Right sidebar — 320px fixed ── */}
-      <div className="w-80 shrink-0 space-y-4">
-        <NotesSidebarPanel loanId={loanId} loan={loan} setLoan={setLoan} />
-        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+      {/* Loan Stage */}
+      <div className="border-l-[3px] border-l-amber-500 rounded-r-lg bg-zinc-900/80 px-4 py-3">
+        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">Loan Stage</p>
+        <StatusBadge status={loan.status} />
+        {loan.milestone && (
+          <p className="text-[10px] font-mono text-zinc-500 mt-2 truncate">{loan.milestone}</p>
+        )}
       </div>
+    </div>
+  )
+}
+
+// ── KeyDatesPanel ─────────────────────────────────────────────────────────────
+
+function KeyDatesPanel({ loan }: { loan: Loan }) {
+  const dates = [
+    { label: 'Application', value: fmtDate(loan.application_date) },
+    { label: 'Submission', value: fmtDate(loan.submission_date) },
+    { label: 'Approval', value: fmtDate(loan.approval_date) },
+    { label: 'Est. Close', value: fmtDate(loan.estimated_closing_date) },
+    { label: 'Rate Lock', value: fmtDate(loan.rate_lock_date) },
+    { label: 'Lock Expiry', value: fmtDate(loan.rate_lock_expiration) },
+    { label: 'Funded', value: fmtDate(loan.funding_date) },
+  ]
+
+  return (
+    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
+        <Calendar size={11} className="text-[#C9A84C]" />
+        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Key Dates</h3>
+      </div>
+      <div className="divide-y divide-zinc-800/60">
+        {dates.map(d => (
+          <div key={d.label} className="flex items-center justify-between gap-3 px-4 py-2">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{d.label}</span>
+            <span className="text-xs font-mono text-zinc-200">{d.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── PartnerContactsPanel ──────────────────────────────────────────────────────
+
+function PartnerContactsPanel({ loan }: { loan: Loan }) {
+  const partners = [
+    { role: 'Realtor', name: loan.referring_agent_name, email: loan.referring_agent_email, phone: loan.referring_agent_phone, color: 'text-amber-400' },
+    { role: "Buyer's Agent", name: loan.buyers_agent_name || loan.buyer_agent_name, email: loan.buyers_agent_email || loan.buyer_agent_email, phone: loan.buyers_agent_phone, color: 'text-emerald-400' },
+    { role: 'Listing Agent', name: loan.listing_agent_name, email: loan.listing_agent_email, phone: loan.listing_agent_phone, color: 'text-sky-400' },
+    { role: 'Title', name: loan.title_company || loan.title_contact, email: loan.title_email, phone: null as string | null, color: 'text-zinc-300' },
+  ].filter(p => p.name || p.email)
+
+  if (partners.length === 0) return null
+
+  return (
+    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
+        <Users size={11} className="text-[#C9A84C]" />
+        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Partners</h3>
+      </div>
+      <div className="divide-y divide-zinc-800/60">
+        {partners.map(p => (
+          <div key={p.role} className="px-4 py-2.5 space-y-1">
+            <p className={`text-[10px] font-mono uppercase tracking-wide ${p.color}`}>{p.role}</p>
+            {p.name && <p className="text-xs font-mono text-zinc-200 truncate">{p.name}</p>}
+            {p.email && (
+              <a href={`mailto:${p.email}`} className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                <Mail size={9} className="shrink-0" /> <span className="truncate">{p.email}</span>
+              </a>
+            )}
+            {p.phone && (
+              <a href={`tel:${p.phone.replace(/\D/g, '')}`} className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                <Phone size={9} className="shrink-0" /> {fmtPhone(p.phone)}
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── LoanTodoList — localStorage-backed per-loan checklist ────────────────────
+
+interface TodoItem {
+  id: string
+  text: string
+  done: boolean
+}
+
+function getDefaultTodos(): TodoItem[] {
+  const items = [
+    'Collect paystubs (last 30 days)',
+    'Collect bank statements (last 2 months)',
+    'Order appraisal',
+    'Submit to underwriting',
+    'Clear UW conditions',
+    'Request CTC',
+    'Schedule closing date',
+    'Confirm wire instructions',
+  ]
+  return items.map((text, i) => ({ id: String(i), text, done: false }))
+}
+
+function LoanTodoList({ loanId, loan: _loan }: { loanId: string; loan: Loan }) {
+  const storageKey = `loanos_todos_${loanId}`
+  const [todos, setTodos] = useState<TodoItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey)
+      if (saved) return JSON.parse(saved) as TodoItem[]
+    } catch { /* ignore */ }
+    return getDefaultTodos()
+  })
+  const [newText, setNewText] = useState('')
+  const [adding, setAdding] = useState(false)
+
+  function persist(items: TodoItem[]) {
+    setTodos(items)
+    try { localStorage.setItem(storageKey, JSON.stringify(items)) } catch { /* ignore */ }
+  }
+
+  const doneCount = todos.filter(t => t.done).length
+
+  return (
+    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 flex items-center justify-between border-b border-zinc-800/60">
+        <div className="flex items-center gap-2">
+          <Inbox size={11} className="text-[#C9A84C]" />
+          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">To-Do</h3>
+        </div>
+        <span className="text-[10px] font-mono text-zinc-500">{doneCount}/{todos.length}</span>
+      </div>
+
+      <div className="divide-y divide-zinc-800/60">
+        {todos.map(t => (
+          <div key={t.id} className="flex items-center gap-2.5 px-4 py-2.5 group hover:bg-zinc-800/20 transition-colors">
+            <button
+              onClick={() => persist(todos.map(x => x.id === t.id ? { ...x, done: !x.done } : x))}
+              className="shrink-0 text-zinc-500 hover:text-[#C9A84C] transition-colors"
+            >
+              {t.done
+                ? <Check size={14} className="text-[#C9A84C]" />
+                : <div className="w-3.5 h-3.5 rounded-sm border border-zinc-600" />
+              }
+            </button>
+            <span className={`flex-1 text-xs font-mono ${t.done ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>{t.text}</span>
+            <button
+              onClick={() => persist(todos.filter(x => x.id !== t.id))}
+              className="shrink-0 text-zinc-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+            >
+              <X size={10} />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {adding ? (
+        <div className="flex items-center gap-2 px-4 py-2.5 border-t border-zinc-800/60">
+          <input
+            autoFocus
+            value={newText}
+            onChange={e => setNewText(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                const text = newText.trim()
+                if (text) persist([...todos, { id: Date.now().toString(), text, done: false }])
+                setNewText(''); setAdding(false)
+              }
+              if (e.key === 'Escape') { setAdding(false); setNewText('') }
+            }}
+            placeholder="Add task…"
+            className="flex-1 text-xs font-mono bg-transparent text-zinc-200 placeholder-zinc-600 border-b border-zinc-600 focus:border-[#C9A84C] outline-none pb-0.5"
+          />
+          <button
+            onClick={() => {
+              const text = newText.trim()
+              if (text) persist([...todos, { id: Date.now().toString(), text, done: false }])
+              setNewText(''); setAdding(false)
+            }}
+            className="text-[10px] font-mono text-[#C9A84C] hover:text-amber-300"
+          >Add</button>
+          <button onClick={() => { setAdding(false); setNewText('') }} className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400">Cancel</button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setAdding(true)}
+          className="w-full px-4 py-2 text-left text-[10px] font-mono text-zinc-600 hover:text-zinc-400 border-t border-zinc-800/60 transition-colors"
+        >
+          + Add task
+        </button>
+      )}
     </div>
   )
 }

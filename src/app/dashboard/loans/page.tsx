@@ -1212,7 +1212,16 @@ export default function LoansPage() {
         })()}
 
         {/* Table */}
-        <div className="flex-1 overflow-auto">
+        <style>{`
+          .loans-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+          .loans-scroll::-webkit-scrollbar-track { background: transparent; }
+          .loans-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 3px; }
+          .loans-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
+        `}</style>
+        <div
+          className="loans-scroll flex-1 overflow-auto"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
+        >
           {loading ? (
             <div className="flex items-center justify-center h-48 text-[#666666] text-sm font-mono">Loading…</div>
           ) : filtered.length === 0 ? (
@@ -1221,7 +1230,7 @@ export default function LoansPage() {
               <p className="text-sm font-mono">No loans found</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="min-w-max text-sm">
               <thead>
                 <tr className="border-b border-[#2A2A2A] bg-[#161616]">
                   <th className="w-8 px-2 py-2.5">

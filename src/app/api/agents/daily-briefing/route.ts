@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     }
   } else {
     // Agent-secret path: no user session — look up the primary org.
-    // Single-tenant fallback: use the first profile with a non-null org.
-    // TODO: replace with proper multi-tenant routing if needed.
+    // Single-tenant: uses the first profile with a non-null org.
+    // If org cannot be resolved, fail hard (never run unscoped queries).
     try {
       const svcClient = createServiceClient()
       const { data: sysProfile } = await svcClient
@@ -45,7 +45,11 @@ export async function GET(request: NextRequest) {
         .single()
       organizationId = sysProfile?.organization_id ?? null
     } catch {
-      console.warn('[daily-briefing] Could not resolve org for agent-secret path — queries will be unscoped')
+      // swallow — null check below will return 500
+    }
+    if (!organizationId) {
+      console.error('[daily-briefing] Could not resolve org for agent-secret path — aborting')
+      return NextResponse.json({ error: 'Could not resolve organization' }, { status: 500 })
     }
   }
 

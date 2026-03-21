@@ -1,53 +1,68 @@
-# LoanOS Daily Report — 2026-03-19
+# LoanOS Daily Report — 2026-03-20
 
 ## 🔴 Action Required
 
-### n8n Execution Errors — Arive New Loan → Supabase (`1tagvoU0UXtdDiMY`)
-4 errors fired today in rapid succession:
-- Execution 572 — 19:36:14 UTC
-- Execution 568 — 19:31:13 UTC
-- Execution 566 — 19:31:01 UTC
-- Execution 564 — 19:29:15 UTC
+### n8n Workflow Errors (2026-03-19)
+- **`1tagvoU0UXtdDiMY` — Arive New Loan → Supabase**: 4 consecutive errors between 18:35–19:36. All show `lastNodeExecuted: null`, meaning failures happened before any node ran (likely webhook auth or malformed payload). Check Arive webhook config — may need re-registration.
+- **`utMvZpkdRwIRZ51u` — Pre-Approval Email**: 1 error at 18:35. Same `lastNodeExecuted: null` pattern — webhook trigger failing at entry point.
 
-All 4 errored within a ~7-minute window. Likely a bad Arive webhook payload or Supabase schema mismatch. Workflow is still active but failing on every trigger. **Check the n8n execution log for the error message.**
+### Activity Gaps — High-Priority Loans (no activity in 5+ days)
+These are in active pipeline stages and have zero activity_log entries since 2026-03-15:
 
-### n8n Execution Error — Pre-Approval Email (`utMvZpkdRwIRZ51u`)
-- Execution 559 — 19:35:37 UTC (today)
-
-Single error. May be a bad payload or missing field. **Review execution 559 in n8n.**
+| Borrower | Status |
+|----------|--------|
+| Maria Gutierrez | processing |
+| Monica Castillo | processing |
+| David Park | processing |
+| Ryan Nguyen | underwriting |
+| Priya Nair | underwriting |
+| Derek Cho | underwriting |
+| Lauren Simmons | underwriting |
 
 ---
 
 ## 🟡 Watch Items
 
-### n8n — Unexpected Inactive Workflows
-| Workflow ID | Name | Notes |
-|-------------|------|-------|
-| `JMmstRl2C5ylmuIY` | LoanOS — Outlook Email Sync | Known — needs Outlook env vars configured |
-| `w7hZLmIcQ4izmndb` | LoanOS — Contract Received (duplicate) | Old/stale version — `UfNcdpoVKQZqy0fj` is the active one. Safe to archive. |
+### Unexpected Inactive n8n Workflows
+- **`JMmstRl2C5ylmuIY` — Outlook Email Sync**: Inactive (known — needs Outlook credential/env vars before activating)
+- **`w7hZLmIcQ4izmndb` — LoanOS — Contract Received**: Inactive. Note: there are now TWO "Contract Received" workflows — this one is inactive/orphaned; `UfNcdpoVKQZqy0fj` is the live one. Consider deleting `w7hZLmIcQ4izmndb`.
+
+### Activity Gaps — Lower-Priority Loans (no activity in 5+ days)
+Pre-approved, lead, application, or On Hold status — less urgent but worth a check:
+
+| Borrower | Status |
+|----------|--------|
+| Rachel Kim | pre_approved |
+| James Harwell | pre_approved |
+| Jennifer Walsh | pre_approved |
+| Tyler Owens | pre_approved |
+| Amanda Reyes | pre_approved |
+| Nathan Burke | pre_approved |
+| Michael Torres | application |
+| Sarah Blackwell | application |
+| Kevin Spotts | On Hold |
+| Martin Cuilla | Started |
+| Courtney Dixon | lead |
+| Patricia Lowe | lead |
+| Unknown (2193e175) | On Hold |
 
 ### Code Quality
-- **`console.log` in API routes:** 1 file — `src/app/api/mismo/parse/route.ts`
-- **Dark theme violations** (`bg-white`, `bg-gray-100`, `text-gray-900`) in:
+- **console.log statements** in API routes (3 total):
+  - `src/app/api/arive-webhook/route.ts` — 2 instances
+  - `src/app/api/mismo/parse/route.ts` — 1 instance
+- **Dark theme violations** (bg-white / bg-gray-100 / text-gray-900 in dashboard):
   - `src/app/dashboard/scenarios/ScenarioList.tsx`
   - `src/app/dashboard/scenarios/new/StatementUpload.tsx`
   - `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
-
-### Unused Components (never imported in `src/app/`)
-`ActivityTimeline`, `EmailDraftPreview`, `GlobalSearch`, `NavDropdown`, `NavItem`, `SmartActionQueue`, `dashboard/DailyBriefingPanel`, `dashboard/DailyScheduleWidget`, `dashboard/TodoList`, `outreach/BulkActionPreview`, `outreach/QuickAddConfirmation`
 
 ---
 
 ## 🟢 All Clear
 
-- **Stale loans:** 0 — all 93 active loans updated within the last 2 days
-- **Pending email drafts:** 0 — no drafts sitting unsent 24h+
-- **Activity log:** Pisheh, Rademacher, Mcneese all have entries in the last 5 days
-- **TypeScript build:** PASS — 0 errors
-- **Weekly Social Post** (`eJG4wckrj6SmSpm1`): Now showing as active (memory had it as "Fixed, inactive" — update memory if this was intentional)
-
----
+- **Stale loans**: 0 — no active loans overdue for an update
+- **Pending email drafts**: 0 — no drafts stuck unsent
+- **Core workflows active**: Milestone Agent, Arive Status Update, Referral Intro, New Application, Final CD, Refi Intake, Inbound Email Sync, Contract Received (`UfNcdpoVKQZqy0fj`), Web Lead Automation — all active
 
 ## Build
 
-**Pass** — `npx tsc --noEmit` completed with 0 errors
+**PASS** — `npx tsc --noEmit` returned 0 errors

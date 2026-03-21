@@ -371,6 +371,7 @@ export default function LoanDetailPage() {
   const supabase = createClient()
   const params = useParams()
   const loanId = params.id as string
+  const { organizationId } = useOrg()
 
   const [loan, setLoan] = useState<Loan | null>(null)
   const [contact, setContact] = useState<ContactRow | null>(null)
@@ -387,6 +388,7 @@ export default function LoanDetailPage() {
   // commission editing moved to CollapsibleDetails > Financials section
   const [editingHeader, setEditingHeader] = useState<string | null>(null)
   const [headerInput, setHeaderInput] = useState('')
+  const [referringAgentContactId, setReferringAgentContactId] = useState<string | null>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -401,6 +403,7 @@ export default function LoanDetailPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
+    setReferringAgentContactId(null)
     const [loanRes, docsRes, actRes, draftsRes, contactEmailsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
@@ -433,13 +436,49 @@ export default function LoanDetailPage() {
           .limit(100)
         setInboundEmails((inbound || []) as InboundEmailRow[])
       }
+
+      // Resolve referring realtor → contact id (email match, then name match within org)
+      const ld = loanRes.data as Loan
+      let realtorId: string | null = null
+      if (organizationId) {
+        if (ld.referring_agent_email?.trim()) {
+          const em = ld.referring_agent_email.trim()
+          const { data: byEmail } = await supabase
+            .from('contacts')
+            .select('id')
+            .eq('organization_id', organizationId)
+            .ilike('email', em)
+            .limit(1)
+            .maybeSingle()
+          if (byEmail?.id) realtorId = byEmail.id
+        }
+        if (!realtorId && ld.referring_agent_name?.trim()) {
+          const name = ld.referring_agent_name.trim()
+          const parts = name.split(/\s+/).filter(Boolean)
+          const firstName = parts[0] ?? ''
+          const lastName = parts.slice(1).join(' ') || ''
+          let q = supabase
+            .from('contacts')
+            .select('id, first_name, last_name')
+            .eq('organization_id', organizationId)
+          if (firstName) q = q.ilike('first_name', firstName)
+          if (lastName) q = q.ilike('last_name', lastName)
+          const { data: list } = await q.limit(50)
+          const match = (list ?? []).find(
+            c =>
+              `${(c.first_name ?? '').trim()} ${(c.last_name ?? '').trim()}`.trim().toLowerCase() === name.toLowerCase()
+          )
+          if (match?.id) realtorId = match.id
+        }
+      }
+      setReferringAgentContactId(realtorId)
     }
     setDocs(docsRes.data || [])
     setActivity(actRes.data || [])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
-  }, [loanId, supabase])
+  }, [loanId, supabase, organizationId])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -612,7 +651,16 @@ export default function LoanDetailPage() {
             {loan.referring_agent_name && (
               <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Realtor</p>
-                <p className="text-[16px] font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
+                <Link
+                  href={
+                    referringAgentContactId
+                      ? `/dashboard/contacts/${referringAgentContactId}`
+                      : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
+                  }
+                  className="text-[16px] font-mono font-semibold text-zinc-100 hover:text-[#C9A84C] transition-colors underline-offset-2 hover:underline block truncate max-w-[11rem]"
+                >
+                  {loan.referring_agent_name}
+                </Link>
               </div>
             )}
 

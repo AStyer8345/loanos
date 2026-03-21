@@ -1,12 +1,13 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-21 (session 13 — multi-tenancy audit + fixes)_
+_Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
 
 ---
 
 ## 🔴 High Priority
 
 - [x] **daily-briefing unscoped fallback** — Fixed 2026-03-21. Replaced `withOrg` ternary fallback with hard 500 check before any queries. `organizationId` must be non-null before any data fetch runs.
+- [x] **Final CD Email n8n check constraint crash** — Fixed 2026-03-21 morning audit. `Log CD Email` node was sending `status: 'draft'` but `email_drafts_status_check` only allows `pending/sent/discarded`. Updated to `status: 'pending'`. Workflow `SkzrWeR0bHZs8kWX`.
 
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
@@ -15,6 +16,7 @@ _Last updated: 2026-03-21 (session 13 — multi-tenancy audit + fixes)_
 
 ## 🟡 Medium Priority
 
+- [ ] **daily-briefing unscoped milestone queries** — `loan_milestone_events` and `milestone_communications` in `/api/agents/daily-briefing` use `createServiceClient()` but are not scoped to `organization_id` (neither table has that column). Low risk single-tenant but should be fixed before multi-tenant launch: join through `loans.organization_id` or add `organization_id` to both tables.
 - [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` extracts PDF fields but doesn't log email drafts — that happens in the n8n workflow `yCTydQ7RfZK4DyUg`. Wire logEmailDraft there.
 - [ ] **Wire logEmailDraft to final-cd** — same pattern — n8n workflow `SkzrWeR0bHZs8kWX`.
 - [ ] **E2E test WF1 + WF2** — all migrations confirmed applied: trigger test webhook, verify loan row in Supabase, verify loan_status_history row.

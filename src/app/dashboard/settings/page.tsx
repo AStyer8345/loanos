@@ -547,7 +547,7 @@ export default function SettingsPage() {
             spellCheck={false}
           />
           <p className="mt-2 text-[11px] font-mono text-zinc-600">
-            The loan or contact record data is always appended automatically — you don't need to include it here.
+            The loan or contact record data is always appended automatically — you don&apos;t need to include it here.
           </p>
         </div>
       </SectionCard>

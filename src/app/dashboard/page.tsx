@@ -85,13 +85,8 @@ export default async function DashboardPage() {
         urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Past est. closing date', date: loan.estimated_closing_date })
       }
     }
-    if (isActive && loan.updated_at) {
-      const daysSince = Math.floor((now.getTime() - new Date(loan.updated_at).getTime()) / (1000 * 60 * 60 * 24))
-      if (daysSince >= 7) {
-        staleLoans.push({ id: loan.id, name: borrowerName, daysSinceActivity: daysSince })
-      }
-    }
   }
+  // staleLoans computed after lastActivityMap is built below
 
   const stageData = DASHBOARD_STAGES.map(stage => ({
     stage,
@@ -112,15 +107,32 @@ export default async function DashboardPage() {
   if (activeLoanIds.length > 0) {
     const { data: activityRows = [] } = await supabase
       .from('activity_log')
-      .select('loan_id, occurred_at')
+      .select('loan_id, occurred_at, action')
       .in('loan_id', activeLoanIds)
       .not('loan_id', 'is', null)
+      .not('action', 'ilike', 'arive.%')
+      .not('action', 'ilike', '%.webhook%')
+      .not('action', 'ilike', 'error_%')
       .order('occurred_at', { ascending: false })
       .limit(500)
 
     for (const row of activityRows ?? []) {
       if (row.loan_id && !lastActivityMap.has(row.loan_id)) {
         lastActivityMap.set(row.loan_id, row.occurred_at)
+      }
+    }
+  }
+
+  // Build staleLoans using real human activity timestamps
+  for (const loan of activeLoans) {
+    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+      || loan.loan_name || 'Unknown'
+    const lastHumanTouch = lastActivityMap.get(loan.id)
+    const compareDate = lastHumanTouch ?? loan.updated_at
+    if (compareDate) {
+      const daysSince = Math.floor((now.getTime() - new Date(compareDate).getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSince >= 7) {
+        staleLoans.push({ id: loan.id, name: borrowerName, daysSinceActivity: daysSince })
       }
     }
   }
@@ -141,6 +153,17 @@ export default async function DashboardPage() {
   }))
 
   const scoredLoans = rankLoans(loansForScoring)
+
+  // ── Recent Applications (new loans in last 30 days) ───────────────────────
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const { data: recentApplications = [] } = await supabase
+    .from('loans')
+    .select('id, loan_name, borrower_first_name, borrower_last_name, loan_amount, status, loan_type, created_at, contact_id')
+    .eq('organization_id', organizationId)
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .not('status', 'in', '("Closed","Funded","Cancelled","Denied","Withdrawn")')
+    .order('created_at', { ascending: false })
+    .limit(10)
 
   // ── Activity feed ─────────────────────────────────────────────────────────
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -195,6 +218,7 @@ export default async function DashboardPage() {
       activityEntries={activityEntries}
       chartData={chartData}
       scoredLoans={scoredLoans}
+      recentApplications={recentApplications ?? []}
     />
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Search, Link2, X, Inbox, FileText, Sparkles } from 'lucide-react'
+import { Search, Link2, X, Inbox, FileText, Sparkles, User } from 'lucide-react'
 
 type UnmatchedEmail = {
   id: string
@@ -32,6 +32,11 @@ type LoanResult = {
   _suggested?: boolean
 }
 
+type AutoSuggestion = {
+  loan: LoanResult | null
+  contact: ContactResult | null
+}
+
 function fmtDate(s: string | null) {
   if (!s) return '—'
   const d = new Date(s)
@@ -41,16 +46,36 @@ function fmtDate(s: string | null) {
     d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
-// Extract a plausible name from an email subject line.
-// e.g. "Re: Preston Couch Introduction - 2621..." → "Preston Couch"
+// Loan-related keywords that indicate this email is about a specific file
+const LOAN_KEYWORDS = /loan|disclosure|document|appraisal|title|closing|close|funding|escrow|deed|application|underwriting|approval|commit/i
+
+// Extract a street address from a subject line.
+// Handles: "2621 Greatwood Trail", "2621 Greatwood Trail, Leander TX", "Couch | 2621 Greatwood Trail"
+function extractAddressFromSubject(subject: string | null): string {
+  if (!subject) return ''
+  const match = subject.match(/\b(\d{3,5}\s+[A-Za-z][A-Za-z\s]{2,30}(?:Trail|Dr|Drive|St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Way|Ct|Court|Ln|Lane|Circle|Cir|Place|Pl|Loop|Pkwy|Parkway))\b/i)
+  return match ? match[1].trim() : ''
+}
+
+// Extract a plausible borrower name from subject.
+// e.g. "Loan Disclosures| Couch | 2621..." → "Couch"
+// e.g. "Re: Kyle Burton Introduction" → "Kyle Burton"
 function extractNameFromSubject(subject: string | null): string {
   if (!subject) return ''
-  // Strip Re:/Fwd:/FW: prefixes
   const clean = subject.replace(/^(re:|fwd:|fw:)\s*/gi, '').trim()
-  // Look for "FirstName LastName" pattern — two consecutive capitalized words
-  const match = clean.match(/\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,20})\b/)
-  if (match) return `${match[1]} ${match[2]}`
+  // Two-word capitalized name
+  const twoWord = clean.match(/\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,20})\b/)
+  if (twoWord) return `${twoWord[1]} ${twoWord[2]}`
+  // Single capitalized word between pipes or after common keywords (surname only)
+  const singleAfterPipe = clean.match(/\|\s*([A-Z][a-z]{2,20})\s*\|/)
+  if (singleAfterPipe) return singleAfterPipe[1]
   return ''
+}
+
+// Determine if this email is loan-related (subject has address or loan keywords)
+function isLoanRelated(subject: string | null): boolean {
+  if (!subject) return false
+  return LOAN_KEYWORDS.test(subject) || !!extractAddressFromSubject(subject)
 }
 
 export default function UnmatchedEmailsPage() {
@@ -64,6 +89,9 @@ export default function UnmatchedEmailsPage() {
   const [loanResults, setLoanResults] = useState<LoanResult[]>([])
   const [searching, setSearching] = useState(false)
 
+  // Auto-suggestions: emailId → { loan, contact }
+  const [suggestions, setSuggestions] = useState<Map<string, AutoSuggestion>>(new Map())
+
   const fetchEmails = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -75,21 +103,109 @@ export default function UnmatchedEmailsPage() {
       .not('dismissed', 'eq', true)
       .order('occurred_at', { ascending: false })
       .limit(200)
-    setEmails((data ?? []) as UnmatchedEmail[])
+    const rows = (data ?? []) as UnmatchedEmail[]
+    setEmails(rows)
     setLoading(false)
+    // Run auto-matching in background after load
+    runAutoMatch(rows)
+  }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-match every email against loans + contacts using subject line analysis
+  const runAutoMatch = useCallback(async (rows: UnmatchedEmail[]) => {
+    const newSuggestions = new Map<string, AutoSuggestion>()
+
+    for (const email of rows) {
+      const address = extractAddressFromSubject(email.subject)
+      const name = extractNameFromSubject(email.subject)
+      let suggestedLoan: LoanResult | null = null
+      let suggestedContact: ContactResult | null = null
+
+      // 1. Try loan match by property address (highest confidence)
+      if (address) {
+        const { data: byAddress } = await supabase
+          .from('loans')
+          .select('id, loan_name, borrower_name, property_address, status')
+          .ilike('property_address', `%${address}%`)
+          .limit(1)
+        if (byAddress && byAddress.length > 0) {
+          suggestedLoan = { ...(byAddress[0] as LoanResult), _suggested: true }
+        }
+      }
+
+      // 2. Try loan match by borrower name (if no address match)
+      if (!suggestedLoan && name) {
+        const parts = name.split(' ')
+        const lastName = parts[parts.length - 1]
+        const { data: byBorrower } = await supabase
+          .from('loans')
+          .select('id, loan_name, borrower_name, property_address, status')
+          .ilike('borrower_name', `%${lastName}%`)
+          .not('status', 'in', '("Closed","Cancelled","Denied","Withdrawn","Funded")')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        if (byBorrower && byBorrower.length > 0) {
+          suggestedLoan = { ...(byBorrower[0] as LoanResult), _suggested: true }
+        }
+      }
+
+      // 3. Try contact match by sender email
+      if (email.from_address) {
+        const { data: byEmail } = await supabase
+          .from('contacts')
+          .select('id, first_name, last_name, email, contact_type')
+          .ilike('email', email.from_address)
+          .limit(1)
+        if (byEmail && byEmail.length > 0) {
+          suggestedContact = { ...(byEmail[0] as ContactResult), _suggested: true }
+        }
+      }
+
+      // 4. Try contact match by name from subject (if no email match)
+      if (!suggestedContact && name) {
+        const parts = name.split(' ')
+        const { data: byName } = await supabase
+          .from('contacts')
+          .select('id, first_name, last_name, email, contact_type')
+          .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
+          .limit(1)
+        if (byName && byName.length > 0) {
+          suggestedContact = { ...(byName[0] as ContactResult), _suggested: true }
+        }
+      }
+
+      if (suggestedLoan || suggestedContact) {
+        newSuggestions.set(email.id, { loan: suggestedLoan, contact: suggestedContact })
+      }
+    }
+
+    setSuggestions(newSuggestions)
   }, [supabase])
 
   useEffect(() => { fetchEmails() }, [fetchEmails])
 
-  // When the link panel opens, auto-suggest by sender email + subject name
+  // Open the link panel, defaulting to LOAN mode for loan-related emails
   const openLinkPanel = useCallback(async (email: UnmatchedEmail) => {
     setLinkingId(email.id)
-    setLinkMode('contact')
+    const defaultMode = isLoanRelated(email.subject) ? 'loan' : 'contact'
+    setLinkMode(defaultMode)
     setSearchQuery('')
     setSearchResults([])
     setLoanResults([])
 
-    // Try to find a contact by exact sender email address
+    // Pre-populate with auto-suggestions if available
+    const suggestion = suggestions.get(email.id)
+    if (suggestion?.loan) {
+      setLoanResults([suggestion.loan])
+      setLinkMode('loan')
+      return
+    }
+    if (suggestion?.contact) {
+      setSearchResults([suggestion.contact])
+      setLinkMode('contact')
+      return
+    }
+
+    // Fallback: try sender email for contact match
     if (email.from_address) {
       setSearching(true)
       const { data: byEmail } = await supabase
@@ -97,30 +213,39 @@ export default function UnmatchedEmailsPage() {
         .select('id, first_name, last_name, email, contact_type')
         .ilike('email', email.from_address)
         .limit(5)
-
       if (byEmail && byEmail.length > 0) {
         setSearchResults((byEmail as ContactResult[]).map(c => ({ ...c, _suggested: true })))
+        setLinkMode('contact')
         setSearching(false)
         return
       }
       setSearching(false)
     }
 
-    // Fallback: extract a name from subject and pre-search
+    // Fallback: name-based search
     const name = extractNameFromSubject(email.subject)
     if (name) {
       setSearchQuery(name)
       setSearching(true)
       const parts = name.split(' ')
-      const { data: byName } = await supabase
-        .from('contacts')
-        .select('id, first_name, last_name, email, contact_type')
-        .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
-        .limit(8)
-      setSearchResults((byName ?? []) as ContactResult[])
+      if (defaultMode === 'loan') {
+        const { data: byBorrower } = await supabase
+          .from('loans')
+          .select('id, loan_name, borrower_name, property_address, status')
+          .ilike('borrower_name', `%${parts[parts.length - 1]}%`)
+          .limit(8)
+        setLoanResults((byBorrower ?? []) as LoanResult[])
+      } else {
+        const { data: byName } = await supabase
+          .from('contacts')
+          .select('id, first_name, last_name, email, contact_type')
+          .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
+          .limit(8)
+        setSearchResults((byName ?? []) as ContactResult[])
+      }
       setSearching(false)
     }
-  }, [supabase])
+  }, [supabase, suggestions])
 
   const searchContacts = async (query: string) => {
     if (!query.trim()) { setSearchResults([]); return }
@@ -143,7 +268,6 @@ export default function UnmatchedEmailsPage() {
       .from('loans')
       .select('id, loan_name, borrower_name, property_address, status')
       .or(`loan_name.ilike.%${q}%,borrower_name.ilike.%${q}%,property_address.ilike.%${q}%`)
-      .not('status', 'in', '("Closed","Cancelled","Denied","Withdrawn")')
       .limit(10)
     setLoanResults((data ?? []) as LoanResult[])
     setSearching(false)
@@ -164,6 +288,7 @@ export default function UnmatchedEmailsPage() {
     setLinkingId(null)
     setSearchQuery('')
     setSearchResults([])
+    setSuggestions(prev => { const m = new Map(prev); m.delete(email.id); return m })
     setEmails(prev => prev.filter(e => e.id !== email.id))
   }
 
@@ -178,6 +303,7 @@ export default function UnmatchedEmailsPage() {
     setLinkingId(null)
     setSearchQuery('')
     setLoanResults([])
+    setSuggestions(prev => { const m = new Map(prev); m.delete(email.id); return m })
     setEmails(prev => prev.filter(e => e.id !== email.id))
   }
 
@@ -186,23 +312,24 @@ export default function UnmatchedEmailsPage() {
       .from('activity_log')
       .update({ dismissed: true })
       .eq('id', emailId)
+    setSuggestions(prev => { const m = new Map(prev); m.delete(emailId); return m })
     setEmails(prev => prev.filter(e => e.id !== emailId))
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 1000 }}>
+    <div style={{ padding: '32px 40px', maxWidth: 1100 }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{
           fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700,
           letterSpacing: '0.08em', color: 'var(--fg)', margin: 0,
         }}>
-          UNMATCHED EMAILS
+          INBOX REVIEW
         </h1>
         <p style={{
           fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)',
           marginTop: 4,
         }}>
-          Inbound emails from unknown senders that look transactional. Link them to a contact or dismiss.
+          Unmatched emails — auto-matched by address & name where possible. Click Link to confirm or reassign.
         </p>
       </div>
 
@@ -226,11 +353,11 @@ export default function UnmatchedEmailsPage() {
         }}>
           {/* Table header */}
           <div style={{
-            display: 'grid', gridTemplateColumns: '200px 1fr 140px 100px',
+            display: 'grid', gridTemplateColumns: '200px 1fr 180px 140px 120px',
             padding: '10px 16px', borderBottom: '1px solid var(--border)',
             background: 'var(--surface)',
           }}>
-            {['FROM', 'SUBJECT', 'RECEIVED', ''].map(h => (
+            {['FROM', 'SUBJECT', 'AUTO-MATCH', 'RECEIVED', ''].map(h => (
               <span key={h} style={{
                 fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)',
                 letterSpacing: '0.1em', fontWeight: 600,
@@ -243,13 +370,15 @@ export default function UnmatchedEmailsPage() {
           {/* Rows */}
           {emails.map(email => {
             const fromName = (email.metadata?.from_name as string) || null
+            const suggestion = suggestions.get(email.id)
             return (
               <div key={email.id} style={{ position: 'relative' }}>
                 <div style={{
-                  display: 'grid', gridTemplateColumns: '200px 1fr 140px 100px',
+                  display: 'grid', gridTemplateColumns: '200px 1fr 180px 140px 120px',
                   padding: '12px 16px', borderBottom: '1px solid var(--border)',
                   alignItems: 'center',
                 }}>
+                  {/* FROM */}
                   <div style={{ overflow: 'hidden' }}>
                     {fromName && (
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -261,6 +390,7 @@ export default function UnmatchedEmailsPage() {
                     </div>
                   </div>
 
+                  {/* SUBJECT */}
                   <div style={{ overflow: 'hidden', paddingRight: 12 }}>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {email.subject || '\u2014'}
@@ -272,10 +402,59 @@ export default function UnmatchedEmailsPage() {
                     )}
                   </div>
 
+                  {/* AUTO-MATCH */}
+                  <div style={{ overflow: 'hidden' }}>
+                    {suggestion?.loan ? (
+                      <button
+                        onClick={() => linkToLoan(email, suggestion.loan!.id)}
+                        title={`Link to loan: ${suggestion.loan.borrower_name || suggestion.loan.loan_name}`}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                          padding: '4px 8px', borderRadius: 4, cursor: 'pointer',
+                          background: 'rgba(99,102,241,0.12)', color: '#818CF8',
+                          border: '1px solid rgba(99,102,241,0.3)',
+                          overflow: 'hidden', maxWidth: '100%',
+                        }}
+                      >
+                        <FileText size={10} style={{ flexShrink: 0 }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {suggestion.loan.borrower_name || suggestion.loan.loan_name}
+                        </span>
+                        <Sparkles size={9} style={{ flexShrink: 0 }} />
+                      </button>
+                    ) : suggestion?.contact ? (
+                      <button
+                        onClick={() => linkToContact(email, suggestion.contact!.id)}
+                        title={`Link to contact: ${[suggestion.contact.first_name, suggestion.contact.last_name].filter(Boolean).join(' ')}`}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                          padding: '4px 8px', borderRadius: 4, cursor: 'pointer',
+                          background: 'rgba(201,168,76,0.1)', color: '#C9A84C',
+                          border: '1px solid rgba(201,168,76,0.3)',
+                          overflow: 'hidden', maxWidth: '100%',
+                        }}
+                      >
+                        <User size={10} style={{ flexShrink: 0 }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {[suggestion.contact.first_name, suggestion.contact.last_name].filter(Boolean).join(' ')}
+                        </span>
+                        <Sparkles size={9} style={{ flexShrink: 0 }} />
+                      </button>
+                    ) : suggestions.size > 0 ? (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>—</span>
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>scanning…</span>
+                    )}
+                  </div>
+
+                  {/* RECEIVED */}
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
                     {fmtDate(email.occurred_at || email.created_at)}
                   </span>
 
+                  {/* ACTIONS */}
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
                       onClick={() => openLinkPanel(email)}
@@ -309,14 +488,14 @@ export default function UnmatchedEmailsPage() {
                 {linkingId === email.id && (
                   <div style={{
                     position: 'absolute', top: 0, right: 0, zIndex: 10,
-                    width: 360, background: 'var(--surface)',
+                    width: 380, background: 'var(--surface)',
                     border: '1px solid var(--border)', borderRadius: 6,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                     padding: 16,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        {(['contact', 'loan'] as const).map(mode => (
+                        {(['loan', 'contact'] as const).map(mode => (
                           <button
                             key={mode}
                             onClick={() => { setLinkMode(mode); setSearchQuery(''); setSearchResults([]); setLoanResults([]) }}
@@ -328,7 +507,7 @@ export default function UnmatchedEmailsPage() {
                               border: `1px solid ${linkMode === mode ? 'rgba(201,168,76,0.4)' : 'var(--border)'}`,
                             }}
                           >
-                            {mode === 'contact' ? 'CONTACT' : 'LOAN'}
+                            {mode === 'loan' ? 'LOAN' : 'CONTACT'}
                           </button>
                         ))}
                       </div>
@@ -341,12 +520,12 @@ export default function UnmatchedEmailsPage() {
                       <Search size={13} style={{ position: 'absolute', left: 8, top: 8, color: 'var(--muted)' }} />
                       <input
                         autoFocus
-                        placeholder={linkMode === 'contact' ? 'Search by name or email...' : 'Search by borrower, address, loan name...'}
+                        placeholder={linkMode === 'loan' ? 'Search by borrower, address, loan name...' : 'Search by name or email...'}
                         value={searchQuery}
                         onChange={e => {
                           setSearchQuery(e.target.value)
-                          if (linkMode === 'contact') searchContacts(e.target.value)
-                          else searchLoans(e.target.value)
+                          if (linkMode === 'loan') searchLoans(e.target.value)
+                          else searchContacts(e.target.value)
                         }}
                         style={{
                           width: '100%', boxSizing: 'border-box',
@@ -361,6 +540,45 @@ export default function UnmatchedEmailsPage() {
                     {searching && (
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>Searching...</p>
                     )}
+
+                    {linkMode === 'loan' && loanResults.map(loan => (
+                      <button
+                        key={loan.id}
+                        onClick={() => linkToLoan(email, loan.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          width: '100%', textAlign: 'left',
+                          padding: '8px 10px', borderRadius: 4, cursor: 'pointer',
+                          background: 'transparent', border: 'none',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.08)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                      >
+                        <div style={{
+                          width: 28, height: 28, borderRadius: 4,
+                          background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <FileText size={12} color="#818CF8" />
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {loan.borrower_name || loan.loan_name || '\u2014'}
+                            {loan._suggested && (
+                              <span style={{ marginLeft: 6, fontSize: 9, color: '#818CF8', letterSpacing: '0.08em' }}>
+                                <Sparkles size={9} style={{ display: 'inline', marginRight: 2 }} />SUGGESTED
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {loan.property_address || loan.loan_name || '\u2014'}
+                            {loan.status && <span style={{ marginLeft: 6, color: '#818CF8' }}>{loan.status}</span>}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
 
                     {linkMode === 'contact' && searchResults.map(c => (
                       <button
@@ -401,50 +619,11 @@ export default function UnmatchedEmailsPage() {
                       </button>
                     ))}
 
-                    {linkMode === 'loan' && loanResults.map(loan => (
-                      <button
-                        key={loan.id}
-                        onClick={() => linkToLoan(email, loan.id)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          width: '100%', textAlign: 'left',
-                          padding: '8px 10px', borderRadius: 4, cursor: 'pointer',
-                          background: 'transparent', border: 'none',
-                          fontFamily: 'var(--font-mono)',
-                        }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.08)' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-                      >
-                        <div style={{
-                          width: 28, height: 28, borderRadius: 4,
-                          background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <FileText size={12} color="#818CF8" />
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {loan.borrower_name || loan.loan_name || '\u2014'}
-                            {loan._suggested && (
-                              <span style={{ marginLeft: 6, fontSize: 9, color: '#818CF8', letterSpacing: '0.08em' }}>
-                                <Sparkles size={9} style={{ display: 'inline', marginRight: 2 }} />SUGGESTED
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {loan.property_address || loan.loan_name || '\u2014'}
-                            {loan.status && <span style={{ marginLeft: 6, color: '#818CF8' }}>{loan.status}</span>}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-
+                    {searchQuery && !searching && linkMode === 'loan' && loanResults.length === 0 && (
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>No loans found</p>
+                    )}
                     {searchQuery && !searching && linkMode === 'contact' && searchResults.length === 0 && (
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>No contacts found</p>
-                    )}
-                    {searchQuery && !searching && linkMode === 'loan' && loanResults.length === 0 && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', padding: '8px 0' }}>No active loans found</p>
                     )}
                   </div>
                 )}

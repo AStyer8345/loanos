@@ -36,6 +36,12 @@ interface ActivityEntry {
 }
 interface ChartPoint { month: string; loans: number; volume: number; commission: number }
 
+interface RecentApplication {
+  id: string; loan_name: string | null; borrower_first_name: string | null
+  borrower_last_name: string | null; loan_amount: number | null
+  status: string | null; loan_type: string | null; created_at: string; contact_id: string | null
+}
+
 interface DashboardClientProps {
   totalActive: number; totalActiveVolume: number; totalActiveCommission: number
   commissionThisMonth: number; commissionYTD: number; projectedCommission: number
@@ -46,6 +52,7 @@ interface DashboardClientProps {
   recentLoans: LoanRow[]; activityEntries: ActivityEntry[]
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
+  recentApplications: RecentApplication[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -226,6 +233,42 @@ export default function DashboardClient(props: DashboardClientProps) {
               </div>
             )}
           </div>
+
+          {/* Recent Applications */}
+          {props.recentApplications.length > 0 && (
+            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-emerald-500 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <FileText size={14} className="text-emerald-400" />
+                  <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">New Applications</span>
+                  <span className="text-[10px] font-mono text-zinc-600">last 30 days</span>
+                </div>
+                <Link href="/dashboard/loans?filter=new_apps" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                  View all <ArrowRight size={9} />
+                </Link>
+              </div>
+              <div className="space-y-1">
+                {props.recentApplications.map(app => {
+                  const name = [app.borrower_first_name, app.borrower_last_name].filter(Boolean).join(' ') || app.loan_name || '(unnamed)'
+                  const daysAgo = Math.floor((Date.now() - new Date(app.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                  return (
+                    <Link
+                      key={app.id}
+                      href={`/dashboard/loans/${app.id}`}
+                      className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors"
+                    >
+                      <span className="text-zinc-200 truncate">{name}</span>
+                      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                        {app.loan_amount ? <span className="text-[#C9A84C]">{fmtK(app.loan_amount)}</span> : null}
+                        {app.loan_type && <span className="text-zinc-500">{app.loan_type}</span>}
+                        <span className="text-emerald-400">{daysAgo === 0 ? 'today' : `${daysAgo}d ago`}</span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Daily Schedule */}
           <DailyScheduleWidget />

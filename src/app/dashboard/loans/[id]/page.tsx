@@ -859,7 +859,7 @@ function PipelineProgressBar({ status }: { status: string | null }) {
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, activity: _activity, contact, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string
@@ -897,7 +897,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, contact, onRefres
         {/* ── Col 2 — Execution (primary focus) ── */}
         <div className="space-y-6">
           <MilestoneTimeline loan={loan} />
-          <LoanTodoList loanId={loanId} loan={loan} />
+          <LoanTodoList loanId={loanId} />
         </div>
 
         {/* ── Col 3 — The Pulse ── */}
@@ -1151,7 +1151,7 @@ function getDefaultTodos(): TodoItem[] {
   return items.map((text, i) => ({ id: String(i), text, done: false }))
 }
 
-function LoanTodoList({ loanId, loan: _loan }: { loanId: string; loan: Loan }) {
+function LoanTodoList({ loanId }: { loanId: string }) {
   const storageKey = `loanos_todos_${loanId}`
   const [todos, setTodos] = useState<TodoItem[]>(() => {
     try {

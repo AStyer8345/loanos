@@ -1,6 +1,13 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, rectSortingStrategy, useSortable, arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -9,6 +16,7 @@ import { useParams } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
+  GripVertical, EyeOff, Eye, Settings2,
 } from 'lucide-react'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
@@ -559,57 +567,57 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Meta chips — unified row */}
-          <div className="flex flex-wrap gap-8 mt-3 pb-4">
+          {/* Meta chips — single row, tight spacing */}
+          <div className="flex flex-nowrap gap-2 mt-3 pb-4 overflow-x-auto">
 
             {/* Loan Amount — gold highlight */}
             {loan.loan_amount && (
-              <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Loan Amount</p>
-                <p className="text-base font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.loan_amount)}</p>
+                <p className="text-[16px] font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.loan_amount)}</p>
               </div>
             )}
 
             {productLabel && (
-              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Product</p>
-                <p className="text-base font-mono font-semibold text-zinc-100">{productLabel}</p>
+                <p className="text-[16px] font-mono font-semibold text-zinc-100">{productLabel}</p>
               </div>
             )}
 
             {/* Rate — gold highlight */}
             {loan.interest_rate && (
-              <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate</p>
-                <p className="text-base font-mono font-semibold text-[#C9A84C]">{fmtPct(loan.interest_rate)}</p>
+                <p className="text-[16px] font-mono font-semibold text-[#C9A84C]">{fmtPct(loan.interest_rate)}</p>
               </div>
             )}
 
             {loan.ltv && (
-              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">LTV</p>
-                <p className="text-base font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
+                <p className="text-[16px] font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
               </div>
             )}
 
             {(loan.front_end_dti || loan.back_end_dti) && (
-              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">DTI</p>
-                <p className="text-base font-mono font-semibold text-zinc-100">
+                <p className="text-[16px] font-mono font-semibold text-zinc-100">
                   {fmtPct(loan.front_end_dti)} / {fmtPct(loan.back_end_dti)}
                 </p>
               </div>
             )}
 
             {loan.referring_agent_name && (
-              <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Realtor</p>
-                <p className="text-base font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
+                <p className="text-[16px] font-mono font-semibold text-zinc-100">{loan.referring_agent_name}</p>
               </div>
             )}
 
             {/* Est. Close Date — editable */}
-            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
               <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Est. Close</p>
               {editingHeader === 'estimated_closing_date' ? (
                 <input
@@ -619,11 +627,11 @@ export default function LoanDetailPage() {
                   onChange={e => setHeaderInput(e.target.value)}
                   onBlur={() => saveHeaderField('estimated_closing_date', headerInput || null)}
                   onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                  className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                 />
               ) : (
                 <p
-                  className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                   onClick={() => { setHeaderInput(loan.estimated_closing_date ?? ''); setEditingHeader('estimated_closing_date') }}
                 >
                   {fmtDate(loan.estimated_closing_date)}
@@ -632,7 +640,7 @@ export default function LoanDetailPage() {
             </div>
 
             {/* Rate Lock Date — editable */}
-            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
               <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate Lock Date</p>
               {editingHeader === 'rate_lock_date' ? (
                 <input
@@ -642,11 +650,11 @@ export default function LoanDetailPage() {
                   onChange={e => setHeaderInput(e.target.value)}
                   onBlur={() => saveHeaderField('rate_lock_date', headerInput || null)}
                   onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                  className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                 />
               ) : (
                 <p
-                  className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                  className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                   onClick={() => { setHeaderInput(loan.rate_lock_date ?? ''); setEditingHeader('rate_lock_date') }}
                 >
                   {fmtDate(loan.rate_lock_date)}
@@ -655,7 +663,7 @@ export default function LoanDetailPage() {
             </div>
 
             {/* Lock Expiry — editable */}
-            <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
               <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Lock Expiry</p>
               <div className="flex items-center gap-2">
                 {editingHeader === 'rate_lock_expiration' ? (
@@ -666,11 +674,11 @@ export default function LoanDetailPage() {
                     onChange={e => setHeaderInput(e.target.value)}
                     onBlur={() => saveHeaderField('rate_lock_expiration', headerInput || null)}
                     onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                    className="w-36 text-base font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+                    className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
                   />
                 ) : (
                   <p
-                    className="text-base font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                    className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
                     onClick={() => { setHeaderInput(loan.rate_lock_expiration ?? ''); setEditingHeader('rate_lock_expiration') }}
                   >
                     {fmtDate(loan.rate_lock_expiration)}
@@ -691,20 +699,23 @@ export default function LoanDetailPage() {
             {/* Days Locked */}
             {(() => {
               if (!loan.rate_lock_expiration) return (
-                <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
-                  <p className="text-base font-mono font-semibold text-zinc-500">—</p>
+                  <p className="text-[16px] font-mono font-semibold text-zinc-500">—</p>
                 </div>
               )
+              const lockStart = loan.rate_lock_date ? new Date(loan.rate_lock_date + 'T00:00:00') : null
               const today = new Date(); today.setHours(0,0,0,0)
+              const daysLocked = lockStart ? Math.max(0, Math.floor((today.getTime() - lockStart.getTime()) / 86400000)) : null
               const exp = new Date(loan.rate_lock_expiration + 'T00:00:00')
-              const days = Math.ceil((exp.getTime() - today.getTime()) / 86400000)
-              const expired = days < 0
+              const daysUntilExpiry = Math.ceil((exp.getTime() - today.getTime()) / 86400000)
+              const expired = daysUntilExpiry < 0
+              const display = daysLocked != null ? `${daysLocked} days` : expired ? `${Math.abs(daysUntilExpiry)} days ago` : `${daysUntilExpiry} days`
               return (
-                <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
+                <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
-                  <p className={`text-base font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
-                    {expired ? `${Math.abs(days)} days ago` : `${days} days`}
+                  <p className={`text-[16px] font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
+                    {display}
                   </p>
                 </div>
               )
@@ -760,47 +771,39 @@ export default function LoanDetailPage() {
   )
 }
 
-// ── Pipeline progress bar ─────────────────────────────────────────────────────
+// ── Pipeline stepped milestone pills ───────────────────────────────────────────
 
 function PipelineProgressBar({ status }: { status: string | null }) {
   const currentIdx = getStageIndex(status)
 
   return (
-    <div className="py-3">
-      <div className="flex items-center">
-        {PIPELINE_STAGES.map((stage, i) => {
-          const done = i < currentIdx
-          const active = i === currentIdx
-          return (
-            <div key={stage} className="flex items-center" style={{ flex: i < PIPELINE_STAGES.length - 1 ? '1' : 'none' }}>
-              <div className="flex flex-col items-center gap-1.5">
-                <div
-                  className="w-2 h-2 rounded-full flex-shrink-0 transition-all duration-300"
-                  style={
-                    active
-                      ? { background: '#C9A84C', boxShadow: '0 0 8px rgba(201,168,76,0.55)' }
-                      : done
-                      ? { background: 'rgba(201,168,76,0.5)' }
-                      : { background: '#3f3f46' }
-                  }
-                />
-                <span
-                  className="text-[9px] font-mono whitespace-nowrap"
-                  style={{ color: active ? '#C9A84C' : done ? '#71717a' : '#52525b', fontWeight: active ? 700 : 400 }}
-                >
-                  {stage}
-                </span>
-              </div>
-              {i < PIPELINE_STAGES.length - 1 && (
-                <div
-                  className="h-px flex-1 mx-1 mb-3"
-                  style={{ background: done ? 'rgba(201,168,76,0.4)' : '#3f3f46' }}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
+    <div className="flex items-center gap-0 py-2">
+      {PIPELINE_STAGES.map((stage, i) => {
+        const done = i < currentIdx
+        const active = i === currentIdx
+        const isLast = i === PIPELINE_STAGES.length - 1
+        return (
+          <div key={stage} className="flex items-center">
+            <span
+              className={`inline-flex items-center px-2.5 py-1 text-[10px] font-mono font-medium rounded-sm transition-all duration-200 ${
+                active
+                  ? 'bg-[#C9A84C]/20 text-[#C9A84C] border border-[#C9A84C]/50'
+                  : done
+                  ? 'bg-[#C9A84C]/10 text-zinc-400 border border-[#C9A84C]/20'
+                  : 'bg-zinc-800/40 text-zinc-600 border border-zinc-700/50'
+              }`}
+            >
+              {stage}
+            </span>
+            {!isLast && (
+              <ChevronRight
+                size={10}
+                className={`mx-0.5 shrink-0 ${done ? 'text-[#C9A84C]/40' : 'text-zinc-700'}`}
+              />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -1095,85 +1098,234 @@ function PartiesCard({
   )
 }
 
+// ── Card layout constants ──────────────────────────────────────────────────────
+
+const DEFAULT_CARD_ORDER = ['borrower', 'loan-terms', 'property', 'key-dates', 'origination', 'parties']
+const CARD_ORDER_KEY = 'loanos_card_order'
+const CARD_HIDDEN_KEY = 'loanos_card_hidden'
+
+// ── SortableCardWrapper ────────────────────────────────────────────────────────
+
+function SortableCardWrapper({
+  id, editLayout, isHidden, onToggleHide, children,
+}: {
+  id: string
+  editLayout: boolean
+  isHidden: boolean
+  onToggleHide: () => void
+  children: React.ReactNode
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : isHidden ? 0.35 : 1,
+        position: 'relative',
+      }}
+    >
+      {editLayout && (
+        <div
+          style={{
+            position: 'absolute', top: 0, left: 0, right: 0,
+            height: 37, // matches card header height (py-2.5 + text)
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            paddingLeft: 10, paddingRight: 10, zIndex: 10,
+          }}
+        >
+          {/* Drag handle */}
+          <button
+            {...listeners} {...attributes}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab', color: '#71717a', padding: 2, lineHeight: 0 }}
+            className="hover:text-zinc-300 transition-colors"
+            title="Drag to reorder"
+          >
+            <GripVertical size={14} />
+          </button>
+          {/* Hide / show toggle */}
+          <button
+            onClick={onToggleHide}
+            style={{ color: isHidden ? '#C9A84C' : '#71717a', padding: 2, lineHeight: 0 }}
+            className="hover:text-zinc-300 transition-colors"
+            title={isHidden ? 'Show card' : 'Hide card'}
+          >
+            {isHidden ? <Eye size={13} /> : <EyeOff size={13} />}
+          </button>
+        </div>
+      )}
+      {children}
+    </div>
+  )
+}
+
+// ── LoanInfoGrid ───────────────────────────────────────────────────────────────
+
 function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
   loan: Loan
   loanId: string
   onSave: (field: string, value: string | number | null) => Promise<void>
   onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
 }) {
-  void loanId; void onSave; void onSaveMultiple // available for future inline editing
+  void loanId; void onSave; void onSaveMultiple
+
+  const [cardOrder, setCardOrder] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(CARD_ORDER_KEY) ?? 'null') ?? DEFAULT_CARD_ORDER }
+    catch { return DEFAULT_CARD_ORDER }
+  })
+
+  const [hiddenCards, setHiddenCards] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(CARD_HIDDEN_KEY) ?? '[]') as string[]) }
+    catch { return new Set() }
+  })
+
+  const [editLayout, setEditLayout] = useState(false)
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIdx = cardOrder.indexOf(active.id as string)
+    const newIdx = cardOrder.indexOf(over.id as string)
+    const next = arrayMove(cardOrder, oldIdx, newIdx)
+    setCardOrder(next)
+    localStorage.setItem(CARD_ORDER_KEY, JSON.stringify(next))
+  }
+
+  function toggleHidden(id: string) {
+    const next = new Set(hiddenCards)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setHiddenCards(next)
+    localStorage.setItem(CARD_HIDDEN_KEY, JSON.stringify([...next]))
+  }
+
+  function resetLayout() {
+    setCardOrder(DEFAULT_CARD_ORDER)
+    setHiddenCards(new Set())
+    localStorage.removeItem(CARD_ORDER_KEY)
+    localStorage.removeItem(CARD_HIDDEN_KEY)
+  }
 
   const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
-
   const downPayment = loan.down_payment
     ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
     : null
 
+  function renderCardContent(id: string) {
+    switch (id) {
+      case 'borrower':
+        return <InfoCard title="Borrower" fields={[
+          { label: 'Name',          value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
+          { label: 'Co-Borrower',   value: loan.co_borrower_name },
+          { label: 'Email',         value: <EmailLink email={loan.borrower_email} /> },
+          { label: 'Phone',         value: <PhoneLink phone={loan.borrower_phone} /> },
+          { label: 'Co-Borr Email', value: <EmailLink email={loan.co_borrower_email} /> },
+          { label: 'Co-Borr Phone', value: <PhoneLink phone={loan.co_borrower_phone} /> },
+        ]} />
+      case 'loan-terms':
+        return <InfoCard title="Loan Terms" fields={[
+          { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
+          { label: 'Loan Type',   value: loan.loan_type },
+          { label: 'Program',     value: loan.loan_program },
+          { label: 'Rate / APR',  value: loan.interest_rate ? `${fmtPct(loan.interest_rate)}${loan.apr ? ` / ${fmtPct(loan.apr)}` : ''}` : null },
+          { label: 'Term',        value: loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : null },
+          { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
+        ]} />
+      case 'property':
+        return <InfoCard title="Property" fields={[
+          { label: 'Address',        value: fullAddress || loan.property_address },
+          { label: 'County',         value: loan.property_county },
+          { label: 'Type',           value: loan.property_type },
+          { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
+          { label: 'Appraised',      value: fmtCurrency(loan.appraised_value) },
+          { label: 'Down Payment',   value: downPayment },
+          { label: 'LTV',            value: fmtPct(loan.ltv) },
+        ]} />
+      case 'key-dates':
+        return <InfoCard title="Key Dates" fields={[
+          { label: 'Application',  value: fmtDate(loan.application_date) },
+          { label: 'Est. Close',   value: fmtDate(loan.estimated_closing_date) },
+          { label: 'Rate Lock',    value: fmtDate(loan.rate_lock_date) },
+          { label: 'Lock Expiry',  value: fmtDate(loan.rate_lock_expiration) },
+          { label: 'Actual Close', value: fmtDate(loan.closing_date) },
+        ]} />
+      case 'origination':
+        return <InfoCard title="Origination" fields={[
+          { label: 'AUS Result',              value: loan.aus_result || loan.milestone },
+          { label: 'Originator Compensation', value: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : null },
+          { label: 'Credit Score',            value: loan.credit_score != null ? String(loan.credit_score) : null },
+          { label: 'DTI (F/B)',               value: (loan.front_end_dti || loan.back_end_dti) ? `${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}` : null },
+          { label: 'Lender',                  value: loan.lender_name },
+        ]} />
+      case 'parties':
+        return <PartiesCard
+          buyerName={loan.buyers_agent_name || loan.buyer_agent_name}
+          buyerContactId={loan.buyer_agent_contact_id}
+          buyerPhone={loan.buyers_agent_phone}
+          buyerEmail={loan.buyers_agent_email || loan.buyer_agent_email}
+          listingName={loan.listing_agent_name}
+          listingContactId={loan.listing_agent_contact_id}
+          listingPhone={loan.listing_agent_phone}
+          listingEmail={loan.listing_agent_email}
+          titleCompany={loan.title_company}
+          titleContact={loan.title_contact}
+          titleEmail={loan.title_email}
+        />
+      default:
+        return null
+    }
+  }
+
+  const visibleInEditMode = cardOrder // show all cards (dimmed if hidden) when editing
+  const visibleNormal = cardOrder.filter(id => !hiddenCards.has(id))
+  const displayOrder = editLayout ? visibleInEditMode : visibleNormal
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {/* Card 1 — Borrower */}
-      <InfoCard title="Borrower" fields={[
-        { label: 'Name',        value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
-        { label: 'Co-Borrower', value: loan.co_borrower_name },
-        { label: 'Email',       value: <EmailLink email={loan.borrower_email} /> },
-        { label: 'Phone',       value: <PhoneLink phone={loan.borrower_phone} /> },
-        { label: 'Co-Borr Email', value: <EmailLink email={loan.co_borrower_email} /> },
-        { label: 'Co-Borr Phone', value: <PhoneLink phone={loan.co_borrower_phone} /> },
-      ]} />
+    <div>
+      {/* Layout controls */}
+      <div className="flex items-center justify-end gap-3 mb-3">
+        {editLayout && hiddenCards.size > 0 && (
+          <button
+            onClick={resetLayout}
+            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors"
+          >
+            Reset
+          </button>
+        )}
+        <button
+          onClick={() => setEditLayout(prev => !prev)}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border transition-colors ${
+            editLayout
+              ? 'border-[#C9A84C] text-[#C9A84C] bg-[#C9A84C]/10'
+              : 'border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-500'
+          }`}
+        >
+          <Settings2 size={11} />
+          {editLayout ? 'Done' : 'Edit layout'}
+        </button>
+      </div>
 
-      {/* Card 2 — Loan Terms */}
-      <InfoCard title="Loan Terms" fields={[
-        { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
-        { label: 'Loan Type',   value: loan.loan_type },
-        { label: 'Program',     value: loan.loan_program },
-        { label: 'Rate / APR',  value: loan.interest_rate ? `${fmtPct(loan.interest_rate)}${loan.apr ? ` / ${fmtPct(loan.apr)}` : ''}` : null },
-        { label: 'Term',        value: loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : null },
-        { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
-      ]} />
-
-      {/* Card 3 — Property */}
-      <InfoCard title="Property" fields={[
-        { label: 'Address',       value: fullAddress || loan.property_address },
-        { label: 'County',        value: loan.property_county },
-        { label: 'Type',          value: loan.property_type },
-        { label: 'Purchase Price',value: fmtCurrency(loan.purchase_price) },
-        { label: 'Appraised',     value: fmtCurrency(loan.appraised_value) },
-        { label: 'Down Payment',  value: downPayment },
-        { label: 'LTV',           value: fmtPct(loan.ltv) },
-      ]} />
-
-      {/* Card 4 — Key Dates */}
-      <InfoCard title="Key Dates" fields={[
-        { label: 'Application',  value: fmtDate(loan.application_date) },
-        { label: 'Est. Close',   value: fmtDate(loan.estimated_closing_date) },
-        { label: 'Rate Lock',    value: fmtDate(loan.rate_lock_date) },
-        { label: 'Lock Expiry',  value: fmtDate(loan.rate_lock_expiration) },
-        { label: 'Actual Close', value: fmtDate(loan.closing_date) },
-      ]} />
-
-      {/* Card 5 — Origination */}
-      <InfoCard title="Origination" fields={[
-        { label: 'AUS Result',            value: loan.aus_result || loan.milestone },
-        { label: 'Originator Compensation', value: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : null },
-        { label: 'Credit Score',          value: loan.credit_score != null ? String(loan.credit_score) : null },
-        { label: 'DTI (F/B)',             value: (loan.front_end_dti || loan.back_end_dti) ? `${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}` : null },
-        { label: 'Lender',                value: loan.lender_name },
-      ]} />
-
-      {/* Card 6 — Parties */}
-      <PartiesCard
-        buyerName={loan.buyers_agent_name || loan.buyer_agent_name}
-        buyerContactId={loan.buyer_agent_contact_id}
-        buyerPhone={loan.buyers_agent_phone}
-        buyerEmail={loan.buyers_agent_email || loan.buyer_agent_email}
-        listingName={loan.listing_agent_name}
-        listingContactId={loan.listing_agent_contact_id}
-        listingPhone={loan.listing_agent_phone}
-        listingEmail={loan.listing_agent_email}
-        titleCompany={loan.title_company}
-        titleContact={loan.title_contact}
-        titleEmail={loan.title_email}
-      />
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={cardOrder} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {displayOrder.map(id => (
+              <SortableCardWrapper
+                key={id}
+                id={id}
+                editLayout={editLayout}
+                isHidden={hiddenCards.has(id)}
+                onToggleHide={() => toggleHidden(id)}
+              >
+                {renderCardContent(id)}
+              </SortableCardWrapper>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   )
 }

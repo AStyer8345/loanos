@@ -50,7 +50,7 @@ export default function ActivityFeed() {
       .select('id, created_at, action, entity_type, metadata, summary, contact_id, loan_id')
       .order('created_at', { ascending: false })
       .limit(50)
-    setEntries(data ?? [])
+    setEntries((data ?? []) as ActivityEntry[])
     setLoading(false)
   }, [supabase])
 

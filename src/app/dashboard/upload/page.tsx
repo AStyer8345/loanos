@@ -16,7 +16,7 @@ export default async function UploadPage() {
 
   const { data: loans } = await supabase
     .from('loans')
-    .select('id, loan_number, property_address, contacts(first_name, last_name)')
+    .select('id, loan_number, property_address, contacts!contact_id(first_name, last_name)')
     .order('created_at', { ascending: false })
 
   return (

@@ -28,7 +28,8 @@ export async function logSecurityEvent({
 }): Promise<void> {
   try {
     const supabase = createServiceClient()
-    await supabase.from('security_audit_log').insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('security_audit_log') as any).insert({
       event_type: eventType,
       actor_id: actorId ?? null,
       actor_email: actorEmail ?? null,

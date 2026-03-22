@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
+import type { Database } from '@/lib/database.types'
+
+type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 /**
  * POST /api/contacts/web-lead
@@ -167,7 +170,7 @@ export async function POST(req: NextRequest) {
   // Remove null values — let DB defaults handle them
   const cleanData = Object.fromEntries(
     Object.entries(insertData).filter(([, v]) => v != null)
-  )
+  ) as unknown as ContactInsert
 
   const { data: newContact, error: insertError } = await supabase
     .from('contacts')

@@ -69,7 +69,8 @@ export function useMCCState(): UseMCCStateReturn {
     const { error: upsertErr } = await supabase
       .from('mcc_state')
       .upsert(
-        { user_id: user.id, key: 'mcc', value: next, updated_at: new Date().toISOString() },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { user_id: user.id, key: 'mcc', value: next as any, updated_at: new Date().toISOString() },
         { onConflict: 'user_id,key' }
       )
 

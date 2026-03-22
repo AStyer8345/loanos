@@ -475,7 +475,7 @@ export default function LoanDetailPage() {
       setReferringAgentContactId(realtorId)
     }
     setDocs(docsRes.data || [])
-    setActivity(actRes.data || [])
+    setActivity((actRes.data || []) as ActivityRow[])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)

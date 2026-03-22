@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
+import type { ActivityEntry } from '@/app/dashboard/contacts/[id]/ContactRecordView'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,7 +118,7 @@ export default async function DashboardPage() {
       .limit(500)
 
     for (const row of activityRows ?? []) {
-      if (row.loan_id && !lastActivityMap.has(row.loan_id)) {
+      if (row.loan_id && row.occurred_at && !lastActivityMap.has(row.loan_id)) {
         lastActivityMap.set(row.loan_id, row.occurred_at)
       }
     }
@@ -174,13 +175,13 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(100)
 
-  const activityEntries = (rawActivity ?? []).filter(e => {
+  const activityEntries = ((rawActivity ?? []).filter(e => {
     const action = (e.action ?? '').toLowerCase()
     const summary = (e.summary ?? '').toLowerCase()
     return !action.includes('webhook.error') && !action.includes('error_loan_not_found')
       && !action.startsWith('arive.webhook') && !summary.includes('webhook error')
       && !action.includes('error_')
-  })
+  }) as unknown as ActivityEntry[])
 
   // Monthly funded data for performance charts
   const monthlyMap: Record<string, { loans: number; volume: number; commission: number }> = {}

@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { normalizeStage } from '@/lib/stageNormalization'
+import type { Database } from '@/lib/database.types'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type RawRow = Record<string, string>
+type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 interface ImportResult {
   imported: number
@@ -116,7 +118,7 @@ export async function POST(req: NextRequest) {
       if (nk    && byName.has(nk))    { result.skipped++; continue }
 
       // Strip nulls
-      const payload = Object.fromEntries(Object.entries(mapped).filter(([, v]) => v !== null && v !== undefined))
+      const payload = Object.fromEntries(Object.entries(mapped).filter(([, v]) => v !== null && v !== undefined)) as unknown as ContactInsert
 
       const { error: insertErr } = await supabase.from('contacts').insert([payload])
 

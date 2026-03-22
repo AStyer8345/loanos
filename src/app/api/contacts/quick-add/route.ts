@@ -3,6 +3,9 @@ import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-pa
 import { normalizeStage } from '@/lib/stageNormalization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
+import type { Database } from '@/lib/database.types'
+
+type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 /**
  * POST /api/contacts/quick-add
@@ -118,7 +121,7 @@ export async function POST(req: NextRequest) {
     // Remove null values — let DB defaults handle them
     const cleanData = Object.fromEntries(
       Object.entries(insertData).filter(([, v]) => v != null)
-    )
+    ) as unknown as ContactInsert
 
     const { data: newContact, error: insertError } = await supabase
       .from('contacts')

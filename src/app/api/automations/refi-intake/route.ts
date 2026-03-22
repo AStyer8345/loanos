@@ -39,7 +39,7 @@ Return ONLY the JSON object. No explanation, no markdown, no code fences.`;
         'anthropic-beta': 'pdfs-2024-09-25',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 512,
         messages: [
           {

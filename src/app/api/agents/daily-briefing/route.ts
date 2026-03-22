@@ -78,6 +78,15 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const withOrg = (query: any) => query.eq('organization_id', organizationId)
 
+    // Pre-fetch org loan IDs so loan_milestone_events + milestone_communications
+    // (which lack organization_id columns) can be scoped via their loan_id FK.
+    const { data: orgLoanRows = [] } = await supabase
+      .from('loans')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .limit(500)
+    const orgLoanIds = (orgLoanRows ?? []).map((l: { id: string }) => l.id)
+
     // ── Parallel data fetch ──────────────────────────────────────────────────
     const [
       staleLeadsResult,
@@ -105,13 +114,16 @@ export async function GET(request: NextRequest) {
         .order('estimated_closing_date', { ascending: true })
         .limit(20)),
 
-      // Milestone events from last 24 hours
-      supabase
-        .from('loan_milestone_events')
-        .select('id, loan_id, milestone, borrower_name, realtor_name, created_at')
-        .gte('created_at', twentyFourHrsAgo)
-        .order('created_at', { ascending: false })
-        .limit(20),
+      // Milestone events from last 24 hours — scoped via org loan IDs
+      orgLoanIds.length > 0
+        ? supabase
+            .from('loan_milestone_events')
+            .select('id, loan_id, milestone, borrower_name, realtor_name, created_at')
+            .in('loan_id', orgLoanIds)
+            .gte('created_at', twentyFourHrsAgo)
+            .order('created_at', { ascending: false })
+            .limit(20)
+        : Promise.resolve({ data: [], error: null }),
 
       // Realtors not touched in 7+ days
       withOrg(supabase
@@ -122,13 +134,24 @@ export async function GET(request: NextRequest) {
         .order('last_touch', { ascending: true, nullsFirst: true })
         .limit(20)),
 
-      // Unsent milestone communication drafts
-      supabase
-        .from('milestone_communications')
-        .select('id, recipient_type, recipient_email, subject, created_at, milestone_event_id')
-        .eq('draft_pushed', false)
-        .order('created_at', { ascending: false })
-        .limit(20),
+      // Unsent milestone communication drafts — scoped via org milestone event IDs
+      (async () => {
+        if (orgLoanIds.length === 0) return { data: [], error: null }
+        const { data: eventRows = [] } = await supabase
+          .from('loan_milestone_events')
+          .select('id')
+          .in('loan_id', orgLoanIds)
+          .limit(500)
+        const eventIds = (eventRows ?? []).map((e: { id: string }) => e.id)
+        if (eventIds.length === 0) return { data: [], error: null }
+        return supabase
+          .from('milestone_communications')
+          .select('id, recipient_type, recipient_email, subject, created_at, milestone_event_id')
+          .in('milestone_event_id', eventIds)
+          .eq('draft_pushed', false)
+          .order('created_at', { ascending: false })
+          .limit(20)
+      })(),
     ])
 
     // ── Unwrap results ───────────────────────────────────────────────────────
@@ -179,7 +202,7 @@ Rules:
 
     const anthropic = await getAnthropicClient()
     const claudeMsg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: systemPrompt,
       messages: [{ role: 'user', content: contextBlock }],

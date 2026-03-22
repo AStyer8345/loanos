@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
 
     const anthropic = await getAnthropicClient()
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: systemPrompt,
       messages,
@@ -197,10 +197,11 @@ export async function POST(req: NextRequest) {
         .from('chat_sessions')
         .update({ messages: updatedMessages })
         .eq('id', sessionId)
+        .eq('organization_id', organizationId)
     } else {
       const { data } = await supabase
         .from('chat_sessions')
-        .insert({ record_id: recordId, record_type: recordType, messages: updatedMessages, user_id: userId })
+        .insert({ record_id: recordId, record_type: recordType, messages: updatedMessages, user_id: userId, organization_id: organizationId })
         .select('id')
         .single()
       newSessionId = data?.id
@@ -215,8 +216,10 @@ export async function POST(req: NextRequest) {
 
 // GET /api/chat?recordId=&recordType= — load most recent session
 export async function GET(req: NextRequest) {
+  let organizationId: string
   try {
-    await getOrganization()
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -236,6 +239,7 @@ export async function GET(req: NextRequest) {
       .select('id, messages, updated_at')
       .eq('record_id', recordId)
       .eq('record_type', recordType)
+      .eq('organization_id', organizationId)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()

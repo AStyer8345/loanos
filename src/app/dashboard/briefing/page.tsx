@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Brain, RefreshCw, CheckCircle2, Circle, AlertCircle, Users, FileText, Bell, Clock } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -76,6 +76,9 @@ export default function DailyBriefingPage() {
 
   const checkedCount = checked.size
   const totalItems   = data?.top7.length ?? 0
+
+  // Auto-fetch on first load so the morning briefing is ready without a manual click
+  useEffect(() => { fetchBriefing() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-[#050505]">
@@ -166,7 +169,7 @@ export default function DailyBriefingPage() {
             {/* Progress bar */}
             <div className="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden border border-zinc-700">
               <div
-                className="h-full bg-[#4ADE80] rounded-full transition-all duration-300"
+                className="h-full bg-green-400 rounded-full transition-all duration-300"
                 style={{ width: totalItems > 0 ? `${(checkedCount / totalItems) * 100}%` : '0%' }}
               />
             </div>
@@ -191,7 +194,7 @@ export default function DailyBriefingPage() {
                       {/* Rank + check */}
                       <div className="flex-shrink-0 mt-0.5">
                         {done
-                          ? <CheckCircle2 size={18} className="text-[#4ADE80]" />
+                          ? <CheckCircle2 size={18} className="text-green-400" />
                           : <Circle size={18} className="text-zinc-500" />
                         }
                       </div>
@@ -224,7 +227,7 @@ export default function DailyBriefingPage() {
             {/* All done */}
             {checkedCount === totalItems && totalItems > 0 && (
               <div className="mt-6 flex flex-col items-center py-8 text-zinc-500">
-                <CheckCircle2 size={36} className="text-[#4ADE80] mb-2" />
+                <CheckCircle2 size={36} className="text-green-400 mb-2" />
                 <p className="text-sm font-mono">All done for today.</p>
               </div>
             )}

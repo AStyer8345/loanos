@@ -139,7 +139,7 @@ Guidelines:
 Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no HTML).`
 
       const borrowerMsg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 512,
         messages: [{ role: 'user', content: borrowerPrompt }],
       })
@@ -222,7 +222,7 @@ Guidelines:
 Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no HTML).`
 
       const realtorMsg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 512,
         messages: [{ role: 'user', content: realtorPrompt }],
       })

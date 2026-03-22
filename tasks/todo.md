@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
+_Last updated: 2026-03-22 (full audit — model bump, chat org scope, milestone scope, briefing UX)_
 
 ---
 
@@ -16,7 +16,7 @@ _Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
 
 ## 🟡 Medium Priority
 
-- [ ] **daily-briefing unscoped milestone queries** — `loan_milestone_events` and `milestone_communications` in `/api/agents/daily-briefing` use `createServiceClient()` but are not scoped to `organization_id` (neither table has that column). Low risk single-tenant but should be fixed before multi-tenant launch: join through `loans.organization_id` or add `organization_id` to both tables.
+- [x] **daily-briefing unscoped milestone queries** — Fixed 2026-03-22. Pre-fetches org loan IDs, then uses `.in('loan_id', orgLoanIds)` for `loan_milestone_events` and a two-step lookup (event IDs → milestone_communications) for `milestone_communications`. Both queries are now org-scoped without requiring schema changes.
 - [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` extracts PDF fields but doesn't log email drafts — that happens in the n8n workflow `yCTydQ7RfZK4DyUg`. Wire logEmailDraft there.
 - [ ] **Wire logEmailDraft to final-cd** — same pattern — n8n workflow `SkzrWeR0bHZs8kWX`.
 - [ ] **E2E test WF1 + WF2** — all migrations confirmed applied: trigger test webhook, verify loan row in Supabase, verify loan_status_history row.
@@ -31,6 +31,14 @@ _Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (2026-03-22 full audit)
+
+- [x] **Claude model version bump** — Updated `claude-sonnet-4-5` → `claude-sonnet-4-6` across all 8 API routes: `chat`, `daily-briefing`, `milestone` (×2), `outreach`, `refi-intake`, `scenarios/generate-narrative`, `scenarios/parse-statement`.
+- [x] **Chat sessions org scoping** — `POST /api/chat`: added `organization_id: organizationId` to new session insert + `.eq('organization_id', organizationId)` on update. `GET /api/chat`: destructured org from `getOrganization()`, added org filter to `chat_sessions` select. Sessions are now fully org-scoped in both reads and writes.
+- [x] **daily-briefing milestone org scope** — `loan_milestone_events` and `milestone_communications` now filtered via pre-fetched org loan IDs. Clears the last medium-priority multi-tenancy item.
+- [x] **Briefing page auto-fetch** — Added `useEffect(() => { fetchBriefing() }, [])` so the morning briefing loads automatically on first visit. No more manual button click every morning.
+- [x] **Briefing page hardcoded hex** — Replaced `bg-[#4ADE80]` and `text-[#4ADE80]` with Tailwind tokens `bg-green-400` / `text-green-400`.
 
 ## ✅ Completed (session 13 — 2026-03-21 multi-tenancy audit)
 

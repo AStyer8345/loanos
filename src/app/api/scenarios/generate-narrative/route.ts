@@ -92,11 +92,9 @@ Rules:
             stream: true,
           })
 
-          let fullText = ''
           for await (const event of response) {
             if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
               const text = event.delta.text
-              fullText += text
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`))
             }
           }

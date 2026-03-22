@@ -1,0 +1,2109 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
+  public: {
+    Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          body_snippet: string | null
+          contact_id: string | null
+          created_at: string
+          dismissed: boolean | null
+          entity_id: string | null
+          entity_type: string | null
+          external_id: string | null
+          from_address: string | null
+          id: string
+          loan_id: string | null
+          metadata: Json | null
+          occurred_at: string | null
+          organization_id: string | null
+          raw_payload: Json | null
+          subject: string | null
+          summary: string | null
+          to_address: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          body_snippet?: string | null
+          contact_id?: string | null
+          created_at?: string
+          dismissed?: boolean | null
+          entity_id?: string | null
+          entity_type?: string | null
+          external_id?: string | null
+          from_address?: string | null
+          id?: string
+          loan_id?: string | null
+          metadata?: Json | null
+          occurred_at?: string | null
+          organization_id?: string | null
+          raw_payload?: Json | null
+          subject?: string | null
+          summary?: string | null
+          to_address?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          body_snippet?: string | null
+          contact_id?: string | null
+          created_at?: string
+          dismissed?: boolean | null
+          entity_id?: string | null
+          entity_type?: string | null
+          external_id?: string | null
+          from_address?: string | null
+          id?: string
+          loan_id?: string | null
+          metadata?: Json | null
+          occurred_at?: string | null
+          organization_id?: string | null
+          raw_payload?: Json | null
+          subject?: string | null
+          summary?: string | null
+          to_address?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          loan_id: string | null
+          platform: string | null
+          posted_at: string | null
+          sent_at: string | null
+          testimonial_id: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          loan_id?: string | null
+          platform?: string | null
+          posted_at?: string | null
+          sent_at?: string | null
+          testimonial_id?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          loan_id?: string | null
+          platform?: string | null
+          posted_at?: string | null
+          sent_at?: string | null
+          testimonial_id?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          created_at: string | null
+          day_number: number
+          growth_mindset_note: string | null
+          id: string
+          is_family_challenge: boolean | null
+          prompt: string
+          scripture: string | null
+          scripture_ref: string | null
+          sub_prompt: string | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_number: number
+          growth_mindset_note?: string | null
+          id?: string
+          is_family_challenge?: boolean | null
+          prompt: string
+          scripture?: string | null
+          scripture_ref?: string | null
+          sub_prompt?: string | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_number?: number
+          growth_mindset_note?: string | null
+          id?: string
+          is_family_challenge?: boolean | null
+          prompt?: string
+          scripture?: string | null
+          scripture_ref?: string | null
+          sub_prompt?: string | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          organization_id: string | null
+          record_id: string
+          record_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          organization_id?: string | null
+          record_id: string
+          record_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          organization_id?: string | null
+          record_id?: string
+          record_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_activity: {
+        Row: {
+          activity_type: string | null
+          contact_id: string | null
+          created_by: string | null
+          id: string
+          loan_id: string | null
+          logged_at: string | null
+          notes: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type?: string | null
+          contact_id?: string | null
+          created_by?: string | null
+          id?: string
+          loan_id?: string | null
+          logged_at?: string | null
+          notes?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string | null
+          contact_id?: string | null
+          created_by?: string | null
+          id?: string
+          loan_id?: string | null
+          logged_at?: string | null
+          notes?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_activity_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_activity_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_emails: {
+        Row: {
+          automation_source: string | null
+          body_html: string | null
+          body_text: string | null
+          contact_id: string | null
+          created_at: string | null
+          direction: string | null
+          id: string
+          loan_id: string | null
+          sent_at: string | null
+          subject: string
+        }
+        Insert: {
+          automation_source?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          direction?: string | null
+          id?: string
+          loan_id?: string | null
+          sent_at?: string | null
+          subject: string
+        }
+        Update: {
+          automation_source?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          direction?: string | null
+          id?: string
+          loan_id?: string | null
+          sent_at?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_emails_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_emails_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          account_name: string | null
+          birthdate: string | null
+          closing_date: string | null
+          co_borrower_birthdate: string | null
+          co_borrower_first: string | null
+          co_borrower_last: string | null
+          co_borrower_mobile: string | null
+          company_name: string | null
+          contact_group: string | null
+          contact_type: string | null
+          created_at: string
+          created_date: string | null
+          email: string | null
+          email_opt_out: boolean | null
+          first_name: string
+          group_tag: string | null
+          home_phone: string | null
+          id: string
+          last_activity_date: string | null
+          last_activity_notes: string | null
+          last_activity_type: string | null
+          last_name: string
+          last_touch: string | null
+          last_touch_at: string | null
+          lead_source: string | null
+          mailing_city: string | null
+          mailing_country: string | null
+          mailing_state: string | null
+          mailing_street: string | null
+          mailing_zip: string | null
+          notes: string | null
+          organization_id: string | null
+          phone: string | null
+          phone_mobile: string | null
+          realtor_email: string | null
+          realtor_phone: string | null
+          referred_by: string | null
+          salesforce_created_date: string | null
+          salesforce_id: string | null
+          source: string | null
+          stage: string | null
+          target_realtor: boolean | null
+          title: string | null
+          top_realtor: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name?: string | null
+          birthdate?: string | null
+          closing_date?: string | null
+          co_borrower_birthdate?: string | null
+          co_borrower_first?: string | null
+          co_borrower_last?: string | null
+          co_borrower_mobile?: string | null
+          company_name?: string | null
+          contact_group?: string | null
+          contact_type?: string | null
+          created_at?: string
+          created_date?: string | null
+          email?: string | null
+          email_opt_out?: boolean | null
+          first_name: string
+          group_tag?: string | null
+          home_phone?: string | null
+          id?: string
+          last_activity_date?: string | null
+          last_activity_notes?: string | null
+          last_activity_type?: string | null
+          last_name: string
+          last_touch?: string | null
+          last_touch_at?: string | null
+          lead_source?: string | null
+          mailing_city?: string | null
+          mailing_country?: string | null
+          mailing_state?: string | null
+          mailing_street?: string | null
+          mailing_zip?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          phone_mobile?: string | null
+          realtor_email?: string | null
+          realtor_phone?: string | null
+          referred_by?: string | null
+          salesforce_created_date?: string | null
+          salesforce_id?: string | null
+          source?: string | null
+          stage?: string | null
+          target_realtor?: boolean | null
+          title?: string | null
+          top_realtor?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string | null
+          birthdate?: string | null
+          closing_date?: string | null
+          co_borrower_birthdate?: string | null
+          co_borrower_first?: string | null
+          co_borrower_last?: string | null
+          co_borrower_mobile?: string | null
+          company_name?: string | null
+          contact_group?: string | null
+          contact_type?: string | null
+          created_at?: string
+          created_date?: string | null
+          email?: string | null
+          email_opt_out?: boolean | null
+          first_name?: string
+          group_tag?: string | null
+          home_phone?: string | null
+          id?: string
+          last_activity_date?: string | null
+          last_activity_notes?: string | null
+          last_activity_type?: string | null
+          last_name?: string
+          last_touch?: string | null
+          last_touch_at?: string | null
+          lead_source?: string | null
+          mailing_city?: string | null
+          mailing_country?: string | null
+          mailing_state?: string | null
+          mailing_street?: string | null
+          mailing_zip?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          phone_mobile?: string | null
+          realtor_email?: string | null
+          realtor_phone?: string | null
+          referred_by?: string | null
+          salesforce_created_date?: string | null
+          salesforce_id?: string | null
+          source?: string | null
+          stage?: string | null
+          target_realtor?: boolean | null
+          title?: string | null
+          top_realtor?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          doc_type: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          loan_id: string | null
+          mime_type: string | null
+          organization_id: string | null
+          uploaded_by: string | null
+          user_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          doc_type?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          loan_id?: string | null
+          mime_type?: string | null
+          organization_id?: string | null
+          uploaded_by?: string | null
+          user_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          doc_type?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          loan_id?: string | null
+          mime_type?: string | null
+          organization_id?: string | null
+          uploaded_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_drafts: {
+        Row: {
+          automation_name: string
+          body_html: string
+          body_preview: string | null
+          contact_id: string | null
+          created_at: string | null
+          id: string
+          loan_id: string | null
+          organization_id: string | null
+          outlook_draft_id: string | null
+          recipient_email: string
+          recipient_name: string | null
+          status: string
+          subject: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          automation_name: string
+          body_html: string
+          body_preview?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          id?: string
+          loan_id?: string | null
+          organization_id?: string | null
+          outlook_draft_id?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          status?: string
+          subject: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          automation_name?: string
+          body_html?: string
+          body_preview?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          id?: string
+          loan_id?: string | null
+          organization_id?: string | null
+          outlook_draft_id?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kids: {
+        Row: {
+          avatar_color: string | null
+          avatar_emoji: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          avatar_color?: string | null
+          avatar_emoji?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          avatar_color?: string | null
+          avatar_emoji?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      loan_milestone_events: {
+        Row: {
+          borrower_email: string | null
+          borrower_name: string | null
+          created_at: string
+          id: string
+          loan_id: string
+          milestone: string
+          processed_at: string | null
+          raw_payload: Json | null
+          realtor_email: string | null
+          realtor_name: string | null
+        }
+        Insert: {
+          borrower_email?: string | null
+          borrower_name?: string | null
+          created_at?: string
+          id?: string
+          loan_id: string
+          milestone: string
+          processed_at?: string | null
+          raw_payload?: Json | null
+          realtor_email?: string | null
+          realtor_name?: string | null
+        }
+        Update: {
+          borrower_email?: string | null
+          borrower_name?: string | null
+          created_at?: string
+          id?: string
+          loan_id?: string
+          milestone?: string
+          processed_at?: string | null
+          raw_payload?: Json | null
+          realtor_email?: string | null
+          realtor_name?: string | null
+        }
+        Relationships: []
+      }
+      loan_status_history: {
+        Row: {
+          arive_loan_id: string
+          changed_at: string
+          id: string
+          loan_id: string | null
+          new_status: string | null
+          old_status: string | null
+          source: string
+        }
+        Insert: {
+          arive_loan_id: string
+          changed_at?: string
+          id?: string
+          loan_id?: string | null
+          new_status?: string | null
+          old_status?: string | null
+          source?: string
+        }
+        Update: {
+          arive_loan_id?: string
+          changed_at?: string
+          id?: string
+          loan_id?: string | null
+          new_status?: string | null
+          old_status?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_status_history_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loans: {
+        Row: {
+          adverse_reason: string | null
+          amortization_type: string | null
+          application_date: string | null
+          appraisal_contingency_date: string | null
+          appraisal_date: string | null
+          appraisal_delivery_date: string | null
+          appraisal_ordered_date: string | null
+          appraisal_status: string | null
+          appraised_value: number | null
+          approval_date: string | null
+          apr: number | null
+          archive_indicator: boolean | null
+          arive_created_at: string | null
+          arive_loan_id: string | null
+          arive_updated_at: string | null
+          arm_adjustment_period: number | null
+          arm_initial_fixed_months: number | null
+          aus_result: string | null
+          back_end_dti: number | null
+          base_loan_amount: number | null
+          borrower_applicant_type: string | null
+          borrower_email: string | null
+          borrower_first_name: string | null
+          borrower_home_phone: string | null
+          borrower_last_name: string | null
+          borrower_mailing_address: string | null
+          borrower_marital_status: string | null
+          borrower_name: string | null
+          borrower_phone: string | null
+          borrower_preferred_language: string | null
+          borrower_work_phone: string | null
+          broker_fee: number | null
+          buydown: boolean | null
+          buyer_agent_brokerage: string | null
+          buyer_agent_contact_id: string | null
+          buyer_agent_email: string | null
+          buyer_agent_name: string | null
+          buyers_agent_email: string | null
+          buyers_agent_name: string | null
+          buyers_agent_phone: string | null
+          cash_to_close: number | null
+          cashout_purpose: string | null
+          cd_date: string | null
+          cd_status: string | null
+          channel: string | null
+          client_review_date: string | null
+          client_review_status: string | null
+          closing_contingency_date: string | null
+          closing_date: string | null
+          cltv: number | null
+          co_borrower_email: string | null
+          co_borrower_name: string | null
+          co_borrower_phone: string | null
+          commission_amount: number | null
+          commissions: number | null
+          compensation_type: string | null
+          contact_id: string | null
+          contract_data: Json | null
+          county: string | null
+          created_at: string
+          credit_expiration_date: string | null
+          credit_import_date: string | null
+          credit_order_date: string | null
+          credit_score: number | null
+          crm_reference_id: string | null
+          deep_link_url: string | null
+          documentation_type: string | null
+          down_payment: number | null
+          down_payment_pct: number | null
+          earnest_money: number | null
+          effective_date: string | null
+          employer_name: string | null
+          epo_date: string | null
+          escrow_agent: string | null
+          escrow_impounds: number | null
+          escrow_officer: string | null
+          est_closing_date: string | null
+          estimated_closing_date: string | null
+          estimated_ltv: number | null
+          financed_fees: number | null
+          first_payment_date: string | null
+          first_time_homebuyer: boolean | null
+          flood_insurance_monthly: number | null
+          front_end_dti: number | null
+          funding_date: string | null
+          funding_wire_date: string | null
+          funding_wire_status: string | null
+          hazard_insurance: number | null
+          hcltv: number | null
+          hoa_dues: number | null
+          hoi_date: string | null
+          hoi_monthly: number | null
+          hoi_ordered_date: string | null
+          hoi_received_date: string | null
+          hoi_status: string | null
+          id: string
+          impound_waiver: boolean | null
+          initial_cd_sent_date: string | null
+          initial_cd_signed_date: string | null
+          initial_le_sent_date: string | null
+          initial_le_signed_date: string | null
+          intent_to_proceed_date: string | null
+          interest_only: boolean | null
+          interest_only_term_months: number | null
+          interest_rate: number | null
+          investor: string | null
+          investor_name: string | null
+          lead_source: string | null
+          lender: string | null
+          lender_credits: number | null
+          lender_loan_number: string | null
+          lender_name: string | null
+          lender_nmls: string | null
+          lien_position: string | null
+          listing_agent_brokerage: string | null
+          listing_agent_contact_id: string | null
+          listing_agent_email: string | null
+          listing_agent_name: string | null
+          listing_agent_phone: string | null
+          loan_amount: number | null
+          loan_contingency_date: string | null
+          loan_costs: number | null
+          loan_created_date: string | null
+          loan_name: string | null
+          loan_number: string | null
+          loan_program: string | null
+          loan_purpose: string | null
+          loan_term: number | null
+          loan_type: string | null
+          lock_date: string | null
+          lock_status: string | null
+          ltv: number | null
+          marketing_campaign: string | null
+          mi_monthly: number | null
+          mi_upfront: number | null
+          middle_score: number | null
+          milestone: string | null
+          monthly_debts: number | null
+          monthly_income: number | null
+          monthly_payment: number | null
+          mortgage_insurance: number | null
+          mortgage_type: string | null
+          most_recent_cd_sent_date: string | null
+          most_recent_cd_signed_date: string | null
+          most_recent_le_sent_date: string | null
+          most_recent_le_signed_date: string | null
+          notes: string | null
+          occupancy: string | null
+          occupancy_type: string | null
+          option_expiration: string | null
+          option_fee: number | null
+          organization_id: string | null
+          originator_comp: number | null
+          payroll_date: string | null
+          payroll_status: string | null
+          pi_payment: number | null
+          piti: number | null
+          points: number | null
+          pre_approval_expiry_date: string | null
+          prepaid_items: number | null
+          prepay_penalty: boolean | null
+          processor_email: string | null
+          processor_name: string | null
+          property_address: string | null
+          property_attachment_type: string | null
+          property_city: string | null
+          property_county: string | null
+          property_state: string | null
+          property_tax: number | null
+          property_taxes_monthly: number | null
+          property_type: string | null
+          property_unit_number: string | null
+          property_units: number | null
+          property_zip: string | null
+          purchase_price: number | null
+          rate_lock_date: string | null
+          rate_lock_days: number | null
+          rate_lock_expiration: string | null
+          raw_payload: Json | null
+          referral_source: string | null
+          referring_agent_email: string | null
+          referring_agent_name: string | null
+          referring_agent_phone: string | null
+          refinance_type: string | null
+          sales_contract_date: string | null
+          sales_price: number | null
+          seller_concessions: number | null
+          seller_credits: number | null
+          signed_docs_date: string | null
+          signed_docs_status: string | null
+          status: string | null
+          status_date: string | null
+          submission_date: string | null
+          synced_at: string | null
+          tax_transcript_ordered_date: string | null
+          tax_transcript_received_date: string | null
+          tbd_address: boolean | null
+          term_months: number | null
+          title_company: string | null
+          title_contact: string | null
+          title_date: string | null
+          title_email: string | null
+          title_ordered_date: string | null
+          title_received_date: string | null
+          title_status: string | null
+          total_closing_costs: number | null
+          trid_date: string | null
+          underwriter_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adverse_reason?: string | null
+          amortization_type?: string | null
+          application_date?: string | null
+          appraisal_contingency_date?: string | null
+          appraisal_date?: string | null
+          appraisal_delivery_date?: string | null
+          appraisal_ordered_date?: string | null
+          appraisal_status?: string | null
+          appraised_value?: number | null
+          approval_date?: string | null
+          apr?: number | null
+          archive_indicator?: boolean | null
+          arive_created_at?: string | null
+          arive_loan_id?: string | null
+          arive_updated_at?: string | null
+          arm_adjustment_period?: number | null
+          arm_initial_fixed_months?: number | null
+          aus_result?: string | null
+          back_end_dti?: number | null
+          base_loan_amount?: number | null
+          borrower_applicant_type?: string | null
+          borrower_email?: string | null
+          borrower_first_name?: string | null
+          borrower_home_phone?: string | null
+          borrower_last_name?: string | null
+          borrower_mailing_address?: string | null
+          borrower_marital_status?: string | null
+          borrower_name?: string | null
+          borrower_phone?: string | null
+          borrower_preferred_language?: string | null
+          borrower_work_phone?: string | null
+          broker_fee?: number | null
+          buydown?: boolean | null
+          buyer_agent_brokerage?: string | null
+          buyer_agent_contact_id?: string | null
+          buyer_agent_email?: string | null
+          buyer_agent_name?: string | null
+          buyers_agent_email?: string | null
+          buyers_agent_name?: string | null
+          buyers_agent_phone?: string | null
+          cash_to_close?: number | null
+          cashout_purpose?: string | null
+          cd_date?: string | null
+          cd_status?: string | null
+          channel?: string | null
+          client_review_date?: string | null
+          client_review_status?: string | null
+          closing_contingency_date?: string | null
+          closing_date?: string | null
+          cltv?: number | null
+          co_borrower_email?: string | null
+          co_borrower_name?: string | null
+          co_borrower_phone?: string | null
+          commission_amount?: number | null
+          commissions?: number | null
+          compensation_type?: string | null
+          contact_id?: string | null
+          contract_data?: Json | null
+          county?: string | null
+          created_at?: string
+          credit_expiration_date?: string | null
+          credit_import_date?: string | null
+          credit_order_date?: string | null
+          credit_score?: number | null
+          crm_reference_id?: string | null
+          deep_link_url?: string | null
+          documentation_type?: string | null
+          down_payment?: number | null
+          down_payment_pct?: number | null
+          earnest_money?: number | null
+          effective_date?: string | null
+          employer_name?: string | null
+          epo_date?: string | null
+          escrow_agent?: string | null
+          escrow_impounds?: number | null
+          escrow_officer?: string | null
+          est_closing_date?: string | null
+          estimated_closing_date?: string | null
+          estimated_ltv?: number | null
+          financed_fees?: number | null
+          first_payment_date?: string | null
+          first_time_homebuyer?: boolean | null
+          flood_insurance_monthly?: number | null
+          front_end_dti?: number | null
+          funding_date?: string | null
+          funding_wire_date?: string | null
+          funding_wire_status?: string | null
+          hazard_insurance?: number | null
+          hcltv?: number | null
+          hoa_dues?: number | null
+          hoi_date?: string | null
+          hoi_monthly?: number | null
+          hoi_ordered_date?: string | null
+          hoi_received_date?: string | null
+          hoi_status?: string | null
+          id?: string
+          impound_waiver?: boolean | null
+          initial_cd_sent_date?: string | null
+          initial_cd_signed_date?: string | null
+          initial_le_sent_date?: string | null
+          initial_le_signed_date?: string | null
+          intent_to_proceed_date?: string | null
+          interest_only?: boolean | null
+          interest_only_term_months?: number | null
+          interest_rate?: number | null
+          investor?: string | null
+          investor_name?: string | null
+          lead_source?: string | null
+          lender?: string | null
+          lender_credits?: number | null
+          lender_loan_number?: string | null
+          lender_name?: string | null
+          lender_nmls?: string | null
+          lien_position?: string | null
+          listing_agent_brokerage?: string | null
+          listing_agent_contact_id?: string | null
+          listing_agent_email?: string | null
+          listing_agent_name?: string | null
+          listing_agent_phone?: string | null
+          loan_amount?: number | null
+          loan_contingency_date?: string | null
+          loan_costs?: number | null
+          loan_created_date?: string | null
+          loan_name?: string | null
+          loan_number?: string | null
+          loan_program?: string | null
+          loan_purpose?: string | null
+          loan_term?: number | null
+          loan_type?: string | null
+          lock_date?: string | null
+          lock_status?: string | null
+          ltv?: number | null
+          marketing_campaign?: string | null
+          mi_monthly?: number | null
+          mi_upfront?: number | null
+          middle_score?: number | null
+          milestone?: string | null
+          monthly_debts?: number | null
+          monthly_income?: number | null
+          monthly_payment?: number | null
+          mortgage_insurance?: number | null
+          mortgage_type?: string | null
+          most_recent_cd_sent_date?: string | null
+          most_recent_cd_signed_date?: string | null
+          most_recent_le_sent_date?: string | null
+          most_recent_le_signed_date?: string | null
+          notes?: string | null
+          occupancy?: string | null
+          occupancy_type?: string | null
+          option_expiration?: string | null
+          option_fee?: number | null
+          organization_id?: string | null
+          originator_comp?: number | null
+          payroll_date?: string | null
+          payroll_status?: string | null
+          pi_payment?: number | null
+          piti?: number | null
+          points?: number | null
+          pre_approval_expiry_date?: string | null
+          prepaid_items?: number | null
+          prepay_penalty?: boolean | null
+          processor_email?: string | null
+          processor_name?: string | null
+          property_address?: string | null
+          property_attachment_type?: string | null
+          property_city?: string | null
+          property_county?: string | null
+          property_state?: string | null
+          property_tax?: number | null
+          property_taxes_monthly?: number | null
+          property_type?: string | null
+          property_unit_number?: string | null
+          property_units?: number | null
+          property_zip?: string | null
+          purchase_price?: number | null
+          rate_lock_date?: string | null
+          rate_lock_days?: number | null
+          rate_lock_expiration?: string | null
+          raw_payload?: Json | null
+          referral_source?: string | null
+          referring_agent_email?: string | null
+          referring_agent_name?: string | null
+          referring_agent_phone?: string | null
+          refinance_type?: string | null
+          sales_contract_date?: string | null
+          sales_price?: number | null
+          seller_concessions?: number | null
+          seller_credits?: number | null
+          signed_docs_date?: string | null
+          signed_docs_status?: string | null
+          status?: string | null
+          status_date?: string | null
+          submission_date?: string | null
+          synced_at?: string | null
+          tax_transcript_ordered_date?: string | null
+          tax_transcript_received_date?: string | null
+          tbd_address?: boolean | null
+          term_months?: number | null
+          title_company?: string | null
+          title_contact?: string | null
+          title_date?: string | null
+          title_email?: string | null
+          title_ordered_date?: string | null
+          title_received_date?: string | null
+          title_status?: string | null
+          total_closing_costs?: number | null
+          trid_date?: string | null
+          underwriter_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adverse_reason?: string | null
+          amortization_type?: string | null
+          application_date?: string | null
+          appraisal_contingency_date?: string | null
+          appraisal_date?: string | null
+          appraisal_delivery_date?: string | null
+          appraisal_ordered_date?: string | null
+          appraisal_status?: string | null
+          appraised_value?: number | null
+          approval_date?: string | null
+          apr?: number | null
+          archive_indicator?: boolean | null
+          arive_created_at?: string | null
+          arive_loan_id?: string | null
+          arive_updated_at?: string | null
+          arm_adjustment_period?: number | null
+          arm_initial_fixed_months?: number | null
+          aus_result?: string | null
+          back_end_dti?: number | null
+          base_loan_amount?: number | null
+          borrower_applicant_type?: string | null
+          borrower_email?: string | null
+          borrower_first_name?: string | null
+          borrower_home_phone?: string | null
+          borrower_last_name?: string | null
+          borrower_mailing_address?: string | null
+          borrower_marital_status?: string | null
+          borrower_name?: string | null
+          borrower_phone?: string | null
+          borrower_preferred_language?: string | null
+          borrower_work_phone?: string | null
+          broker_fee?: number | null
+          buydown?: boolean | null
+          buyer_agent_brokerage?: string | null
+          buyer_agent_contact_id?: string | null
+          buyer_agent_email?: string | null
+          buyer_agent_name?: string | null
+          buyers_agent_email?: string | null
+          buyers_agent_name?: string | null
+          buyers_agent_phone?: string | null
+          cash_to_close?: number | null
+          cashout_purpose?: string | null
+          cd_date?: string | null
+          cd_status?: string | null
+          channel?: string | null
+          client_review_date?: string | null
+          client_review_status?: string | null
+          closing_contingency_date?: string | null
+          closing_date?: string | null
+          cltv?: number | null
+          co_borrower_email?: string | null
+          co_borrower_name?: string | null
+          co_borrower_phone?: string | null
+          commission_amount?: number | null
+          commissions?: number | null
+          compensation_type?: string | null
+          contact_id?: string | null
+          contract_data?: Json | null
+          county?: string | null
+          created_at?: string
+          credit_expiration_date?: string | null
+          credit_import_date?: string | null
+          credit_order_date?: string | null
+          credit_score?: number | null
+          crm_reference_id?: string | null
+          deep_link_url?: string | null
+          documentation_type?: string | null
+          down_payment?: number | null
+          down_payment_pct?: number | null
+          earnest_money?: number | null
+          effective_date?: string | null
+          employer_name?: string | null
+          epo_date?: string | null
+          escrow_agent?: string | null
+          escrow_impounds?: number | null
+          escrow_officer?: string | null
+          est_closing_date?: string | null
+          estimated_closing_date?: string | null
+          estimated_ltv?: number | null
+          financed_fees?: number | null
+          first_payment_date?: string | null
+          first_time_homebuyer?: boolean | null
+          flood_insurance_monthly?: number | null
+          front_end_dti?: number | null
+          funding_date?: string | null
+          funding_wire_date?: string | null
+          funding_wire_status?: string | null
+          hazard_insurance?: number | null
+          hcltv?: number | null
+          hoa_dues?: number | null
+          hoi_date?: string | null
+          hoi_monthly?: number | null
+          hoi_ordered_date?: string | null
+          hoi_received_date?: string | null
+          hoi_status?: string | null
+          id?: string
+          impound_waiver?: boolean | null
+          initial_cd_sent_date?: string | null
+          initial_cd_signed_date?: string | null
+          initial_le_sent_date?: string | null
+          initial_le_signed_date?: string | null
+          intent_to_proceed_date?: string | null
+          interest_only?: boolean | null
+          interest_only_term_months?: number | null
+          interest_rate?: number | null
+          investor?: string | null
+          investor_name?: string | null
+          lead_source?: string | null
+          lender?: string | null
+          lender_credits?: number | null
+          lender_loan_number?: string | null
+          lender_name?: string | null
+          lender_nmls?: string | null
+          lien_position?: string | null
+          listing_agent_brokerage?: string | null
+          listing_agent_contact_id?: string | null
+          listing_agent_email?: string | null
+          listing_agent_name?: string | null
+          listing_agent_phone?: string | null
+          loan_amount?: number | null
+          loan_contingency_date?: string | null
+          loan_costs?: number | null
+          loan_created_date?: string | null
+          loan_name?: string | null
+          loan_number?: string | null
+          loan_program?: string | null
+          loan_purpose?: string | null
+          loan_term?: number | null
+          loan_type?: string | null
+          lock_date?: string | null
+          lock_status?: string | null
+          ltv?: number | null
+          marketing_campaign?: string | null
+          mi_monthly?: number | null
+          mi_upfront?: number | null
+          middle_score?: number | null
+          milestone?: string | null
+          monthly_debts?: number | null
+          monthly_income?: number | null
+          monthly_payment?: number | null
+          mortgage_insurance?: number | null
+          mortgage_type?: string | null
+          most_recent_cd_sent_date?: string | null
+          most_recent_cd_signed_date?: string | null
+          most_recent_le_sent_date?: string | null
+          most_recent_le_signed_date?: string | null
+          notes?: string | null
+          occupancy?: string | null
+          occupancy_type?: string | null
+          option_expiration?: string | null
+          option_fee?: number | null
+          organization_id?: string | null
+          originator_comp?: number | null
+          payroll_date?: string | null
+          payroll_status?: string | null
+          pi_payment?: number | null
+          piti?: number | null
+          points?: number | null
+          pre_approval_expiry_date?: string | null
+          prepaid_items?: number | null
+          prepay_penalty?: boolean | null
+          processor_email?: string | null
+          processor_name?: string | null
+          property_address?: string | null
+          property_attachment_type?: string | null
+          property_city?: string | null
+          property_county?: string | null
+          property_state?: string | null
+          property_tax?: number | null
+          property_taxes_monthly?: number | null
+          property_type?: string | null
+          property_unit_number?: string | null
+          property_units?: number | null
+          property_zip?: string | null
+          purchase_price?: number | null
+          rate_lock_date?: string | null
+          rate_lock_days?: number | null
+          rate_lock_expiration?: string | null
+          raw_payload?: Json | null
+          referral_source?: string | null
+          referring_agent_email?: string | null
+          referring_agent_name?: string | null
+          referring_agent_phone?: string | null
+          refinance_type?: string | null
+          sales_contract_date?: string | null
+          sales_price?: number | null
+          seller_concessions?: number | null
+          seller_credits?: number | null
+          signed_docs_date?: string | null
+          signed_docs_status?: string | null
+          status?: string | null
+          status_date?: string | null
+          submission_date?: string | null
+          synced_at?: string | null
+          tax_transcript_ordered_date?: string | null
+          tax_transcript_received_date?: string | null
+          tbd_address?: boolean | null
+          term_months?: number | null
+          title_company?: string | null
+          title_contact?: string | null
+          title_date?: string | null
+          title_email?: string | null
+          title_ordered_date?: string | null
+          title_received_date?: string | null
+          title_status?: string | null
+          total_closing_costs?: number | null
+          trid_date?: string | null
+          underwriter_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_buyer_agent_contact_id_fkey"
+            columns: ["buyer_agent_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_listing_agent_contact_id_fkey"
+            columns: ["listing_agent_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_activity_log: {
+        Row: {
+          day_of_week: string
+          id: string
+          logged_at: string
+          organization_id: string | null
+          source: string
+          task_name: string
+          user_id: string
+        }
+        Insert: {
+          day_of_week: string
+          id?: string
+          logged_at?: string
+          organization_id?: string | null
+          source?: string
+          task_name: string
+          user_id: string
+        }
+        Update: {
+          day_of_week?: string
+          id?: string
+          logged_at?: string
+          organization_id?: string | null
+          source?: string
+          task_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_activity_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcc_state: {
+        Row: {
+          key: string
+          organization_id: string | null
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          key?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_state_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestone_communications: {
+        Row: {
+          body: string | null
+          created_at: string
+          draft_pushed: boolean
+          draft_pushed_at: string | null
+          id: string
+          milestone_event_id: string | null
+          recipient_email: string | null
+          recipient_type: string
+          subject: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          draft_pushed?: boolean
+          draft_pushed_at?: string | null
+          id?: string
+          milestone_event_id?: string | null
+          recipient_email?: string | null
+          recipient_type: string
+          subject?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          draft_pushed?: boolean
+          draft_pushed_at?: string | null
+          id?: string
+          milestone_event_id?: string | null
+          recipient_email?: string | null
+          recipient_type?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_communications_milestone_event_id_fkey"
+            columns: ["milestone_event_id"]
+            isOneToOne: false
+            referencedRelation: "loan_milestone_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_state: {
+        Row: {
+          created_at: string
+          state: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          state: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          state?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      org_settings: {
+        Row: {
+          arive_webhook_url: string | null
+          created_at: string
+          id: string
+          los_type: string | null
+          mailchimp_list_ids: Json | null
+          n8n_webhook_url: string | null
+          organization_id: string
+          outlook_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          arive_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          los_type?: string | null
+          mailchimp_list_ids?: Json | null
+          n8n_webhook_url?: string | null
+          organization_id: string
+          outlook_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arive_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          los_type?: string | null
+          mailchimp_list_ids?: Json | null
+          n8n_webhook_url?: string | null
+          organization_id?: string
+          outlook_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          brand_color: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          nmls: string | null
+          plan: string
+          slug: string | null
+        }
+        Insert: {
+          brand_color?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          nmls?: string | null
+          plan?: string
+          slug?: string | null
+        }
+        Update: {
+          brand_color?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          nmls?: string | null
+          plan?: string
+          slug?: string | null
+        }
+        Relationships: []
+      }
+      outlook_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          refresh_token: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          refresh_token: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          refresh_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          email_signature: string | null
+          full_name: string | null
+          id: string
+          nmls_individual: string | null
+          organization_id: string | null
+          phone: string | null
+          role: string
+          states_licensed: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          email_signature?: string | null
+          full_name?: string | null
+          id: string
+          nmls_individual?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          role?: string
+          states_licensed?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          email_signature?: string | null
+          full_name?: string | null
+          id?: string
+          nmls_individual?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          role?: string
+          states_licensed?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          challenge_id: string | null
+          drawing_url: string | null
+          id: string
+          kid_id: string | null
+          kid_name: string | null
+          response_text: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          drawing_url?: string | null
+          id?: string
+          kid_id?: string | null
+          kid_name?: string | null
+          response_text?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          drawing_url?: string | null
+          id?: string
+          kid_id?: string | null
+          kid_name?: string | null
+          response_text?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responses_kid_id_fkey"
+            columns: ["kid_id"]
+            isOneToOne: false
+            referencedRelation: "kids"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenarios: {
+        Row: {
+          borrower_name: string | null
+          created_at: string | null
+          current_loan_data: Json | null
+          id: string
+          mismo_file_url: string | null
+          narrative: string | null
+          narrative_edited: boolean | null
+          organization_id: string | null
+          pdf_url: string | null
+          property_address: string | null
+          property_value: number | null
+          reinvestment_data: Json | null
+          results_data: Json | null
+          scenario_type: string
+          scenarios_data: Json
+          share_expires_at: string | null
+          share_token: string | null
+          source: string | null
+          updated_at: string | null
+          user_id: string | null
+          view_count: number | null
+        }
+        Insert: {
+          borrower_name?: string | null
+          created_at?: string | null
+          current_loan_data?: Json | null
+          id?: string
+          mismo_file_url?: string | null
+          narrative?: string | null
+          narrative_edited?: boolean | null
+          organization_id?: string | null
+          pdf_url?: string | null
+          property_address?: string | null
+          property_value?: number | null
+          reinvestment_data?: Json | null
+          results_data?: Json | null
+          scenario_type: string
+          scenarios_data: Json
+          share_expires_at?: string | null
+          share_token?: string | null
+          source?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          borrower_name?: string | null
+          created_at?: string | null
+          current_loan_data?: Json | null
+          id?: string
+          mismo_file_url?: string | null
+          narrative?: string | null
+          narrative_edited?: boolean | null
+          organization_id?: string | null
+          pdf_url?: string | null
+          property_address?: string | null
+          property_value?: number | null
+          reinvestment_data?: Json | null
+          results_data?: Json | null
+          scenario_type?: string
+          scenarios_data?: Json
+          share_expires_at?: string | null
+          share_token?: string | null
+          source?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_audit_log: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          resource: string | null
+          resource_id: string | null
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          resource_id?: string | null
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          resource_id?: string | null
+        }
+        Relationships: []
+      }
+      system_prompts: {
+        Row: {
+          content: string
+          id: string
+          name: string
+          org_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content: string
+          id?: string
+          name?: string
+          org_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string
+          id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_prompts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todo_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          is_complete: boolean
+          is_urgent: boolean
+          organization_id: string | null
+          related_contact_id: string | null
+          related_loan_id: string | null
+          text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          is_urgent?: boolean
+          organization_id?: string | null
+          related_contact_id?: string | null
+          related_loan_id?: string | null
+          text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          is_urgent?: boolean
+          organization_id?: string | null
+          related_contact_id?: string | null
+          related_loan_id?: string | null
+          text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todo_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todo_items_related_contact_id_fkey"
+            columns: ["related_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todo_items_related_loan_id_fkey"
+            columns: ["related_loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          key: string
+          organization_id: string | null
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_my_organization_id: { Args: never; Returns: string }
+      get_my_role: { Args: never; Returns: string }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

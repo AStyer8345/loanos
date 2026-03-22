@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import type { Database } from '@/lib/database.types'
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -12,7 +13,7 @@ export function createClient() {
 
   const cookieStore = cookies()
 
-  return createServerClient(
+  return createServerClient<Database>(
     url,
     anonKey,
     {

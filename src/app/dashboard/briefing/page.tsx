@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Brain, RefreshCw, CheckCircle2, Circle, AlertCircle, Users, FileText, Bell, Clock } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -49,6 +49,12 @@ export default function DailyBriefingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checked, setChecked] = useState<Set<number>>(new Set())
+
+  // Auto-fetch on mount so Adam doesn't have to click the button manually
+  useEffect(() => {
+    fetchBriefing()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function fetchBriefing() {
     setLoading(true)

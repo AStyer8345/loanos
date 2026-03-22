@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { logSecurityEvent } from '@/lib/audit'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function GET(request: NextRequest) {
   // Allow server-to-server calls with agent secret, or browser calls with session auth
@@ -179,7 +180,7 @@ Rules:
 
     const anthropic = await getAnthropicClient()
     const claudeMsg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: systemPrompt,
       messages: [{ role: 'user', content: contextBlock }],

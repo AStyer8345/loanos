@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function POST(req: NextRequest) {
   // 20 requests per minute per IP (no auth on this route)
@@ -85,7 +86,7 @@ Rules:
       async start(controller) {
         try {
           const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-5',
+            model: CLAUDE_MODEL,
             max_tokens: 1024,
             system: systemPrompt,
             messages: [{ role: 'user', content: `Analyze these ${mode} loan scenarios:\n${dataContext}` }],

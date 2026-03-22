@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const client = await getAnthropicClient()
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       messages: [
         {

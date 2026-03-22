@@ -5,6 +5,7 @@ import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { logSecurityEvent } from '@/lib/audit'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 // ── Milestone → human-readable label ─────────────────────────────────────────
 const MILESTONE_LABELS: Record<string, string> = {
@@ -139,7 +140,7 @@ Guidelines:
 Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no HTML).`
 
       const borrowerMsg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
+        model: CLAUDE_MODEL,
         max_tokens: 512,
         messages: [{ role: 'user', content: borrowerPrompt }],
       })
@@ -222,7 +223,7 @@ Guidelines:
 Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no HTML).`
 
       const realtorMsg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
+        model: CLAUDE_MODEL,
         max_tokens: 512,
         messages: [{ role: 'user', content: realtorPrompt }],
       })

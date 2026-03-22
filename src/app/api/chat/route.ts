@@ -102,7 +102,7 @@ ${loan ? `
   if (loanError) console.error('[chat/route] loan fetch error:', loanError)
   if (!data) return base
 
-  let contact: { first_name: string; last_name: string; email: string; phone: string } | null = null
+  let contact: { first_name: string; last_name: string; email: string | null; phone: string | null } | null = null
   if (data.contact_id) {
     const { data: contactRow } = await supabase
       .from('contacts')

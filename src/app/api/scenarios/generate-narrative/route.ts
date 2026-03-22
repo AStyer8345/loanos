@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
@@ -105,18 +104,9 @@ Rules:
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
 
-          // Log to activity_log
-          try {
-            const supabase = createServiceClient()
-            await supabase.from('activity_log').insert({
-              type: 'ai_generation',
-              action: 'scenario_narrative',
-              summary: `AI narrative generated for ${mode} scenario — ${borrowerName || 'unnamed borrower'}`,
-              metadata: { mode, scenarioCount: mode === 'purchase' ? purchaseScenarios?.length : refiScenarios?.length, wordCount: fullText.split(/\s+/).length },
-            })
-          } catch (logErr) {
-            console.error('[narrative] activity log error:', logErr)
-          }
+          // Note: activity_log insert omitted — this route has no auth context,
+          // so organization_id cannot be determined. Logging unscoped rows would
+          // pollute activity_log and break multi-tenant isolation.
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Generation failed'
           const msgLc = msg.toLowerCase()

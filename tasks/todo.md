@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
+_Last updated: 2026-03-22 (daily prep — activity_log null org fixes)_
 
 ---
 
@@ -8,9 +8,12 @@ _Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
 
 - [x] **daily-briefing unscoped fallback** — Fixed 2026-03-21. Replaced `withOrg` ternary fallback with hard 500 check before any queries. `organizationId` must be non-null before any data fetch runs.
 - [x] **Final CD Email n8n check constraint crash** — Fixed 2026-03-21 morning audit. `Log CD Email` node was sending `status: 'draft'` but `email_drafts_status_check` only allows `pending/sent/discarded`. Updated to `status: 'pending'`. Workflow `SkzrWeR0bHZs8kWX`.
+- [x] **activity_log null org rows (Next.js)** — Fixed 2026-03-22. `updateLastTouch.ts` now fetches org_id from profile. `outlook-sync logEmailActivity` now stamps `contact.organization_id`. `generate-narrative` unscoped insert removed. Migration 046 backfilled 3 orphan rows.
 
+- [ ] **n8n activity_log null org — Arive Status Update** (`9JyzzwKac8v3uQ7d`) — inserts `status_updated` to activity_log without `organization_id`. Needs a `Get Org ID` node (same as WF1/WF2 pattern) before the activity_log HTTP Request node.
+- [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Also blocked on Azure App Registration. Low priority until Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
-- [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
+- [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 
 ---
 
@@ -31,6 +34,13 @@ _Last updated: 2026-03-21 (morning audit — n8n error sweep + Final CD fix)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (2026-03-22 daily prep — activity_log null org fixes)
+
+- [x] **Migration 046 applied** — Backfilled 3 null `organization_id` rows in `activity_log`. All 3 were created after migration 043 by n8n workflows and a code bug. Assigned to Adam's org. `activity_log` now has 0 null org rows.
+- [x] **`updateLastTouch.ts` fixed** — Was inserting to `activity_log` without `organization_id`. Now fetches `profiles.organization_id` for the authenticated user and stamps it on every insert.
+- [x] **`outlook-sync/route.ts` `logEmailActivity()` fixed** — Was inserting without `organization_id`. Now passes `contact.organization_id` (already present on the contact row fetched from Supabase) into the activity_log row.
+- [x] **`generate-narrative/route.ts` unscoped insert removed** — Route has no auth (IP rate-limited only), so org_id is unknowable. The activity_log insert was producing orphan rows. Removed the insert entirely. Unused `createServiceClient` import also cleaned up.
 
 ## ✅ Completed (session 13 — 2026-03-21 multi-tenancy audit)
 

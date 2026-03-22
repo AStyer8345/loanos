@@ -16,7 +16,29 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13).**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep).**
+
+## Multi-Tenancy Status (2026-03-22 — daily prep)
+
+**Audited today:**
+- Schema: all 14 org-scoped tables confirmed. `activity_log` found 3 new null org rows (created after migration 043's backfill) — root cause: n8n workflows inserting without org_id + Next.js code bugs.
+- RLS: all policies confirmed correct. No new gaps. `activity_log` UPDATE/DELETE intentionally absent (immutable audit log). `org_settings` has no DELETE policy (acceptable).
+- API routes: two code paths inserting to `activity_log` without `organization_id` found and fixed.
+- `generate-narrative` route had no auth context — its activity_log insert would always produce null-org rows. Removed the insert.
+- Onboarding: ✅ fully working (Tier 1 data, org create, profile link, redirect).
+- n8n `status_updated` null row: from Arive Status Update workflow — cannot fix in Next.js code; will persist until n8n workflow is updated.
+
+**Built/fixed this session:**
+- Migration 046: backfilled 3 null `organization_id` rows in `activity_log` (0 null rows now)
+- `src/lib/updateLastTouch.ts`: now fetches `profiles.organization_id` and stamps it on every activity_log insert
+- `src/app/api/outlook-sync/route.ts` `logEmailActivity()`: now stamps `organization_id` from the matched contact row
+- `src/app/api/scenarios/generate-narrative/route.ts`: removed unscoped activity_log insert (route has no auth — org_id unknowable)
+
+**Outstanding:**
+- n8n Arive Status Update workflow (`9JyzzwKac8v3uQ7d`) still inserts activity_log rows without org_id — Next.js code is now clean but n8n workflow needs a `Get Org ID` node added before the activity_log HTTP Request
+- n8n Outlook Email Sync workflow (`JMmstRl2C5ylmuIY`) still inserts `email.received` rows without org_id — same pattern
+- `chat_sessions.organization_id` is still nullable (no NOT NULL constraint) — safe to add after confirming no new nulls accumulate
+- Plan selection UI in onboarding deferred (defaults to 'starter')
 
 ## Multi-Tenancy Status (2026-03-21 — session 13)
 

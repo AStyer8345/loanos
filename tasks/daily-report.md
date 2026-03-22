@@ -1,68 +1,91 @@
-# LoanOS Daily Report — 2026-03-20
+# LoanOS Daily Report — 2026-03-21
 
 ## 🔴 Action Required
 
-### n8n Workflow Errors (2026-03-19)
-- **`1tagvoU0UXtdDiMY` — Arive New Loan → Supabase**: 4 consecutive errors between 18:35–19:36. All show `lastNodeExecuted: null`, meaning failures happened before any node ran (likely webhook auth or malformed payload). Check Arive webhook config — may need re-registration.
-- **`utMvZpkdRwIRZ51u` — Pre-Approval Email**: 1 error at 18:35. Same `lastNodeExecuted: null` pattern — webhook trigger failing at entry point.
+### Stale Active Loans (65 loans not updated in 3+ days)
+High-priority loans that need attention:
 
-### Activity Gaps — High-Priority Loans (no activity in 5+ days)
-These are in active pipeline stages and have zero activity_log entries since 2026-03-15:
+| Borrower | Status | Last Updated |
+|----------|--------|--------------|
+| Farinaz Pisheh | DISCLOSURE_SENT | 2026-03-17 |
+| Patrick Rademacher | Loan in Process | 2026-03-17 |
+| Andrew Mcneese | CLEAR_TO_CLOSE | 2026-03-17 |
+| Travis Coleman | clear_to_close | 2026-03-18 |
+| Jessica Holt | clear_to_close | 2026-03-17 |
+| Linda Okafor | clear_to_close | 2026-03-17 |
+| Kenneth Turner | UNDERWRITING_SUBMITTED | 2026-03-17 |
+| Kyle Jennings | RE_SUBMITTAL | 2026-03-18 |
+| Dhaval Poladia | UNDERWRITING_SUBMITTED | 2026-03-17 |
+| Chelsea Wise | CLEAR_TO_CLOSE | 2026-03-17 |
+| Drew Benac | Loan in Process | 2026-03-17 |
+| Ryan Nguyen | underwriting | 2026-03-17 |
+| Priya Nair | underwriting | 2026-03-17 |
+| Derek Cho | underwriting | 2026-03-17 |
+| Lauren Simmons | underwriting | 2026-03-17 |
+| Maria Gutierrez | processing | 2026-03-17 |
+| Monica Castillo | processing | 2026-03-17 |
+| Scott Tillman | processing | 2026-03-18 |
+| David Park | processing | 2026-03-17 |
 
-| Borrower | Status |
-|----------|--------|
-| Maria Gutierrez | processing |
-| Monica Castillo | processing |
-| David Park | processing |
-| Ryan Nguyen | underwriting |
-| Priya Nair | underwriting |
-| Derek Cho | underwriting |
-| Lauren Simmons | underwriting |
+Plus 46 additional stale loans in lead/application/pre_approved/Started/On Hold status.
+
+### n8n Workflow Error (last 24h)
+- **LoanOS — Final CD Email** (`SkzrWeR0bHZs8kWX`) — execution error at 2026-03-21 02:10 UTC
+  → Check n8n execution logs for root cause
+
+### Inactive Workflows (not in intentional inactive list)
+- **LoanOS — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inactive (needs Outlook credential)
+- **LoanOS — Contract Received** (`w7hZLmIcQ4izmndb`) — inactive duplicate (superseded by `UfNcdpoVKQZqy0fj`)
 
 ---
 
 ## 🟡 Watch Items
 
-### Unexpected Inactive n8n Workflows
-- **`JMmstRl2C5ylmuIY` — Outlook Email Sync**: Inactive (known — needs Outlook credential/env vars before activating)
-- **`w7hZLmIcQ4izmndb` — LoanOS — Contract Received**: Inactive. Note: there are now TWO "Contract Received" workflows — this one is inactive/orphaned; `UfNcdpoVKQZqy0fj` is the live one. Consider deleting `w7hZLmIcQ4izmndb`.
+### Activity Gaps (62 of 72 active loans have no activity_log entry in 5+ days)
+Most of the pipeline has no recent activity logged. Either:
+- Loans are genuinely idle (older "Started" / "On Hold" entries from Arive import), or
+- Activity log is not being written consistently for all status changes
 
-### Activity Gaps — Lower-Priority Loans (no activity in 5+ days)
-Pre-approved, lead, application, or On Hold status — less urgent but worth a check:
+Notable active-stage loans with no logged activity:
+- Andrew Mcneese | CLEAR_TO_CLOSE
+- Travis Coleman | clear_to_close
+- Jessica Holt | clear_to_close
+- Linda Okafor | clear_to_close
+- Kenneth Turner | UNDERWRITING_SUBMITTED
+- Kyle Jennings | RE_SUBMITTAL
 
-| Borrower | Status |
-|----------|--------|
-| Rachel Kim | pre_approved |
-| James Harwell | pre_approved |
-| Jennifer Walsh | pre_approved |
-| Tyler Owens | pre_approved |
-| Amanda Reyes | pre_approved |
-| Nathan Burke | pre_approved |
-| Michael Torres | application |
-| Sarah Blackwell | application |
-| Kevin Spotts | On Hold |
-| Martin Cuilla | Started |
-| Courtney Dixon | lead |
-| Patricia Lowe | lead |
-| Unknown (2193e175) | On Hold |
+### Console.log Statements in API Routes (2 files)
+- `src/app/api/arive-webhook/route.ts`
+- `src/app/api/mismo/parse/route.ts`
 
-### Code Quality
-- **console.log statements** in API routes (3 total):
-  - `src/app/api/arive-webhook/route.ts` — 2 instances
-  - `src/app/api/mismo/parse/route.ts` — 1 instance
-- **Dark theme violations** (bg-white / bg-gray-100 / text-gray-900 in dashboard):
-  - `src/app/dashboard/scenarios/ScenarioList.tsx`
-  - `src/app/dashboard/scenarios/new/StatementUpload.tsx`
-  - `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
+### Unused Components (10 files)
+Not imported anywhere in `src/app/`:
+- `SmartActionQueue.tsx`
+- `EmailDraftPreview.tsx`
+- `NavDropdown.tsx`
+- `dashboard/DailyBriefingPanel.tsx`
+- `dashboard/DailyScheduleWidget.tsx`
+- `ActivityTimeline.tsx`
+- `GlobalSearch.tsx`
+- `outreach/QuickAddConfirmation.tsx`
+- `outreach/BulkActionPreview.tsx`
+- `NavItem.tsx`
+
+### Dark Theme Violations (3 files in dashboard)
+Files using `bg-white`, `bg-gray-100`, or `text-gray-900`:
+- `src/app/dashboard/scenarios/ScenarioList.tsx`
+- `src/app/dashboard/scenarios/new/StatementUpload.tsx`
+- `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
 
 ---
 
 ## 🟢 All Clear
 
-- **Stale loans**: 0 — no active loans overdue for an update
-- **Pending email drafts**: 0 — no drafts stuck unsent
-- **Core workflows active**: Milestone Agent, Arive Status Update, Referral Intro, New Application, Final CD, Refi Intake, Inbound Email Sync, Contract Received (`UfNcdpoVKQZqy0fj`), Web Lead Automation — all active
+- **Pending email drafts**: None — no drafts sitting unsent for 24h+
+- **TypeScript build**: ✅ Pass — `npx tsc --noEmit` returned no errors
+- **Core n8n workflows**: All primary LoanOS workflows active (Arive sync, milestone agent, pre-approval, referral intro, refi intake, inbound email, web lead, contract received, final CD)
+
+---
 
 ## Build
-
-**PASS** — `npx tsc --noEmit` returned 0 errors
+**Pass** — 0 TypeScript errors

@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-23 (daily audit — WF1 org_id + column fix, dead code removal)_
+_Last updated: 2026-03-23 (morning audit — dead code cleanup: ResultsTable.tsx + pipeline/stats route deleted)_
 
 ---
 
@@ -14,6 +14,8 @@ _Last updated: 2026-03-23 (daily audit — WF1 org_id + column fix, dead code re
 - [x] **n8n WF2 est_closing_date column name bug** — Fixed 2026-03-22 morning audit. `Update Loan Status` node was PATCHing `est_closing_date` (old column, never written by Next.js arive-webhook). Fixed to `estimated_closing_date` to match the schema and the Next.js webhook handler. Local file updated; must be pushed to n8n cloud.
 - [x] **n8n WF1 activity_log null org** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. Added `Get Org ID` + `Extract Org ID` nodes (profiles lookup by systemUserId). Stamped `organization_id` on Upsert Contact, Upsert Loan, and Log Activity. Local file updated: `n8n/workflows/workflow-1-new-loan.json`. **Adam must push to n8n cloud.**
 - [x] **n8n WF1 est_closing_date column** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. `Upsert Loan` body updated to `estimated_closing_date`. Local file updated. **Adam must push to n8n cloud.**
+- [x] **Null org recurrence post-046** — Fixed 2026-03-23 (daily prep). 6 new null activity_log rows (5 email_inbound from Outlook Sync, 1 loan_created from WF1 pre-push) + 1 null contact (Aaron Treptow, from WF1). Migration 048 applied — backfilled all to Adam's org. 0 null rows confirmed.
+- [x] **activity_log SELECT RLS tightened** — Fixed 2026-03-23 (daily prep). Dropped `"Users can read own activity"` policy (had `user_id OR org_id` clause — exposed null-org rows to their author). New policy `"Org members can read activity"` is org-only. Migration 048.
 - [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Also blocked on Azure App Registration. Low priority until Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
@@ -34,7 +36,7 @@ _Last updated: 2026-03-23 (daily audit — WF1 org_id + column fix, dead code re
 - [ ] **Migration file numbering** — files 001–015 use 3-digit prefix, 0016/0017 use 4-digit. Rename to 016/017 for consistency.
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
-- [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
+- [x] **Dead API route `/api/pipeline/stats`** — Deleted 2026-03-23 morning audit. Confirmed no callers anywhere in src/.
 
 ---
 

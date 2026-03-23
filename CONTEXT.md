@@ -16,20 +16,27 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit).**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep).**
 
-## Daily Audit 2026-03-23
+## Daily Audit 2026-03-23 (scheduled — second run)
+
+**Audited:**
+- Schema: all 14 org-scoped tables confirmed. 6 new null activity_log rows + 1 null contact row found since migration 046 backfill.
+- Root cause: 5 email_inbound rows from Outlook Email Sync (JMmstRl2C5ylmuIY — known, Azure blocked). 1 loan_created row + 1 contact (Aaron Treptow) from WF1 before 2026-03-23 fix (not yet pushed to n8n cloud).
+- API routes audited: quick-add, web-lead, import/contacts, import/loans, outreach — all stamp organization_id correctly. No unscoped writers found in Next.js code.
+- activity_log SELECT RLS: old policy had `user_id = auth.uid() OR organization_id = get_my_organization_id()` — the OR fallback exposed null-org rows to their original user (cross-tenant risk). Tightened to org-only.
 
 **Fixed this session:**
-- `n8n/workflows/workflow-1-new-loan.json`: Added `Get Org ID` HTTP node (profiles lookup by systemUserId) + `Extract Org ID` code node. Stamped `organization_id` on Upsert Contact, Upsert Loan, and Log Activity. Fixed `est_closing_date` → `estimated_closing_date` in Upsert Loan body.
-- `src/app/api/arive-webhook/route.ts`: Removed 2 debug `console.log` lines that were dumping full loan payloads (PII) to Vercel logs.
-- Deleted `src/components/EmailDraftPreview.tsx` (253 lines) and `src/components/ActivityTimeline.tsx` (246 lines) — confirmed zero import references.
+- **Migration 048 applied**: backfilled 6 null activity_log rows + 1 null contact (Aaron Treptow) → Adam's org. 0 null rows in both tables confirmed.
+- **activity_log SELECT RLS tightened**: dropped `"Users can read own activity"` policy (user_id OR clause). New policy `"Org members can read activity"` scopes to `organization_id = get_my_organization_id()` only.
 
-**Outstanding (unchanged from 2026-03-22):**
-- **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — local JSON updated but not live
-- n8n Outlook Email Sync blocked on Azure App Registration
+**Outstanding (unchanged from 2026-03-23 morning):**
+- **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — local JSON fixed but not live; will continue producing null-org rows until pushed
+- n8n Outlook Email Sync blocked on Azure App Registration — continues producing email_inbound null-org rows
 - Performance page still uses localStorage with real borrower names in seed data
 - `chat_sessions.organization_id` still nullable — add NOT NULL once 0 null rows confirmed
+
+## Multi-Tenancy Status (2026-03-23 — daily prep, second run)
 
 ## Multi-Tenancy Status (2026-03-22 — daily prep)
 

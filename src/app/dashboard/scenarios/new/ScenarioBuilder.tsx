@@ -509,7 +509,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                           <ScenarioSummaryTable data={displayData} />
                         </div>
                         <div className="flex-shrink-0 w-72">
-                          <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} />
+                          <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} rows={displayData.rows} />
                         </div>
                       </div>
 

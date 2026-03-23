@@ -230,6 +230,7 @@ export type Database = {
           loan_id: string | null
           logged_at: string | null
           notes: string | null
+          organization_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -240,6 +241,7 @@ export type Database = {
           loan_id?: string | null
           logged_at?: string | null
           notes?: string | null
+          organization_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -250,6 +252,7 @@ export type Database = {
           loan_id?: string | null
           logged_at?: string | null
           notes?: string | null
+          organization_id?: string | null
           user_id?: string | null
         }
         Relationships: [

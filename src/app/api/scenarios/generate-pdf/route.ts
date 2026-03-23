@@ -106,7 +106,7 @@ function fmtK(v: number): string {
 const CHART_COLORS = ['#4A90D9', '#3BB080', '#E86B4F', '#9B59B6', '#E67E22']
 
 function renderSVGBarChart(
-  items: { label: string; value: number; isRecommended: boolean }[],
+  items: { label: string; value: number }[],
   fmtFn: (v: number) => string
 ): string {
   const W = 500
@@ -124,7 +124,7 @@ function renderSVGBarChart(
     const barH = Math.max(4, Math.round((item.value / maxVal) * CHART_H))
     const x = startX + i * (barW + gap)
     const y = BOTTOM - barH
-    const fill = item.isRecommended ? '#C9A84C' : CHART_COLORS[i % CHART_COLORS.length]
+    const fill = CHART_COLORS[i % CHART_COLORS.length]
     const shortLabel = item.label.length > 12 ? item.label.slice(0, 11) + '\u2026' : item.label
     return [
       `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${fill}" rx="3"/>`,
@@ -141,43 +141,84 @@ function renderSVGBarChart(
 
 function renderSummaryTable(rows: ScenarioDisplayRow[], mode: 'purchase' | 'refinance'): string {
   const hasPurchasePrice = mode === 'purchase' && rows.some(r => r.purchasePrice)
+  const hasHOA = rows.some(r => r.hoa > 0)
+  const hasPMI = rows.some(r => r.pmi > 0)
 
-  const headerCells = rows.map((r) => {
-    const isRec = r.isRecommended
-    return `<th style="${isRec ? 'background:#0A1628;color:#fff;border:2px solid #C9A84C;' : 'background:#f5f5f5;color:#333;'} padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">
-      ${r.label}${isRec ? '<br><span style="font-size:9px;color:#C9A84C;font-weight:600;">★ Recommended</span>' : ''}
-      <br><span style="font-size:9px;font-weight:500;color:${isRec ? '#C9A84C80' : '#999'};text-transform:uppercase;">${r.loanType}</span>
+  const headerCells = rows.map(r =>
+    `<th style="background:#f5f5f5;color:#333;padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">
+      ${r.label}
+      <br><span style="font-size:9px;font-weight:500;color:#999;text-transform:uppercase;">${r.loanType}</span>
     </th>`
-  }).join('')
+  ).join('')
 
-  const metricRows: Array<[string, (r: ScenarioDisplayRow) => string]> = [
+  const cell = (val: string) =>
+    `<td style="padding:6px 12px;font-size:10.5px;text-align:center;font-family:'IBM Plex Mono',monospace;">${val}</td>`
+
+  const subCell = (val: string, color = '#888') =>
+    `<td style="padding:4px 12px;font-size:9.5px;text-align:center;font-family:'IBM Plex Mono',monospace;color:${color};">${val}</td>`
+
+  const labelCell = (label: string, indent = false) =>
+    `<td style="padding:6px 12px;font-size:10.5px;color:#666;font-weight:500;white-space:nowrap;${indent ? 'padding-left:22px;font-size:9.5px;color:#999;' : ''}">${label}</td>`
+
+  const staticRows: Array<[string, (r: ScenarioDisplayRow) => string]> = [
     ...(hasPurchasePrice ? [['Purchase Price', (r: ScenarioDisplayRow) => r.purchasePrice ? fmtCurrency(r.purchasePrice) : '—'] as [string, (r: ScenarioDisplayRow) => string]] : []),
-    ['Loan Amount', (r) => fmtCurrency(r.loanAmount)],
-    ['Interest Rate', (r) => `${r.interestRate.toFixed(3)}%`],
-    ['APR', (r) => `${r.apr.toFixed(3)}%`],
-    ['Monthly P&I', (r) => fmtCurrency(r.monthlyPI)],
-    ['Total Monthly Payment', (r) => fmtCurrency(r.totalMonthlyPayment)],
-    ['Cash to Close', (r) => fmtCurrency(r.cashToClose)],
-    ['Monthly Savings', (r) => (r.monthlySavingsVsCurrent ?? 0) > 0 ? `+${fmtCurrency(r.monthlySavingsVsCurrent!)}` : '—'],
-    ['Total Interest (Life)', (r) => fmtCurrency(r.totalInterest)],
+    ['Loan Amount', r => fmtCurrency(r.loanAmount)],
+    ['Interest Rate', r => `${r.interestRate.toFixed(3)}%`],
+    ['APR', r => `${r.apr.toFixed(3)}%`],
   ]
 
-  const tableRows = metricRows.map(([label, fn], rowIdx) => {
-    const cells = rows.map((r, i) => {
-      const isRec = r.isRecommended
-      const val = fn(r)
-      return `<td style="${isRec ? 'background:#0A1628;color:#fff;border-left:2px solid #C9A84C;border-right:2px solid #C9A84C;' : ''} padding:6px 12px;font-size:10.5px;text-align:center;font-family:'IBM Plex Mono',monospace;${i === 0 ? '' : ''}">${val}</td>`
-    }).join('')
-    return `<tr style="background:${rowIdx % 2 === 0 ? '#fff' : '#fafafa'}">
-      <td style="padding:6px 12px;font-size:10.5px;color:#666;font-weight:500;white-space:nowrap;">${label}</td>
-      ${cells}
+  const staticRowsHTML = staticRows.map(([label, fn], rowIdx) =>
+    `<tr style="background:${rowIdx % 2 === 0 ? '#fff' : '#fafafa'}">
+      ${labelCell(label)}
+      ${rows.map(r => cell(fn(r))).join('')}
     </tr>`
-  }).join('')
-
-  // Close recommended column bottom border
-  const footerCells = rows.map(r =>
-    `<td style="${r.isRecommended ? 'border-bottom:2px solid #C9A84C;border-left:2px solid #C9A84C;border-right:2px solid #C9A84C;' : ''}"></td>`
   ).join('')
+
+  // Monthly Payment section (always expanded in PDF)
+  const monthlyPaymentHTML = `
+    <tr style="background:#f0f0f0;">
+      <td style="padding:7px 12px;font-size:10.5px;font-weight:700;color:#0A1628;white-space:nowrap;">Monthly Payment</td>
+      ${rows.map(r => `<td style="padding:7px 12px;font-size:10.5px;font-weight:700;color:#0A1628;text-align:center;font-family:'IBM Plex Mono',monospace;">${fmtCurrency(r.totalMonthlyPayment)}</td>`).join('')}
+    </tr>
+    <tr style="background:#fafafa;">
+      ${labelCell('Principal &amp; Interest', true)}
+      ${rows.map(r => subCell(fmtCurrency(r.monthlyPI))).join('')}
+    </tr>
+    <tr style="background:#fafafa;">
+      ${labelCell('Property Tax (est.)', true)}
+      ${rows.map(r => subCell(r.propertyTaxes > 0 ? fmtCurrency(r.propertyTaxes) : '—')).join('')}
+    </tr>
+    <tr style="background:#fafafa;">
+      ${labelCell('Homeowners Insurance (est.)', true)}
+      ${rows.map(r => subCell(r.homeownersInsurance > 0 ? fmtCurrency(r.homeownersInsurance) : '—')).join('')}
+    </tr>
+    ${hasHOA ? `<tr style="background:#fafafa;">
+      ${labelCell('HOA', true)}
+      ${rows.map(r => subCell(r.hoa > 0 ? fmtCurrency(r.hoa) : '—')).join('')}
+    </tr>` : ''}
+    ${hasPMI ? `<tr style="background:#fafafa;">
+      ${labelCell('MI / PMI', true)}
+      ${rows.map(r => subCell(r.pmi > 0 ? fmtCurrency(r.pmi) : '—')).join('')}
+    </tr>` : ''}
+  `
+
+  // Cash to Close (totals only per instructions)
+  const ctcHTML = `
+    <tr style="background:#fff;">
+      <td style="padding:7px 12px;font-size:10.5px;font-weight:600;color:#666;white-space:nowrap;">Cash to Close</td>
+      ${rows.map(r => `<td style="padding:7px 12px;font-size:10.5px;font-weight:600;text-align:center;font-family:'IBM Plex Mono',monospace;color:#0A1628;">${fmtCurrency(r.cashToClose)}</td>`).join('')}
+    </tr>
+  `
+
+  const savingsHTML = `
+    <tr style="background:#fafafa;">
+      <td style="padding:7px 12px;font-size:10.5px;color:#666;font-weight:500;white-space:nowrap;">${mode === 'purchase' ? 'Monthly Savings vs. Baseline' : 'Monthly Savings vs. Current'}</td>
+      ${rows.map(r => {
+        const s = r.monthlySavingsVsCurrent ?? 0
+        return `<td style="padding:7px 12px;font-size:10.5px;font-weight:600;text-align:center;font-family:'IBM Plex Mono',monospace;color:${s > 0 ? '#2A7A4B' : '#666'};">${s > 0 ? `+${fmtCurrency(s)}/mo` : '—'}</td>`
+      }).join('')}
+    </tr>
+  `
 
   return `<table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:8px;overflow:hidden;">
     <thead>
@@ -187,8 +228,10 @@ function renderSummaryTable(rows: ScenarioDisplayRow[], mode: 'purchase' | 'refi
       </tr>
     </thead>
     <tbody>
-      ${tableRows}
-      <tr>${'<td></td>' + footerCells}</tr>
+      ${staticRowsHTML}
+      ${monthlyPaymentHTML}
+      ${ctcHTML}
+      ${savingsHTML}
     </tbody>
   </table>`
 }
@@ -199,7 +242,7 @@ function renderKeyMetricsGrid(data: DisplayData): string {
     { label: 'Monthly Savings', value: fmtCurrency(m.monthlySavings), sub: '/month', green: m.monthlySavings > 0 },
     { label: 'Savings — 5 Years', value: fmtCurrency(m.savings5yr), sub: 'cumulative', green: m.savings5yr > 0 },
     { label: 'Savings — 15 Years', value: fmtCurrency(m.savings15yr), sub: 'cumulative', green: m.savings15yr > 0 },
-    { label: 'Total Interest Paid', value: fmtCurrency(m.interestAt15yrBest), sub: 'best option', green: false },
+    { label: 'Interest at 15 Years', value: fmtCurrency(m.interestAt15yrBest), sub: 'best option, through yr 15', green: false },
   ]
 
   return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
@@ -331,8 +374,8 @@ function generatePDFHTML(
   const email = settings?.email || 'adam@styermortgage.com'
 
   // Bar chart data
-  const paymentBars = data.rows.map(r => ({ label: r.label, value: Math.round(r.totalMonthlyPayment), isRecommended: r.isRecommended }))
-  const interestBars = data.rows.map(r => ({ label: r.label, value: Math.round(r.totalInterest), isRecommended: r.isRecommended }))
+  const paymentBars = data.rows.map(r => ({ label: r.label, value: Math.round(r.totalMonthlyPayment) }))
+  const interestBars = data.rows.map(r => ({ label: r.label, value: Math.round(r.totalInterest) }))
 
   const hasBreakEven = data.breakEvenRows.length > 0
   const hasClosingCosts = closingCosts.some(c => c.cc !== null)

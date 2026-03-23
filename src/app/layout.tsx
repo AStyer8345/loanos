@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 import { OutreachChatProvider } from '@/components/outreach/OutreachChatContext'
-import OutreachChat from '@/components/outreach/OutreachChat'
+import LoanOSChat from '@/components/crm/LoanOSChat'
 
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-mono' })
 const ibmPlexSans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans' })
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} ${ibmPlexMono.className} bg-gray-950 antialiased`}>
         <OutreachChatProvider>
           {children}
-          <OutreachChat />
+          <LoanOSChat />
         </OutreachChatProvider>
       </body>
     </html>

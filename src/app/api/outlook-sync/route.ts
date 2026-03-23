@@ -115,6 +115,11 @@ async function logEmailActivity(
     summary,
     raw_payload: { ...payload, body: (message.body as Record<string, string>)?.content || null },
     external_id: message.internetMessageId,
+    // Dedicated columns for Inbox Review queries
+    from_address: from,
+    subject: message.subject,
+    body_snippet: (message.bodyPreview as string) || null,
+    occurred_at: message.receivedDateTime,
   };
 
   const res = await fetch(`${SUPABASE_URL}/rest/v1/activity_log`, {
@@ -130,6 +135,55 @@ async function logEmailActivity(
     const body = await res.text();
     if (res.status === 409) return false;
     throw new Error(`Failed to insert activity_log: ${res.status} ${body}`);
+  }
+
+  return true;
+}
+
+async function logUnmatchedEmail(message: Record<string, unknown>) {
+  const from = (message.from as Record<string, Record<string, string>>)?.emailAddress?.address || '';
+  const fromName = (message.from as Record<string, Record<string, string>>)?.emailAddress?.name || '';
+
+  const row = {
+    action: 'email_inbound',
+    type: 'email_inbound',
+    entity_type: 'email',
+    user_id: LOANOS_SYSTEM_USER_ID,
+    summary: `Email from ${fromName || from}: ${message.subject}`,
+    from_address: from,
+    subject: message.subject,
+    body_snippet: (message.bodyPreview as string) || null,
+    occurred_at: message.receivedDateTime,
+    external_id: message.internetMessageId,
+    metadata: {
+      from,
+      from_name: fromName,
+      subject: message.subject,
+      preview: message.bodyPreview,
+      received_at: message.receivedDateTime,
+      message_id: message.internetMessageId,
+    },
+    raw_payload: {
+      from,
+      subject: message.subject,
+      preview: message.bodyPreview,
+      body: (message.body as Record<string, string>)?.content || null,
+    },
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/activity_log`, {
+    method: 'POST',
+    headers: {
+      ...sbHeaders(),
+      Prefer: 'resolution=ignore-duplicates,return=minimal',
+    },
+    body: JSON.stringify(row),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    if (res.status === 409) return false;
+    throw new Error(`Failed to insert unmatched email: ${res.status} ${body}`);
   }
 
   return true;
@@ -151,7 +205,11 @@ async function runSync() {
     if (!senderEmail) { stats.skipped++; continue; }
 
     const contact = await findContactByEmail(senderEmail);
-    if (!contact) { stats.unmatched++; continue; }
+    if (!contact) {
+      stats.unmatched++;
+      await logUnmatchedEmail(msg);
+      continue;
+    }
 
     const inserted = await logEmailActivity(contact, msg, 'email_inbound');
     if (inserted) { stats.inserted++; } else { stats.skipped++; }

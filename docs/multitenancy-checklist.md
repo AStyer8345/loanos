@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-22 (daily prep — migration 046 applied, updateLastTouch + outlook-sync + generate-narrative fixed)_
+_Last updated: 2026-03-23 (daily prep — migration 048 backfill, activity_log SELECT RLS tightened to org-only)_
 
 ---
 
@@ -21,9 +21,9 @@ _Last updated: 2026-03-22 (daily prep — migration 046 applied, updateLastTouch
 | `user_settings` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies; redundant ALL policy dropped in 040 |
-| 0 loans with null `organization_id` | ✅ | Verified 2026-03-21 (0 null rows) |
-| 0 contacts with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
-| 0 activity_log with null `organization_id` | ✅ | 78 legacy nulls backfilled — migration 043; 3 new nulls from n8n/code bugs — migration 046 + code fixes 2026-03-22 |
+| 0 loans with null `organization_id` | ✅ | Verified 2026-03-23 (0 null rows) |
+| 0 contacts with null `organization_id` | ✅ | 1 new null (Aaron Treptow, from WF1 pre-push) backfilled — migration 048 2026-03-23 |
+| 0 activity_log with null `organization_id` | ✅ | 6 new nulls (5 Outlook Sync email_inbound + 1 WF1 loan_created) backfilled — migration 048 2026-03-23 |
 | 0 chat_sessions with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
 | `updateLastTouch.ts` stamps org_id | ✅ | Fixed 2026-03-22 — was inserting without org_id |
 | `outlook-sync logEmailActivity` stamps org_id | ✅ | Fixed 2026-03-22 — uses contact.organization_id |
@@ -39,7 +39,7 @@ _Last updated: 2026-03-22 (daily prep — migration 046 applied, updateLastTouch
 |-------|--------|--------|--------|--------|
 | `loans` | ✅ | ✅ | ✅ | ✅ |
 | `contacts` | ✅ | ✅ | ✅ | ✅ (stale user_id policies dropped in 040) |
-| `activity_log` | ✅ | ✅ | n/a (immutable — UPDATE policy dropped in 040) | n/a (immutable) |
+| `activity_log` | ✅ (org-only, tightened 048 — dropped user_id OR clause) | ✅ | n/a (immutable — UPDATE policy dropped in 040) | n/a (immutable) |
 | `todo_items` | ✅ | ✅ | ✅ | ✅ |
 | `documents` | ✅ | ✅ | ✅ | ✅ |
 | `email_drafts` | ✅ | ✅ | ✅ | ✅ |

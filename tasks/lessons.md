@@ -130,5 +130,10 @@ WF2 (`workflow-2-status-update.json`) had two independent bugs:
 ### n8n status enum mismatch crashes silently (2026-03-21)
 Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check constraint "email_drafts_status_check"`. Root cause: `Log CD Email` node sent `status: 'draft'` but the `email_drafts` table only allows `'pending' | 'sent' | 'discarded'`. Fix: change to `status: 'pending'`. **Pattern:** whenever adding a Supabase INSERT node to n8n, verify the exact allowed values on any check-constrained column (status, type, etc.) before writing the body expression. `'draft'` is a common intuitive guess that's often wrong.
 
+### Dead code survives component rewrites (2026-03-23)
+`ResultsTable.tsx` (255 lines) and `/api/pipeline/stats/route.ts` (149 lines) were confirmed orphaned: no imports, no callers. `ResultsTable` was explicitly "removed" from ScenarioBuilder in v4.1.0 CHANGELOG but the file itself was never deleted. Pattern: when a CHANGELOG says "removed X reference", also delete the underlying file if it has no other consumers. Always verify with a project-wide import search before deleting.
+
+---
+
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
 The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

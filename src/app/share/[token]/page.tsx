@@ -133,7 +133,7 @@ export default function SharePage({ params }: { params: { token: string } }) {
             <h2 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#C9A84C' }}>
               Key Metrics
             </h2>
-            <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} />
+            <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} rows={displayData.rows} />
           </section>
 
           {/* Section 3: Break-Even Analysis */}

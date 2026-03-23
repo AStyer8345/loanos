@@ -58,7 +58,7 @@ export default function KeyMetricsGrid({ metrics, mode }: { metrics: KeyMetrics;
         />
         <StatCard
           label="Total Interest Paid"
-          value={fmtCurrency(metrics.totalInterestBest)}
+          value={fmtCurrency(metrics.interestAt15yrBest)}
           subLabel="full loan term"
         />
       </div>

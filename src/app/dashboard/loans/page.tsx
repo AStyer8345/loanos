@@ -1219,7 +1219,7 @@ export default function LoansPage() {
           .loans-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
         `}</style>
         <div
-          className="loans-scroll flex-1 min-w-0 overflow-auto"
+          className="loans-scroll flex-1 w-0 min-w-full overflow-auto"
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
         >
           {loading ? (

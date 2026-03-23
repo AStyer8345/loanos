@@ -838,7 +838,7 @@ export default function LoansPage() {
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A]">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[#2A2A2A]">
           <div>
             <h1 className="text-lg font-mono font-semibold text-[#F0F0F0]">
               {activeListLabel}
@@ -847,62 +847,6 @@ export default function LoansPage() {
               {filtered.length} {filtered.length === 1 ? 'loan' : 'loans'}
               {search && ` matching "${search}"`}
             </p>
-          </div>
-          {/* Quick filter dropdown */}
-          <select
-            value={LOAN_QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
-            onChange={e => handleListChange(e.target.value)}
-            className="text-xs font-mono px-3 py-1.5 border border-[#C9A84C]/40 rounded-lg bg-[#1A1A1A] text-[#C9A84C] cursor-pointer outline-none"
-          >
-            {LOAN_QUICK_FILTERS.map(f => (
-              <option key={f.id} value={f.id}>{f.label}</option>
-            ))}
-          </select>
-          {/* Column picker */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowColPicker(p => !p)}
-              className="text-xs font-mono font-medium text-[#666666] px-3 py-1.5 border border-[#2A2A2A] rounded-lg hover:bg-[#1A1A1A] hover:text-[#F0F0F0] transition-colors"
-            >
-              COLUMNS ▾
-            </button>
-            {showColPicker && (
-              <div
-                role="listbox"
-                className="absolute right-0 top-full mt-1 z-[100] w-[220px] bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="p-2 border-b border-[#2A2A2A]">
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="Search fields…"
-                    value={colSearch}
-                    onChange={e => setColSearch(e.target.value)}
-                    className="w-full px-2 py-1 text-xs font-mono bg-[#0A0A0A] border border-[#2A2A2A] rounded text-[#F0F0F0] placeholder:text-[#555] outline-none focus:ring-1 focus:ring-[#C9A84C]"
-                  />
-                </div>
-                <div className="max-h-[280px] overflow-y-auto py-1">
-                  {LOAN_COLUMNS.filter(col =>
-                    !colSearch || col.label.toLowerCase().includes(colSearch.toLowerCase())
-                  ).map(col => (
-                    <label
-                      key={col.id}
-                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[#F0F0F0] cursor-pointer hover:bg-[#2A2A2A]"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns.includes(col.id)}
-                        onChange={() => toggleColumn(col.id)}
-                        className="rounded cursor-pointer accent-[#C9A84C]"
-                      />
-                      {col.label}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           {/* Search */}
           <div className="relative w-64">
@@ -917,40 +861,98 @@ export default function LoansPage() {
           </div>
         </div>
 
-        {/* Filter bar */}
-        <div className="px-4 pt-3 pb-2 border-b border-[#2A2A2A] bg-[#0E0E0E]">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Preset dropdown */}
-            <select
-              value={filterPreset}
-              onChange={e => applyPreset(e.target.value)}
-              className="text-[11px] font-mono px-2 py-1.5 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#999999] outline-none"
-            >
-              <option value="">Presets…</option>
-              <option value="inprocess">Loans in Process</option>
-              <option value="preapproval">Pre-Approvals</option>
-              <option value="leads">Leads + New Applications</option>
-              <option value="closed-jan">Closed — January {new Date().getFullYear()}</option>
-              <option value="closed-feb">Closed — February {new Date().getFullYear()}</option>
-              <option value="closed-mar">Closed — March {new Date().getFullYear()}</option>
-              <option value="closed-ytd">Closed — YTD</option>
-              <option value="needs-attention">Needs Attention (3+ days idle)</option>
-            </select>
+        {/* Unified control + stats bar */}
+        <div className="px-4 py-2 border-b border-[#1e293b] bg-[#0a0f1a]">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <select
+                value={LOAN_QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
+                onChange={e => handleListChange(e.target.value)}
+                className="text-xs font-mono px-2.5 py-1.5 border border-[#C9A84C]/40 rounded bg-[#111827] text-[#C9A84C] cursor-pointer outline-none"
+              >
+                {LOAN_QUICK_FILTERS.map(f => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowFilters(p => !p)}
+                className={`text-xs font-mono px-2.5 py-1.5 border rounded transition-colors ${
+                  showFilters || hasAdvancedFilters
+                    ? 'border-[#C9A84C]/40 text-[#C9A84C] bg-[#C9A84C]/10'
+                    : 'border-[#2A2A2A] text-[#9CA3AF] hover:text-[#F0F0F0] hover:bg-[#111827]'
+                }`}
+              >
+                Filters {hasAdvancedFilters ? '●' : '▾'}
+              </button>
+            </div>
 
-            {/* Toggle advanced filters */}
-            <button
-              type="button"
-              onClick={() => setShowFilters(p => !p)}
-              className={`text-[11px] font-mono px-2 py-1.5 border rounded transition-colors ${
-                showFilters || hasAdvancedFilters
-                  ? 'border-[#C9A84C]/40 text-[#C9A84C] bg-[#C9A84C]/10'
-                  : 'border-[#2A2A2A] text-[#666666] hover:text-[#F0F0F0]'
-              }`}
-            >
-              Filters {hasAdvancedFilters ? '●' : '▾'}
-            </button>
+            <div className="flex-1 min-w-0 flex items-center justify-center">
+              {!loading && filtered.length > 0 && (() => {
+                const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
+                const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
+                return (
+                  <div className="flex items-center gap-3 text-xs font-mono whitespace-nowrap">
+                    <span className="text-[#9CA3AF]">Total Loans <span className="text-[#F3F4F6] font-semibold">{filtered.length}</span></span>
+                    <span className="text-[#374151]">|</span>
+                    <span className="text-[#9CA3AF]">Total Volume <span className="text-blue-400 font-semibold">{fmtCurrency(totalVolume)}</span></span>
+                    <span className="text-[#374151]">|</span>
+                    <span className="text-[#9CA3AF]">Gross Commission <span className="text-[#C9A84C] font-semibold">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</span></span>
+                  </div>
+                )
+              })()}
+            </div>
 
-            {/* Active filter chips */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowColPicker(p => !p)}
+                className="text-xs font-mono font-medium text-[#9CA3AF] px-2.5 py-1.5 border border-[#2A2A2A] rounded hover:bg-[#111827] hover:text-[#F0F0F0] transition-colors"
+              >
+                COLUMNS ▾
+              </button>
+              {showColPicker && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 top-full mt-1 z-[100] w-[220px] bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="p-2 border-b border-[#2A2A2A]">
+                    <input
+                      autoFocus
+                      type="text"
+                      placeholder="Search fields…"
+                      value={colSearch}
+                      onChange={e => setColSearch(e.target.value)}
+                      className="w-full px-2 py-1 text-xs font-mono bg-[#0A0A0A] border border-[#2A2A2A] rounded text-[#F0F0F0] placeholder:text-[#555] outline-none focus:ring-1 focus:ring-[#C9A84C]"
+                    />
+                  </div>
+                  <div className="max-h-[280px] overflow-y-auto py-1">
+                    {LOAN_COLUMNS.filter(col =>
+                      !colSearch || col.label.toLowerCase().includes(colSearch.toLowerCase())
+                    ).map(col => (
+                      <label
+                        key={col.id}
+                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[#F0F0F0] cursor-pointer hover:bg-[#2A2A2A]"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.includes(col.id)}
+                          onChange={() => toggleColumn(col.id)}
+                          className="rounded cursor-pointer accent-[#C9A84C]"
+                        />
+                        {col.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {(hasAdvancedFilters || (urlFilterActive && (urlFilterActive.stage || urlFilterActive.filter || urlFilterActive.period))) && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              {/* Active filter chips */}
             {filterStatuses.length > 0 && filterStatuses.map(s => (
               <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[10px] font-mono text-violet-400">
                 {s}
@@ -993,14 +995,51 @@ export default function LoansPage() {
                 <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
+              {urlFilterActive?.stage && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[10px] font-mono text-[#C9A84C]">
+                  Stage: {urlFilterActive.stage}
+                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
+                </span>
+              )}
+              {urlFilterActive?.period && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/30 border border-blue-700 text-[10px] font-mono text-blue-400">
+                  Period: {urlFilterActive.period === 'mtd' ? 'This Month' : urlFilterActive.period === 'ytd' ? 'Year to Date' : urlFilterActive.period}
+                  <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-white"><X size={10} /></button>
+                </span>
+              )}
+              {urlFilterActive?.filter && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[10px] font-mono text-orange-400">
+                  {urlFilterActive.filter === 'no_activity_3days' ? 'No activity 3+ days' : urlFilterActive.filter}
+                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
+                </span>
+              )}
             {hasAdvancedFilters && (
-              <button onClick={clearAllFilters} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
+                <button onClick={clearAllFilters} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Expanded filter controls */}
           {showFilters && (
             <div className="mt-3 p-3 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg">
+              <div className="mb-3">
+                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Presets</label>
+                <select
+                  value={filterPreset}
+                  onChange={e => applyPreset(e.target.value)}
+                  className="text-[11px] font-mono px-2 py-1.5 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#999999] outline-none min-w-[220px]"
+                >
+                  <option value="">Presets…</option>
+                  <option value="inprocess">Loans in Process</option>
+                  <option value="preapproval">Pre-Approvals</option>
+                  <option value="leads">Leads + New Applications</option>
+                  <option value="closed-jan">Closed — January {new Date().getFullYear()}</option>
+                  <option value="closed-feb">Closed — February {new Date().getFullYear()}</option>
+                  <option value="closed-mar">Closed — March {new Date().getFullYear()}</option>
+                  <option value="closed-ytd">Closed — YTD</option>
+                  <option value="needs-attention">Needs Attention (3+ days idle)</option>
+                </select>
+              </div>
               <div className="flex items-start gap-4 flex-wrap">
                 {/* Status multi-select */}
                 <div className="min-w-[180px]">
@@ -1118,57 +1157,6 @@ export default function LoansPage() {
             </div>
           </div>
         )}
-
-        {/* Active URL filter badge */}
-        {urlFilterActive && (urlFilterActive.stage || urlFilterActive.filter || urlFilterActive.period) && (
-          <div className="px-4 pt-3 pb-1 flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Filtered:</span>
-            {urlFilterActive.stage && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-xs font-mono text-[#C9A84C]">
-                Stage: {urlFilterActive.stage}
-                <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={11} /></button>
-              </span>
-            )}
-            {urlFilterActive.period && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-900/30 border border-blue-700 text-xs font-mono text-blue-400">
-                Period: {urlFilterActive.period === 'mtd' ? 'This Month' : urlFilterActive.period === 'ytd' ? 'Year to Date' : urlFilterActive.period}
-                <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-white"><X size={11} /></button>
-              </span>
-            )}
-            {urlFilterActive.filter && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-900/30 border border-orange-700 text-xs font-mono text-orange-400">
-                {urlFilterActive.filter === 'no_activity_3days' ? 'No activity 3+ days' : urlFilterActive.filter}
-                <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={11} /></button>
-              </span>
-            )}
-            <button
-              onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }}
-              className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline"
-            >Clear all</button>
-          </div>
-        )}
-
-        {/* Header stats — shown when not loading */}
-        {!loading && filtered.length > 0 && (() => {
-          const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
-          const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
-          return (
-            <div className="px-4 pt-3 pb-2 border-b border-[#1e293b] bg-[#0a0f1a] flex items-center gap-6">
-              <div>
-                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Loans</p>
-                <p className="text-lg font-mono font-bold text-zinc-100">{filtered.length}</p>
-              </div>
-              <div>
-                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Total Volume</p>
-                <p className="text-lg font-mono font-bold text-blue-400">{fmtCurrency(totalVolume)}</p>
-              </div>
-              <div>
-                <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Gross Commission</p>
-                <p className="text-lg font-mono font-bold text-[#C9A84C]">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</p>
-              </div>
-            </div>
-          )
-        })()}
 
         {/* Pipeline dashboard — shown only on Loans in Process tab */}
         {activeList === 'inprocess' && !loading && loans.length > 0 && (() => {

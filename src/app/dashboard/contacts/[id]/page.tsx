@@ -162,7 +162,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, resolveReferrer])
+  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return

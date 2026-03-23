@@ -550,7 +550,7 @@ export default function ContactsPage() {
       q = q.or(`first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},phone.ilike.${s}`)
     }
     return q
-  }, [supabase, activeList, search, customLists])
+  }, [activeList, search, customLists])
 
   const fetchContacts = useCallback(async () => {
     setLoading(true)

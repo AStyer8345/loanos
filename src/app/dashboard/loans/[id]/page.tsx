@@ -19,7 +19,7 @@ import {
   GripVertical, EyeOff, Eye, Settings2,
   Mail, Phone, MapPin, Calendar, Users,
 } from 'lucide-react'
-import LoanOSChat from '@/components/crm/LoanOSChat'
+import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
 
@@ -382,6 +382,7 @@ export default function LoanDetailPage() {
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [loading, setLoading] = useState(true)
+  const { setActiveRecord } = useOutreachChat()
   const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -483,6 +484,18 @@ export default function LoanDetailPage() {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
+  const displayName =
+    loan
+      ? [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
+      : '(unnamed)'
+
+  // Set active record so the global chat bot knows we're on a loan page.
+  // Keep hook order stable across loading / not-found early returns.
+  useEffect(() => {
+    setActiveRecord({ id: loanId, type: 'loan', name: displayName })
+    return () => setActiveRecord(null)
+  }, [loanId, displayName, setActiveRecord])
+
   if (loading) return (
     <div className="flex items-center justify-center h-96 text-zinc-500 text-sm font-mono">Loading…</div>
   )
@@ -490,11 +503,10 @@ export default function LoanDetailPage() {
     <div className="flex flex-col items-center justify-center h-96 gap-3 text-zinc-500 font-mono">
       <AlertCircle size={24} />
       <p>Loan not found</p>
-      <Link href="/dashboard/loans" className="text-emerald-600 hover:underline text-sm">← Back to loans</Link>
+      <Link href="/dashboard/loans" className="text-amber-400 hover:underline text-sm">← Back to loans</Link>
     </div>
   )
 
-  const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
   const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
 
   // Header inline edit save helper
@@ -819,7 +831,6 @@ export default function LoanDetailPage() {
         )}
       </div>
 
-      <LoanOSChat recordId={loanId} recordType="loan" recordName={displayName} />
     </div>
   )
 }
@@ -1872,7 +1883,7 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
                 <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
               </div>
               <div className="p-4">
-                <Link href={`/dashboard/contacts?id=${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-indigo-400 transition-colors">
+                <Link href={`/dashboard/contacts?id=${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors">
                   {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
                 </Link>
                 {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
@@ -1880,7 +1891,7 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
                 {contact.referred_by && (
                   <div className="mt-3 pt-3 border-t border-zinc-700">
                     <p className="text-xs text-zinc-500 font-mono">Referred by</p>
-                    <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-indigo-400 hover:text-indigo-300 font-mono flex items-center gap-1 mt-0.5">
+                    <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5">
                       {contact.referred_by}<ChevronRight size={12} />
                     </Link>
                   </div>
@@ -2133,7 +2144,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               onBlur={commit}
               onKeyDown={onKeyDown}
               placeholder="Type to search contacts…"
-              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full placeholder-zinc-600"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full placeholder-zinc-600"
             />
             {(loadingSuggestions || suggestions.length > 0) && dropdownRect && typeof document !== 'undefined' && createPortal(
               <div
@@ -2153,7 +2164,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
                       {[c.first_name, c.last_name].filter(Boolean).join(' ')}
                     </div>
                     {c.email && <div className="text-[10px] font-mono text-zinc-400 mt-0.5">{c.email}</div>}
-                    {c.contact_type && <span className="text-[9px] font-mono text-indigo-400 uppercase tracking-wide">{c.contact_type}</span>}
+                    {c.contact_type && <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-wide">{c.contact_type}</span>}
                   </button>
                 ))}
               </div>,
@@ -2167,7 +2178,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
-              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
             >
               <option value="">—</option>
               {(options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
@@ -2181,13 +2192,13 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
               onKeyDown={onKeyDown}
-              className="text-xs font-mono border border-indigo-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
             />
           )
         ) : (
           <span
             onClick={canEdit ? startEdit : undefined}
-            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-indigo-300 transition-colors' : ''} ${saved ? 'text-emerald-400' : 'text-zinc-200'}`}
+            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-400 transition-colors' : ''} ${saved ? 'text-emerald-400' : 'text-zinc-200'}`}
           >
             {saved ? '✓ Saved' : (displayValue ?? <span className="text-zinc-600">—</span>)}
           </span>
@@ -2196,7 +2207,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
       {canEdit && !editing && !saved && (
         <button
           onClick={startEdit}
-          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-zinc-500 hover:text-indigo-400 transition-all shrink-0"
+          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-zinc-500 hover:text-amber-400 transition-all shrink-0"
           title="Edit"
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -2282,7 +2293,7 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
             key={wf.id}
             ref={wf.id === highlightId ? highlightRef : undefined}
             className={`bg-zinc-900/80 border rounded-lg shadow-lg shadow-black/50 p-4 transition-colors ${
-              wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-zinc-700 hover:border-indigo-500/50'
+              wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-zinc-700 hover:border-zinc-600'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -2294,7 +2305,7 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
             </div>
             <button
               onClick={() => setActiveModal(wf)}
-              className="mt-3 w-full py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1"
+              className="mt-3 w-full py-1.5 text-xs font-medium bg-amber-500 text-zinc-900 rounded-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-1"
             >
               <Zap size={11} /> {wf.triggerLabel}
             </button>
@@ -2399,7 +2410,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
                   <label className="block text-xs font-mono text-zinc-400 mb-1">{workflow.triggerLabel}</label>
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-zinc-800/50"
+                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-amber-500/50 transition-colors bg-zinc-800/50"
                   >
                     {file ? (
                       <p className="text-sm text-emerald-700 font-medium">{file.name}</p>
@@ -2427,7 +2438,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
               <button
                 onClick={handleSubmit}
                 disabled={sending}
-                className="mt-4 w-full py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5"
+                className="mt-4 w-full py-2 text-sm font-medium bg-amber-500 text-zinc-900 rounded-lg hover:bg-amber-400 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5"
               >
                 {sending ? 'Sending…' : <><Zap size={13} /> Run Automation</>}
               </button>
@@ -2505,7 +2516,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     <div className="max-w-2xl">
       {/* Log activity buttons */}
       <div className="flex gap-2 mb-4">
-        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-emerald-900/30 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/50 transition-colors">
+        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-zinc-800 text-zinc-300 border border-zinc-600 hover:border-amber-500/50 hover:text-amber-400 transition-colors">
           <span className="text-sm">📞</span> Log Call
         </button>
         <button onClick={() => setLogModal('email')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-blue-900/30 text-blue-400 border border-blue-800 hover:bg-blue-900/50 transition-colors">
@@ -2568,7 +2579,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 filter === f
-                  ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/50'
+                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
                   : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-600'
               }`}
             >
@@ -2636,12 +2647,12 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
 // ── Email history tab ─────────────────────────────────────────────────────────
 
 const DRAFT_COLORS: Record<string, string> = {
-  pre_approval:      'bg-emerald-900/40 text-emerald-400 border-emerald-800',
+  pre_approval:      'bg-amber-900/40 text-amber-400 border-amber-800',
   contract_received: 'bg-blue-900/40 text-blue-400 border-blue-800',
   final_cd:          'bg-amber-900/40 text-amber-400 border-amber-800',
   review_request:    'bg-purple-900/40 text-purple-400 border-purple-800',
   referral_intro:    'bg-orange-900/40 text-orange-400 border-orange-800',
-  milestone:         'bg-indigo-900/40 text-indigo-400 border-indigo-800',
+  milestone:         'bg-zinc-800/60 text-zinc-300 border-zinc-700',
 }
 
 const DRAFT_LABELS: Record<string, string> = {
@@ -2729,7 +2740,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                   <div className="flex gap-2 p-3 border-t border-zinc-800">
                     <button
                       onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'sent') }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-400 bg-emerald-900/30 hover:bg-emerald-900/50 border border-emerald-800 rounded-md transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-400 bg-amber-900/20 hover:bg-amber-900/30 border border-amber-800 rounded-md transition-colors"
                     >
                       <Check className="w-3.5 h-3.5" /> Mark Sent
                     </button>

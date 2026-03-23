@@ -186,20 +186,19 @@ export default function LoanOSChat() {
       e.target.value = ''
       return
     }
-    pendingFileCountRef.current += files.length
     for (const file of files) {
       if (!ACCEPTED_TYPES.includes(file.type)) {
-        pendingFileCountRef.current -= 1
         setAttachError(`${file.name}: unsupported type. Use JPEG, PNG, WebP, or PDF.`)
         e.target.value = ''
         return
       }
       if (file.size > MAX_FILE_SIZE) {
-        pendingFileCountRef.current -= 1
         setAttachError(`${file.name} is too large (max 1 MB).`)
         e.target.value = ''
         return
       }
+      // Only increment AFTER validation passes — inside the loop
+      pendingFileCountRef.current += 1
       const reader = new FileReader()
       reader.onerror = () => {
         pendingFileCountRef.current -= 1
@@ -485,6 +484,11 @@ export default function LoanOSChat() {
     addMessage({ role: 'user', content: text })
     setInput('')
 
+    // Clear attachment state on any submit
+    setAttachments([])
+    setAttachError(null)
+    pendingFileCountRef.current = 0
+
     const parsed = parseCommand(text, hasSelected)
 
     switch (parsed.type) {
@@ -506,9 +510,6 @@ export default function LoanOSChat() {
       case CommandType.GENERAL_CHAT:
       default: {
         const pendingAttachments = attachments
-        setAttachments([])  // clear chips immediately on send
-        pendingFileCountRef.current = 0
-        setAttachError(null)
         setIsLoading(true)
         try {
           const { text: reply, sessionId: newSessionId } = await callClaude(text, undefined, pendingAttachments)

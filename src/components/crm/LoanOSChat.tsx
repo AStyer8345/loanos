@@ -229,6 +229,55 @@ export default function LoanOSChat() {
     setAttachments((prev) => prev.filter((a) => a.uid !== uid))
   }
 
+  function handlePaste(e: React.ClipboardEvent) {
+    const items = Array.from(e.clipboardData.items)
+    const imageItems = items.filter(
+      (item) => item.kind === 'file' && ACCEPTED_TYPES.includes(item.type)
+    )
+    if (imageItems.length === 0) return // let normal text paste proceed
+
+    e.preventDefault()
+    setAttachError(null)
+
+    for (const item of imageItems) {
+      const file = item.getAsFile()
+      if (!file) continue
+
+      if (attachments.length + pendingFileCountRef.current + 1 > MAX_FILES) {
+        setAttachError(`Max ${MAX_FILES} files per message.`)
+        return
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        setAttachError('Pasted image is too large (max 1 MB).')
+        return
+      }
+
+      pendingFileCountRef.current += 1
+      const reader = new FileReader()
+      reader.onerror = () => {
+        pendingFileCountRef.current -= 1
+        setAttachError('Could not read pasted image — please try again.')
+      }
+      reader.onload = () => {
+        pendingFileCountRef.current -= 1
+        const result = reader.result as string
+        const base64 = result.split(',')[1]
+        const ext = file.type.split('/')[1] ?? 'png'
+        setAttachments((prev) => [
+          ...prev,
+          {
+            uid: `paste-${Date.now()}`,
+            type: 'image',
+            mimeType: file.type,
+            name: `screenshot.${ext}`,
+            data: base64,
+          },
+        ])
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   function toggleListening() {
     if (isListening) {
       recognitionRef.current?.stop()
@@ -936,6 +985,7 @@ export default function LoanOSChat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={
                   activeRecord
                     ? `Ask about this ${activeRecord.type}…`

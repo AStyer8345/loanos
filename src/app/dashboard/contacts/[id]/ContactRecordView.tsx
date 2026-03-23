@@ -17,7 +17,7 @@ import {
   StickyNote,
   Plus,
 } from 'lucide-react'
-import LoanOSChat from '@/components/crm/LoanOSChat'
+import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 
@@ -430,6 +430,14 @@ export function ContactRecordView(props: Props) {
     onSaveField,
     onLogActivity,
   } = props
+
+  const { setActiveRecord } = useOutreachChat()
+
+  useEffect(() => {
+    const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || 'Contact'
+    setActiveRecord({ id: contact.id, type: 'contact', name })
+    return () => setActiveRecord(null)
+  }, [contact.id, contact.first_name, contact.last_name, setActiveRecord])
 
   const [leftTab, setLeftTab] = useState<LeftTab>('overview')
 
@@ -1073,7 +1081,6 @@ export function ContactRecordView(props: Props) {
         </div>
       </div>
 
-      <LoanOSChat recordId={contact.id} recordType="contact" recordName={fullName(contact)} />
     </div>
   )
 }

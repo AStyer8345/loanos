@@ -12,19 +12,28 @@ export type SelectedContact = {
   contact_type: string | null
 }
 
-type OutreachChatState = {
+export type ActiveRecord = {
+  id: string
+  type: 'contact' | 'loan'
+  name: string
+}
+
+type ChatState = {
   selectedContacts: SelectedContact[]
   setSelectedContacts: (contacts: SelectedContact[]) => void
   clearSelected: () => void
+  activeRecord: ActiveRecord | null
+  setActiveRecord: (record: ActiveRecord | null) => void
   isOpen: boolean
   setIsOpen: (open: boolean) => void
   openWithContacts: (contacts: SelectedContact[]) => void
 }
 
-const OutreachChatCtx = createContext<OutreachChatState | null>(null)
+const ChatCtx = createContext<ChatState | null>(null)
 
 export function OutreachChatProvider({ children }: { children: ReactNode }) {
   const [selectedContacts, setSelectedContacts] = useState<SelectedContact[]>([])
+  const [activeRecord, setActiveRecord] = useState<ActiveRecord | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const clearSelected = useCallback(() => setSelectedContacts([]), [])
@@ -35,23 +44,25 @@ export function OutreachChatProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <OutreachChatCtx.Provider
+    <ChatCtx.Provider
       value={{
         selectedContacts,
         setSelectedContacts,
         clearSelected,
+        activeRecord,
+        setActiveRecord,
         isOpen,
         setIsOpen,
         openWithContacts,
       }}
     >
       {children}
-    </OutreachChatCtx.Provider>
+    </ChatCtx.Provider>
   )
 }
 
 export function useOutreachChat() {
-  const ctx = useContext(OutreachChatCtx)
+  const ctx = useContext(ChatCtx)
   if (!ctx) throw new Error('useOutreachChat must be used within OutreachChatProvider')
   return ctx
 }

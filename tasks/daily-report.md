@@ -1,91 +1,102 @@
-# LoanOS Daily Report — 2026-03-21
+# LoanOS Daily Report — 2026-03-22
 
 ## 🔴 Action Required
 
-### Stale Active Loans (65 loans not updated in 3+ days)
-High-priority loans that need attention:
+### CTC Loans Stale 3–5+ Days (High Urgency)
+These files should be actively closing — no updates logged since Mar 17–19:
 
 | Borrower | Status | Last Updated |
-|----------|--------|--------------|
-| Farinaz Pisheh | DISCLOSURE_SENT | 2026-03-17 |
-| Patrick Rademacher | Loan in Process | 2026-03-17 |
+|----------|--------|-------------|
 | Andrew Mcneese | CLEAR_TO_CLOSE | 2026-03-17 |
 | Travis Coleman | clear_to_close | 2026-03-18 |
 | Jessica Holt | clear_to_close | 2026-03-17 |
 | Linda Okafor | clear_to_close | 2026-03-17 |
+| Chelsea Wise | CLEAR_TO_CLOSE | 2026-03-19 |
+
+**Action:** Verify with Janie. If closed/funded, update Arive status to trigger sync.
+
+### Underwriting Files with No Activity in 5+ Days
+| Borrower | Status | Last Updated |
+|----------|--------|-------------|
 | Kenneth Turner | UNDERWRITING_SUBMITTED | 2026-03-17 |
-| Kyle Jennings | RE_SUBMITTAL | 2026-03-18 |
-| Dhaval Poladia | UNDERWRITING_SUBMITTED | 2026-03-17 |
-| Chelsea Wise | CLEAR_TO_CLOSE | 2026-03-17 |
-| Drew Benac | Loan in Process | 2026-03-17 |
 | Ryan Nguyen | underwriting | 2026-03-17 |
 | Priya Nair | underwriting | 2026-03-17 |
 | Derek Cho | underwriting | 2026-03-17 |
 | Lauren Simmons | underwriting | 2026-03-17 |
-| Maria Gutierrez | processing | 2026-03-17 |
-| Monica Castillo | processing | 2026-03-17 |
-| Scott Tillman | processing | 2026-03-18 |
-| David Park | processing | 2026-03-17 |
 
-Plus 46 additional stale loans in lead/application/pre_approved/Started/On Hold status.
+**Action:** Chase UW decisions. 5 days with no logged update is a flag.
 
-### n8n Workflow Error (last 24h)
-- **LoanOS — Final CD Email** (`SkzrWeR0bHZs8kWX`) — execution error at 2026-03-21 02:10 UTC
-  → Check n8n execution logs for root cause
-
-### Inactive Workflows (not in intentional inactive list)
-- **LoanOS — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inactive (needs Outlook credential)
-- **LoanOS — Contract Received** (`w7hZLmIcQ4izmndb`) — inactive duplicate (superseded by `UfNcdpoVKQZqy0fj`)
+### n8n Inactive Workflows (Not on Intentional Inactive List)
+| Workflow | ID | Action |
+|----------|-----|--------|
+| LoanOS — Outlook Email Sync | `JMmstRl2C5ylmuIY` | Blocked on Outlook credential — activate once env vars are set |
+| LoanOS — Contract Received (duplicate) | `w7hZLmIcQ4izmndb` | Likely superseded by `UfNcdpoVKQZqy0fj` (active) — consider deleting |
 
 ---
 
 ## 🟡 Watch Items
 
-### Activity Gaps (62 of 72 active loans have no activity_log entry in 5+ days)
-Most of the pipeline has no recent activity logged. Either:
-- Loans are genuinely idle (older "Started" / "On Hold" entries from Arive import), or
-- Activity log is not being written consistently for all status changes
+### Other Stale Active Loans (3+ days, lower urgency)
+In Process / Processing / Pre-Approved / RE-Submittal loans not updated since Mar 17–18:
 
-Notable active-stage loans with no logged activity:
-- Andrew Mcneese | CLEAR_TO_CLOSE
-- Travis Coleman | clear_to_close
-- Jessica Holt | clear_to_close
-- Linda Okafor | clear_to_close
-- Kenneth Turner | UNDERWRITING_SUBMITTED
-- Kyle Jennings | RE_SUBMITTAL
+| Borrower | Status |
+|----------|--------|
+| Farinaz Pisheh | DISCLOSURE_SENT |
+| Patrick Rademacher | Loan in Process |
+| Drew Benac | Loan in Process |
+| Kyle Jennings | RE_SUBMITTAL |
+| Maria Gutierrez | processing |
+| Monica Castillo | processing |
+| Scott Tillman | processing |
+| David Park | processing |
+| Rachel Kim | pre_approved |
+| Jennifer Walsh | pre_approved |
+| Tyler Owens | pre_approved |
+| Amanda Reyes | pre_approved |
+| James Harwell | pre_approved |
+| Nathan Burke | pre_approved |
 
-### Console.log Statements in API Routes (2 files)
+Note: Many loans showing "Started" / "On Hold" / "Cancelled" (bulk import rows) are expected to be stale — not actionable.
+
+### Recent n8n Error (Near 24h Boundary)
+- **LoanOS — Final CD Email** (`SkzrWeR0bHZs8kWX`) — error execution at 2026-03-21 02:10 UTC (~22h ago)
+- No other errors in last 24h
+- **Action:** Check n8n execution logs if Final CD email sending is expected
+
+### Console.log in API Routes (2 files)
 - `src/app/api/arive-webhook/route.ts`
 - `src/app/api/mismo/parse/route.ts`
 
-### Unused Components (10 files)
-Not imported anywhere in `src/app/`:
-- `SmartActionQueue.tsx`
-- `EmailDraftPreview.tsx`
-- `NavDropdown.tsx`
-- `dashboard/DailyBriefingPanel.tsx`
-- `dashboard/DailyScheduleWidget.tsx`
-- `ActivityTimeline.tsx`
-- `GlobalSearch.tsx`
-- `outreach/QuickAddConfirmation.tsx`
-- `outreach/BulkActionPreview.tsx`
-- `NavItem.tsx`
-
-### Dark Theme Violations (3 files in dashboard)
-Files using `bg-white`, `bg-gray-100`, or `text-gray-900`:
+### Dark Theme Violations in Dashboard (3 files)
+Using `bg-white`, `bg-gray-100`, or `text-gray-900`:
 - `src/app/dashboard/scenarios/ScenarioList.tsx`
 - `src/app/dashboard/scenarios/new/StatementUpload.tsx`
 - `src/app/dashboard/scenarios/new/ScenarioCard.tsx`
+
+### Potentially Unused Components (10)
+Not imported in `src/app/` — verify before removing:
+- `ActivityTimeline.tsx`
+- `EmailDraftPreview.tsx`
+- `GlobalSearch.tsx`
+- `NavDropdown.tsx`
+- `NavItem.tsx`
+- `SmartActionQueue.tsx`
+- `dashboard/DailyBriefingPanel.tsx`
+- `dashboard/DailyScheduleWidget.tsx`
+- `outreach/BulkActionPreview.tsx`
+- `outreach/QuickAddConfirmation.tsx`
 
 ---
 
 ## 🟢 All Clear
 
-- **Pending email drafts**: None — no drafts sitting unsent for 24h+
-- **TypeScript build**: ✅ Pass — `npx tsc --noEmit` returned no errors
-- **Core n8n workflows**: All primary LoanOS workflows active (Arive sync, milestone agent, pre-approval, referral intro, refi intake, inbound email, web lead, contract received, final CD)
+- **Pending email drafts:** 0 — no drafts sitting unsent ✅
+- **n8n errors (last 24h):** 0 ✅
+- **13 of 15 workflows active** — Milestone Agent, Arive Sync (both), Pre-Approval, Referral Intro, Final CD Email, Contract Received, New App Received, Refi Intake, Inbound Email, Web Lead all running ✅
+- **Intentionally inactive:** Weekly Social Post (`eJG4wckrj6SmSpm1`), Review Request Email (`AK1fBcaX1cPcdlGx`) ✅
 
 ---
 
 ## Build
-**Pass** — 0 TypeScript errors
+
+**Pass** — `tsc --noEmit` returned 0 errors ✅

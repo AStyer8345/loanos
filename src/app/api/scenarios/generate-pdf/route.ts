@@ -199,7 +199,7 @@ function renderKeyMetricsGrid(data: DisplayData): string {
     { label: 'Monthly Savings', value: fmtCurrency(m.monthlySavings), sub: '/month', green: m.monthlySavings > 0 },
     { label: 'Savings — 5 Years', value: fmtCurrency(m.savings5yr), sub: 'cumulative', green: m.savings5yr > 0 },
     { label: 'Savings — 15 Years', value: fmtCurrency(m.savings15yr), sub: 'cumulative', green: m.savings15yr > 0 },
-    { label: 'Total Interest Paid', value: fmtCurrency(m.totalInterestBest), sub: 'best option', green: false },
+    { label: 'Total Interest Paid', value: fmtCurrency(m.interestAt15yrBest), sub: 'best option', green: false },
   ]
 
   return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">

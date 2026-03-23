@@ -4,17 +4,110 @@ import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
+import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
+import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages'
+
+type Attachment = {
+  type: 'image' | 'pdf'
+  mimeType: string
+  name: string
+  data: string // raw base64, no data URI prefix
+}
+
+function buildUserContent(text: string, attachments: Attachment[]): ContentBlockParam[] {
+  const blocks: ContentBlockParam[] = []
+  for (const att of attachments) {
+    if (att.type === 'image') {
+      blocks.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: att.mimeType as 'image/jpeg' | 'image/png' | 'image/webp',
+          data: att.data,
+        },
+      })
+    } else {
+      blocks.push({
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf' as const,
+          data: att.data,
+        },
+      })
+    }
+  }
+  blocks.push({ type: 'text', text })
+  return blocks
+}
+
+// ── NotebookLM tool ──────────────────────────────────────────────────────────
+const NOTEBOOKLM_SERVICE_URL = process.env.NOTEBOOKLM_SERVICE_URL || 'http://localhost:8001'
+
+const MORTGAGE_KB_TOOL = {
+  name: 'query_mortgage_knowledge_base',
+  description: `Search the LoanOS mortgage knowledge base for accurate, detailed information.
+Use this tool whenever the user asks about:
+- Fannie Mae or Freddie Mac guidelines (DTI limits, LTV, income types, asset requirements)
+- Loan programs (Conventional, FHA, VA, USDA, Jumbo, Non-QM)
+- Mortgage compliance requirements (TRID, RESPA, ECOA, fair lending)
+- Underwriting criteria or overlays
+- Marketing strategies for loan officers
+- Industry best practices or regulatory questions
+Do NOT use for general CRM questions, pipeline updates, or contact management.`,
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      question: {
+        type: 'string',
+        description: 'The specific mortgage question to look up in the knowledge base.',
+      },
+    },
+    required: ['question'],
+  },
+}
+
+async function queryNotebookLM(question: string): Promise<string> {
+  try {
+    const res = await fetch(`${NOTEBOOKLM_SERVICE_URL}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+      signal: AbortSignal.timeout(30_000),
+    })
+    if (!res.ok) return `Knowledge base unavailable (HTTP ${res.status}).`
+    const data = await res.json()
+    const sources = data.sources?.length
+      ? `\n\nSources: ${data.sources.join(', ')}`
+      : ''
+    return (data.answer || 'No answer returned.') + sources
+  } catch {
+    // Service not running or unreachable — Claude answers from its own knowledge
+    return ''
+  }
+}
+
+type SelectedContact = {
+  first_name?: string
+  last_name?: string
+  email?: string
+  phone?: string
+}
 
 async function buildSystemPrompt(
-  recordId: string,
-  recordType: 'contact' | 'loan',
-  organizationId: string
+  organizationId: string,
+  recordId?: string,
+  recordType?: 'contact' | 'loan',
+  selectedContacts?: SelectedContact[],
+  generateType?: 'email' | 'text'
 ): Promise<string> {
   const supabase = createServiceClient()
-  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  const todayStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  })
 
-  // Load custom prompt from DB, fall back to default
+  // Load custom base prompt from DB, fall back to merged default
   const { data: promptRow } = await supabase
     .from('system_prompts')
     .select('content')
@@ -22,12 +115,60 @@ async function buildSystemPrompt(
     .eq('name', 'base')
     .maybeSingle()
 
-  const base = `${promptRow?.content ?? DEFAULT_SYSTEM_PROMPT}
+  const basePrompt = promptRow?.content ?? `${DEFAULT_SYSTEM_PROMPT}
+
+${DEFAULT_OUTREACH_PROMPT}`
+
+  let prompt = `${basePrompt}
 
 Today's date: ${todayStr}`
 
-  if (recordType === 'contact') {
-    const { data, error } = await supabase
+  // Always include pipeline context
+  const [loansRes, contactsRes] = await Promise.all([
+    supabase
+      .from('loans')
+      .select('loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date, property_city, property_state, loan_type')
+      .eq('organization_id', organizationId)
+      .not('status', 'in', '("Closed","Funded","Cancelled","Withdrawn")')
+      .order('closing_date', { ascending: true })
+      .limit(20),
+    supabase
+      .from('contacts')
+      .select('contact_type, stage')
+      .eq('organization_id', organizationId),
+  ])
+
+  const loans = loansRes.data ?? []
+  const contacts = contactsRes.data ?? []
+
+  const contactCounts: Record<string, number> = {}
+  for (const c of contacts) {
+    const t = c.contact_type || 'Unknown'
+    contactCounts[t] = (contactCounts[t] ?? 0) + 1
+  }
+  const contactSummary = Object.entries(contactCounts)
+    .map(([type, count]) => `${count} ${type}`)
+    .join(', ')
+
+  prompt += `\n\n## Pipeline\n- Total contacts: ${contacts.length}${contactSummary ? ` (${contactSummary})` : ''}\n- Active loans: ${loans.length}`
+
+  if (loans.length > 0) {
+    const loanLines = loans.map(l => {
+      const name = l.loan_name
+        || [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ')
+        || l.borrower_name || 'Unknown'
+      const location = [l.property_city, l.property_state].filter(Boolean).join(', ')
+      const close = l.closing_date || l.estimated_closing_date
+      const amount = l.loan_amount ? `$${Number(l.loan_amount).toLocaleString()}` : null
+      const parts = [l.status, l.loan_type, location, amount, close ? `closes ${close}` : null].filter(Boolean)
+      return `  - ${name}${parts.length ? ` — ${parts.join(', ')}` : ''}`
+    })
+    prompt += '\n' + loanLines.join('\n')
+  }
+
+  // Add record-specific context if on a record page
+  if (recordId && recordType === 'contact') {
+    const { data } = await supabase
       .from('contacts')
       .select(`
         first_name, last_name, email, phone,
@@ -40,116 +181,84 @@ Today's date: ${todayStr}`
       .eq('id', recordId)
       .maybeSingle()
 
-    if (error) console.error('[chat/route] contact fetch error:', error)
-    if (!data) return base
+    if (data) {
+      const { data: loanRows } = await supabase
+        .from('loans')
+        .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name')
+        .eq('contact_id', recordId)
+        .limit(1)
 
-    const { data: loanRows } = await supabase
+      const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
+      const loan = loanRows?.[0] ?? null
+      const mailingParts = [data.mailing_street, data.mailing_city, data.mailing_state, data.mailing_zip].filter(Boolean)
+      const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
+
+      prompt += `\n\n## Active Contact Record\n- Name: ${fullName || 'N/A'}\n- Email: ${data.email || 'N/A'}\n- Phone: ${data.phone || 'N/A'}\n- Type: ${data.contact_type || 'N/A'}\n- Stage: ${data.stage || 'N/A'}\n- Group: ${data.group_tag || 'N/A'}\n- Source: ${data.source || 'N/A'}\n- Mailing Address: ${mailingAddress || 'N/A'}\n- Closing Date: ${data.closing_date || 'N/A'}\n- Realtor Email: ${data.realtor_email || 'N/A'}\n- Realtor Phone: ${data.realtor_phone || 'N/A'}\n- Notes: ${data.notes || 'None'}`
+
+      if (loan) {
+        prompt += `\n\n## Associated Loan\n- Amount: ${loan.loan_amount ? `$${Number(loan.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${loan.sales_price ? `$${Number(loan.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${loan.interest_rate ? `${loan.interest_rate}%` : 'N/A'}\n- Property: ${[loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || 'N/A'}\n- Type: ${loan.loan_type || 'N/A'}\n- Program: ${loan.loan_program || 'N/A'}\n- Status: ${loan.status || 'N/A'}\n- Close Date: ${loan.closing_date || loan.estimated_closing_date || 'N/A'}\n- Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}`
+      }
+    }
+  }
+
+  if (recordId && recordType === 'loan') {
+    const { data } = await supabase
       .from('loans')
-      .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name')
-      .eq('contact_id', recordId)
-      .limit(1)
-
-    const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
-    const loan = loanRows?.[0] ?? null
-    const mailingParts = [data.mailing_street, data.mailing_city, data.mailing_state, data.mailing_zip].filter(Boolean)
-    const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
-
-    return `${base}
-
-## Current Contact Record
-- Name: ${fullName || 'N/A'}
-- Email: ${data.email || 'N/A'}
-- Phone: ${data.phone || 'N/A'}
-- Type: ${data.contact_type || 'N/A'}
-- Stage: ${data.stage || 'N/A'}
-- Group: ${data.group_tag || 'N/A'}
-- Source: ${data.source || 'N/A'}
-- Mailing Address: ${mailingAddress || 'N/A'}
-- Closing Date: ${data.closing_date || 'N/A'}
-- Realtor Email: ${data.realtor_email || 'N/A'}
-- Realtor Phone: ${data.realtor_phone || 'N/A'}
-- Notes: ${data.notes || 'None'}
-${loan ? `
-## Associated Loan
-- Amount: ${loan.loan_amount ? `$${Number(loan.loan_amount).toLocaleString()}` : 'N/A'}
-- Purchase Price: ${loan.sales_price ? `$${Number(loan.sales_price).toLocaleString()}` : 'N/A'}
-- Interest Rate: ${loan.interest_rate ? `${loan.interest_rate}%` : 'N/A'}
-- Property: ${[loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || 'N/A'}
-- Type: ${loan.loan_type || 'N/A'}
-- Program: ${loan.loan_program || 'N/A'}
-- Status: ${loan.status || 'N/A'}
-- Close Date: ${loan.closing_date || loan.estimated_closing_date || 'N/A'}
-- Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}` : ''}`
-  }
-
-  // recordType === 'loan'
-  const { data, error: loanError } = await supabase
-    .from('loans')
-    .select(`
-      loan_name, loan_number, loan_amount, loan_type, loan_program,
-      property_address, property_city, property_state,
-      loan_purpose, occupancy, status, contact_id,
-      sales_price, interest_rate, closing_date, estimated_closing_date,
-      buyer_agent_name, buyer_agent_email, buyer_agent_brokerage,
-      listing_agent_name, listing_agent_email,
-      title_company, county, seller_concessions,
-      down_payment_pct, estimated_ltv, effective_date,
-      borrower_name, borrower_first_name, borrower_last_name
-    `)
-    .eq('id', recordId)
-    .maybeSingle()
-
-  if (loanError) console.error('[chat/route] loan fetch error:', loanError)
-  if (!data) return base
-
-  let contact: { first_name: string; last_name: string; email: string | null; phone: string | null } | null = null
-  if (data.contact_id) {
-    const { data: contactRow } = await supabase
-      .from('contacts')
-      .select('first_name, last_name, email, phone')
-      .eq('id', data.contact_id)
+      .select(`
+        loan_name, loan_number, loan_amount, loan_type, loan_program,
+        property_address, property_city, property_state,
+        loan_purpose, occupancy, status, contact_id,
+        sales_price, interest_rate, closing_date, estimated_closing_date,
+        buyer_agent_name, buyer_agent_email, buyer_agent_brokerage,
+        listing_agent_name, listing_agent_email,
+        title_company, county, seller_concessions,
+        down_payment_pct, estimated_ltv, effective_date,
+        borrower_name, borrower_first_name, borrower_last_name
+      `)
+      .eq('id', recordId)
       .maybeSingle()
-    contact = contactRow ?? null
+
+    if (data) {
+      let contact: { first_name: string; last_name: string; email: string | null; phone: string | null } | null = null
+      if (data.contact_id) {
+        const { data: contactRow } = await supabase
+          .from('contacts')
+          .select('first_name, last_name, email, phone')
+          .eq('id', data.contact_id)
+          .maybeSingle()
+        contact = contactRow ?? null
+      }
+
+      const borrowerName = data.borrower_name
+        || [data.borrower_first_name, data.borrower_last_name].filter(Boolean).join(' ')
+        || (contact ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') : '')
+        || 'N/A'
+      const propertyFull = [data.property_address, data.property_city, data.property_state].filter(Boolean).join(', ')
+      const closeDate = data.closing_date || data.estimated_closing_date
+
+      prompt += `\n\n## Active Loan Record\n- Loan Name: ${data.loan_name || 'N/A'}\n- Loan Number: ${data.loan_number || 'N/A'}\n- Borrower: ${borrowerName}\n- Borrower Email: ${contact?.email || 'N/A'}\n- Borrower Phone: ${contact?.phone || 'N/A'}\n- Loan Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${data.sales_price ? `$${Number(data.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${data.interest_rate ? `${data.interest_rate}%` : 'N/A'}\n- Down Payment: ${data.down_payment_pct ? `${data.down_payment_pct}%` : 'N/A'}\n- LTV: ${data.estimated_ltv ? `${data.estimated_ltv}%` : 'N/A'}\n- Seller Concessions: ${data.seller_concessions ? `$${Number(data.seller_concessions).toLocaleString()}` : 'N/A'}\n- Type: ${data.loan_type || 'N/A'}\n- Program: ${data.loan_program || 'N/A'}\n- Purpose: ${data.loan_purpose || 'N/A'}\n- Occupancy: ${data.occupancy || 'N/A'}\n- Property: ${propertyFull || 'N/A'}\n- County: ${data.county || 'N/A'}\n- Status: ${data.status || 'N/A'}\n- Close Date: ${closeDate || 'N/A'}\n- Effective Date: ${data.effective_date || 'N/A'}\n- Title Company: ${data.title_company || 'N/A'}\n- Buyer's Agent: ${data.buyer_agent_name || 'N/A'}${data.buyer_agent_email ? ` (${data.buyer_agent_email})` : ''}${data.buyer_agent_brokerage ? ` — ${data.buyer_agent_brokerage}` : ''}\n- Listing Agent: ${data.listing_agent_name || 'N/A'}${data.listing_agent_email ? ` (${data.listing_agent_email})` : ''}`
+    }
   }
 
-  const borrowerName = data.borrower_name
-    || [data.borrower_first_name, data.borrower_last_name].filter(Boolean).join(' ')
-    || (contact ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') : '')
-    || 'N/A'
-  const propertyFull = [data.property_address, data.property_city, data.property_state]
-    .filter(Boolean)
-    .join(', ')
-  const closeDate = data.closing_date || data.estimated_closing_date
+  // Add selected contacts context for bulk outreach
+  if (selectedContacts && selectedContacts.length > 0) {
+    const names = selectedContacts
+      .map((c) => [c.first_name, c.last_name].filter(Boolean).join(' ') || 'Unknown')
+      .join(', ')
+    prompt += `\n\nCurrently selected contacts: ${names}\nWhen drafting messages for these contacts, personalize where possible. Keep messages concise.`
+  }
 
-  return `${base}
+  // Add generate type modifier
+  if (generateType === 'email') {
+    prompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "Adam Styer | Mortgage Solutions LP | NMLS #513013"`
+  } else if (generateType === 'text') {
+    prompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
+  }
 
-## Current Loan Record
-- Loan Name: ${data.loan_name || 'N/A'}
-- Loan Number: ${data.loan_number || 'N/A'}
-- Borrower: ${borrowerName}
-- Borrower Email: ${contact?.email || 'N/A'}
-- Borrower Phone: ${contact?.phone || 'N/A'}
-- Loan Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}
-- Purchase Price: ${data.sales_price ? `$${Number(data.sales_price).toLocaleString()}` : 'N/A'}
-- Interest Rate: ${data.interest_rate ? `${data.interest_rate}%` : 'N/A'}
-- Down Payment: ${data.down_payment_pct ? `${data.down_payment_pct}%` : 'N/A'}
-- LTV: ${data.estimated_ltv ? `${data.estimated_ltv}%` : 'N/A'}
-- Seller Concessions: ${data.seller_concessions ? `$${Number(data.seller_concessions).toLocaleString()}` : 'N/A'}
-- Type: ${data.loan_type || 'N/A'}
-- Program: ${data.loan_program || 'N/A'}
-- Purpose: ${data.loan_purpose || 'N/A'}
-- Occupancy: ${data.occupancy || 'N/A'}
-- Property: ${propertyFull || 'N/A'}
-- County: ${data.county || 'N/A'}
-- Status: ${data.status || 'N/A'}
-- Close Date: ${closeDate || 'N/A'}
-- Effective Date: ${data.effective_date || 'N/A'}
-- Title Company: ${data.title_company || 'N/A'}
-- Buyer's Agent: ${data.buyer_agent_name || 'N/A'}${data.buyer_agent_email ? ` (${data.buyer_agent_email})` : ''}${data.buyer_agent_brokerage ? ` — ${data.buyer_agent_brokerage}` : ''}
-- Listing Agent: ${data.listing_agent_name || 'N/A'}${data.listing_agent_email ? ` (${data.listing_agent_email})` : ''}`
+  return prompt
 }
 
-// POST /api/chat — send a message
+// POST /api/chat
 export async function POST(req: NextRequest) {
   let userId: string
   let organizationId: string
@@ -161,50 +270,111 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 30 requests per minute per user
   const { allowed } = checkRateLimit(`chat:${userId}`, 30, 60_000)
   if (!allowed) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
   try {
-    const { messages, recordId, recordType, sessionId } = await req.json()
+    const { messages, recordId, recordType, sessionId, selectedContacts, generateType, attachments } = await req.json()
 
-    if (!messages || !recordId || !recordType) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: 'Messages array required' }, { status: 400 })
     }
 
-    const systemPrompt = await buildSystemPrompt(recordId, recordType, organizationId)
+    const systemPrompt = await buildSystemPrompt(
+      organizationId,
+      recordId,
+      recordType,
+      selectedContacts,
+      generateType
+    )
 
     const anthropic = await getAnthropicClient()
-    const response = await anthropic.messages.create({
+
+    // Normalize messages for the Anthropic API
+    const apiMessages: MessageParam[] = messages.map((m: { role: string; content: string }) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }))
+
+    // Replace last user message content with multimodal blocks when files are attached
+    if (attachments?.length) {
+      const lastMsg = apiMessages[apiMessages.length - 1]
+      if (lastMsg?.role === 'user' && typeof lastMsg.content === 'string') {
+        lastMsg.content = buildUserContent(lastMsg.content, attachments)
+      }
+    }
+
+    // First call — Claude may invoke a tool
+    let response = await anthropic.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: systemPrompt,
-      messages,
+      tools: [MORTGAGE_KB_TOOL],
+      messages: apiMessages,
     })
 
-    const assistantMessage = {
-      role: 'assistant' as const,
-      content: response.content[0].type === 'text' ? response.content[0].text : '',
+    // Tool-use loop — execute any tool calls then get Claude's final answer
+    if (response.stop_reason === 'tool_use') {
+      const toolUseBlock = response.content.find((b) => b.type === 'tool_use')
+      if (toolUseBlock?.type === 'tool_use') {
+        const question = (toolUseBlock.input as { question: string }).question
+        const kbAnswer = await queryNotebookLM(question)
+
+        const toolResultContent = kbAnswer
+          ? kbAnswer
+          : 'The mortgage knowledge base is not available right now. Please answer from your own knowledge.'
+
+        response = await anthropic.messages.create({
+          model: CLAUDE_MODEL,
+          max_tokens: 2048,
+          system: systemPrompt,
+          tools: [MORTGAGE_KB_TOOL],
+          messages: [
+            ...apiMessages,
+            { role: 'assistant', content: response.content },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'tool_result',
+                  tool_use_id: toolUseBlock.id,
+                  content: toolResultContent,
+                },
+              ],
+            },
+          ],
+        })
+      }
     }
 
+    const text = response.content.find((b) => b.type === 'text')?.text ?? ''
+    const assistantMessage = { role: 'assistant' as const, content: text }
     const updatedMessages = [...messages, assistantMessage]
     const supabase = createServiceClient()
 
+    // Only persist sessions when on a specific record
     let newSessionId = sessionId
-    if (sessionId) {
-      await supabase
-        .from('chat_sessions')
-        .update({ messages: updatedMessages })
-        .eq('id', sessionId)
-    } else {
-      const { data } = await supabase
-        .from('chat_sessions')
-        .insert({ record_id: recordId, record_type: recordType, messages: updatedMessages, user_id: userId })
-        .select('id')
-        .single()
-      newSessionId = data?.id
+    if (recordId) {
+      if (sessionId) {
+        await supabase
+          .from('chat_sessions')
+          .update({ messages: updatedMessages })
+          .eq('id', sessionId)
+      } else {
+        const { data } = await supabase
+          .from('chat_sessions')
+          .insert({
+            record_id: recordId,
+            record_type: recordType,
+            messages: updatedMessages,
+            user_id: userId,
+          })
+          .select('id')
+          .single()
+        newSessionId = data?.id
+      }
     }
 
     return NextResponse.json({ message: assistantMessage, sessionId: newSessionId })
@@ -214,7 +384,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/chat?recordId=&recordType= — load most recent session
+// GET /api/chat?recordId=&recordType= — load most recent session for a record
 export async function GET(req: NextRequest) {
   try {
     await getOrganization()

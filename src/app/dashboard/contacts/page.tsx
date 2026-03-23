@@ -39,6 +39,7 @@ type Contact = {
   stage: string | null
   lead_source: string | null
   referred_by: string | null
+  referral_type: string | null
   company_name: string | null
   notes: string | null
   birthday: string | null
@@ -222,6 +223,18 @@ function applyCustomListRulesContact(query: any, rules: CustomListRule[]): any {
 }
 
 
+const REFERRAL_TYPE_LABELS: Record<string, string> = {
+  web_lead:                   'Web Lead',
+  realtor_referral:           'Realtor Referral',
+  client_referral:            'Client Referral',
+  past_client:                'Past Client',
+  friend_family:              'Friend / Family',
+  financial_advisor_referral: 'Financial Advisor',
+  builder_referral:           'Builder Referral',
+  open_house:                 'Open House',
+  other:                      'Other',
+}
+
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
   { id: 'name',         label: 'Name',             minWidth: 200, render: c => (
@@ -235,6 +248,9 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'email',        label: 'Email',            minWidth: 220, render: c => <EmailCell value={c.email} /> },
   { id: 'stage',        label: 'Stage',            minWidth: 120, render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      minWidth: 140, render: c => c.lead_source ?? '—' },
+  { id: 'referral_type', label: 'Referral Type',    minWidth: 140, render: c => c.referral_type
+      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 7px', borderRadius: 4, background: 'rgba(59,130,246,0.12)', color: '#60a5fa', whiteSpace: 'nowrap' }}>{REFERRAL_TYPE_LABELS[c.referral_type] ?? c.referral_type}</span>
+      : <span style={{ color: 'var(--muted)' }}>—</span> },
   { id: 'referred_by',  label: 'Referred By',      minWidth: 160, render: c => c.referred_by
       ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
       : '—' },
@@ -723,7 +739,7 @@ export default function ContactsPage() {
     if (!error) {
       setEditMode(false)
       setSelectedContact(prev => prev ? { ...prev, ...editData } as Contact : null)
-      updateLastTouch(supabase, selectedContact.id, 'contact_updated', 'Updated contact record')
+      updateLastTouch(supabase, selectedContact.id, 'contact_updated', 'Updated contact record', undefined, { fields: Object.keys(editData) })
       await Promise.all([fetchContacts(), fetchCounts()])
     }
     setSaving(false)

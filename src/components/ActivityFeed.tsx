@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const LS_KEY = 'loanos_activity_last_read'
@@ -13,6 +14,8 @@ type ActivityEntry = {
   summary: string | null
   contact_id: string | null
   loan_id: string | null
+  contacts: { first_name: string | null; last_name: string | null } | null
+  loans: { loan_name: string | null } | null
 }
 
 function timeAgo(iso: string): string {
@@ -25,13 +28,54 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function actionLabel(action: string | null): string {
+function actionLabel(action: string | null, metadata: Record<string, unknown> | null): string {
   if (!action) return 'Activity'
-  return action.replace(/_/g, ' ').replace(/\./g, ' › ')
+  if (action === 'contact_updated') {
+    const field = metadata?.field as string | undefined
+    const fields = metadata?.fields as string[] | undefined
+    if (field) return `Updated ${field.replace(/_/g, ' ')}`
+    if (fields?.length) return `Updated ${fields.map(f => f.replace(/_/g, ' ')).join(', ')}`
+  }
+  if (action === 'email.received' || action === 'email_received') return 'Email received'
+  if (action === 'loan_created') return 'Loan created'
+  if (action === 'contact_created') return 'Contact created'
+  if (action === 'note_added') return 'Note added'
+  if (action === 'stage_changed') return 'Stage changed'
+  return action.replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+function actionDetail(entry: ActivityEntry): string | null {
+  const meta = entry.metadata ?? {}
+  const action = entry.action ?? ''
+
+  if (action === 'email.received' || action === 'email_received') {
+    return (meta.subject ?? meta.email_subject ?? meta.from_address ?? null) as string | null
+  }
+  if (action === 'stage_changed') {
+    return entry.summary ?? null
+  }
+  if (entry.summary && entry.summary !== 'Updated contact record') return entry.summary
+  return null
+}
+
+function entityName(entry: ActivityEntry): string | null {
+  if (entry.contacts) {
+    const { first_name, last_name } = entry.contacts
+    return [first_name, last_name].filter(Boolean).join(' ') || null
+  }
+  if (entry.loans?.loan_name) return entry.loans.loan_name
+  return null
+}
+
+function navTarget(entry: ActivityEntry): string | null {
+  if (entry.contact_id) return `/dashboard/contacts/${entry.contact_id}`
+  if (entry.loan_id) return `/dashboard/loans/${entry.loan_id}`
+  return null
 }
 
 export default function ActivityFeed() {
   const supabase = createClient()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [entries, setEntries] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(false)
@@ -47,7 +91,7 @@ export default function ActivityFeed() {
     setLoading(true)
     const { data } = await supabase
       .from('activity_log')
-      .select('id, created_at, action, entity_type, metadata, summary, contact_id, loan_id')
+      .select('id, created_at, action, entity_type, metadata, summary, contact_id, loan_id, contacts(first_name, last_name), loans(loan_name)')
       .order('created_at', { ascending: false })
       .limit(50)
     setEntries((data ?? []) as ActivityEntry[])
@@ -137,17 +181,24 @@ export default function ActivityFeed() {
                 <p style={{ padding: 20, color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, textAlign: 'center' }}>No activity yet.</p>
               ) : entries.map(entry => {
                 const isUnread = entry.created_at > lastRead
-                const label = actionLabel(entry.action)
-                const preview = entry.summary
-                  ?? (entry.metadata
-                    ? (Object.values(entry.metadata).find(v => typeof v === 'string') as string | undefined) ?? ''
-                    : '')
+                const label = actionLabel(entry.action, entry.metadata)
+                const detail = actionDetail(entry)
+                const name = entityName(entry)
+                const target = navTarget(entry)
                 return (
-                  <div key={entry.id} style={{
-                    display: 'flex', gap: 12, padding: '12px 20px',
-                    borderBottom: '1px solid var(--border)',
-                    background: isUnread ? 'rgba(201,168,76,0.05)' : 'transparent',
-                  }}>
+                  <div
+                    key={entry.id}
+                    onClick={target ? () => { setOpen(false); router.push(target) } : undefined}
+                    style={{
+                      display: 'flex', gap: 12, padding: '12px 20px',
+                      borderBottom: '1px solid var(--border)',
+                      background: isUnread ? 'rgba(201,168,76,0.05)' : 'transparent',
+                      cursor: target ? 'pointer' : 'default',
+                      transition: 'background 0.1s',
+                    }}
+                    onMouseEnter={target ? e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)' } : undefined}
+                    onMouseLeave={target ? e => { (e.currentTarget as HTMLDivElement).style.background = isUnread ? 'rgba(201,168,76,0.05)' : 'transparent' } : undefined}
+                  >
                     {/* Unread indicator dot */}
                     <div style={{ paddingTop: 6, flexShrink: 0 }}>
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: isUnread ? '#c9a84c' : 'transparent' }} />
@@ -161,14 +212,19 @@ export default function ActivityFeed() {
                           {timeAgo(entry.created_at)}
                         </span>
                       </div>
-                      {preview && (
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {String(preview).slice(0, 80)}
+                      {name && (
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--foreground)', margin: '0 0 2px', fontWeight: 500 }}>
+                          {name}
                         </p>
                       )}
-                      {entry.entity_type && (
-                        <span style={{ fontSize: 9, color: '#c9a84c', fontFamily: 'var(--font-mono)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 4px', display: 'inline-block', marginTop: 4 }}>
-                          {entry.entity_type}
+                      {detail && (
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {detail.slice(0, 80)}
+                        </p>
+                      )}
+                      {target && (
+                        <span style={{ fontSize: 9, color: 'rgba(201,168,76,0.6)', fontFamily: 'var(--font-mono)', marginTop: 4, display: 'inline-block' }}>
+                          view →
                         </span>
                       )}
                     </div>

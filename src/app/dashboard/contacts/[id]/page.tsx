@@ -195,7 +195,7 @@ export default function ContactRecordPage() {
     if (!contact) return
     const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
     if (!error) {
-      updateLastTouch(supabase, contact.id, 'contact_updated', 'Updated contact record')
+      updateLastTouch(supabase, contact.id, 'contact_updated', 'Updated contact record', undefined, { field })
       setContact(prev => prev ? { ...prev, [field]: value } : null)
     }
   }

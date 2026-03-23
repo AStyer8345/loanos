@@ -226,6 +226,67 @@ type Props = {
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
 }
 
+// Inline select for referral_type — shows dropdown with predefined options only
+function ReferralTypeSelect({ value, onSave }: {
+  value: string | null
+  onSave: (field: keyof Contact, value: string | null) => Promise<void>
+}) {
+  const [editing, setEditing] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+
+  async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value || null
+    setEditing(false)
+    await onSave('referral_type', next)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  if (editing) return (
+    <div>
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>REFERRAL TYPE</div>
+      <select
+        autoFocus
+        defaultValue={value ?? ''}
+        onChange={handleChange}
+        onBlur={() => setEditing(false)}
+        style={{
+          ...baseStyle,
+          color: 'var(--fg)',
+          background: 'var(--bg)',
+          border: '1px solid rgba(201,168,76,0.6)',
+          borderRadius: 3,
+          padding: '3px 8px',
+          width: '100%',
+          outline: 'none',
+        }}
+      >
+        <option value="">— none —</option>
+        {Object.entries(REFERRAL_TYPE_LABELS).map(([k, v]) => (
+          <option key={k} value={k}>{v}</option>
+        ))}
+      </select>
+    </div>
+  )
+
+  return (
+    <div onClick={() => setEditing(true)} title="Click to change referral type" style={{ cursor: 'pointer' }}>
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>REFERRAL TYPE</div>
+      <div style={{
+        ...baseStyle,
+        color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
+        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        paddingBottom: 1,
+        display: 'inline-block',
+        minWidth: 80,
+      }}>
+        {saved ? '✓ Saved' : (value ? (REFERRAL_TYPE_LABELS[value] ?? value) : '—')}
+      </div>
+    </div>
+  )
+}
+
 // Inline-editable text field — click to edit, blur/Enter to save
 function EditableContactField({ label, value, field, onSave }: {
   label: string
@@ -814,7 +875,7 @@ export function ContactRecordView(props: Props) {
                       <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
                       <EditableContactField label="Type"         value={contact.contact_type}  field="contact_type" onSave={onSaveField} />
                       <EditableContactField label="Referred By"   value={contact.referred_by}    field="referred_by"    onSave={onSaveField} />
-                      <EditableContactField label="Referral Type" value={contact.referral_type ?? null}  field="referral_type"  onSave={onSaveField} />
+                      <ReferralTypeSelect value={contact.referral_type ?? null} onSave={onSaveField} />
                       <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
                       <EditableContactField label="Closing Date"  value={contact.closing_date}   field="closing_date"   onSave={onSaveField} />
                     </div>

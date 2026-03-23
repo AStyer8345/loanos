@@ -18,6 +18,7 @@ export async function updateLastTouch(
   eventType: string,
   description: string,
   loanId?: string,
+  metadata?: Record<string, unknown>,
 ): Promise<void> {
   const now = new Date().toISOString()
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,6 +45,7 @@ export async function updateLastTouch(
       occurred_at: now,
       user_id: user.id,
       organization_id: profile?.organization_id ?? null,
+      metadata: (metadata ?? null) as never,
     }),
   ])
 }

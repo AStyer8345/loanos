@@ -73,6 +73,8 @@ export default function LoanOSChat() {
   const [isLoading, setIsLoading] = useState(false)
   const [historyLoaded, setHistoryLoaded] = useState<string | null>(null)
 
+  const [isExpanded, setIsExpanded] = useState(false)
+
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [attachError, setAttachError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -136,6 +138,16 @@ export default function LoanOSChat() {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [isOpen])
+
+  // Collapse expanded mode on Esc
+  useEffect(() => {
+    if (!isExpanded) return
+    function onKeyDown(e: globalThis.KeyboardEvent) {
+      if (e.key === 'Escape') setIsExpanded(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isExpanded])
 
   const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
     setMessages((prev) => [...prev, { ...msg, id: uid() }])
@@ -513,24 +525,41 @@ export default function LoanOSChat() {
       {/* Chat panel */}
       {isOpen && (
         <div
-          style={{
-            position: 'fixed',
-            bottom: 88,
-            right: 24,
-            zIndex: 9998,
-            width: 400,
-            height: 560,
-            background: BG,
-            border: `1px solid ${BORDER}`,
-            borderRadius: 12,
-            display: 'flex',
-            flexDirection: 'column',
-            fontFamily: FONT,
-            fontSize: 13,
-            color: '#e0e0e0',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
-            overflow: 'hidden',
-          }}
+          style={
+            isExpanded
+              ? {
+                  position: 'fixed',
+                  inset: 0,
+                  zIndex: 9000,
+                  background: BG,
+                  border: 'none',
+                  borderRadius: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  fontFamily: FONT,
+                  fontSize: 13,
+                  color: '#e0e0e0',
+                  overflow: 'hidden',
+                }
+              : {
+                  position: 'fixed',
+                  bottom: 88,
+                  right: 24,
+                  zIndex: 9000,
+                  width: 400,
+                  height: 560,
+                  background: BG,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 12,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  fontFamily: FONT,
+                  fontSize: 13,
+                  color: '#e0e0e0',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+                  overflow: 'hidden',
+                }
+          }
         >
           {/* Header */}
           <div
@@ -588,6 +617,22 @@ export default function LoanOSChat() {
                   clear
                 </button>
               )}
+              <button
+                onClick={() => setIsExpanded((v) => !v)}
+                title={isExpanded ? 'Collapse' : 'Expand to full screen'}
+                style={{
+                  background: 'none',
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 6,
+                  color: '#666',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  padding: '3px 7px',
+                  fontFamily: FONT,
+                }}
+              >
+                {isExpanded ? '⤡' : '⤢'}
+              </button>
               <button
                 onClick={() => setIsOpen(false)}
                 style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px' }}

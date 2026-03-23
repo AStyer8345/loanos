@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -25,8 +25,8 @@
 
   /* Legacy aliases */
   --accent:        var(--gold);
-  --accent-light:  hsla(210, 70%, 60%, 0.12);
-  --accent-border: hsla(210, 70%, 60%, 0.5);
+  --accent-light:  hsla(43, 55%, 54%, 0.12);
+  --accent-border: hsla(43, 55%, 54%, 0.5);
 
   /* Scenario Builder palette — navy + blue accent */
   --sc-bg:       #0c1220;

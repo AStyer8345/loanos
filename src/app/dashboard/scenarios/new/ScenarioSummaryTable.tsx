@@ -24,7 +24,7 @@ function computeCtcWorksheet(row: ScenarioDisplayRow) {
     ['Processing Fee', cc.processingFee],
     ...(cc.applicationFee > 0 ? [['Application Fee', cc.applicationFee]] as [string, number][] : []),
     ...(cc.adminFee > 0 ? [['Admin Fee', cc.adminFee]] as [string, number][] : []),
-  ].filter(([, v]) => v > 0) as [string, number][] : []
+  ].filter(([, v]: [string, number]) => v > 0) as [string, number][] : []
 
   const thirdPartyFees: [string, number][] = cc ? [
     ['Appraisal', cc.appraisal],
@@ -37,7 +37,7 @@ function computeCtcWorksheet(row: ScenarioDisplayRow) {
     ['Title Endorsements', cc.titleEndorsements],
     ['Recording Fee', cc.recordingFee],
     ["Lender's Title Policy", cc.lendersTitlePolicy],
-  ].filter(([, v]) => v > 0) as [string, number][] : []
+  ].filter(([, v]: [string, number]) => v > 0) as [string, number][] : []
 
   const dailyRate = loanAmount > 0 && interestRate > 0 ? (loanAmount * (interestRate / 100)) / 365 : 0
   const prepaidInterestAmt = cc ? Math.round(dailyRate * cc.prepaidInterestDays) : 0

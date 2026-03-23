@@ -98,6 +98,18 @@ function telHref(phone: string | null | undefined): string | null {
   return digits.length >= 10 ? `tel:${String(phone).trim()}` : null
 }
 
+function fmtPhone(phone: string | null | undefined): string {
+  if (!phone) return '—'
+  const digits = String(phone).replace(/\D/g, '')
+  if (digits.length === 11 && digits[0] === '1') {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+  }
+  return String(phone).trim() || '—'
+}
+
 function mailtoHref(email: string | null | undefined): string | null {
   if (!email || !String(email).trim() || !String(email).includes('@')) return null
   return `mailto:${String(email).trim()}`
@@ -1207,7 +1219,7 @@ export default function LoansPage() {
           .loans-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
         `}</style>
         <div
-          className="loans-scroll flex-1 overflow-auto"
+          className="loans-scroll flex-1 min-w-0 overflow-auto"
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
         >
           {loading ? (
@@ -1366,7 +1378,15 @@ export default function LoansPage() {
                       if (col.id === 'property_state') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.property_state || '—'}</td>
                       if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
                       if (col.id === 'borrower_email') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_email || '—'}</td>
-                      if (col.id === 'borrower_phone') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_phone || '—'}</td>
+                      if (col.id === 'borrower_phone') {
+                        const href = telHref(loan.borrower_phone)
+                        const val = fmtPhone(loan.borrower_phone)
+                        return (
+                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
+                          </td>
+                        )
+                      }
                       if (col.id === 'commission_amount') {
                         const isEditing = editingCommissionId === loan.id
                         return (
@@ -1408,7 +1428,7 @@ export default function LoansPage() {
                       }
                       if (col.id === 'contact_phone') {
                         const href = telHref(loan.contact_phone)
-                        const val = loan.contact_phone ?? '—'
+                        const val = fmtPhone(loan.contact_phone)
                         return (
                           <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
                             {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}

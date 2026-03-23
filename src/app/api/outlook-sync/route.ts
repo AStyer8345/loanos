@@ -109,6 +109,7 @@ async function logEmailActivity(
     entity_id: contact.id,
     contact_id: contact.id,
     user_id: LOANOS_SYSTEM_USER_ID,
+    organization_id: contact.organization_id ?? null,
     metadata: payload,
     type: direction,
     summary,

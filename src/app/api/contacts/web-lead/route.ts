@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
+import type { Database } from '@/lib/database.types'
+
+type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 /**
  * POST /api/contacts/web-lead
@@ -29,6 +32,7 @@ export async function POST(req: NextRequest) {
     contact_type,
     lead_source,
     referred_by,
+    referral_type,
     notes,
     company_name,
     // Web lead specific
@@ -50,6 +54,7 @@ export async function POST(req: NextRequest) {
     contact_type?: string
     lead_source?: string
     referred_by?: string | null
+    referral_type?: string
     notes?: string
     company_name?: string | null
     loan_type?: string
@@ -156,8 +161,9 @@ export async function POST(req: NextRequest) {
     phone:        phone        || null,
     stage:        stage        || 'Lead',
     contact_type: contact_type || 'borrower',
-    lead_source:  lead_source  || 'Website',
-    referred_by:  referred_by  || null,
+    lead_source:   lead_source    || 'Website',
+    referred_by:   referred_by   || null,
+    referral_type: referral_type || 'web_lead',
     notes:        constructedNotes || null,
     company_name: company_name || null,
     created_at:   now,
@@ -167,7 +173,7 @@ export async function POST(req: NextRequest) {
   // Remove null values — let DB defaults handle them
   const cleanData = Object.fromEntries(
     Object.entries(insertData).filter(([, v]) => v != null)
-  )
+  ) as unknown as ContactInsert
 
   const { data: newContact, error: insertError } = await supabase
     .from('contacts')

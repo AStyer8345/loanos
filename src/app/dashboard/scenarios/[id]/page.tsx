@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 import ScenarioBuilder from '../new/ScenarioBuilder'
 import { ensureClosingCosts, sumClosingCosts, DEFAULT_CLOSING_COSTS } from '@/lib/scenarios/utils'
-import type { ScenarioState, RefiScenarioInput, PurchaseScenarioInput } from '@/lib/scenarios/types'
+import type { ScenarioState, ScenarioMode, RefiScenarioInput, PurchaseScenarioInput, CurrentLoanInput } from '@/lib/scenarios/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +30,7 @@ export default async function ViewScenarioPage({ params }: { params: { id: strin
   let initialState: Partial<ScenarioState>
   try {
     initialState = {
-      mode: scenario.scenario_type,
+      mode: scenario.scenario_type as ScenarioMode,
       borrowerName: scenario.borrower_name || '',
       propertyAddress: scenario.property_address || '',
       propertyValue: scenario.property_value || 0,
@@ -39,17 +39,18 @@ export default async function ViewScenarioPage({ params }: { params: { id: strin
     }
 
     if (scenario.scenario_type === 'purchase') {
-      initialState.purchaseScenarios = (scenario.scenarios_data as PurchaseScenarioInput[]).map(s => ({
+      initialState.purchaseScenarios = (scenario.scenarios_data as unknown as PurchaseScenarioInput[]).map(s => ({
         ...s,
         closingCostBreakdown: ensureClosingCosts(s.closingCostBreakdown),
         totalClosingCosts: s.totalClosingCosts ?? sumClosingCosts(s.closingCostBreakdown ?? DEFAULT_CLOSING_COSTS),
         buydownYearRates: s.buydownYearRates ?? [],
       }))
     } else {
-      initialState.currentLoan = scenario.current_loan_data
-        ? { ...scenario.current_loan_data, debts: scenario.current_loan_data.debts ?? [] }
+      const currentLoanData = scenario.current_loan_data as unknown as (CurrentLoanInput & { debts?: unknown[] }) | null
+      initialState.currentLoan = currentLoanData
+        ? { ...currentLoanData, debts: currentLoanData.debts ?? [] }
         : undefined
-      initialState.refiScenarios = (scenario.scenarios_data as RefiScenarioInput[]).map(s => ({
+      initialState.refiScenarios = (scenario.scenarios_data as unknown as RefiScenarioInput[]).map(s => ({
         ...s,
         closingCostBreakdown: ensureClosingCosts(s.closingCostBreakdown),
         closingCosts: s.closingCosts ?? sumClosingCosts(s.closingCostBreakdown ?? DEFAULT_CLOSING_COSTS),

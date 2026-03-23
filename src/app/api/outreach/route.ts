@@ -3,6 +3,7 @@ import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 async function buildSystemPrompt(
   organizationId: string,
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
 
     const anthropic = await getAnthropicClient()
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       system: systemPrompt,
       messages: messages.map((m: { role: string; content: string }) => ({

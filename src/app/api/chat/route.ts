@@ -4,6 +4,7 @@ import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 async function buildSystemPrompt(
   recordId: string,
@@ -101,7 +102,7 @@ ${loan ? `
   if (loanError) console.error('[chat/route] loan fetch error:', loanError)
   if (!data) return base
 
-  let contact: { first_name: string; last_name: string; email: string; phone: string } | null = null
+  let contact: { first_name: string; last_name: string; email: string | null; phone: string | null } | null = null
   if (data.contact_id) {
     const { data: contactRow } = await supabase
       .from('contacts')
@@ -177,7 +178,7 @@ export async function POST(req: NextRequest) {
 
     const anthropic = await getAnthropicClient()
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: systemPrompt,
       messages,

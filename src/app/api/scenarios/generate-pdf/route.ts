@@ -34,13 +34,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Scenario not found' }, { status: 404 })
     }
 
-    const { data: settings } = await serviceClient
+    const { data: settingsRows } = await serviceClient
       .from('user_settings')
-      .select('settings')
+      .select('key, value')
       .eq('user_id', user.id)
-      .single()
 
-    const userSettings = settings?.settings as Record<string, string> | null
+    // Convert key-value rows into a flat settings object
+    const userSettings: Record<string, string> | null = settingsRows?.length
+      ? Object.fromEntries(settingsRows.map(r => [r.key, String(r.value ?? '')]))
+      : null
     const mode = scenario.scenario_type as string
     const propertyValue = scenario.property_value as number || 0
     const scenarioInputs = scenario.scenarios_data as Record<string, unknown>[]

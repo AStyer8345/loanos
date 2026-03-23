@@ -137,7 +137,9 @@ export async function GET() {
       let vol = 0
       let cnt = 0
       for (const l of closedLoans || []) {
-        const d = new Date(l.closing_date || l.funding_date)
+        const dateStr = l.closing_date || l.funding_date
+        if (!dateStr) continue
+        const d = new Date(dateStr)
         if (d >= weekStart && d < weekEnd) {
           vol += l.loan_amount || 0
           cnt++

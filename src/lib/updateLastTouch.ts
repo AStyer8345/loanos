@@ -23,6 +23,12 @@ export async function updateLastTouch(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single()
+
   await Promise.all([
     supabase
       .from('contacts')
@@ -37,6 +43,7 @@ export async function updateLastTouch(
       entity_type: 'contact',
       occurred_at: now,
       user_id: user.id,
+      organization_id: profile?.organization_id ?? null,
     }),
   ])
 }

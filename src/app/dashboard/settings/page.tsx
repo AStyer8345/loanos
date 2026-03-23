@@ -249,10 +249,10 @@ export default function SettingsPage() {
       .then(({ data }) => {
         for (const row of data ?? []) {
           const key = row.key as SectionKey
-          if (key === 'integrations') setIntegrations(row.value as Integrations)
-          if (key === 'website')      setWebsite(row.value as WebsiteSettings)
-          if (key === 'social')       setSocial(row.value as SocialSettings)
-          if (key === 'identity')     setIdentity(row.value as IdentitySettings)
+          if (key === 'integrations') setIntegrations(row.value as unknown as Integrations)
+          if (key === 'website')      setWebsite(row.value as unknown as WebsiteSettings)
+          if (key === 'social')       setSocial(row.value as unknown as SocialSettings)
+          if (key === 'identity')     setIdentity(row.value as unknown as IdentitySettings)
           setTimestamps(prev => ({ ...prev, [key]: row.updated_at }))
         }
       })
@@ -361,7 +361,8 @@ export default function SettingsPage() {
     const now = new Date().toISOString()
     await supabase
       .from('user_settings')
-      .upsert({ user_id: userId, key, value, updated_at: now }, { onConflict: 'user_id,key' })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .upsert({ user_id: userId, key, value: value as any, updated_at: now }, { onConflict: 'user_id,key' })
     setSaving(prev => ({ ...prev, [key]: false }))
     setTimestamps(prev => ({ ...prev, [key]: now }))
   }

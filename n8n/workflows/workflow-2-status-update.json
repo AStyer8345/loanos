@@ -45,7 +45,7 @@
       },
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?arive_loan_id=eq.' + encodeURIComponent($json.ariveLoanId) + '&limit=1&select=id,contact_id,arive_loan_id,status' }}",
+        "url": "={{ 'https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/loans?arive_loan_id=eq.' + encodeURIComponent($json.ariveLoanId) + '&limit=1&select=id,contact_id,arive_loan_id,status,organization_id' }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
@@ -63,7 +63,7 @@
       "typeVersion": 2,
       "position": [960, 300],
       "parameters": {
-        "jsCode": "// Parse the GET response and determine if the loan exists\nconst response = $input.item.json;\nconst loans = Array.isArray(response) ? response : [];\nconst loan = loans[0] || null;\n\nconst fields = $('Extract Status Fields').item.json;\n\nreturn [{\n  json: {\n    loanFound: !!loan,\n    loanId: loan ? loan.id : null,\n    contactId: loan ? loan.contact_id : null,\n    ariveLoanId: fields.ariveLoanId,\n    status: fields.status,\n    firstPaymentDate: fields.firstPaymentDate,\n    fundingDate: fields.fundingDate,\n    estClosingDate: fields.estClosingDate,\n    systemUserId: fields.systemUserId\n  }\n}];"
+        "jsCode": "// Parse the GET response and determine if the loan exists\nconst response = $input.item.json;\nconst loans = Array.isArray(response) ? response : [];\nconst loan = loans[0] || null;\n\nconst fields = $('Extract Status Fields').item.json;\n\nreturn [{\n  json: {\n    loanFound: !!loan,\n    loanId: loan ? loan.id : null,\n    contactId: loan ? loan.contact_id : null,\n    organizationId: loan ? loan.organization_id : null,\n    ariveLoanId: fields.ariveLoanId,\n    status: fields.status,\n    firstPaymentDate: fields.firstPaymentDate,\n    fundingDate: fields.fundingDate,\n    estClosingDate: fields.estClosingDate,\n    systemUserId: fields.systemUserId\n  }\n}];"
       }
     },
     {
@@ -114,7 +114,7 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  status: $json.status,\n  first_payment_date: $json.firstPaymentDate,\n  funding_date: $json.fundingDate,\n  est_closing_date: $json.estClosingDate,\n  updated_at: new Date().toISOString()\n}) }}"
+        "body": "={{ JSON.stringify({\n  status: $json.status,\n  first_payment_date: $json.firstPaymentDate,\n  funding_date: $json.fundingDate,\n  estimated_closing_date: $json.estClosingDate,\n  updated_at: new Date().toISOString()\n}) }}"
       }
     },
     {
@@ -144,7 +144,7 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  action: 'status_updated',\n  entity_type: 'loan',\n  entity_id: $('Check Loan Found').item.json.loanId,\n  loan_id: $('Check Loan Found').item.json.loanId,\n  contact_id: $('Check Loan Found').item.json.contactId,\n  metadata: {\n    new_status: $('Check Loan Found').item.json.status,\n    arive_loan_id: $('Check Loan Found').item.json.ariveLoanId,\n    source: 'arive_webhook'\n  },\n  user_id: $('Check Loan Found').item.json.systemUserId\n}) }}"
+        "body": "={{ JSON.stringify({\n  action: 'status_updated',\n  entity_type: 'loan',\n  entity_id: $('Check Loan Found').item.json.loanId,\n  loan_id: $('Check Loan Found').item.json.loanId,\n  contact_id: $('Check Loan Found').item.json.contactId,\n  organization_id: $('Check Loan Found').item.json.organizationId,\n  metadata: {\n    new_status: $('Check Loan Found').item.json.status,\n    arive_loan_id: $('Check Loan Found').item.json.ariveLoanId,\n    source: 'arive_webhook'\n  },\n  user_id: $('Check Loan Found').item.json.systemUserId\n}) }}"
       }
     },
     {

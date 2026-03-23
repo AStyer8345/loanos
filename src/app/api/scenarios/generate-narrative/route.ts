@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function POST(req: NextRequest) {
   // 20 requests per minute per IP (no auth on this route)
@@ -85,18 +85,16 @@ Rules:
       async start(controller) {
         try {
           const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-6',
+            model: CLAUDE_MODEL,
             max_tokens: 1024,
             system: systemPrompt,
             messages: [{ role: 'user', content: `Analyze these ${mode} loan scenarios:\n${dataContext}` }],
             stream: true,
           })
 
-          let fullText = ''
           for await (const event of response) {
             if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
               const text = event.delta.text
-              fullText += text
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`))
             }
           }
@@ -104,18 +102,9 @@ Rules:
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
 
-          // Log to activity_log
-          try {
-            const supabase = createServiceClient()
-            await supabase.from('activity_log').insert({
-              type: 'ai_generation',
-              action: 'scenario_narrative',
-              summary: `AI narrative generated for ${mode} scenario — ${borrowerName || 'unnamed borrower'}`,
-              metadata: { mode, scenarioCount: mode === 'purchase' ? purchaseScenarios?.length : refiScenarios?.length, wordCount: fullText.split(/\s+/).length },
-            })
-          } catch (logErr) {
-            console.error('[narrative] activity log error:', logErr)
-          }
+          // Note: activity_log insert omitted — this route has no auth context,
+          // so organization_id cannot be determined. Logging unscoped rows would
+          // pollute activity_log and break multi-tenant isolation.
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Generation failed'
           const msgLc = msg.toLowerCase()

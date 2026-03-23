@@ -187,10 +187,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Log raw payload for field auditing (helps verify Arive key names)
-  console.log('[arive-webhook] raw payload keys:', Object.keys(body))
-  console.log('[arive-webhook] raw payload:', JSON.stringify(body, null, 2))
-
   const now = new Date().toISOString()
 
   try {

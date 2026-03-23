@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
+import type { Database } from '@/lib/database.types'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type RawRow = Record<string, string>
+type LoanInsert = Database['public']['Tables']['loans']['Insert']
 
 interface ImportResult {
   imported: number
@@ -131,7 +133,7 @@ export async function POST(req: NextRequest) {
       // Strip nulls before insert
       const payload = Object.fromEntries(
         Object.entries(mapped).filter(([, v]) => v !== null && v !== undefined)
-      )
+      ) as unknown as LoanInsert
 
       const { error: insertErr } = await supabase.from('loans').insert([payload])
 

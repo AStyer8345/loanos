@@ -9,10 +9,10 @@ interface ScenarioRow {
   scenario_type: string
   borrower_name: string | null
   property_address: string | null
-  created_at: string
-  updated_at: string
-  view_count: number
-  share_token: string
+  created_at: string | null
+  updated_at: string | null
+  view_count: number | null
+  share_token: string | null
 }
 
 export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }) {
@@ -108,7 +108,7 @@ export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }
                     {s.property_address || '—'}
                   </td>
                   <td className="px-4 py-3 text-xs hidden sm:table-cell" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
-                    {new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs hidden sm:table-cell" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
                     {s.view_count}

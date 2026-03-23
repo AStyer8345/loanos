@@ -50,6 +50,12 @@ export default function DailyBriefingPage() {
   const [error, setError] = useState<string | null>(null)
   const [checked, setChecked] = useState<Set<number>>(new Set())
 
+  // Auto-fetch on mount so Adam doesn't have to click the button manually
+  useEffect(() => {
+    fetchBriefing()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function fetchBriefing() {
     setLoading(true)
     setError(null)

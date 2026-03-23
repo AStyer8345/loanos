@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-22 (full audit — model bump, chat org scope, milestone scope, briefing UX)_
+_Last updated: 2026-03-23 (morning audit — dead code cleanup: ResultsTable.tsx + pipeline/stats route deleted)_
 
 ---
 
@@ -8,9 +8,15 @@ _Last updated: 2026-03-22 (full audit — model bump, chat org scope, milestone 
 
 - [x] **daily-briefing unscoped fallback** — Fixed 2026-03-21. Replaced `withOrg` ternary fallback with hard 500 check before any queries. `organizationId` must be non-null before any data fetch runs.
 - [x] **Final CD Email n8n check constraint crash** — Fixed 2026-03-21 morning audit. `Log CD Email` node was sending `status: 'draft'` but `email_drafts_status_check` only allows `pending/sent/discarded`. Updated to `status: 'pending'`. Workflow `SkzrWeR0bHZs8kWX`.
+- [x] **activity_log null org rows (Next.js)** — Fixed 2026-03-22. `updateLastTouch.ts` now fetches org_id from profile. `outlook-sync logEmailActivity` now stamps `contact.organization_id`. `generate-narrative` unscoped insert removed. Migration 046 backfilled 3 orphan rows.
 
+- [x] **n8n activity_log null org — Arive Status Update** (`9JyzzwKac8v3uQ7d`) — Fixed 2026-03-22 morning audit. Added `organization_id` to `Find Loan by Arive ID` SELECT, propagated through `Check Loan Found`, stamped on `Log Status Updated` body. Local file: `n8n/workflows/workflow-2-status-update.json`. Must be pushed to n8n cloud (workflow ID `9JyzzwKac8v3uQ7d`) to take effect.
+- [x] **n8n WF2 est_closing_date column name bug** — Fixed 2026-03-22 morning audit. `Update Loan Status` node was PATCHing `est_closing_date` (old column, never written by Next.js arive-webhook). Fixed to `estimated_closing_date` to match the schema and the Next.js webhook handler. Local file updated; must be pushed to n8n cloud.
+- [x] **n8n WF1 activity_log null org** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. Added `Get Org ID` + `Extract Org ID` nodes (profiles lookup by systemUserId). Stamped `organization_id` on Upsert Contact, Upsert Loan, and Log Activity. Local file updated: `n8n/workflows/workflow-1-new-loan.json`. **Adam must push to n8n cloud.**
+- [x] **n8n WF1 est_closing_date column** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. `Upsert Loan` body updated to `estimated_closing_date`. Local file updated. **Adam must push to n8n cloud.**
+- [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Also blocked on Azure App Registration. Low priority until Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
-- [ ] **n8n Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
+- [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 
 ---
 
@@ -34,11 +40,12 @@ _Last updated: 2026-03-22 (full audit — model bump, chat org scope, milestone 
 
 ## ✅ Completed (2026-03-22 full audit)
 
-- [x] **Claude model version bump** — Updated `claude-sonnet-4-5` → `claude-sonnet-4-6` across all 8 API routes: `chat`, `daily-briefing`, `milestone` (×2), `outreach`, `refi-intake`, `scenarios/generate-narrative`, `scenarios/parse-statement`.
-- [x] **Chat sessions org scoping** — `POST /api/chat`: added `organization_id: organizationId` to new session insert + `.eq('organization_id', organizationId)` on update. `GET /api/chat`: destructured org from `getOrganization()`, added org filter to `chat_sessions` select. Sessions are now fully org-scoped in both reads and writes.
-- [x] **daily-briefing milestone org scope** — `loan_milestone_events` and `milestone_communications` now filtered via pre-fetched org loan IDs. Clears the last medium-priority multi-tenancy item.
-- [x] **Briefing page auto-fetch** — Added `useEffect(() => { fetchBriefing() }, [])` so the morning briefing loads automatically on first visit. No more manual button click every morning.
-- [x] **Briefing page hardcoded hex** — Replaced `bg-[#4ADE80]` and `text-[#4ADE80]` with Tailwind tokens `bg-green-400` / `text-green-400`.
+- [x] **Claude model version bump** — Updated `claude-sonnet-4-5` → `claude-sonnet-4-6` across all 8 API routes.
+- [x] **Chat sessions org scoping** — Sessions fully org-scoped in both reads and writes.
+- [x] **daily-briefing milestone org scope** — `loan_milestone_events` and `milestone_communications` now filtered via pre-fetched org loan IDs.
+- [x] **Briefing page auto-fetch** — Loads automatically on first visit.
+- [x] **WF2 activity_log org + est_closing_date** — Fixed and pushed.
+- [x] **activity_log null org rows (Next.js)** — Fixed `updateLastTouch.ts`, `outlook-sync`, removed unscoped insert in `generate-narrative`. Migration 046 backfilled.
 
 ## ✅ Completed (session 13 — 2026-03-21 multi-tenancy audit)
 

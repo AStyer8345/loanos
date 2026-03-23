@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnthropicClient } from '@/lib/anthropic/client'
+import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('pdf') as File | null;
+    const formData = await req.formData()
+    const file = formData.get('pdf') as File | null
 
     if (!file) {
-      return NextResponse.json({ error: 'No PDF provided' }, { status: 400 });
+      return NextResponse.json({ error: 'No PDF provided' }, { status: 400 })
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const base64Pdf = Buffer.from(arrayBuffer).toString('base64');
+    const arrayBuffer = await file.arrayBuffer()
+    const base64Pdf = Buffer.from(arrayBuffer).toString('base64')
 
     const prompt = `You are extracting fields from a mortgage Initial Fees Worksheet. Return ONLY valid JSON with these keys:
 - borrower_first_name
@@ -23,23 +25,14 @@ export async function POST(req: NextRequest) {
 - lock_period (string, e.g. "30 days" or "45 days")
 - escrow (exactly "Waived" or "Active")
 
-Return ONLY the JSON object. No explanation, no markdown, no code fences.`;
+Return ONLY the JSON object. No explanation, no markdown, no code fences.`
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 });
-    }
+    const anthropic = await getAnthropicClient()
 
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-beta': 'pdfs-2024-09-25',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const claudeData = await (anthropic.messages.create as any)(
+      {
+        model: CLAUDE_MODEL,
         max_tokens: 512,
         messages: [
           {
@@ -60,28 +53,22 @@ Return ONLY the JSON object. No explanation, no markdown, no code fences.`;
             ],
           },
         ],
-      }),
-    });
+      },
+      { headers: { 'anthropic-beta': 'pdfs-2024-09-25' } }
+    )
 
-    if (!claudeRes.ok) {
-      const err = await claudeRes.text();
-      console.error('Claude API error:', err);
-      return NextResponse.json({ error: 'Claude extraction failed', detail: err }, { status: 502 });
-    }
-
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content?.[0]?.text ?? '';
+    const rawText = (claudeData.content?.[0] as { type: string; text: string })?.text ?? ''
 
     // Parse JSON — strip markdown fences if Claude wraps anyway
-    const match = rawText.match(/\{[\s\S]*\}/);
+    const match = rawText.match(/\{[\s\S]*\}/)
     if (!match) {
-      return NextResponse.json({ error: 'Could not parse JSON from Claude response', raw: rawText }, { status: 422 });
+      return NextResponse.json({ error: 'Could not parse JSON from Claude response', raw: rawText }, { status: 422 })
     }
 
-    const fields = JSON.parse(match[0]);
-    return NextResponse.json({ fields });
+    const fields = JSON.parse(match[0])
+    return NextResponse.json({ fields })
   } catch (err) {
-    console.error('refi-intake extraction error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('refi-intake extraction error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

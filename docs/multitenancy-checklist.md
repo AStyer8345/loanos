@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-21 (session 13 — migrations 043/044 applied, daily-briefing unscoped fallback fixed)_
+_Last updated: 2026-03-22 (daily prep — migration 046 applied, updateLastTouch + outlook-sync + generate-narrative fixed)_
 
 ---
 
@@ -23,8 +23,13 @@ _Last updated: 2026-03-21 (session 13 — migrations 043/044 applied, daily-brie
 | `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies; redundant ALL policy dropped in 040 |
 | 0 loans with null `organization_id` | ✅ | Verified 2026-03-21 (0 null rows) |
 | 0 contacts with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
-| 0 activity_log with null `organization_id` | ✅ | 78 legacy nulls backfilled — migration 043 |
+| 0 activity_log with null `organization_id` | ✅ | 78 legacy nulls backfilled — migration 043; 3 new nulls from n8n/code bugs — migration 046 + code fixes 2026-03-22 |
 | 0 chat_sessions with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
+| `updateLastTouch.ts` stamps org_id | ✅ | Fixed 2026-03-22 — was inserting without org_id |
+| `outlook-sync logEmailActivity` stamps org_id | ✅ | Fixed 2026-03-22 — uses contact.organization_id |
+| `generate-narrative` no unscoped activity_log | ✅ | Fixed 2026-03-22 — insert removed (no auth context) |
+| n8n `9JyzzwKac8v3uQ7d` stamps org_id | ❌ | Arive Status Update workflow inserts without org_id |
+| n8n `JMmstRl2C5ylmuIY` stamps org_id | ❌ | Outlook Email Sync workflow inserts without org_id |
 
 ---
 

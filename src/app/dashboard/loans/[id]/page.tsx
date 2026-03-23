@@ -382,7 +382,10 @@ export default function LoanDetailPage() {
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
   const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [loading, setLoading] = useState(true)
-  const { setActiveRecord } = useOutreachChat()
+  const outreachChat = useOutreachChat() as unknown as {
+    setActiveRecord?: (record: { id: string; type: 'contact' | 'loan'; name: string } | null) => void
+  }
+  const setActiveRecord = outreachChat.setActiveRecord
   const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -492,8 +495,8 @@ export default function LoanDetailPage() {
   // Set active record so the global chat bot knows we're on a loan page.
   // Keep hook order stable across loading / not-found early returns.
   useEffect(() => {
-    setActiveRecord({ id: loanId, type: 'loan', name: displayName })
-    return () => setActiveRecord(null)
+    setActiveRecord?.({ id: loanId, type: 'loan', name: displayName })
+    return () => setActiveRecord?.(null)
   }, [loanId, displayName, setActiveRecord])
 
   if (loading) return (

@@ -22,6 +22,7 @@ type Message = {
 }
 
 type Attachment = {
+  uid: string
   type: 'image' | 'pdf'
   mimeType: string
   name: string
@@ -31,6 +32,10 @@ type Attachment = {
 function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
+
+const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1 MB
+const MAX_FILES = 3
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 
 const RECORD_QUICK_ACTIONS: Record<string, string[]> = {
   contact: [
@@ -71,6 +76,7 @@ export default function LoanOSChat() {
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [attachError, setAttachError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const pendingFileCountRef = useRef(0)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -139,38 +145,43 @@ export default function LoanOSChat() {
     setMessages((prev) => [...prev, { id: uid(), role: 'assistant', content, ...extra }])
   }, [])
 
-  const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1 MB
-  const MAX_FILES = 3
-  const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     setAttachError(null)
     const files = Array.from(e.target.files ?? [])
-    if (attachments.length + files.length > MAX_FILES) {
+    // Check total including in-flight reads not yet committed to state
+    if (attachments.length + pendingFileCountRef.current + files.length > MAX_FILES) {
       setAttachError(`Max ${MAX_FILES} files per message.`)
       e.target.value = ''
       return
     }
+    pendingFileCountRef.current += files.length
     for (const file of files) {
       if (!ACCEPTED_TYPES.includes(file.type)) {
+        pendingFileCountRef.current -= 1
         setAttachError(`${file.name}: unsupported type. Use JPEG, PNG, WebP, or PDF.`)
         e.target.value = ''
         return
       }
       if (file.size > MAX_FILE_SIZE) {
+        pendingFileCountRef.current -= 1
         setAttachError(`${file.name} is too large (max 1 MB).`)
         e.target.value = ''
         return
       }
       const reader = new FileReader()
-      reader.onerror = () => setAttachError(`Could not read ${file.name} — please try again.`)
+      reader.onerror = () => {
+        pendingFileCountRef.current -= 1
+        setAttachError(`Could not read ${file.name} — please try again.`)
+      }
       reader.onload = () => {
+        pendingFileCountRef.current -= 1
         const result = reader.result as string
         // Strip the data URI prefix: "data:image/jpeg;base64," → raw base64
         const base64 = result.split(',')[1]
         setAttachments((prev) => [
           ...prev,
           {
+            uid: `${file.name}-${Date.now()}`,
             type: file.type === 'application/pdf' ? 'pdf' : 'image',
             mimeType: file.type,
             name: file.name,
@@ -183,8 +194,8 @@ export default function LoanOSChat() {
     e.target.value = '' // reset so same file can be re-selected
   }
 
-  function removeAttachment(index: number) {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
+  function removeAttachment(uid: string) {
+    setAttachments((prev) => prev.filter((a) => a.uid !== uid))
   }
 
   // ── Core Claude call ────────────────────────────────────────────────────
@@ -421,6 +432,7 @@ export default function LoanOSChat() {
       default: {
         const pendingAttachments = attachments
         setAttachments([])  // clear chips immediately on send
+        pendingFileCountRef.current = 0
         setAttachError(null)
         setIsLoading(true)
         try {
@@ -703,9 +715,9 @@ export default function LoanOSChat() {
             {/* Attachment chips */}
             {attachments.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-                {attachments.map((att, i) => (
+                {attachments.map((att) => (
                   <div
-                    key={i}
+                    key={att.uid}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -721,7 +733,7 @@ export default function LoanOSChat() {
                     {att.type === 'pdf' ? '📄' : '🖼'}
                     <span>{att.name.length > 20 ? att.name.slice(0, 17) + '…' : att.name}</span>
                     <button
-                      onClick={() => removeAttachment(i)}
+                      onClick={() => removeAttachment(att.uid)}
                       style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 12, padding: '0 0 0 2px', lineHeight: 1 }}
                     >
                       ✕

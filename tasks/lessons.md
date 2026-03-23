@@ -121,6 +121,12 @@ Arive webhooks sometimes fire with `currentLoanStatus_status: null` — this hap
 ### n8n contact upsert null NOT NULL crash (2026-03-20)
 Arive sometimes sends webhook payloads with null `firstName` or `lastName` (happens when borrower profile is incomplete in Arive). In n8n, `JSON.stringify({ first_name: $json.firstName })` with a null value produces `{"first_name":null}`. Supabase treats this as an explicit NULL assignment and rejects it if the column has a NOT NULL constraint. Pattern: always add `|| ''` fallback for any NOT NULL varchar column in contact/loan upsert bodies: `first_name: $json.firstName || ''`. This applies to every n8n HTTP Request node that upserts into `contacts` or `loans`.
 
+### n8n WF2 org_id + column name drift (2026-03-22)
+WF2 (`workflow-2-status-update.json`) had two independent bugs:
+1. `Find Loan by Arive ID` SELECT only included `id, contact_id, arive_loan_id, status` — no `organization_id`. The `Log Status Updated` activity_log INSERT had no org context, producing orphan rows (same class of bug as 2026-03-22 Next.js fixes). Fix: add `organization_id` to the SELECT, propagate through `Check Loan Found`, stamp on activity_log body.
+2. `Update Loan Status` PATCH body used `est_closing_date` (old column, migrations 005/007). The Next.js arive-webhook handler writes `estimated_closing_date` (migration 011). Both columns exist in the schema, so there's no constraint error — but WF2 status updates were silently writing to the wrong column, leaving `estimated_closing_date` stale for Arive loans updated via n8n. Fix: use `estimated_closing_date` in the PATCH body.
+**Pattern:** When copying activity_log INSERT patterns across n8n workflows, always verify the SELECT in the preceding lookup node includes `organization_id`. Column drift between old/new schemas won't crash — it silently writes to the wrong column. Always cross-check n8n field names against the Next.js webhook handler (the authoritative writer).
+
 ### n8n status enum mismatch crashes silently (2026-03-21)
 Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check constraint "email_drafts_status_check"`. Root cause: `Log CD Email` node sent `status: 'draft'` but the `email_drafts` table only allows `'pending' | 'sent' | 'discarded'`. Fix: change to `status: 'pending'`. **Pattern:** whenever adding a Supabase INSERT node to n8n, verify the exact allowed values on any check-constrained column (status, type, etc.) before writing the body expression. `'draft'` is a common intuitive guess that's often wrong.
 

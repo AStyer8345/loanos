@@ -1,12 +1,15 @@
 {
-  "name": "LoanOS — Arive New Loan → Supabase",
+  "name": "LoanOS \u2014 Arive New Loan \u2192 Supabase",
   "nodes": [
     {
       "id": "arl-w1-001",
       "name": "Arive New Loan Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
         "path": "arive-new-loan",
         "httpMethod": "POST",
@@ -26,7 +29,10 @@
       "name": "Extract Loan Fields",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "jsCode": "// Get system user ID from n8n environment\nconst systemUserId = process.env.LOANOS_SYSTEM_USER_ID;\nif (!systemUserId) {\n  throw new Error('LOANOS_SYSTEM_USER_ID not set in n8n environment variables. Set it to Adams auth.users UUID.');\n}\n\n// Arive webhooks nest payload under body\nconst body = $json.body || $json;\n\n// Normalize: return null for empty/missing fields\nconst n = (val) => {\n  if (val === null || val === undefined || val === '') return null;\n  return val;\n};\n\nconst rawEmail = n(body.loanBorrower1_emailAddressText);\nif (!rawEmail) {\n  throw new Error('Missing required field: loanBorrower1_emailAddressText');\n}\n\nconst ariveLoanId = String(body.ariveLoanId ?? '');\nif (!ariveLoanId) {\n  throw new Error('Missing required field: ariveLoanId');\n}\n\nreturn [{\n  json: {\n    // Contact fields\n    email: rawEmail.toLowerCase().trim(),\n    firstName: n(body.loanBorrower1_firstName) || '',\n    lastName: n(body.loanBorrower1_lastName) || '',\n    phone: n(body.loanBorrower1_mobilePhoneText),\n    mailingStreet: n(body.loanProperty_streetAddressText),\n    mailingCity: n(body.loanProperty_cityText),\n    mailingState: n(body.loanProperty_stateText),\n    mailingZip: n(body.loanProperty_postalCodeText),\n    // Loan fields\n    ariveLoanId,\n    status: n(body.currentLoanStatus_status),\n    firstPaymentDate: n(body.keyDates_firstPaymentDate),\n    estClosingDate: n(body.keyDates_closingContingencyDate),\n    fundingDate: n(body.keyDates_estimatedFundingDate),\n    salesContractDate: n(body.keyDates_salesContractDate),\n    // System\n    systemUserId,\n    rawPayload: body\n  }\n}];"
       }
@@ -36,7 +42,10 @@
       "name": "Upsert Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [720, 300],
+      "position": [
+        1200,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURE_IN_N8N",
@@ -51,14 +60,20 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "resolution=merge-duplicates,return=representation" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  email: $json.email,\n  first_name: $json.firstName,\n  last_name: $json.lastName,\n  phone: $json.phone,\n  mailing_street: $json.mailingStreet,\n  mailing_city: $json.mailingCity,\n  mailing_state: $json.mailingState,\n  mailing_zip: $json.mailingZip,\n  group_tag: 'Client',\n  stage: 'Lead',\n  source: 'arive_webhook',\n  contact_type: 'borrower',\n  user_id: $json.systemUserId,\n  updated_at: new Date().toISOString()\n}) }}"
+        "body": "={{ JSON.stringify({\n  email: $json.email,\n  first_name: $json.firstName,\n  last_name: $json.lastName,\n  phone: $json.phone,\n  mailing_street: $json.mailingStreet,\n  mailing_city: $json.mailingCity,\n  mailing_state: $json.mailingState,\n  mailing_zip: $json.mailingZip,\n  group_tag: 'Client',\n  stage: 'Lead',\n  source: 'arive_webhook',\n  contact_type: 'borrower',\n  user_id: $json.systemUserId,\n  organization_id: $json.orgId || null,\n  updated_at: new Date().toISOString()\n}) }}"
       }
     },
     {
@@ -66,9 +81,12 @@
       "name": "Extract Contact ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 300],
+      "position": [
+        1440,
+        300
+      ],
       "parameters": {
-        "jsCode": "// Supabase upsert with return=representation returns an array\nconst response = $input.item.json;\nconst contact = Array.isArray(response) ? response[0] : response;\n\nif (!contact || !contact.id) {\n  throw new Error('Upsert Contact returned no record. Response: ' + JSON.stringify(response));\n}\n\n// Carry forward all fields needed for downstream nodes\nconst fields = $('Extract Loan Fields').item.json;\nreturn [{\n  json: {\n    contactId: contact.id,\n    ariveLoanId: fields.ariveLoanId,\n    status: fields.status,\n    firstPaymentDate: fields.firstPaymentDate,\n    estClosingDate: fields.estClosingDate,\n    fundingDate: fields.fundingDate,\n    salesContractDate: fields.salesContractDate,\n    systemUserId: fields.systemUserId,\n    rawPayload: fields.rawPayload\n  }\n}];"
+        "jsCode": "// Supabase upsert with return=representation returns an array\nconst response = $input.item.json;\nconst contact = Array.isArray(response) ? response[0] : response;\n\nif (!contact || !contact.id) {\n  throw new Error('Upsert Contact returned no record. Response: ' + JSON.stringify(response));\n}\n\n// Carry forward all fields needed for downstream nodes\nconst fields = $('Extract Org ID').item.json;\nreturn [{\n  json: {\n    contactId: contact.id,\n    ariveLoanId: fields.ariveLoanId,\n    status: fields.status,\n    firstPaymentDate: fields.firstPaymentDate,\n    estClosingDate: fields.estClosingDate,\n    fundingDate: fields.fundingDate,\n    salesContractDate: fields.salesContractDate,\n    systemUserId: fields.systemUserId,\n    orgId: fields.orgId,\n    rawPayload: fields.rawPayload\n  }\n}];"
       }
     },
     {
@@ -76,7 +94,10 @@
       "name": "Upsert Loan",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1200, 300],
+      "position": [
+        1680,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURE_IN_N8N",
@@ -91,14 +112,20 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "resolution=merge-duplicates,return=representation" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  arive_loan_id: $json.ariveLoanId,\n  contact_id: $json.contactId,\n  status: $json.status,\n  first_payment_date: $json.firstPaymentDate,\n  est_closing_date: $json.estClosingDate,\n  funding_date: $json.fundingDate,\n  sales_contract_date: $json.salesContractDate,\n  raw_payload: $json.rawPayload,\n  user_id: $json.systemUserId,\n  updated_at: new Date().toISOString()\n}) }}"
+        "body": "={{ JSON.stringify({\n  arive_loan_id: $json.ariveLoanId,\n  contact_id: $json.contactId,\n  status: $json.status,\n  first_payment_date: $json.firstPaymentDate,\n  estimated_closing_date: $json.estClosingDate,\n  funding_date: $json.fundingDate,\n  sales_contract_date: $json.salesContractDate,\n  raw_payload: $json.rawPayload,\n  user_id: $json.systemUserId,\n  organization_id: $json.orgId || null,\n  updated_at: new Date().toISOString()\n}) }}"
       }
     },
     {
@@ -106,9 +133,12 @@
       "name": "Extract Loan ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1440, 300],
+      "position": [
+        1920,
+        300
+      ],
       "parameters": {
-        "jsCode": "const response = $input.item.json;\nconst loan = Array.isArray(response) ? response[0] : response;\n\nif (!loan || !loan.id) {\n  throw new Error('Upsert Loan returned no record. Response: ' + JSON.stringify(response));\n}\n\nconst prev = $('Extract Contact ID').item.json;\nreturn [{\n  json: {\n    loanId: loan.id,\n    contactId: prev.contactId,\n    ariveLoanId: prev.ariveLoanId,\n    status: prev.status,\n    systemUserId: prev.systemUserId\n  }\n}];"
+        "jsCode": "const response = $input.item.json;\nconst loan = Array.isArray(response) ? response[0] : response;\n\nif (!loan || !loan.id) {\n  throw new Error('Upsert Loan returned no record. Response: ' + JSON.stringify(response));\n}\n\nconst prev = $('Extract Contact ID').item.json;\nreturn [{\n  json: {\n    loanId: loan.id,\n    contactId: prev.contactId,\n    ariveLoanId: prev.ariveLoanId,\n    status: prev.status,\n    systemUserId: prev.systemUserId,\n    orgId: prev.orgId\n  }\n}];"
       }
     },
     {
@@ -116,7 +146,10 @@
       "name": "Log Activity",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1680, 300],
+      "position": [
+        2160,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURE_IN_N8N",
@@ -131,14 +164,20 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "return=minimal" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  action: 'loan_created',\n  entity_type: 'loan',\n  entity_id: $json.loanId,\n  loan_id: $json.loanId,\n  contact_id: $json.contactId,\n  metadata: {\n    arive_loan_id: $json.ariveLoanId,\n    status: $json.status,\n    source: 'arive_webhook'\n  },\n  user_id: $json.systemUserId\n}) }}"
+        "body": "={{ JSON.stringify({\n  action: 'loan_created',\n  entity_type: 'loan',\n  entity_id: $json.loanId,\n  loan_id: $json.loanId,\n  contact_id: $json.contactId,\n  metadata: {\n    arive_loan_id: $json.ariveLoanId,\n    status: $json.status,\n    source: 'arive_webhook'\n  },\n  user_id: $json.systemUserId,\n  organization_id: $json.orgId || null\n}) }}"
       }
     },
     {
@@ -146,7 +185,10 @@
       "name": "Return 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1920, 300],
+      "position": [
+        2400,
+        300
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify({ success: true, loan_id: $('Extract Loan ID').item.json.loanId, contact_id: $('Extract Loan ID').item.json.contactId }) }}",
@@ -160,7 +202,10 @@
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [240, 540],
+      "position": [
+        240,
+        540
+      ],
       "parameters": {}
     },
     {
@@ -168,7 +213,10 @@
       "name": "Log Error",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [480, 540],
+      "position": [
+        480,
+        540
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURE_IN_N8N",
@@ -183,8 +231,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "return=minimal" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendBody": true,
@@ -192,47 +246,161 @@
         "rawContentType": "application/json",
         "body": "={{ JSON.stringify({\n  action: 'arive.webhook.error',\n  entity_type: 'loan',\n  entity_id: null,\n  metadata: {\n    error_message: $json.execution.error.message,\n    node_name: $json.execution.error.node ? $json.execution.error.node.name : 'unknown',\n    workflow_id: $json.workflow.id,\n    execution_id: $json.execution.id,\n    source: 'arive_new_loan_webhook'\n  },\n  user_id: process.env.LOANOS_SYSTEM_USER_ID\n}) }}"
       }
+    },
+    {
+      "id": "arl-w1-011",
+      "name": "Get Org ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_IN_N8N",
+          "name": "LoanOS Supabase Service Key"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "=https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/profiles?user_id=eq.{{ $json.systemUserId }}&select=organization_id&limit=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "arl-w1-012",
+      "name": "Extract Org ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// profiles endpoint returns an array\nconst response = $input.item.json;\nconst profiles = Array.isArray(response) ? response : [response];\nconst orgId = profiles.length > 0 ? (profiles[0].organization_id || null) : null;\n\n// Carry forward all fields from Extract Loan Fields\nconst fields = $('Extract Loan Fields').item.json;\nreturn [{\n  json: {\n    ...fields,\n    orgId\n  }\n}];"
+      }
     }
   ],
   "connections": {
     "Arive New Loan Webhook": {
       "main": [
-        [{ "node": "Extract Loan Fields", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Extract Loan Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Extract Loan Fields": {
       "main": [
-        [{ "node": "Upsert Contact", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Get Org ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Upsert Contact": {
       "main": [
-        [{ "node": "Extract Contact ID", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Extract Contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Extract Contact ID": {
       "main": [
-        [{ "node": "Upsert Loan", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Upsert Loan",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Upsert Loan": {
       "main": [
-        [{ "node": "Extract Loan ID", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Extract Loan ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Extract Loan ID": {
       "main": [
-        [{ "node": "Log Activity", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Log Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Log Activity": {
       "main": [
-        [{ "node": "Return 200", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Return 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Error Trigger": {
       "main": [
-        [{ "node": "Log Error", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Org ID": {
+      "main": [
+        [
+          {
+            "node": "Extract Org ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Org ID": {
+      "main": [
+        [
+          {
+            "node": "Upsert Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -244,5 +412,15 @@
   },
   "staticData": null,
   "pinData": {},
-  "tags": [{ "name": "LoanOS" }, { "name": "Arive" }, { "name": "Phase 2" }]
+  "tags": [
+    {
+      "name": "LoanOS"
+    },
+    {
+      "name": "Arive"
+    },
+    {
+      "name": "Phase 2"
+    }
+  ]
 }

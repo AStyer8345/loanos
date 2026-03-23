@@ -129,7 +129,8 @@ export default async function DashboardPage() {
     const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
       || loan.loan_name || 'Unknown'
     const lastHumanTouch = lastActivityMap.get(loan.id)
-    const compareDate = lastHumanTouch ?? loan.updated_at
+    // Use created_at as fallback (not updated_at) — Arive syncs touch updated_at constantly
+    const compareDate = lastHumanTouch ?? loan.created_at
     if (compareDate) {
       const daysSince = Math.floor((now.getTime() - new Date(compareDate).getTime()) / (1000 * 60 * 60 * 24))
       if (daysSince >= 7) {
@@ -155,8 +156,42 @@ export default async function DashboardPage() {
 
   const scoredLoans = rankLoans(loansForScoring)
 
-  // ── Recent Applications (new loans in last 30 days) ───────────────────────
+  // ── New Leads (contacts without a loan, last 30 days) ────────────────────
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+  // Get all contact_ids already tied to a loan so we can exclude them
+  const { data: loanContactRows = [] } = await supabase
+    .from('loans')
+    .select('contact_id')
+    .eq('organization_id', organizationId)
+    .not('contact_id', 'is', null)
+
+  const contactIdsWithLoans = (loanContactRows ?? [])
+    .map(r => r.contact_id as string)
+    .filter(Boolean)
+
+  // Cast via unknown — referral_type/lead_source not yet in generated DB types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const contactsTable = supabase.from('contacts') as any
+
+  let leadsQuery = contactsTable
+    .select('id, first_name, last_name, email, phone, referral_type, lead_source, created_at, stage')
+    .eq('organization_id', organizationId)
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (contactIdsWithLoans.length > 0) {
+    leadsQuery = leadsQuery.not('id', 'in', `(${contactIdsWithLoans.join(',')})`)
+  }
+
+  const { data: newLeads = [] } = await leadsQuery as { data: Array<{
+    id: string; first_name: string | null; last_name: string | null
+    email: string | null; phone: string | null; created_at: string
+    stage: string | null; referral_type: string | null; lead_source: string | null
+  }> | null }
+
+  // ── Recent Applications (new loans in last 30 days) ───────────────────────
   const { data: recentApplications = [] } = await supabase
     .from('loans')
     .select('id, loan_name, borrower_first_name, borrower_last_name, loan_amount, status, loan_type, created_at, contact_id')
@@ -220,6 +255,7 @@ export default async function DashboardPage() {
       chartData={chartData}
       scoredLoans={scoredLoans}
       recentApplications={recentApplications ?? []}
+      newLeads={newLeads ?? []}
     />
   )
 }

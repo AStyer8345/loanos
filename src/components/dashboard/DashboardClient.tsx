@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   AlertTriangle, Clock, Brain, ListChecks,
-  Phone, Mail, MessageSquare, FileText, Zap, ArrowRight,
+  Phone, Mail, MessageSquare, FileText, Zap, ArrowRight, UserPlus,
 } from 'lucide-react'
 import SmartActionQueue from '@/components/SmartActionQueue'
 import type { ScoredLoan } from '@/lib/scoreLoans'
@@ -42,6 +42,25 @@ interface RecentApplication {
   status: string | null; loan_type: string | null; created_at: string; contact_id: string | null
 }
 
+interface NewLead {
+  id: string; first_name: string | null; last_name: string | null
+  email: string | null; phone: string | null
+  referral_type: string | null; lead_source: string | null
+  created_at: string; stage: string | null
+}
+
+const REFERRAL_TYPE_LABELS: Record<string, string> = {
+  web_lead:                   'Web Lead',
+  realtor_referral:           'Realtor Referral',
+  client_referral:            'Client Referral',
+  past_client:                'Past Client',
+  friend_family:              'Friend / Family',
+  financial_advisor_referral: 'Financial Advisor',
+  builder_referral:           'Builder Referral',
+  open_house:                 'Open House',
+  other:                      'Other',
+}
+
 interface DashboardClientProps {
   totalActive: number; totalActiveVolume: number; totalActiveCommission: number
   commissionThisMonth: number; commissionYTD: number; projectedCommission: number
@@ -53,6 +72,7 @@ interface DashboardClientProps {
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
   recentApplications: RecentApplication[]
+  newLeads: NewLead[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -262,6 +282,42 @@ export default function DashboardClient(props: DashboardClientProps) {
                         {app.loan_amount ? <span className="text-[#C9A84C]">{fmtK(app.loan_amount)}</span> : null}
                         {app.loan_type && <span className="text-zinc-500">{app.loan_type}</span>}
                         <span className="text-emerald-400">{daysAgo === 0 ? 'today' : `${daysAgo}d ago`}</span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* New Leads — contacts without a loan yet */}
+          {props.newLeads.length > 0 && (
+            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-blue-500 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus size={14} className="text-blue-400" />
+                  <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">New Leads</span>
+                  <span className="text-[10px] font-mono text-zinc-600">last 30 days · no application yet</span>
+                </div>
+                <Link href="/dashboard/contacts" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                  View all <ArrowRight size={9} />
+                </Link>
+              </div>
+              <div className="space-y-1">
+                {props.newLeads.map(lead => {
+                  const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || '(unnamed)'
+                  const daysAgo = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                  const typeLabel = REFERRAL_TYPE_LABELS[lead.referral_type ?? ''] ?? lead.lead_source ?? 'Lead'
+                  return (
+                    <Link
+                      key={lead.id}
+                      href={`/dashboard/contacts/${lead.id}`}
+                      className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors"
+                    >
+                      <span className="text-zinc-200 truncate">{name}</span>
+                      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                        <span className="text-blue-400 text-[10px]">{typeLabel}</span>
+                        <span className="text-zinc-500">{daysAgo === 0 ? 'today' : `${daysAgo}d ago`}</span>
                       </div>
                     </Link>
                   )

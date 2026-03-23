@@ -30,6 +30,8 @@ export type Contact = {
   contact_type: string | null
   stage: string | null
   referred_by: string | null
+  referral_type?: string | null
+  lead_source?: string | null
   notes: string | null
   last_touch: string | null
   closing_date: string | null
@@ -121,6 +123,18 @@ function initials(c: Contact) {
   const first = (c.first_name ?? '').trim().slice(0, 1).toUpperCase()
   const last = (c.last_name ?? '').trim().slice(0, 1).toUpperCase()
   return (first + last) || '?'
+}
+
+const REFERRAL_TYPE_LABELS: Record<string, string> = {
+  web_lead:                    'Web Lead',
+  realtor_referral:            'Realtor Referral',
+  client_referral:             'Client Referral',
+  past_client:                 'Past Client',
+  friend_family:               'Friend / Family',
+  financial_advisor_referral:  'Financial Advisor',
+  builder_referral:            'Builder Referral',
+  open_house:                  'Open House',
+  other:                       'Other',
 }
 
 // Stage badge for contacts (uses contact stage labels)
@@ -568,6 +582,11 @@ export function ContactRecordView(props: Props) {
                   {contact.group_tag}
                 </span>
               )}
+              {contact.referral_type && (
+                <span style={{ ...getStageBadgeStyle(null), background: 'rgba(59,130,246,0.12)', color: '#60a5fa', textTransform: 'none' }}>
+                  {REFERRAL_TYPE_LABELS[contact.referral_type] ?? contact.referral_type}
+                </span>
+              )}
               {contact.referred_by && (
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
                   via{' '}
@@ -786,8 +805,10 @@ export function ContactRecordView(props: Props) {
                       <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} />
                       <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
                       <EditableContactField label="Type"         value={contact.contact_type}  field="contact_type" onSave={onSaveField} />
-                      <EditableContactField label="Referred By"  value={contact.referred_by}   field="referred_by"  onSave={onSaveField} />
-                      <EditableContactField label="Closing Date" value={contact.closing_date}  field="closing_date" onSave={onSaveField} />
+                      <EditableContactField label="Referred By"   value={contact.referred_by}    field="referred_by"    onSave={onSaveField} />
+                      <EditableContactField label="Referral Type" value={contact.referral_type ?? null}  field="referral_type"  onSave={onSaveField} />
+                      <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
+                      <EditableContactField label="Closing Date"  value={contact.closing_date}   field="closing_date"   onSave={onSaveField} />
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

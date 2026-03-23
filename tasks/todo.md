@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-22 (daily prep — activity_log null org fixes)_
+_Last updated: 2026-03-23 (daily audit — WF1 org_id + column fix, dead code removal)_
 
 ---
 
@@ -10,7 +10,10 @@ _Last updated: 2026-03-22 (daily prep — activity_log null org fixes)_
 - [x] **Final CD Email n8n check constraint crash** — Fixed 2026-03-21 morning audit. `Log CD Email` node was sending `status: 'draft'` but `email_drafts_status_check` only allows `pending/sent/discarded`. Updated to `status: 'pending'`. Workflow `SkzrWeR0bHZs8kWX`.
 - [x] **activity_log null org rows (Next.js)** — Fixed 2026-03-22. `updateLastTouch.ts` now fetches org_id from profile. `outlook-sync logEmailActivity` now stamps `contact.organization_id`. `generate-narrative` unscoped insert removed. Migration 046 backfilled 3 orphan rows.
 
-- [ ] **n8n activity_log null org — Arive Status Update** (`9JyzzwKac8v3uQ7d`) — inserts `status_updated` to activity_log without `organization_id`. Needs a `Get Org ID` node (same as WF1/WF2 pattern) before the activity_log HTTP Request node.
+- [x] **n8n activity_log null org — Arive Status Update** (`9JyzzwKac8v3uQ7d`) — Fixed 2026-03-22 morning audit. Added `organization_id` to `Find Loan by Arive ID` SELECT, propagated through `Check Loan Found`, stamped on `Log Status Updated` body. Local file: `n8n/workflows/workflow-2-status-update.json`. Must be pushed to n8n cloud (workflow ID `9JyzzwKac8v3uQ7d`) to take effect.
+- [x] **n8n WF2 est_closing_date column name bug** — Fixed 2026-03-22 morning audit. `Update Loan Status` node was PATCHing `est_closing_date` (old column, never written by Next.js arive-webhook). Fixed to `estimated_closing_date` to match the schema and the Next.js webhook handler. Local file updated; must be pushed to n8n cloud.
+- [x] **n8n WF1 activity_log null org** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. Added `Get Org ID` + `Extract Org ID` nodes (profiles lookup by systemUserId). Stamped `organization_id` on Upsert Contact, Upsert Loan, and Log Activity. Local file updated: `n8n/workflows/workflow-1-new-loan.json`. **Adam must push to n8n cloud.**
+- [x] **n8n WF1 est_closing_date column** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. `Upsert Loan` body updated to `estimated_closing_date`. Local file updated. **Adam must push to n8n cloud.**
 - [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Also blocked on Azure App Registration. Low priority until Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
@@ -34,6 +37,11 @@ _Last updated: 2026-03-22 (daily prep — activity_log null org fixes)_
 - [ ] **Dead API route `/api/pipeline/stats`** — fully functional but its output is now unused; dashboard server component pulls all data directly. Consider removing or repurposing.
 
 ---
+
+## ✅ Completed (2026-03-22 morning audit — WF2 org_id + column name fixes)
+
+- [x] **WF2 activity_log organization_id** — `n8n/workflows/workflow-2-status-update.json` updated. Added `organization_id` to Supabase SELECT in `Find Loan by Arive ID`, propagated through `Check Loan Found` code node, stamped into `Log Status Updated` INSERT body. All three paths (found/not-found/error) now produce scoped rows when org is resolvable.
+- [x] **WF2 est_closing_date → estimated_closing_date** — `Update Loan Status` PATCH body was writing to non-existent column for the Next.js arive-webhook schema. Fixed to `estimated_closing_date`.
 
 ## ✅ Completed (2026-03-22 daily prep — activity_log null org fixes)
 

@@ -542,7 +542,11 @@ export default function LoanDetailPage() {
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <StatusBadge status={loan.status} />
+              <InlineStatusSelect
+                status={loan.status}
+                loanId={loanId}
+                onUpdate={s => setLoan(l => l ? { ...l, status: s } : l)}
+              />
               {/* Actions dropdown */}
               <div className="relative" ref={actionsRef}>
                 <button
@@ -903,7 +907,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
 
         {/* ── Col 3 — The Pulse ── */}
         <div className="space-y-4">
-          <LoanVitalCards loan={loan} />
+          <LoanVitalCards loan={loan} loanId={loanId} onStatusUpdate={s => setLoan({ ...loan, status: s })} />
           <KeyDatesPanel loan={loan} />
           <PartnerContactsPanel loan={loan} />
           <NotesSidebarPanel loanId={loanId} loan={loan} setLoan={setLoan} />
@@ -1053,7 +1057,7 @@ function PropertySummaryCard({ loan }: { loan: Loan }) {
 
 // ── LoanVitalCards — stat cards per THEME.md ─────────────────────────────────
 
-function LoanVitalCards({ loan }: { loan: Loan }) {
+function LoanVitalCards({ loan, loanId, onStatusUpdate }: { loan: Loan; loanId: string; onStatusUpdate: (s: string) => void }) {
   const daysToClose = (() => {
     const target = loan.estimated_closing_date || loan.closing_date
     if (!target) return null
@@ -1083,13 +1087,11 @@ function LoanVitalCards({ loan }: { loan: Loan }) {
       {/* Loan Stage */}
       <div className="border-l-4 border-l-[#C9A84C] rounded-r-lg bg-zinc-900/80 px-4 py-4">
         <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">Loan Stage</p>
-        {loan.status ? (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-semibold bg-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/30">
-            {loan.status}
-          </span>
-        ) : (
-          <span className="text-zinc-600 text-xs font-mono">—</span>
-        )}
+        <InlineStatusSelect
+          status={loan.status}
+          loanId={loanId}
+          onUpdate={onStatusUpdate}
+        />
         {loan.milestone && (
           <p className="text-[10px] font-mono text-zinc-500 mt-2 truncate">{loan.milestone}</p>
         )}
@@ -2489,7 +2491,6 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     onRefresh()
   }
 
-  const INTERNAL_KEYS = new Set(['loan_id', 'contact_id', 'user_id', 'id', 'created_at'])
   const isSystem = (item: ActivityRow) => item.action.includes('.')
 
   const systemCount = activity.filter(isSystem).length
@@ -2598,28 +2599,28 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
                 {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
               </div>
               <div className="pb-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {typeLabel && <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400">{typeLabel}</span>}
-                  <p className="text-sm font-mono text-zinc-200">{item.action}</p>
+                  <p className="text-sm font-mono text-zinc-200">
+                    {(() => {
+                      const { label, detail } = formatActivityAction(item)
+                      return (
+                        <>
+                          {label}
+                          {detail && <span className="text-zinc-400 ml-1">— {detail}</span>}
+                        </>
+                      )
+                    })()}
+                  </p>
                 </div>
-                <p className="text-xs text-zinc-500 font-mono mt-0.5">
+                {item.summary && item.summary !== item.action && (
+                  <p className="text-xs font-mono text-zinc-400 mt-0.5">{item.summary}</p>
+                )}
+                <p className="text-xs text-zinc-600 font-mono mt-0.5">
                   {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' at '}
                   {new Date(item.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 </p>
-                {item.summary && (
-                  <p className="text-xs font-mono text-zinc-300 mt-1">{item.summary}</p>
-                )}
-                {item.metadata && Object.keys(item.metadata).length > 0 && (
-                  <div className="mt-1 bg-zinc-800 rounded px-2 py-1 text-xs text-zinc-500 font-mono flex flex-wrap gap-x-3 gap-y-1 border border-zinc-700">
-                    {Object.entries(item.metadata)
-                      .filter(([k]) => !INTERNAL_KEYS.has(k))
-                      .map(([k, v]) => (
-                        <span key={k}><span className="font-medium">{k}:</span> {String(v)}</span>
-                      ))
-                    }
-                  </div>
-                )}
               </div>
             </div>
             )
@@ -2851,5 +2852,87 @@ function StatusBadge({ status }: { status: string | null }) {
       {status}
     </span>
   )
+}
+
+// Clickable status badge that opens an inline dropdown to change loan status
+function InlineStatusSelect({ status, loanId, onUpdate }: {
+  status: string | null
+  loanId: string
+  onUpdate: (s: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const supabase = createClient()
+
+  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value
+    if (!newStatus || newStatus === status) { setOpen(false); return }
+    setSaving(true)
+    setOpen(false)
+    await supabase.from('loans').update({ status: newStatus }).eq('id', loanId)
+    onUpdate(newStatus)
+    setSaving(false)
+  }
+
+  if (open) {
+    return (
+      <select
+        autoFocus
+        defaultValue={status ?? ''}
+        onChange={handleChange}
+        onBlur={() => setOpen(false)}
+        className="text-xs font-mono bg-zinc-800 border border-[#C9A84C]/60 rounded px-2 py-1 text-zinc-100 focus:outline-none focus:border-[#C9A84C]"
+      >
+        <option value="">— Select Status —</option>
+        {LOAN_STATUS_OPTS.map(opt => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setOpen(true)}
+      title="Click to change status"
+      className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+    >
+      <StatusBadge status={saving ? '...' : status} />
+      <ChevronDown size={10} className="text-zinc-500" />
+    </button>
+  )
+}
+
+// Format an activity_log row into a human-readable label + optional detail line
+function formatActivityAction(item: ActivityRow): { label: string; detail: string | null } {
+  const meta = (item.metadata ?? {}) as Record<string, string>
+  const action = item.action ?? ''
+
+  if (action === 'email.received' || action === 'email_received') {
+    const subject = meta.subject ?? meta.email_subject ?? null
+    const from = meta.from_address ?? meta.from ?? meta.sender ?? null
+    return {
+      label: 'Email Received',
+      detail: subject ?? from ?? null,
+    }
+  }
+  if (action === 'status_updated' || action === 'status.updated') {
+    const from = meta.old_status ?? meta.from ?? null
+    const to = meta.new_status ?? meta.to ?? meta.status ?? null
+    if (from && to) return { label: 'Status Updated', detail: `${from} → ${to}` }
+    if (to) return { label: 'Status Updated', detail: `→ ${to}` }
+    return { label: 'Status Updated', detail: null }
+  }
+  if (action === 'contact_created') return { label: 'Contact Created', detail: null }
+  if (action === 'loan_created')    return { label: 'Loan Created', detail: null }
+  if (action === 'note_added')      return { label: 'Note Added', detail: null }
+  if (action === 'doc_uploaded')    return { label: 'Document Uploaded', detail: meta.file_name ?? null }
+
+  // Generic humanize: "email.received" → "Email Received", "arive.status_update" → "Arive: Status Update"
+  const humanized = action
+    .replace(/^arive\./, 'Arive: ')
+    .replace(/[._]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+  return { label: humanized, detail: null }
 }
 

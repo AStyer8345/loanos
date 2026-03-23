@@ -14,6 +14,10 @@ After **every** `git push`:
 
 **Never leave a session with a failed Vercel deployment.**
 
+## Read First
+
+Before doing any work, read `CONTEXT.md` — it contains the current project status, schema details, and session history.
+
 ## Project
 
 - Repo: `/Users/adamstyer/Documents/loanos-clone`

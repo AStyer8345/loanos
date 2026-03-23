@@ -16,7 +16,20 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep).**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit).**
+
+## Daily Audit 2026-03-23
+
+**Fixed this session:**
+- `n8n/workflows/workflow-1-new-loan.json`: Added `Get Org ID` HTTP node (profiles lookup by systemUserId) + `Extract Org ID` code node. Stamped `organization_id` on Upsert Contact, Upsert Loan, and Log Activity. Fixed `est_closing_date` → `estimated_closing_date` in Upsert Loan body.
+- `src/app/api/arive-webhook/route.ts`: Removed 2 debug `console.log` lines that were dumping full loan payloads (PII) to Vercel logs.
+- Deleted `src/components/EmailDraftPreview.tsx` (253 lines) and `src/components/ActivityTimeline.tsx` (246 lines) — confirmed zero import references.
+
+**Outstanding (unchanged from 2026-03-22):**
+- **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — local JSON updated but not live
+- n8n Outlook Email Sync blocked on Azure App Registration
+- Performance page still uses localStorage with real borrower names in seed data
+- `chat_sessions.organization_id` still nullable — add NOT NULL once 0 null rows confirmed
 
 ## Multi-Tenancy Status (2026-03-22 — daily prep)
 

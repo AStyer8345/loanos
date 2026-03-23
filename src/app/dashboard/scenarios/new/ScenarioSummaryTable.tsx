@@ -18,26 +18,26 @@ function computeCtcWorksheet(row: ScenarioDisplayRow) {
   const pointsDollar = Math.round(loanAmount * (row.pointsPercent / 100))
   const creditsDollar = Math.round(loanAmount * (row.creditsPercent / 100))
 
-  const lenderFees: [string, number][] = cc ? [
+  const lenderFees: [string, number][] = cc ? (([
     ['Origination Fee', cc.originationFee],
     ['Underwriting Fee', cc.underwritingFee],
     ['Processing Fee', cc.processingFee],
-    ...(cc.applicationFee > 0 ? [['Application Fee', cc.applicationFee]] as [string, number][] : []),
-    ...(cc.adminFee > 0 ? [['Admin Fee', cc.adminFee]] as [string, number][] : []),
-  ].filter(([, v]: [string, number]) => v > 0) as [string, number][] : []
+    cc.applicationFee > 0 ? ['Application Fee', cc.applicationFee] : null,
+    cc.adminFee > 0 ? ['Admin Fee', cc.adminFee] : null,
+  ].filter(Boolean)) as [string, number][]).filter(([, v]) => v > 0) : []
 
-  const thirdPartyFees: [string, number][] = cc ? [
+  const thirdPartyFees: [string, number][] = cc ? (([
     ['Appraisal', cc.appraisal],
     ['Credit Report', cc.creditReport],
     ['Doc Preparation', cc.docPrepFee],
     ['Flood Certification', cc.floodCert],
-    ...(cc.attorneyFee > 0 ? [['TX Attorney Fee', cc.attorneyFee]] as [string, number][] : []),
+    cc.attorneyFee > 0 ? ['TX Attorney Fee', cc.attorneyFee] : null,
     ['Settlement Fee', cc.settlementFee],
     ['Title Search', cc.titleSearch],
     ['Title Endorsements', cc.titleEndorsements],
     ['Recording Fee', cc.recordingFee],
     ["Lender's Title Policy", cc.lendersTitlePolicy],
-  ].filter(([, v]: [string, number]) => v > 0) as [string, number][] : []
+  ].filter(Boolean)) as [string, number][]).filter(([, v]) => v > 0) : []
 
   const dailyRate = loanAmount > 0 && interestRate > 0 ? (loanAmount * (interestRate / 100)) / 365 : 0
   const prepaidInterestAmt = cc ? Math.round(dailyRate * cc.prepaidInterestDays) : 0

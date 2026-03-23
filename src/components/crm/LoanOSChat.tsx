@@ -80,6 +80,19 @@ export default function LoanOSChat() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingFileCountRef = useRef(0)
 
+  const [isListening, setIsListening] = useState(false)
+  const [interimTranscript, setInterimTranscript] = useState('')
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
+
+  // Detect SpeechRecognition support once on mount
+  const [speechSupported, setSpeechSupported] = useState(false)
+  useEffect(() => {
+    setSpeechSupported(
+      typeof window !== 'undefined' &&
+        ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+    )
+  }, [])
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const hasSelected = selectedContacts.length > 0
@@ -134,8 +147,15 @@ export default function LoanOSChat() {
 
   // Focus input when opened
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100)
+    } else {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      setInterimTranscript('')
+    }
+    return () => {
+      recognitionRef.current?.stop()
     }
   }, [isOpen])
 
@@ -208,6 +228,49 @@ export default function LoanOSChat() {
 
   function removeAttachment(uid: string) {
     setAttachments((prev) => prev.filter((a) => a.uid !== uid))
+  }
+
+  function toggleListening() {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      return
+    }
+
+    const SpeechRecognitionAPI =
+      (window as Window & { SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ??
+      (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition
+    if (!SpeechRecognitionAPI) return
+
+    const recognition = new SpeechRecognitionAPI()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      let interim = ''
+      let final = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript
+        if (e.results[i].isFinal) final += t
+        else interim += t
+      }
+      if (final) setInput((prev) => (prev ? prev + ' ' + final.trim() : final.trim()))
+      setInterimTranscript(interim)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+      setInterimTranscript('')
+    }
+
+    recognition.onerror = () => {
+      setIsListening(false)
+      setInterimTranscript('')
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
   }
 
   // ── Core Claude call ────────────────────────────────────────────────────
@@ -490,6 +553,12 @@ export default function LoanOSChat() {
 
   return (
     <>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
       {/* Floating button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -793,6 +862,21 @@ export default function LoanOSChat() {
               <div style={{ fontSize: 11, color: '#e05555', marginBottom: 6 }}>{attachError}</div>
             )}
 
+            {/* Interim voice transcript */}
+            {isListening && (
+              <div style={{
+                fontSize: 11,
+                color: '#888',
+                marginBottom: 6,
+                padding: '4px 8px',
+                background: SURFACE,
+                borderRadius: 4,
+                border: `1px solid ${BORDER}`,
+              }}>
+                🔴 {interimTranscript ? `"${interimTranscript}"` : 'Listening…'}
+              </div>
+            )}
+
             {/* Input row */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
               {/* Left: attach + mic stacked */}
@@ -818,8 +902,31 @@ export default function LoanOSChat() {
                 >
                   📎
                 </button>
-                {/* Mic button placeholder — will be replaced in Task 5 */}
-                <div style={{ width: 30, height: 30 }} />
+                {speechSupported && (
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={toggleListening}
+                    title={isListening ? 'Stop dictating' : 'Dictate'}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 6,
+                      background: isListening ? '#2a1a00' : SURFACE,
+                      border: `1px solid ${isListening ? ACCENT : BORDER}`,
+                      color: isListening ? ACCENT : (isLoading ? '#444' : '#888'),
+                      cursor: isLoading ? 'default' : 'pointer',
+                      fontSize: 14,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      animation: isListening ? 'pulse 1.2s ease-in-out infinite' : 'none',
+                    }}
+                  >
+                    🎤
+                  </button>
+                )}
+                {!speechSupported && <div style={{ width: 30, height: 30 }} />}
               </div>
 
               {/* Textarea */}

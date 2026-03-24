@@ -101,9 +101,6 @@ export async function POST(req: NextRequest) {
 
     const fields = extractMISMOFields(xmlContent)
 
-    // Log the import (no SSN logging)
-    console.log(`[mismo/parse] Extracted ${Object.keys(fields).length} fields from ${file.name}`)
-
     return NextResponse.json({ fields, filename: file.name })
   } catch (error) {
     console.error('[mismo/parse] error:', error)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
@@ -69,6 +70,8 @@ interface ContactLoan {
   id: string
   loan_name: string | null
   borrower_name: string | null
+  borrower_first_name: string | null
+  borrower_last_name: string | null
   status: string | null
   loan_amount: number | null
   closing_date: string | null
@@ -328,10 +331,122 @@ function applySmartList(query: any, listId: string): any {
 }
 
 // ── Blank new-contact form ────────────────────────────────────────────────────
+// ── ContactTypeahead ──────────────────────────────────────────────────────────
+// Typeahead input that searches existing contacts by name. Stores the selected
+// contact's full name as a string (referred_by is a free-text field in the DB).
+type TypeaheadResult = { id: string; first_name: string | null; last_name: string | null; contact_type: string | null }
+
+function ContactTypeahead({
+  value,
+  onChange,
+  supabase,
+  placeholder = 'referred by…',
+  inputStyle,
+}: {
+  value: string
+  onChange: (val: string) => void
+  supabase: ReturnType<typeof createClient>
+  placeholder?: string
+  inputStyle?: React.CSSProperties
+}) {
+  const [results, setResults] = useState<TypeaheadResult[]>([])
+  const [open, setOpen]       = useState(false)
+  const [highlighted, setHighlighted] = useState(0)
+  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  function runSearch(term: string) {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!term.trim()) { setResults([]); setOpen(false); return }
+    debounceRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, contact_type')
+        .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
+        .limit(8)
+      const list = (data ?? []) as TypeaheadResult[]
+      setResults(list)
+      setOpen(list.length > 0)
+      setHighlighted(0)
+    }, 300)
+  }
+
+  function select(c: TypeaheadResult) {
+    const name = `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim()
+    onChange(name)
+    setResults([])
+    setOpen(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open) return
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHighlighted(h => Math.min(h + 1, results.length - 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlighted(h => Math.max(h - 1, 0)) }
+    else if (e.key === 'Enter' && results[highlighted]) { e.preventDefault(); select(results[highlighted]) }
+    else if (e.key === 'Escape') { setOpen(false) }
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const base: React.CSSProperties = {
+    width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
+    color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box' as const,
+    fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 10,
+    ...inputStyle,
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative', marginBottom: 10 }}>
+      <input
+        placeholder={placeholder}
+        value={value}
+        autoComplete="off"
+        onChange={e => { onChange(e.target.value); runSearch(e.target.value) }}
+        onKeyDown={handleKeyDown}
+        style={{ ...base, marginBottom: 0 }}
+      />
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 500,
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 4,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)', marginTop: 2, overflow: 'hidden',
+        }}>
+          {results.map((c, i) => (
+            <div
+              key={c.id}
+              onMouseDown={() => select(c)}
+              style={{
+                padding: '7px 10px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: i === highlighted ? 'rgba(201,168,76,0.12)' : 'transparent',
+                fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text)',
+              }}
+            >
+              <span>{`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim()}</span>
+              {c.contact_type && (
+                <span style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {c.contact_type}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const BLANK_CONTACT = {
   first_name: '', last_name: '', email: '', phone: '', phone_mobile: '',
   contact_type: 'borrower' as string | null, stage: 'Lead',
-  lead_source: '', referred_by: '', company_name: '', notes: '',
+  lead_source: '', referred_by: '', referral_type: null as string | null, company_name: '', notes: '',
+  co_borrower_first: '', co_borrower_last: '', co_borrower_birthdate: '', co_borrower_mobile: '', co_borrower_email: '',
 }
 
 const CONTACTS_PAGE_SIZE = 100
@@ -398,6 +513,7 @@ function SortableColumnHeader({
 export default function ContactsPage() {
   const supabase = useMemo(() => createClient(), [])
   const { organizationId, userId } = useOrg()
+  const router = useRouter()
 
   // list state
   const [contacts, setContacts]     = useState<Contact[]>([])
@@ -424,6 +540,7 @@ export default function ContactsPage() {
   const [newContact, setNewContact]     = useState({ ...BLANK_CONTACT })
   const [creating, setCreating]         = useState(false)
   const [createError, setCreateError]   = useState<string | null>(null)
+  const [showCoBorrower, setShowCoBorrower] = useState(false)
 
   // column picker + order
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_COLUMNS)
@@ -513,7 +630,7 @@ export default function ContactsPage() {
     setContactLoansLoading(true)
     supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, status, loan_amount, closing_date')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date')
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
       .then(({ data }) => {
@@ -768,13 +885,18 @@ export default function ContactsPage() {
       user_id: userId,
       organization_id: organizationId,
     }
-    const { error } = await supabase.from('contacts').insert([payload])
+    const { data, error } = await supabase.from('contacts').insert([payload]).select('id')
     if (error) {
       setCreateError(error.message)
     } else {
+      const newId = data?.[0]?.id
       setShowNewContact(false)
       setNewContact({ ...BLANK_CONTACT })
-      await Promise.all([fetchContacts(), fetchCounts()])
+      if (newId) {
+        router.push(`/dashboard/contacts/${newId}`)
+      } else {
+        await Promise.all([fetchContacts(), fetchCounts()])
+      }
     }
     setCreating(false)
   }
@@ -1484,7 +1606,7 @@ export default function ContactsPage() {
                           href={`/dashboard/loans/${l.id}`}
                           style={{ color: '#c9a84c', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
                         >
-                          {l.borrower_name || l.loan_name || '(unnamed)'}
+                          {[l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.borrower_name || l.loan_name || '(unnamed)'}
                         </Link>
                         <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>
                           {[fmtCurrency(l.loan_amount), isClosedLoan(l.status) ? 'Closed' : l.status, fmtDate(l.closing_date)].filter(Boolean).join(' · ')}
@@ -1833,11 +1955,13 @@ export default function ContactsPage() {
         }} onClick={() => setShowNewContact(false)}>
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-            padding: 24, width: 400, fontFamily: 'var(--font-mono)',
+            padding: 24, width: 420, maxHeight: '90vh', overflowY: 'auto', fontFamily: 'var(--font-mono)',
           }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               New Contact
             </div>
+
+            {/* Core fields */}
             {(['first_name', 'last_name', 'email', 'phone'] as const).map(field => (
               <input key={field} placeholder={field.replace('_', ' ')}
                 value={newContact[field] ?? ''}
@@ -1846,11 +1970,13 @@ export default function ContactsPage() {
                          color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',
                          fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 10 }} />
             ))}
+
+            {/* Contact type */}
             <select value={newContact.contact_type ?? ''}
               onChange={e => setNewContact(prev => ({ ...prev, contact_type: e.target.value }))}
               style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
                        color: 'var(--text)', borderRadius: 4, padding: '8px 10px',
-                       fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 16 }}>
+                       fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 10 }}>
               <option value="">— Type —</option>
               <option value="borrower">Borrower</option>
               <option value="realtor">Realtor</option>
@@ -1859,13 +1985,67 @@ export default function ContactsPage() {
               <option value="insurance">Insurance</option>
               <option value="other">Other</option>
             </select>
+
+            {/* Referred By — typeahead */}
+            <ContactTypeahead
+              value={newContact.referred_by ?? ''}
+              onChange={val => setNewContact(prev => ({ ...prev, referred_by: val }))}
+              supabase={supabase}
+              placeholder="referred by…"
+            />
+
+            {/* Referral Type */}
+            <select value={newContact.referral_type ?? ''}
+              onChange={e => setNewContact(prev => ({ ...prev, referral_type: e.target.value || null }))}
+              style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
+                       color: 'var(--text)', borderRadius: 4, padding: '8px 10px',
+                       fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 16 }}>
+              <option value="">— Referral type —</option>
+              {Object.entries(REFERRAL_TYPE_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+
+            {/* Co-borrower toggle */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginBottom: 12 }}>
+              <button
+                onClick={() => setShowCoBorrower(p => !p)}
+                style={{
+                  background: 'transparent', border: 'none', color: showCoBorrower ? 'var(--accent)' : 'var(--muted)',
+                  fontFamily: 'var(--font-mono)', fontSize: 10, cursor: 'pointer', padding: 0,
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                }}
+              >
+                {showCoBorrower ? '▾ co-borrower' : '▸ + co-borrower'}
+              </button>
+            </div>
+
+            {showCoBorrower && (
+              <div style={{ marginBottom: 16 }}>
+                {([
+                  ['co_borrower_first',     'co-borrower first name'],
+                  ['co_borrower_last',      'co-borrower last name'],
+                  ['co_borrower_birthdate', 'co-borrower date of birth (YYYY-MM-DD)'],
+                  ['co_borrower_mobile',    'co-borrower mobile'],
+                  ['co_borrower_email',     'co-borrower email'],
+                ] as const).map(([field, placeholder]) => (
+                  <input key={field} placeholder={placeholder}
+                    value={newContact[field] ?? ''}
+                    onChange={e => setNewContact(prev => ({ ...prev, [field]: e.target.value }))}
+                    style={{ width: '100%', background: 'var(--bg)', border: '1px solid rgba(201,168,76,0.3)',
+                             color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',
+                             fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 8 }} />
+                ))}
+              </div>
+            )}
+
             {createError && (
               <div style={{ color: '#f97373', fontSize: 11, fontFamily: 'var(--font-mono)', marginBottom: 12 }}>
                 {createError}
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowNewContact(false)}
+              <button onClick={() => { setShowNewContact(false); setShowCoBorrower(false) }}
                 style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)',
                          borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                 CANCEL

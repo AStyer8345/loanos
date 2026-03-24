@@ -332,6 +332,7 @@ export type Database = {
           birthdate: string | null
           closing_date: string | null
           co_borrower_birthdate: string | null
+          co_borrower_email: string | null
           co_borrower_first: string | null
           co_borrower_last: string | null
           co_borrower_mobile: string | null
@@ -380,6 +381,7 @@ export type Database = {
           birthdate?: string | null
           closing_date?: string | null
           co_borrower_birthdate?: string | null
+          co_borrower_email?: string | null
           co_borrower_first?: string | null
           co_borrower_last?: string | null
           co_borrower_mobile?: string | null
@@ -428,6 +430,7 @@ export type Database = {
           birthdate?: string | null
           closing_date?: string | null
           co_borrower_birthdate?: string | null
+          co_borrower_email?: string | null
           co_borrower_first?: string | null
           co_borrower_last?: string | null
           co_borrower_mobile?: string | null

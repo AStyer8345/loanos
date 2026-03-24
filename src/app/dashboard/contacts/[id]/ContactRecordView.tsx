@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft,
   Phone,
@@ -32,6 +33,11 @@ export type Contact = {
   referred_by: string | null
   referral_type?: string | null
   lead_source?: string | null
+  co_borrower_first?: string | null
+  co_borrower_last?: string | null
+  co_borrower_birthdate?: string | null
+  co_borrower_mobile?: string | null
+  co_borrower_email?: string | null
   notes: string | null
   last_touch: string | null
   closing_date: string | null
@@ -54,6 +60,8 @@ export type ContactLoan = {
   id: string
   loan_name: string | null
   borrower_name: string | null
+  borrower_first_name: string | null
+  borrower_last_name: string | null
   status: string | null
   loan_amount: number | null
   interest_rate: number | null
@@ -224,6 +232,144 @@ type Props = {
   onSaveNotes?: (notes: string) => Promise<void>
   onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
+}
+
+// Typeahead for referred_by — searches existing contacts by name
+type TAResult = { id: string; first_name: string | null; last_name: string | null; contact_type: string | null }
+
+function ReferredByTypeahead({ value, onSave }: {
+  value: string | null
+  onSave: (field: keyof Contact, value: string | null) => Promise<void>
+}) {
+  const supabase = createClient()
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft]     = useState(value ?? '')
+  const [results, setResults] = useState<TAResult[]>([])
+  const [open, setOpen]       = useState(false)
+  const [highlighted, setHighlighted] = useState(0)
+  const [saved, setSaved]     = useState(false)
+  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+
+  function runSearch(term: string) {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!term.trim()) { setResults([]); setOpen(false); return }
+    debounceRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, contact_type')
+        .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
+        .limit(8)
+      const list = (data ?? []) as TAResult[]
+      setResults(list)
+      setOpen(list.length > 0)
+      setHighlighted(0)
+    }, 300)
+  }
+
+  function select(c: TAResult) {
+    const name = `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim()
+    setDraft(name)
+    setResults([])
+    setOpen(false)
+  }
+
+  async function commit() {
+    setEditing(false)
+    setOpen(false)
+    const next = draft.trim() || null
+    await onSave('referred_by', next)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && open && results[highlighted]) {
+      e.preventDefault(); select(results[highlighted])
+    } else if (e.key === 'Enter') {
+      e.preventDefault(); commit()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault(); setHighlighted(h => Math.min(h + 1, results.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault(); setHighlighted(h => Math.max(h - 1, 0))
+    } else if (e.key === 'Escape') {
+      setOpen(false); setEditing(false); setDraft(value ?? '')
+    }
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        if (editing) commit()
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing, draft])
+
+  if (editing) return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>REFERRED BY</div>
+      <input
+        autoFocus
+        value={draft}
+        placeholder="search by name…"
+        onChange={e => { setDraft(e.target.value); runSearch(e.target.value) }}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        style={{
+          ...baseStyle,
+          color: 'var(--fg)', background: 'var(--bg)',
+          border: '1px solid rgba(201,168,76,0.6)', borderRadius: 3,
+          padding: '3px 8px', width: '100%', outline: 'none', boxSizing: 'border-box',
+        }}
+      />
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 500,
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 4,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)', marginTop: 2, overflow: 'hidden',
+        }}>
+          {results.map((c, i) => (
+            <div
+              key={c.id}
+              onMouseDown={() => select(c)}
+              style={{
+                padding: '7px 10px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: i === highlighted ? 'rgba(201,168,76,0.12)' : 'transparent',
+                fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)',
+              }}
+            >
+              <span>{`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim()}</span>
+              {c.contact_type && (
+                <span style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {c.contact_type}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div onClick={() => { setEditing(true); setDraft(value ?? '') }} title="Click to edit referred by" style={{ cursor: 'pointer' }}>
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>REFERRED BY</div>
+      <div style={{
+        ...baseStyle,
+        color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
+        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        paddingBottom: 1, display: 'inline-block', minWidth: 80,
+      }}>
+        {saved ? '✓ Saved' : (value || '—')}
+      </div>
+    </div>
+  )
 }
 
 // Inline select for referral_type — shows dropdown with predefined options only
@@ -828,9 +974,8 @@ export function ContactRecordView(props: Props) {
                           </thead>
                           <tbody>
                             {referredLoans.map(loan => {
-                              const borrowerName = (loan as { borrower_first_name?: string | null; borrower_last_name?: string | null }).borrower_first_name
-                                ? `${(loan as { borrower_first_name?: string | null }).borrower_first_name ?? ''} ${(loan as { borrower_last_name?: string | null }).borrower_last_name ?? ''}`.trim()
-                                : loan.borrower_name || loan.loan_name || '—'
+                              const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+                                || loan.borrower_name || loan.loan_name || '—'
                               const closeDate = (loan as { estimated_closing_date?: string | null }).estimated_closing_date || loan.closing_date
                               return (
                                 <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, #2a2a2a)' }}>
@@ -874,7 +1019,7 @@ export function ContactRecordView(props: Props) {
                       <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} />
                       <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
                       <EditableContactField label="Type"         value={contact.contact_type}  field="contact_type" onSave={onSaveField} />
-                      <EditableContactField label="Referred By"   value={contact.referred_by}    field="referred_by"    onSave={onSaveField} />
+                      <ReferredByTypeahead value={contact.referred_by} onSave={onSaveField} />
                       <ReferralTypeSelect value={contact.referral_type ?? null} onSave={onSaveField} />
                       <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
                       <EditableContactField label="Closing Date"  value={contact.closing_date}   field="closing_date"   onSave={onSaveField} />
@@ -913,6 +1058,49 @@ export function ContactRecordView(props: Props) {
                     </div>
                   )}
                 </div>
+
+                {/* Co-Borrower */}
+                {(onSaveField || contact.co_borrower_first || contact.co_borrower_last) && (
+                  <div style={cardStyle}>
+                    <div style={labelStyle}>CO-BORROWER</div>
+                    {onSaveField ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <EditableContactField label="First Name" value={contact.co_borrower_first ?? null} field="co_borrower_first" onSave={onSaveField} />
+                        <EditableContactField label="Last Name"  value={contact.co_borrower_last ?? null}  field="co_borrower_last"  onSave={onSaveField} />
+                        <EditableContactField label="Date of Birth" value={contact.co_borrower_birthdate ?? null} field="co_borrower_birthdate" onSave={onSaveField} />
+                        <EditableContactField label="Mobile"    value={contact.co_borrower_mobile ?? null} field="co_borrower_mobile" onSave={onSaveField} />
+                        <EditableContactField label="Email"     value={contact.co_borrower_email ?? null}  field="co_borrower_email"  onSave={onSaveField} />
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+                        {(contact.co_borrower_first || contact.co_borrower_last) && (
+                          <div style={{ color: 'var(--fg)' }}>
+                            {`${contact.co_borrower_first ?? ''} ${contact.co_borrower_last ?? ''}`.trim()}
+                          </div>
+                        )}
+                        {contact.co_borrower_birthdate && (
+                          <div><span style={{ color: 'var(--muted)' }}>DOB </span>{contact.co_borrower_birthdate}</div>
+                        )}
+                        {contact.co_borrower_mobile && (
+                          <div>
+                            <a href={`tel:${contact.co_borrower_mobile.replace(/\D/g, '')}`}
+                              style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                              {fmtPhone(contact.co_borrower_mobile) ?? contact.co_borrower_mobile}
+                            </a>
+                          </div>
+                        )}
+                        {contact.co_borrower_email && (
+                          <div>
+                            <a href={`mailto:${contact.co_borrower_email}`}
+                              style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                              {contact.co_borrower_email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Relationship */}
                 <div style={cardStyle}>

@@ -4,8 +4,69 @@ import { normalizeStage } from '@/lib/stageNormalization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import type { Database } from '@/lib/database.types'
+import { getAnthropicClient } from '@/lib/anthropic/client'
 
 type ContactInsert = Database['public']['Tables']['contacts']['Insert']
+
+async function extractContactInfoWithAI(raw: string): Promise<ExtractedContact> {
+  const anthropic = await getAnthropicClient()
+  const response = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 300,
+    temperature: 0,
+    messages: [{
+      role: 'user',
+      content: `Extract contact info from the following natural language input and return ONLY valid JSON with these exact fields (null if not present):
+{
+  "first_name": string | null,
+  "last_name": string | null,
+  "email": string | null,
+  "phone": string | null,
+  "stage": one of exactly ["Lead","Pre-App","Application","Pre-Approved","In Process","Closing","Closed","Other"] | null,
+  "contact_type": "borrower" | "realtor" | "referral partner" | "vendor" | null,
+  "referred_by": string | null,
+  "notes": string | null,
+  "source": string | null,
+  "company_name": string | null
+}
+
+Stage inference rules (use exact string from list above):
+- "just met", "new lead", "open house", "reached out", no purchase context → "Lead"
+- "wants to apply", "ready to start", "filling out app" → "Application"
+- "pre-approved", "got approval", "has approval" → "Pre-Approved"
+- "in process", "submitted to lender" → "In Process"
+- "closing soon", "clear to close" → "Closing"
+- "funded", "closed" → "Closed"
+- If unclear → null
+
+Notes: capture any free-form context not represented by other fields — personality, situation, timeline, follow-up reminders. Put it here verbatim or lightly paraphrased.
+
+Return ONLY the JSON object, no markdown, no explanation.
+
+Input: ${raw}`,
+    }],
+  })
+
+  // Validate response content exists and is text
+  if (!response.content || response.content.length === 0 || response.content[0].type !== 'text') {
+    throw new Error('[quick-add] AI extractor returned no text content')
+  }
+
+  const text = response.content[0].text.trim()
+  if (!text) {
+    throw new Error('[quick-add] AI extractor returned empty response')
+  }
+
+  // Guard JSON.parse — malformed JSON should propagate to the fallback
+  let parsed: ExtractedContact
+  try {
+    parsed = JSON.parse(text) as ExtractedContact
+  } catch {
+    throw new Error(`[quick-add] AI extractor returned non-JSON: ${text.slice(0, 100)}`)
+  }
+
+  return parsed
+}
 
 /**
  * POST /api/contacts/quick-add
@@ -26,8 +87,13 @@ export async function POST(req: NextRequest) {
       // User confirmed the parsed data — use it directly
       extracted = body.contact
     } else if (body.raw) {
-      // Parse natural language input
-      extracted = extractContactInfo(body.raw)
+      // Try AI extraction first, fall back to regex on error
+      try {
+        extracted = await extractContactInfoWithAI(body.raw)
+      } catch (err) {
+        console.warn('[quick-add] AI extraction failed, using regex fallback:', err)
+        extracted = extractContactInfo(body.raw)
+      }
     } else {
       return NextResponse.json({ error: 'Missing raw text or confirmed contact' }, { status: 400 })
     }

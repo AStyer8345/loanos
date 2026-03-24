@@ -274,17 +274,15 @@ export default function UnmatchedEmailsPage() {
   }
 
   const linkToContact = async (email: UnmatchedEmail, contactId: string) => {
-    await supabase
-      .from('activity_log')
-      .update({
-        contact_id: contactId,
-        summary: email.subject || email.body_snippet?.slice(0, 120) || 'Inbound email',
-      })
-      .eq('id', email.id)
-    await supabase
-      .from('contacts')
-      .update({ last_touch_at: new Date().toISOString() })
-      .eq('id', contactId)
+    const res = await fetch('/api/emails/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailId: email.id, contactId }),
+    })
+    if (!res.ok) {
+      console.error('[inbox-review] linkToContact failed:', await res.text())
+      return
+    }
     setLinkingId(null)
     setSearchQuery('')
     setSearchResults([])
@@ -293,13 +291,15 @@ export default function UnmatchedEmailsPage() {
   }
 
   const linkToLoan = async (email: UnmatchedEmail, loanId: string) => {
-    await supabase
-      .from('activity_log')
-      .update({
-        loan_id: loanId,
-        summary: email.subject || email.body_snippet?.slice(0, 120) || 'Inbound email',
-      })
-      .eq('id', email.id)
+    const res = await fetch('/api/emails/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailId: email.id, loanId }),
+    })
+    if (!res.ok) {
+      console.error('[inbox-review] linkToLoan failed:', await res.text())
+      return
+    }
     setLinkingId(null)
     setSearchQuery('')
     setLoanResults([])
@@ -308,10 +308,15 @@ export default function UnmatchedEmailsPage() {
   }
 
   const dismissEmail = async (emailId: string) => {
-    await supabase
-      .from('activity_log')
-      .update({ dismissed: true })
-      .eq('id', emailId)
+    const res = await fetch('/api/emails/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailId, dismiss: true }),
+    })
+    if (!res.ok) {
+      console.error('[inbox-review] dismissEmail failed:', await res.text())
+      return
+    }
     setSuggestions(prev => { const m = new Map(prev); m.delete(emailId); return m })
     setEmails(prev => prev.filter(e => e.id !== emailId))
   }

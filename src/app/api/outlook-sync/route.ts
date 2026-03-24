@@ -10,6 +10,14 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const LOANOS_SYSTEM_USER_ID = process.env.LOANOS_SYSTEM_USER_ID!;
 const SYNC_WINDOW_MINUTES = parseInt(process.env.OUTLOOK_SYNC_WINDOW_MINUTES || '20', 10);
 
+// Domains whose emails should be silently dropped — never logged, never shown in inbox review
+const BLOCKED_SENDER_DOMAINS = new Set([
+  'zillow.com',
+  'zillowgroup.com',
+  'realtor.com',
+  'marketinganimals.com',
+]);
+
 function sbHeaders() {
   return {
     apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -263,6 +271,10 @@ async function runSync() {
     stats.processed++;
     const senderEmail = (msg.from as Record<string, Record<string, string>>)?.emailAddress?.address;
     if (!senderEmail) { stats.skipped++; continue; }
+
+    // Drop emails from blocked domains (Zillow, realtor.com, marketing lists, etc.)
+    const senderDomain = senderEmail.split('@')[1]?.toLowerCase() ?? '';
+    if (BLOCKED_SENDER_DOMAINS.has(senderDomain)) { stats.skipped++; continue; }
 
     const contact = await findContactByEmail(senderEmail);
     if (!contact) {

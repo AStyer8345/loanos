@@ -16,7 +16,32 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23.**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep).**
+
+## Daily Audit 2026-03-24 (scheduled)
+
+**Audited:**
+- Schema: 14 org-scoped tables confirmed. `contact_activity` found missing `organization_id` — migration 048 was written on disk but never applied to Supabase.
+- Null rows: activity_log 18 null (15 email_inbound from Outlook Sync [Azure blocked], 2 status_updated from n8n WF2 [not pushed], 1 loan_created from n8n WF1 [not pushed]). chat_sessions 2 null (same 2 from 2026-03-23, user sessions created without org stamp).
+- API routes: bulk-action, cd-extraction, pa-extraction all stamp org_id correctly. No new unscoped writers found.
+- contact_activity RLS: was user_id-scoped only. Upgraded to org-scoped via migration 048.
+
+**Fixed this session:**
+- **Migration 048 applied**: Added `organization_id` to `contact_activity`, backfilled from related contact, dropped user_id-scoped policies, created org-scoped SELECT + INSERT policies. contact_activity is now fully org-scoped.
+- **Migration 050 applied**: Backfilled 18 null activity_log rows + 2 null chat_sessions rows via profile lookup. 0 null rows confirmed in both tables.
+
+**Outstanding (unchanged):**
+- **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — will keep producing null loan_created rows until pushed
+- **Adam must push WF2 to n8n cloud** (workflow ID `9JyzzwKac8v3uQ7d`) — will keep producing null status_updated rows until pushed
+- n8n Outlook Email Sync blocked on Azure App Registration — continues producing email_inbound null-org rows daily
+- chat_sessions.organization_id still nullable — can add NOT NULL once nulls stop recurring (requires WF1/WF2 pushed first)
+- `daily-briefing` milestone queries (loan_milestone_events, milestone_communications) unscoped — medium priority, pre-multi-tenant launch fix needed
+
+## Multi-Tenancy Status (2026-03-24 — daily prep)
+
+**Tables with org_id (15 total):** loans ✅, contacts ✅, activity_log ✅, documents ✅, email_drafts ✅, scenarios ✅, todo_items ✅, chat_sessions ✅, contact_emails ✅ (scoped via join), contact_activity ✅ (added today), marketing_activity_log ✅, mcc_state ✅, user_settings ✅, org_settings ✅, system_prompts ✅ (uses org_id col)
+
+**Null counts (post-050):** All 0. Recurring sources: Outlook Sync (Azure blocked) + n8n WF1/WF2 (not pushed).
 
 ## Daily Audit 2026-03-23 (scheduled — second run)
 

@@ -26,6 +26,8 @@ interface ReferralLoan {
   id: string
   loan_name: string | null
   borrower_name: string | null
+  borrower_first_name: string | null
+  borrower_last_name: string | null
   status: string | null
   loan_amount: number | null
   loan_purpose: string | null
@@ -112,7 +114,7 @@ export default function ReferralPage() {
         const ids = contactList.map(c => c.id)
         const { data: loanData } = await supabase
           .from('loans')
-          .select('id, loan_name, borrower_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_city, property_state')
+          .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_city, property_state')
           .in('contact_id', ids)
           .order('closing_date', { ascending: false, nullsFirst: false })
         setLoans(loanData || [])
@@ -321,9 +323,9 @@ export default function ReferralPage() {
                           href={`/dashboard/loans/${l.id}`}
                           style={{ color: '#c9a84c', textDecoration: 'none' }}
                         >
-                          {l.borrower_name || l.loan_name || '(unnamed)'}
+                          {[l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.borrower_name || l.loan_name || '(unnamed)'}
                         </Link>
-                        {l.loan_name && l.borrower_name && (
+                        {l.loan_name && (l.borrower_first_name || l.borrower_name) && (
                           <div style={{ fontSize: 11, color: '#71717a', marginTop: 2 }}>{l.loan_name}</div>
                         )}
                       </td>

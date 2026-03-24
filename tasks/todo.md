@@ -6,6 +6,8 @@ _Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org
 
 ## 🔴 High Priority
 
+- [x] **borrower_name drift on contacts + referral pages** — Fixed 2026-03-24 morning audit. `contacts/[id]/page.tsx` fetchLoans, `contacts/page.tsx` contact panel, and `referral/[referrerName]/page.tsx` all selected only `borrower_name` (null for Arive loans). Added `borrower_first_name`/`borrower_last_name` to all 3 queries + types. Updated display to use first+last fallback. Also removed type-cast hack in `ContactRecordView.tsx` referred loans table. TypeScript clean.
+
 - [x] **daily-briefing unscoped fallback** — Fixed 2026-03-21. Replaced `withOrg` ternary fallback with hard 500 check before any queries. `organizationId` must be non-null before any data fetch runs.
 - [x] **Final CD Email n8n check constraint crash** — Fixed 2026-03-21 morning audit. `Log CD Email` node was sending `status: 'draft'` but `email_drafts_status_check` only allows `pending/sent/discarded`. Updated to `status: 'pending'`. Workflow `SkzrWeR0bHZs8kWX`.
 - [x] **activity_log null org rows (Next.js)** — Fixed 2026-03-22. `updateLastTouch.ts` now fetches org_id from profile. `outlook-sync logEmailActivity` now stamps `contact.organization_id`. `generate-narrative` unscoped insert removed. Migration 046 backfilled 3 orphan rows.
@@ -17,6 +19,7 @@ _Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org
 - [x] **Null org recurrence post-046** — Fixed 2026-03-23 (daily prep). 6 new null activity_log rows (5 email_inbound from Outlook Sync, 1 loan_created from WF1 pre-push) + 1 null contact (Aaron Treptow, from WF1). Migration 048 applied — backfilled all to Adam's org. 0 null rows confirmed.
 - [x] **activity_log SELECT RLS tightened** — Fixed 2026-03-23 (daily prep). Dropped `"Users can read own activity"` policy (had `user_id OR org_id` clause — exposed null-org rows to their author). New policy `"Org members can read activity"` is org-only. Migration 048.
 - [x] **activity_log null org — structural fix** — Fixed 2026-03-24 (daily audit). Migration 050: Postgres `BEFORE INSERT` trigger `trg_activity_log_stamp_org` auto-resolves `organization_id` from `profiles` using `user_id`. Backfilled 11 null rows. This is the permanent fix — no more recurring backfills needed.
+- [x] **contact_activity missing org_id** — Fixed 2026-03-24. Migration 048 applied: added `organization_id` column, backfilled from contacts, upgraded from user_id-scoped to org-scoped RLS (SELECT + INSERT). 15 tables now fully org-scoped.
 - [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Trigger now auto-fixes these, but the n8n workflow should still be updated when Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.

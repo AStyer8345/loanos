@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-23 (daily prep — migration 048 backfill, activity_log SELECT RLS tightened to org-only)_
+_Last updated: 2026-03-24 (daily prep — contact_activity org_id applied [migration 048], null backfill [migration 050], 15 tables now fully org-scoped)_
 
 ---
 
@@ -16,15 +16,17 @@ _Last updated: 2026-03-23 (daily prep — migration 048 backfill, activity_log S
 | `email_drafts` has `organization_id` | ✅ | Migration 032/033 |
 | `scenarios` has `organization_id` | ✅ | Migration 032/033 |
 | `contact_emails` org scoping | ✅ | Join-based RLS via loan_id/contact_id → 037 |
+| `contact_activity` has `organization_id` | ✅ | Migration 048 applied 2026-03-24 — backfilled from contacts |
 | `chat_sessions` has `organization_id` | ✅ | Migration 039 — 10/10 rows backfilled |
 | `mcc_state` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `user_settings` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` has `organization_id` | ✅ | Migration 039 — backfilled |
 | `marketing_activity_log` RLS enabled | ✅ | Migration 039 — 4 policies; redundant ALL policy dropped in 040 |
 | 0 loans with null `organization_id` | ✅ | Verified 2026-03-23 (0 null rows) |
-| 0 contacts with null `organization_id` | ✅ | 1 new null (Aaron Treptow, from WF1 pre-push) backfilled — migration 048 2026-03-23 |
-| 0 activity_log with null `organization_id` | ✅ | 6 new nulls (5 Outlook Sync email_inbound + 1 WF1 loan_created) backfilled — migration 048 2026-03-23 |
-| 0 chat_sessions with null `organization_id` | ✅ | 2 legacy nulls backfilled — migration 043 |
+| 0 contacts with null `organization_id` | ✅ | Last null: Aaron Treptow backfilled 2026-03-23 |
+| 0 activity_log with null `organization_id` | ✅ | 18 new nulls (15 Outlook Sync + 2 WF2 + 1 WF1) backfilled — migration 050 2026-03-24. Recurring until Azure unblocked + n8n workflows pushed. |
+| 0 chat_sessions with null `organization_id` | ✅ | 2 nulls backfilled — migration 050 2026-03-24 |
+| 0 contact_activity with null `organization_id` | ✅ | Backfilled from contacts — migration 048 2026-03-24 |
 | `updateLastTouch.ts` stamps org_id | ✅ | Fixed 2026-03-22 — was inserting without org_id |
 | `outlook-sync logEmailActivity` stamps org_id | ✅ | Fixed 2026-03-22 — uses contact.organization_id |
 | `generate-narrative` no unscoped activity_log | ✅ | Fixed 2026-03-22 — insert removed (no auth context) |
@@ -45,6 +47,7 @@ _Last updated: 2026-03-23 (daily prep — migration 048 backfill, activity_log S
 | `email_drafts` | ✅ | ✅ | ✅ | ✅ |
 | `scenarios` | ✅ | ✅ | ✅ | ✅ |
 | `contact_emails` | ✅ | ✅ | ✅ | ✅ |
+| `contact_activity` | ✅ (org-scoped, added 2026-03-24) | ✅ (org-scoped, added 2026-03-24) | — | — |
 | `profiles` | ✅ | ✅ | ✅ | n/a |
 | `organizations` | ✅ | — | — | — |
 | `chat_sessions` | ✅ (org-scoped) | ✅ (org-scoped) | ✅ (org-scoped) | ✅ (org-scoped) |
@@ -107,10 +110,11 @@ _Last updated: 2026-03-23 (daily prep — migration 048 backfill, activity_log S
 | Item | Status | Notes |
 |------|--------|-------|
 | Adam's org ID | ✅ | `18613f82-fdd9-42dd-a09e-f3c577328258` |
-| 0 loans with null org_id | ✅ | Verified 2026-03-21 |
-| 0 contacts with null org_id | ✅ | Backfilled 2026-03-21 (migration 043) |
-| 0 activity_log with null org_id | ✅ | Backfilled 2026-03-21 (migration 043, 78 rows) |
-| 0 chat_sessions with null org_id | ✅ | Backfilled 2026-03-21 (migration 043, 2 rows) |
+| 0 loans with null org_id | ✅ | Verified 2026-03-24 |
+| 0 contacts with null org_id | ✅ | Verified 2026-03-24 |
+| 0 activity_log with null org_id | ✅ | Backfilled 2026-03-24 (migration 050) — recurring until Azure + n8n fixed |
+| 0 chat_sessions with null org_id | ✅ | Backfilled 2026-03-24 (migration 050) |
+| 0 contact_activity with null org_id | ✅ | Backfilled 2026-03-24 (migration 048) |
 | No unscoped API fallbacks | ✅ | daily-briefing `withOrg` fallback removed 2026-03-21 |
 
 ---

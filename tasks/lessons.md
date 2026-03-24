@@ -130,6 +130,9 @@ WF2 (`workflow-2-status-update.json`) had two independent bugs:
 ### n8n status enum mismatch crashes silently (2026-03-21)
 Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check constraint "email_drafts_status_check"`. Root cause: `Log CD Email` node sent `status: 'draft'` but the `email_drafts` table only allows `'pending' | 'sent' | 'discarded'`. Fix: change to `status: 'pending'`. **Pattern:** whenever adding a Supabase INSERT node to n8n, verify the exact allowed values on any check-constrained column (status, type, etc.) before writing the body expression. `'draft'` is a common intuitive guess that's often wrong.
 
+### borrower_name drift spreads to every new query (2026-03-24)
+`ContactLoan` and `ReferralLoan` types only declared `borrower_name`, so every new query that referenced them naturally selected only that field. When the fix was applied to the loans list page (session 7), the type interfaces for the contacts and referral pages were not updated. Fix: update the *type* first so the compiler enforces the correct columns everywhere. The `ContactRecordView.tsx` referred-loans table was already doing the right first+last display but used a type cast because the type was stale — fixing the type eliminated the cast. **Pattern:** when fixing a column drift bug, update every type interface that represents that table row, not just the query that triggered the bug.
+
 ### Dead code survives component rewrites (2026-03-23)
 `ResultsTable.tsx` (255 lines) and `/api/pipeline/stats/route.ts` (149 lines) were confirmed orphaned: no imports, no callers. `ResultsTable` was explicitly "removed" from ScenarioBuilder in v4.1.0 CHANGELOG but the file itself was never deleted. Pattern: when a CHANGELOG says "removed X reference", also delete the underlying file if it has no other consumers. Always verify with a project-wide import search before deleting.
 

@@ -44,7 +44,7 @@ async def get_client() -> NotebookLMClient:
             logger.info("Initialising NotebookLM client from saved auth...")
             # from_storage() is async and returns a NotebookLMClient instance.
             # __aenter__ activates the HTTP session (must be called separately).
-            instance = await NotebookLMClient.from_storage()
+            instance = await NotebookLMClient.from_storage(timeout=120.0)
             _client = await instance.__aenter__()
             logger.info("NotebookLM client ready (notebook: %s)", NOTEBOOK_ID)
     return _client

@@ -41,7 +41,7 @@ export default function ContactRecordPage() {
   const fetchLoans = useCallback(async () => {
     const { data } = await supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, status, loan_amount, interest_rate, closing_date, property_address, property_city, property_state, loan_purpose, loan_type, created_at')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, property_address, property_city, property_state, loan_purpose, loan_type, created_at')
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setLoans((data as ContactLoan[]) ?? [])

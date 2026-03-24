@@ -626,19 +626,27 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Days to Close — inline in header */}
+          {/* Days to Close — prominent card in header */}
           {(() => {
             const target = loan.estimated_closing_date || loan.closing_date
             const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
             if (dtc == null) return null
+            const color = dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'
+            const border = dtc < 0 ? 'border-red-800' : dtc <= 7 ? 'border-amber-800' : 'border-[#C9A84C]/30'
+            const bg = dtc < 0 ? 'bg-red-950/30' : dtc <= 7 ? 'bg-amber-950/30' : 'bg-[#C9A84C]/5'
             return (
-              <div className="flex items-center gap-3 mt-2">
-                <span className={`text-2xl font-mono font-bold ${dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'}`}>
+              <div className={`inline-flex items-center gap-3 mt-3 px-4 py-2.5 rounded-lg border ${border} ${bg}`}>
+                <span className={`text-3xl font-mono font-bold ${color}`}>
                   {Math.abs(dtc)}
                 </span>
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                  {dtc < 0 ? 'days past est. close' : dtc === 0 ? 'closes today' : 'days to close'}
-                </span>
+                <div>
+                  <p className={`text-xs font-mono font-semibold ${color}`}>
+                    {dtc < 0 ? 'DAYS PAST EST. CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
+                  </p>
+                  <p className="text-[10px] font-mono text-zinc-500">
+                    Est. {new Date(target + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
               </div>
             )
           })()}
@@ -935,7 +943,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
         <div className="space-y-6">
           <MilestoneTimeline loan={loan} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KeyDatesPanel loan={loan} />
+            <KeyDatesPanel loan={loan} onSave={handleSaveField} />
             <PartnerContactsPanel loan={loan} />
           </div>
         </div>
@@ -1092,18 +1100,26 @@ function PropertySummaryCard({ loan }: { loan: Loan }) {
 
 // (LoanVitalCards removed — Days to Close moved to header, Loan Stage in status badge)
 
-// ── KeyDatesPanel ─────────────────────────────────────────────────────────────
+// ── KeyDatesPanel (inline-editable) ──────────────────────────────────────────
 
-function KeyDatesPanel({ loan }: { loan: Loan }) {
+function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, value: string | null) => void }) {
+  const [editing, setEditing] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
+
   const dates = [
-    { label: 'Application', value: fmtDate(loan.application_date) },
-    { label: 'Submission', value: fmtDate(loan.submission_date) },
-    { label: 'Approval', value: fmtDate(loan.approval_date) },
-    { label: 'Est. Close', value: fmtDate(loan.estimated_closing_date) },
-    { label: 'Rate Lock', value: fmtDate(loan.rate_lock_date) },
-    { label: 'Lock Expiry', value: fmtDate(loan.rate_lock_expiration) },
-    { label: 'Funded', value: fmtDate(loan.funding_date) },
+    { label: 'Application', field: 'application_date', value: loan.application_date },
+    { label: 'Submission', field: 'submission_date', value: loan.submission_date },
+    { label: 'Approval', field: 'approval_date', value: loan.approval_date },
+    { label: 'Est. Close', field: 'estimated_closing_date', value: loan.estimated_closing_date },
+    { label: 'Rate Lock', field: 'rate_lock_date', value: loan.rate_lock_date },
+    { label: 'Lock Expiry', field: 'rate_lock_expiration', value: loan.rate_lock_expiration },
+    { label: 'Funded', field: 'funding_date', value: loan.funding_date },
   ]
+
+  const handleSave = (field: string) => {
+    onSave(field, editValue || null)
+    setEditing(null)
+  }
 
   return (
     <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
@@ -1113,12 +1129,29 @@ function KeyDatesPanel({ loan }: { loan: Loan }) {
       </div>
       <div className="divide-y divide-zinc-800/60">
         {dates.map(d => (
-          <div key={d.label} className="flex items-center justify-between gap-3 px-4 py-2.5">
+          <div key={d.field} className="flex items-center justify-between gap-3 px-4 py-2.5 group">
             <div className="flex items-center gap-1.5 shrink-0">
               <Calendar size={9} className="text-zinc-600" />
               <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{d.label}</span>
             </div>
-            <span className="text-xs font-mono text-zinc-200">{d.value}</span>
+            {editing === d.field ? (
+              <input
+                autoFocus
+                type="date"
+                value={editValue}
+                onChange={e => setEditValue(e.target.value)}
+                onBlur={() => handleSave(d.field)}
+                onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(null) }}
+                className="w-32 text-xs font-mono text-zinc-200 bg-transparent border-b border-zinc-500 outline-none text-right"
+              />
+            ) : (
+              <span
+                className="text-xs font-mono text-zinc-200 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                onClick={() => { setEditValue(d.value ?? ''); setEditing(d.field) }}
+              >
+                {fmtDate(d.value) || <span className="text-zinc-600">—</span>}
+              </span>
+            )}
           </div>
         ))}
       </div>

@@ -74,6 +74,22 @@ async function sbInsert(table: string, body: Record<string, unknown>) {
   }
 }
 
+// Patch only the fields that are currently null (never overwrite user-set dates)
+async function sbPatchNulls(table: string, id: string, fields: Record<string, string>) {
+  // Only update fields that are currently null in the DB
+  const nullChecks = Object.keys(fields).map(f => `${f}.is.null`).join(',')
+  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}&or=(${nullChecks})`
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { ...sbHeaders(), Prefer: 'return=minimal' },
+    body: JSON.stringify(fields),
+  })
+  // Silently ignore — this is best-effort date derivation
+  if (!res.ok) {
+    console.warn(`sbPatchNulls ${table} ${id}: ${res.status}`)
+  }
+}
+
 // Normalize: treat empty string / undefined / null as null
 function n(val: unknown): string | number | null {
   return val === null || val === undefined || val === '' ? null : (val as string | number)
@@ -250,16 +266,18 @@ export async function POST(request: NextRequest) {
 
       status: n(body.status),
       milestone: n(body.milestone),
-      application_date: nDate(body.applicationDate),
-      submission_date: nDate(body.submissionDate) ?? nDate(body.UNDERWRITING_SUBMITTED),
-      approval_date: nDate(body.approvalDate),
-      closing_date: nDate(body.closingDate),
-      funding_date: nDate(body.fundingDate),
-      rate_lock_date: nDate(body.rateLockDate) ?? nDate(body.lockDate),
-      rate_lock_expiration: nDate(body.rateLockExpiration) ?? nDate(body.lockExpirationDate),
-      estimated_closing_date: nDate(body['keyDates_estimatedFundingDate']) ?? nDate(body.estimatedClosingDate) ?? nDate(body['keyDates_closingContingency']),
-      appraisal_ordered_date: nDate(body.appraisalOrderedDate) ?? nDate(body['keyDates_appraisalOrderedDate']),
-      first_payment_date: nDate(body.firstPaymentDate) ?? nDate(body['keyDates_estFirstPaymentDate']) ?? nDate(body['keyDates_firstPaymentDate']),
+      // Only include date fields when Arive actually sends a value.
+      // Null dates are omitted so merge-duplicates won't overwrite existing values.
+      ...(nDate(body.applicationDate) ? { application_date: nDate(body.applicationDate) } : {}),
+      ...(nDate(body.submissionDate) ?? nDate(body.UNDERWRITING_SUBMITTED) ? { submission_date: nDate(body.submissionDate) ?? nDate(body.UNDERWRITING_SUBMITTED) } : {}),
+      ...(nDate(body.approvalDate) ? { approval_date: nDate(body.approvalDate) } : {}),
+      ...(nDate(body.closingDate) ? { closing_date: nDate(body.closingDate) } : {}),
+      ...(nDate(body.fundingDate) ? { funding_date: nDate(body.fundingDate) } : {}),
+      ...(nDate(body.rateLockDate) ?? nDate(body.lockDate) ? { rate_lock_date: nDate(body.rateLockDate) ?? nDate(body.lockDate) } : {}),
+      ...(nDate(body.rateLockExpiration) ?? nDate(body.lockExpirationDate) ? { rate_lock_expiration: nDate(body.rateLockExpiration) ?? nDate(body.lockExpirationDate) } : {}),
+      ...(nDate(body['keyDates_estimatedFundingDate']) ?? nDate(body.estimatedClosingDate) ?? nDate(body['keyDates_closingContingency']) ? { estimated_closing_date: nDate(body['keyDates_estimatedFundingDate']) ?? nDate(body.estimatedClosingDate) ?? nDate(body['keyDates_closingContingency']) } : {}),
+      ...(nDate(body.appraisalOrderedDate) ?? nDate(body['keyDates_appraisalOrderedDate']) ? { appraisal_ordered_date: nDate(body.appraisalOrderedDate) ?? nDate(body['keyDates_appraisalOrderedDate']) } : {}),
+      ...(nDate(body.firstPaymentDate) ?? nDate(body['keyDates_estFirstPaymentDate']) ?? nDate(body['keyDates_firstPaymentDate']) ? { first_payment_date: nDate(body.firstPaymentDate) ?? nDate(body['keyDates_estFirstPaymentDate']) ?? nDate(body['keyDates_firstPaymentDate']) } : {}),
 
       monthly_payment: n(body.monthlyPayment) ?? n(body.principalInterestAndPMI) ?? n(body.firstMortgagePrincipalAndInterestMonthlyAmt),
       piti: n(body.piti) ?? n(body.totalMonthlyHousingExpenseAmt),
@@ -304,6 +322,46 @@ export async function POST(request: NextRequest) {
     const loan = (await sbUpsert('loans', conflictCol, loanRecord)) as { id: string } | null
 
     if (!loan?.id) throw new Error('Loan upsert returned no record')
+
+    // ── 3b. Auto-derive key dates from status/milestone ─────────────────────
+    // When Arive doesn't send explicit date fields, stamp them based on the
+    // current status. Only fills nulls — never overwrites user-set dates.
+    const status = String(n(body.status) ?? '').toUpperCase()
+    const today = now.slice(0, 10) // YYYY-MM-DD
+    const derivedDates: Record<string, string> = {}
+
+    // Application date: stamp when we first see ANY status
+    if (n(body.status)) derivedDates.application_date = today
+
+    // Disclosure sent
+    if (status === 'DISCLOSURE_SENT' || status === 'DISCLOSED') {
+      derivedDates.application_date = today
+    }
+
+    // Submitted to underwriting
+    if (status === 'UNDERWRITING_SUBMITTED' || status === 'SUBMITTED' || status === 'SUBMITTED_TO_UNDERWRITING') {
+      derivedDates.submission_date = today
+    }
+
+    // Approved with conditions
+    if (status === 'APPROVED_WITH_CONDITIONS' || status === 'APPROVED' || status === 'CONDITIONAL_APPROVAL') {
+      derivedDates.approval_date = today
+    }
+
+    // Clear to close
+    if (status === 'CLEAR_TO_CLOSE' || status === 'CTC_ISSUED') {
+      derivedDates.approval_date = today
+    }
+
+    // Funded / closed
+    if (status === 'FUNDED' || status === 'CLOSED') {
+      derivedDates.funding_date = today
+      derivedDates.closing_date = today
+    }
+
+    if (Object.keys(derivedDates).length > 0) {
+      await sbPatchNulls('loans', loan.id, derivedDates)
+    }
 
     // ── 4. Log activity ───────────────────────────────────────────────────────
     await sbInsert('activity_log', {

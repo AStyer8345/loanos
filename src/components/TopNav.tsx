@@ -134,11 +134,11 @@ export default function TopNav() {
             const evt = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
             document.dispatchEvent(evt)
           }}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/20 text-white/50 hover:text-white/80 hover:border-white/40 transition-colors mr-2"
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-zinc-700 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500 transition-colors mr-2"
           style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.05em' }}
         >
           <span>⌘K</span>
-          <span className="text-white/30">search</span>
+          <span className="text-zinc-600">search</span>
         </button>
 
         <ActivityFeed />

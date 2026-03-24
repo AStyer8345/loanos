@@ -34,7 +34,7 @@ export default async function DashboardPage() {
 
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
     .eq('organization_id', organizationId)
     .order('estimated_closing_date', { ascending: true })
 
@@ -96,6 +96,15 @@ export default async function DashboardPage() {
     if (loan.estimated_closing_date && isActive) {
       if (new Date(loan.estimated_closing_date) < now) {
         urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Past est. closing date', date: loan.estimated_closing_date })
+      }
+    }
+    if (loan.rate_lock_expiration && isActive) {
+      const lockExp = new Date(loan.rate_lock_expiration + 'T00:00:00')
+      const next7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      if (lockExp < now) {
+        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Rate lock EXPIRED', date: loan.rate_lock_expiration })
+      } else if (lockExp <= next7) {
+        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Rate lock expiring', date: loan.rate_lock_expiration })
       }
     }
   }

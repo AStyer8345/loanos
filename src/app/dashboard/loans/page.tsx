@@ -1372,7 +1372,20 @@ export default function LoansPage() {
                       )
                       if (col.id === 'interest_rate') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{loan.interest_rate != null ? `${loan.interest_rate}%` : '—'}</td>
                       if (col.id === 'lender') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.lender || '—'}</td>
-                      if (col.id === 'rate_lock_expiration') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{fmtDate(loan.rate_lock_expiration)}</td>
+                      if (col.id === 'rate_lock_expiration') {
+                        const lockDays = daysUntilClose(loan.rate_lock_expiration)
+                        const lockExpired = lockDays !== null && lockDays < 0
+                        const lockWarn = lockDays !== null && lockDays >= 0 && lockDays <= 7
+                        return (
+                          <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
+                            <span className={lockExpired ? 'text-red-400' : lockWarn ? 'text-amber-400' : 'text-[#999999]'}>
+                              {fmtDate(loan.rate_lock_expiration)}
+                            </span>
+                            {lockExpired && <span className="ml-1.5 text-[10px] text-red-400">EXPIRED</span>}
+                            {lockWarn && <span className="ml-1.5 text-[10px] text-amber-400">{lockDays}d</span>}
+                          </td>
+                        )
+                      }
                       if (col.id === 'loan_number') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_number || '—'}</td>
                       if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loanLocation(loan)}</td>
                       if (col.id === 'property_state') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.property_state || '—'}</td>

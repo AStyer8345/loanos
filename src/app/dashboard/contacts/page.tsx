@@ -880,7 +880,7 @@ export default function ContactsPage() {
       setCreating(false)
       return
     }
-    const payload = {
+    const raw = {
       ...newContact,
       first_name: first,
       last_name: last,
@@ -889,7 +889,11 @@ export default function ContactsPage() {
       user_id: userId,
       organization_id: organizationId,
     }
-    const { data, error } = await supabase.from('contacts').insert([payload]).select('id')
+    // Convert empty strings to null so date/typed columns don't receive ""
+    const payload = Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [k, v === '' ? null : v])
+    )
+    const { data, error } = await supabase.from('contacts').insert([payload as any]).select('id') // eslint-disable-line @typescript-eslint/no-explicit-any
     if (error) {
       setCreateError(error.message)
     } else {

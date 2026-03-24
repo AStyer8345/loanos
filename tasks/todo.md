@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-23 (morning audit — dead code cleanup: ResultsTable.tsx + pipeline/stats route deleted)_
+_Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org trigger, migration 050)_
 
 ---
 
@@ -16,7 +16,8 @@ _Last updated: 2026-03-23 (morning audit — dead code cleanup: ResultsTable.tsx
 - [x] **n8n WF1 est_closing_date column** (`1tagvoU0UXtdDiMY`) — Fixed 2026-03-23. `Upsert Loan` body updated to `estimated_closing_date`. Local file updated. **Adam must push to n8n cloud.**
 - [x] **Null org recurrence post-046** — Fixed 2026-03-23 (daily prep). 6 new null activity_log rows (5 email_inbound from Outlook Sync, 1 loan_created from WF1 pre-push) + 1 null contact (Aaron Treptow, from WF1). Migration 048 applied — backfilled all to Adam's org. 0 null rows confirmed.
 - [x] **activity_log SELECT RLS tightened** — Fixed 2026-03-23 (daily prep). Dropped `"Users can read own activity"` policy (had `user_id OR org_id` clause — exposed null-org rows to their author). New policy `"Org members can read activity"` is org-only. Migration 048.
-- [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Also blocked on Azure App Registration. Low priority until Azure is unblocked.
+- [x] **activity_log null org — structural fix** — Fixed 2026-03-24 (daily audit). Migration 050: Postgres `BEFORE INSERT` trigger `trg_activity_log_stamp_org` auto-resolves `organization_id` from `profiles` using `user_id`. Backfilled 11 null rows. This is the permanent fix — no more recurring backfills needed.
+- [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Trigger now auto-fixes these, but the n8n workflow should still be updated when Azure is unblocked.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 - [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 
@@ -37,8 +38,16 @@ _Last updated: 2026-03-23 (morning audit — dead code cleanup: ResultsTable.tsx
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 - [x] **Dead API route `/api/pipeline/stats`** — Deleted 2026-03-23 morning audit. Confirmed no callers anywhere in src/.
+- [ ] **Dark theme violations in nav** — `TopNav.tsx`, `NavDropdown.tsx`, `NavItem.tsx` use `bg-white`/`bg-slate-*`. Visible on every page. Should match dark zinc theme.
+- [ ] **Dark theme violations in scenarios** — `ScenarioCard.tsx`, `StatementUpload.tsx`, `ScenarioList.tsx` use `bg-white`. Should match dark zinc theme.
+- [ ] **Status normalization** — 22 distinct non-terminal status values with case/format duplicates (`Closed` vs `closed`, `APPLICATION_INTAKE` vs `application`). Stale loan queries unreliable. Consider normalizing to lowercase snake_case.
+- [ ] **n8n MCP configuration** — MCP server returns 0 workflows on all searches. Credential/instance mismatch. Adam should verify.
 
 ---
+
+## ✅ Completed (2026-03-24 daily audit — structural fix)
+
+- [x] **Migration 050 applied** — `BEFORE INSERT` trigger on `activity_log` auto-stamps `organization_id` from `profiles` using `user_id`. Backfilled 11 null rows (8 email_inbound from Outlook Sync, 3 status_updated from WF2). 0 null org rows confirmed. Permanent structural fix for the recurring null org_id pattern.
 
 ## ✅ Completed (2026-03-22 morning audit — WF2 org_id + column name fixes)
 

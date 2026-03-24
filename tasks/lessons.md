@@ -135,5 +135,8 @@ Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check co
 
 ---
 
+### Recurring null org_id: use DB triggers, not backfills (2026-03-24)
+`activity_log` null `organization_id` rows recurred 4 times (migrations 043, 046, 048, 050). Each time we backfilled, n8n workflows created new nulls because the root cause (n8n inserting without org_id) was outside our code's control. **Structural fix:** Postgres `BEFORE INSERT` trigger (`trg_activity_log_stamp_org`) that auto-resolves org_id from `profiles.organization_id` using the row's `user_id`. Pattern: when a data quality issue recurs 3+ times and the root cause is in an external system you can't immediately fix, add a database-level safety net (trigger/default/constraint) rather than patching the same table repeatedly.
+
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
 The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

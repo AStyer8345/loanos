@@ -17,7 +17,7 @@ import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
   GripVertical, EyeOff, Eye, Settings2,
-  Mail, Phone, MapPin, Calendar, Users,
+  Mail, Phone, MapPin, Calendar, Users, MessageSquare, StickyNote,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
@@ -626,6 +626,23 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
+          {/* Days to Close — inline in header */}
+          {(() => {
+            const target = loan.estimated_closing_date || loan.closing_date
+            const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
+            if (dtc == null) return null
+            return (
+              <div className="flex items-center gap-3 mt-2">
+                <span className={`text-2xl font-mono font-bold ${dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'}`}>
+                  {Math.abs(dtc)}
+                </span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                  {dtc < 0 ? 'days past est. close' : dtc === 0 ? 'closes today' : 'days to close'}
+                </span>
+              </div>
+            )
+          })()}
+
           {/* Meta chips — single row, tight spacing */}
           <div className="flex flex-nowrap gap-2 mt-3 pb-4 overflow-x-auto">
 
@@ -821,7 +838,7 @@ export default function LoanDetailPage() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'dashboard' && (
-          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} contact={contact} onRefresh={fetchAll} />
+          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} onRefresh={fetchAll} />
         )}
         {activeTab === 'automations' && (
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
@@ -877,12 +894,13 @@ function PipelineProgressBar({ status }: { status: string | null }) {
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string
   docs: DocRow[]
   activity: ActivityRow[]
+  setActivity: (a: ActivityRow[]) => void
   contact: ContactRow | null
   onRefresh: () => void
 }) {
@@ -913,22 +931,25 @@ function DashboardTab({ loan, setLoan, loanId, docs, contact, onRefresh }: {
           <PropertySummaryCard loan={loan} />
         </div>
 
-        {/* ── Col 2 — Execution (primary focus) ── */}
+        {/* ── Col 2 — Milestones + Key Dates / Partners ── */}
         <div className="space-y-6">
           <MilestoneTimeline loan={loan} />
-          <LoanTodoList loanId={loanId} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <KeyDatesPanel loan={loan} />
+            <PartnerContactsPanel loan={loan} />
+          </div>
         </div>
 
-        {/* ── Col 3 — The Pulse ── */}
+        {/* ── Col 3 — Documents + Activity/Notes ── */}
         <div className="space-y-4">
-          <LoanVitalCards loan={loan} loanId={loanId} onStatusUpdate={s => setLoan({ ...loan, status: s })} />
-          <KeyDatesPanel loan={loan} />
-          <PartnerContactsPanel loan={loan} />
-          <NotesSidebarPanel loanId={loanId} loan={loan} setLoan={setLoan} />
           <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} onRefresh={onRefresh} />
         </div>
 
       </div>
+
+      {/* ── To-Do (full width, below grid) ── */}
+      <LoanTodoList loanId={loanId} />
 
       {/* ── Full info grid (draggable cards) ── */}
       <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
@@ -1069,50 +1090,7 @@ function PropertySummaryCard({ loan }: { loan: Loan }) {
   )
 }
 
-// ── LoanVitalCards — stat cards per THEME.md ─────────────────────────────────
-
-function LoanVitalCards({ loan, loanId, onStatusUpdate }: { loan: Loan; loanId: string; onStatusUpdate: (s: string) => void }) {
-  const daysToClose = (() => {
-    const target = loan.estimated_closing_date || loan.closing_date
-    if (!target) return null
-    return Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000)
-  })()
-
-  return (
-    <div className="space-y-3">
-      {/* Days to Close */}
-      <div className="border-l-4 border-l-[#C9A84C] rounded-r-lg bg-zinc-900/80 px-4 py-4">
-        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1">Days to Close</p>
-        <p className={`text-3xl font-mono font-bold ${
-          daysToClose == null ? 'text-zinc-600'
-          : daysToClose < 0 ? 'text-red-400'
-          : daysToClose <= 7 ? 'text-amber-300'
-          : 'text-amber-400'
-        }`}>
-          {daysToClose == null ? '—' : Math.abs(daysToClose)}
-        </p>
-        {daysToClose != null && (
-          <p className="text-[10px] font-mono text-zinc-500 mt-0.5">
-            {daysToClose < 0 ? 'days past est. close' : daysToClose === 0 ? 'closes today' : 'days remaining'}
-          </p>
-        )}
-      </div>
-
-      {/* Loan Stage */}
-      <div className="border-l-4 border-l-[#C9A84C] rounded-r-lg bg-zinc-900/80 px-4 py-4">
-        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">Loan Stage</p>
-        <InlineStatusSelect
-          status={loan.status}
-          loanId={loanId}
-          onUpdate={onStatusUpdate}
-        />
-        {loan.milestone && (
-          <p className="text-[10px] font-mono text-zinc-500 mt-2 truncate">{loan.milestone}</p>
-        )}
-      </div>
-    </div>
-  )
-}
+// (LoanVitalCards removed — Days to Close moved to header, Loan Stage in status badge)
 
 // ── KeyDatesPanel ─────────────────────────────────────────────────────────────
 
@@ -1301,51 +1279,180 @@ function LoanTodoList({ loanId }: { loanId: string }) {
   )
 }
 
-// ── Notes sidebar panel ───────────────────────────────────────────────────────
+// (NotesSidebarPanel removed — replaced by LoanActivityPanel with Call/Text/Email/Note logging)
 
-function NotesSidebarPanel({ loanId, loan, setLoan }: { loanId: string; loan: Loan; setLoan: (l: Loan) => void }) {
+// ── Activity / Notes panel (contact-record style) ────────────────────────────
+
+const LOAN_ACTIVITY_CONFIG: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
+  call:  { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
+  text:  { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
+  email: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
+  note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
+}
+
+function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
+  loanId: string
+  activity: ActivityRow[]
+  setActivity: (a: ActivityRow[]) => void
+  onRefresh: () => void
+}) {
   const supabase = createClient()
-  const [notes, setNotes] = useState(loan.notes ?? '')
+  const { userId } = useOrg()
+  const [activeType, setActiveType] = useState<'call' | 'text' | 'email' | 'note' | null>(null)
+  const [logNotes, setLogNotes] = useState('')
   const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const save = useCallback(async (value: string) => {
+  const handleLog = async () => {
+    if (!activeType) return
     setSaving(true)
-    await supabase.from('loans').update({ notes: value }).eq('id', loanId)
-    setLoan({ ...loan, notes: value })
+
+    const newRow: ActivityRow = {
+      id: crypto.randomUUID(),
+      created_at: new Date().toISOString(),
+      action: `Logged ${activeType}`,
+      type: activeType,
+      summary: logNotes.trim() || null,
+      entity_type: 'loan',
+      metadata: { activity_type: activeType },
+    }
+
+    // Optimistic update
+    setActivity([newRow, ...activity])
+    setActiveType(null)
+    setLogNotes('')
+
+    const { error } = await supabase.from('activity_log').insert({
+      loan_id: loanId,
+      action: `Logged ${activeType}`,
+      type: activeType,
+      summary: logNotes.trim() || null,
+      entity_type: 'loan',
+      metadata: { activity_type: activeType },
+      user_id: userId ?? null,
+    })
+
     setSaving(false)
-    setLastSaved(new Date())
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loanId, loan])
-
-  const handleChange = (value: string) => {
-    setNotes(value)
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = setTimeout(() => save(value), 500)
+    if (error) { setActivity(activity); return }
+    onRefresh()
   }
 
-  const handleBlur = () => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    save(notes)
-  }
+  // Show manual logs + email type entries
+  const feedItems = activity.filter(a => {
+    const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
+    return ['call', 'text', 'email', 'note'].includes(aType ?? '')
+  })
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Notes</h2>
-        <span className="text-[10px] font-mono text-zinc-600">
-          {saving ? 'Saving…' : lastSaved ? '✓ Saved' : ''}
-        </span>
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
+      {/* Header */}
+      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <Activity size={11} className="text-[#C9A84C]" />
+          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+            Activity {feedItems.length > 0 && `(${feedItems.length})`}
+          </h2>
+        </div>
       </div>
-      <textarea
-        value={notes}
-        onChange={e => handleChange(e.target.value)}
-        onBlur={handleBlur}
-        placeholder="Add notes about this loan…"
-        rows={10}
-        className="w-full p-3 text-xs text-zinc-200 bg-zinc-800/50 placeholder-zinc-600 focus:outline-none resize-y font-mono border-0 focus:ring-1 focus:ring-[#C9A84C]/40"
-      />
+
+      {/* Action buttons */}
+      <div className="px-3 py-2.5 border-b border-zinc-700/60 shrink-0">
+        <div className="flex gap-1.5">
+          {(['call', 'text', 'email', 'note'] as const).map(type => {
+            const cfg = LOAN_ACTIVITY_CONFIG[type]
+            const Icon = cfg.icon
+            const isActive = activeType === type
+            return (
+              <button
+                key={type}
+                onClick={() => {
+                  if (isActive) { setActiveType(null); setLogNotes('') }
+                  else { setActiveType(type); setLogNotes('') }
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-[10px] font-mono font-semibold tracking-wide transition-all"
+                style={{
+                  background: isActive ? cfg.bg : 'transparent',
+                  color: isActive ? cfg.color : '#71717a',
+                  border: isActive ? `1px solid ${cfg.color}` : '1px solid #3f3f46',
+                }}
+              >
+                <Icon size={10} /> {cfg.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Inline form */}
+        {activeType && (
+          <div className="mt-2.5">
+            <textarea
+              autoFocus
+              value={logNotes}
+              onChange={e => setLogNotes(e.target.value)}
+              placeholder={`Notes about this ${activeType}…`}
+              rows={2}
+              className="w-full bg-zinc-900 border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
+            />
+            <div className="flex gap-2 mt-1.5">
+              <button
+                onClick={handleLog}
+                disabled={saving}
+                className="px-3 py-1 rounded text-[10px] font-mono font-semibold bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
+              >
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+              <button
+                onClick={() => { setActiveType(null); setLogNotes('') }}
+                className="px-2.5 py-1 rounded text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Feed */}
+      <div className="flex-1 overflow-y-auto">
+        {feedItems.length === 0 ? (
+          <div className="py-8 text-center">
+            <p className="text-xs text-zinc-600 font-mono">No activity yet — log a call, text, or note above.</p>
+          </div>
+        ) : (
+          feedItems.map(item => {
+            const aType = (item.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? item.type ?? 'note'
+            const cfg = LOAN_ACTIVITY_CONFIG[aType] ?? LOAN_ACTIVITY_CONFIG.note
+            const Icon = cfg.icon
+            const ts = new Date(item.created_at)
+            const now = new Date()
+            const diffDays = Math.floor((now.getTime() - ts.getTime()) / 86400000)
+            const timeLabel = diffDays === 0
+              ? ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+              : diffDays === 1 ? 'Yesterday'
+              : diffDays < 7 ? `${diffDays}d ago`
+              : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+            return (
+              <div key={item.id} className="flex gap-2.5 px-4 py-2.5 border-b border-zinc-800/50">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ background: cfg.bg }}
+                >
+                  <Icon size={11} style={{ color: cfg.color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-[10px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                    <span className="text-[10px] font-mono text-zinc-600 shrink-0">{timeLabel}</span>
+                  </div>
+                  {item.summary && (
+                    <p className="text-[11px] font-mono text-zinc-300 mt-0.5 leading-relaxed">{item.summary}</p>
+                  )}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
     </div>
   )
 }

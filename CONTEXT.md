@@ -16,7 +16,29 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23.**
+Phase 1 complete. Phase 2 (Automation) ~97% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. Daily audit 2026-03-24: Claude model upgraded to claude-sonnet-4-6, CLAUDE_HAIKU_MODEL constant added, quick-add route model reference fixed, activity feed defense-in-depth org filter added.**
+
+## Daily Audit 2026-03-24
+
+**Audited:**
+- Architecture: clean overall. Two DnD libraries (`@hello-pangea/dnd` + `@dnd-kit`) coexist in contacts page — known tech debt. `stageNormalization.ts` confirmed to serve a different domain (contact stages) vs `loan-stages.ts` (loan statuses) — not redundant, but rename to `contactStageNormalization.ts` recommended for clarity.
+- Claude API: `CLAUDE_MODEL` was `claude-sonnet-4-5` (one generation behind). `quick-add/route.ts` was hardcoding `claude-haiku-4-5` instead of using a constant. `dashboard/page.tsx` activity feed query was missing explicit `organization_id` filter (relied on RLS alone, inconsistent with every other query in the file).
+- Feature status: Performance page still on localStorage (Adam's private P&L tracker — low risk but not multi-tenant ready). `chat_sessions.organization_id` still nullable.
+- All 14 org-scoped tables confirmed. RLS policies confirmed clean post-migration 048/049.
+- No new null org rows found.
+
+**Fixed this session:**
+- **`src/lib/anthropic/model.ts`**: Upgraded `CLAUDE_MODEL` to `claude-sonnet-4-6` (latest). Added `CLAUDE_HAIKU_MODEL = 'claude-haiku-4-5'` as named constant for extraction tasks.
+- **`src/app/api/contacts/quick-add/route.ts`**: Replaced hardcoded `'claude-haiku-4-5'` with `CLAUDE_HAIKU_MODEL` import.
+- **`src/app/dashboard/page.tsx`**: Added `.eq('organization_id', organizationId)` to activity_log SELECT — defense-in-depth, consistent with all other queries.
+
+**Outstanding (unchanged):**
+- Adam must push WF1 to n8n cloud (`1tagvoU0UXtdDiMY`) — local JSON fixed but not live
+- n8n Outlook Email Sync blocked on Azure App Registration
+- Performance page still uses localStorage with real borrower seed data
+- `chat_sessions.organization_id` still nullable — add NOT NULL (migration 050) once confirmed 0 new null rows
+- `stageNormalization.ts` should be renamed to `contactStageNormalization.ts` for clarity (5 callers to update)
+- Arive webhook multi-tenant routing — single-tenant fallback until Arive sends user_id field
 
 ## Daily Audit 2026-03-23 (scheduled — second run)
 

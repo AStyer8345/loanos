@@ -255,6 +255,9 @@ Today's date: ${todayStr}`
     prompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
   }
 
+  // Routing hint for knowledge-base chips
+  prompt += `\n\nWhen the user's message begins with "Sales question:" or "Underwriting question:", call the query_mortgage_knowledge_base tool before answering.`
+
   return prompt
 }
 

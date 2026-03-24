@@ -53,8 +53,12 @@ const RECORD_QUICK_ACTIONS: Record<string, string[]> = {
 }
 
 const GENERAL_QUICK_ACTIONS = [
-  { label: 'Add contact', prompt: 'Add ' },
-  { label: 'Draft email', prompt: 'Draft an email to ' },
+  { label: 'Add contact',        prompt: 'Add ' },
+  { label: 'Draft email',        prompt: 'Draft an email to ' },
+  { label: 'Mass update',        prompt: 'Update all ' },
+  { label: 'Scenario',           prompt: 'Mortgage scenario: ' },
+  { label: 'Sales Q',            prompt: 'Sales question: ' },
+  { label: 'Underwriting Q',     prompt: 'Underwriting question: ' },
 ]
 
 const SELECTED_QUICK_ACTIONS = (n: number) => [

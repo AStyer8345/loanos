@@ -437,11 +437,12 @@ function ReferralTypeSelect({ value, onSave }: {
 }
 
 // Inline-editable text field — click to edit, blur/Enter to save
-function EditableContactField({ label, value, field, onSave }: {
+function EditableContactField({ label, value, field, onSave, display }: {
   label: string
   value: string | null
   field: keyof Contact
   onSave: (field: keyof Contact, value: string | null) => Promise<void>
+  display?: string | null
 }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value ?? '')
@@ -498,7 +499,7 @@ function EditableContactField({ label, value, field, onSave }: {
         display: 'inline-block',
         minWidth: 80,
       }}>
-        {saved ? '✓ Saved' : (value || '—')}
+        {saved ? '✓ Saved' : ((display ?? value) || '—')}
       </div>
     </div>
   )
@@ -979,7 +980,7 @@ export function ContactRecordView(props: Props) {
                       <EditableContactField label="First Name"   value={contact.first_name}   field="first_name"   onSave={onSaveField} />
                       <EditableContactField label="Last Name"    value={contact.last_name}    field="last_name"    onSave={onSaveField} />
                       <EditableContactField label="Email"        value={contact.email}         field="email"        onSave={onSaveField} />
-                      <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} />
+                      <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} display={fmtPhone(contact.phone)} />
                       <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
                       <EditableContactField label="Type"         value={contact.contact_type}  field="contact_type" onSave={onSaveField} />
                       <ReferredByTypeahead value={contact.referred_by} onSave={onSaveField} />

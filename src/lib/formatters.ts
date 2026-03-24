@@ -74,13 +74,13 @@ export function fmtPct(n: number | null | undefined): string {
  * Strips all non-digits, handles 10-digit and 11-digit (1+) numbers.
  * Returns the original string if it can't be parsed.
  * Returns null for null/undefined/empty input.
- * Example: '5125710303' → '512-571-0303'
+ * Example: '5125710303' → '(512) 571-0303'
  */
 export function fmtPhone(val: string | null | undefined): string | null {
   if (!val) return null
   const d = val.replace(/\D/g, '')
-  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`
-  if (d.length === 11 && d[0] === '1') return `${d.slice(1, 4)}-${d.slice(4, 7)}-${d.slice(7)}`
+  if (d.length === 10) return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`
+  if (d.length === 11 && d[0] === '1') return `(${d.slice(1, 4)}) ${d.slice(4, 7)}-${d.slice(7)}`
   return val
 }
 

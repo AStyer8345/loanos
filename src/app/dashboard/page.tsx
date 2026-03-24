@@ -5,7 +5,7 @@ import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import type { ActivityEntry } from '@/app/dashboard/contacts/[id]/ContactRecordView'
-import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
+import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
 export const dynamic = 'force-dynamic'
 

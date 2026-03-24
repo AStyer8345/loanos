@@ -30,7 +30,7 @@ export function NavDropdown({
           transition-colors
           ${isOpen
             ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
-            : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'}
+            : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60'}
         `}
       >
         {icon && <span className="text-base leading-none">{icon}</span>}

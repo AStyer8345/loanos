@@ -89,7 +89,7 @@ export default function StatementUpload({ onImport }: StatementUploadProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors hover:bg-white/5"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors hover:bg-zinc-800/60"
         style={{ border: '1px solid var(--sc-border)', color: 'var(--sc-muted)' }}
       >
         <Upload size={12} />
@@ -101,7 +101,7 @@ export default function StatementUpload({ onImport }: StatementUploadProps) {
           <div className="rounded-xl p-6 w-full max-w-md" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold" style={{ color: 'var(--sc-text)' }}>Upload Mortgage Statement</h3>
-              <button onClick={() => { setOpen(false); setPreview(null); setError(null) }} className="p-1 rounded hover:bg-white/5" style={{ color: 'var(--sc-muted)' }}>
+              <button onClick={() => { setOpen(false); setPreview(null); setError(null) }} className="p-1 rounded hover:bg-zinc-800/60" style={{ color: 'var(--sc-muted)' }}>
                 <X size={16} />
               </button>
             </div>

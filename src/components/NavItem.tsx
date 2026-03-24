@@ -16,8 +16,8 @@ export function NavItem({ label, icon, isActive, onClick }: NavItemProps) {
         inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
         transition-colors transition-transform
         ${isActive
-          ? 'bg-emerald-500/20 text-white'
-          : 'text-emerald-50/80 hover:text-white hover:bg-white/10'}
+          ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60'}
       `}
     >
       {icon && <span className="text-base leading-none">{icon}</span>}

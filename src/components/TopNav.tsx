@@ -150,8 +150,8 @@ export default function TopNav() {
             onClick={() => navigate('/dashboard/settings')}
             className={`hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
               currentSection === 'settings'
-                ? 'bg-white/20 text-white'
-                : 'text-white/50 hover:bg-white/10 hover:text-white/80'
+                ? 'bg-amber-500/20 text-amber-200'
+                : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
             title="Settings"
           >
@@ -175,7 +175,7 @@ export default function TopNav() {
           {/* Mobile hamburger */}
           <button
             type="button"
-            className="md:hidden ml-1 inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/20 text-white hover:bg-white/10"
+            className="md:hidden ml-1 inline-flex items-center justify-center w-9 h-9 rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
             onClick={() => setMobileOpen((prev) => !prev)}
           >
             <span className="sr-only">Toggle navigation</span>
@@ -190,15 +190,15 @@ export default function TopNav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="fixed inset-x-0 top-16 z-20 bg-slate-950/95 text-white border-t border-white/10 md:hidden">
+        <div className="fixed inset-x-0 top-16 z-20 bg-zinc-950/95 text-zinc-200 border-t border-zinc-800 md:hidden">
           <div className="flex flex-col gap-1 px-3 py-3">
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'dashboard'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📊</span>
@@ -210,8 +210,8 @@ export default function TopNav() {
               onClick={() => navigate('/dashboard/loans')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'loans'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📋</span>
@@ -223,8 +223,8 @@ export default function TopNav() {
               onClick={() => navigate('/dashboard/contacts')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'contacts'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">👥</span>
@@ -236,8 +236,8 @@ export default function TopNav() {
               onClick={() => navigate('/dashboard/emails/unmatched')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'emails'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📧</span>
@@ -249,8 +249,8 @@ export default function TopNav() {
               onClick={() => navigate('/dashboard/scenarios')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'scenarios'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📐</span>
@@ -262,8 +262,8 @@ export default function TopNav() {
               onClick={() => navigate('/dashboard/performance')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'reports'
-                  ? 'bg-white/10 text-white'
-                  : 'text-blue-50/90'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📈</span>
@@ -271,30 +271,30 @@ export default function TopNav() {
             </button>
 
             <div className="mt-2">
-              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-blue-200/70">
+              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
                 Marketing
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/marketing')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
               >
                 <span>Marketing Command Center</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/automations')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
               >
                 <span>Automations</span>
               </button>
             </div>
 
-            <div className="mt-2 border-t border-white/10 pt-2">
+            <div className="mt-2 border-t border-zinc-800 pt-2">
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/settings')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-blue-50/90 hover:bg-white/5 w-full text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
               >
                 <span>⚙️</span>
                 <span>Settings</span>

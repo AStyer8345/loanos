@@ -983,7 +983,7 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
           <span className="text-xl font-mono font-bold text-[#C9A84C]">{initials}</span>
         </div>
         <div className="min-w-0 w-full">
-          <p className="text-base font-mono font-semibold text-white truncate">{fullName}</p>
+          <p className="text-base font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
           {loan.contact_id && contact && (
             <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-500 hover:text-[#C9A84C] transition-colors">
               View Contact →
@@ -1052,7 +1052,7 @@ function LoanEssentialsPanel({ loan }: { loan: Loan }) {
       {items.map(item => (
         <div key={item.label} className="flex items-baseline justify-between gap-2">
           <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider shrink-0">{item.label}</span>
-          <span className={`text-sm font-mono font-semibold ${item.gold ? 'text-[#C9A84C]' : 'text-white'}`}>{item.value}</span>
+          <span className={`text-sm font-mono font-semibold ${item.gold ? 'text-[#C9A84C]' : 'text-zinc-100'}`}>{item.value}</span>
         </div>
       ))}
     </div>
@@ -1161,7 +1161,7 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
 function PartnerContactsPanel({ loan }: { loan: Loan }) {
   const partners = [
     { role: 'Realtor', name: loan.referring_agent_name, email: loan.referring_agent_email, phone: loan.referring_agent_phone, color: 'text-amber-400' },
-    { role: "Buyer's Agent", name: loan.buyers_agent_name || loan.buyer_agent_name, email: loan.buyers_agent_email || loan.buyer_agent_email, phone: loan.buyers_agent_phone, color: 'text-emerald-400' },
+    { role: "Buyer's Agent", name: loan.buyers_agent_name || loan.buyer_agent_name, email: loan.buyers_agent_email || loan.buyer_agent_email, phone: loan.buyers_agent_phone, color: 'text-blue-400' },
     { role: 'Listing Agent', name: loan.listing_agent_name, email: loan.listing_agent_email, phone: loan.listing_agent_phone, color: 'text-sky-400' },
     { role: 'Title', name: loan.title_company || loan.title_contact, email: loan.title_email, phone: null as string | null, color: 'text-zinc-300' },
   ].filter(p => p.name || p.email)
@@ -1635,7 +1635,7 @@ function PartiesCard({
       </div>
       <div className="p-4 space-y-3">
         {/* Buyer's Agent — emerald tint */}
-        <div className="rounded p-2.5 space-y-1.5 bg-emerald-950/50 border border-emerald-900/40">
+        <div className="rounded p-2.5 space-y-1.5 bg-blue-950/50 border border-blue-900/40">
           {row("Buyer's Agent", nameLink(buyerName, buyerContactId))}
           {row('BA Phone', <PhoneLink phone={buyerPhone} />)}
           {row('BA Email', <EmailLink email={buyerEmail} />)}
@@ -1990,9 +1990,9 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
             { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
             { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
             { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
-            { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name, field: 'buyers_agent_name', rawValue: loan.buyers_agent_name || loan.buyer_agent_name, searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-emerald-400' },
-            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-emerald-400/70' },
-            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone, field: 'buyers_agent_phone', rawValue: loan.buyers_agent_phone, labelColor: 'text-emerald-400/70' },
+            { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name, field: 'buyers_agent_name', rawValue: loan.buyers_agent_name || loan.buyer_agent_name, searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-blue-400' },
+            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-blue-400/70' },
+            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone, field: 'buyers_agent_phone', rawValue: loan.buyers_agent_phone, labelColor: 'text-blue-400/70' },
             { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
             { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },
             { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
@@ -2523,7 +2523,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         </div>
         <div className="p-5">
           {done ? (
-            <div className="flex flex-col items-center py-4 gap-2 text-emerald-700">
+            <div className="flex flex-col items-center py-4 gap-2 text-[#4ADE80]">
               <Check size={28} />
               <p className="font-medium">Sent to n8n</p>
               <p className="text-xs text-zinc-500 font-mono">Check Outlook for draft</p>
@@ -2545,7 +2545,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
                     className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-amber-500/50 transition-colors bg-zinc-800/50"
                   >
                     {file ? (
-                      <p className="text-sm text-emerald-700 font-medium">{file.name}</p>
+                      <p className="text-sm text-[#4ADE80] font-medium">{file.name}</p>
                     ) : (
                       <p className="text-sm text-zinc-500 font-mono">Drop PDF here or click to browse</p>
                     )}
@@ -2560,7 +2560,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
                     value={referralText}
                     onChange={e => setReferralText(e.target.value)}
                     placeholder="Name, contact info, what they're looking for…"
-                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500 resize-none"
+                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-amber-500 resize-none"
                   />
                 </div>
               )}
@@ -2737,7 +2737,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
                 {typeIcon ? (
                   <span className="text-sm mt-0.5 shrink-0">{typeIcon}</span>
                 ) : (
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isManual ? 'bg-blue-400' : 'bg-emerald-500'}`} />
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isManual ? 'bg-zinc-400' : 'bg-[#4ADE80]'}`} />
                 )}
                 {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
               </div>
@@ -2794,7 +2794,7 @@ const DRAFT_LABELS: Record<string, string> = {
 
 const STATUS_CLASSES: Record<string, string> = {
   pending:   'bg-amber-900/40 text-amber-400 border-amber-800',
-  sent:      'bg-emerald-900/40 text-emerald-400 border-emerald-800',
+  sent:      'bg-green-900/40 text-[#4ADE80] border-green-800',
   discarded: 'bg-zinc-800 text-zinc-500 border-zinc-700',
 }
 

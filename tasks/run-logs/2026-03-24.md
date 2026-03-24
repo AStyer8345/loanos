@@ -49,7 +49,8 @@ Query returned 20 loans with `updated_at` 7+ days ago and non-terminal status. H
 | console.log statements | **2** | (first run) |
 | Files with bg-white | **6** | (first run) |
 | Files with bg-slate/bg-gray | **2** | (first run) |
-| Orphaned components | TBD | (first run) |
+| Orphaned components | **0** | (first run) |
+| Unscoped Supabase queries | **1** (share endpoint — by design) | (first run) |
 
 **console.log locations:**
 - `src/lib/outlook/refresh.ts:106,118` — debug logging for token refresh (low priority, useful for debugging)

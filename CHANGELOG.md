@@ -1,5 +1,32 @@
 # LoanOS Changelog
 
+## [4.6.0] — 2026-03-23 — Chat Intelligence + Attachments + Voice + Quick Actions
+
+### New
+- **AI-powered contact extraction** (`/api/contacts/quick-add`): Claude Haiku replaces regex-only parsing — captures free-text notes and infers stage from conversational context (e.g., "just met them at an open house" → Lead). Regex fallback preserved on error
+- **Dashboard "Hot Leads" widget** (`src/components/dashboard/HotLeadsWidget.tsx`): Surfaces contacts with follow-up-intent notes updated in last 30 days. Keyword scoring ranks by urgency. Top 5 shown with note snippet + days ago, linking to contact record
+- **4 new AI chat quick action chips**: Mass update (`Update all …`), Scenario (`Mortgage scenario: …`), Sales Q (`Sales question: …`), Underwriting Q (`Underwriting question: …`)
+- **Chat file/image attachments**: Paperclip button in chat input — supports PDF and images (JPEG, PNG, WebP), 1 MB per file, max 3 files. Chips appear above input; cleared after send
+- **Clipboard paste for screenshots**: Paste images directly into chat (Ctrl/Cmd+V) — routes through same FileReader pipeline as file picker
+- **Voice dictation**: Mic button in chat — tap to start/stop, interim transcript shown live, final text appended to textarea (Web Speech API, hidden when unsupported)
+- **Full-screen expand mode**: ⤢ button in chat header expands to `position: fixed; inset: 0; z-index: 9000`; Esc or ⤡ collapses back
+- **NotebookLM routing hint**: System prompt instructs Claude to call `query_mortgage_knowledge_base` tool when message begins with "Sales question:" or "Underwriting question:"
+
+### Changed
+- **`DashboardClient`**: accepts `hotLeads: HotLead[]` prop; renders Hot Leads widget between Urgent Attention and Needs Attention sections
+- **`buildSystemPrompt`** in `/api/chat/route.ts`: routing hint appended for knowledge-base chip prefixes
+
+### Files Changed (session 2026-03-23)
+- `src/app/api/contacts/quick-add/route.ts` — AI extraction with fallback
+- `src/components/dashboard/HotLeadsWidget.tsx` — new component
+- `src/app/dashboard/page.tsx` — hot leads query + scoring
+- `src/components/dashboard/DashboardClient.tsx` — hot leads prop + render
+- `src/components/crm/LoanOSChat.tsx` — 4 new chips, attachments, voice, expand
+- `src/app/api/chat/route.ts` — multimodal support, routing hint
+- `package.json` — `@types/dom-speech-recognition` devDependency
+
+---
+
 ## [4.5.0] — 2026-03-20 — Loan Detail Redesign + Auto Loan Names
 
 ### New

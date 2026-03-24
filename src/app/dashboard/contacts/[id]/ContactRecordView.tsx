@@ -208,10 +208,9 @@ const labelStyle: React.CSSProperties = {
 const LEFT_TABS = [
   { id: 'overview' as const, label: 'Overview' },
   { id: 'emails'   as const, label: 'Emails' },
-  { id: 'notes'    as const, label: 'Notes' },
 ]
 
-type LeftTab = 'overview' | 'emails' | 'notes'
+type LeftTab = 'overview' | 'emails'
 
 type Props = {
   contact: Contact
@@ -223,13 +222,12 @@ type Props = {
   inboundEmails: InboundEmailRow[]
   contactEmails?: ContactEmailRow[]
   referrerContactId: string | null
-  activeTab: 'overview' | 'loans' | 'activity' | 'notes' | 'emails'
-  setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'notes' | 'emails') => void
+  activeTab: 'overview' | 'loans' | 'activity' | 'emails'
+  setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'emails') => void
   newNote: string
   setNewNote: (s: string) => void
   savingNote: boolean
   onAddNote: () => void
-  onSaveNotes?: (notes: string) => Promise<void>
   onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
 }
@@ -638,7 +636,6 @@ export function ContactRecordView(props: Props) {
     inboundEmails,
     contactEmails = [],
     referrerContactId,
-    onSaveNotes,
     onSaveField,
     onLogActivity,
   } = props
@@ -653,14 +650,6 @@ export function ContactRecordView(props: Props) {
 
   const [leftTab, setLeftTab] = useState<LeftTab>('overview')
 
-  const [notesVal, setNotesVal] = useState(contact.notes ?? '')
-  const [fullNotesVal, setFullNotesVal] = useState(contact.notes ?? '')
-  const [fullNotesSaving, setFullNotesSaving] = useState(false)
-  const [fullNotesLastSaved, setFullNotesLastSaved] = useState<Date | null>(null)
-  const fullNotesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [notesSaving, setNotesSaving] = useState(false)
-  const [notesSaved, setNotesSaved] = useState(false)
-
   // Activity form state
   const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
   const [activityNotes, setActivityNotes] = useState('')
@@ -671,37 +660,6 @@ export function ContactRecordView(props: Props) {
   const [logPromptType, setLogPromptType] = useState<'call' | 'text' | 'email' | null>(null)
 
   const activityNotesRef = useRef<HTMLTextAreaElement>(null)
-
-  const handleNotesBlur = async () => {
-    if (!onSaveNotes) return
-    if (notesVal === (contact.notes ?? '')) return
-    setNotesSaving(true)
-    await onSaveNotes(notesVal)
-    setNotesSaving(false)
-    setNotesSaved(true)
-    setTimeout(() => setNotesSaved(false), 2000)
-  }
-
-  const handleFullNotesChange = (value: string) => {
-    setFullNotesVal(value)
-    if (fullNotesSaveTimer.current) clearTimeout(fullNotesSaveTimer.current)
-    fullNotesSaveTimer.current = setTimeout(async () => {
-      if (!onSaveNotes) return
-      setFullNotesSaving(true)
-      await onSaveNotes(value)
-      setFullNotesSaving(false)
-      setFullNotesLastSaved(new Date())
-    }, 500)
-  }
-
-  const handleFullNotesBlur = async () => {
-    if (!onSaveNotes) return
-    if (fullNotesSaveTimer.current) clearTimeout(fullNotesSaveTimer.current)
-    setFullNotesSaving(true)
-    await onSaveNotes(fullNotesVal)
-    setFullNotesSaving(false)
-    setFullNotesLastSaved(new Date())
-  }
 
   const phone = contact.phone || contact.phone_mobile || null
   const cityState = [contact.mailing_city, contact.mailing_state].filter(Boolean).join(', ')
@@ -1138,31 +1096,6 @@ export function ContactRecordView(props: Props) {
                   </div>
                 </div>
 
-                {/* Notes */}
-                <div style={cardStyle}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <div style={labelStyle}>NOTES</div>
-                    {(notesSaving || notesSaved) && (
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: notesSaved ? '#80c080' : 'var(--muted)' }}>
-                        {notesSaving ? 'Saving…' : '✓ Saved'}
-                      </span>
-                    )}
-                  </div>
-                  <textarea
-                    value={notesVal}
-                    onChange={e => setNotesVal(e.target.value)}
-                    onBlur={handleNotesBlur}
-                    placeholder="Add notes…"
-                    rows={5}
-                    style={{
-                      width: '100%', background: 'var(--bg)', color: 'var(--fg)',
-                      border: '1px solid var(--border)', borderRadius: 4,
-                      padding: '10px 12px', fontFamily: 'var(--font-mono)', fontSize: 12,
-                      resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6,
-                    }}
-                  />
-                </div>
-
               </div>
             )}
 
@@ -1180,48 +1113,6 @@ export function ContactRecordView(props: Props) {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-
-            {leftTab === 'notes' && (
-              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Notes</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: fullNotesSaving ? 'var(--muted)' : fullNotesLastSaved ? '#80c080' : 'transparent' }}>
-                    {fullNotesSaving ? 'Saving…' : fullNotesLastSaved ? `✓ Saved ${Math.round((Date.now() - fullNotesLastSaved.getTime()) / 60000)} min ago` : ''}
-                  </span>
-                </div>
-                <textarea
-                  value={fullNotesVal}
-                  onChange={e => handleFullNotesChange(e.target.value)}
-                  onBlur={handleFullNotesBlur}
-                  placeholder="Add notes about this contact…"
-                  style={{
-                    flex: 1,
-                    width: '100%',
-                    minHeight: 'calc(100vh - 360px)',
-                    background: 'var(--bg)',
-                    color: 'var(--fg)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 6,
-                    padding: '14px 16px',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    resize: 'none',
-                    boxSizing: 'border-box',
-                    lineHeight: 1.7,
-                    outline: 'none',
-                    caretColor: '#c9a84c',
-                  }}
-                  onFocus={e => { e.target.style.borderColor = '#c9a84c' }}
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onBlurCapture={e => { e.target.style.borderColor = 'var(--border)' }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
-                    {fullNotesVal.length.toLocaleString()} chars
-                  </span>
-                </div>
               </div>
             )}
 

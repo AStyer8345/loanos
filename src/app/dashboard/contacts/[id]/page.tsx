@@ -18,7 +18,7 @@ export default function ContactRecordPage() {
   const [contactActivity, setContactActivity] = useState<ContactActivityRow[]>([])
   const [referrerContactId, setReferrerContactId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'notes' | 'emails'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'emails'>('overview')
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
@@ -182,15 +182,6 @@ export default function ContactRecordPage() {
     setSavingNote(false)
   }
 
-  const handleSaveNotes = async (notes: string) => {
-    if (!contact) return
-    const { error } = await supabase.from('contacts').update({ notes }).eq('id', contact.id)
-    if (!error) {
-      updateLastTouch(supabase, contact.id, 'note_added', 'Added a note')
-      setContact(prev => prev ? { ...prev, notes } : null)
-    }
-  }
-
   const handleSaveField = async (field: keyof Contact, value: string | null) => {
     if (!contact) return
     const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
@@ -260,7 +251,6 @@ export default function ContactRecordPage() {
       setNewNote={setNewNote}
       savingNote={savingNote}
       onAddNote={handleAddNote}
-      onSaveNotes={handleSaveNotes}
       referredLoans={referredLoans}
       onSaveField={handleSaveField}
       onLogActivity={handleLogActivity}

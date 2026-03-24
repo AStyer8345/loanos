@@ -170,29 +170,57 @@ export default async function DashboardPage() {
 
   // ── New Leads (contacts without a loan, last 30 days) ────────────────────
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-  // Hot leads query — contacts with follow-up intent notes updated in last 30 days
   const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()
-  const { data: recentContacts = [] } = await supabase
-    .from('contacts')
-    .select('id, first_name, last_name, notes, updated_at')
+
+  // Hot leads — score contacts by keyword matches across all activity entries (last 30 days)
+  const { data: recentActivityRows = [] } = await supabase
+    .from('contact_activity')
+    .select('contact_id, notes, logged_at')
     .eq('organization_id', organizationId)
     .not('notes', 'is', null)
-    .gte('updated_at', thirtyDaysAgoIso)
-    .limit(20)
+    .gte('logged_at', thirtyDaysAgoIso)
+    .order('logged_at', { ascending: false })
+    .limit(200)
 
-  const hotLeads: HotLead[] = (recentContacts ?? [])
-    .map(c => ({
-      id: c.id,
-      first_name: c.first_name ?? 'Unknown',
-      last_name: c.last_name ?? null,
-      notes: c.notes as string,
-      daysAgo: Math.floor((now.getTime() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24)),
-      score: scoreNotes(c.notes as string),
-    }))
-    .filter(h => h.score > 0)
-    .sort((a, b) => b.score - a.score || a.daysAgo - b.daysAgo)
-    .slice(0, 5)
+  // Group activity notes by contact, track most recent entry date
+  const activityByContact = new Map<string, { notes: string[]; latestAt: string }>()
+  for (const row of recentActivityRows ?? []) {
+    if (!row.contact_id || !row.notes) continue
+    const existing = activityByContact.get(row.contact_id)
+    if (existing) {
+      existing.notes.push(row.notes)
+    } else {
+      activityByContact.set(row.contact_id, { notes: [row.notes], latestAt: row.logged_at ?? '' })
+    }
+  }
+
+  // Fetch contact names for those who have activity
+  const activeContactIds = [...activityByContact.keys()]
+  let hotLeads: HotLead[] = []
+  if (activeContactIds.length > 0) {
+    const { data: hotContactRows = [] } = await supabase
+      .from('contacts')
+      .select('id, first_name, last_name')
+      .eq('organization_id', organizationId)
+      .in('id', activeContactIds)
+
+    hotLeads = (hotContactRows ?? [])
+      .map(c => {
+        const entry = activityByContact.get(c.id)!
+        const combinedNotes = entry.notes.join(' ')
+        return {
+          id: c.id,
+          first_name: c.first_name ?? 'Unknown',
+          last_name: c.last_name ?? null,
+          notes: combinedNotes,
+          daysAgo: Math.floor((now.getTime() - new Date(entry.latestAt).getTime()) / (1000 * 60 * 60 * 24)),
+          score: scoreNotes(combinedNotes),
+        }
+      })
+      .filter(h => h.score > 0)
+      .sort((a, b) => b.score - a.score || a.daysAgo - b.daysAgo)
+      .slice(0, 5)
+  }
 
   // Get all contact_ids already tied to a loan so we can exclude them
   const { data: loanContactRows = [] } = await supabase

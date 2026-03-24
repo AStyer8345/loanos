@@ -17,6 +17,7 @@ import DailyScheduleWidget from './DailyScheduleWidget'
 import TodoList from './TodoList'
 import { fmtCurrency, fmtK, fmtRelative } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
+import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -73,6 +74,7 @@ interface DashboardClientProps {
   scoredLoans: ScoredLoan[]
   recentApplications: RecentApplication[]
   newLeads: NewLead[]
+  hotLeads: HotLead[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -227,6 +229,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               </div>
             </div>
           )}
+
+          {/* Hot Leads */}
+          <HotLeadsWidget hotLeads={props.hotLeads} />
 
           {/* Needs Attention — full width */}
           <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">

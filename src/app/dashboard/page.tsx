@@ -5,10 +5,22 @@ import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import type { ActivityEntry } from '@/app/dashboard/contacts/[id]/ContactRecordView'
+import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
 export const dynamic = 'force-dynamic'
 
 const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
+
+const HOT_KEYWORDS = [
+  'follow up', 'call back', 'interested', 'ready', 'wants to',
+  'motivated', 'urgent', 'asap', 'soon', 'this week', 'next week',
+  'remind', 'reach out', 'needs to', 'looking to', 'actively',
+]
+
+function scoreNotes(notes: string): number {
+  const lower = notes.toLowerCase()
+  return HOT_KEYWORDS.reduce((score, kw) => score + (lower.includes(kw) ? 1 : 0), 0)
+}
 
 export default async function DashboardPage() {
   let organizationId: string
@@ -159,6 +171,29 @@ export default async function DashboardPage() {
   // ── New Leads (contacts without a loan, last 30 days) ────────────────────
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
+  // Hot leads query — contacts with follow-up intent notes updated in last 30 days
+  const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()
+  const { data: recentContacts = [] } = await supabase
+    .from('contacts')
+    .select('id, first_name, last_name, notes, updated_at')
+    .eq('organization_id', organizationId)
+    .not('notes', 'is', null)
+    .gte('updated_at', thirtyDaysAgoIso)
+    .limit(20)
+
+  const hotLeads: HotLead[] = (recentContacts ?? [])
+    .map(c => ({
+      id: c.id,
+      first_name: c.first_name ?? 'Unknown',
+      last_name: c.last_name ?? null,
+      notes: c.notes as string,
+      daysAgo: Math.floor((now.getTime() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24)),
+      score: scoreNotes(c.notes as string),
+    }))
+    .filter(h => h.score > 0)
+    .sort((a, b) => b.score - a.score || a.daysAgo - b.daysAgo)
+    .slice(0, 5)
+
   // Get all contact_ids already tied to a loan so we can exclude them
   const { data: loanContactRows = [] } = await supabase
     .from('loans')
@@ -256,6 +291,7 @@ export default async function DashboardPage() {
       scoredLoans={scoredLoans}
       recentApplications={recentApplications ?? []}
       newLeads={newLeads ?? []}
+      hotLeads={hotLeads}
     />
   )
 }

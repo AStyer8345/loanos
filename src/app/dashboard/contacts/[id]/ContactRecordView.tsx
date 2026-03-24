@@ -260,10 +260,15 @@ function ReferredByTypeahead({ value, onSave }: {
         .from('contacts')
         .select('id, first_name, last_name, contact_type')
         .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
-        .limit(8)
-      const list = (data ?? []) as TAResult[]
-      setResults(list)
-      setOpen(list.length > 0)
+        .limit(20)
+      // Sort so realtors appear before borrowers
+      const sorted = ((data ?? []) as TAResult[]).sort((a, b) => {
+        const aR = (a.contact_type === 'realtor' || a.contact_type === 'agent') ? 0 : 1
+        const bR = (b.contact_type === 'realtor' || b.contact_type === 'agent') ? 0 : 1
+        return aR - bR
+      }).slice(0, 10)
+      setResults(sorted)
+      setOpen(sorted.length > 0)
       setHighlighted(0)
     }, 300)
   }
@@ -1060,9 +1065,18 @@ export function ContactRecordView(props: Props) {
                 </div>
 
                 {/* Co-Borrower */}
-                {(onSaveField || contact.co_borrower_first || contact.co_borrower_last) && (
+                {(onSaveField || contact.co_borrower_first || contact.co_borrower_last) && (() => {
+                  const hasCoBorrower = !!(contact.co_borrower_first || contact.co_borrower_last || contact.co_borrower_mobile || contact.co_borrower_email || contact.co_borrower_birthdate)
+                  return (
                   <div style={cardStyle}>
-                    <div style={labelStyle}>CO-BORROWER</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={labelStyle}>CO-BORROWER</div>
+                      {!hasCoBorrower && onSaveField && (
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', cursor: 'default' }}>
+                          click any field below to add
+                        </span>
+                      )}
+                    </div>
                     {onSaveField ? (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                         <EditableContactField label="First Name" value={contact.co_borrower_first ?? null} field="co_borrower_first" onSave={onSaveField} />
@@ -1100,7 +1114,8 @@ export function ContactRecordView(props: Props) {
                       </div>
                     )}
                   </div>
-                )}
+                  )
+                })()}
 
                 {/* Relationship */}
                 <div style={cardStyle}>

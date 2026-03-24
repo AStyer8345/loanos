@@ -363,10 +363,14 @@ function ContactTypeahead({
         .from('contacts')
         .select('id, first_name, last_name, contact_type')
         .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
-        .limit(8)
-      const list = (data ?? []) as TypeaheadResult[]
-      setResults(list)
-      setOpen(list.length > 0)
+        .limit(20)
+      const sorted = ((data ?? []) as TypeaheadResult[]).sort((a, b) => {
+        const aR = (a.contact_type === 'realtor' || a.contact_type === 'agent') ? 0 : 1
+        const bR = (b.contact_type === 'realtor' || b.contact_type === 'agent') ? 0 : 1
+        return aR - bR
+      }).slice(0, 10)
+      setResults(sorted)
+      setOpen(sorted.length > 0)
       setHighlighted(0)
     }, 300)
   }

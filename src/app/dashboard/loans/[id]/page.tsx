@@ -556,7 +556,29 @@ export default function LoanDetailPage() {
                 {loan.loan_number ? ` · #${loan.loan_number}` : ''}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Days to Close — right-aligned in header */}
+              {(() => {
+                const target = loan.estimated_closing_date || loan.closing_date
+                const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
+                if (dtc == null) return null
+                const color = dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'
+                const border = dtc < 0 ? 'border-red-800' : dtc <= 7 ? 'border-amber-800' : 'border-[#C9A84C]/30'
+                const bg = dtc < 0 ? 'bg-red-950/30' : dtc <= 7 ? 'bg-amber-950/30' : 'bg-[#C9A84C]/5'
+                return (
+                  <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg border ${border} ${bg}`}>
+                    <span className={`text-2xl font-mono font-bold leading-none ${color}`}>{Math.abs(dtc)}</span>
+                    <div>
+                      <p className={`text-[9px] font-mono font-semibold ${color} leading-tight`}>
+                        {dtc < 0 ? 'DAYS PAST' : dtc === 0 ? 'CLOSES' : 'DAYS TO'}
+                      </p>
+                      <p className={`text-[9px] font-mono font-semibold ${color} leading-tight`}>
+                        {dtc < 0 ? 'EST. CLOSE' : dtc === 0 ? 'TODAY' : 'CLOSE'}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })()}
               <InlineStatusSelect
                 status={loan.status}
                 loanId={loanId}
@@ -625,31 +647,6 @@ export default function LoanDetailPage() {
               </div>
             </div>
           </div>
-
-          {/* Days to Close — prominent card in header */}
-          {(() => {
-            const target = loan.estimated_closing_date || loan.closing_date
-            const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
-            if (dtc == null) return null
-            const color = dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'
-            const border = dtc < 0 ? 'border-red-800' : dtc <= 7 ? 'border-amber-800' : 'border-[#C9A84C]/30'
-            const bg = dtc < 0 ? 'bg-red-950/30' : dtc <= 7 ? 'bg-amber-950/30' : 'bg-[#C9A84C]/5'
-            return (
-              <div className={`inline-flex items-center gap-3 mt-3 px-4 py-2.5 rounded-lg border ${border} ${bg}`}>
-                <span className={`text-3xl font-mono font-bold ${color}`}>
-                  {Math.abs(dtc)}
-                </span>
-                <div>
-                  <p className={`text-xs font-mono font-semibold ${color}`}>
-                    {dtc < 0 ? 'DAYS PAST EST. CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
-                  </p>
-                  <p className="text-[10px] font-mono text-zinc-500">
-                    Est. {new Date(target + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-            )
-          })()}
 
           {/* Meta chips — single row, tight spacing */}
           <div className="flex flex-nowrap gap-2 mt-3 pb-4 overflow-x-auto">
@@ -1662,7 +1659,7 @@ function PartiesCard({
 
 // ── Card layout constants ──────────────────────────────────────────────────────
 
-const DEFAULT_CARD_ORDER = ['borrower', 'loan-terms', 'property', 'key-dates', 'origination', 'parties']
+const DEFAULT_CARD_ORDER = ['borrower', 'loan-terms', 'property', 'origination', 'parties']
 const CARD_ORDER_KEY = 'loanos_card_order'
 const CARD_HIDDEN_KEY = 'loanos_card_hidden'
 
@@ -1806,14 +1803,6 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
           { label: 'Appraised',      value: fmtCurrency(loan.appraised_value) },
           { label: 'Down Payment',   value: downPayment },
           { label: 'LTV',            value: fmtPct(loan.ltv) },
-        ]} />
-      case 'key-dates':
-        return <InfoCard title="Key Dates" fields={[
-          { label: 'Application',  value: fmtDate(loan.application_date) },
-          { label: 'Est. Close',   value: fmtDate(loan.estimated_closing_date) },
-          { label: 'Rate Lock',    value: fmtDate(loan.rate_lock_date) },
-          { label: 'Lock Expiry',  value: fmtDate(loan.rate_lock_expiration) },
-          { label: 'Actual Close', value: fmtDate(loan.closing_date) },
         ]} />
       case 'origination':
         return <InfoCard title="Origination" fields={[

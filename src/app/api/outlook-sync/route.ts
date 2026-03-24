@@ -73,6 +73,59 @@ async function findContactByEmail(emailAddress: string) {
   return null;
 }
 
+// Find the most recent active loan for a contact, or by subject-line matching
+async function findLoanForContact(contactId: string | null, subject: string | null) {
+  // 1. If we have a contact, find their most recent active loan
+  if (contactId) {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/loans?contact_id=eq.${contactId}&order=updated_at.desc&limit=1`,
+      { headers: sbHeaders() }
+    );
+    if (res.ok) {
+      const rows = await res.json();
+      if (rows.length > 0) return rows[0].id as string;
+    }
+  }
+
+  // 2. Try matching by subject line — extract address or borrower name
+  if (subject) {
+    const subj = String(subject);
+
+    // Try to find a property address pattern (e.g. "1234 Main St" or "1234 Elm")
+    const addrMatch = subj.match(/\b(\d{2,5}\s+[A-Z][a-z]+(?:\s+(?:St|Ave|Dr|Rd|Blvd|Ln|Way|Ct|Cir|Pl|Trail|Trl|Loop|Run|Pass|Pkwy|Pike|Bend))?)\b/);
+    if (addrMatch) {
+      const addr = addrMatch[1].replace(/'/g, "''");
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/loans?property_address=ilike.*${encodeURIComponent(addr)}*&order=updated_at.desc&limit=1`,
+        { headers: sbHeaders() }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows.length > 0) return rows[0].id as string;
+      }
+    }
+
+    // Try borrower name matching — look for "LastName" or "First Last" patterns in subject
+    // Extract potential names (capitalized words that aren't common email words)
+    const skipWords = new Set(['re', 'fw', 'fwd', 'email', 'loan', 'disclosure', 'document', 'appraisal', 'title', 'closing', 'funding', 'escrow', 'underwriting', 'approval', 'application', 'update', 'status', 'new', 'the', 'for', 'and', 'from']);
+    const words = subj.replace(/[^a-zA-Z\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !skipWords.has(w.toLowerCase()));
+    for (const word of words) {
+      if (word[0] === word[0].toUpperCase()) {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/loans?or=(borrower_last_name.ilike.*${encodeURIComponent(word)}*,borrower_name.ilike.*${encodeURIComponent(word)}*,loan_name.ilike.*${encodeURIComponent(word)}*)&order=updated_at.desc&limit=1`,
+          { headers: sbHeaders() }
+        );
+        if (res.ok) {
+          const rows = await res.json();
+          if (rows.length > 0) return rows[0].id as string;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 async function logEmailActivity(
   contact: Record<string, unknown>,
   message: Record<string, unknown>,
@@ -103,14 +156,21 @@ async function logEmailActivity(
     message_id: message.internetMessageId,
   };
 
+  // Auto-link to loan via contact's active loans or subject-line matching
+  const loanId = await findLoanForContact(
+    contact.id as string,
+    message.subject as string | null
+  );
+
   const row = {
     action: direction,
     entity_type: 'contact',
     entity_id: contact.id,
     contact_id: contact.id,
+    loan_id: loanId ?? null,
     user_id: LOANOS_SYSTEM_USER_ID,
     organization_id: contact.organization_id ?? null,
-    metadata: payload,
+    metadata: { ...payload, activity_type: 'email' },
     type: direction,
     summary,
     raw_payload: { ...payload, body: (message.body as Record<string, string>)?.content || null },
@@ -206,6 +266,29 @@ async function runSync() {
 
     const contact = await findContactByEmail(senderEmail);
     if (!contact) {
+      // Try subject-line matching to a loan even without a contact match
+      const loanId = await findLoanForContact(null, msg.subject as string | null);
+      if (loanId) {
+        // We found a loan — log with loan_id but no contact_id
+        const from = senderEmail;
+        const fromName = (msg.from as Record<string, Record<string, string>>)?.emailAddress?.name || '';
+        await fetch(`${SUPABASE_URL}/rest/v1/activity_log`, {
+          method: 'POST',
+          headers: { ...sbHeaders(), Prefer: 'resolution=ignore-duplicates,return=minimal' },
+          body: JSON.stringify({
+            action: 'email_inbound', type: 'email_inbound', entity_type: 'email',
+            loan_id: loanId, user_id: LOANOS_SYSTEM_USER_ID,
+            summary: `Email from ${fromName || from}: ${msg.subject}`,
+            from_address: from, subject: msg.subject,
+            body_snippet: (msg.bodyPreview as string) || null,
+            occurred_at: msg.receivedDateTime,
+            external_id: msg.internetMessageId,
+            metadata: { from, from_name: fromName, subject: msg.subject, preview: msg.bodyPreview, received_at: msg.receivedDateTime, activity_type: 'email' },
+          }),
+        });
+        stats.inserted++;
+        continue;
+      }
       stats.unmatched++;
       await logUnmatchedEmail(msg);
       continue;

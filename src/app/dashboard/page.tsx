@@ -69,7 +69,7 @@ export default async function DashboardPage() {
     }
 
     const closingDate = loan.closing_date || loan.funding_date
-    if (closingDate && ['closed', 'funded'].includes(rawStatus)) {
+    if (closingDate && (rawStatus.includes('closed') || rawStatus.includes('funded'))) {
       const cd = new Date(closingDate)
       if (cd.getFullYear() === thisYear) {
         fundedYTD++
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
   for (const loan of loans ?? []) {
     const rawStatus = (loan.status ?? '').toLowerCase()
     const closingDate = loan.closing_date || loan.funding_date
-    if (!closingDate || !['closed', 'funded'].includes(rawStatus)) continue
+    if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
     const cd = new Date(closingDate)
     if (cd.getFullYear() !== thisYear) continue
     const mk = cd.toLocaleString('en-US', { month: 'short' })

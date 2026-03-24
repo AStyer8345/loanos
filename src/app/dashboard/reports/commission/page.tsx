@@ -30,7 +30,9 @@ export default async function CommissionReportPage() {
   const funded = (loans ?? []).filter(l => {
     const s = (l.status ?? '').toLowerCase()
     const cd = l.closing_date || l.funding_date
-    if (!cd || !['closed', 'funded'].includes(s)) return false
+    // Match all variations: "funded", "closed", "FUNDED", "Funded / Closed", "clear_to_close" etc.
+    const isFunded = s.includes('funded') || s.includes('closed') || s === 'clear_to_close' || s === 'ctc_issued'
+    if (!cd || !isFunded) return false
     return new Date(cd).getFullYear() === thisYear
   })
 

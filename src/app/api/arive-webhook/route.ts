@@ -353,8 +353,8 @@ export async function POST(request: NextRequest) {
       derivedDates.approval_date = today
     }
 
-    // Funded / closed
-    if (status === 'FUNDED' || status === 'CLOSED') {
+    // Funded / closed — catch all variations
+    if (status.includes('FUNDED') || status.includes('CLOSED') || status === 'CLOSING') {
       derivedDates.funding_date = today
       derivedDates.closing_date = today
     }

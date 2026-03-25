@@ -36,7 +36,7 @@ Look for "LoanOS Enterprise".
 If NOT found — create it and seed with foundational docs:
 ```bash
 /Users/adamstyer/.local/bin/notebooklm create "LoanOS Enterprise" --json
-/Users/adamstyer/.local/bin/notebooklm use <new-id> --json
+/Users/adamstyer/.local/bin/notebooklm use <new-id>
 /Users/adamstyer/.local/bin/notebooklm source add CONTEXT.md --json
 /Users/adamstyer/.local/bin/notebooklm source add LOANOS_SYSTEM_KNOWLEDGE_BASE.md --json
 /Users/adamstyer/.local/bin/notebooklm source add CLAUDE.md --json
@@ -45,7 +45,7 @@ Save notebook ID to `tasks/enterprise/notebooklm-id.txt`.
 
 If found — activate it:
 ```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt) --json
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt)
 ```
 
 ### Step 2 — Pull Prior Context for Today's Topic
@@ -101,7 +101,7 @@ NOTEBOOKLM (PULL): COMPLETE — [DATETIME]
 
 ### Step 1 — Activate Notebook
 ```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt) --json
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt)
 ```
 
 ---

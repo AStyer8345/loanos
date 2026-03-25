@@ -256,7 +256,29 @@ Use `notebooklm source delete <id> --json` (NOT `source remove`).
 
 ---
 
-### Step 5 — GENERATE DAILY DIGEST
+### Step 5 — PUSH TO MASTER NOTEBOOK
+
+Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create \
+  "[SEO/SEM] [DATE] [AM/PM] — COMPLETED: [bullet summary of keyword research/on-page work done]. BUILT: [files created or modified]. KEY DECISIONS: [targeting or content strategy decisions]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
+  -t "[DATE] [AM/PM] — SEO/SEM" \
+  --json
+```
+
+Then switch back to the SEO/SEM notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/seo-sem/notebooklm-id.txt)
+```
+
+---
+
+### Step 6 — GENERATE DAILY DIGEST
 
 After the PUSH+CURATE mode completes (PM session only, or only session of day):
 
@@ -350,7 +372,7 @@ If Zapier webhook fails — save digest to `tasks/seo-sem/digests/[DATE]-digest-
 
 ---
 
-### Step 6 — Signal Complete
+### Step 7 — Signal Complete
 
 Append to `tasks/seo-sem/subagent-status.md`:
 ```

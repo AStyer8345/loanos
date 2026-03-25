@@ -255,7 +255,29 @@ ls tasks/social-media/build-reports/[TODAY]*.md 2>/dev/null && \
 
 ---
 
-### Step 5 — GENERATE DAILY DIGEST
+### Step 5 — PUSH TO MASTER NOTEBOOK
+
+Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create \
+  "[SOCIAL MEDIA] [DATE] [AM/PM] — COMPLETED: [bullet summary of content researched/written/scheduled]. BUILT: [posts created, files modified]. KEY DECISIONS: [platform strategy or content direction decisions]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
+  -t "[DATE] [AM/PM] — Social Media" \
+  --json
+```
+
+Then switch back to the Social Media notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/social-media/notebooklm-id.txt)
+```
+
+---
+
+### Step 6 — GENERATE DAILY DIGEST
 
 After the PUSH+CURATE mode completes (runs once per day — PM session only):
 
@@ -351,7 +373,7 @@ If Zapier webhook fails — save digest to `tasks/social-media/digests/[DATE]-di
 
 ---
 
-### Step 6 — Signal Complete
+### Step 7 — Signal Complete
 
 Append to `tasks/social-media/subagent-status.md`:
 ```

@@ -250,7 +250,29 @@ notebooklm note create \
 
 ---
 
-### Step 6 — GENERATE DAILY DIGEST
+### Step 6 — PUSH TO MASTER NOTEBOOK
+
+Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create \
+  "[CRM] [DATE] [AM/PM] — COMPLETED: [bullet summary of what was migrated/built]. BUILT: [files created or modified]. KEY DECISIONS: [any data model or integration decisions made]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
+  -t "[DATE] [AM/PM] — CRM Migration" \
+  --json
+```
+
+Then switch back to the CRM notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/crm/notebooklm-id.txt)
+```
+
+---
+
+### Step 7 — GENERATE DAILY DIGEST
 
 Check if digest already sent today:
 ```bash
@@ -283,7 +305,7 @@ If Zapier fails — save as `[DATE]-digest-UNSENT.md`.
 
 ---
 
-### Step 7 — Signal Complete
+### Step 8 — Signal Complete
 
 Append to `tasks/crm/subagent-status.md`:
 ```

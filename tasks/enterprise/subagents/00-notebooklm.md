@@ -257,7 +257,29 @@ notebooklm note create \
 
 ---
 
-### Step 5 — GENERATE DAILY DIGEST
+### Step 5 — PUSH TO MASTER NOTEBOOK
+
+Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create \
+  "[ENTERPRISE] [DATE] [AM/PM] — COMPLETED: [bullet summary of what was built/decided]. BUILT: [files created or modified]. KEY DECISIONS: [any architectural or strategic decisions made]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
+  -t "[DATE] [AM/PM] — Enterprise Build" \
+  --json
+```
+
+Then switch back to the enterprise notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt)
+```
+
+---
+
+### Step 6 — GENERATE DAILY DIGEST
 
 After the PUSH+CURATE mode completes (runs once per day — PM session only, or only session of day):
 
@@ -351,7 +373,7 @@ If Zapier webhook fails — save digest to `tasks/enterprise/digests/[DATE]-dige
 
 ---
 
-### Step 6 — Signal Complete
+### Step 7 — Signal Complete
 
 Append to `tasks/enterprise/subagent-status.md`:
 ```

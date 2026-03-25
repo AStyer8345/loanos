@@ -285,7 +285,7 @@ Save to `tasks/enterprise/digests/[YYYY-MM-DD]-digest.md`:
 Date: [DATE]
 Sessions Run: [AM / PM / Both]
 Active Topic: [TOPIC]
-Week in Queue: [Week X of 8]
+Active Phase: [Phase X — Topic]
 
 ---
 
@@ -313,8 +313,8 @@ Week in Queue: [Week X of 8]
 3. [Priority 3 — specific]
 
 ## Enterprise Queue Status
-- Current: [Week X — Topic]
-- Progress: [% complete estimate]
+- Current Phase: [Phase name — specific topic]
+- Outstanding items: [count and brief list]
 - Advance to next topic: [YES / NO — reason]
 
 ---

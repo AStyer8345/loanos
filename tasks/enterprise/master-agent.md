@@ -29,6 +29,19 @@ You operate like a CTO running a sprint — you assign, you verify, you escalate
 
 ---
 
+## STEP 0 — NOTEBOOKLM PULL
+
+Before doing anything else, activate the NotebookLM subagent in PULL mode.
+SESSION_START was already written to subagent-status.md by the AM skill — so this will correctly run PULL mode and load prior context, open questions, and architectural decisions into this session.
+
+```bash
+cat tasks/enterprise/subagents/00-notebooklm.md | claude --dangerously-skip-permissions
+```
+
+Wait for PULL to complete before proceeding.
+
+---
+
 ## STEP 1 — LOAD CONTEXT
 
 Read these files in order:

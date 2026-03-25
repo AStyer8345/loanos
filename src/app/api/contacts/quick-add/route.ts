@@ -5,14 +5,14 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import type { Database } from '@/lib/database.types'
 import { getAnthropicClient } from '@/lib/anthropic/client'
-import { CLAUDE_MODEL } from '@/lib/anthropic/model'
+import { CLAUDE_HAIKU_MODEL } from '@/lib/anthropic/model'
 
 type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 async function extractContactInfoWithAI(raw: string): Promise<ExtractedContact> {
   const anthropic = await getAnthropicClient()
   const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
+    model: CLAUDE_HAIKU_MODEL,
     max_tokens: 300,
     temperature: 0,
     messages: [{

@@ -365,6 +365,7 @@ export async function POST(req: NextRequest) {
           .from('chat_sessions')
           .update({ messages: updatedMessages })
           .eq('id', sessionId)
+          .eq('organization_id', organizationId)
       } else {
         const { data } = await supabase
           .from('chat_sessions')
@@ -373,6 +374,7 @@ export async function POST(req: NextRequest) {
             record_type: recordType,
             messages: updatedMessages,
             user_id: userId,
+            organization_id: organizationId,
           })
           .select('id')
           .single()
@@ -389,8 +391,10 @@ export async function POST(req: NextRequest) {
 
 // GET /api/chat?recordId=&recordType= — load most recent session for a record
 export async function GET(req: NextRequest) {
+  let organizationId: string
   try {
-    await getOrganization()
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -410,6 +414,7 @@ export async function GET(req: NextRequest) {
       .select('id, messages, updated_at')
       .eq('record_id', recordId)
       .eq('record_type', recordType)
+      .eq('organization_id', organizationId)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()

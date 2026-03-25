@@ -278,6 +278,7 @@ export default async function DashboardPage() {
   const { data: rawActivity = [] } = await supabase
     .from('activity_log')
     .select('id, created_at, type, action, summary, contact_id, loan_id, metadata')
+    .eq('organization_id', organizationId)
     .gte('created_at', sevenDaysAgo.toISOString())
     .order('created_at', { ascending: false })
     .limit(100)

@@ -16,7 +16,7 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep).**
+Phase 1 complete. Phase 2 (Automation) ~97% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Daily audit 2026-03-24: Claude model upgraded to claude-sonnet-4-6, CLAUDE_HAIKU_MODEL constant added, quick-add route model reference fixed, activity feed defense-in-depth org filter added. Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep).**
 
 ## Daily Audit 2026-03-25 (scheduled)
 
@@ -36,6 +36,8 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 - `activity_log.organization_id` NOT NULL — safe to add after WF1/WF2 confirmed pushed
 - Performance page still uses localStorage with real borrower names
 - Plan selection UI in onboarding deferred (defaults to 'starter')
+- `stageNormalization.ts` should be renamed to `contactStageNormalization.ts` for clarity (5 callers to update)
+- Arive webhook multi-tenant routing — single-tenant fallback until Arive sends user_id field
 
 ## Multi-Tenancy Status (2026-03-25 — daily prep)
 
@@ -45,24 +47,30 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 
 **daily-briefing unscoped query:** ✅ Fixed — milestone_events and milestone_communications now scoped via loans join
 
-## Daily Audit 2026-03-24 (scheduled)
+## Daily Audit 2026-03-24
 
 **Audited:**
 - Schema: 14 org-scoped tables confirmed. `contact_activity` found missing `organization_id` — migration 048 was written on disk but never applied to Supabase.
+- Architecture: clean overall. Two DnD libraries (`@hello-pangea/dnd` + `@dnd-kit`) coexist in contacts page — known tech debt. `stageNormalization.ts` confirmed to serve a different domain (contact stages) vs `loan-stages.ts` (loan statuses) — not redundant, but rename to `contactStageNormalization.ts` recommended for clarity.
+- Claude API: `CLAUDE_MODEL` was `claude-sonnet-4-5` (one generation behind). `quick-add/route.ts` was hardcoding `claude-haiku-4-5` instead of using a constant. `dashboard/page.tsx` activity feed query was missing explicit `organization_id` filter (relied on RLS alone, inconsistent with every other query in the file).
 - Null rows: activity_log 18 null (15 email_inbound from Outlook Sync [Azure blocked], 2 status_updated from n8n WF2 [not pushed], 1 loan_created from n8n WF1 [not pushed]). chat_sessions 2 null (same 2 from 2026-03-23, user sessions created without org stamp).
 - API routes: bulk-action, cd-extraction, pa-extraction all stamp org_id correctly. No new unscoped writers found.
+- Feature status: Performance page still on localStorage (Adam's private P&L tracker — low risk but not multi-tenant ready). `chat_sessions.organization_id` still nullable.
+- All 14 org-scoped tables confirmed. RLS policies confirmed clean post-migration 048/049.
 - contact_activity RLS: was user_id-scoped only. Upgraded to org-scoped via migration 048.
 
 **Fixed this session:**
 - **Migration 048 applied**: Added `organization_id` to `contact_activity`, backfilled from related contact, dropped user_id-scoped policies, created org-scoped SELECT + INSERT policies. contact_activity is now fully org-scoped.
 - **Migration 050 applied**: Backfilled 18 null activity_log rows + 2 null chat_sessions rows via profile lookup. 0 null rows confirmed in both tables.
+- **`src/lib/anthropic/model.ts`**: Upgraded `CLAUDE_MODEL` to `claude-sonnet-4-6` (latest). Added `CLAUDE_HAIKU_MODEL = 'claude-haiku-4-5'` as named constant for extraction tasks.
+- **`src/app/api/contacts/quick-add/route.ts`**: Replaced hardcoded `'claude-haiku-4-5'` with `CLAUDE_HAIKU_MODEL` import.
+- **`src/app/dashboard/page.tsx`**: Added `.eq('organization_id', organizationId)` to activity_log SELECT — defense-in-depth, consistent with all other queries.
 
 **Outstanding (unchanged):**
 - **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — will keep producing null loan_created rows until pushed
 - **Adam must push WF2 to n8n cloud** (workflow ID `9JyzzwKac8v3uQ7d`) — will keep producing null status_updated rows until pushed
 - n8n Outlook Email Sync blocked on Azure App Registration — continues producing email_inbound null-org rows daily
 - chat_sessions.organization_id still nullable — can add NOT NULL once nulls stop recurring (requires WF1/WF2 pushed first)
-- `daily-briefing` milestone queries (loan_milestone_events, milestone_communications) unscoped — medium priority, pre-multi-tenant launch fix needed
 
 ## Multi-Tenancy Status (2026-03-24 — daily prep)
 

@@ -57,17 +57,14 @@ _Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, dail
 
 - [x] **Migration 050 applied** — `BEFORE INSERT` trigger on `activity_log` auto-stamps `organization_id` from `profiles` using `user_id`. Backfilled 11 null rows (8 email_inbound from Outlook Sync, 3 status_updated from WF2). 0 null org rows confirmed. Permanent structural fix for the recurring null org_id pattern.
 
-## ✅ Completed (2026-03-22 morning audit — WF2 org_id + column name fixes)
+## ✅ Completed (2026-03-22 full audit)
 
-- [x] **WF2 activity_log organization_id** — `n8n/workflows/workflow-2-status-update.json` updated. Added `organization_id` to Supabase SELECT in `Find Loan by Arive ID`, propagated through `Check Loan Found` code node, stamped into `Log Status Updated` INSERT body. All three paths (found/not-found/error) now produce scoped rows when org is resolvable.
-- [x] **WF2 est_closing_date → estimated_closing_date** — `Update Loan Status` PATCH body was writing to non-existent column for the Next.js arive-webhook schema. Fixed to `estimated_closing_date`.
-
-## ✅ Completed (2026-03-22 daily prep — activity_log null org fixes)
-
-- [x] **Migration 046 applied** — Backfilled 3 null `organization_id` rows in `activity_log`. All 3 were created after migration 043 by n8n workflows and a code bug. Assigned to Adam's org. `activity_log` now has 0 null org rows.
-- [x] **`updateLastTouch.ts` fixed** — Was inserting to `activity_log` without `organization_id`. Now fetches `profiles.organization_id` for the authenticated user and stamps it on every insert.
-- [x] **`outlook-sync/route.ts` `logEmailActivity()` fixed** — Was inserting without `organization_id`. Now passes `contact.organization_id` (already present on the contact row fetched from Supabase) into the activity_log row.
-- [x] **`generate-narrative/route.ts` unscoped insert removed** — Route has no auth (IP rate-limited only), so org_id is unknowable. The activity_log insert was producing orphan rows. Removed the insert entirely. Unused `createServiceClient` import also cleaned up.
+- [x] **Claude model version bump** — Updated `claude-sonnet-4-5` → `claude-sonnet-4-6` across all 8 API routes.
+- [x] **Chat sessions org scoping** — Sessions fully org-scoped in both reads and writes.
+- [x] **daily-briefing milestone org scope** — `loan_milestone_events` and `milestone_communications` now filtered via pre-fetched org loan IDs.
+- [x] **Briefing page auto-fetch** — Loads automatically on first visit.
+- [x] **WF2 activity_log org + est_closing_date** — Fixed and pushed.
+- [x] **activity_log null org rows (Next.js)** — Fixed `updateLastTouch.ts`, `outlook-sync`, removed unscoped insert in `generate-narrative`. Migration 046 backfilled.
 
 ## ✅ Completed (session 13 — 2026-03-21 multi-tenancy audit)
 

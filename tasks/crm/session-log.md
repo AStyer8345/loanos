@@ -60,9 +60,15 @@ Research: 5 | Strategy: 5 | Execution: N/A | Review: N/A | QA: N/A
 **SOFT BLOCKER:** Sample run cannot execute until Adam confirms location of Salesforce CSV export (`report1773019847271.xls` or fresh export). Adam must also confirm full "Type" column value list from Salesforce for contact_type mapping.
 
 ### Next Session Instructions
-Priority 1: Adam confirms Salesforce CSV location → Builder executes "Closed Borrowers" UI fix + writes `scripts/crm/migrate-contacts.js` → runs dry-run on 100 records
-Priority 2: Adam reviews dry-run output → approves sample insert → Builder runs sample + validates
-Priority 3: If sample passes, update domain-queue.md to advance Week 2 → Week 3 (Full Migration)
+Priority 1: Run decommission audit — list all Salesforce/Jungo automations still active; confirm n8n equivalent exists for each
+Priority 2: Fix UI gaps blocking daily LoanOS use: pagination cap (500-record hard limit), "Closed Borrowers" smart list bug
+Priority 3: Adam walks through LoanOS for one week noting anything missing → final sign-off checklist
+
+### Context Update (2026-03-25, post-session conversation)
+Adam confirmed: contacts + loans already in LoanOS. n8n automations mostly built. Data migration phases are complete.
+CSV migration script spec (tasks/crm/specs/2026-03-25-contact-dedup-spec.md) is no longer needed — do not execute.
+Goal revised: decommission audit → cancel Salesforce. Salesforce contract runs through Oct 2026 regardless.
+domain-queue.md updated to reflect this.
 
 ### Data Integrity Status
 - Phone: 718 contacts (30%) have no phone at all — normal for legacy mortgage CRM data; not a migration blocker

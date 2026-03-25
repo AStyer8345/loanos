@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
-import { normalizeStage } from '@/lib/stageNormalization'
+import { getStageLabel } from '@/lib/constants/loan-stages'
 import type { Database } from '@/lib/database.types'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ function mapRow(raw: RawRow, userId: string, organizationId: string): Record<str
     phone:                  g('Phone')       ?? g('phone'),
     mobile_phone:           g('Mobile')      ?? g('mobile_phone'),
     contact_type:           g('contact_type') ?? 'borrower',
-    stage:                  normalizeStage(g('Stage') ?? g('stage')),
+    stage:                  getStageLabel(g('Stage') ?? g('stage')),
     lead_source:            g('Lead Source')  ?? g('lead_source'),
     referred_by:            g('Referred By')  ?? g('referred_by'),
     company_name:           g('Company Name') ?? g('company_name'),

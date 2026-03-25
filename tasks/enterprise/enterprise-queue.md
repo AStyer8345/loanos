@@ -20,9 +20,9 @@ PHASE 2 — MULTI-TENANCY: ~95% COMPLETE ✅
   OUTSTANDING (finish before Phase 3 launch):
   - [ ] Adam must push WF1 (1tagvoU0UXtdDiMY) to n8n cloud — still running old version
   - [ ] Adam must push WF2 (9JyzzwKac8v3uQ7d) to n8n cloud — same
-  - [ ] activity_log.organization_id NOT NULL — safe once WF1/WF2 confirmed pushed
-  - [ ] Performance page: localStorage seed data still shows real borrower names — fix or remove
-  - [ ] Plan selection UI in onboarding — currently defaults to 'starter', no user choice
+  - [ ] activity_log.organization_id NOT NULL — safe once WF1/WF2 confirmed pushed (migration 056 ready)
+  - [x] Performance page: localStorage seed data still shows real borrower names — FIXED 2026-03-25 PM
+  - [ ] Plan selection UI in onboarding — selectedPlan storage verification deferred to Week 2
   - [ ] Outlook Email Sync (JMmstRl2C5ylmuIY) blocked on Azure App Registration
 
 ---

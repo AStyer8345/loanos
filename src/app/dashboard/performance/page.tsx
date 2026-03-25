@@ -19,18 +19,19 @@ const TRUST_START = 1611
 // localStorage key kept for one-time migration of existing data
 const STORAGE_KEY = 'loanDashboard2026'
 
+// Seed data — shown only when no Supabase data exists (new user first login)
 const SEED_LOANS: Loan[] = [
-  {id:1,month:'January',name:'Voelkel',amount:313000,gross:3000,compRate:1.2,date:'2026-01-13'},
-  {id:2,month:'January',name:'Aguilar',amount:320000,gross:6080,compRate:1,date:'2026-01-16'},
-  {id:3,month:'January',name:'Stackhouse',amount:501500,gross:10000,compRate:1,date:''},
-  {id:4,month:'January',name:'Stevenson',amount:396000,gross:9900,compRate:1,date:''},
-  {id:5,month:'January',name:'Patel',amount:832750,gross:8992,compRate:1,date:'2026-01-01'},
-  {id:6,month:'February',name:'Garcia',amount:150000,gross:3500,compRate:1,date:''},
-  {id:7,month:'February',name:'Preble',amount:400610,gross:4400,compRate:1,date:''},
-  {id:8,month:'February',name:'Humphrey',amount:451000,gross:4383,compRate:1,date:''},
-  {id:9,month:'February',name:'Rademacher',amount:189000,gross:4300,compRate:1,date:''},
-  {id:10,month:'February',name:'Cunningham',amount:380000,gross:4297,compRate:1,date:''},
-  {id:11,month:'February',name:'Cunningham',amount:318750,gross:5976,compRate:1,date:''},
+  {id:1,month:'January',name:'Anderson',amount:313000,gross:3000,compRate:1.2,date:'2026-01-13'},
+  {id:2,month:'January',name:'Martinez',amount:320000,gross:6080,compRate:1,date:'2026-01-16'},
+  {id:3,month:'January',name:'Thompson',amount:501500,gross:10000,compRate:1,date:''},
+  {id:4,month:'January',name:'Jackson',amount:396000,gross:9900,compRate:1,date:''},
+  {id:5,month:'January',name:'Williams',amount:832750,gross:8992,compRate:1,date:'2026-01-01'},
+  {id:6,month:'February',name:'Davis',amount:150000,gross:3500,compRate:1,date:''},
+  {id:7,month:'February',name:'Miller',amount:400610,gross:4400,compRate:1,date:''},
+  {id:8,month:'February',name:'Wilson',amount:451000,gross:4383,compRate:1,date:''},
+  {id:9,month:'February',name:'Moore',amount:189000,gross:4300,compRate:1,date:''},
+  {id:10,month:'February',name:'Taylor',amount:380000,gross:4297,compRate:1,date:''},
+  {id:11,month:'February',name:'Brown',amount:318750,gross:5976,compRate:1,date:''},
 ]
 
 function seedOIE(): OIE {

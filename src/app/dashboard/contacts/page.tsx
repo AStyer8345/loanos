@@ -7,7 +7,7 @@ import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 import Papa from 'papaparse'
-import { normalizeStage } from '@/lib/stageNormalization'
+import { getStageLabel } from '@/lib/constants/loan-stages'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import { fmtCurrency, fmtDate, fmtDateOnly } from '@/lib/formatters'
 import { Trash2, Pencil, GripVertical } from 'lucide-react'
@@ -769,7 +769,7 @@ export default function ContactsPage() {
     // Persist to Supabase
     const { error } = await supabase
       .from('contacts')
-      .update({ stage: normalizeStage(toStage), updated_at: new Date().toISOString() })
+      .update({ stage: getStageLabel(toStage), updated_at: new Date().toISOString() })
       .eq('id', contactId)
     if (error) {
       console.error('Stage update failed:', error)
@@ -804,7 +804,7 @@ export default function ContactsPage() {
       if (selectedContact?.id === contactId)
         setSelectedContact(prev => prev ? { ...prev, stage: stageValue } : null)
     }
-    await supabase.from('contacts').update({ stage: normalizeStage(stageValue) }).eq('id', contactId)
+    await supabase.from('contacts').update({ stage: getStageLabel(stageValue) }).eq('id', contactId)
     updateLastTouch(supabase, contactId, 'stage_changed', `Stage changed to ${stageValue ?? '(none)'}`)
     fetchCounts()
   }
@@ -833,7 +833,7 @@ export default function ContactsPage() {
     setBulkProcessing(true)
     const ids = Array.from(selectedIds)
     const field = bulkAction === 'stage' ? 'stage' : bulkAction === 'type' ? 'contact_type' : 'referred_by'
-    const writeValue = field === 'stage' ? normalizeStage(bulkValue) : bulkValue
+    const writeValue = field === 'stage' ? getStageLabel(bulkValue) : bulkValue
     await supabase.from('contacts').update({ [field]: writeValue }).in('id', ids)
     setBulkAction(null)
     setBulkValue('')
@@ -885,7 +885,7 @@ export default function ContactsPage() {
       first_name: first,
       last_name: last,
       contact_type: newContact.contact_type || 'other',
-      stage: normalizeStage(newContact.stage),
+      stage: getStageLabel(newContact.stage),
       user_id: userId,
       organization_id: organizationId,
     }

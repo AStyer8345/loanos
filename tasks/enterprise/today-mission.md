@@ -1,3 +1,38 @@
+## Mission Brief — 2026-03-25 PM
+
+### Focus Area
+Phase 2 Closeout — Multi-Tenant RLS Security Fix + PII Anonymization + Code Consolidation
+
+### Session Type
+[x] Build
+[x] Review + QA (inline)
+
+### Objectives
+1. Apply migration 055 — fix performance_data INSERT RLS missing WITH CHECK (security gap)
+2. Anonymize SEED_LOANS — replace 11 real borrower last names with fictional names (PII fix)
+3. Consolidate stageNormalization.ts — update 4 files to use loan-stages.ts, delete old file
+
+### Files in Scope
+- supabase/migrations/055_fix_performance_data_rls.sql — CREATE
+- src/app/dashboard/performance/page.tsx — MODIFY (SEED_LOANS names only)
+- src/app/dashboard/contacts/page.tsx — MODIFY (import + call sites)
+- src/app/api/import/contacts/route.ts — MODIFY (import + call sites)
+- src/app/api/contacts/quick-add/route.ts — MODIFY (import + call sites)
+- src/app/api/contacts/bulk-action/route.ts — MODIFY (import + call sites)
+- src/lib/stageNormalization.ts — DELETE
+
+### Definition of Done
+- Migration 055 applied in Supabase, pg_policies query confirms WITH CHECK
+- SEED_LOANS has 0 real borrower names
+- git grep stageNormalization returns zero results
+- npm run build passes with zero TypeScript errors
+- Changes committed and pushed to main, Vercel deployment READY
+
+### HIGH RISK Items
+- NONE — all 3 changes are low/no risk per spec risk register
+
+---
+
 ## Mission Brief — 2026-03-25 AM
 
 ### Focus Area

@@ -47,29 +47,50 @@ function fmtDate(s: string | null) {
 }
 
 // Loan-related keywords that indicate this email is about a specific file
-const LOAN_KEYWORDS = /loan|disclosure|document|appraisal|title|closing|close|funding|escrow|deed|application|underwriting|approval|commit/i
+const LOAN_KEYWORDS = /loan|disclosure|document|appraisal|title|closing|close|funding|escrow|deed|application|underwriting|approval|commit|signing|refi|prelim|compliance|cd\b/i
+
+// Words to strip before looking for names — mortgage/email vocabulary
+const SKIP_WORDS = new Set([
+  're', 'fw', 'fwd', 'external',
+  'email', 'message', 'notification', 'reminder', 'alert', 'confirmation',
+  'verification', 'request', 'response', 'reply', 'sent', 'received',
+  'updated', 'assigned', 'ready', 'pick', 'new', 'your', 'the', 'for',
+  'and', 'from', 'with', 'are', 'has', 'was', 'been', 'will', 'can',
+  'loan', 'disclosure', 'document', 'documents', 'appraisal', 'title',
+  'closing', 'close', 'funding', 'funded', 'escrow', 'underwriting',
+  'approval', 'approved', 'application', 'update', 'status', 'review',
+  'signing', 'appointment', 'refi', 'refinance', 'refinancing',
+  'preliminary', 'prelim', 'compliance', 'hold', 'final', 'clear',
+  'conditions', 'condition', 'submit', 'submission', 'submitted',
+  'mortgage', 'rate', 'lock', 'locked', 'tasks', 'task', 'need',
+  'attention', 'steps', 'next', 'analysis', 'call', 'summary',
+  'touchbase', 'officer', 'assistant', 'introduction', 'intro',
+])
 
 // Extract a street address from a subject line.
-// Handles: "2621 Greatwood Trail", "2621 Greatwood Trail, Leander TX", "Couch | 2621 Greatwood Trail"
 function extractAddressFromSubject(subject: string | null): string {
   if (!subject) return ''
   const match = subject.match(/\b(\d{3,5}\s+[A-Za-z][A-Za-z\s]{2,30}(?:Trail|Dr|Drive|St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Way|Ct|Court|Ln|Lane|Circle|Cir|Place|Pl|Loop|Pkwy|Parkway))\b/i)
   return match ? match[1].trim() : ''
 }
 
-// Extract a plausible borrower name from subject.
-// e.g. "Loan Disclosures| Couch | 2621..." → "Couch"
-// e.g. "Re: Kyle Burton Introduction" → "Kyle Burton"
-function extractNameFromSubject(subject: string | null): string {
-  if (!subject) return ''
+// Extract candidate name words from a subject — strips mortgage vocabulary first.
+// Returns individual words that could be surnames/names, in order of appearance.
+function extractCandidateNames(subject: string | null): string[] {
+  if (!subject) return []
   const clean = subject.replace(/^(re:|fwd:|fw:)\s*/gi, '').trim()
-  // Two-word capitalized name
-  const twoWord = clean.match(/\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,20})\b/)
-  if (twoWord) return `${twoWord[1]} ${twoWord[2]}`
-  // Single capitalized word between pipes or after common keywords (surname only)
-  const singleAfterPipe = clean.match(/\|\s*([A-Z][a-z]{2,20})\s*\|/)
-  if (singleAfterPipe) return singleAfterPipe[1]
-  return ''
+  // Remove non-alpha except spaces, split, filter
+  const words = clean.replace(/[^a-zA-Z\s]/g, '').split(/\s+/)
+    .filter(w => w.length > 2 && !SKIP_WORDS.has(w.toLowerCase()))
+  // Keep words that start with an uppercase letter (handles both "McNeese" and "JENNINGS")
+  return words.filter(w => w[0] === w[0].toUpperCase())
+}
+
+// Extract loan number from subject (7+ digit sequences)
+function extractLoanNumber(subject: string | null): string | null {
+  if (!subject) return null
+  const match = subject.match(/\b(\d{7,})\b/)
+  return match ? match[1] : null
 }
 
 // Determine if this email is loan-related (subject has address or loan keywords)
@@ -110,13 +131,17 @@ export default function UnmatchedEmailsPage() {
     runAutoMatch(rows)
   }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Terminal loan statuses — exclude from auto-match suggestions
+  const TERMINAL = '("Closed","Cancelled","Denied","Withdrawn","Funded","LOAN_FUNDED")'
+
   // Auto-match every email against loans + contacts using subject line analysis
   const runAutoMatch = useCallback(async (rows: UnmatchedEmail[]) => {
     const newSuggestions = new Map<string, AutoSuggestion>()
 
     for (const email of rows) {
       const address = extractAddressFromSubject(email.subject)
-      const name = extractNameFromSubject(email.subject)
+      const candidateNames = extractCandidateNames(email.subject)
+      const loanNumber = extractLoanNumber(email.subject)
       let suggestedLoan: LoanResult | null = null
       let suggestedContact: ContactResult | null = null
 
@@ -132,23 +157,49 @@ export default function UnmatchedEmailsPage() {
         }
       }
 
-      // 2. Try loan match by borrower name (if no address match)
-      if (!suggestedLoan && name) {
-        const parts = name.split(' ')
-        const lastName = parts[parts.length - 1]
-        const { data: byBorrower } = await supabase
+      // 2. Try loan match by loan number (e.g. "4256208411" in subject)
+      if (!suggestedLoan && loanNumber) {
+        const { data: byNum } = await supabase
           .from('loans')
           .select('id, loan_name, borrower_name, property_address, status')
-          .ilike('borrower_name', `%${lastName}%`)
-          .not('status', 'in', '("Closed","Cancelled","Denied","Withdrawn","Funded")')
-          .order('created_at', { ascending: false })
+          .ilike('loan_name', `%${loanNumber}%`)
           .limit(1)
-        if (byBorrower && byBorrower.length > 0) {
-          suggestedLoan = { ...(byBorrower[0] as LoanResult), _suggested: true }
+        if (byNum && byNum.length > 0) {
+          suggestedLoan = { ...(byNum[0] as LoanResult), _suggested: true }
         }
       }
 
-      // 3. Try contact match by sender email
+      // 3. Try loan match by each candidate name word against borrower_last_name
+      if (!suggestedLoan) {
+        for (const word of candidateNames) {
+          // Try borrower_last_name first (exact-ish match, most reliable)
+          const { data: byLast } = await supabase
+            .from('loans')
+            .select('id, loan_name, borrower_name, property_address, status')
+            .ilike('borrower_last_name', word)
+            .not('status', 'in', TERMINAL)
+            .order('created_at', { ascending: false })
+            .limit(1)
+          if (byLast && byLast.length > 0) {
+            suggestedLoan = { ...(byLast[0] as LoanResult), _suggested: true }
+            break
+          }
+          // Fallback: broader search across borrower_name and loan_name
+          const { data: byBorrower } = await supabase
+            .from('loans')
+            .select('id, loan_name, borrower_name, property_address, status')
+            .or(`borrower_name.ilike.%${word}%,loan_name.ilike.%${word}%`)
+            .not('status', 'in', TERMINAL)
+            .order('created_at', { ascending: false })
+            .limit(1)
+          if (byBorrower && byBorrower.length > 0) {
+            suggestedLoan = { ...(byBorrower[0] as LoanResult), _suggested: true }
+            break
+          }
+        }
+      }
+
+      // 4. Try contact match by sender email
       if (email.from_address) {
         const { data: byEmail } = await supabase
           .from('contacts')
@@ -160,16 +211,31 @@ export default function UnmatchedEmailsPage() {
         }
       }
 
-      // 4. Try contact match by name from subject (if no email match)
-      if (!suggestedContact && name) {
-        const parts = name.split(' ')
+      // 5. Try contact match by name from subject (if no email match)
+      if (!suggestedContact && candidateNames.length > 0) {
+        const last = candidateNames[candidateNames.length - 1]
+        const first = candidateNames[0]
         const { data: byName } = await supabase
           .from('contacts')
           .select('id, first_name, last_name, email, contact_type')
-          .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
+          .or(`last_name.ilike.%${last}%${first !== last ? `,first_name.ilike.%${first}%` : ''}`)
           .limit(1)
         if (byName && byName.length > 0) {
           suggestedContact = { ...(byName[0] as ContactResult), _suggested: true }
+        }
+      }
+
+      // 6. If we found a contact but no loan, look up the contact's active loans
+      if (suggestedContact && !suggestedLoan) {
+        const { data: contactLoans } = await supabase
+          .from('loans')
+          .select('id, loan_name, borrower_name, property_address, status')
+          .eq('contact_id', suggestedContact.id)
+          .not('status', 'in', TERMINAL)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+        if (contactLoans && contactLoans.length > 0) {
+          suggestedLoan = { ...(contactLoans[0] as LoanResult), _suggested: true }
         }
       }
 
@@ -222,24 +288,24 @@ export default function UnmatchedEmailsPage() {
       setSearching(false)
     }
 
-    // Fallback: name-based search
-    const name = extractNameFromSubject(email.subject)
+    // Fallback: name-based search using improved extraction
+    const candidates = extractCandidateNames(email.subject)
+    const name = candidates.length > 0 ? candidates[0] : ''
     if (name) {
       setSearchQuery(name)
       setSearching(true)
-      const parts = name.split(' ')
       if (defaultMode === 'loan') {
         const { data: byBorrower } = await supabase
           .from('loans')
           .select('id, loan_name, borrower_name, property_address, status')
-          .ilike('borrower_name', `%${parts[parts.length - 1]}%`)
+          .or(`borrower_last_name.ilike.%${name}%,borrower_name.ilike.%${name}%,loan_name.ilike.%${name}%`)
           .limit(8)
         setLoanResults((byBorrower ?? []) as LoanResult[])
       } else {
         const { data: byName } = await supabase
           .from('contacts')
           .select('id, first_name, last_name, email, contact_type')
-          .or(`first_name.ilike.%${parts[0]}%,last_name.ilike.%${parts[parts.length - 1]}%`)
+          .or(`first_name.ilike.%${name}%,last_name.ilike.%${name}%`)
           .limit(8)
         setSearchResults((byName ?? []) as ContactResult[])
       }

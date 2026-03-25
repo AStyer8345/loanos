@@ -10,13 +10,28 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const LOANOS_SYSTEM_USER_ID = process.env.LOANOS_SYSTEM_USER_ID!;
 const SYNC_WINDOW_MINUTES = parseInt(process.env.OUTLOOK_SYNC_WINDOW_MINUTES || '20', 10);
 
-// Domains whose emails should be silently dropped — never logged, never shown in inbox review
-const BLOCKED_SENDER_DOMAINS = new Set([
+// Domains whose emails should be silently dropped — never logged, never shown in inbox review.
+// Uses suffix matching so subdomains like mail.zillow.com are also caught.
+const BLOCKED_SENDER_DOMAINS = [
   'zillow.com',
   'zillowgroup.com',
   'realtor.com',
   'marketinganimals.com',
-]);
+  'themarketinganimals.com',
+];
+
+// Prefix patterns to block (noreply, automated mailers, etc.)
+const BLOCKED_SENDER_PREFIXES = [
+  'noreply@', 'no-reply@', 'donotreply@', 'do-not-reply@',
+  'mailer-daemon@', 'instant-updates@',
+];
+
+function isSenderBlocked(email: string): boolean {
+  const lower = email.toLowerCase();
+  if (BLOCKED_SENDER_PREFIXES.some(p => lower.startsWith(p))) return true;
+  const domain = lower.split('@')[1] ?? '';
+  return BLOCKED_SENDER_DOMAINS.some(d => domain === d || domain.endsWith('.' + d));
+}
 
 function sbHeaders() {
   return {
@@ -113,9 +128,26 @@ async function findLoanForContact(contactId: string | null, subject: string | nu
       }
     }
 
-    // Try borrower name matching — look for "LastName" or "First Last" patterns in subject
-    // Extract potential names (capitalized words that aren't common email words)
-    const skipWords = new Set(['re', 'fw', 'fwd', 'email', 'loan', 'disclosure', 'document', 'appraisal', 'title', 'closing', 'funding', 'escrow', 'underwriting', 'approval', 'application', 'update', 'status', 'new', 'the', 'for', 'and', 'from']);
+    // Try borrower name matching — extract potential names (filter out mortgage/email vocabulary)
+    const skipWords = new Set([
+      // Email prefixes
+      're', 'fw', 'fwd', 'external',
+      // Common email/subject words
+      'email', 'message', 'notification', 'reminder', 'alert', 'confirmation',
+      'verification', 'request', 'response', 'reply', 'sent', 'received',
+      'updated', 'assigned', 'ready', 'pick', 'new', 'your', 'the', 'for',
+      'and', 'from', 'with', 'are', 'has', 'was', 'been', 'will', 'can',
+      // Mortgage/loan vocabulary
+      'loan', 'disclosure', 'document', 'documents', 'appraisal', 'title',
+      'closing', 'close', 'funding', 'funded', 'escrow', 'underwriting',
+      'approval', 'approved', 'application', 'update', 'status', 'review',
+      'signing', 'appointment', 'refi', 'refinance', 'refinancing',
+      'preliminary', 'prelim', 'compliance', 'hold', 'final', 'clear',
+      'conditions', 'condition', 'submit', 'submission', 'submitted',
+      'mortgage', 'rate', 'lock', 'locked', 'tasks', 'task', 'need',
+      'attention', 'steps', 'next', 'analysis', 'call', 'summary',
+      'touchbase', 'officer', 'assistant',
+    ]);
     const words = subj.replace(/[^a-zA-Z\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !skipWords.has(w.toLowerCase()));
     for (const word of words) {
       if (word[0] === word[0].toUpperCase()) {
@@ -127,6 +159,19 @@ async function findLoanForContact(contactId: string | null, subject: string | nu
           const rows = await res.json();
           if (rows.length > 0) return rows[0].id as string;
         }
+      }
+    }
+
+    // Try matching by loan number (7+ digit sequences in subject)
+    const loanNumMatch = subj.match(/\b(\d{7,})\b/);
+    if (loanNumMatch) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/loans?loan_name=ilike.*${encodeURIComponent(loanNumMatch[1])}*&order=updated_at.desc&limit=1`,
+        { headers: sbHeaders() }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows.length > 0) return rows[0].id as string;
       }
     }
   }
@@ -272,9 +317,8 @@ async function runSync() {
     const senderEmail = (msg.from as Record<string, Record<string, string>>)?.emailAddress?.address;
     if (!senderEmail) { stats.skipped++; continue; }
 
-    // Drop emails from blocked domains (Zillow, realtor.com, marketing lists, etc.)
-    const senderDomain = senderEmail.split('@')[1]?.toLowerCase() ?? '';
-    if (BLOCKED_SENDER_DOMAINS.has(senderDomain)) { stats.skipped++; continue; }
+    // Drop emails from blocked domains/prefixes (Zillow, realtor.com, marketing lists, etc.)
+    if (isSenderBlocked(senderEmail)) { stats.skipped++; continue; }
 
     const contact = await findContactByEmail(senderEmail);
     if (!contact) {

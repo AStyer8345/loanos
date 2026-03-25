@@ -47,11 +47,14 @@ Trigger `trg_activity_log_stamp_org` (migration 050) continues to prevent new nu
 | console.log statements | **2** | 2 (5 pre-fix) | **-3 fixed** |
 | Files with bg-white | **0** | 6 | **-6 resolved** |
 | Files with bg-slate/bg-gray (violations) | **0** | 2 | **-2 resolved** |
-| Orphaned components | **0** | 0 | — |
-| Unscoped Supabase queries | **1** (share endpoint — by design) | 1 | — |
+| Orphaned components | **1** | 0 | **+1 new** |
+| Unscoped Supabase queries | **2** (GlobalSearch + ActivityFeed — RLS-protected) | 1 | +1 (safe by design) |
 
 **console.log remaining (2):**
 - `src/lib/outlook/refresh.ts:106,118` — Outlook token refresh debug logging (Outlook Sync is decommissioned; low priority)
+
+**Orphaned component:**
+- `src/app/dashboard/contacts/ImportModal.tsx` — exported but never imported anywhere. Candidate for cleanup.
 
 **Dark theme violations:** All 6 previously reported files (`TopNav.tsx`, `NavDropdown.tsx`, `NavItem.tsx`, `ScenarioCard.tsx`, `StatementUpload.tsx`, `ScenarioList.tsx`) are already using dark CSS variables or zinc-based Tailwind classes. Yesterday's report was inaccurate — these files were already dark-themed. **Marking nav + scenario dark theme todo items as resolved.**
 

@@ -76,3 +76,53 @@ domain-queue.md updated to reflect this.
 - salesforce_id: 2,333 contacts (98%) missing — must be backfilled during migration via upsert; critical for dedup tracking in Week 3 full run
 - stage: 13 contacts with null stage — will default to 'Lead' on next upsert pass
 ---
+
+---
+## Session: 2026-03-25 PM — CRM Migration
+Focus: Decommission Audit — Confirm LoanOS Covers Everything, Cancel Salesforce
+Type: Research (Sequence A)
+
+### Completed
+- **Decommission audit research written** — `tasks/crm/research/2026-03-25-decommission-audit-research.md` — all 7 checklist items covered
+- **Automation gap analysis** — Full inventory: 5 live, 7 need action, 6 not yet built, 1 blocked (Azure)
+- **UI gaps documented** — Pagination cap (1,877 contacts unreachable), "Closed Borrowers" smart list bug (0 results), ZAPIER_DISPATCH_WEBHOOK_URL missing (milestone emails silent)
+- **Contacts completeness gap** — LoanOS has 2,377; referenced import count was 2,441 → 64-contact delta needs fresh SF export to verify
+- **NotebookLM PUSH+CURATE complete** — 2 error-status SQL sources removed, decommission audit research added, session note created
+- **Daily digest SENT** — Zapier webhook success (`019d26da-43e5-47e0-f387-7934ade5d516`) to adam@thestyerteam.com
+
+### Deferred
+- Execution work (UI fixes, automation testing) — deferred to next session (Builder sequence)
+- Birthday/anniversary automation build — deferred; not a blocker for decommissioning
+- Realtor ranking dashboard — deferred post-decommission
+
+### Migration Progress
+| Asset | Count |
+|-------|-------|
+| Contacts in LoanOS | 2,377 |
+| Loans in LoanOS | 817+ |
+| n8n workflows live | 5 |
+| n8n workflows needing action | 7 |
+| n8n workflows not built | 6 |
+| UI gaps blocking daily use | 3 (HIGH severity) |
+
+### Queue Position
+Current: Decommission Audit
+Advance to next topic: NO — audit complete but execution items remain
+
+### Quality Ratings (1-5)
+Research: 5 | Strategy: N/A | Execution: N/A | Review: N/A | QA: N/A
+
+### BLOCKERS
+**ADAM ACTION REQUIRED:**
+1. Push WF1 to n8n cloud (workflow `1tagvoU0UXtdDiMY`) — null org_id rows accumulate until pushed
+2. Push WF2 to n8n cloud (workflow `9JyzzwKac8v3uQ7d`) — same
+3. Set `ZAPIER_DISPATCH_WEBHOOK_URL` in Vercel env vars — milestone emails go silent without this
+4. Provide SMTP review page URL for Review Request Email workflow
+5. Run fresh Salesforce contact export to verify 64-contact gap
+
+### Next Session Instructions
+Priority 1 (Builder): Fix "Closed Borrowers" smart list — 1-line code change in contacts query
+Priority 2 (Builder): Fix contacts pagination cap — remove 500-record hard limit in contacts API + UI
+Priority 3 (Builder + Adam): Test CD email, New App email, Refi Intake email end-to-end
+Priority 4 (Research): Run Salesforce export diff — quantify 64-contact gap before decommission
+---

@@ -79,6 +79,25 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const withOrg = (query: any) => query.eq('organization_id', organizationId)
 
+    // Pre-fetch org's arive_loan_ids — used to scope milestone queries that have no
+    // organization_id column and must join through loans.organization_id instead.
+    const { data: orgLoansData } = await supabase
+      .from('loans')
+      .select('arive_loan_id')
+      .eq('organization_id', organizationId)
+      .not('arive_loan_id', 'is', null)
+    const ariveLoanIds = (orgLoansData ?? []).map(l => l.arive_loan_id as string).filter(Boolean)
+
+    // Pre-fetch milestone event IDs for this org's loans (needed to scope milestone_communications)
+    let milestoneEventIds: string[] = []
+    if (ariveLoanIds.length > 0) {
+      const { data: eventsData } = await supabase
+        .from('loan_milestone_events')
+        .select('id')
+        .in('loan_id', ariveLoanIds)
+      milestoneEventIds = (eventsData ?? []).map(e => e.id)
+    }
+
     // ── Parallel data fetch ──────────────────────────────────────────────────
     const [
       staleLeadsResult,
@@ -106,13 +125,16 @@ export async function GET(request: NextRequest) {
         .order('estimated_closing_date', { ascending: true })
         .limit(20)),
 
-      // Milestone events from last 24 hours
-      supabase
-        .from('loan_milestone_events')
-        .select('id, loan_id, milestone, borrower_name, realtor_name, created_at')
-        .gte('created_at', twentyFourHrsAgo)
-        .order('created_at', { ascending: false })
-        .limit(20),
+      // Milestone events from last 24 hours — scoped via loans.organization_id
+      ariveLoanIds.length > 0
+        ? supabase
+            .from('loan_milestone_events')
+            .select('id, loan_id, milestone, borrower_name, realtor_name, created_at')
+            .in('loan_id', ariveLoanIds)
+            .gte('created_at', twentyFourHrsAgo)
+            .order('created_at', { ascending: false })
+            .limit(20)
+        : Promise.resolve({ data: [] as Record<string, unknown>[], error: null }),
 
       // Realtors not touched in 7+ days
       withOrg(supabase
@@ -123,13 +145,16 @@ export async function GET(request: NextRequest) {
         .order('last_touch', { ascending: true, nullsFirst: true })
         .limit(20)),
 
-      // Unsent milestone communication drafts
-      supabase
-        .from('milestone_communications')
-        .select('id, recipient_type, recipient_email, subject, created_at, milestone_event_id')
-        .eq('draft_pushed', false)
-        .order('created_at', { ascending: false })
-        .limit(20),
+      // Unsent milestone communication drafts — scoped via milestone_event_id → loans.organization_id
+      milestoneEventIds.length > 0
+        ? supabase
+            .from('milestone_communications')
+            .select('id, recipient_type, recipient_email, subject, created_at, milestone_event_id')
+            .eq('draft_pushed', false)
+            .in('milestone_event_id', milestoneEventIds)
+            .order('created_at', { ascending: false })
+            .limit(20)
+        : Promise.resolve({ data: [] as Record<string, unknown>[], error: null }),
     ])
 
     // ── Unwrap results ───────────────────────────────────────────────────────

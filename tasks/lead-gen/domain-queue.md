@@ -1,40 +1,65 @@
 DOMAIN: Lead Generation
 NOTEBOOK: LoanOS Lead Gen Intelligence
 FUNNELS: Pre-approval funnel, Rate alert funnel, First-time buyer funnel, Refi watch funnel
-GOAL: 20 qualified leads/month from owned channels (not paid referrals) by Week 8
+GOAL: 20 qualified leads/month from owned channels (not paid referrals)
 
-ACTIVE: Week 1 — Current State Audit
-  Map all existing lead sources: website forms, Zillow, referrals, social, paid.
-  Calculate cost per lead and close rate per source. Identify highest ROI source.
-  Identify the biggest gap in the funnel (traffic? conversion? follow-up speed?).
-  Document what funnels exist today vs. what is planned. What n8n automations are
-  already live and touching leads? What Mailchimp sequences exist and what are their
-  open/click rates? DO NOT build anything until this audit is complete.
+---
 
-QUEUE:
-- Week 2: Pre-Approval Funnel
-    Landing page copy + design. Form fields (name, email, phone, purchase price,
-    timeline). Thank you page. Immediate email + SMS follow-up sequence.
-    n8n → LoanOS contact creation (Supabase). Lead Source tag: Web Lead.
-- Week 3: Rate Alert Funnel
-    Rate alert signup page. Weekly automated rate email via Mailchimp.
+CURRENT STATE (as of 2026-03-25):
+
+n8n AUTOMATIONS ALREADY BUILT (check CLAUDE.md for full list + IDs):
+  ✅ Pre-Approval Email (utMvZpkdRwIRZ51u) — tested
+  ✅ Referral Intro Email (YbgDnTpPdefcazKy) — tested
+  ⚡ Website Lead Follow-up (AK1fBcaX1cPcdlGx) — fixed, needs activation
+  ⚡ New Application Received (cWESnXXy9UOLB13q) — built, untested
+  ⚡ Refi Intake Email (yCTydQ7RfZK4DyUg) — built, untested
+  ⚡ Final CD Email (SkzrWeR0bHZs8kWX) — built, untested
+  ✅ Arive → LoanOS webhook (WF1, WF2) — live (need cloud push from Adam)
+
+WEBSITE: styermortgage.com — existing forms and landing pages need audit
+CRM: LoanOS (Supabase) — contacts + loans already populated. All new leads → LoanOS via n8n.
+
+---
+
+ACTIVE: Lead Flow Audit + Activation
+  The infrastructure exists. The question is: are the flows connected end-to-end?
+  1. [ ] Test website form submission → confirm n8n fires → confirm LoanOS contact created
+  2. [ ] Activate Website Lead Follow-up workflow (AK1fBcaX1cPcdlGx) — fixed but inactive
+  3. [ ] Test New Application Received (cWESnXXy9UOLB13q) end-to-end with fake data
+  4. [ ] Test Refi Intake Email (yCTydQ7RfZK4DyUg) end-to-end
+  5. [ ] Inventory what Mailchimp sequences exist and their current open/click rates
+  6. [ ] Identify which funnels have landing pages vs. which are missing pages entirely
+
+---
+
+QUEUE (build what doesn't exist yet):
+- Rate Alert Funnel
+    Rate alert signup page on styermortgage.com. Weekly automated rate email via Mailchimp.
     Segmentation: buyer vs. refi. Nurture sequence: 6 emails over 90 days.
-- Week 4: First-Time Buyer Funnel
+    n8n → LoanOS contact creation. Lead Source tag: Rate Alert.
+- First-Time Buyer Funnel
     Resource guide lead magnet (PDF). Opt-in page. Download delivery email.
     Drip sequence: 8 emails over 60 days. Realtor co-marketing version.
-- Week 5: Refi Watch Funnel
+- Refi Watch Funnel
     Past client reactivation sequence. Rate drop trigger automation.
     Home equity milestone alerts. Birthday/anniversary touches.
-- Week 6: Realtor Referral System
+- Realtor Referral System
     Referral tracking in LoanOS. Referral acknowledgment automation.
     Monthly realtor value report. Co-branded marketing materials.
-- Week 7: Paid Lead Sources
-    Zillow Premier Agent ROI analysis. Google Ads lead funnel.
-    Facebook/Instagram lead ad setup. Lead response time automation (<5 min).
-- Week 8: Lead Scoring + Routing
+- Lead Scoring + Routing
     Score leads by: timeline, loan amount, credit range, source.
     Auto-route hot leads to Adam immediately. Warm leads to nurture.
     Cold leads to long-term drip. Dashboard: leads by stage, source, close rate.
+
+---
+
+COMPLETED:
+- Core automation infrastructure (n8n → LoanOS webhook flow)
+- Pre-Approval Email workflow ✅
+- Referral Intro Email workflow ✅
+- LoanOS CRM receiving all new leads via Arive webhook (WF1/WF2)
+
+---
 
 COMPLIANCE:
 - TCPA: SMS opt-in required before texting — opt-in checkbox must be explicit and unchecked by default

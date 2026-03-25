@@ -1,9 +1,9 @@
 # CRM Domain Queue
-# LoanOS CRM Migration Program — Salesforce/Jungo → LoanOS Supabase
+# LoanOS CRM Program
 # Schedule: 6:00 AM daily
 # Notebook: LoanOS CRM Intelligence
 
-DOMAIN: CRM (Salesforce/Jungo → LoanOS Supabase)
+DOMAIN: LoanOS CRM
 NOTEBOOK: LoanOS CRM Intelligence
 CURRENT STACK: LoanOS is primary. Salesforce/Jungo still active (contract through Oct 2026).
 GOAL: Confirm LoanOS fully covers Adam's workflow, then cancel Salesforce/Jungo.

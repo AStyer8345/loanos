@@ -60,7 +60,8 @@ Read in order:
 2. `tasks/lead-gen/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
 3. `tasks/lead-gen/domain-queue.md` — active focus area
 4. `CONTEXT.md` — LoanOS repo current state (n8n workflow status, Supabase schema)
-5. `tasks/lead-gen/BLOCKERS.md` — any active blockers from prior sessions
+5. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: read this for the full n8n workflow table (IDs, statuses), Publer account IDs, Supabase keys, and existing tool inventory. Do NOT assume something hasn't been built — check here first.**
+6. `tasks/lead-gen/BLOCKERS.md` — any active blockers from prior sessions
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 

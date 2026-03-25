@@ -36,6 +36,7 @@ Read these files in order:
 1. `tasks/enterprise/session-log.md` — last session's report
 2. `CONTEXT.md` — current repo state
 3. `tasks/enterprise/enterprise-queue.md` — active focus area
+4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: full n8n workflow table (IDs, statuses), Publer account IDs, Supabase keys, existing tool inventory. Do NOT assume something hasn't been built — check here first.**
 
 If `tasks/enterprise/enterprise-queue.md` does not exist, create it:
 

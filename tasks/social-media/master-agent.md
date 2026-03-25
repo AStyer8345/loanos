@@ -30,7 +30,7 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 
 ## CRITICAL RULES — SOCIAL MEDIA DOMAIN
 
-- NEVER publish a post live. All output goes into scheduling tool (Buffer or Later) as DRAFTS.
+- NEVER publish a post live. All output goes into scheduling tool (Publer) as DRAFTS.
 - NEVER publish rate-related content without NMLS# 513013 present.
 - NEVER post guaranteed approval language — blocked by RESPA/Reg Z.
 - NEVER use "The Styer Team" — always "Adam Styer | Mortgage Solutions LP".
@@ -62,7 +62,8 @@ Read in order:
 1. `tasks/social-media/session-log.md` — last session report
 2. `tasks/social-media/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
 3. `tasks/social-media/domain-queue.md` — active focus area
-4. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
+4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: Publer account IDs (Facebook, Instagram, LinkedIn, GBP), n8n workflow table, existing tool inventory. Do NOT assume something hasn't been set up — check here first.**
+5. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 
@@ -178,7 +179,7 @@ Write BLOCKER to `tasks/social-media/BLOCKERS.md` if:
 - Post goes live before compliance review
 - NMLS# 513013 is missing from any rate-related content
 - Reviewer rejects content AND Builder cannot fix without Adam input
-- Builder cannot access scheduling tool (Buffer/Later) and posts cannot be queued as drafts
+- Builder cannot access scheduling tool (Publer) and posts cannot be queued as drafts
 - A post contains guaranteed approval language, specific rates without APR, or discriminatory targeting
 - QA fails verification and posts cannot be confirmed as drafts
 

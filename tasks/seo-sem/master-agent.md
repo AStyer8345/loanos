@@ -64,7 +64,8 @@ Read in order:
 2. `tasks/seo-sem/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
 3. `tasks/seo-sem/domain-queue.md` — active focus area
 4. `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/styermortgage-context.md` — site structure and current state
-5. `tasks/seo-sem/BLOCKERS.md` — any active blockers from prior sessions
+5. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: n8n workflow table, existing tool inventory, Publer accounts. Do NOT assume something hasn't been set up — check here first.**
+6. `tasks/seo-sem/BLOCKERS.md` — any active blockers from prior sessions
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 

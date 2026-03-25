@@ -11,7 +11,7 @@ Social Media (LinkedIn, Instagram, Facebook)
 
 ## WHAT THIS SUBAGENT EXECUTES
 - Writes post copy for each platform (LinkedIn, Instagram, Facebook)
-- Formats copy for scheduling in Buffer or Later as DRAFTS
+- Formats copy for scheduling in Publer as DRAFTS
 - Generates Canva image prompts for visual posts
 - Flags all rate-related posts with compliance requirements before handoff to Reviewer
 - Does NOT publish anything live — drafts only
@@ -33,7 +33,28 @@ Read:
 - [ ] Platform word limits understood (LinkedIn ≤150 words, Instagram ≤150 words, Facebook ≤120 words)
 - [ ] Compliance flags identified for each post
 - [ ] Definition of done understood
-- [ ] Scheduling tool access confirmed (Buffer or Later)
+- [ ] Publer account IDs loaded from `/Users/adamstyer/Documents/CLAUDE.md` (Facebook, Instagram, LinkedIn, GBP)
+- [ ] Publer API key loaded: `14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2`
+
+### Publer API (Schedule as DRAFT)
+```bash
+# Create a draft post via Publer API
+curl -X POST https://api.publer.io/v1/posts \
+  -H "Authorization: Bearer 14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspaceId": "69b052bf835c8c689fab8fd8",
+    "profiles": ["<ACCOUNT_ID>"],
+    "text": "<POST_COPY>",
+    "scheduledAt": "<ISO_DATETIME>",
+    "isDraft": true
+  }'
+```
+Account IDs (from CLAUDE.md):
+- LinkedIn: `69b0536404b824ffb2c05426`
+- Facebook: `69b05329de86f5e15b7c0722`
+- Instagram: `69b0530110a77a0ed895847d`
+- GBP: `69c3e3f548d8e4e643d45438`
 
 ### Execution Standards
 

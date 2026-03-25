@@ -72,15 +72,24 @@ async function run() {
   // ── 2. Insert one test loan per org ─────────────────────────────────────────
   console.log('\nStep 2: Inserting one loan per org...')
 
+  // Fetch a real user_id — loans/contacts require FK to auth.users
+  const { data: anyUser } = await svc.from('profiles').select('id').limit(1).single()
+  const TEST_USER_ID = anyUser?.id ?? ''
+  if (!TEST_USER_ID) {
+    console.error('FATAL: No users found in database to use as test user_id.')
+    await runCleanup()
+    process.exit(1)
+  }
+
   const { data: loan1, error: le1 } = await svc
     .from('loans')
-    .insert({ organization_id: org1.id, loan_name: '__test_loan_alpha__', status: 'Lead' })
+    .insert({ organization_id: org1.id, user_id: TEST_USER_ID, loan_name: '__test_loan_alpha__', status: 'Lead' })
     .select('id')
     .single()
 
   const { data: loan2, error: le2 } = await svc
     .from('loans')
-    .insert({ organization_id: org2.id, loan_name: '__test_loan_beta__', status: 'Lead' })
+    .insert({ organization_id: org2.id, user_id: TEST_USER_ID, loan_name: '__test_loan_beta__', status: 'Lead' })
     .select('id')
     .single()
 
@@ -100,13 +109,13 @@ async function run() {
 
   const { data: contact1, error: ce1 } = await svc
     .from('contacts')
-    .insert({ organization_id: org1.id, first_name: '__TestAlpha__', last_name: 'Contact', contact_type: 'borrower' })
+    .insert({ organization_id: org1.id, user_id: TEST_USER_ID, first_name: '__TestAlpha__', last_name: 'Contact', contact_type: 'borrower' })
     .select('id')
     .single()
 
   const { data: contact2, error: ce2 } = await svc
     .from('contacts')
-    .insert({ organization_id: org2.id, first_name: '__TestBeta__', last_name: 'Contact', contact_type: 'borrower' })
+    .insert({ organization_id: org2.id, user_id: TEST_USER_ID, first_name: '__TestBeta__', last_name: 'Contact', contact_type: 'borrower' })
     .select('id')
     .single()
 

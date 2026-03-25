@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org trigger, migration 050)_
+_Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, daily-briefing milestone scoping fix)_
 
 ---
 
@@ -20,15 +20,15 @@ _Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org
 - [x] **activity_log SELECT RLS tightened** — Fixed 2026-03-23 (daily prep). Dropped `"Users can read own activity"` policy (had `user_id OR org_id` clause — exposed null-org rows to their author). New policy `"Org members can read activity"` is org-only. Migration 048.
 - [x] **activity_log null org — structural fix** — Fixed 2026-03-24 (daily audit). Migration 050: Postgres `BEFORE INSERT` trigger `trg_activity_log_stamp_org` auto-resolves `organization_id` from `profiles` using `user_id`. Backfilled 11 null rows. This is the permanent fix — no more recurring backfills needed.
 - [x] **contact_activity missing org_id** — Fixed 2026-03-24. Migration 048 applied: added `organization_id` column, backfilled from contacts, upgraded from user_id-scoped to org-scoped RLS (SELECT + INSERT). 15 tables now fully org-scoped.
-- [ ] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — inserts `email.received` rows without `organization_id`. Trigger now auto-fixes these, but the n8n workflow should still be updated when Azure is unblocked.
+- [x] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync is decommissioned. Azure not being used. Delete any email_inbound null-org rows; do not fix the workflow.**
+- [x] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync decommissioned. Azure App Registration not needed.**
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
-- [ ] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — needs Azure env vars. MICROSOFT_CLIENT_ID is still a placeholder in `.env.local`. Azure App Registration not completed. Blocked on Adam.
 
 ---
 
 ## 🟡 Medium Priority
 
-- [ ] **daily-briefing unscoped milestone queries** — `loan_milestone_events` and `milestone_communications` in `/api/agents/daily-briefing` use `createServiceClient()` but are not scoped to `organization_id` (neither table has that column). Low risk single-tenant but should be fixed before multi-tenant launch: join through `loans.organization_id` or add `organization_id` to both tables.
+- [x] **daily-briefing unscoped milestone queries** — Fixed 2026-03-25. Pre-fetches org's `arive_loan_ids` from loans, scopes `loan_milestone_events` via `.in('loan_id')`, pre-fetches `milestoneEventIds`, scopes `milestone_communications` via `.in('milestone_event_id')`. Both queries now return only the authenticated org's data.
 - [ ] **Wire logEmailDraft to refi-intake** — `/api/automations/refi-intake/route.ts` extracts PDF fields but doesn't log email drafts — that happens in the n8n workflow `yCTydQ7RfZK4DyUg`. Wire logEmailDraft there.
 - [ ] **Wire logEmailDraft to final-cd** — same pattern — n8n workflow `SkzrWeR0bHZs8kWX`.
 - [ ] **E2E test WF1 + WF2** — all migrations confirmed applied: trigger test webhook, verify loan row in Supabase, verify loan_status_history row.
@@ -47,6 +47,11 @@ _Last updated: 2026-03-24 (daily audit — structural fix: activity_log auto-org
 - [ ] **n8n MCP configuration** — MCP server returns 0 workflows on all searches. Credential/instance mismatch. Adam should verify.
 
 ---
+
+## ✅ Completed (2026-03-25 daily prep — NOT NULL hardening + daily-briefing scoping)
+
+- [x] **Migration 053 applied (NOT NULL hardening)** — SET NOT NULL on loans, contacts, documents, email_drafts, scenarios, todo_items, contact_activity, chat_sessions. 0 nulls confirmed in all 8 before applying. activity_log left nullable pending WF1/WF2 push confirmation.
+- [x] **daily-briefing milestone scoping fixed** — `loan_milestone_events` and `milestone_communications` queries now scoped via pre-fetched `ariveLoanIds` and `milestoneEventIds`. No longer return cross-tenant data.
 
 ## ✅ Completed (2026-03-24 daily audit — structural fix)
 

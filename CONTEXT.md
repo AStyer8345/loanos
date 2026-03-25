@@ -16,7 +16,34 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep).**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep).**
+
+## Daily Audit 2026-03-25 (scheduled)
+
+**Audited:**
+- Null rows: all 9 tables 0 nulls ✅. email_inbound rows: 0 (fully purged).
+- Schema: 8 `organization_id` columns still nullable. Applied NOT NULL to loans, contacts, documents, email_drafts, scenarios, todo_items, contact_activity, chat_sessions (migration 053). activity_log left nullable — trigger in place but WF1/WF2 cloud push unconfirmed.
+- RLS: all policies confirmed correct. No new gaps.
+- API routes: daily-briefing route had unscoped `loan_milestone_events` and `milestone_communications` queries (service role, no org filter). Fixed.
+
+**Fixed this session:**
+- **Migration 053 applied (via MCP as 051_not_null_organization_id_hardening)**: SET NOT NULL on loans, contacts, documents, email_drafts, scenarios, todo_items, contact_activity, chat_sessions. 0 nulls in all 8 confirmed before applying.
+- **daily-briefing milestone query scoping**: Pre-fetches org's `arive_loan_ids` from loans, then scopes `loan_milestone_events` via `.in('loan_id', ariveLoanIds)`. Pre-fetches `milestoneEventIds` from that result to scope `milestone_communications` via `.in('milestone_event_id', milestoneEventIds)`. Both queries now return only the authenticated org's data.
+
+**Outstanding:**
+- **Adam must push WF1 to n8n cloud** (workflow ID `1tagvoU0UXtdDiMY`) — may still produce null loan_created rows; trigger catches it but NOT NULL constraint on activity_log still pending push confirmation
+- **Adam must push WF2 to n8n cloud** (workflow ID `9JyzzwKac8v3uQ7d`) — same
+- `activity_log.organization_id` NOT NULL — safe to add after WF1/WF2 confirmed pushed
+- Performance page still uses localStorage with real borrower names
+- Plan selection UI in onboarding deferred (defaults to 'starter')
+
+## Multi-Tenancy Status (2026-03-25 — daily prep)
+
+**NOT NULL hardened (8 tables):** loans ✅ NOT NULL, contacts ✅ NOT NULL, documents ✅ NOT NULL, email_drafts ✅ NOT NULL, scenarios ✅ NOT NULL, todo_items ✅ NOT NULL, contact_activity ✅ NOT NULL, chat_sessions ✅ NOT NULL
+
+**Still nullable:** activity_log (trigger in place), marketing_activity_log, mcc_state, user_settings (last 3 are user-scoped by design)
+
+**daily-briefing unscoped query:** ✅ Fixed — milestone_events and milestone_communications now scoped via loans join
 
 ## Daily Audit 2026-03-24 (scheduled)
 

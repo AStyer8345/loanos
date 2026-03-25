@@ -1,6 +1,6 @@
 # LoanOS — Multi-Tenancy Checklist
 
-_Last updated: 2026-03-24 (daily prep — contact_activity org_id applied [migration 048], null backfill [migration 050], 15 tables now fully org-scoped)_
+_Last updated: 2026-03-25 (daily prep — NOT NULL hardening [migration 053], daily-briefing milestone scoping fixed)_
 
 ---
 
@@ -102,6 +102,32 @@ _Last updated: 2026-03-24 (daily prep — contact_activity org_id applied [migra
 | Item | Status | Notes |
 |------|--------|-------|
 | Isolation test script | ⚠️ | Built — `scripts/verify-tenant-isolation.ts`. Tests data-layer isolation via service role. Full RLS enforcement test requires real auth sessions (service role bypasses RLS). |
+
+---
+
+## Priority 1 — Schema Hardening (NOT NULL)
+
+| Table | organization_id NOT NULL | Notes |
+|-------|--------------------------|-------|
+| `loans` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `contacts` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `documents` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `email_drafts` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `scenarios` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `todo_items` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `contact_activity` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `chat_sessions` | ✅ NOT NULL | Migration 053, 2026-03-25 |
+| `activity_log` | ⚠️ Still nullable | Trigger in place. Add NOT NULL once WF1/WF2 confirmed pushed to n8n cloud |
+
+---
+
+## Priority 3 — Pre-Launch Gaps
+
+| Item | Status | Notes |
+|------|--------|-------|
+| `daily-briefing` milestone queries scoped | ✅ Fixed 2026-03-25 | `loan_milestone_events` + `milestone_communications` now scoped via loans join |
+| Performance page uses localStorage | ❌ | Move to Supabase before licensing |
+| Plan selection UI in onboarding | ❌ | Defaults to 'starter' — no selection step |
 
 ---
 

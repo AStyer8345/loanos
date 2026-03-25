@@ -1,0 +1,157 @@
+<h2>Where should attach & voice buttons go?</h2>
+<p class="subtitle">Showing 3 layouts for the chat input bar — click your preferred one</p>
+
+<style>
+  .chat-mockup {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: "IBM Plex Mono", monospace;
+    margin-bottom: 0;
+  }
+  .attach-preview {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .file-chip {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    color: #C9A84C;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+  .mock-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    resize: none;
+    outline: none;
+    min-height: 28px;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  .icon-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+  }
+  .icon-btn.muted { background: #222; color: #666; }
+  .icon-btn.accent { background: #C9A84C; color: #000; font-weight: bold; }
+  .icon-btn.active { background: #2a1a00; color: #C9A84C; }
+  .toolbar-row {
+    display: flex;
+    gap: 6px;
+    padding: 4px 0 0 0;
+    align-items: center;
+  }
+  .divider { width: 1px; height: 16px; background: #2a2a2a; }
+  .label-sm { font-size: 9px; color: #555; font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+
+<div class="cards">
+
+  <!-- Option A: Icons left of textarea, send right -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 16px 8px;">
+      <div class="chat-mockup">
+        <div class="attach-preview">
+          <div class="file-chip">📄 loan-docs.pdf ✕</div>
+          <div class="file-chip">🖼 photo.jpg ✕</div>
+        </div>
+        <div class="input-row">
+          <button class="icon-btn muted">📎</button>
+          <button class="icon-btn muted">🎤</button>
+          <div class="divider"></div>
+          <textarea class="mock-textarea" readonly placeholder="Ask anything…"></textarea>
+          <button class="icon-btn accent">↑</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Icons inside the input bar, left side</h3>
+      <p>Paperclip + mic sit left of the textarea, send button stays right. Compact — everything in one row.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Toolbar row below textarea -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 16px 8px;">
+      <div class="chat-mockup">
+        <div class="attach-preview">
+          <div class="file-chip">📄 loan-docs.pdf ✕</div>
+        </div>
+        <div class="input-row" style="flex-direction:column; gap:6px; align-items: stretch;">
+          <textarea class="mock-textarea" style="min-height:36px;" readonly placeholder="Ask anything…"></textarea>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="toolbar-row">
+              <button class="icon-btn muted">📎</button>
+              <span class="label-sm">Attach</span>
+              <div class="divider"></div>
+              <button class="icon-btn active">🎤</button>
+              <span class="label-sm" style="color:#C9A84C;">Listening…</span>
+            </div>
+            <button class="icon-btn accent">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Toolbar row below textarea</h3>
+      <p>Attach + mic live in a row under the text. More room to show status ("Listening…") and labels. Send stays bottom-right.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Floating action buttons outside input -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 16px 8px;">
+      <div class="chat-mockup">
+        <div class="attach-preview">
+          <div class="file-chip">📄 appraisal.pdf ✕</div>
+          <div class="file-chip">🖼 front.jpg ✕</div>
+          <div class="file-chip">🖼 back.jpg ✕</div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:flex-end;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <button class="icon-btn muted">📎</button>
+            <button class="icon-btn muted">🎤</button>
+          </div>
+          <div class="input-row" style="flex:1;">
+            <textarea class="mock-textarea" readonly placeholder="Ask anything…"></textarea>
+            <button class="icon-btn accent">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Buttons stacked outside, left of input</h3>
+      <p>Attach + mic sit in a vertical stack to the left of the input box. Input stays clean inside.</p>
+    </div>
+  </div>
+
+</div>

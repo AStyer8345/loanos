@@ -16,6 +16,7 @@ type Tab  = 'dashboard' | 'loans' | 'expenses'
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const SHORT: Record<string,string> = {January:'Jan',February:'Feb',March:'Mar',April:'Apr',May:'May',June:'Jun',July:'Jul',August:'Aug',September:'Sep',October:'Oct',November:'Nov',December:'Dec'}
 const TRUST_START = 1611
+// localStorage key kept for one-time migration of existing data
 const STORAGE_KEY = 'loanDashboard2026'
 
 const SEED_LOANS: Loan[] = [
@@ -83,24 +84,45 @@ export default function PerformancePage() {
   const [loaded, setLoaded]         = useState(false)
   const [form, setForm]             = useState({ month:'January', name:'', amount:'', gross:'', compRate:'1', date:'' })
 
-  // Load from localStorage
+  // Load from Supabase (with one-time migration from localStorage)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        const d = JSON.parse(saved)
-        setLoans(d.loans); setOie(d.oie); setNextId(d.nextId || 12)
-      } else {
-        setLoans([...SEED_LOANS])
-      }
-    } catch { setLoans([...SEED_LOANS]) }
-    setLoaded(true)
+    async function load() {
+      try {
+        const res = await fetch('/api/performance')
+        if (res.ok) {
+          const { data } = await res.json()
+          if (data) {
+            setLoans(data.loans ?? []); setOie(data.oie ?? seedOIE()); setNextId(data.nextId || 12)
+            setLoaded(true)
+            return
+          }
+        }
+      } catch { /* fall through to localStorage migration */ }
+
+      // One-time migration: if Supabase had no data, check localStorage
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (saved) {
+          const d = JSON.parse(saved)
+          setLoans(d.loans ?? []); setOie(d.oie ?? seedOIE()); setNextId(d.nextId || 12)
+        } else {
+          setLoans([...SEED_LOANS])
+        }
+      } catch { setLoans([...SEED_LOANS]) }
+      setLoaded(true)
+    }
+    load()
   }, [])
 
-  // Save to localStorage
+  // Save to Supabase
   useEffect(() => {
     if (!loaded) return
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ loans, oie, nextId }))
+    const payload = { loans, oie, nextId }
+    fetch('/api/performance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => null)
   }, [loans, oie, nextId, loaded])
 
   // ── Calculations ──────────────────────────────────────────────────────────

@@ -1,0 +1,213 @@
+<h2>How should "expand" work?</h2>
+<p class="subtitle">The chat currently lives in a floating corner panel. Pick how expansion should behave.</p>
+
+<style>
+  .chat-mockup {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    overflow: hidden;
+    position: relative;
+  }
+  .chat-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    padding: 7px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #C9A84C;
+  }
+  .header-actions { display: flex; gap: 6px; }
+  .hbtn {
+    width: 18px; height: 18px; border-radius: 3px;
+    background: #222; border: none; color: #666; font-size: 10px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .hbtn.accent { background: #C9A84C22; color: #C9A84C; }
+  .chat-body { padding: 10px; min-height: 100px; }
+  .msg { margin-bottom: 8px; font-size: 9px; line-height: 1.5; }
+  .msg.user { color: #C9A84C; text-align: right; }
+  .msg.ai { color: #bbb; }
+  .msg-label { font-size: 8px; color: #555; margin-bottom: 2px; }
+  .chat-input-area {
+    border-top: 1px solid #2a2a2a;
+    padding: 7px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    background: #111;
+  }
+  .side-btns { display: flex; flex-direction: column; gap: 4px; }
+  .ibtn { width: 22px; height: 22px; border-radius: 4px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #666; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+  .ibox { flex: 1; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 5px; padding: 5px 7px; font-size: 9px; color: #555; min-height: 30px; }
+  .send-btn { width: 22px; height: 22px; border-radius: 4px; background: #C9A84C; color: #000; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+  /* Page wireframe shell */
+  .page-shell {
+    background: #080808;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+    height: 200px;
+    margin-bottom: 0;
+  }
+  .page-sidebar {
+    width: 36px;
+    background: #111;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .page-main {
+    flex: 1;
+    background: #111;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .corner-chat {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 90px;
+  }
+  .right-panel-chat {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 130px;
+    border-left: 1px solid #2a2a2a;
+    background: #0f0f0f;
+  }
+  .fullscreen-chat {
+    position: absolute;
+    inset: 6px;
+    background: #0f0f0f;
+    border-radius: 6px;
+    border: 1px solid #C9A84C44;
+  }
+  .expand-btn-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    background: #C9A84C22;
+    border: 1px solid #C9A84C66;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #C9A84C;
+  }
+</style>
+
+<div class="cards">
+
+  <!-- Option A: Wider/taller floating panel -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;">
+      <div class="page-shell">
+        <div class="page-sidebar"></div>
+        <div class="page-main">
+          <!-- Small corner panel → expands to larger corner panel -->
+          <div class="corner-chat" style="width:135px; bottom:5px; right:5px;">
+            <div class="chat-mockup">
+              <div class="chat-header">
+                ◈ LoanOS AI
+                <div class="header-actions">
+                  <div class="hbtn accent">⤢</div>
+                  <div class="hbtn">✕</div>
+                </div>
+              </div>
+              <div class="chat-body" style="min-height:70px;">
+                <div class="msg ai"><div class="msg-label">AI</div>What can I help you with today?</div>
+                <div class="msg user"><div class="msg-label">You</div>Analyze this appraisal PDF</div>
+              </div>
+              <div class="chat-input-area">
+                <div class="side-btns"><div class="ibtn">📎</div><div class="ibtn">🎤</div></div>
+                <div class="ibox">Ask anything…</div>
+                <div class="send-btn">↑</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:9px;color:#555;margin:4px 0 0;text-align:center;">⤢ button expands the panel to ~2× size, still floating in corner</p>
+    </div>
+    <div class="card-body">
+      <h3>A — Larger floating panel</h3>
+      <p>Expand button grows the corner chat to roughly double width/height. Still a float — doesn't take over the page. Press again to shrink back.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Side panel / drawer -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;">
+      <div class="page-shell">
+        <div class="page-sidebar"></div>
+        <div class="page-main">
+          <div class="right-panel-chat">
+            <div class="chat-header" style="justify-content:space-between;">
+              ◈ LoanOS AI
+              <div class="header-actions">
+                <div class="hbtn accent">⇥</div>
+                <div class="hbtn">✕</div>
+              </div>
+            </div>
+            <div style="padding:8px;font-size:8px;color:#bbb;line-height:1.5;">
+              What can I help you with today?
+            </div>
+            <div style="padding:4px 8px;font-size:8px;color:#C9A84C;text-align:right;">
+              Analyze this PDF ↓
+            </div>
+            <div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid #2a2a2a;padding:5px;background:#111;display:flex;gap:4px;align-items:flex-end;">
+              <div class="side-btns"><div class="ibtn" style="width:18px;height:18px;font-size:9px;">📎</div><div class="ibtn" style="width:18px;height:18px;font-size:9px;">🎤</div></div>
+              <div class="ibox" style="font-size:8px;min-height:24px;">Ask…</div>
+              <div class="send-btn" style="width:18px;height:18px;font-size:9px;">↑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:9px;color:#555;margin:4px 0 0;text-align:center;">⇥ button slides a fixed panel in from the right edge</p>
+    </div>
+    <div class="card-body">
+      <h3>B — Side drawer panel</h3>
+      <p>Expand pushes a fixed-width panel in from the right side of the screen, like a chat sidebar. The main content compresses slightly. Best for extended conversations.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Full-screen overlay -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;">
+      <div class="page-shell">
+        <div class="page-sidebar"></div>
+        <div class="page-main">
+          <div class="fullscreen-chat">
+            <div class="chat-header">
+              ◈ LoanOS AI — Full view
+              <div class="header-actions">
+                <div class="hbtn accent">⤡</div>
+                <div class="hbtn">✕</div>
+              </div>
+            </div>
+            <div style="padding:8px;font-size:8px;color:#bbb;line-height:1.6;">
+              Analyzing appraisal.pdf…<br/>
+              <span style="color:#C9A84C;">The appraised value of $485,000 is supported by 3 comps within 0.5 miles…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:9px;color:#555;margin:4px 0 0;text-align:center;">⤡ button overlays full-screen on top of the app</p>
+    </div>
+    <div class="card-body">
+      <h3>C — Full-screen overlay</h3>
+      <p>Chat expands to cover the entire screen. Nothing else visible — total focus. Press Esc or ⤡ to collapse back to corner.</p>
+    </div>
+  </div>
+
+</div>

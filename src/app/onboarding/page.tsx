@@ -32,12 +32,28 @@ const US_STATES = [
   'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
 ]
 
+const PLANS = [
+  {
+    id: 'starter',
+    label: 'Starter',
+    price: 'Free',
+    features: ['Unlimited loans', 'AI milestone agent', 'Pre-approval & CD emails', 'Daily briefing'],
+  },
+  {
+    id: 'professional',
+    label: 'Professional',
+    price: '$99/mo',
+    features: ['Everything in Starter', 'Team members', 'Custom branding', 'Priority support'],
+  },
+] as const
+
 export default function OnboardingPage() {
   const [fullName, setFullName] = useState('')
   const [orgName, setOrgName] = useState('')
   const [nmlsIndividual, setNmlsIndividual] = useState('')
   const [phone, setPhone] = useState('')
   const [statesLicensed, setStatesLicensed] = useState<string[]>([])
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'professional'>('starter')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -62,6 +78,7 @@ export default function OnboardingPage() {
         nmlsIndividual: nmlsIndividual.trim() || null,
         phone: phone.trim() || null,
         statesLicensed,
+        plan: selectedPlan,
       }),
     })
 
@@ -181,6 +198,46 @@ export default function OnboardingPage() {
               required
               style={INPUT_STYLE}
             />
+          </div>
+
+          {/* Section: Plan */}
+          <div style={{ borderBottom: '1px solid #1e293b', paddingBottom: '0.25rem', marginBottom: '0.25rem', marginTop: '0.25rem' }}>
+            <span style={{ color: '#C9A84C', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              Choose a Plan
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            {PLANS.map(plan => {
+              const active = selectedPlan === plan.id
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => setSelectedPlan(plan.id)}
+                  style={{
+                    background: active ? '#C9A84C15' : 'transparent',
+                    border: active ? '1px solid #C9A84C' : '1px solid #334155',
+                    borderRadius: '6px',
+                    padding: '0.875rem 0.75rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.1s',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
+                    <span style={{ color: active ? '#C9A84C' : '#e2e8f0', fontWeight: 700, fontSize: '0.875rem' }}>{plan.label}</span>
+                    <span style={{ color: active ? '#C9A84C' : '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>{plan.price}</span>
+                  </div>
+                  {plan.features.map(f => (
+                    <div key={f} style={{ color: '#64748b', fontSize: '0.65rem', marginBottom: '0.2rem', display: 'flex', alignItems: 'flex-start', gap: '0.3rem' }}>
+                      <span style={{ color: active ? '#C9A84C' : '#475569', flexShrink: 0 }}>·</span>{f}
+                    </div>
+                  ))}
+                </button>
+              )
+            })}
           </div>
 
           {error && (

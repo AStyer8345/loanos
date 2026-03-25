@@ -544,7 +544,7 @@ export default function LoanDetailPage() {
           {/* Name row */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="font-bold text-zinc-100" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '30px', lineHeight: '1.15', letterSpacing: '-0.01em' }}>
+              <h1 className="font-mono font-bold uppercase tracking-wider text-zinc-100 text-2xl leading-tight">
                 {loan.loan_name || displayName}
               </h1>
               <p className="text-xs text-zinc-500 font-mono mt-0.5">
@@ -1373,7 +1373,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
   })
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
       {/* Header */}
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
@@ -1491,7 +1491,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
 
 function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; docs: DocRow[]; onRefresh: () => void }) {
   const supabase = createClient()
-  const { userId } = useOrg()
+  const { userId, organizationId } = useOrg()
   const [signingId, setSigningId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -1504,7 +1504,8 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
     const storagePath = `${userId}/${loanId}/${Date.now()}_${file.name}`
     const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
     if (uploadError) { alert('Upload failed: ' + uploadError.message); setUploading(false); return }
-    const { error: insertError } = await supabase.from('documents').insert({ user_id: userId, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null })
+    if (!organizationId) { alert('No organization found'); setUploading(false); return }
+    const { error: insertError } = await supabase.from('documents').insert({ user_id: userId, loan_id: loanId, file_name: file.name, file_path: storagePath, file_size: file.size, doc_type: file.type || null, organization_id: organizationId })
     if (insertError) { alert('Record save failed: ' + insertError.message); setUploading(false); return }
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -1520,7 +1521,7 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
   }
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
         <div className="flex items-center gap-3">
@@ -2063,7 +2064,7 @@ function MilestoneTimeline({ loan }: { loan: Loan }) {
   const goldMuted = 'rgba(201,168,76,0.35)'
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-3 py-2 bg-zinc-800/80 border-b border-zinc-700">
         <h2 className="text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">Milestones</h2>
       </div>
@@ -2330,7 +2331,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
         ) : (
           <span
             onClick={canEdit ? startEdit : undefined}
-            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-400 transition-colors' : ''} ${saved ? 'text-emerald-400' : 'text-zinc-200'}`}
+            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-400 transition-colors' : ''} ${saved ? 'text-[#4ADE80]' : 'text-zinc-200'}`}
           >
             {saved ? '✓ Saved' : (displayValue ?? <span className="text-zinc-600">—</span>)}
           </span>
@@ -2369,7 +2370,7 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
 }) {
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg shadow-lg shadow-black/50 overflow-hidden">
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">{title}</h2>
       </div>
@@ -2853,8 +2854,8 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                 </div>
                 {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
               </div>
-              <div className="text-sm font-medium text-zinc-100 mb-1 truncate">{draft.subject}</div>
-              <div className="text-xs text-zinc-400 truncate">To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}</div>
+              <div className="text-sm font-mono font-medium text-zinc-100 mb-1 truncate">{draft.subject}</div>
+              <div className="text-xs font-mono text-zinc-400 truncate">To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}</div>
               {!isOpen && draft.body_preview && <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{draft.body_preview}</div>}
             </button>
             {isOpen && (
@@ -2909,8 +2910,8 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                     </div>
                     {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
                   </div>
-                  <div className="text-sm font-medium text-zinc-100 truncate mb-1">{email.subject || '(no subject)'}</div>
-                  <div className="text-xs text-zinc-400 truncate">From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '—')}</div>
+                  <div className="text-sm font-mono font-medium text-zinc-100 truncate mb-1">{email.subject || '(no subject)'}</div>
+                  <div className="text-xs font-mono text-zinc-400 truncate">From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '—')}</div>
                   {!isOpen && email.body_snippet && (
                     <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{email.body_snippet}</div>
                   )}
@@ -2945,7 +2946,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                     </div>
                     {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
                   </div>
-                  <div className="text-sm font-medium text-zinc-100 truncate">{ce.subject}</div>
+                  <div className="text-sm font-mono font-medium text-zinc-100 truncate">{ce.subject}</div>
                 </button>
                 {isOpen && (ce.body_html || ce.body_text) && (
                   <div className="border-t border-zinc-800 p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">

@@ -14,6 +14,12 @@ export default async function UploadPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single()
+
   const { data: loans } = await supabase
     .from('loans')
     .select('id, loan_number, property_address, contacts!contact_id(first_name, last_name)')
@@ -37,7 +43,7 @@ export default async function UploadPage() {
           className="rounded border p-6"
           style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
         >
-          <UploadForm loans={(loans ?? []) as Loan[]} userId={user.id} />
+          <UploadForm loans={(loans ?? []) as Loan[]} userId={user.id} organizationId={profile?.organization_id ?? ''} />
         </div>
 
       </div>

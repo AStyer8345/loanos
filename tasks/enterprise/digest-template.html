@@ -1,0 +1,310 @@
+<!-- 
+  LoanOS Enterprise Daily Digest — Email Template
+  File: tasks/enterprise/digest-template.html
+  Used by: NotebookLM Curator Subagent (PUSH mode)
+  Sent to: adam@thestyerteam.com via Zapier Outlook webhook
+  
+  USAGE: Replace all [PLACEHOLDER] values before sending.
+  The subagent reads this file, populates it, and POSTs to the Zapier webhook.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #0a0a0a;
+    font-family: 'Courier New', monospace;
+    color: #e8e8e8;
+  }
+  .wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .header {
+    border-bottom: 1px solid #C9A84C;
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #C9A84C;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-size: 20px;
+    font-weight: normal;
+    color: #e8e8e8;
+    margin: 0 0 4px 0;
+  }
+  .header-meta {
+    font-size: 11px;
+    color: #555;
+  }
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #C9A84C;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-left: 2px solid #C9A84C;
+    padding-left: 10px;
+  }
+  .section-body {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #aaa;
+    padding-left: 12px;
+  }
+  .priority-box {
+    background: #111;
+    border: 1px solid #C9A84C;
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .priority-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #C9A84C;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .priority-item {
+    font-size: 13px;
+    color: #e8e8e8;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+  }
+  .priority-num {
+    color: #C9A84C;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 3px;
+    padding: 12px 16px;
+    flex: 1;
+    min-width: 120px;
+  }
+  .stat-num {
+    font-size: 22px;
+    color: #C9A84C;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 0.1em;
+  }
+  .blocker-box {
+    background: rgba(201, 76, 76, 0.08);
+    border: 1px solid rgba(201, 76, 76, 0.3);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+  }
+  .blocker-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #C94C4C;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .blocker-body {
+    font-size: 12px;
+    color: #e07070;
+    line-height: 1.7;
+  }
+  .no-blockers {
+    background: rgba(76, 201, 138, 0.06);
+    border: 1px solid rgba(76, 201, 138, 0.2);
+    border-radius: 3px;
+    padding: 10px 16px;
+    margin-bottom: 28px;
+    font-size: 12px;
+    color: #4CC98A;
+  }
+  .queue-bar {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+  }
+  .queue-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .queue-current {
+    font-size: 13px;
+    color: #C9A84C;
+    margin-bottom: 4px;
+  }
+  .queue-next {
+    font-size: 11px;
+    color: #555;
+  }
+  .footer {
+    border-top: 1px solid #1e1e1e;
+    padding-top: 16px;
+    font-size: 10px;
+    color: #333;
+    line-height: 1.8;
+  }
+  ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-label">LoanOS // Enterprise Build Program</div>
+    <div class="header-title">Daily Digest — [DATE]</div>
+    <div class="header-meta">Sessions: [AM / PM / Both] &nbsp;·&nbsp; Topic: [ACTIVE_TOPIC] &nbsp;·&nbsp; Queue: Week [X] of 8</div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num">[SOURCES_ADDED]</div>
+      <div class="stat-label">Sources Added</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">[STALE_REMOVED]</div>
+      <div class="stat-label">Stale Removed</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">[WEB_ADDED]</div>
+      <div class="stat-label">Web Sources</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">[TOTAL_SOURCES]</div>
+      <div class="stat-label">Total in NLM</div>
+    </div>
+  </div>
+
+  <!-- TOMORROW'S PRIORITIES — most important block -->
+  <div class="priority-box">
+    <div class="priority-label">Tomorrow's Priorities</div>
+    <div class="priority-item"><span class="priority-num">1.</span><span>[PRIORITY_1]</span></div>
+    <div class="priority-item"><span class="priority-num">2.</span><span>[PRIORITY_2]</span></div>
+    <div class="priority-item"><span class="priority-num">3.</span><span>[PRIORITY_3]</span></div>
+  </div>
+
+  <!-- ACCOMPLISHED TODAY -->
+  <div class="section">
+    <div class="section-label">Accomplished Today</div>
+    <div class="section-body">
+      <ul>
+        [ACCOMPLISHED_BULLETS]
+        <!-- Example:
+        <li>Completed RLS policy research — Salesforce and HubSpot patterns documented</li>
+        <li>Architecture spec written for tenant isolation layer</li>
+        <li>5 web sources added from Supabase docs and Stripe engineering blog</li>
+        -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- FILES BUILT/MODIFIED -->
+  <div class="section">
+    <div class="section-label">Files Created / Modified</div>
+    <div class="section-body">
+      <ul>
+        [FILES_BUILT]
+        <!-- Example:
+        <li>tasks/enterprise/research/2026-03-25-rls-architecture.md — RLS research</li>
+        <li>tasks/enterprise/specs/2026-03-25-rls-spec.md — Architecture spec</li>
+        -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- KNOWLEDGE BASE UPDATES -->
+  <div class="section">
+    <div class="section-label">Knowledge Base Updates</div>
+    <div class="section-body">
+      <ul>
+        [KB_UPDATES]
+        <!-- Example:
+        <li>Added: Supabase RLS documentation (official docs)</li>
+        <li>Added: Stripe multi-tenant billing architecture (Stripe engineering blog)</li>
+        <li>Removed: Week 1 draft research (superseded by final spec)</li>
+        <li>Updated: CONTEXT.md (re-synced after repo changes)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- OPEN QUESTIONS -->
+  <div class="section">
+    <div class="section-label">Open Questions Needing Decisions</div>
+    <div class="section-body">
+      <ul>
+        [OPEN_QUESTIONS]
+        <!-- Example:
+        <li>Should tenant isolation use schema-per-tenant or RLS-per-tenant? (RLS recommended but confirm)</li>
+        <li>Stripe billing — usage-based or flat subscription for Phase 1?</li>
+        -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- BLOCKERS -->
+  <!-- Show blocker box if blockers exist, no-blockers box if clean -->
+  [IF_BLOCKERS]
+  <div class="blocker-box">
+    <div class="blocker-label">⚠ Active Blockers</div>
+    <div class="blocker-body">
+      [BLOCKER_CONTENT]
+    </div>
+  </div>
+  [ELSE]
+  <div class="no-blockers">✓ No active blockers — build chain is clear</div>
+  [END_IF]
+
+  <!-- QUEUE STATUS -->
+  <div class="queue-bar">
+    <div class="queue-label">Enterprise Queue</div>
+    <div class="queue-current">Week [X]: [CURRENT_TOPIC]</div>
+    <div class="queue-next">Next: Week [X+1]: [NEXT_TOPIC] &nbsp;·&nbsp; Advance: [YES/NO]</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated by LoanOS Enterprise Agent System &nbsp;·&nbsp; [DATETIME]<br>
+    Full logs: ~/Documents/loanos-clone/tasks/enterprise/session-log.md<br>
+    NotebookLM: LoanOS Enterprise notebook &nbsp;·&nbsp; <code>notebooklm use [ID]</code>
+  </div>
+
+</div>
+</body>
+</html>

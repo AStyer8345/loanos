@@ -185,7 +185,7 @@ export type Database = {
           created_at: string
           id: string
           messages: Json
-          organization_id: string | null
+          organization_id: string
           record_id: string
           record_type: string
           updated_at: string
@@ -195,7 +195,7 @@ export type Database = {
           created_at?: string
           id?: string
           messages?: Json
-          organization_id?: string | null
+          organization_id: string
           record_id: string
           record_type: string
           updated_at?: string
@@ -205,7 +205,7 @@ export type Database = {
           created_at?: string
           id?: string
           messages?: Json
-          organization_id?: string | null
+          organization_id?: string
           record_id?: string
           record_type?: string
           updated_at?: string
@@ -230,7 +230,7 @@ export type Database = {
           loan_id: string | null
           logged_at: string | null
           notes: string | null
-          organization_id: string | null
+          organization_id: string
           user_id: string | null
         }
         Insert: {
@@ -241,7 +241,7 @@ export type Database = {
           loan_id?: string | null
           logged_at?: string | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id: string
           user_id?: string | null
         }
         Update: {
@@ -252,7 +252,7 @@ export type Database = {
           loan_id?: string | null
           logged_at?: string | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id?: string
           user_id?: string | null
         }
         Relationships: [
@@ -268,6 +268,13 @@ export type Database = {
             columns: ["loan_id"]
             isOneToOne: false
             referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_activity_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -360,11 +367,12 @@ export type Database = {
           mailing_street: string | null
           mailing_zip: string | null
           notes: string | null
-          organization_id: string | null
+          organization_id: string
           phone: string | null
           phone_mobile: string | null
           realtor_email: string | null
           realtor_phone: string | null
+          referral_type: string | null
           referred_by: string | null
           salesforce_created_date: string | null
           salesforce_id: string | null
@@ -409,11 +417,12 @@ export type Database = {
           mailing_street?: string | null
           mailing_zip?: string | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id: string
           phone?: string | null
           phone_mobile?: string | null
           realtor_email?: string | null
           realtor_phone?: string | null
+          referral_type?: string | null
           referred_by?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
@@ -458,11 +467,12 @@ export type Database = {
           mailing_street?: string | null
           mailing_zip?: string | null
           notes?: string | null
-          organization_id?: string | null
+          organization_id?: string
           phone?: string | null
           phone_mobile?: string | null
           realtor_email?: string | null
           realtor_phone?: string | null
+          referral_type?: string | null
           referred_by?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
@@ -495,7 +505,7 @@ export type Database = {
           id: string
           loan_id: string | null
           mime_type: string | null
-          organization_id: string | null
+          organization_id: string
           uploaded_by: string | null
           user_id: string
         }
@@ -509,7 +519,7 @@ export type Database = {
           id?: string
           loan_id?: string | null
           mime_type?: string | null
-          organization_id?: string | null
+          organization_id: string
           uploaded_by?: string | null
           user_id: string
         }
@@ -523,7 +533,7 @@ export type Database = {
           id?: string
           loan_id?: string | null
           mime_type?: string | null
-          organization_id?: string | null
+          organization_id?: string
           uploaded_by?: string | null
           user_id?: string
         }
@@ -560,7 +570,7 @@ export type Database = {
           created_at: string | null
           id: string
           loan_id: string | null
-          organization_id: string | null
+          organization_id: string
           outlook_draft_id: string | null
           recipient_email: string
           recipient_name: string | null
@@ -577,7 +587,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           loan_id?: string | null
-          organization_id?: string | null
+          organization_id: string
           outlook_draft_id?: string | null
           recipient_email: string
           recipient_name?: string | null
@@ -594,7 +604,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           loan_id?: string | null
-          organization_id?: string | null
+          organization_id?: string
           outlook_draft_id?: string | null
           recipient_email?: string
           recipient_name?: string | null
@@ -881,7 +891,7 @@ export type Database = {
           occupancy_type: string | null
           option_expiration: string | null
           option_fee: number | null
-          organization_id: string | null
+          organization_id: string
           originator_comp: number | null
           payroll_date: string | null
           payroll_status: string | null
@@ -1093,7 +1103,7 @@ export type Database = {
           occupancy_type?: string | null
           option_expiration?: string | null
           option_fee?: number | null
-          organization_id?: string | null
+          organization_id: string
           originator_comp?: number | null
           payroll_date?: string | null
           payroll_status?: string | null
@@ -1305,7 +1315,7 @@ export type Database = {
           occupancy_type?: string | null
           option_expiration?: string | null
           option_fee?: number | null
-          organization_id?: string | null
+          organization_id?: string
           originator_comp?: number | null
           payroll_date?: string | null
           payroll_status?: string | null
@@ -1635,6 +1645,38 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_data: {
+        Row: {
+          data: Json
+          id: string
+          organization_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          data?: Json
+          id?: string
+          organization_id: string
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          data?: Json
+          id?: string
+          organization_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_data_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1736,7 +1778,7 @@ export type Database = {
           mismo_file_url: string | null
           narrative: string | null
           narrative_edited: boolean | null
-          organization_id: string | null
+          organization_id: string
           pdf_url: string | null
           property_address: string | null
           property_value: number | null
@@ -1759,7 +1801,7 @@ export type Database = {
           mismo_file_url?: string | null
           narrative?: string | null
           narrative_edited?: boolean | null
-          organization_id?: string | null
+          organization_id: string
           pdf_url?: string | null
           property_address?: string | null
           property_value?: number | null
@@ -1782,7 +1824,7 @@ export type Database = {
           mismo_file_url?: string | null
           narrative?: string | null
           narrative_edited?: boolean | null
-          organization_id?: string | null
+          organization_id?: string
           pdf_url?: string | null
           property_address?: string | null
           property_value?: number | null
@@ -1885,7 +1927,7 @@ export type Database = {
           id: string
           is_complete: boolean
           is_urgent: boolean
-          organization_id: string | null
+          organization_id: string
           related_contact_id: string | null
           related_loan_id: string | null
           text: string
@@ -1898,7 +1940,7 @@ export type Database = {
           id?: string
           is_complete?: boolean
           is_urgent?: boolean
-          organization_id?: string | null
+          organization_id: string
           related_contact_id?: string | null
           related_loan_id?: string | null
           text: string
@@ -1911,7 +1953,7 @@ export type Database = {
           id?: string
           is_complete?: boolean
           is_urgent?: boolean
-          organization_id?: string | null
+          organization_id?: string
           related_contact_id?: string | null
           related_loan_id?: string | null
           text?: string
@@ -1979,6 +2021,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_contact_by_email: {
+        Args: { lookup_email: string }
+        Returns: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          loan_id: string
+          loan_status: string
+          organization_id: string
+        }[]
+      }
       get_my_organization_id: { Args: never; Returns: string }
       get_my_role: { Args: never; Returns: string }
     }

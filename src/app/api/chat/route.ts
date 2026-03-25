@@ -373,6 +373,7 @@ export async function POST(req: NextRequest) {
             record_type: recordType,
             messages: updatedMessages,
             user_id: userId,
+            organization_id: organizationId,
           })
           .select('id')
           .single()

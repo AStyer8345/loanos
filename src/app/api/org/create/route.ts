@@ -19,17 +19,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Already assigned to an organization' }, { status: 400 })
     }
 
-    const { orgName, fullName, nmlsIndividual, phone, statesLicensed } = await req.json()
+    const { orgName, fullName, nmlsIndividual, phone, statesLicensed, plan } = await req.json()
     if (!orgName?.trim()) return NextResponse.json({ error: 'Organization name required' }, { status: 400 })
     if (!fullName?.trim()) return NextResponse.json({ error: 'Full name required' }, { status: 400 })
 
+    const validPlan = plan === 'professional' ? 'professional' : 'starter'
     const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     const service = createServiceClient()
 
     // Create organization
     const { data: org, error: orgError } = await service
       .from('organizations')
-      .insert({ name: orgName.trim(), slug })
+      .insert({ name: orgName.trim(), slug, plan: validPlan })
       .select('id')
       .single()
 

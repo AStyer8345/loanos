@@ -22,7 +22,7 @@ function loanLabel(loan: Loan): string {
   return `${name}${num}${addr}`
 }
 
-export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: string }) {
+export default function UploadForm({ loans, userId, organizationId }: { loans: Loan[]; userId: string; organizationId: string }) {
   const supabase = createClient()
 
   const [docType, setDocType]               = useState('')
@@ -62,10 +62,11 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
         const { data: contact, error: cErr } = await supabase
           .from('contacts')
           .insert({
-            user_id:      userId,
-            first_name:   firstName.trim(),
-            last_name:    lastName.trim(),
-            contact_type: 'borrower',
+            user_id:         userId,
+            organization_id: organizationId,
+            first_name:      firstName.trim(),
+            last_name:       lastName.trim(),
+            contact_type:    'borrower',
           })
           .select('id')
           .single()
@@ -75,10 +76,11 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
         const { data: loan, error: lErr } = await supabase
           .from('loans')
           .insert({
-            user_id:     userId,
-            contact_id:  contact.id,
-            loan_number: loanNumber.trim() || null,
-            status:      'lead',
+            user_id:         userId,
+            organization_id: organizationId,
+            contact_id:      contact.id,
+            loan_number:     loanNumber.trim() || null,
+            status:          'lead',
           })
           .select('id')
           .single()
@@ -103,14 +105,15 @@ export default function UploadForm({ loans, userId }: { loans: Loan[]; userId: s
       const { data: doc, error: docErr } = await supabase
         .from('documents')
         .insert({
-          user_id:     userId,
-          loan_id:     loanId,
-          file_name:   file.name,
-          file_path:   storagePath,
-          file_size:   file.size,
-          mime_type:   'application/pdf',
-          doc_type:    docType,
-          uploaded_by: userId,
+          user_id:         userId,
+          organization_id: organizationId,
+          loan_id:         loanId,
+          file_name:       file.name,
+          file_path:       storagePath,
+          file_size:       file.size,
+          mime_type:       'application/pdf',
+          doc_type:        docType,
+          uploaded_by:     userId,
         })
         .select('id')
         .single()

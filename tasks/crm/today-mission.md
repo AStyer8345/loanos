@@ -55,3 +55,37 @@ The CSV migration spec (tasks/crm/specs/2026-03-25-contact-dedup-spec.md) is wri
 
 ### HIGH RISK Items
 NONE — this is a read-only audit session. No data migration, no Supabase writes, no n8n changes.
+
+---
+
+## Mission Brief — 2026-03-25 PM Late (Session 2)
+
+### Domain
+LoanOS CRM
+
+### Focus Area
+Contact Data Architecture Review — what information actually matters for a mortgage LO contact record?
+
+### Session Type
+[x] Research + Planning (Sequence A)
+
+### Objectives
+1. Audit the LoanOS contacts table schema against what top-performing LOs actually track
+2. Identify fields that are empty/unused vs. fields that are missing but would add value
+3. Recommend smart list definitions that Adam should have as daily working views
+4. Identify UI organization improvements (what should be above the fold on a contact record?)
+
+### Definition of Done
+- Research file written at tasks/crm/research/2026-03-25-contact-data-architecture.md
+- Field inventory completed (used vs. unused vs. missing)
+- Smart list recommendations written with query logic
+- Open questions for Adam documented
+
+### Resources / Files in Scope
+- Supabase: contacts table (live schema query)
+- LoanOS contacts UI (src/app/contacts/)
+- n8n workflow index (CLAUDE.md)
+- domain-queue.md (scope definition)
+
+### HIGH RISK Items
+- None — research only, no schema changes or execution in this session

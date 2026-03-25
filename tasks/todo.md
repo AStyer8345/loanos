@@ -41,8 +41,8 @@ _Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, dail
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 - [x] **Dead API route `/api/pipeline/stats`** — Deleted 2026-03-23 morning audit. Confirmed no callers anywhere in src/.
-- [ ] **Dark theme violations in nav** — `TopNav.tsx`, `NavDropdown.tsx`, `NavItem.tsx` use `bg-white`/`bg-slate-*`. Visible on every page. Should match dark zinc theme.
-- [ ] **Dark theme violations in scenarios** — `ScenarioCard.tsx`, `StatementUpload.tsx`, `ScenarioList.tsx` use `bg-white`. Should match dark zinc theme.
+- [x] **Dark theme violations in nav** — Verified 2026-03-25 daily audit: `TopNav.tsx`, `NavDropdown.tsx`, `NavItem.tsx` already use dark zinc/CSS-variable theme. No `bg-white` or `bg-slate-*` found. Previous report was inaccurate.
+- [x] **Dark theme violations in scenarios** — Verified 2026-03-25 daily audit: `ScenarioCard.tsx`, `StatementUpload.tsx`, `ScenarioList.tsx` use CSS custom properties (`var(--sc-card)`, etc.). No `bg-white` found.
 - [ ] **Status normalization** — 22 distinct non-terminal status values with case/format duplicates (`Closed` vs `closed`, `APPLICATION_INTAKE` vs `application`). Stale loan queries unreliable. Consider normalizing to lowercase snake_case.
 - [ ] **n8n MCP configuration** — MCP server returns 0 workflows on all searches. Credential/instance mismatch. Adam should verify.
 

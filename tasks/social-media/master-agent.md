@@ -48,8 +48,9 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 01-research.md                   ← social media research
 02-architect.md                  ← content plan / strategy
 03-builder.md                    ← write posts, generate Canva prompts, schedule drafts
-04-reviewer.md                   ← quality + compliance review
-05-qa.md                         ← verify posts are queued correctly
+03b-quality.md                   ← brand & quality polish (score/rewrite until ≥7/10)
+04-reviewer.md                   ← compliance + spec review (gets polished copy only)
+05-qa.md                         ← verify posts are queued correctly in Publer
 06-reporter.md                   ← session log
 00-notebooklm.md  (PUSH mode)   ← pushes knowledge to NotebookLM
 ```

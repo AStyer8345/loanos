@@ -45,7 +45,8 @@ By Week 8, generate 20+ qualified leads/month from owned channels (website, emai
 01-research.md                   ← lead gen research
 02-architect.md                  ← funnel design / strategy
 03-builder.md                    ← execute (build landing pages, configure Mailchimp, wire n8n)
-04-reviewer.md                   ← quality + compliance review
+03b-quality.md                   ← brand & quality polish (score/rewrite until ≥7/10)
+04-reviewer.md                   ← compliance + spec review (gets polished copy only)
 05-qa.md                         ← verify output works as intended
 06-reporter.md                   ← session log
 00-notebooklm.md  (PUSH mode)   ← pushes knowledge to NotebookLM
@@ -158,12 +159,12 @@ Check `tasks/lead-gen/subagent-status.md` for completion signal after each subag
 
 ### Sequence C — Execute
 ```
-00 (PULL) → 02 Architect (confirm plan) → 03 Builder → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
+00 (PULL) → 02 Architect (confirm plan) → 03 Builder → 03b Quality → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
 ```
 
 ### Sequence D — Full Cycle
 ```
-00 (PULL) → 01 Research → 02 Architect → 03 Builder → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
+00 (PULL) → 01 Research → 02 Architect → 03 Builder → 03b Quality → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
 ```
 
 **Lead Gen Rule:** Week 1 = Sequence A only. Do not build any funnels until the current-state audit and research is complete. Architect must produce a spec before Builder runs anything.

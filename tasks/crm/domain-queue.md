@@ -1,52 +1,103 @@
-# CRM Domain Queue
 # LoanOS CRM Program
 # Schedule: 6:00 AM daily
 # Notebook: LoanOS CRM Intelligence
 
 DOMAIN: LoanOS CRM
 NOTEBOOK: LoanOS CRM Intelligence
-CURRENT STACK: LoanOS is primary. Salesforce/Jungo still active (contract through Oct 2026).
-GOAL: Confirm LoanOS fully covers Adam's workflow, then cancel Salesforce/Jungo.
-
-STATUS UPDATE (2026-03-25):
-  - Contacts: already in LoanOS (2,377 records)
-  - Loans: already in LoanOS (817+ historical + Arive webhook handling new)
-  - n8n automations: mostly built and running
-  - Data migration phases (Weeks 2-5): COMPLETE or N/A
-  - Remaining: decommission audit — confirm nothing is missing, then cancel
+CURRENT STACK: LoanOS (Supabase) — primary and active. Salesforce contract runs through Oct 2026, not worth maintaining.
+GOAL: Make LoanOS the most effective CRM a mortgage LO could use — better organized, better data, better automations than anything Adam's used before.
 
 ---
 
-ACTIVE: Decommission Audit — Confirm LoanOS Covers Everything, Cancel Salesforce
+WHAT THIS PROGRAM IS:
 
-  The question is not "how do we migrate" — the data is already there.
-  The question is "what would break or be missed if Salesforce went dark today?"
+NOT: data migration (done), NOT: Salesforce decommission (contract is contract)
+YES: continuously improving LoanOS as a CRM product using best practices
 
-  Checklist:
-  1. [ ] Automations audit — list every automation currently running in Salesforce/Jungo.
-         For each: is the equivalent live in n8n? If not, what's missing?
-  2. [ ] Workflow gaps — are there any manual processes Adam does IN Salesforce
-         that have no equivalent in LoanOS yet? (e.g. logging a call, creating a task)
-  3. [ ] Reporting — any reports Adam pulls from Salesforce that LoanOS doesn't have?
-  4. [ ] Contacts completeness — any contacts/leads in Salesforce NOT in LoanOS?
-         (Run: export Salesforce contacts, compare email list against LoanOS)
-  5. [ ] Realtor database — realtors fully migrated with production volume data?
-  6. [ ] UI gaps blocking daily use — pagination cap (1,877 contacts unreachable),
-         "Closed Borrowers" smart list bug, etc.
-  7. [ ] Adam signs off: "I don't need to log into Salesforce for anything"
+Each session reviews one area of the CRM through this lens:
+  → What information is actually important for a mortgage LO to have?
+  → What's noise, clutter, or just taking up space?
+  → What's the best way to organize this?
+  → What are top-performing LOs doing in their CRMs that Adam isn't?
+  → What automations, views, or workflows would make Adam's daily use faster/better?
 
-  When all 7 items are checked → cancel Salesforce. Subscription runs Oct 2026 regardless.
+This is a product excellence program, not a build-from-scratch program.
+LoanOS exists. We're making it great.
 
 ---
 
-QUEUE:
-- Fix UI gaps blocking daily use (pagination, smart list bugs) — no dependency on Salesforce
-- n8n automation gap fill (whatever's missing from item 1 above)
-- Realtor enrichment (production volume, preferred areas) — Week 6 original plan
+CURRENT STATE (as of 2026-03-25):
+  Contacts: 2,377 records in LoanOS ✅
+  Loans: 817+ historical + Arive webhook for new ✅
+  n8n automations: mostly live (see CLAUDE.md for full list)
+  UI gaps: pagination cap (1,877 contacts unreachable past page ~120), "Closed Borrowers" smart list bug
+  Data gaps: phone normalization raw, some contacts missing key fields
+
+---
+
+ACTIVE: Contact Data Architecture Review
+
+  The question: what information actually matters for a mortgage LO contact record?
+  What should every contact have? What's optional? What's irrelevant?
+
+  Review LoanOS contact schema against:
+  1. What top-performing LOs track in their CRMs (research best practices)
+  2. What Adam actually uses day-to-day (read contacts table, look at populated vs. empty fields)
+  3. What triggers automations (what fields does n8n read to decide who gets what communication?)
+  4. What's missing that would make LoanOS more useful (e.g., last_rate_shopped, home_anniversary, pre_approval_expiry)
+
+  Output: concrete recommendations for:
+  - Fields to add (with data type + why)
+  - Fields to remove or archive (never populated, never used)
+  - Smart list definitions that actually matter (hot buyers, past clients due for refi review, realtors not referred in 90 days)
+  - UI organization improvements (what should be above the fold on a contact record?)
+
+---
+
+QUEUE (review each area in sequence):
+- Loan Pipeline Organization
+    What stages make sense? Are there too many or too few?
+    What information should be visible at a glance per loan?
+    What's buried that should surface?
+    Compare to best-in-class LOS CRM views (Encompass, Byte, SimpleNexus pipeline views)
+
+- Automation Coverage Audit
+    Map every meaningful event in a borrower's life (pre-approval, rate lock, CTC, funding, 1yr anniversary)
+    For each: does an n8n automation exist? Is it working? Is the timing right? Is the message good?
+    Identify gaps — what should be automated that isn't?
+
+- Realtor Relationship System
+    Realtors are a primary lead source. What does a great realtor CRM look like?
+    Referral volume tracking, last deal together, co-marketing materials sent, GBP reviews requested.
+    What smart lists and automations would help Adam stay top of mind with top referring realtors?
+
+- Smart Lists + Segmentation
+    Build the definitive set of smart lists Adam should use daily:
+    Hot Buyers (pre-approved, searching), Watch List (rate-sensitive refis), Past Client (1yr+ since closing),
+    Realtor (top 20 by referral volume), Cold Lead (12+ months no activity)
+    Each list needs: query logic + automation trigger + recommended outreach frequency
+
+- Data Quality Program
+    Which contacts are missing critical fields? (email, phone, contact type, source)
+    What's the right way to normalize phone formats in the existing data?
+    Build a "contact completeness score" and surface incomplete records
+
+- Reporting + Insights
+    What reports would tell Adam if his business is healthy?
+    Pipeline velocity (avg days from lead to funded), lead source ROI, realtor production rankings,
+    close rate by source, avg loan amount trend. What's buildable in LoanOS now?
 
 ---
 
 COMPLETED:
-- Week 1 — Data Audit + Field Mapping (2026-03-13)
-- Data Migration — Contacts + Loans already in LoanOS (confirmed 2026-03-25)
-- n8n Core Automations — mostly live (confirmed 2026-03-25)
+- Data migration (contacts + loans in LoanOS) ✅
+- Core n8n automations built ✅
+- Multi-tenancy foundation ✅
+
+---
+
+COMPLIANCE:
+- GLBA: no financial data written to non-encrypted destinations
+- Janie access scope: active files only, never full contact database
+- Data retention: loan records 7 years minimum
+- All data modifications logged in activity_log

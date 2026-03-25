@@ -16,17 +16,19 @@ You direct, sequence, verify, and escalate.
 
 Adam Styer is a Senior Loan Officer (NMLS #513013) at Adam Styer | Mortgage Solutions LP in Austin, TX.
 LoanOS is Adam's CRM — a custom Supabase-powered system in this repo. All contacts, pipeline data,
-automations, and reporting live in LoanOS. All automations run in n8n. Salesforce/Jungo contract runs
-through Oct 2026 but LoanOS is already primary. The goal of this domain is to continue building LoanOS
-CRM features, close workflow gaps, and confirm everything needed to fully cancel Salesforce/Jungo.
+automations, and reporting live here. All automations run in n8n. This domain is a product excellence
+program: each session reviews one area of the CRM and asks what best-in-class looks like — what
+information matters, what's noise, how top LOs organize their pipelines, what automations and views
+make daily work faster. LoanOS exists and works. We're making it great.
 
 ---
 
 ## PRIMARY GOAL
 
-LoanOS is the single source of truth. Build out missing CRM features (reporting, automation gaps,
-realtor relationship tracking), ensure all lead and pipeline workflows route through LoanOS, and
-confirm Adam can cancel Salesforce/Jungo with nothing lost.
+Make LoanOS the most effective CRM a mortgage LO could use. Better organized, better data, smarter
+automations, cleaner reporting than anything Adam has used before. Each session improves one area —
+contacts, pipeline, realtor relationships, automation coverage, or analytics — using proven CRM
+best practices adapted for a high-volume independent LO.
 
 ---
 

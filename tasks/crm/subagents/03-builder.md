@@ -9,7 +9,7 @@
 ---
 
 ## DOMAIN
-CRM (Salesforce/Jungo → LoanOS Supabase Migration)
+LoanOS CRM
 
 ## WHAT THIS SUBAGENT EXECUTES
 Supabase migrations (via MCP), n8n workflow creation/updates (via API), contact import scripts,
@@ -67,7 +67,7 @@ curl -X POST -H "X-N8N-API-KEY: $N8N_KEY" \
 
 **Data migration rules:**
 - Always run a 100-record test batch first. Verify results. Then proceed to full run.
-- Never DELETE source data. Salesforce data is read-only during migration.
+- Never delete contact or loan records without explicit spec instruction and Reviewer sign-off.
 - Log every record count before and after: `SELECT COUNT(*) FROM contacts;`
 - If a batch insert fails partway through — check for partial inserts and clean up before retrying.
 - Duplicate detection: use the dedup logic from spec. Never insert a record if it matches an existing email + name combination without checking with Reviewer first.

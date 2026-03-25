@@ -10,7 +10,7 @@
 ---
 
 ## DOMAIN
-CRM (Salesforce/Jungo → LoanOS Supabase Migration)
+LoanOS CRM
 
 ## PRE-CONDITION
 Check `tasks/crm/subagent-status.md`.
@@ -34,7 +34,7 @@ Append to `tasks/crm/session-log.md`:
 
 ```markdown
 ---
-## Session: [DATE] AM — CRM Migration
+## Session: [DATE] AM — LoanOS CRM
 Focus: [TOPIC]
 Type: [Research / Strategy / Execute / Full Cycle]
 
@@ -45,13 +45,13 @@ Type: [Research / Strategy / Execute / Full Cycle]
 ### Deferred
 - [item]: [reason] → [when to pick up]
 
-### Migration Progress
+### CRM Progress
 | Asset | Before | After | Delta |
 |-------|--------|-------|-------|
 | Contacts in LoanOS | [N] | [N] | +[N] |
 | Active loans in LoanOS | [N] | [N] | +[N] |
-| n8n workflows rebuilt | [N] | [N] | +[N] |
-| Salesforce automations remaining | [N] | [N] | -[N] |
+| n8n workflows active | [N] | [N] | +[N] |
+| Salesforce decommission checklist items remaining | [N] | [N] | -[N] |
 
 ### Queue Position
 Current week: [Week X of 8 — topic]

@@ -19,7 +19,7 @@ Each row is one scheduled task. To add a new agent system:
 | Task ID | What It Does | Schedule | Notebook | Week Goal | Status |
 |---------|-------------|----------|----------|-----------|--------|
 | `social-media-am` | Researches content, writes LinkedIn/Instagram/Facebook posts, reviews for compliance | 2 AM daily | LoanOS Social Media (new) | 5 posts/week zero manual input | ✅ Week 1 |
-| `lead-gen-am` | Builds landing pages, Mailchimp sequences, Zapier/n8n funnels | 3 AM daily | LoanOS Lead Gen Intelligence (new) | 20 qualified leads/month from owned channels | ✅ Week 1 |
+| `lead-gen-am` | Builds landing pages, Mailchimp sequences, n8n funnels — all leads route to LoanOS CRM | 3 AM daily | LoanOS Lead Gen Intelligence (new) | 20 qualified leads/month from owned channels | ✅ Week 1 |
 | `seo-sem-am` | Keyword research, meta tags, blog posts, on-page SEO for styermortgage.com | 4 AM daily | SEO SEM & Lead Gen 2026 (existing) | Rank #1 "mortgage broker Austin TX" + 10 keywords | ✅ Week 1 |
 
 ### Morning (runs before business hours)
@@ -29,7 +29,7 @@ Each row is one scheduled task. To add a new agent system:
 | `loanos-enterprise-am` | Master orchestrator for LoanOS app — research, architecture, execution across all LoanOS features | 7 AM daily | LoanOS Enterprise (existing) | Full AI-powered mortgage business OS | ✅ Active |
 | `styer-site-daily` | styermortgage.com conversion optimization — CTAs, landing pages, funnel health, A/B ideas | 7 AM daily | LoanOS Website Intelligence (existing) | 5%+ visitor-to-lead conversion | ✅ Active |
 | `loanos-daily` | LoanOS codebase health — build checks, TypeScript errors, code quality, one fix per run | 8 AM daily | — | Zero build errors, clean code | ✅ Active |
-| `loanos-crm-am` | Salesforce → LoanOS Supabase CRM migration — data audit, field mapping, automation rebuild | 8 AM daily | LoanOS CRM Intelligence (existing) | Full Jungo replacement by Week 8 | ✅ Week 1 |
+| `loanos-crm-am` | LoanOS CRM operations — contact workflows, automation gaps, Salesforce decommission checklist | 8 AM daily | LoanOS CRM Intelligence (existing) | Full LoanOS CRM, Salesforce cancelled | ✅ Active |
 
 ### Weekly
 

@@ -9,11 +9,11 @@
 ---
 
 ## DOMAIN
-CRM (Salesforce/Jungo → LoanOS Supabase Migration)
+LoanOS CRM
 
 ## WHAT THIS SUBAGENT DESIGNS
-Migration plans, Supabase schema changes, n8n automation blueprints, data transformation logic,
-field mapping specifications, deduplication rules, and rollback strategies.
+LoanOS CRM feature specs, Supabase schema changes, n8n automation blueprints, contact/lead
+workflow designs, reporting dashboards, and Salesforce decommission plans.
 Every spec must be complete enough that Builder can execute without asking questions.
 
 ---
@@ -40,17 +40,16 @@ Read in order:
 ### 2. Migration / Schema Design
 Depending on focus area, design one or more of:
 
-**Contact Migration:**
-- Salesforce field → Supabase column mapping (exact names, types, nullability)
+**Contact / Lead Workflows:**
+- LoanOS contact schema for the use case (fields, types, nullability)
+- Lead source tagging: what tag, what stage, what n8n workflow fires on creation
 - Deduplication logic: what uniquely identifies a contact (email? phone? both?)
-- Data cleaning rules: normalize phone formats, email lowercase, name capitalization
-- Handling missing/null fields: what gets a default vs. stays null
-- Import batch size: 100 records for test, then 500-record batches for production
+- CRM routing: all new leads → LoanOS via n8n, never Salesforce
 
-**Pipeline Migration:**
-- Jungo stage name → LoanOS status mapping (exact enum values)
-- Which loans are active (migrate now) vs. historical (migrate separately)
-- How to preserve created_at / updated_at timestamps from Salesforce
+**Pipeline / Loan Tracking:**
+- LoanOS status mapping (exact enum values)
+- Automation triggers at each stage
+- How to route notifications to Adam and Janie
 
 **Automation Blueprint (n8n):**
 - Trigger definition: what event fires the workflow (webhook, cron, DB change)
@@ -107,7 +106,7 @@ Status: READY FOR EXECUTION
 [Exact SQL statements or n8n config JSON if applicable]
 
 ## Tools / Access Needed
-[List: Supabase MCP, n8n API, Salesforce export file, etc.]
+[List: Supabase MCP, n8n API, etc. — no Salesforce access needed]
 
 ## Implementation Order
 1. [First — dependency for everything else]

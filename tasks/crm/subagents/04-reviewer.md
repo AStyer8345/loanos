@@ -9,7 +9,7 @@
 ---
 
 ## DOMAIN
-CRM (Salesforce/Jungo → LoanOS Supabase Migration)
+LoanOS CRM
 
 ## REVIEW PROTOCOL
 
@@ -61,13 +61,13 @@ SELECT COUNT(*) FROM loans WHERE borrower_name IS NULL OR loan_amount IS NULL;
   ORDER BY tablename, policyname;
   ```
 - [ ] Audit log: All data modifications logged in activity_log with timestamp + user
-- [ ] No Salesforce data deleted or modified (read-only source)
+- [ ] No lead or contact routing to Salesforce (all routing must go to LoanOS via n8n)
 
 ### 4. Quality Review
 - Data cleaning: Phone numbers normalized? Names properly capitalized?
-- Field mapping: Are there any Salesforce fields that were dropped but should have been migrated?
+- Field completeness: Required fields populated? Lead source tagged correctly?
 - Empty strings vs. NULLs: Consistent handling throughout?
-- Timestamps: Were created_at values preserved from source, or did they get reset to now()?
+- Timestamps: Were created_at values preserved where applicable, or reset to now()?
 
 ### 5. Brand / Configuration Review
 - Business name in any generated content: "Adam Styer | Mortgage Solutions LP" (never "The Styer Team")

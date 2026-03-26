@@ -30,7 +30,8 @@ WHAT EXISTS:
 - Scenario saving to Supabase
 
 KNOWN GAPS (start here):
-- [ ] Input is too slow — no pre-fill from contact/loan data, no smart defaults
+- [x] Input is too slow — COMPLETE: `?loan_id=` pre-fill + loan detail link existed pre-agent
+- [x] Share page was bare — COMPLETE 2026-03-25 AM: hero, summary stats, narrative, CTA
 - [ ] PDF looks functional, not impressive — borrowers don't share it
 - [ ] AI narrative is generic — doesn't feel personalized
 - [ ] No 2-1 buydown scenario type
@@ -48,8 +49,8 @@ KNOWN GAPS (start here):
 ## IMPROVEMENT QUEUE (priority order)
 
 ### Tier 1 — Highest impact, fix first
-- **Input speed**: Pre-fill loan amount, rate, term from active contact/loan record
-- **Share page redesign**: Make it presentation-quality (borrower-facing, not LO-facing)
+- ~~**Input speed**: Pre-fill loan amount, rate, term from active contact/loan record~~ ✅ DONE (pre-existing)
+- ~~**Share page redesign**: Make it presentation-quality (borrower-facing, not LO-facing)~~ ✅ DONE 2026-03-25 AM
 - **PDF redesign**: Branded, visual, something a borrower would actually read
 - **AI narrative upgrade**: More personalized, incorporate borrower name + specific numbers more naturally
 

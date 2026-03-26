@@ -17,7 +17,7 @@ import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
   GripVertical, EyeOff, Eye, Settings2,
-  Mail, Phone, MapPin, Calendar, Users, MessageSquare, StickyNote,
+  Mail, Phone, MapPin, Calendar, Users, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
@@ -1331,6 +1331,23 @@ function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
   const [activeType, setActiveType] = useState<'call' | 'text' | 'email' | 'note' | null>(null)
   const [logNotes, setLogNotes] = useState('')
   const [saving, setSaving] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  const handleDelete = async (id: string) => {
+    setDeletingIds(prev => new Set(prev).add(id))
+    await supabase.from('activity_log').delete().eq('id', id)
+    setActivity(activity.filter(a => a.id !== id))
+    setDeletingIds(prev => { const next = new Set(prev); next.delete(id); return next })
+  }
 
   const handleLog = async () => {
     if (!activeType) return
@@ -1460,24 +1477,51 @@ function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
               : diffDays === 1 ? 'Yesterday'
               : diffDays < 7 ? `${diffDays}d ago`
               : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            const isExpanded = expandedIds.has(item.id)
+            const isDeleting = deletingIds.has(item.id)
+            const preview = item.summary
+              ? item.summary.replace(/\n+/g, ' ').slice(0, 70) + (item.summary.length > 70 ? '…' : '')
+              : null
 
             return (
-              <div key={item.id} className="flex gap-2.5 px-4 py-2.5 border-b border-zinc-800/50">
+              <div key={item.id} className="border-b border-zinc-800/50">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: cfg.bg }}
+                  className="flex gap-2.5 px-4 py-2.5 items-center cursor-pointer hover:bg-zinc-800/30 transition-colors"
+                  onClick={() => toggleExpanded(item.id)}
                 >
-                  <Icon size={11} style={{ color: cfg.color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[10px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
-                    <span className="text-[10px] font-mono text-zinc-600 shrink-0">{timeLabel}</span>
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: cfg.bg }}
+                  >
+                    <Icon size={11} style={{ color: cfg.color }} />
                   </div>
-                  {item.summary && (
-                    <p className="text-[11px] font-mono text-zinc-300 mt-0.5 leading-relaxed">{item.summary}</p>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[10px] font-mono text-zinc-600">{timeLabel}</span>
+                        <ChevronDown size={10} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                      </div>
+                    </div>
+                    {!isExpanded && preview && (
+                      <p className="text-[10px] font-mono text-zinc-600 mt-0.5 truncate">{preview}</p>
+                    )}
+                  </div>
                 </div>
+                {isExpanded && (
+                  <div className="px-4 pb-3 pl-12">
+                    {item.summary && (
+                      <p className="text-[11px] font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap mb-2">{item.summary}</p>
+                    )}
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      disabled={isDeleting}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                    >
+                      <Trash2 size={10} /> {isDeleting ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </div>
+                )}
               </div>
             )
           })
@@ -2592,6 +2636,23 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
   const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
   const [logNotes, setLogNotes] = useState('')
   const [logSaving, setLogSaving] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  const handleDeleteActivity = async (id: string) => {
+    setDeletingIds(prev => new Set(prev).add(id))
+    await supabase.from('activity_log').delete().eq('id', id)
+    setActivity(activity.filter(a => a.id !== id))
+    setDeletingIds(prev => { const next = new Set(prev); next.delete(id); return next })
+  }
 
   const handleLogActivity = async () => {
     if (!logModal) return
@@ -2727,46 +2788,73 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
           <p className="text-sm">No {filter} activity</p>
         </div>
       ) : (
-        <div className="space-y-0">
-          {visible.map((item, i) => {
-            const typeIcon = item.type === 'call' ? '📞' : item.type === 'email' ? '📧' : item.type === 'text' ? '💬' : null
-            const typeLabel = item.type === 'call' ? 'Call' : item.type === 'email' ? 'Email' : item.type === 'text' ? 'Text' : null
+        <div className="space-y-0 border border-zinc-800 rounded-lg overflow-hidden">
+          {visible.map((item) => {
+            const typeIcon = item.type === 'call' ? '📞' : item.type === 'email' ? '📧' : item.type === 'text' ? '💬' : item.type === 'note' ? '📝' : null
+            const typeLabel = item.type === 'call' ? 'Call' : item.type === 'email' ? 'Email' : item.type === 'text' ? 'Text' : item.type === 'note' ? 'Note' : null
             const isManual = !isSystem(item)
+            const isExpanded = expandedIds.has(item.id)
+            const isDeleting = deletingIds.has(item.id)
+            const { label, detail } = formatActivityAction(item)
+            const summaryText = item.summary && item.summary !== item.action ? item.summary : null
+            const previewText = summaryText
+              ? summaryText.replace(/\n+/g, ' ').slice(0, 80) + (summaryText.length > 80 ? '…' : '')
+              : detail
+                ? detail.slice(0, 80) + (detail.length > 80 ? '…' : '')
+                : null
+            const dateStr = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              + ' at '
+              + new Date(item.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+
             return (
-            <div key={item.id} className="flex gap-3">
-              <div className="flex flex-col items-center">
-                {typeIcon ? (
-                  <span className="text-sm mt-0.5 shrink-0">{typeIcon}</span>
-                ) : (
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${isManual ? 'bg-zinc-400' : 'bg-[#4ADE80]'}`} />
-                )}
-                {i !== visible.length - 1 && <div className="w-px flex-1 bg-zinc-700 mt-1" />}
-              </div>
-              <div className="pb-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {typeLabel && <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400">{typeLabel}</span>}
-                  <p className="text-sm font-mono text-zinc-200">
-                    {(() => {
-                      const { label, detail } = formatActivityAction(item)
-                      return (
-                        <>
-                          {label}
-                          {detail && <span className="text-zinc-400 ml-1">— {detail}</span>}
-                        </>
-                      )
-                    })()}
-                  </p>
+              <div key={item.id} className="border-b border-zinc-800 last:border-b-0">
+                <div
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/40 transition-colors"
+                  onClick={() => toggleExpanded(item.id)}
+                >
+                  <div className="shrink-0">
+                    {typeIcon ? (
+                      <span className="text-sm">{typeIcon}</span>
+                    ) : (
+                      <div className={`w-2 h-2 rounded-full ${isManual ? 'bg-zinc-400' : 'bg-[#4ADE80]'}`} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {typeLabel && <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400 shrink-0">{typeLabel}</span>}
+                        <p className="text-sm font-mono text-zinc-200 truncate">{label}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[10px] font-mono text-zinc-600">{dateStr}</span>
+                        <ChevronDown size={11} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                      </div>
+                    </div>
+                    {!isExpanded && previewText && (
+                      <p className="text-xs font-mono text-zinc-500 mt-0.5 truncate">{previewText}</p>
+                    )}
+                  </div>
                 </div>
-                {item.summary && item.summary !== item.action && (
-                  <p className="text-xs font-mono text-zinc-400 mt-0.5">{item.summary}</p>
+                {isExpanded && (
+                  <div className="px-4 pb-3 pl-11">
+                    {summaryText && (
+                      <p className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap mb-2">{summaryText}</p>
+                    )}
+                    {detail && !summaryText && (
+                      <p className="text-xs font-mono text-zinc-400 mb-2">{detail}</p>
+                    )}
+                    {isManual && (
+                      <button
+                        onClick={() => handleDeleteActivity(item.id)}
+                        disabled={isDeleting}
+                        className="inline-flex items-center gap-1 text-[10px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                      >
+                        <Trash2 size={10} /> {isDeleting ? 'Deleting…' : 'Delete'}
+                      </button>
+                    )}
+                  </div>
                 )}
-                <p className="text-xs text-zinc-600 font-mono mt-0.5">
-                  {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  {' at '}
-                  {new Date(item.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                </p>
               </div>
-            </div>
             )
           })}
         </div>

@@ -14,9 +14,11 @@ import {
   Check,
   X,
   ChevronRight,
+  ChevronDown,
   ExternalLink,
   StickyNote,
   Plus,
+  Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
@@ -230,6 +232,7 @@ type Props = {
   onAddNote: () => void
   onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
+  onDeleteActivity?: (id: string) => Promise<void>
 }
 
 // Typeahead for referred_by — searches existing contacts by name
@@ -580,48 +583,88 @@ const ACTIVITY_TYPE_CONFIG: Record<string, { icon: typeof Phone; color: string; 
 }
 
 // ── Activity feed item ───────────────────────────────────────────────────────
-function ActivityFeedItem({ item }: { item: ContactActivityRow }) {
+function ActivityFeedItem({ item, onDelete }: { item: ContactActivityRow; onDelete?: (id: string) => Promise<void> }) {
   const cfg = ACTIVITY_TYPE_CONFIG[item.activity_type] ?? ACTIVITY_TYPE_CONFIG.note
   const Icon = cfg.icon
   const ts = new Date(item.logged_at)
   const now = new Date()
-  const diffMs = now.getTime() - ts.getTime()
-  const diffDays = Math.floor(diffMs / 86400000)
+  const diffDays = Math.floor((now.getTime() - ts.getTime()) / 86400000)
+  const [expanded, setExpanded] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
-  let timeLabel: string
-  if (diffDays === 0) {
-    timeLabel = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-  } else if (diffDays === 1) {
-    timeLabel = 'Yesterday'
-  } else if (diffDays < 7) {
-    timeLabel = `${diffDays}d ago`
-  } else {
-    timeLabel = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const timeLabel = diffDays === 0
+    ? ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    : diffDays === 1 ? 'Yesterday'
+    : diffDays < 7 ? `${diffDays}d ago`
+    : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+  const preview = item.notes
+    ? item.notes.replace(/\n+/g, ' ').slice(0, 80) + (item.notes.length > 80 ? '…' : '')
+    : null
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!onDelete) return
+    setDeleting(true)
+    await onDelete(item.id)
+    setDeleting(false)
   }
 
   return (
-    <div style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: '50%',
-        background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-      }}>
-        <Icon size={13} style={{ color: cfg.color }} />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: cfg.color }}>
-            {cfg.label}
-          </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-            {timeLabel}
-          </span>
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{ display: 'flex', gap: 10, padding: '9px 0', alignItems: 'center', cursor: 'pointer' }}
+      >
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%',
+          background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Icon size={13} style={{ color: cfg.color }} />
         </div>
-        {item.notes && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', marginTop: 3, lineHeight: 1.5 }}>
-            {item.notes}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: cfg.color }}>
+              {cfg.label}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                {timeLabel}
+              </span>
+              <ChevronDown size={11} style={{ color: 'var(--muted)', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }} />
+            </div>
           </div>
-        )}
+          {!expanded && preview && (
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {preview}
+            </div>
+          )}
+        </div>
       </div>
+      {expanded && (
+        <div style={{ paddingLeft: 38, paddingBottom: 10 }}>
+          {item.notes && (
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 8 }}>
+              {item.notes}
+            </div>
+          )}
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontFamily: 'var(--font-mono)', fontSize: 10, color: '#ef4444',
+                background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: 4, padding: '3px 8px', cursor: deleting ? 'default' : 'pointer',
+                opacity: deleting ? 0.5 : 1,
+              }}
+            >
+              <Trash2 size={10} /> {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -639,6 +682,7 @@ export function ContactRecordView(props: Props) {
     referrerContactId,
     onSaveField,
     onLogActivity,
+    onDeleteActivity,
   } = props
 
   const { setActiveRecord } = useOutreachChat()
@@ -1229,7 +1273,7 @@ export function ContactRecordView(props: Props) {
               </div>
             ) : (
               contactActivity.map(item => (
-                <ActivityFeedItem key={item.id} item={item} />
+                <ActivityFeedItem key={item.id} item={item} onDelete={onDeleteActivity} />
               ))
             )}
           </div>

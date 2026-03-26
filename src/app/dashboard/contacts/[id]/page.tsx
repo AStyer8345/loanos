@@ -191,6 +191,11 @@ export default function ContactRecordPage() {
     }
   }
 
+  const handleDeleteActivity = async (id: string) => {
+    await supabase.from('contact_activity').delete().eq('id', id)
+    setContactActivity(prev => prev.filter(a => a.id !== id))
+  }
+
   const handleLogActivity = async (type: ContactActivityRow['activity_type'], notes: string) => {
     if (!contact) return
     const res = await fetch(`/api/contacts/${contact.id}/activity`, {
@@ -254,6 +259,7 @@ export default function ContactRecordPage() {
       referredLoans={referredLoans}
       onSaveField={handleSaveField}
       onLogActivity={handleLogActivity}
+      onDeleteActivity={handleDeleteActivity}
     />
   )
 }

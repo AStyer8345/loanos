@@ -68,7 +68,7 @@ Read in order:
 4. `CONTEXT.md` — LoanOS repo current state
 5. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: read this for the full n8n workflow table (IDs, statuses), Supabase keys, and existing tool inventory. Do NOT assume something hasn't been built — check here first.**
 6. `tasks/crm/BLOCKERS.md` — any active blockers from prior sessions
-7. `tasks/ADAM-TODO.md` — review pending Adam action items (read-only — Reporter appends here at session end)
+7. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 

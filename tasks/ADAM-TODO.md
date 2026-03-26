@@ -1,6 +1,7 @@
 # Adam's Action Items
-# Agents append here after every session. Adam reviews and deletes completed items.
-# Format: [ ] [DOMAIN] [DATE] — what to do + why it matters
+# Agents append [ ] items here after every session.
+# Adam: change [ ] to [x] when done. Leave [x] items in place — agents will ignore them.
+# Agents: only act on [ ] items. [x] items are complete — do not re-surface them.
 
 ---
 

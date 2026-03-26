@@ -50,7 +50,7 @@ Read these files in order:
 2. `CONTEXT.md` — current repo state
 3. `tasks/enterprise/enterprise-queue.md` — active focus area
 4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: full n8n workflow table (IDs, statuses), Publer account IDs, Supabase keys, existing tool inventory. Do NOT assume something hasn't been built — check here first.**
-5. `tasks/ADAM-TODO.md` — review pending Adam action items (read-only — Reporter appends here at session end)
+5. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
 If `tasks/enterprise/enterprise-queue.md` does not exist, create it:
 

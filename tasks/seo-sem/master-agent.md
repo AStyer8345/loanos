@@ -44,7 +44,7 @@ Read simultaneously:
 - `tasks/seo-sem/agent-rules.md` — learned rules from prior sessions
 - `tasks/seo-sem/backlog.md` — prioritized work queue
 - `tasks/seo-sem/BLOCKERS.md` — stop if active blockers exist
-- `tasks/ADAM-TODO.md` — review pending Adam action items (read-only)
+- `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only
 - `styermortgage-context.md` — site state
 
 Write SESSION_START to `subagent-status.md`.

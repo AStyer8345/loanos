@@ -11,17 +11,6 @@ export const dynamic = 'force-dynamic'
 
 const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
 
-const HOT_KEYWORDS = [
-  'follow up', 'call back', 'interested', 'ready', 'wants to',
-  'motivated', 'urgent', 'asap', 'soon', 'this week', 'next week',
-  'remind', 'reach out', 'needs to', 'looking to', 'actively',
-]
-
-function scoreNotes(notes: string): number {
-  const lower = notes.toLowerCase()
-  return HOT_KEYWORDS.reduce((score, kw) => score + (lower.includes(kw) ? 1 : 0), 0)
-}
-
 export default async function DashboardPage() {
   let organizationId: string
   try {
@@ -179,57 +168,52 @@ export default async function DashboardPage() {
 
   // ── New Leads (contacts without a loan, last 30 days) ────────────────────
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-  const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()
 
-  // Hot leads — score contacts by keyword matches across all activity entries (last 30 days)
-  const { data: recentActivityRows = [] } = await supabase
-    .from('contact_activity')
-    .select('contact_id, notes, logged_at')
+  // ── Hot Leads — website leads in Lead stage, created within 14 days ───────
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: webLeadContacts = [] } = await (supabase.from('contacts') as any)
+    .select('id, first_name, last_name, email, phone, referred_by, created_at')
     .eq('organization_id', organizationId)
-    .not('notes', 'is', null)
-    .gte('logged_at', thirtyDaysAgoIso)
-    .order('logged_at', { ascending: false })
-    .limit(200)
+    .eq('lead_source', 'Website')
+    .eq('stage', 'Lead')
+    .gte('created_at', fourteenDaysAgo.toISOString())
+    .order('created_at', { ascending: false }) as { data: Array<{
+      id: string; first_name: string | null; last_name: string | null
+      email: string | null; phone: string | null; referred_by: string | null
+      created_at: string
+    }> | null }
 
-  // Group activity notes by contact, track most recent entry date
-  const activityByContact = new Map<string, { notes: string[]; latestAt: string }>()
-  for (const row of recentActivityRows ?? []) {
-    if (!row.contact_id || !row.notes) continue
-    const existing = activityByContact.get(row.contact_id)
-    if (existing) {
-      existing.notes.push(row.notes)
-    } else {
-      activityByContact.set(row.contact_id, { notes: [row.notes], latestAt: row.logged_at ?? '' })
+  // Get most recent contact_activity note per lead
+  const webLeadIds = (webLeadContacts ?? []).map(c => c.id)
+  const latestActivityNote = new Map<string, string>()
+  if (webLeadIds.length > 0) {
+    const { data: actRows = [] } = await supabase
+      .from('contact_activity')
+      .select('contact_id, notes')
+      .in('contact_id', webLeadIds)
+      .not('notes', 'is', null)
+      .order('logged_at', { ascending: false })
+      .limit(200)
+    for (const row of actRows ?? []) {
+      if (row.contact_id && !latestActivityNote.has(row.contact_id)) {
+        latestActivityNote.set(row.contact_id, row.notes ?? '')
+      }
     }
   }
 
-  // Fetch contact names for those who have activity
-  const activeContactIds = [...activityByContact.keys()]
-  let hotLeads: HotLead[] = []
-  if (activeContactIds.length > 0) {
-    const { data: hotContactRows = [] } = await supabase
-      .from('contacts')
-      .select('id, first_name, last_name')
-      .eq('organization_id', organizationId)
-      .in('id', activeContactIds)
-
-    hotLeads = (hotContactRows ?? [])
-      .map(c => {
-        const entry = activityByContact.get(c.id)!
-        const combinedNotes = entry.notes.join(' ')
-        return {
-          id: c.id,
-          first_name: c.first_name ?? 'Unknown',
-          last_name: c.last_name ?? null,
-          notes: combinedNotes,
-          daysAgo: Math.floor((now.getTime() - new Date(entry.latestAt).getTime()) / (1000 * 60 * 60 * 24)),
-          score: scoreNotes(combinedNotes),
-        }
-      })
-      .filter(h => h.score > 0)
-      .sort((a, b) => b.score - a.score || a.daysAgo - b.daysAgo)
-      .slice(0, 5)
-  }
+  const hotLeads: HotLead[] = (webLeadContacts ?? []).map(c => ({
+    id: c.id,
+    first_name: c.first_name ?? 'Unknown',
+    last_name: c.last_name ?? null,
+    email: c.email ?? null,
+    phone: c.phone ?? null,
+    referred_by: c.referred_by ?? null,
+    notes: latestActivityNote.get(c.id) ?? '',
+    daysAgo: Math.floor((now.getTime() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+    score: 0,
+  }))
 
   // Get all contact_ids already tied to a loan so we can exclude them
   const { data: loanContactRows = [] } = await supabase

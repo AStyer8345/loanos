@@ -6,6 +6,9 @@ export type HotLead = {
   id: string
   first_name: string
   last_name: string | null
+  email: string | null
+  phone: string | null
+  referred_by: string | null
   notes: string
   daysAgo: number
   score: number
@@ -13,6 +16,26 @@ export type HotLead = {
 
 interface HotLeadsWidgetProps {
   hotLeads: HotLead[]
+}
+
+const TH_STYLE: React.CSSProperties = {
+  fontFamily: '"IBM Plex Mono", monospace',
+  fontSize: 10,
+  color: '#555',
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  textAlign: 'left',
+  padding: '6px 10px',
+  whiteSpace: 'nowrap',
+}
+
+const TD_STYLE: React.CSSProperties = {
+  fontFamily: '"IBM Plex Mono", monospace',
+  fontSize: 11,
+  color: '#bbb',
+  padding: '9px 10px',
+  verticalAlign: 'top',
 }
 
 export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
@@ -43,66 +66,80 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
         }}>
           Hot Leads
         </span>
+        <span style={{
+          fontFamily: '"IBM Plex Mono", monospace',
+          fontSize: 10,
+          color: '#444',
+          marginLeft: 4,
+        }}>
+          — website leads · last 14 days
+        </span>
       </div>
-      <div>
-        {hotLeads.map((lead, i) => {
-          const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ')
-          const snippet = lead.notes.length > 60
-            ? lead.notes.slice(0, 57) + '…'
-            : lead.notes
-          const daysLabel = lead.daysAgo === 0
-            ? 'today'
-            : lead.daysAgo === 1
-              ? '1d ago'
-              : `${lead.daysAgo}d ago`
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid #1e1e1e' }}>
+              <th style={TH_STYLE}>Name</th>
+              <th style={TH_STYLE}>Email</th>
+              <th style={TH_STYLE}>Phone</th>
+              <th style={TH_STYLE}>Notes</th>
+              <th style={TH_STYLE}>Referred By</th>
+              <th style={{ ...TH_STYLE, textAlign: 'right' }}>Age</th>
+            </tr>
+          </thead>
+          <tbody>
+            {hotLeads.map((lead, i) => {
+              const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ')
+              const noteSnippet = lead.notes.length > 80
+                ? lead.notes.slice(0, 77) + '…'
+                : lead.notes
+              const daysLabel = lead.daysAgo === 0
+                ? 'today'
+                : lead.daysAgo === 1
+                  ? '1d ago'
+                  : `${lead.daysAgo}d ago`
 
-          return (
-            <Link
-              key={lead.id}
-              href={`/dashboard/contacts/${lead.id}`}
-              style={{
-                display: 'block',
-                padding: '10px 14px',
-                borderBottom: i < hotLeads.length - 1 ? '1px solid #1e1e1e' : 'none',
-                textDecoration: 'none',
-                transition: 'background 0.1s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#1a1a1a')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                marginBottom: 3,
-              }}>
-                <span style={{
-                  fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: 11,
-                  color: '#e0e0e0',
-                  fontWeight: 500,
-                }}>
-                  {name}
-                </span>
-                <span style={{
-                  fontFamily: '"IBM Plex Mono", monospace',
-                  fontSize: 10,
-                  color: '#555',
-                }}>
-                  {daysLabel}
-                </span>
-              </div>
-              <div style={{
-                fontFamily: '"IBM Plex Mono", monospace',
-                fontSize: 10,
-                color: '#666',
-                fontStyle: 'italic',
-              }}>
-                &quot;{snippet}&quot;
-              </div>
-            </Link>
-          )
-        })}
+              return (
+                <tr
+                  key={lead.id}
+                  style={{ borderBottom: i < hotLeads.length - 1 ? '1px solid #1a1a1a' : 'none' }}
+                >
+                  <td style={TD_STYLE}>
+                    <Link
+                      href={`/dashboard/contacts/${lead.id}`}
+                      style={{ color: '#e0e0e0', textDecoration: 'none', fontWeight: 500 }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#C9A84C')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#e0e0e0')}
+                    >
+                      {name}
+                    </Link>
+                  </td>
+                  <td style={TD_STYLE}>
+                    {lead.email
+                      ? <a href={`mailto:${lead.email}`} style={{ color: '#888', textDecoration: 'none' }}>{lead.email}</a>
+                      : <span style={{ color: '#333' }}>—</span>
+                    }
+                  </td>
+                  <td style={{ ...TD_STYLE, whiteSpace: 'nowrap' }}>
+                    {lead.phone
+                      ? <a href={`tel:${lead.phone}`} style={{ color: '#888', textDecoration: 'none' }}>{lead.phone}</a>
+                      : <span style={{ color: '#333' }}>—</span>
+                    }
+                  </td>
+                  <td style={{ ...TD_STYLE, color: '#666', fontStyle: 'italic', maxWidth: 260 }}>
+                    {noteSnippet || <span style={{ color: '#333' }}>—</span>}
+                  </td>
+                  <td style={{ ...TD_STYLE, color: '#666' }}>
+                    {lead.referred_by || <span style={{ color: '#333' }}>—</span>}
+                  </td>
+                  <td style={{ ...TD_STYLE, textAlign: 'right', color: '#444', whiteSpace: 'nowrap' }}>
+                    {daysLabel}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   )

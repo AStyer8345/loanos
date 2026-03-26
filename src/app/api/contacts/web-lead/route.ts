@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 5. Build structured notes string ─────────────────────────────────────────
-  const noteLines: string[] = ['[Web Lead — Google Ads]']
+  const noteLines: string[] = ['[Web Lead — styermortgage.com]']
   if (loan_type)          noteLines.push(`Loan Type: ${loan_type}`)
   if (credit_score_range) noteLines.push(`Credit Score: ${credit_score_range}`)
   if (purchase_price)     noteLines.push(`Purchase Price: ${purchase_price}`)
@@ -205,7 +205,37 @@ export async function POST(req: NextRequest) {
       if (error) console.error('[web-lead] activity log error:', error)
     })
 
-  // ── 8. Return ─────────────────────────────────────────────────────────────────
+  // ── 8. Log to contact_activity (powers Hot Leads notes column) ───────────────
+  const activityNoteLines: string[] = []
+  if (loan_type)          activityNoteLines.push(`Loan: ${loan_type}`)
+  if (credit_score_range) activityNoteLines.push(`Credit: ${credit_score_range}`)
+  if (purchase_price)     activityNoteLines.push(`Price: ${purchase_price}`)
+  if (down_payment)       activityNoteLines.push(`Down: ${down_payment}`)
+  if (current_balance)    activityNoteLines.push(`Balance: ${current_balance}`)
+  if (home_value)         activityNoteLines.push(`Home Value: ${home_value}`)
+  if (goals && Array.isArray(goals) && goals.length > 0) {
+    activityNoteLines.push(`Goals: ${goals.join(', ')}`)
+  }
+  if (situation)          activityNoteLines.push(`Message: ${situation}`)
+
+  const activityNote = activityNoteLines.join('\n')
+  if (activityNote) {
+    await supabase
+      .from('contact_activity')
+      .insert({
+        organization_id,
+        contact_id:    newContact.id,
+        activity_type: 'web_lead',
+        notes:         activityNote,
+        logged_at:     now,
+        created_by:    'system',
+      })
+      .then(({ error }) => {
+        if (error) console.error('[web-lead] contact_activity insert error:', error)
+      })
+  }
+
+  // ── 9. Return ─────────────────────────────────────────────────────────────────
   const fullName = [first_name, last_name].filter(Boolean).join(' ')
   return NextResponse.json({
     contact:   newContact,

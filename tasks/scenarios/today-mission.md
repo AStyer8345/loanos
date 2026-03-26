@@ -1,46 +1,34 @@
-## Scenarios Mission Brief — 2026-03-25 AM
+## Scenarios Mission Brief — 2026-03-26 AM
 
 ### Focus Area
-Share page redesign — make it presentation-quality, borrower-facing, mobile-first
+PDF Redesign — Hero stat + Summary stat cards + Narrative lede
 
 ### Why This Matters
-The share page is the only thing a borrower ever sees. Right now it opens with a data table.
-Mortgage Coach opens with an emotional hero — borrower name, key takeaway stat, a story.
-A borrower who opens a LoanOS share link on their phone currently sees a raw comparison table.
-A borrower who opens a MC link feels like they're being coached, not invoiced.
-This is the highest-leverage visual change: same data, completely different experience.
-
-Note: Input speed (Tier 1 item 1) is ALREADY DONE — `page.tsx` pre-fills from `?loan_id=`
-and the loan detail page already links to `/dashboard/scenarios/new?loan_id=${loanId}`.
-Moving to Tier 1 item 2: Share page redesign.
+The share page now opens with an emotional hook (borrower name, hero number, summary stats).
+The PDF still opens with "Sarah — Purchase Analysis" followed immediately by a data table.
+Borrowers receive the PDF, open it, see numbers — not a story. They don't share it.
+Mortgage Coach presentations lead with the most important number and aspirational framing.
+This session brings the PDF up to the share page's standard.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Add a hero section with borrower name, property address, and the single most important number (top monthly payment or savings)
-2. Render the AI narrative with proper typography — formatted paragraphs, not a bare div
-3. Add an Adam Styer CTA block at the bottom: "Questions? Schedule a call" → Calendly link
-4. Make the layout mobile-first: readable on a phone without horizontal scroll
-5. Add a visual "summary stat" bar above the table — the one number that tells the story
+1. PDF opens with borrower headline ("Sarah's Purchase Options") + hero stat ($X/mo) right-aligned — same emotional pattern as share page
+2. Three summary stat cards directly below hero (matching share page: lowest payment / lowest CTC / lowest 15yr interest OR monthly savings / 5yr savings / break-even)
+3. First paragraph of AI narrative gets gold left-border lede treatment (larger text, distinct from body)
 
 ### Files in Scope
-ONLY these files may be touched:
-- `src/app/share/[token]/page.tsx` — complete share page redesign
-
-Everything else is off limits.
+- `src/app/api/scenarios/generate-pdf/route.ts` — ONLY this file
 
 ### Definition of Done
-- [ ] `npm run build` passes (no TypeScript errors)
-- [ ] Share page has: hero section, formatted narrative, CTA block, mobile-friendly layout
-- [ ] Summary stat bar shows the top takeaway number
-- [ ] Design matches LoanOS system: IBM Plex Mono, gold #C9A84C, dark #0a0a0a backgrounds
-- [ ] Mobile layout readable at 390px width (iPhone 15 standard)
-- [ ] Compliance footer preserved
-- [ ] No changes to auth, RLS, or multi-tenant code
+- `npm run build` passes with 0 TypeScript errors
+- PDF HTML includes: hero title block with borrower name + hero stat, 3 summary stat cards, narrative lede styling
+- Dark header and existing sections (comparison table, key metrics, break-even, charts, closing costs, footer) unchanged
+- No auth/RLS/multi-tenant code touched
 
 ### Subagents to Activate
-Note: Only 00-notebooklm.md subagent exists. Builder/QA/Reporter running inline this session.
+Note: Only 00-notebooklm.md subagent exists. Builder/QA/Reporter running inline.
 [x] Builder (inline)
 [x] QA (npm run build)
 [x] Reporter (session-log.md update)

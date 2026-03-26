@@ -281,11 +281,136 @@ function renderBreakEvenTable(rows: BreakEvenRow[]): string {
 }
 
 function renderNarrativeHTML(narrative: string): string {
-  return narrative
-    .split(/\n\n+/)
-    .filter(p => p.trim())
-    .map(p => `<p style="font-size:11px;color:#444;line-height:1.7;margin:0 0 12px;">${p.trim().replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>`)
-    .join('')
+  const paragraphs = narrative.split(/\n\n+/).filter(p => p.trim())
+  return paragraphs.map((p, i) => {
+    const text = p.trim().replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    if (i === 0) {
+      return `<p style="font-size:12px;font-weight:500;color:#1a1a1a;line-height:1.65;margin:0 0 14px;padding-left:12px;border-left:3px solid #C9A84C;">${text}</p>`
+    }
+    return `<p style="font-size:11px;color:#555;line-height:1.7;margin:0 0 11px;">${text}</p>`
+  }).join('')
+}
+
+function renderHeroTitleBlock(
+  borrower: string,
+  address: string,
+  mode: 'purchase' | 'refinance',
+  loName: string,
+  date: string,
+  data: DisplayData
+): string {
+  const firstName = borrower ? borrower.split(/[\s,]+/)[0] : ''
+  const headline = firstName
+    ? `${firstName}'s ${mode === 'purchase' ? 'Purchase' : 'Refinance'} Options`
+    : `${mode === 'purchase' ? 'Purchase' : 'Refinance'} Options`
+
+  let heroValue = ''
+  let heroLabel = ''
+  let heroSublabel = ''
+
+  if (mode === 'purchase') {
+    const payments = data.rows.map(r => r.totalMonthlyPayment).filter(p => p > 0)
+    if (payments.length > 0) {
+      heroLabel = 'Starting At'
+      heroValue = fmtCurrency(Math.min(...payments)) + '/mo'
+      heroSublabel = data.rows.length > 1 ? `across ${data.rows.length} scenarios` : 'monthly payment'
+    }
+  } else {
+    const savings = data.keyMetrics.monthlySavings
+    if (savings > 0) {
+      heroLabel = 'You Could Save'
+      heroValue = fmtCurrency(savings) + '/mo'
+      heroSublabel = 'vs. your current loan'
+    } else {
+      const payments = data.rows.map(r => r.totalMonthlyPayment).filter(p => p > 0)
+      if (payments.length > 0) {
+        heroLabel = 'Best Option'
+        heroValue = fmtCurrency(Math.min(...payments)) + '/mo'
+        heroSublabel = 'new monthly payment'
+      }
+    }
+  }
+
+  return `
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.09em;color:#C9A84C;font-weight:700;margin-bottom:6px;">${mode === 'purchase' ? 'Purchase Analysis' : 'Refinance Analysis'}${address ? ` &nbsp;·&nbsp; ${address}` : ''}</div>
+        <h1 style="font-size:26px;font-weight:700;color:#0A1628;letter-spacing:-0.02em;line-height:1.1;margin:0 0 5px;">${headline}</h1>
+        <div style="font-size:10px;color:#999;">Prepared by ${loName} &nbsp;·&nbsp; ${date}</div>
+      </div>
+      ${heroValue ? `
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:#888;font-weight:600;margin-bottom:4px;">${heroLabel}</div>
+        <div style="font-size:34px;font-weight:700;color:#C9A84C;font-family:'IBM Plex Mono',monospace;line-height:1;">${heroValue}</div>
+        <div style="font-size:9px;color:#aaa;margin-top:3px;">${heroSublabel}</div>
+      </div>` : ''}
+    </div>
+    <div style="height:2px;background:#C9A84C;margin-top:14px;"></div>
+  </div>`
+}
+
+function renderSummaryStatCards(data: DisplayData): string {
+  let cards: Array<{ label: string; value: string; sub: string; highlight: boolean }>
+
+  if (data.mode === 'purchase') {
+    const payments = data.rows.map(r => r.totalMonthlyPayment).filter(p => p > 0)
+    const ctcs = data.rows.map(r => r.cashToClose).filter(c => c > 0)
+    const interests = data.rows.map(r => r.totalInterest).filter(i => i > 0)
+    cards = [
+      {
+        label: 'Lowest Monthly Payment',
+        value: payments.length > 0 ? fmtCurrency(Math.min(...payments)) + '/mo' : '—',
+        sub: 'best option',
+        highlight: true,
+      },
+      {
+        label: 'Lowest Cash to Close',
+        value: ctcs.length > 0 ? fmtCurrency(Math.min(...ctcs)) : '—',
+        sub: 'total at closing',
+        highlight: false,
+      },
+      {
+        label: 'Lowest Total Interest',
+        value: interests.length > 0 ? fmtK(Math.min(...interests)) : '—',
+        sub: 'over loan term',
+        highlight: false,
+      },
+    ]
+  } else {
+    const m = data.keyMetrics
+    const breakEven = data.breakEvenRows.length > 0 ? data.breakEvenRows[0].breakEvenMonths : 0
+    cards = [
+      {
+        label: 'Monthly Savings',
+        value: m.monthlySavings > 0 ? fmtCurrency(m.monthlySavings) + '/mo' : '—',
+        sub: 'vs. current loan',
+        highlight: m.monthlySavings > 0,
+      },
+      {
+        label: '5-Year Savings',
+        value: m.savings5yr > 0 ? fmtCurrency(m.savings5yr) : '—',
+        sub: 'cumulative',
+        highlight: m.savings5yr > 0,
+      },
+      {
+        label: 'Break-Even',
+        value: breakEven > 0 ? `${breakEven} mo` : '—',
+        sub: 'cost recovery period',
+        highlight: false,
+      },
+    ]
+  }
+
+  return `
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;">
+    ${cards.map(c => `
+    <div style="background:${c.highlight ? '#0A1628' : '#F9F8F6'};border:1px solid ${c.highlight ? '#C9A84C' : '#E0DDD8'};border-radius:8px;padding:13px 14px;">
+      <div style="font-size:8px;text-transform:uppercase;letter-spacing:0.07em;color:${c.highlight ? '#C9A84C' : '#888'};font-weight:700;margin-bottom:5px;">${c.label}</div>
+      <div style="font-size:20px;font-weight:700;color:${c.highlight ? '#C9A84C' : '#0A1628'};font-family:'IBM Plex Mono',monospace;line-height:1;">${c.value}</div>
+      <div style="font-size:9px;color:${c.highlight ? '#666' : '#aaa'};margin-top:4px;">${c.sub}</div>
+    </div>`).join('')}
+  </div>`
 }
 
 function renderClosingCostsHTML(
@@ -420,21 +545,9 @@ function generatePDFHTML(
 
   <div style="max-width:900px;margin:0 auto;padding:28px 40px 24px;">
 
-    <!-- Title -->
-    <div style="margin-bottom:20px;">
-      <h1 style="font-size:24px;font-weight:700;color:#0A1628;letter-spacing:-0.02em;">
-        ${borrower ? `${borrower} — ` : ''}${mode === 'purchase' ? 'Purchase' : 'Refinance'} Analysis
-      </h1>
-      <div style="font-size:11px;color:#888;margin-top:4px;">Prepared by ${loName} · ${date}</div>
-    </div>
-    <div style="height:2px;background:#C9A84C;margin-bottom:18px;"></div>
-
-    <!-- Meta -->
-    <div style="display:flex;gap:24px;padding:10px 16px;background:#F2F0EB;border-radius:6px;border-left:3px solid #C9A84C;margin-bottom:4px;">
-      ${borrower ? `<div style="font-size:11px;color:#666;">Borrower: <strong style="color:#1a1a1a;">${borrower}</strong></div>` : ''}
-      ${address ? `<div style="font-size:11px;color:#666;">Property: <strong style="color:#1a1a1a;">${address}</strong></div>` : ''}
-      <div style="font-size:11px;color:#666;">Type: <strong style="color:#1a1a1a;">${mode === 'purchase' ? 'Purchase' : 'Refinance'}</strong></div>
-    </div>
+    <!-- Hero Title + Summary Stats -->
+    ${renderHeroTitleBlock(borrower, address, mode, loName, date, data)}
+    ${renderSummaryStatCards(data)}
 
     <!-- Section 1: Scenario Summary Table -->
     <div class="no-break">

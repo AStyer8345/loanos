@@ -49,3 +49,37 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 - Tier 1 item 2 (Share page redesign) — ✅ COMPLETE this session
 
 ---
+
+## AM Session — 2026-03-26 (scenarios-am)
+
+**What was built:**
+- PDF redesign (`src/app/api/scenarios/generate-pdf/route.ts`)
+  - Replaced title + meta section with `renderHeroTitleBlock()`:
+    - Borrower first name headline: "Sarah's Purchase Options" / "Sarah's Refinance Options"
+    - Property address as gold uppercase subheader
+    - Hero stat right-aligned: "Starting At $X/mo" (purchase) or "You Could Save $X/mo" (refi)
+    - "Prepared by [LO] · [Date]" subtext
+    - Gold accent divider retained
+  - Added `renderSummaryStatCards()` — 3-card bar below hero:
+    - Purchase: Lowest Monthly Payment (dark/gold highlight) + Lowest Cash to Close + Lowest Total Interest
+    - Refi: Monthly Savings (dark/gold if positive) + 5-Year Savings + Break-Even months
+  - Updated `renderNarrativeHTML()` — lede treatment on first paragraph:
+    - First paragraph: font-size 12px, font-weight 500, gold left border (3px #C9A84C), padding-left 12px
+    - Remaining paragraphs: font-size 11px, color #555, standard line-height
+
+**MC gap closed:** PDF now opens the same way as the share page — borrower name, hero number, summary stats. Before: "Sarah — Purchase Analysis" then immediately a data table. After: "Sarah's Purchase Options" + "$2,450/mo" hero + 3 stat cards before any table.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Files touched:** `src/app/api/scenarios/generate-pdf/route.ts` only — no auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. AI narrative upgrade — personalization pass:
+   - Incorporate borrower first name into narrative opening
+   - Reference specific numbers from the scenario data (not generic "your monthly payment")
+   - Make the 4 paragraphs feel like they were written for this specific borrower
+2. 2-1 buydown scenario type (Tier 2) — if narrative upgrade is quick
+
+**Domain queue updates:**
+- Tier 1 item 3 (PDF redesign) — ✅ COMPLETE this session
+
+---

@@ -51,7 +51,7 @@ KNOWN GAPS (start here):
 ### Tier 1 — Highest impact, fix first
 - ~~**Input speed**: Pre-fill loan amount, rate, term from active contact/loan record~~ ✅ DONE (pre-existing)
 - ~~**Share page redesign**: Make it presentation-quality (borrower-facing, not LO-facing)~~ ✅ DONE 2026-03-25 AM
-- **PDF redesign**: Branded, visual, something a borrower would actually read
+- ~~**PDF redesign**: Branded, visual, something a borrower would actually read~~ ✅ DONE 2026-03-26 AM
 - **AI narrative upgrade**: More personalized, incorporate borrower name + specific numbers more naturally
 
 ### Tier 2 — New scenario types

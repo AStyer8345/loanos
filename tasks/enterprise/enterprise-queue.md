@@ -2,7 +2,7 @@
 
 ---
 
-CURRENT STATE (as of 2026-03-25):
+CURRENT STATE (as of 2026-03-26):
 
 PHASE 1 — COMPLETE ✅
   Core CRM: contacts (2,377), loans (817+), documents, activity log, email drafts, scenarios
@@ -22,26 +22,26 @@ PHASE 2 — MULTI-TENANCY: COMPLETE ✅
   - [x] Adam must push WF2 (9JyzzwKac8v3uQ7d) to n8n cloud — DONE 2026-03-25
   - [x] activity_log.organization_id NOT NULL — APPLIED migration 056 — 2026-03-25 PM
   - [x] Performance page: localStorage seed data still shows real borrower names — FIXED 2026-03-25 PM
-  - [ ] Plan selection UI in onboarding — selectedPlan storage verification (Week 2 first task)
+  - [x] Plan selection UI in onboarding — VERIFIED 2026-03-26: /api/org/create stores plan, onboarding page has working plan UI
   - [ ] Outlook Email Sync (JMmstRl2C5ylmuIY) blocked on Azure App Registration (not a Phase 2 blocker)
 
 ---
 
-ACTIVE: Phase 2 Closeout + Phase 3 Planning
+ACTIVE: Phase 3 — Billing + Subscriptions
 
-  Priority 1 — Finish Phase 2:
-  Resolve the 5 outstanding items above. Each is a known bug or missing piece.
-  WF1/WF2 cloud push unblocks activity_log NOT NULL hardening.
-  Performance page localStorage fix is a data privacy issue.
+  Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md
+  Decision: Fixed-tier billing (Starter free, Professional $99/mo). Per-seat deferred to Phase 5.
 
-  Priority 2 — Phase 3 Design:
-  LoanOS is production-ready for Adam. Phase 3 = licensing to other LOs.
-  Key questions for Phase 3:
-    - Billing: Stripe subscription per tenant (plan: starter/pro/enterprise)
-    - Plan limits: what's gated per tier? (contacts, loans, users, automations)
-    - White-label: custom domain + logo per tenant, or shared domain with slug?
-    - Admin dashboard: tenant list, usage metrics, support tools
-    - Onboarding for other LOs: what data do they bring in? (CSV import, LOS connection)
+  Build sequence (3 sessions):
+    Session 1: Infrastructure — stripe package, migrations 057+058, entitlements helper
+    Session 2: Webhook + Checkout — webhook handler, checkout/portal routes, org/create modification
+    Session 3: UI + Polish — billing settings page, feature gating in components, upgrade prompts
+
+  ADAM ACTION REQUIRED before build can start:
+    - [ ] Create Stripe account (or use existing)
+    - [ ] Create Product "LoanOS Professional" + Price $99/mo in Stripe Dashboard
+    - [ ] Configure webhook endpoint: https://loanos.vercel.app/api/webhooks/stripe
+    - [ ] Add to Vercel: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_PRICE_PROFESSIONAL_MONTHLY
 
 ---
 

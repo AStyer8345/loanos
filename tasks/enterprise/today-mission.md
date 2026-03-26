@@ -1,3 +1,54 @@
+## Mission Brief — 2026-03-26 AM
+
+### Focus Area
+Phase 3 — Billing + Subscriptions (Kickoff)
+
+### Session Type
+[x] Research + Planning
+[x] Architecture + Spec
+[ ] Build
+[ ] Review + QA
+[ ] Full cycle (Research → Build → QA)
+
+### Objectives
+1. INVESTIGATE — Verify plan storage in /api/org/create (DONE — plan IS stored, 'starter' or 'professional')
+2. ARCHITECTURE — Write Phase 3 Billing + Subscriptions kickoff spec: database schema, Stripe integration pattern, webhook handling, feature gating strategy
+3. RESEARCH — Web research on Stripe + Supabase + Next.js billing patterns (2026 best practices)
+4. DOCUMENT — Note GLBA compliance requirements for Phase 3 Security Hardening (weeks 5-6)
+
+### Key Findings (Pre-Mission)
+- `/api/org/create` line 22: extracts `plan` from request body
+- `/api/org/create` line 27: validates as 'professional' or defaults to 'starter'
+- `/api/org/create` line 33: inserts `plan` into organizations table
+- Onboarding page has full plan selection UI (Starter = Free, Professional = $99/mo)
+- **Plan naming discrepancy**: Code uses 'starter'/'professional', knowledge base uses 'starter'/'pro'/'team'
+- No Stripe package or code exists in the codebase yet
+
+### Files in Scope
+- tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md — CREATE (architecture spec)
+- tasks/enterprise/web-research/2026-03-26-billing-web.md — CREATE (web research)
+- tasks/enterprise/notebooklm-pull-2026-03-26.md — CREATE (pull report)
+
+### Definition of Done
+- Architecture spec written with: database schema, Stripe integration plan, webhook events, feature gating strategy, migration list
+- Web research captured with authoritative sources
+- NotebookLM pull report written
+- Session log updated
+- No code changes this session — research and architecture only
+
+### Subagents to Activate
+[x] Research (inline — not subprocess)
+[x] Architect (inline — master orchestrator writes spec directly)
+[ ] Builder — NOT THIS SESSION
+[ ] Reviewer — NOT THIS SESSION
+[ ] QA — NOT THIS SESSION
+[x] Reporter (session log update)
+
+### HIGH RISK Items
+None — this is a research/architecture session. No code changes.
+
+---
+
 ## Mission Brief — 2026-03-25 PM
 
 ### Focus Area
@@ -30,50 +81,3 @@ Phase 2 Closeout — Multi-Tenant RLS Security Fix + PII Anonymization + Code Co
 
 ### HIGH RISK Items
 - NONE — all 3 changes are low/no risk per spec risk register
-
----
-
-## Mission Brief — 2026-03-25 AM
-
-### Focus Area
-Week 1 — Multi-Tenant RLS Architecture + Tenant Isolation
-(Foundation complete — this session documents what's built, closes remaining gaps, and briefs Week 2)
-
-### Session Type
-[x] Architecture + Spec
-[x] Research + Planning
-
-**Rationale:** The daily prep sessions (2026-03-18 through 2026-03-25) completed the multi-tenancy foundation ahead of the formal enterprise program launch. This session's job is:
-1. Write the authoritative architecture spec documenting what was built
-2. Research the remaining gaps (Performance page migration, stage normalization consolidation)
-3. Produce a Week 2 readiness brief
-
-### Objectives
-1. Write `tasks/enterprise/specs/2026-03-25-multi-tenant-rls-architecture.md` — complete, authoritative spec of the implemented multi-tenant system
-2. Research localStorage → Supabase migration pattern for Performance page
-3. Brief Week 2: Onboarding Flow — what's needed, what's already in place
-
-### Files in Scope
-- `tasks/enterprise/specs/` — create architecture spec
-- `tasks/enterprise/research/` — create research file
-- `tasks/enterprise/session-log.md` — update at end
-- `tasks/enterprise/subagent-status.md` — status tracking
-- No production code changes this session
-
-### Definition of Done
-- [ ] Architecture spec written to specs/ directory
-- [ ] Research file written to research/ directory
-- [ ] Session log updated with findings
-- [ ] Week 2 readiness confirmed or blockers flagged
-
-### Subagents to Activate
-[x] Research Subagent (01-research.md)
-[x] Architect Subagent (02-architect.md)
-[ ] Builder Subagent — NOT THIS SESSION (no code changes)
-[ ] Reviewer Subagent — N/A
-[ ] QA Subagent — N/A
-[x] Reporter Subagent (06-reporter.md)
-
-### HIGH RISK Items
-- NONE this session — read-only research + spec writing only
-- No code changes, no migrations, no RLS policy changes

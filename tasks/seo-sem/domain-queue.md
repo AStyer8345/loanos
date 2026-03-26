@@ -5,7 +5,8 @@ TOOLS: Google Search Console, Google Analytics, Google Ads
 GOAL: Rank #1 for "mortgage broker Austin TX" and 10 supporting keywords by Week 8
 
 COMPLETED: Week 1 — Technical SEO Audit ✅ (2026-03-25 AM) — see seo-audit-week1.md
-ACTIVE: Week 2 — Keyword Research ← START HERE
+COMPLETED: Week 2 — Keyword Research ✅ (2026-03-26 AM) — see research/2026-03-26-keyword-research.md + specs/2026-03-26-keyword-strategy-spec.md
+ACTIVE: Week 3 — On-Page Optimization ← START HERE (spec ready at specs/2026-03-26-keyword-strategy-spec.md)
   Crawl styermortgage.com for technical issues: broken links, missing meta tags,
   page speed, mobile responsiveness, Core Web Vitals, sitemap, robots.txt,
   structured data, SSL, canonical tags. Document every issue with priority score.

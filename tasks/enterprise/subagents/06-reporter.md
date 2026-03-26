@@ -119,6 +119,30 @@ For each subagent that had an issue this session:
 
 ---
 
+## ADAM ACTION ITEMS
+
+After writing the session log, check: does Adam need to do anything manually because of this session?
+
+Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
+Skip if nothing requires his manual intervention.
+
+Examples of things that DO belong here:
+- A Vercel environment variable needs to be set (agent can't write secrets)
+- A Supabase migration is ready but needs Adam to run it in production
+- A new external service needs an account or API key created
+- A feature is built but needs Adam to test and approve before going live
+- Outlook/Azure OAuth needs to be reconnected — requires Adam's credentials
+
+Examples of things that do NOT belong here:
+- Session summaries or FYI notes
+- Things the agent already handled
+- Next session priorities (those go in session-log.md)
+
+Format — append each item as:
+```markdown
+- [ ] [ENTERPRISE] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+```
+
 ## COMPLETION SIGNAL
 
 Append to `tasks/enterprise/subagent-status.md`:
@@ -127,6 +151,7 @@ REPORTER SUBAGENT: COMPLETE
 Session log updated.
 Timestamp: [DATETIME]
 SESSION COMPLETE ✓
+Adam action items added: [count or "none"]
 ```
 
 Then clear `tasks/enterprise/subagent-status.md` for the next session.

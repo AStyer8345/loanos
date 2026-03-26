@@ -65,6 +65,7 @@ Read in order:
 3. `tasks/social-media/domain-queue.md` — active focus area
 4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: Publer account IDs (Facebook, Instagram, LinkedIn, GBP), n8n workflow table, existing tool inventory. Do NOT assume something hasn't been set up — check here first.**
 5. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
+6. `tasks/ADAM-TODO.md` — review pending Adam action items (read-only — Reporter appends here at session end)
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 

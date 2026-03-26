@@ -100,10 +100,35 @@ Only append improvements that are specific and actionable. Skip vague suggestion
 
 ---
 
+## ADAM ACTION ITEMS
+
+After writing the session log, check: does Adam need to do anything manually because of this session?
+
+Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
+Skip if nothing requires his manual intervention.
+
+Examples of things that DO belong here:
+- A funnel or landing page needs Adam's review before going live
+- Mailchimp credentials expired or a list is missing
+- A lead came in that needs Adam's immediate attention
+- A compliance gap requires Adam's judgment call (e.g. TCPA opt-in unclear)
+- An n8n workflow failed on a live lead and needs manual follow-up
+
+Examples of things that do NOT belong here:
+- Session summaries or FYI notes
+- Things the agent already handled
+- Next session priorities (those go in session-log.md)
+
+Format — append each item as:
+```markdown
+- [ ] [LEAD-GEN] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+```
+
 ## COMPLETION SIGNAL
 Write to `tasks/lead-gen/subagent-status.md`:
 ```
 REPORTER SUBAGENT: COMPLETE — [DATETIME]
 Session log: tasks/lead-gen/session-log.md
 SESSION COMPLETE ✓
+Adam action items added: [count or "none"]
 ```

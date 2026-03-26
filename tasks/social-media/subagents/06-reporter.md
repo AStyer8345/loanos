@@ -95,9 +95,34 @@ Append to `tasks/social-media/prompt-improvements.md`:
 
 Only add an entry if there's a genuine improvement to suggest. Skip if everything ran cleanly.
 
+## ADAM ACTION ITEMS
+
+After writing the session log, check: does Adam need to do anything manually because of this session?
+
+Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
+Skip if nothing requires his manual intervention.
+
+Examples of things that DO belong here:
+- Publer API credential expired — Adam must re-auth
+- A post was flagged below 7/10 after two rewrites and needs Adam's rewrite
+- A platform account was disconnected and needs reconnection
+- A compliance issue requires Adam's judgment call
+- A new tool/account needs to be set up that the agent can't do
+
+Examples of things that do NOT belong here:
+- Session summaries or FYI notes
+- Things the agent already handled
+- Next session priorities (those go in session-log.md)
+
+Format — append each item as:
+```markdown
+- [ ] [SOCIAL] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+```
+
 ## COMPLETION SIGNAL
 ```
 REPORTER SUBAGENT: COMPLETE — [DATETIME]
 SESSION COMPLETE ✓
 Posts this session: [count] | Platforms covered: [list] | Compliance issues: [count]
+Adam action items added: [count or "none"]
 ```

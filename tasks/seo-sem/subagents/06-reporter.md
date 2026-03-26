@@ -106,8 +106,33 @@ Session type: [Research / Strategy / Execute / Full Cycle]
 
 ---
 
+## ADAM ACTION ITEMS
+
+After writing the session log, check: does Adam need to do anything manually because of this session?
+
+Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
+Skip if nothing requires his manual intervention.
+
+Examples of things that DO belong here:
+- A page needs to be deployed to Netlify (agent wrote the HTML but can't deploy)
+- Google Search Console access needed — agent can't add the site
+- A blog post needs Adam's review/approval before publishing
+- A Google Ads account needs to be set up (requires Adam's billing info)
+- A backlink outreach email needs Adam to send it from his actual email
+
+Examples of things that do NOT belong here:
+- Session summaries or FYI notes
+- Things the agent already handled
+- Next session priorities (those go in session-log.md)
+
+Format — append each item as:
+```markdown
+- [ ] [SEO] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+```
+
 ## COMPLETION SIGNAL
 ```
 REPORTER SUBAGENT: COMPLETE — [DATETIME]
 SESSION COMPLETE ✓
+Adam action items added: [count or "none"]
 ```

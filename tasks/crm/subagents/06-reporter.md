@@ -115,9 +115,34 @@ This triggers the NotebookLM PUSH+CURATE mode.
 
 ---
 
+## ADAM ACTION ITEMS
+
+After writing the session log, check: does Adam need to do anything manually because of this session?
+
+Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
+Skip if nothing requires his manual intervention.
+
+Examples of things that DO belong here:
+- A Supabase schema change needs review before deploying to production
+- An n8n workflow needs Adam to approve before it goes live on real borrowers
+- A data quality issue was found that needs Adam's judgment to resolve
+- A CRM improvement requires Adam to provide information (e.g. "what stage does X belong in?")
+- Janie's access scope needs to be reviewed/updated
+
+Examples of things that do NOT belong here:
+- Session summaries or FYI notes
+- Things the agent already handled
+- Next session priorities (those go in session-log.md)
+
+Format — append each item as:
+```markdown
+- [ ] [CRM] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+```
+
 ## COMPLETION SIGNAL
 ```
 REPORTER SUBAGENT: COMPLETE — [DATETIME]
 SESSION COMPLETE ✓
 Queue advanced: [YES/NO]
+Adam action items added: [count or "none"]
 ```

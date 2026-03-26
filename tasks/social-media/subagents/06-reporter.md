@@ -99,8 +99,7 @@ Only add an entry if there's a genuine improvement to suggest. Skip if everythin
 
 After writing the session log, check: does Adam need to do anything manually because of this session?
 
-Only append to `tasks/ADAM-TODO.md` if there is a genuine action Adam must take.
-Skip if nothing requires his manual intervention.
+Only act if there is a genuine action Adam must take. Skip if nothing requires his manual intervention.
 
 Examples of things that DO belong here:
 - Publer API credential expired — Adam must re-auth
@@ -114,10 +113,23 @@ Examples of things that do NOT belong here:
 - Things the agent already handled
 - Next session priorities (those go in session-log.md)
 
-Format — append each item as:
+For each genuine action item, do BOTH steps:
+
+**Step 1 — Append to `tasks/ADAM-TODO.md`:**
 ```markdown
-- [ ] [SOCIAL] [YYYY-MM-DD] — [what Adam needs to do] — [why it can't be done automatically]
+- [ ] [SOCIAL] YYYY-MM-DD — [what Adam needs to do] — [why it can't be done automatically]
 ```
+
+**Step 2 — POST to LoanOS dashboard (Supabase):**
+```bash
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/todo_items" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"[SOCIAL] $(date +%Y-%m-%d) — [what Adam needs to do]\", \"is_complete\": false, \"is_urgent\": false, \"organization_id\": \"18613f82-fdd9-42dd-a09e-f3c577328258\", \"user_id\": \"b13aa8c6-c3a0-4312-9b35-c76073e7ccdc\"}"
+```
+
+Run one POST per action item. Replace the placeholder text with the actual action description. Set `is_urgent: true` only for time-sensitive items.
 
 ## COMPLETION SIGNAL
 ```

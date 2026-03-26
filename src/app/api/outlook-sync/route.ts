@@ -179,6 +179,15 @@ async function findLoanForContact(contactId: string | null, subject: string | nu
   return null;
 }
 
+// Detect whether an email subject/preview indicates a pre-approval was sent
+function detectEmailType(subject: string | null, preview: string | null): string | null {
+  const text = `${subject ?? ''} ${preview ?? ''}`.toLowerCase();
+  if (/pre.?approv|pre.?qual|pa letter|approval letter/i.test(text)) return 'pa_sent';
+  if (/closing disclosure|cd sent|cd is ready/i.test(text)) return 'cd_sent';
+  if (/clear to close|ctc/i.test(text)) return 'ctc';
+  return null;
+}
+
 async function logEmailActivity(
   contact: Record<string, unknown>,
   message: Record<string, unknown>,
@@ -195,6 +204,11 @@ async function logEmailActivity(
       ? `Email from ${from}: ${message.subject}`
       : `Email to ${toList}: ${message.subject}`;
 
+  const detectedType = detectEmailType(
+    message.subject as string | null,
+    message.bodyPreview as string | null
+  );
+
   const payload = {
     direction,
     from,
@@ -207,6 +221,7 @@ async function logEmailActivity(
     preview: message.bodyPreview,
     received_at: message.receivedDateTime,
     message_id: message.internetMessageId,
+    ...(detectedType ? { detected_type: detectedType } : {}),
   };
 
   // Auto-link to loan via contact's active loans or subject-line matching
@@ -376,7 +391,38 @@ async function runSync() {
       if (inserted) { stats.inserted++; } else { stats.skipped++; }
     }
 
-    if (!matched) stats.unmatched++;
+    if (!matched) {
+      // Try subject-line matching to a loan even without a recipient match
+      const loanId = await findLoanForContact(null, msg.subject as string | null);
+      const toList = ((msg.toRecipients as Record<string, Record<string, string>>[]) || [])
+        .map(r => r.emailAddress?.address).filter(Boolean).join(', ');
+      const detectedType = detectEmailType(
+        msg.subject as string | null,
+        msg.bodyPreview as string | null
+      );
+      await fetch(`${SUPABASE_URL}/rest/v1/activity_log`, {
+        method: 'POST',
+        headers: { ...sbHeaders(), Prefer: 'resolution=ignore-duplicates,return=minimal' },
+        body: JSON.stringify({
+          action: 'email_outbound', type: 'email_outbound', entity_type: 'email',
+          ...(loanId ? { loan_id: loanId } : {}),
+          user_id: LOANOS_SYSTEM_USER_ID,
+          summary: `Email to ${toList}: ${msg.subject}`,
+          from_address: process.env.OUTLOOK_USER_EMAIL || '',
+          subject: msg.subject,
+          body_snippet: (msg.bodyPreview as string) || null,
+          occurred_at: msg.receivedDateTime,
+          external_id: msg.internetMessageId,
+          metadata: {
+            direction: 'email_outbound', to: toList, subject: msg.subject,
+            preview: msg.bodyPreview, received_at: msg.receivedDateTime,
+            message_id: msg.internetMessageId, activity_type: 'email',
+            ...(detectedType ? { detected_type: detectedType } : {}),
+          },
+        }),
+      });
+      stats.unmatched++;
+    }
   }
 
   return stats;

@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 export type HotLead = {
   id: string
@@ -39,7 +41,21 @@ const TD_STYLE: React.CSSProperties = {
 }
 
 export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
-  if (hotLeads.length === 0) return null
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  const supabase = createClient()
+
+  const visible = hotLeads.filter(l => !dismissed.has(l.id))
+
+  async function handleDismiss(id: string) {
+    setDismissed(prev => new Set([...prev, id]))
+    await supabase
+      .from('contacts')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update({ hot_lead_dismissed: true } as any)
+      .eq('id', id)
+  }
+
+  if (visible.length === 0) return null
 
   return (
     <div style={{
@@ -72,7 +88,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
           color: '#444',
           marginLeft: 4,
         }}>
-          — website leads · last 14 days
+          — recent leads · last 14 days
         </span>
       </div>
       <div style={{ overflowX: 'auto' }}>
@@ -85,10 +101,11 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
               <th style={TH_STYLE}>Notes</th>
               <th style={TH_STYLE}>Referred By</th>
               <th style={{ ...TH_STYLE, textAlign: 'right' }}>Age</th>
+              <th style={{ ...TH_STYLE, width: 32 }}></th>
             </tr>
           </thead>
           <tbody>
-            {hotLeads.map((lead, i) => {
+            {visible.map((lead, i) => {
               const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ')
               const noteSnippet = lead.notes.length > 80
                 ? lead.notes.slice(0, 77) + '…'
@@ -102,7 +119,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
               return (
                 <tr
                   key={lead.id}
-                  style={{ borderBottom: i < hotLeads.length - 1 ? '1px solid #1a1a1a' : 'none' }}
+                  style={{ borderBottom: i < visible.length - 1 ? '1px solid #1a1a1a' : 'none' }}
                 >
                   <td style={TD_STYLE}>
                     <Link
@@ -134,6 +151,27 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                   </td>
                   <td style={{ ...TD_STYLE, textAlign: 'right', color: '#444', whiteSpace: 'nowrap' }}>
                     {daysLabel}
+                  </td>
+                  <td style={{ ...TD_STYLE, textAlign: 'center', padding: '9px 8px' }}>
+                    <button
+                      onClick={() => handleDismiss(lead.id)}
+                      title="Remove from hot leads"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#333',
+                        fontSize: 14,
+                        lineHeight: 1,
+                        padding: '2px 4px',
+                        borderRadius: 3,
+                        transition: 'color 0.15s',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#888')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#333')}
+                    >
+                      ×
+                    </button>
                   </td>
                 </tr>
               )

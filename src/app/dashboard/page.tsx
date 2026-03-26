@@ -169,15 +169,16 @@ export default async function DashboardPage() {
   // ── New Leads (contacts without a loan, last 30 days) ────────────────────
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-  // ── Hot Leads — website leads in Lead stage, created within 14 days ───────
+  // ── Hot Leads — all Lead-stage contacts, created within 14 days, not dismissed ─
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: webLeadContacts = [] } = await (supabase.from('contacts') as any)
     .select('id, first_name, last_name, email, phone, referred_by, created_at')
     .eq('organization_id', organizationId)
-    .eq('lead_source', 'Website')
     .eq('stage', 'Lead')
+    .neq('hot_lead_dismissed', true)
+    .not('contact_type', 'in', '("realtor","agent","lender","title")')
     .gte('created_at', fourteenDaysAgo.toISOString())
     .order('created_at', { ascending: false }) as { data: Array<{
       id: string; first_name: string | null; last_name: string | null

@@ -186,12 +186,32 @@ A BLOCKER means: no further builds happen until the issue is resolved.
 
 ---
 
+## STEP 7 — PUSH TO MASTER NOTEBOOK
+
+After all subagents complete, push a summary note to the master aggregator notebook so Adam sees all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create "[ENTERPRISE] $(date +%Y-%m-%d) AM — COMPLETED: [what was built/researched]. NEXT: [top priority for next session]. BLOCKERS: [None or specific issue]." -t "$(date +%Y-%m-%d) AM — Enterprise"
+```
+
+Switch back to domain notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/enterprise/notebooklm-id.txt)
+```
+
+---
+
 ## OUTPUT
 
 Your final output is confirmation that:
 1. Mission brief was written
 2. Subagents ran in correct sequence
 3. Session log was updated
-4. Next session knows exactly what to do
+4. Master notebook received today's summary note
+5. Next session knows exactly what to do
 
 You are the system. Keep it running.

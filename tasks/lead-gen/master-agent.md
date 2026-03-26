@@ -184,7 +184,26 @@ Write BLOCKER to `tasks/lead-gen/BLOCKERS.md` if:
 
 ---
 
-## STEP 8 — VERIFY CHAIN COMPLETE
+## STEP 8 — PUSH TO MASTER NOTEBOOK
+
+After all subagents complete, push a summary note to the master aggregator notebook so Adam sees all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create "[LEAD-GEN] $(date +%Y-%m-%d) AM — COMPLETED: [what was built/researched]. NEXT: [top priority for next session]. BLOCKERS: [None or specific issue]." -t "$(date +%Y-%m-%d) AM — Lead Gen"
+```
+
+Switch back to domain notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/lead-gen/notebooklm-id.txt)
+```
+
+---
+
+## STEP 9 — VERIFY CHAIN COMPLETE
 
 - [ ] NotebookLM pull report exists
 - [ ] Research written (if applicable)
@@ -195,3 +214,4 @@ Write BLOCKER to `tasks/lead-gen/BLOCKERS.md` if:
 - [ ] Session log updated
 - [ ] NotebookLM push complete
 - [ ] Daily digest sent (PM session)
+- [ ] Master notebook updated

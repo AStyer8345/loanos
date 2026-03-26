@@ -162,6 +162,25 @@ Stop and write a BLOCKER to session-log.md if:
 
 ---
 
+## STEP 7 — PUSH TO MASTER NOTEBOOK
+
+After all subagents complete, push a summary note to the master aggregator notebook so Adam sees all agent activity in one place.
+
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
+```
+
+```bash
+notebooklm note create "[SCENARIOS] $(date +%Y-%m-%d) AM — COMPLETED: [what was built/improved]. MC GAP CLOSED: [which Mortgage Coach advantage was addressed]. NEXT: [top priority]. BLOCKERS: [None or specific]." -t "$(date +%Y-%m-%d) AM — Scenarios"
+```
+
+Switch back to domain notebook:
+```bash
+/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/scenarios/notebooklm-id.txt)
+```
+
+---
+
 ## OUTPUT
 
 Confirm:
@@ -169,6 +188,7 @@ Confirm:
 2. Subagents ran in sequence
 3. Build passes
 4. Session log updated — next session knows exactly what to work on
-5. NotebookLM PUSH complete (runs via PM skill)
+5. Master notebook received today's summary note
+6. NotebookLM PUSH complete (runs via PM skill)
 
 You are building the tool that replaces Mortgage Coach. Make it count every session.

@@ -12,18 +12,18 @@ PHASE 1 — COMPLETE ✅
   Marketing tab, daily briefing, performance reports, todo system
   Scenario Builder: 3-step wizard, branded PDF output, AI narrative
 
-PHASE 2 — MULTI-TENANCY: ~95% COMPLETE ✅
-  Full org-scoped RLS across all 15 tables (migrations 001–053)
+PHASE 2 — MULTI-TENANCY: COMPLETE ✅
+  Full org-scoped RLS across all 15 tables (migrations 001–056)
   Onboarding flow: org create, member invite, role management (/api/org/*)
-  NOT NULL hardened on 8 tables (migration 053, 2026-03-25)
+  NOT NULL hardened on all tables incl. activity_log (migration 056, 2026-03-25 PM)
 
-  OUTSTANDING (finish before Phase 3 launch):
-  - [ ] Adam must push WF1 (1tagvoU0UXtdDiMY) to n8n cloud — still running old version
-  - [ ] Adam must push WF2 (9JyzzwKac8v3uQ7d) to n8n cloud — same
-  - [ ] activity_log.organization_id NOT NULL — safe once WF1/WF2 confirmed pushed (migration 056 ready)
+  OUTSTANDING (carry to Phase 3 — not blockers):
+  - [x] Adam must push WF1 (1tagvoU0UXtdDiMY) to n8n cloud — DONE 2026-03-25
+  - [x] Adam must push WF2 (9JyzzwKac8v3uQ7d) to n8n cloud — DONE 2026-03-25
+  - [x] activity_log.organization_id NOT NULL — APPLIED migration 056 — 2026-03-25 PM
   - [x] Performance page: localStorage seed data still shows real borrower names — FIXED 2026-03-25 PM
-  - [ ] Plan selection UI in onboarding — selectedPlan storage verification deferred to Week 2
-  - [ ] Outlook Email Sync (JMmstRl2C5ylmuIY) blocked on Azure App Registration
+  - [ ] Plan selection UI in onboarding — selectedPlan storage verification (Week 2 first task)
+  - [ ] Outlook Email Sync (JMmstRl2C5ylmuIY) blocked on Azure App Registration (not a Phase 2 blocker)
 
 ---
 

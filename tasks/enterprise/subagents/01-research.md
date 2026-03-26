@@ -26,10 +26,9 @@ For the focus area, research the following:
 
 ### 1. Industry Benchmarks
 How did the best SaaS companies solve this problem?
-- Salesforce: their architectural decisions, data model, public engineering blog posts
 - HubSpot: how they handle multi-tenancy, onboarding, billing
 - Rippling, Stripe, Linear — any relevant patterns for the focus area
-- Mortgage-specific: Encompass, BytePro, Jungo — how they handle the same problem
+- Mortgage-specific: Encompass, BytePro — how they handle the same problem
 
 ### 2. Financial Services Requirements
 - GLBA compliance requirements relevant to the focus area
@@ -64,14 +63,11 @@ Session: [AM/PM]
 [3-5 sentences. What's the most important thing to know?]
 
 ## How Top SaaS Companies Did It
-### Salesforce
-[Key decisions, patterns, architecture]
-
 ### HubSpot / Others
 [Relevant patterns]
 
 ### Mortgage Industry Specific
-[What LOS vendors do, what Jungo does]
+[What LOS vendors do — Encompass, BytePro, SimpleNexus]
 
 ## Financial Services Requirements
 [GLBA, SOC 2, PII — what applies]

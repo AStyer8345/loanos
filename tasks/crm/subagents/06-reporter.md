@@ -51,7 +51,6 @@ Type: [Research / Strategy / Execute / Full Cycle]
 | Contacts in LoanOS | [N] | [N] | +[N] |
 | Active loans in LoanOS | [N] | [N] | +[N] |
 | n8n workflows active | [N] | [N] | +[N] |
-| Salesforce decommission checklist items remaining | [N] | [N] | -[N] |
 
 ### Queue Position
 Current week: [Week X of 8 — topic]

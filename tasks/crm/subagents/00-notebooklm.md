@@ -85,11 +85,10 @@ Read active topic from `tasks/crm/domain-queue.md`.
 
 Run these queries:
 ```bash
-notebooklm ask "What do we already know about [ACTIVE_TOPIC] for the CRM migration?" --json
-notebooklm ask "What Salesforce/Jungo fields and data structures have been documented so far?" --json
+notebooklm ask "What do we already know about [ACTIVE_TOPIC] for LoanOS CRM?" --json
 notebooklm ask "What Supabase schema decisions have been made for contacts and pipeline?" --json
-notebooklm ask "What n8n automations have been rebuilt or are planned for CRM?" --json
-notebooklm ask "What are the highest priority unresolved migration items?" --json
+notebooklm ask "What n8n automations are live or planned for CRM?" --json
+notebooklm ask "What are the highest priority unresolved CRM improvement items?" --json
 notebooklm ask "What did the last session complete and what was deferred?" --json
 ```
 
@@ -102,10 +101,10 @@ Save to `tasks/crm/notebooklm-pull-[YYYY-MM-DD].md`:
 Active Topic: [TOPIC]
 
 ## What We Already Know
-[Synthesized — not raw output. What's established knowledge about the migration.]
+[Synthesized — not raw output. What's established knowledge about the CRM.]
 
-## Salesforce/Jungo Field Map (known so far)
-[What fields have been documented, what's still unmapped]
+## LoanOS Contact Schema (current state)
+[What fields exist in the contacts table, what's populated vs. empty]
 
 ## Supabase Schema Decisions
 [What tables/columns exist, what's planned]
@@ -146,7 +145,7 @@ NOTEBOOKLM (PULL): COMPLETE — [DATETIME]
 #### 2a — Identify Stale Sources
 ```bash
 notebooklm ask "List all sources currently in this notebook with their approximate age and topic" --json
-notebooklm ask "Which sources contain information about Salesforce field structures that may have been superseded by updated specs?" --json
+notebooklm ask "Which sources contain information about CRM schema or field structures that may have been superseded by updated specs?" --json
 ```
 
 Cross-reference against local files:
@@ -205,10 +204,10 @@ curl -s "https://api.search.brave.com/res/v1/web/search?q=[QUERY]&count=5" \
 ```
 
 If BRAVE_SEARCH_KEY is NOT set — use the WebSearch tool with these queries:
-- "Salesforce to Supabase CRM migration [CURRENT_YEAR]"
-- "mortgage CRM data migration best practices [CURRENT_YEAR]"
-- "n8n Salesforce automation replacement [CURRENT_YEAR]"
+- "mortgage CRM best practices [CURRENT_YEAR]"
+- "Supabase CRM schema mortgage [CURRENT_YEAR]"
 - "GLBA CRM data compliance mortgage broker [CURRENT_YEAR]"
+- "n8n mortgage automation CRM [CURRENT_YEAR]"
 - "Supabase contacts pipeline schema best practices [CURRENT_YEAR]"
 
 Save useful results to `tasks/crm/web-research/[DATE]-[topic-slug]-web.md`
@@ -217,7 +216,7 @@ Add authoritative sources to NotebookLM:
 notebooklm source add <URL> --json
 ```
 
-**Rules:** Max 5 new web sources per session. Only authoritative domains: Supabase docs, n8n docs, Salesforce docs, CFPB, HUD, GLBA guidance, mortgage industry publications.
+**Rules:** Max 5 new web sources per session. Only authoritative domains: Supabase docs, n8n docs, CFPB, HUD, GLBA guidance, mortgage industry publications.
 
 ---
 

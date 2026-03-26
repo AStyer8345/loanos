@@ -29,7 +29,7 @@ Each row is one scheduled task. To add a new agent system:
 | `loanos-enterprise-am` | Master orchestrator for LoanOS app — research, architecture, execution across all LoanOS features | 7 AM daily | LoanOS Enterprise (existing) | Full AI-powered mortgage business OS | ✅ Active |
 | `styer-site-daily` | styermortgage.com conversion optimization — CTAs, landing pages, funnel health, A/B ideas | 7 AM daily | LoanOS Website Intelligence (existing) | 5%+ visitor-to-lead conversion | ✅ Active |
 | `loanos-daily` | LoanOS codebase health — build checks, TypeScript errors, code quality, one fix per run | 8 AM daily | — | Zero build errors, clean code | ✅ Active |
-| `loanos-crm-am` | LoanOS CRM operations — contact workflows, automation gaps, Salesforce decommission checklist | 8 AM daily | LoanOS CRM Intelligence (existing) | Full LoanOS CRM, Salesforce cancelled | ✅ Active |
+| `loanos-crm-am` | LoanOS CRM operations — contact workflows, automation coverage, data quality improvements | 8 AM daily | LoanOS CRM Intelligence (existing) | Best-in-class mortgage CRM in LoanOS | ✅ Active |
 
 ### Weekly
 
@@ -76,7 +76,7 @@ MORTGAGE BUSINESS
 │   ├── loanos-daily                ← Code health
 │   ├── loanos-knowledge-base       ← Weekly deep fixes
 │   ├── loanos-build-watchdog       ← Uptime
-│   └── loanos-crm-am/pm            ← Salesforce → Supabase migration
+│   └── loanos-crm-am/pm            ← LoanOS CRM improvement program
 │
 ├── Website (styermortgage.com)
 │   ├── styer-site-daily            ← Conversion optimization

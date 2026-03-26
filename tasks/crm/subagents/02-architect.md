@@ -13,7 +13,7 @@ LoanOS CRM
 
 ## WHAT THIS SUBAGENT DESIGNS
 LoanOS CRM feature specs, Supabase schema changes, n8n automation blueprints, contact/lead
-workflow designs, reporting dashboards, and Salesforce decommission plans.
+workflow designs, and reporting dashboards.
 Every spec must be complete enough that Builder can execute without asking questions.
 
 ---
@@ -44,7 +44,7 @@ Depending on focus area, design one or more of:
 - LoanOS contact schema for the use case (fields, types, nullability)
 - Lead source tagging: what tag, what stage, what n8n workflow fires on creation
 - Deduplication logic: what uniquely identifies a contact (email? phone? both?)
-- CRM routing: all new leads → LoanOS via n8n, never Salesforce
+- CRM routing: all new leads → LoanOS via n8n
 
 **Pipeline / Loan Tracking:**
 - LoanOS status mapping (exact enum values)
@@ -106,7 +106,7 @@ Status: READY FOR EXECUTION
 [Exact SQL statements or n8n config JSON if applicable]
 
 ## Tools / Access Needed
-[List: Supabase MCP, n8n API, etc. — no Salesforce access needed]
+[List: Supabase MCP, n8n API, etc.]
 
 ## Implementation Order
 1. [First — dependency for everything else]

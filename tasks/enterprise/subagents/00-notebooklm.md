@@ -192,7 +192,6 @@ Search for current best practices on today's active topic and any topics where s
 # - "[ACTIVE_TOPIC] SaaS best practices [CURRENT_YEAR]"
 # - "Supabase multi-tenant [ACTIVE_TOPIC] [CURRENT_YEAR]"
 # - "financial services [ACTIVE_TOPIC] compliance [CURRENT_YEAR]"
-# - "Salesforce [ACTIVE_TOPIC] architecture"
 # - "Next.js [ACTIVE_TOPIC] pattern [CURRENT_YEAR]"
 
 If BRAVE_SEARCH_KEY is set in environment:

@@ -9,33 +9,34 @@
 ---
 
 ## DOMAIN
-CRM (Salesforce/Jungo → LoanOS Supabase Migration)
+CRM (LoanOS — Supabase-powered)
 
 ## RESEARCH MISSION
 Read `tasks/crm/today-mission.md` for today's focus.
 Read `tasks/crm/notebooklm-pull-[TODAY].md` for what's already known — do not duplicate it.
+
+LoanOS IS the CRM. Salesforce/Jungo are decommissioned — do not reference them, do not query them, do not suggest routing anything to them.
 
 ---
 
 ## RESEARCH PROTOCOL
 
 ### 1. Industry Benchmarks
-Study best-in-class mortgage CRM architecture and migration patterns:
+Study best-in-class mortgage CRM architecture:
 - How top mortgage brokers structure contact data (borrowers, realtors, past clients)
-- Jungo/Salesforce data models for mortgage — what fields matter, what's noise
 - Best-in-class pipeline stage definitions for residential lending
 - How leading LOs use automation to replace manual CRM tasks
 - Supabase as a CRM backend — real-world patterns from engineering blogs
+- What best-in-class mortgage CRMs (BNTouch, Velocify, Total Expert) do well — to inform what LoanOS should build next
 
-### 2. Competitor Analysis
-- What Jungo/Velocify/BNTouch offer that LoanOS doesn't yet
-- What features Adam uses in Jungo today vs. what he's never touched
+### 2. Feature Gap Analysis
+- What features top mortgage CRMs offer that LoanOS doesn't yet
 - What automations are non-negotiable (birthday emails, milestone alerts, rate watch)
+- What reporting/analytics top LOs use daily to run their business
 
 ### 3. Platform / Technology Best Practices
 - Supabase RLS patterns for multi-user CRM access (Adam + Janie with different scopes)
 - n8n automation patterns for CRM triggers (new contact, status change, milestone)
-- Salesforce export formats — which export method preserves the most relational data
 - Data deduplication strategies for contact imports
 - Field validation patterns before Supabase insert
 
@@ -48,11 +49,11 @@ GLBA requirements for mortgage CRM data:
 - Consumer financial data must not be exported to unauthorized third-party systems
 
 ### 5. What's Working in Adam's Current Setup
-Check available data on Adam's current CRM state:
+Check available data on Adam's current LoanOS state:
 - Review CONTEXT.md for current Supabase contacts/loans schema
 - Check n8n workflow index in memory/tools/n8n.md for what automations already exist
-- Check tasks/crm/session-log.md for any prior migration work completed
-- Identify which Salesforce/Jungo fields are actively used vs. dead weight
+- Check tasks/crm/session-log.md for any prior work completed
+- Query Supabase contacts table directly to understand current data quality
 
 ---
 
@@ -70,8 +71,8 @@ Date: [DATE]
 ## Industry Benchmarks
 [What best-in-class mortgage CRM architecture looks like]
 
-## Current Gap Analysis (Jungo → LoanOS)
-[What Jungo has that LoanOS doesn't yet — with priority rating for each gap]
+## Current Gap Analysis
+[What best-in-class mortgage CRMs have that LoanOS doesn't yet — with priority rating for each gap]
 
 ## Platform Best Practices
 [Supabase/n8n patterns relevant to today's focus]

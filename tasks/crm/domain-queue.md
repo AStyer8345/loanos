@@ -4,14 +4,14 @@
 
 DOMAIN: LoanOS CRM
 NOTEBOOK: LoanOS CRM Intelligence
-CURRENT STACK: LoanOS (Supabase) — primary and active. Salesforce contract runs through Oct 2026, not worth maintaining.
+CURRENT STACK: LoanOS (Supabase) — primary and active. LoanOS IS the CRM.
 GOAL: Make LoanOS the most effective CRM a mortgage LO could use — better organized, better data, better automations than anything Adam's used before.
 
 ---
 
 WHAT THIS PROGRAM IS:
 
-NOT: data migration (done), NOT: Salesforce decommission (contract is contract)
+NOT: data migration (done — 2,377 contacts and 817+ loans live in LoanOS)
 YES: continuously improving LoanOS as a CRM product using best practices
 
 Each session reviews one area of the CRM through this lens:

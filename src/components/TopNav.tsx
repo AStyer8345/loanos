@@ -120,6 +120,10 @@ export default function TopNav() {
                 label: 'Automations (n8n, Zapier)',
                 onClick: () => navigate('/dashboard/automations'),
               },
+              {
+                label: 'Beta Waitlist',
+                onClick: () => navigate('/dashboard/waitlist'),
+              },
             ]}
           />
         </div>
@@ -287,6 +291,13 @@ export default function TopNav() {
                 className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
               >
                 <span>Automations</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/waitlist')}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
+              >
+                <span>Beta Waitlist</span>
               </button>
             </div>
 

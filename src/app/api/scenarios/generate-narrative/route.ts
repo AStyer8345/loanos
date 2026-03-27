@@ -17,16 +17,24 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      mode, borrowerName,
+      mode, borrowerName, propertyAddress,
       purchaseScenarios, purchaseResults,
       refiScenarios, refiResults,
       reinvestmentResult,
     } = body
 
+    // Extract first name for personal opening (e.g. "John & Jane Smith" → "John")
+    const firstName = borrowerName
+      ? (borrowerName as string).split(/[\s&,]+/)[0].trim()
+      : ''
+
     // Build context for Claude
     let dataContext = ''
+    if (propertyAddress) {
+      dataContext += `**Property:** ${propertyAddress}\n\n`
+    }
     if (mode === 'purchase') {
-      dataContext = purchaseScenarios.map((s: Record<string, unknown>, i: number) => {
+      dataContext += purchaseScenarios.map((s: Record<string, unknown>, i: number) => {
         const r = purchaseResults[i]
         return `
 **${s.label || `Option ${i + 1}`}** (${String(s.loanType).toUpperCase()})
@@ -41,7 +49,7 @@ ${r?.yearsSaved ? `- Extra Payment Saves: ${r.yearsSaved} years, ${r.monthsSaved
       }).join('\n')
     } else {
       const currentPmt = refiResults?.[0]?.currentMonthlyPayment ?? 0
-      dataContext = `**Current Loan:** Monthly payment $${Number(currentPmt).toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`
+      dataContext += `**Current Loan:** Monthly payment $${Number(currentPmt).toLocaleString(undefined, { minimumFractionDigits: 2 })}\n`
       dataContext += (refiScenarios || []).map((s: Record<string, unknown>, i: number) => {
         const r = refiResults?.[i]
         return `
@@ -61,22 +69,24 @@ ${r?.debtsEliminated?.length ? `- Debts Eliminated: ${r.debtsEliminated.map((d: 
       dataContext += `\n\n**Reinvestment:** If the $${Number(reinvestmentResult.monthlySavings).toLocaleString()}/month savings is invested at ${reinvestmentResult.returnRate}% for ${reinvestmentResult.horizonYears} years, it grows to $${Number(reinvestmentResult.futureValue).toLocaleString()}.`
     }
 
-    const systemPrompt = `You are a senior mortgage advisor. Write a clear analysis of these loan scenarios for ${borrowerName || 'the borrower'}.
+    const nameRef = firstName || borrowerName || 'the borrower'
+    const systemPrompt = `You are a senior mortgage advisor writing a personal analysis for ${nameRef}.
 
 Format: Plain paragraphs only — no bullet points, no headers, no bold text. Write in paragraph form.
 Length: Exactly 4 paragraphs, maximum 5 sentences each.
 
-Paragraph 1 — Which scenario wins and why: Name the best option specifically. Include the exact dollar difference in monthly payment and total interest.
-Paragraph 2 — Break-even timing in plain English: For refinance, explain when the borrower recoups closing costs. For purchase, compare when each option becomes more expensive than the other.
-Paragraph 3 — When each scenario makes sense: Short-term hold vs long-term hold, income stability, risk tolerance.
-Paragraph 4 — One clear recommendation with reasoning, plus any risks or trade-offs worth flagging.
+Paragraph 1 — Open directly with ${firstName ? `"${firstName},"` : 'the borrower\'s name,'} then name the best option and why. Include the exact dollar difference in monthly payment. Use possessive language: "your payment", "your closing costs".
+Paragraph 2 — Break-even timing in plain English using "you" and "your": For refinance, explain when you recoup your closing costs. For purchase, explain when each option becomes more expensive for you than the other.
+Paragraph 3 — When each scenario makes sense for you: Short-term hold vs long-term hold, your income stability, your risk tolerance. Use "you" throughout — not "the borrower".
+Paragraph 4 — One clear recommendation with reasoning${firstName ? `, addressing ${firstName} directly` : ''}. Include any risks or trade-offs worth flagging. End with: "This analysis is for informational purposes only."
 
 Rules:
-- Write in plain English — no jargon
-- Be specific with dollar amounts and months
+- Address the borrower by name — use the first name in the opening and 1–2 more times naturally
+- Use "you", "your", "you'll" throughout — never "the borrower" or "one"
+- Be specific with exact dollar amounts and months from the scenario data
 - Never reference protected classes (race, religion, gender, national origin, familial status, disability, age)
 - Never make a lending decision — present trade-offs only
-- End last paragraph with: "This analysis is for informational purposes only."`
+- Never recommend one product over another — present what each option means for the borrower's situation`
 
     // Stream response using SSE
     const anthropic = await getAnthropicClient()

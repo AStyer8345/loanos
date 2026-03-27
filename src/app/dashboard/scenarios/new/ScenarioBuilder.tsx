@@ -552,6 +552,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                   currentLoan={currentLoan}
                   reinvestmentResult={reinvestmentResult}
                   borrowerName={borrowerName}
+                  propertyAddress={propertyAddress}
                   onNarrativeChange={(text) => { setNarrative(text); setNarrativeEdited(true) }}
                   onNarrativeGenerated={setNarrative}
                 />

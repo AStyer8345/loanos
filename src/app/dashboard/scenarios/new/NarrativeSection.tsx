@@ -12,7 +12,7 @@ const DISCLAIMER = 'This analysis is for informational purposes only and does no
 export default function NarrativeSection({
   mode, narrative, narrativeEdited,
   purchaseScenarios, purchaseResults, refiScenarios, refiResults,
-  currentLoan, reinvestmentResult, borrowerName,
+  currentLoan, reinvestmentResult, borrowerName, propertyAddress,
   onNarrativeChange, onNarrativeGenerated,
 }: {
   mode: ScenarioMode
@@ -25,6 +25,7 @@ export default function NarrativeSection({
   currentLoan: CurrentLoanInput
   reinvestmentResult: ReinvestmentResult | null
   borrowerName: string
+  propertyAddress: string
   onNarrativeChange: (text: string) => void
   onNarrativeGenerated: (text: string) => void
 }) {
@@ -43,6 +44,7 @@ export default function NarrativeSection({
         body: JSON.stringify({
           mode,
           borrowerName,
+          propertyAddress,
           purchaseScenarios: mode === 'purchase' ? purchaseScenarios : [],
           purchaseResults: mode === 'purchase' ? purchaseResults : [],
           refiScenarios: mode === 'refinance' ? refiScenarios : [],

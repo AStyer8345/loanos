@@ -12,7 +12,7 @@ import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
@@ -371,6 +371,7 @@ function hasReachedStage(status: string | null, target: StageKey): boolean {
 export default function LoanDetailPage() {
   const supabase = createClient()
   const params = useParams()
+  const router = useRouter()
   const loanId = params.id as string
   const { organizationId } = useOrg()
 
@@ -388,6 +389,8 @@ export default function LoanDetailPage() {
   const setActiveRecord = outreachChat.setActiveRecord
   const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
   // commission editing moved to CollapsibleDetails > Financials section
@@ -513,6 +516,17 @@ export default function LoanDetailPage() {
   const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
 
   // Header inline edit save helper
+  const handleDeleteLoan = async () => {
+    setDeleting(true)
+    const { error } = await supabase.from('loans').delete().eq('id', loanId)
+    if (error) {
+      setDeleting(false)
+      alert('Failed to delete loan: ' + error.message)
+      return
+    }
+    router.push('/dashboard/loans')
+  }
+
   const saveHeaderField = async (field: string, value: string | number | null) => {
     await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
     setLoan({ ...loan, [field]: value } as Loan)
@@ -532,6 +546,7 @@ export default function LoanDetailPage() {
   })()
 
   return (
+    <>
     <div className="flex flex-col h-full">
       {/* ── Header ── */}
       <div className="border-b border-zinc-800 shrink-0" style={{ background: 'linear-gradient(160deg, #0a0a0c 0%, #0d111e 100%)' }}>
@@ -641,6 +656,16 @@ export default function LoanDetailPage() {
                           {label}
                         </button>
                       ))}
+                    </div>
+                    <div className="border-t border-zinc-800 mt-1 pt-1">
+                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-red-600">Danger</p>
+                      <button
+                        onClick={() => { setDeleteConfirmOpen(true); setActionsOpen(false) }}
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors flex items-center gap-2"
+                      >
+                        <Trash2 size={12} className="shrink-0" />
+                        Delete Record
+                      </button>
                     </div>
                   </div>
                 )}
@@ -857,6 +882,42 @@ export default function LoanDetailPage() {
       </div>
 
     </div>
+
+    {/* Delete confirmation modal */}
+    {deleteConfirmOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-sm shadow-2xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-red-950/50 rounded-lg">
+              <Trash2 size={18} className="text-red-400" />
+            </div>
+            <h2 className="text-sm font-mono font-semibold text-zinc-100">Delete Loan Record</h2>
+          </div>
+          <p className="text-xs font-mono text-zinc-400 mb-2">
+            This will permanently delete <span className="text-zinc-200 font-semibold">{loan.loan_name ?? loan.borrower_name ?? 'this loan'}</span> and all associated data.
+          </p>
+          <p className="text-xs font-mono text-red-400 mb-6">This action cannot be undone.</p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setDeleteConfirmOpen(false)}
+              disabled={deleting}
+              className="px-4 py-1.5 text-xs font-mono text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteLoan}
+              disabled={deleting}
+              className="px-4 py-1.5 text-xs font-mono text-white bg-red-700 hover:bg-red-600 rounded transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Trash2 size={11} />
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 

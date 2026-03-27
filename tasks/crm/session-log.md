@@ -329,3 +329,54 @@ Priority 5 (Architect): Once Adam answers contact questions → write full conta
 - Contact stages: clean (regression fixed 2026-03-26 PM)
 - Loan statuses: per Arive sync via WF2 — no issues identified
 ---
+
+---
+## Session: 2026-03-26 PM (scheduled) — LoanOS CRM
+Focus: Pipeline UI — Closing This Week stat + Last Milestone Sent column
+Type: Execute (Sequence C — Builder)
+
+### Completed
+- **"Closing This Week" added to loans summary bar** — 4th stat added to the existing Total Loans / Total Volume / Gross Commission bar. Counts loans in the current filtered view with a closing date 0–7 days out. Shows amber when > 0 (urgency signal), white when 0.
+- **"Last Milestone" column added** — new opt-in column in the loans table (add via COLUMNS picker). Fetches `loan_milestone_events!loan_id(created_at)` alongside each loan in the existing query. Reduces event array to most recent timestamp. Shows relative time ("today", "3 days ago", "2w ago"). Renders amber if > 30 days — surfaces neglected loans.
+- **`fmtRelativeDate()` helper added** — pure function, no dependencies.
+- **Pre-existing features confirmed** — days-to-close countdown on closing_date column was already built. Row urgency highlighting was already built. Rate lock expiry column with EXPIRED warning was already built. No duplication.
+- **Build verified** — `npm run build` PASS, 0 TypeScript errors.
+
+### Deferred
+- **Contact Data Architecture Review** — 8 open questions from 2026-03-25 still pending Adam's answers — gates schema spec
+- **Kanban toggle** — Medium complexity, deferred to after the current sprint
+- **`lock_expiry_date` in schema** — requires Arive webhook addition, deferred
+- **`stage_entered_at`** — enables days-in-stage visibility, deferred
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,331 | 2,331 | 0 |
+| Loans in LoanOS | 817+ | 817+ | 0 |
+| n8n workflows live | 5 | 5 | 0 |
+| Loans page summary stats | 3 (volume, loans, commission) | 4 (+Closing This Week) | +1 |
+| Loans table columns | 17 | 18 (+Last Milestone) | +1 |
+
+### Queue Position
+Current: Contact Data Architecture Review (awaiting Adam's 8 answers)
+Parallel: Loan Pipeline Organization — Priority 1 builds now complete (summary bar, milestone column)
+Advance queue: NO — still waiting on Adam contact schema decisions
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### BLOCKERS
+None.
+
+### Next Session Instructions
+Priority 1 (Adam): Answer 8 contact schema questions (tasks/crm/research/2026-03-25-contact-data-architecture.md)
+Priority 2 (Adam): Answer 5 pipeline questions (tasks/crm/research/2026-03-26-loan-pipeline-organization.md)
+Priority 3 (Builder): Add `lock_expiry_date` column to loans schema — requires Arive webhook investigation
+Priority 4 (Builder): Add Kanban toggle to loans page — secondary view by stage column
+Priority 5 (Research): Automation Coverage Audit — next item in domain-queue.md after contact architecture
+
+### Data Integrity Status
+- Contact stages: clean (regression fixed 2026-03-26 PM)
+- email_opt_out: 321 contacts (13.5%) opted out — enforced in milestone route (2026-03-26 AM)
+- Loan milestone events: populating correctly via n8n WF1 + milestone route
+---

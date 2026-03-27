@@ -43,6 +43,7 @@ interface Loan {
   contact_phone?: string | null
   commission_amount?: number | null
   doc_count?: number
+  last_milestone_at?: string | null
 }
 
 interface SmartList {
@@ -115,6 +116,17 @@ function mailtoHref(email: string | null | undefined): string | null {
   return `mailto:${String(email).trim()}`
 }
 
+function fmtRelativeDate(s: string | null | undefined): string {
+  if (!s) return '—'
+  const diffDays = Math.floor((Date.now() - new Date(s).getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return 'today'
+  if (diffDays === 1) return '1 day ago'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`
+  return `${Math.floor(diffDays / 365)}y ago`
+}
+
 function borrowerDisplayName(loan: Pick<Loan, 'borrower_first_name' | 'borrower_last_name' | 'borrower_name' | 'loan_name'>): string {
   const full = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
   return full || loan.borrower_name || loan.loan_name || '(unnamed)'
@@ -160,6 +172,7 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
   { id: 'borrower_email',       label: 'Borrower Email',      key: null },
   { id: 'borrower_phone',       label: 'Borrower Phone',      key: null },
   { id: 'commission_amount',    label: 'Commission',          key: null },
+  { id: 'last_milestone',      label: 'Last Milestone',       key: null },
 ]
 
 const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'loan_purpose', 'closing_date', 'location', 'loan_program', 'contact_email', 'contact_phone']
@@ -207,14 +220,24 @@ function flattenLoans(data: Record<string, unknown>[]): Loan[] {
   return data.map((row) => {
     const raw = row.contacts
     const contact = Array.isArray(raw) ? raw[0] : raw
+    const events = row.loan_milestone_events
+    const lastMilestoneAt = Array.isArray(events) && events.length > 0
+      ? events
+          .map((e) => (e as { created_at?: string }).created_at)
+          .filter((d): d is string => Boolean(d))
+          .sort()
+          .pop() ?? null
+      : null
     const rest = { ...row }
     delete rest.contacts
+    delete rest.loan_milestone_events
     const loan = rest as unknown as Loan & { lender?: string | null; lender_name?: string | null }
     return {
       ...loan,
       lender: loan.lender || loan.lender_name || null,
       contact_email: (contact as { email?: string } | null)?.email ?? null,
       contact_phone: (contact as { phone?: string } | null)?.phone ?? null,
+      last_milestone_at: lastMilestoneAt,
     } as Loan
   })
 }
@@ -367,7 +390,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone), loan_milestone_events!loan_id(created_at)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
@@ -903,6 +926,10 @@ export default function LoansPage() {
               {!loading && filtered.length > 0 && (() => {
                 const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
                 const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
+                const closingThisWeek = filtered.filter(l => {
+                  const d = daysUntilClose(l.closing_date)
+                  return d !== null && d >= 0 && d <= 7
+                }).length
                 return (
                   <div className="flex items-center gap-3 text-xs font-mono whitespace-nowrap">
                     <span className="text-[#9CA3AF]">Total Loans <span className="text-[#F3F4F6] font-semibold">{filtered.length}</span></span>
@@ -910,6 +937,8 @@ export default function LoansPage() {
                     <span className="text-[#9CA3AF]">Total Volume <span className="text-blue-400 font-semibold">{fmtCurrency(totalVolume)}</span></span>
                     <span className="text-[#374151]">|</span>
                     <span className="text-[#9CA3AF]">Gross Commission <span className="text-[#C9A84C] font-semibold">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</span></span>
+                    <span className="text-[#374151]">|</span>
+                    <span className="text-[#9CA3AF]">Closing This Week <span className={`font-semibold ${closingThisWeek > 0 ? 'text-amber-400' : 'text-[#F3F4F6]'}`}>{closingThisWeek}</span></span>
                   </div>
                 )
               })()}
@@ -1445,6 +1474,17 @@ export default function LoansPage() {
                         return (
                           <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
                             {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
+                          </td>
+                        )
+                      }
+                      if (col.id === 'last_milestone') {
+                        const ms = loan.last_milestone_at
+                        const msAgeDays = ms ? Math.floor((Date.now() - new Date(ms).getTime()) / (1000 * 60 * 60 * 24)) : null
+                        return (
+                          <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
+                            <span className={msAgeDays !== null && msAgeDays > 30 ? 'text-amber-400' : 'text-[#999999]'}>
+                              {fmtRelativeDate(ms)}
+                            </span>
                           </td>
                         )
                       }

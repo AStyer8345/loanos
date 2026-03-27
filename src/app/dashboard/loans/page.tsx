@@ -178,6 +178,7 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
 const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'loan_purpose', 'closing_date', 'location', 'loan_program', 'contact_email', 'contact_phone']
 const LS_LOAN_COLUMNS_KEY = 'loanos_loans_columns_v1'
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
+const LS_LOAN_VIEW_KEY = 'loanos_loans_view_v1'
 
 // ── Custom lists (filter builder) ───────────────────────────────────────────
 type CustomListRule = { field: string; operator: string; value: string }
@@ -307,6 +308,7 @@ export default function LoansPage() {
   const loansOffsetRef = useRef(0)
   const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null)
   const [editingCommissionValue, setEditingCommissionValue] = useState<string>('')
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
 
   // Fetch distinct status + lender values for filter dropdowns
   useEffect(() => {
@@ -335,6 +337,14 @@ export default function LoansPage() {
         if (Array.isArray(parsed) && parsed.length > 0)
           setVisibleColumns(parsed.filter(id => LOAN_COLUMNS.some(c => c.id === id)))
       }
+    } catch {}
+  }, [])
+
+  // Restore view mode from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LS_LOAN_VIEW_KEY)
+      if (stored === 'kanban' || stored === 'table') setViewMode(stored)
     } catch {}
   }, [])
 
@@ -655,6 +665,42 @@ export default function LoansPage() {
     })
   }, [loans, search, sortKey, sortDir, urlFilterActive, filterStatuses, filterPurpose, filterProgram, filterLender, filterState, filterRateMin, filterDateFrom, filterDateTo])
 
+  // ── Kanban columns (view mode = 'kanban') ─────────────────────────────
+  const kanbanColumns = useMemo(() => {
+    if (viewMode !== 'kanban') return []
+    if (activeList === 'inprocess') {
+      // Use pipeline stage ordering for the inprocess list
+      return PIPELINE_STAGES.map(stage => ({
+        key: stage.label,
+        label: stage.label,
+        hex: stage.hex,
+        loans: filtered.filter(l => stage.statuses.includes(l.status ?? '')),
+      }))
+    }
+    // For other lists: group by status, ordered by pipeline stage order then alpha
+    const stageOrder = PIPELINE_STAGES.flatMap(s => s.statuses)
+    const statuses = [...new Set(filtered.map(l => l.status ?? '(No Status)'))]
+      .sort((a, b) => {
+        const ai = stageOrder.indexOf(a)
+        const bi = stageOrder.indexOf(b)
+        if (ai >= 0 && bi >= 0) return ai - bi
+        if (ai >= 0) return -1
+        if (bi >= 0) return 1
+        return a.localeCompare(b)
+      })
+    return statuses.map(status => ({
+      key: status,
+      label: status,
+      hex: statusHex(status),
+      loans: filtered.filter(l => (l.status ?? '(No Status)') === status),
+    }))
+  }, [viewMode, activeList, filtered])
+
+  const toggleViewMode = (mode: 'table' | 'kanban') => {
+    setViewMode(mode)
+    try { localStorage.setItem(LS_LOAN_VIEW_KEY, mode) } catch {}
+  }
+
   // ── Sort icon ──────────────────────────────────────────────────────────
   const SortIcon = ({ k }: { k: SortKey }) => {
     if (sortKey !== k) return <ChevronDown size={12} className="text-[#666666] ml-0.5" />
@@ -942,6 +988,27 @@ export default function LoansPage() {
                   </div>
                 )
               })()}
+            </div>
+
+            {/* View toggle: Table | Kanban */}
+            <div className="flex items-center border border-[#2A2A2A] rounded overflow-hidden shrink-0">
+              <button
+                type="button"
+                onClick={() => toggleViewMode('table')}
+                title="Table view"
+                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'table' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-[#666666] hover:text-[#F0F0F0] hover:bg-[#111827]'}`}
+              >
+                ≡ List
+              </button>
+              <div className="w-px h-4 bg-[#2A2A2A]" />
+              <button
+                type="button"
+                onClick={() => toggleViewMode('kanban')}
+                title="Kanban view"
+                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'kanban' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-[#666666] hover:text-[#F0F0F0] hover:bg-[#111827]'}`}
+              >
+                ⊞ Board
+              </button>
             </div>
 
             <div className="relative shrink-0">
@@ -1247,8 +1314,76 @@ export default function LoansPage() {
           .loans-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 3px; }
           .loans-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
         `}</style>
+        {/* ── Kanban board ───────────────────────────────────────────────── */}
+        {viewMode === 'kanban' && (
+          <div
+            className="loans-scroll flex-1 overflow-x-auto"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent', display: 'flex', minHeight: 0 }}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center w-full text-[#666666] text-sm font-mono">Loading…</div>
+            ) : kanbanColumns.filter(c => c.loans.length > 0).length === 0 ? (
+              <div className="flex flex-col items-center justify-center w-full gap-2 text-[#666666]">
+                <AlertCircle size={20} />
+                <p className="text-sm font-mono">No loans found</p>
+              </div>
+            ) : (
+              kanbanColumns.filter(c => c.loans.length > 0).map(col => (
+                <div key={col.key} className="flex-shrink-0 w-72 flex flex-col border-r border-[#2A2A2A] last:border-r-0">
+                  {/* Column header */}
+                  <div
+                    className="px-3 py-2 border-b border-[#2A2A2A] flex items-center gap-2 sticky top-0 z-10"
+                    style={{ background: `color-mix(in srgb, ${col.hex} 10%, #0E0E0E)` }}
+                  >
+                    <span className="text-xs font-mono font-semibold truncate" style={{ color: col.hex }}>{col.label}</span>
+                    <span
+                      className="ml-auto shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+                      style={{ background: `${col.hex}22`, color: col.hex }}
+                    >
+                      {col.loans.length}
+                    </span>
+                  </div>
+                  {/* Cards */}
+                  <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
+                    {col.loans.map(loan => {
+                      const days = daysUntilClose(loan.closing_date)
+                      const urgentClose = days !== null && days <= 7
+                      const warnClose = days !== null && days > 7 && days <= 14
+                      return (
+                        <div
+                          key={loan.id}
+                          onClick={() => router.push(`/dashboard/loans/${loan.id}`)}
+                          className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-3 cursor-pointer hover:border-[#C9A84C]/40 hover:bg-[#1E1E1E] transition-colors"
+                          style={urgentClose
+                            ? { borderLeftColor: 'rgba(239,68,68,0.5)', borderLeftWidth: 3 }
+                            : warnClose
+                              ? { borderLeftColor: 'rgba(245,158,11,0.5)', borderLeftWidth: 3 }
+                              : {}}
+                        >
+                          <p className="text-sm font-mono font-medium text-[#F0F0F0] truncate">{borrowerDisplayName(loan)}</p>
+                          {loan.loan_name && <p className="text-[10px] font-mono text-[#C9A84C]/60 truncate mt-0.5">{loan.loan_name}</p>}
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span className="text-xs font-mono text-blue-400 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</span>
+                            {loan.closing_date && (
+                              <span className={`text-[10px] font-mono whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-[#555555]'}`}>
+                                {fmtDate(loan.closing_date)}{days !== null && days <= 14 ? ` · ${days}d` : ''}
+                              </span>
+                            )}
+                          </div>
+                          {loan.lender && <p className="text-[10px] font-mono text-[#444444] mt-1.5 truncate">{loan.lender}</p>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* ── Table ─────────────────────────────────────────────────────── */}
         <div
-          className="loans-scroll flex-1 w-0 min-w-full overflow-auto"
+          className={`loans-scroll flex-1 w-0 min-w-full overflow-auto${viewMode === 'kanban' ? ' hidden' : ''}`}
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
         >
           {loading ? (

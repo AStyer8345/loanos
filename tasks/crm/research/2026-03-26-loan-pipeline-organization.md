@@ -211,13 +211,25 @@ Items 1-3 are additive with no schema changes and can be built next session.
 
 ---
 
-## Open Questions for Adam
+## Adam's Decisions — 2026-03-27
 
-1. **Pipeline page default sort:** By closing date? By stage? By last activity?
-2. **"Active" loan definition:** Which statuses count as "active" for the summary bar? (application_received through closing_scheduled, excluding funded?)
-3. **Rate lock date:** Is this already in Arive? Does Arive fire a webhook when a lock is set or expires?
-4. **Janie view:** Should Janie see the pipeline page at all, or only documents/conditions? (access control question)
-5. **Kanban desire:** Has Adam ever wanted a stage-column drag view, or is the table sufficient?
+1. **Default sort:** By closing date ✅
+2. **"Active" statuses:** application_received, processing, appraisal_ordered, conditional_approval, clear_to_close, closing_scheduled — exclude funded ✅
+3. **Rate lock date:** YES — available in Arive webhook. Add `lock_expiry_date` to schema + WF2 mapping. Also: estimated closing date is NOT currently coming over from Arive webhook but SHOULD be — add to WF1/WF2 payload mapping ✅
+4. **Janie/processor access:** Janie will NOT use LoanOS — all processor work stays in Arive. No Janie view needed. ✅
+5. **Kanban:** YES — wants stage-column drag view. Build it. ✅
+
+### What These Decisions Unlock
+
+| Build Item | Status | Notes |
+|-----------|--------|-------|
+| Pipeline summary bar | ✅ Ready to build | Active = statuses 1-6, exclude funded |
+| Default sort by closing date | ✅ Ready to build | Use existing `closing_date` column |
+| Days-to-close countdown | ✅ Ready to build | Uses `closing_date` |
+| Kanban view for loans | ✅ Confirmed, ready to spec | Stage columns, drag-to-advance |
+| `lock_expiry_date` field | Schema + webhook work needed | Add to loans table + WF2 payload |
+| `closing_date` from Arive webhook | Webhook mapping needed | WF1 new loan payload check, WF2 status update |
+| Janie view | ❌ Will not build | Processor work stays in Arive |
 
 ---
 

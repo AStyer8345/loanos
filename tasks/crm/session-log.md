@@ -461,3 +461,60 @@ Priority 3 (Adam still open): Answer 4 remaining pipeline questions (default sor
 - No schema changes this session
 - Kanban view is read-only (no drag-and-drop — status changes still go through table inline edit or loan detail)
 ---
+
+---
+## Session: 2026-03-27 AM — LoanOS CRM
+Focus: WF2 Enhancements — closing_date sync + contact current_rate/current_loan_balance auto-sync on funded/closed
+Type: Execute (Builder + Reviewer + QA)
+
+### Context Correction
+Prior session note (Kanban Reporter) listed "Priority 1: Add lock_expiry_date column (migration 061)" as next step. This was wrong. Live schema audit confirmed `rate_lock_expiration` already exists in the loans table AND is already synced by WF2. No migration 061 needed. Column reference going forward is `rate_lock_expiration`.
+
+### Completed
+- **WF2 updated — 15 → 17 nodes** — Applied cleanly in a single PUT to n8n cloud. WF2 confirmed Active after update (`updatedAt: 2026-03-27T13:16:19.995Z`).
+- **closing_date sync added** — Extract Status Fields (arl-w2-002) now extracts `closingDate` from `keyDates_estimatedFundingDate`. Update Loan Status (arl-w2-006) now includes `closing_date` in the Supabase PATCH alongside `est_closing_date`.
+- **Contact rate+balance auto-sync added** — Two new nodes after Update Loan Status:
+  - `Is Loan Funded?` (arl-w2-015) — IF gate: fires only when status is `loan_funded`, `funded`, or `closed` (case-insensitive) AND contactId is not null
+  - `Sync Contact Rate+Balance` (arl-w2-016) — PATCH contacts: writes `current_rate` ← interestRate, `current_loan_balance` ← loanAmount, plus `updated_at`
+  - Both IF branches converge at Log Status History — no disruption to existing flow
+- **QA verified** — All schema columns confirmed. Counts healthy: 2,376 contacts, 854 loans (841 active). email_opt_out null count = 0 (no regression).
+
+### Deferred
+- **Investigate Arive actualFundingDate** — closing_date currently maps from estimated field (same as est_closing_date). If Arive exposes `keyDates_actualFundingDate`, that should be the source for closing_date. Low priority.
+- **Enable MCP access on WF2** — WF2 node-level MCP inspection blocked (flag not enabled in n8n workflow settings). Adam needs to enable in n8n dashboard for future reviewer tooling.
+- **Status value normalization** — 22 distinct status values with mixed casing in loans table. Pre-existing issue; not introduced this session.
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,376 | 2,376 | 0 |
+| Active loans in LoanOS | 841 | 841 | 0 |
+| n8n WF2 node count | 15 | 17 | +2 |
+| Loan fields synced by WF2 | closing_date not synced | closing_date now synced | +1 |
+| Contact fields auto-synced on fund | 0 | 2 (current_rate, current_loan_balance) | +2 |
+
+### Queue Position
+Current: Contact Data Architecture + Loan Pipeline Organization (parallel — both partially complete)
+Advance to next topic: NO — pipeline questions 1, 2, 4 still pending Adam's answers
+Next topic when ready: Automation Coverage Audit
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- The pull step should check whether schema columns already exist BEFORE adding them to the next-session priority list. Three consecutive sessions referenced "add lock_expiry_date" when `rate_lock_expiration` already existed. A 1-line schema check would have caught this.
+
+### BLOCKERS
+None.
+
+### Next Session Instructions
+Priority 1: Automation Coverage Audit — map every borrower lifecycle event against existing n8n workflows; identify gaps
+Priority 2 (pending Adam): Answer remaining pipeline questions — tasks/crm/research/2026-03-26-loan-pipeline-organization.md
+Priority 3 (low): Investigate Arive `actualFundingDate` field for precise closing_date source; enable MCP access on WF2
+
+### Data Integrity Status
+- Contacts: 2,376 records — stages clean, email_opt_out enforced, do_not_call live
+- Loans: 854 total (841 active, 13 funded/denied/withdrawn)
+- closing_date: 5 loans have closing_date ≠ est_closing_date — WF2 will overwrite on next Arive webhook for those 5
+- current_rate / current_loan_balance: all 2,376 contacts currently NULL — auto-sync now in place for future funded loans
+---

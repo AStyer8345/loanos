@@ -1,3 +1,43 @@
+## Mission Brief — 2026-03-27 AM
+
+### Domain
+LoanOS CRM
+
+### Focus Area
+WF2 Enhancements: closing_date sync + contact current_rate/loan_balance auto-sync
+
+### Session Type
+[x] Execute / Build (Sequence C)
+
+### Context Correction
+Prior session notes referenced "migration 061: add lock_expiry_date column". This was incorrect.
+Live schema audit confirms:
+- `rate_lock_expiration` EXISTS in loans table — already synced by WF2 from Arive `lockExpirationDate`
+- No new schema migration needed
+- UI rate lock expiry warnings already built
+
+### Objectives
+1. Add `closing_date` to WF2 field sync — map from `keyDates_estimatedFundingDate`
+2. Add contact current_rate/current_loan_balance auto-sync in WF2 — when funded/closed, PATCH borrower's contact record with interest_rate → current_rate and loan_amount → current_loan_balance
+3. Verify WF2 still Active after update. Run npm run build (no TS changes expected).
+
+### Definition of Done
+- WF2 updated in n8n cloud with closing_date field + contact sync logic
+- WF2 confirmed Active
+- No regressions to existing WF2 field mappings
+
+### Resources / Files in Scope
+- n8n workflow ID: 9JyzzwKac8v3uQ7d (WF2 — Arive Status Update → Supabase)
+- Supabase loans table: closing_date column
+- Supabase contacts table: current_rate, current_loan_balance columns (added in migration 060)
+
+### HIGH RISK Items
+- Contact PATCH fires only on funded/closed status — NOT on every update
+- All changes additive — no existing fields removed or altered
+- Validate WF2 JSON before updating
+
+---
+
 # Mission Brief — 2026-03-26 AM (scheduled)
 
 ---

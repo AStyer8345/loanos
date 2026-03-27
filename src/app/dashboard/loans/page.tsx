@@ -221,24 +221,15 @@ function flattenLoans(data: Record<string, unknown>[]): Loan[] {
   return data.map((row) => {
     const raw = row.contacts
     const contact = Array.isArray(raw) ? raw[0] : raw
-    const events = row.loan_milestone_events
-    const lastMilestoneAt = Array.isArray(events) && events.length > 0
-      ? events
-          .map((e) => (e as { created_at?: string }).created_at)
-          .filter((d): d is string => Boolean(d))
-          .sort()
-          .pop() ?? null
-      : null
     const rest = { ...row }
     delete rest.contacts
-    delete rest.loan_milestone_events
     const loan = rest as unknown as Loan & { lender?: string | null; lender_name?: string | null }
     return {
       ...loan,
       lender: loan.lender || loan.lender_name || null,
       contact_email: (contact as { email?: string } | null)?.email ?? null,
       contact_phone: (contact as { phone?: string } | null)?.phone ?? null,
-      last_milestone_at: lastMilestoneAt,
+      last_milestone_at: null,
     } as Loan
   })
 }
@@ -400,7 +391,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone), loan_milestone_events!loan_id(created_at)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)

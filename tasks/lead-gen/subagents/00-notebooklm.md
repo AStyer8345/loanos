@@ -245,35 +245,44 @@ git diff --name-only HEAD | grep "CONTEXT.md"
 If modified — remove the old version and re-add the updated file.
 Use `notebooklm source delete <id> --json` (NOT `source remove`).
 
-#### 4e — Create Session Note in NotebookLM
+#### 4e — APPEND TO MASTER SOURCE LOG (replaces note create)
 
-# CRITICAL FIX: correct signature is:
-#   notebooklm note create "CONTENT" -t "TITLE" --json
-# NOT: notebooklm note create "TITLE" "BODY" --json  ← this is wrong
-# The positional argument is CONTENT, title is the -t flag.
+**Do NOT use `notebooklm note create`.** Append this session's summary to the Styer Mortgage master source log and re-sync it to the Styer Mortgage Master notebook.
+
+**Master log:** `/Users/adamstyer/Documents/memory/styer-mortgage/Styer_Growth_Log.md`
 
 ```bash
-/Users/adamstyer/.local/bin/notebooklm note create \
-  "COMPLETED: [bullet summary]. FUNNELS BUILT: [list or None]. DEFERRED: [what was skipped and why]. NEXT SESSION: [priority 1, 2, 3]. BLOCKERS: [active blockers or None]. WEB SOURCES ADDED: [count]. STALE SOURCES REMOVED: [count]." \
-  -t "[DATE] [AM/PM] Session — Lead Gen: [TOPIC]" \
-  --json
+MASTER_LOG="/Users/adamstyer/Documents/memory/styer-mortgage/Styer_Growth_Log.md"
+ENTRY_DATE=$(date +%Y-%m-%d)
+AGENT_ID="lead-gen-pm"
+
+cat >> "$MASTER_LOG" << ENTRY
+
+## $ENTRY_DATE | $AGENT_ID
+
+[Paste the EXACT digest body content here — same content sent by email]
+
+### Action Items for Adam
+- [Each item requiring human approval, roadblocks, or GAPS items needing initialization]
+- [If none: "None this session"]
+
+---
+ENTRY
 ```
 
 ---
 
-### Step 5 — PUSH TO MASTER NOTEBOOK
-
-Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+### Step 5 — SYNC MASTER LOG TO STYER MORTGAGE MASTER NOTEBOOK
 
 ```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
-```
-
-```bash
-notebooklm note create \
-  "[LEAD GEN] [DATE] [AM/PM] — COMPLETED: [bullet summary of funnels built/optimized/researched]. BUILT: [landing pages, sequences, files modified]. KEY DECISIONS: [targeting or funnel strategy decisions]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
-  -t "[DATE] [AM/PM] — Lead Generation" \
-  --json
+NLM="/Users/adamstyer/.local/bin/notebooklm"
+$NLM use 5348ff90-dc61-4604-bcf4-45ff9ac5a26a
+SOURCE_ID=$($NLM source list --json 2>/dev/null | python3 -c \
+  "import json,sys; sources=json.load(sys.stdin).get('sources',[]); print(next((s['id'] for s in sources if 'Styer_Growth_Log' in (s.get('title') or '')), ''))" 2>/dev/null)
+if [ -n "$SOURCE_ID" ]; then
+  $NLM source delete "$SOURCE_ID" --yes --json
+fi
+$NLM source add "$MASTER_LOG" --json
 ```
 
 Then switch back to the Lead Gen notebook:

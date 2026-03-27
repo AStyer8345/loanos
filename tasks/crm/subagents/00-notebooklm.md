@@ -237,31 +237,44 @@ git diff --name-only HEAD | grep "CONTEXT.md" && \
   notebooklm source add CONTEXT.md --json
 ```
 
-### Step 5 — CREATE SESSION NOTE
+### Step 5 — APPEND TO MASTER SOURCE LOG (replaces note create)
 
-# VERIFIED: correct signature is: notebooklm note create "CONTENT" -t "TITLE" --json
+**Do NOT use `notebooklm note create`.** Instead, append this session's summary to the LoanOS master source log and re-sync it to the LoanOS Enterprise notebook.
+
+**Master log:** `/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md`
+
 ```bash
-notebooklm note create \
-  "COMPLETED: [bullet summary]. DEFERRED: [what was skipped and why]. MIGRATED: [tables/records/workflows]. NEXT SESSION: [priority 1, 2, 3]. BLOCKERS: [active blockers or None]. WEB SOURCES ADDED: [count]. STALE SOURCES REMOVED: [count]." \
-  -t "[DATE] AM Session — CRM — [TOPIC]" \
-  --json
+MASTER_LOG="/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md"
+ENTRY_DATE=$(date +%Y-%m-%d)
+AGENT_ID="loanos-crm-pm"
+
+cat >> "$MASTER_LOG" << ENTRY
+
+## $ENTRY_DATE | $AGENT_ID
+
+[Paste the EXACT digest body content here — same content sent by email]
+
+### Action Items for Adam
+- [Each item requiring human approval, roadblocks, or GAPS items needing initialization]
+- [If none: "None this session"]
+
+---
+ENTRY
 ```
 
 ---
 
-### Step 6 — PUSH TO MASTER NOTEBOOK
-
-Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
+### Step 6 — SYNC MASTER LOG TO LOANOS ENTERPRISE NOTEBOOK
 
 ```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
-```
-
-```bash
-notebooklm note create \
-  "[CRM] [DATE] [AM/PM] — COMPLETED: [bullet summary of what was migrated/built]. BUILT: [files created or modified]. KEY DECISIONS: [any data model or integration decisions made]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
-  -t "[DATE] [AM/PM] — CRM Migration" \
-  --json
+NLM="/Users/adamstyer/.local/bin/notebooklm"
+$NLM use 284383e3-c395-45de-bc63-d2052809b359
+SOURCE_ID=$($NLM source list --json 2>/dev/null | python3 -c \
+  "import json,sys; sources=json.load(sys.stdin).get('sources',[]); print(next((s['id'] for s in sources if 'LoanOS_System_Log' in (s.get('title') or '')), ''))" 2>/dev/null)
+if [ -n "$SOURCE_ID" ]; then
+  $NLM source delete "$SOURCE_ID" --yes --json
+fi
+$NLM source add "$MASTER_LOG" --json
 ```
 
 Then switch back to the CRM notebook:

@@ -159,25 +159,42 @@ notebooklm source delete <old-queue-source-id>
 notebooklm source add tasks/scenarios/domain-queue.md
 ```
 
-### Step 5 — CREATE SESSION NOTE
+### Step 5 — APPEND TO MASTER SOURCE LOG (replaces note create)
+
+**Do NOT use `notebooklm note create`.** Append this session's summary to the LoanOS master source log and re-sync it to the LoanOS Enterprise notebook.
+
+**Master log:** `/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md`
+
 ```bash
-notebooklm note create \
-  "COMPLETED: [what was built/improved]. BUILT: [specific files changed]. MC GAP CLOSED: [which Mortgage Coach advantage was addressed]. NEXT: [top priority for next session]. BLOCKERS: [None or specific issue]." \
-  -t "[DATE] [AM/PM] — Scenarios Session"
+MASTER_LOG="/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md"
+ENTRY_DATE=$(date +%Y-%m-%d)
+AGENT_ID="scenarios-pm"
+
+cat >> "$MASTER_LOG" << ENTRY
+
+## $ENTRY_DATE | $AGENT_ID
+
+[Paste the EXACT digest body content here — same content sent by email]
+
+### Action Items for Adam
+- [Each item requiring human approval, roadblocks, or GAPS items needing initialization]
+- [If none: "None this session"]
+
+---
+ENTRY
 ```
 
-### Step 6 — PUSH TO MASTER NOTEBOOK
-
-Push a summary to the master aggregator so Adam sees all activity in one place.
+### Step 6 — SYNC MASTER LOG TO LOANOS ENTERPRISE NOTEBOOK
 
 ```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
-```
-
-```bash
-notebooklm note create \
-  "[SCENARIOS] [DATE] [AM/PM] — COMPLETED: [what was improved]. MC GAP CLOSED: [which Mortgage Coach advantage was addressed]. NEXT: [top priority]. BLOCKERS: [None or specific]." \
-  -t "[DATE] [AM/PM] — Scenarios"
+NLM="/Users/adamstyer/.local/bin/notebooklm"
+$NLM use 284383e3-c395-45de-bc63-d2052809b359
+SOURCE_ID=$($NLM source list --json 2>/dev/null | python3 -c \
+  "import json,sys; sources=json.load(sys.stdin).get('sources',[]); print(next((s['id'] for s in sources if 'LoanOS_System_Log' in (s.get('title') or '')), ''))" 2>/dev/null)
+if [ -n "$SOURCE_ID" ]; then
+  $NLM source delete "$SOURCE_ID" --yes --json
+fi
+$NLM source add "$MASTER_LOG" --json
 ```
 
 Switch back:

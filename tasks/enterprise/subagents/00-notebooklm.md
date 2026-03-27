@@ -240,35 +240,46 @@ git diff --name-only HEAD | grep -E "CONTEXT.md|LOANOS_SYSTEM"
 If either was modified this session — remove the old version and re-add the updated file.
 Use `notebooklm source delete <id> --json` (NOT `source remove`).
 
-#### 4d — Create Session Note in NotebookLM
+#### 4d — APPEND TO MASTER SOURCE LOG (replaces note create)
 
-# VERIFIED FIX: correct signature is:
-#   notebooklm note create "CONTENT" -t "TITLE" --json
-# NOT: notebooklm note create "TITLE" "BODY" --json  ← this is wrong
-# The positional argument is CONTENT, title is the -t flag.
+**Do NOT use `notebooklm note create`.** Instead, append this session's summary to the LoanOS master source log and re-sync it to the LoanOS Enterprise notebook. This makes the content readable by the AI context window as a source, not just a note.
+
+**Master log:** `/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md`
 
 ```bash
-notebooklm note create \
-  "COMPLETED: [bullet summary]. DEFERRED: [what was skipped and why]. BUILT: [files created/modified]. NEXT SESSION: [priority 1, 2, 3]. BLOCKERS: [active blockers or None]. WEB SOURCES ADDED: [count]. STALE SOURCES REMOVED: [count]." \
-  -t "[DATE] [AM/PM] Session — [TOPIC]" \
-  --json
+MASTER_LOG="/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md"
+ENTRY_DATE=$(date +%Y-%m-%d)
+AGENT_ID="loanos-enterprise-pm"
+
+cat >> "$MASTER_LOG" << ENTRY
+
+## $ENTRY_DATE | $AGENT_ID
+
+[Paste the EXACT digest body content here — same content sent by email]
+
+### Action Items for Adam
+- [Each item requiring human approval, roadblocks, or GAPS items needing initialization]
+- [If none: "None this session"]
+
+---
+ENTRY
 ```
 
 ---
 
-### Step 5 — PUSH TO MASTER NOTEBOOK
+### Step 5 — SYNC MASTER LOG TO LOANOS ENTERPRISE NOTEBOOK
 
-Push a summary note to the master aggregator notebook so Adam can see all agent activity in one place.
-
-```bash
-/Users/adamstyer/.local/bin/notebooklm use $(cat tasks/master-notebook-id.txt)
-```
+Re-sync the master source log so the LoanOS Enterprise notebook reflects the latest append.
 
 ```bash
-notebooklm note create \
-  "[ENTERPRISE] [DATE] [AM/PM] — COMPLETED: [bullet summary of what was built/decided]. BUILT: [files created or modified]. KEY DECISIONS: [any architectural or strategic decisions made]. BLOCKERS: [active blockers or None]. NEXT: [top priority for next session]." \
-  -t "[DATE] [AM/PM] — Enterprise Build" \
-  --json
+NLM="/Users/adamstyer/.local/bin/notebooklm"
+$NLM use 284383e3-c395-45de-bc63-d2052809b359
+SOURCE_ID=$($NLM source list --json 2>/dev/null | python3 -c \
+  "import json,sys; sources=json.load(sys.stdin).get('sources',[]); print(next((s['id'] for s in sources if 'LoanOS_System_Log' in (s.get('title') or '')), ''))" 2>/dev/null)
+if [ -n "$SOURCE_ID" ]; then
+  $NLM source delete "$SOURCE_ID" --yes --json
+fi
+$NLM source add "$MASTER_LOG" --json
 ```
 
 Then switch back to the enterprise notebook:

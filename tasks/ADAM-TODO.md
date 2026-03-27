@@ -13,4 +13,5 @@
 - [ ] [CRM] 2026-03-26 — Answer 8 contact schema questions in `tasks/crm/research/2026-03-25-contact-data-architecture.md` — these gate the Contact Data Architecture spec and all smart list / schema improvements
 - [x] [CRM] 2026-03-26 — Confirm email_opt_out is enforced in n8n milestone email workflows — FIXED 2026-03-26 AM session: enforcement now in milestone route.ts
 - [x] [CRM] 2026-03-26 — Answer 5 loan pipeline questions — ANSWERED 2026-03-27: sort=closing date, active=app_received→closing_scheduled, rate lock=yes in Arive+add closing_date to webhook, Janie=Arive only, Kanban=yes build it
+- [ ] [CRM] 2026-03-27 — Answer 4 automation coverage questions before builder sequence can start: (1) Drip enrollment trigger — auto on Pre-Approval Lead Notify webhook or manual stage change? (2) WF2 architecture — add outbound emails to WF2 or build separate milestone-triggered workflows? (3) Review Request trigger — is it manual, Arive fund event, or scheduled? (4) Rate watch source — Adam enters rate weekly, pull from rate API, or compare to rate update email? See: tasks/crm/research/2026-03-27-automation-coverage-audit.md#open-questions
 

@@ -518,3 +518,61 @@ Priority 3 (low): Investigate Arive `actualFundingDate` field for precise closin
 - closing_date: 5 loans have closing_date ≠ est_closing_date — WF2 will overwrite on next Arive webhook for those 5
 - current_rate / current_loan_balance: all 2,376 contacts currently NULL — auto-sync now in place for future funded loans
 ---
+
+---
+## Session: 2026-03-27 PM — LoanOS CRM
+Focus: Automation Coverage Audit — full lifecycle event mapping vs. n8n workflows
+Type: Research (Sequence A)
+
+### Completed
+- **Full automation coverage map written** — `tasks/crm/research/2026-03-27-automation-coverage-audit.md` — every borrower lifecycle event (Lead Intake, Pre-Approval, Under Contract, In Process, Closing, Post-Close, Realtor Touchpoints, Drip/Nurture) mapped against 15+ active n8n workflows
+- **All 15 core n8n workflows confirmed Active** — live status verified via n8n MCP. Note: Pre-Approval Lead Notify (J9Pe24vUi6fpZtdZ) appears to have been activated (was listed as Inactive in MEMORY.md)
+- **Drip infrastructure confirmed ready but unenrolled** — "Pre-Approval Welcome Series" (6 steps / 60 days) is built, Drip Scheduler is active, but 0 contacts enrolled — enrollment trigger never wired
+- **741 closed borrowers identified as immediate referral opportunity** — all have `funding_date`; post-close touchpoint automation covers 0 of them today
+- **16 automation gaps ranked by impact + effort** — Top 4 actionable without schema changes (drip enrollment, closing congratulations, post-close check-in, realtor referral thank-you)
+- **email_opt_out compliance gap flagged** — milestone route enforces it, but 4 standalone n8n workflows (Referral Intro, Pre-Approval Email, CD Email, Review Request) do NOT check `email_opt_out` before sending
+
+### Deferred
+- **Building automation gaps** — research is complete; builder work gates on Adam's 4 decisions (drip trigger, WF2 architecture, review request trigger, rate watch source)
+- **Realtor Relationship System** — next queue item; richer realtor layer needed before realtor touchpoint automations make sense
+- **Cold database nurture campaign** — deferred; requires content strategy definition first
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,376 | 2,376 | 0 |
+| Active loans in LoanOS | 841 | 841 | 0 |
+| n8n workflows active | 15 | 15 | 0 (research only) |
+| Automation gaps documented | 0 | 16 gaps ranked | +16 |
+| Closed borrowers without any post-close automation | 741 | 741 | flagged |
+
+### Queue Position
+Current: Automation Coverage Audit — research complete; builder sequence pending Adam's 4 decisions
+Advance to next topic: NO — Adam must answer 4 open questions before build phase begins
+Next topic when ready: Realtor Relationship System
+
+### Quality Ratings (1-5)
+Research: 5 | Strategy: N/A | Execution: N/A | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- The Pre-Approval Lead Notify workflow status in MEMORY.md (listed as Inactive) may be stale — live n8n shows it as Active. MEMORY.md should be updated to reflect confirmed live status.
+- The drip enrollment gap (Gap #1, Effort 1) should have been caught earlier — the drip campaign was built weeks ago but never wired up. Future research sessions should always query `drip_enrollments COUNT` as a quick health check.
+- Supabase `loan_milestone_events` has only 1 record — this table is mostly unused. The real milestone data lives in Arive. Future architect work should clarify whether `loan_milestone_events` is the right place to log milestones or whether it should be deprecated.
+
+### BLOCKERS
+None — research only. Builder sequence gates on Adam's 4 decisions.
+
+### Next Session Instructions
+Priority 1 (Adam): Answer 4 open questions in `tasks/crm/research/2026-03-27-automation-coverage-audit.md` (drip enrollment trigger, WF2 outbound architecture, review request trigger, rate watch source)
+Priority 2 (Builder — easiest win, no schema change): Wire drip enrollment trigger — auto-enroll new pre-approval contacts in Welcome Series when Pre-Approval Lead Notify fires
+Priority 3 (Builder — high ROI, no schema change): Add "Congratulations, you closed!" email node to WF2 on fund status + realtor thank-you node
+Priority 4 (Builder): Add email_opt_out check to Referral Intro, Pre-Approval Email, CD Email, and Review Request n8n workflows
+Priority 5 (Research): Realtor Relationship System — next queue item; focus on referral volume tracking, last deal together, top-mind automation
+
+### Data Integrity Status
+- Contacts: 2,376 | Loans: 854 total (741 Closed, 25 Started, 19 Cancelled, 13 Funded, others)
+- email_opt_out: enforced in milestone route; NOT enforced in 4 standalone n8n outbound workflows
+- do_not_call: column live, all 2,376 defaulted false — TCPA gate ready for future SMS
+- drip_enrollments: 0 active — drip infrastructure built but no auto-enrollment wired
+- loan_milestone_events: 1 record (conditional_approval) — nearly empty; Arive webhooks are the actual source
+---

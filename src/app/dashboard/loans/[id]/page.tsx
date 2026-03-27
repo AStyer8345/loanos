@@ -923,6 +923,12 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loanId, loan])
 
+  const handleReassignContact = useCallback(async (contactId: string) => {
+    const { error } = await supabase.from('loans').update({ contact_id: contactId }).eq('id', loanId)
+    if (!error) onRefresh()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loanId, onRefresh])
+
   return (
     <div className="p-6 space-y-8">
 
@@ -960,7 +966,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
       <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
 
       {/* ── Full editable details (collapsible) ── */}
-      <CollapsibleDetails loan={loan} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} />
+      <CollapsibleDetails loan={loan} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} contact={contact} onReassignContact={handleReassignContact} />
 
     </div>
   )
@@ -1928,13 +1934,38 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
 
 // ── CollapsibleDetails — wraps all EditableSectionCards ───────────────────────
 
-function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
+type ContactSearchResult = { id: string; first_name: string | null; last_name: string | null; email: string | null }
+
+function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact, onReassignContact }: {
   loan: Loan
   onSave: (field: string, value: string | number | null) => Promise<void>
   onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
   contact: ContactRow | null
+  onReassignContact: (contactId: string) => Promise<void>
 }) {
+  const supabase = createClient()
   const [open, setOpen] = useState(false)
+  const [reassigning, setReassigning] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<ContactSearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+
+  useEffect(() => {
+    if (!reassigning || !searchQuery.trim()) { setSearchResults([]); return }
+    const timer = setTimeout(async () => {
+      setSearching(true)
+      const q = searchQuery.trim()
+      const { data } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, email')
+        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
+        .limit(8)
+      setSearchResults((data as ContactSearchResult[]) ?? [])
+      setSearching(false)
+    }, 250)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, reassigning])
 
   return (
     <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
@@ -2054,28 +2085,78 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact }: {
           ]} />
 
           {/* Linked Contact */}
-          {contact && (
-            <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-              <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-                <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
-              </div>
-              <div className="p-4">
-                <Link href={`/dashboard/contacts?id=${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors">
-                  {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-                </Link>
-                {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
-                {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
-                {contact.referred_by && (
-                  <div className="mt-3 pt-3 border-t border-zinc-700">
-                    <p className="text-xs text-zinc-500 font-mono">Referred by</p>
-                    <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5">
-                      {contact.referred_by}<ChevronRight size={12} />
-                    </Link>
-                  </div>
-                )}
-              </div>
+          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
+              <button
+                onClick={() => { setReassigning(r => !r); setSearchQuery(''); setSearchResults([]) }}
+                className="text-[11px] font-mono text-zinc-500 hover:text-amber-400 transition-colors"
+              >
+                {reassigning ? 'Cancel' : contact ? 'Reassign' : 'Link Contact'}
+              </button>
             </div>
-          )}
+            <div className="p-4">
+              {!reassigning ? (
+                contact ? (
+                  <>
+                    <Link href={`/dashboard/contacts/${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors">
+                      {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
+                    </Link>
+                    {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
+                    {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
+                    {contact.referred_by && (
+                      <div className="mt-3 pt-3 border-t border-zinc-700">
+                        <p className="text-xs text-zinc-500 font-mono">Referred by</p>
+                        <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5">
+                          {contact.referred_by}<ChevronRight size={12} />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-zinc-600 font-mono">No contact linked — use &quot;Link Contact&quot; to attach one.</p>
+                )
+              ) : (
+                <div>
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Search by name or email…"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm font-mono text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500/60"
+                  />
+                  {searching && (
+                    <p className="text-xs text-zinc-600 font-mono mt-2">Searching…</p>
+                  )}
+                  {searchResults.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {searchResults.map(r => (
+                        <button
+                          key={r.id}
+                          onClick={async () => {
+                            await onReassignContact(r.id)
+                            setReassigning(false)
+                            setSearchQuery('')
+                            setSearchResults([])
+                          }}
+                          className="w-full text-left px-3 py-2 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-amber-500/40 transition-colors"
+                        >
+                          <p className="text-sm font-mono font-semibold text-zinc-100">
+                            {[r.first_name, r.last_name].filter(Boolean).join(' ') || '(no name)'}
+                          </p>
+                          {r.email && <p className="text-xs font-mono text-zinc-500">{r.email}</p>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {!searching && searchQuery.trim() && searchResults.length === 0 && (
+                    <p className="text-xs text-zinc-600 font-mono mt-2">No contacts found.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

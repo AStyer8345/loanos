@@ -1,32 +1,31 @@
-## Scenarios Mission Brief — 2026-03-26 PM
+## Scenarios Mission Brief — 2026-03-27 AM
 
 ### Focus Area
-AI Narrative Personalization — name-driven opening, possessive language, property address context
+2-1 Buydown Scenario Display — expose the year-by-year payment schedule that's already calculated but never shown
 
 ### Why This Matters
-Mortgage Coach narratives feel personal because they reference the borrower by name and use possessive language. LoanOS narrative currently frames the prompt "for [name]" but never directs Claude to OPEN with the name or say "your payment". The output reads like a generic analysis that could belong to anyone. Borrowers who receive a share link or PDF that says "Sarah, the 30-year fixed saves you $127/month..." feel seen. They share it. They call back.
+When a seller offers a rate buydown (very common in today's market), Adam needs to show borrowers exactly what their payments look like in Year 1, Year 2, and Year 3+. Mortgage Coach does this clearly. LoanOS calculates it but hides the results. This closes a concrete MC gap that shows up in every seller-concession negotiation.
 
 ### Session Type
-[x] Build (system prompt edit only — no new architecture)
+[x] Build
 
 ### Objectives
-1. Paragraph 1 opens with borrower's first name directly ("Sarah, Option A...")
-2. Possessive language throughout ("your monthly payment", "your closing costs", "your break-even")
-3. Property address added to data context so Claude can reference the specific home
-4. Narrative still compliance-safe: trade-offs only, no product recommendation, no protected classes
+1. Show buydown year-by-year payment schedule in purchase results (Year 1/2/3+ rows, scenarios as columns)
+2. Show buydown cost + break-even month within the same section
+3. Section only renders when ≥1 scenario has buydown type != 'none'
 
 ### Files in Scope
-- `src/app/api/scenarios/generate-narrative/route.ts` — ONLY this file
+- `src/lib/scenarios/displayData.ts` — add buydown fields to ScenarioDisplayRow + buildPurchaseDisplayData
+- `src/app/dashboard/scenarios/new/BuydownSection.tsx` — NEW: buydown schedule grid component
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` — import + render BuydownSection
 
 ### Definition of Done
-- `borrowerName` first name extracted and used in paragraph opening instruction
-- `propertyAddress` extracted from body and added to data context
-- System prompt paragraph instructions updated with name + possessive language directives
-- `npm run build` passes with 0 TypeScript errors
-- No auth/RLS/multi-tenant code touched
+- `npm run build` passes, 0 TypeScript errors
+- When a scenario has buydown type "2-1 Buydown" and user clicks Calculate, a "Buydown Schedule" section appears showing Year 1/Year 2/Year 3+ payments for each scenario
+- Non-buydown scenarios show "—" in the buydown rows (or the section hides cleanly)
+- Buydown cost ($X,XXX) and break-even month shown per scenario
 
 ### Subagents to Activate
-Note: Only 00-notebooklm.md subagent exists. Builder/QA/Reporter running inline.
-[x] Builder (inline)
-[x] QA (npm run build)
-[x] Reporter (session-log.md update)
+[x] Builder Subagent
+[x] QA Subagent
+[x] Reporter Subagent

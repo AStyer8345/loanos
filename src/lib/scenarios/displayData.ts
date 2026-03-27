@@ -7,7 +7,7 @@
 import type {
   PurchaseScenarioInput, PurchaseCalculatedResult,
   RefiScenarioInput, RefiCalculatedResult, CurrentLoanInput,
-  ClosingCostBreakdown,
+  ClosingCostBreakdown, BuydownType,
 } from './types'
 
 const APPRECIATION_RATE = 0.04 // 4% annual, used for 15yr home value projection
@@ -67,6 +67,11 @@ export interface ScenarioDisplayRow {
   isRecommended: boolean
   // Horizon analysis (5yr and 15yr)
   horizonAnalysis?: HorizonAnalysis
+  // Buydown schedule (purchase only)
+  buydownType?: BuydownType
+  buydownPayments?: { year: number; rate: number; monthlyPI: number }[]
+  buydownCost?: number
+  buydownBreakEvenMonth?: number
 }
 
 export interface KeyMetrics {
@@ -151,6 +156,25 @@ export function buildPurchaseDisplayData(
       equity15yr: round2(homeValue15yr - balAt15yr),
     }
 
+    // Buydown break-even: months until cumulative savings from lower payment = buydown cost
+    let buydownBreakEvenMonth: number | undefined
+    if (r.buydownCost && r.buydownCost > 0 && r.buydownPayments && r.buydownPayments.length > 0) {
+      const fullPI = r.monthlyPI
+      let cumSavings = 0
+      let month = 0
+      for (const yp of r.buydownPayments) {
+        for (let m = 0; m < 12; m++) {
+          month++
+          cumSavings += fullPI - yp.monthlyPI
+          if (cumSavings >= r.buydownCost) {
+            buydownBreakEvenMonth = month
+            break
+          }
+        }
+        if (buydownBreakEvenMonth) break
+      }
+    }
+
     return {
       label: s.label || `Option ${i + 1}`,
       loanType: s.loanType,
@@ -179,6 +203,10 @@ export function buildPurchaseDisplayData(
       additionalCostToClose: i !== baselineIdx ? additionalCostToClose : undefined,
       isRecommended: i === recommendedIdx,
       horizonAnalysis,
+      buydownType: s.buydownType !== 'none' ? s.buydownType : undefined,
+      buydownPayments: r.buydownPayments,
+      buydownCost: r.buydownCost,
+      buydownBreakEvenMonth,
     }
   })
 

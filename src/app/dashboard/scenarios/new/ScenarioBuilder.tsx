@@ -17,6 +17,7 @@ import BreakEvenTable from './BreakEvenTable'
 import { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart } from './ScenarioCharts'
 import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
+import BuydownSection from './BuydownSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
@@ -515,6 +516,11 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
 
                       {/* ── Row 2: Break-Even Analysis ──────────────────────── */}
                       <BreakEvenTable rows={displayData.breakEvenRows} mode={displayData.mode} />
+
+                      {/* ── Buydown Schedule (purchase only, when any scenario has buydown) ── */}
+                      {displayData.mode === 'purchase' && (
+                        <BuydownSection rows={displayData.rows} />
+                      )}
 
                       {/* ── Row 3: Total Interest Paid ──────────────────────── */}
                       <TotalInterestChart data={displayData} />

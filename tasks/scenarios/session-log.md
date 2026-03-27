@@ -116,3 +116,33 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 - Tier 1 item 3 (PDF redesign) — ✅ COMPLETE this session
 
 ---
+
+---
+
+## AM Session — 2026-03-27 (scenarios-am)
+
+**What was built:**
+- Buydown Schedule Display (`src/lib/scenarios/displayData.ts`, `src/app/dashboard/scenarios/new/BuydownSection.tsx`, `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`)
+  - `displayData.ts`: Added `buydownType`, `buydownPayments`, `buydownCost`, `buydownBreakEvenMonth` to `ScenarioDisplayRow`; pass-through from `PurchaseCalculatedResult` in `buildPurchaseDisplayData`; computes break-even month by simulating cumulative savings vs buydown cost month by month
+  - `BuydownSection.tsx`: New component — year-by-year P&I grid (each buydown year as gold-highlighted row, final "full rate" row), buydown cost in red, break-even month in green, total 2-yr payment savings; only renders when ≥1 scenario has buydown; compliance footer included
+  - `ScenarioBuilder.tsx`: Import + render `BuydownSection` after `BreakEvenTable` in purchase mode results section (conditional on mode === 'purchase')
+
+**MC gap closed:** Borrowers can now see exactly what their payments look like Year 1 / Year 2 / Year 3+ when a seller offers to buy down the rate. Before: buydown was calculated but invisible. After: a dedicated table shows each year's payment, the buydown cost, and the month it pays for itself.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `77b9828` — pushed to main
+**Vercel:** `dpl_oeAJMdtBaSq5pS5Yjp7npRqFWwt3` — ✅ READY
+
+**Files touched:**
+- `src/lib/scenarios/displayData.ts`
+- `src/app/dashboard/scenarios/new/BuydownSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Down payment comparison mode (3% / 5% / 10% / 20%) — PMI tier effects, monthly payment delta, cash required side by side
+2. Rent vs own mode — monthly rent vs PITI + equity build, 5-year breakeven
+
+**Domain queue updates:**
+- Tier 2 item 1 (2-1 buydown display) — ✅ COMPLETE this session
+

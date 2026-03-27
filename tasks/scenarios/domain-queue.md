@@ -55,7 +55,7 @@ KNOWN GAPS (start here):
 - ~~**AI narrative upgrade**: More personalized, incorporate borrower name + specific numbers more naturally~~ ✅ DONE 2026-03-26 PM
 
 ### Tier 2 — New scenario types
-- **2-1 buydown**: Show Year 1, Year 2, Year 3+ payments vs fixed rate
+- ~~**2-1 buydown**: Show Year 1, Year 2, Year 3+ payments vs fixed rate~~ ✅ DONE 2026-03-27 AM
 - **Down payment comparison**: Same loan at 3% / 5% / 10% / 20% down — PMI tier effects
 - **Rent vs own**: Monthly rent vs PITI + equity build, 5-year breakeven
 

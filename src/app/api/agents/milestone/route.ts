@@ -96,6 +96,17 @@ export async function POST(req: NextRequest) {
     const contactId = loanRecord?.contact_id ?? null
     const organizationId = loanRecord?.organization_id ?? null
 
+    // ── 0b. Check email_opt_out on the borrower's contact record ──────────────
+    let borrowerOptedOut = false
+    if (contactId) {
+      const { data: contactRecord } = await supabase
+        .from('contacts')
+        .select('email_opt_out')
+        .eq('id', contactId)
+        .single()
+      borrowerOptedOut = contactRecord?.email_opt_out === true
+    }
+
     // ── 1. Insert milestone event ──────────────────────────────────────────────
     const { data: event, error: eventError } = await supabase
       .from('loan_milestone_events')
@@ -121,8 +132,11 @@ export async function POST(req: NextRequest) {
 
     const anthropic = await getAnthropicClient()
 
-    // ── 2. Draft borrower email (if email provided) ───────────────────────────
-    if (borrower_email) {
+    // ── 2. Draft borrower email (if email provided and not opted out) ─────────
+    if (borrowerOptedOut) {
+      console.log(`[milestone] Skipping borrower email — contact ${contactId} has email_opt_out = true`)
+    }
+    if (borrower_email && !borrowerOptedOut) {
       const borrowerPrompt = `You are Adam Styer, a senior mortgage broker in Austin, TX. Write a short, warm email to a homebuyer about their loan milestone.
 
 Milestone: ${milestoneLabel}
@@ -297,6 +311,7 @@ Return ONLY a JSON object with keys "subject" and "body" (body is plain text, no
       event_id: eventId,
       milestone,
       results,
+      ...(borrowerOptedOut ? { borrower_email_skipped: 'email_opt_out' } : {}),
     })
   } catch (err) {
     console.error('[milestone] Unhandled error:', err)

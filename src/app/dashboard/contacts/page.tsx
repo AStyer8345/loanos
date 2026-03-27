@@ -1134,7 +1134,10 @@ export default function ContactsPage() {
               {activeListLabel.toUpperCase()}
             </h1>
             <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 11, marginTop: 2 }}>
-              {total.toLocaleString()} {total === 1 ? 'contact' : 'contacts'}
+              {counts[activeList] && counts[activeList] > total
+                ? <>{total.toLocaleString()} of {counts[activeList].toLocaleString()} {counts[activeList] === 1 ? 'contact' : 'contacts'}</>
+                : <>{total.toLocaleString()} {total === 1 ? 'contact' : 'contacts'}</>
+              }
               {someSelected && <span style={{ marginLeft: 8, color: '#c9a84c' }}>· {selectedIds.size} selected</span>}
             </div>
           </div>
@@ -1491,7 +1494,7 @@ export default function ContactsPage() {
                     disabled={loadingMore}
                     className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-zinc-600 rounded text-zinc-400 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length})`}
+                    {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length}${counts[activeList] ? ` of ${counts[activeList]}` : ''})`}
                   </button>
                 </div>
               )}

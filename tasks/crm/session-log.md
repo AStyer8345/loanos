@@ -267,3 +267,65 @@ Priority 4 (Research): Loan Pipeline Organization — next item in domain queue
 - Closed Borrowers: 842 contacts with stage = 'Closed' — smart list query is correct
 - Pagination: all 2,331 contacts reachable via Load More — no technical cap exists
 ---
+
+---
+## Session: 2026-03-26 AM (scheduled) — LoanOS CRM
+Focus: email_opt_out Enforcement + X-of-Y Count Indicator + Loan Pipeline Research
+Type: Execute + Research (Sequence C + A)
+
+### Completed
+- **email_opt_out enforcement in milestone route** — Added contact lookup for `email_opt_out` flag in `src/app/api/agents/milestone/route.ts`. Before drafting or sending borrower email, route now queries `contacts.email_opt_out` for the associated contact. If `true`, skips AI generation and Zapier push, logs a console message, and returns `borrower_email_skipped: 'email_opt_out'` in the response. Realtor email is unaffected (realtors don't have opt-out in this context). Milestone event is still logged regardless — the audit trail is preserved.
+- **"X of Y contacts" count indicator** — Updated `src/app/dashboard/contacts/page.tsx` header subtitle (line 1137) to show "X of Y contacts" when there are more to load (`counts[activeList] > total`). Also updated Load More button label to show "Load more (showing X of Y)". Uses existing `counts[activeList]` from Supabase `count: 'exact'` query — zero additional DB calls.
+- **Build verified** — `npm run build` passes with 0 TypeScript errors.
+- **Loan Pipeline Organization research** — Full research file at `tasks/crm/research/2026-03-26-loan-pipeline-organization.md`. Covers: 7-stage model (matches current MILESTONE_LABELS), 3 priority tiers of what to show per loan, days-to-close countdown, rate lock expiry gap, summary bar recommendation, Kanban view recommendation, comparison to Encompass/SimpleNexus/Arive/Byte.
+
+### Deferred
+- **Contact Data Architecture Review** — 8 open questions from 2026-03-25 still pending Adam's answers — gates schema spec
+- **Pipeline Priority 1 builds** (no schema change required): summary bar, days-to-close countdown, last-milestone-sent column — ready for next Builder session
+- **Rate lock expiry** (`lock_expiry_date`) — needs schema addition + Arive sync
+- **Kanban toggle for loans** — Medium complexity, deferred to after summary bar
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,331 | 2,331 | 0 |
+| Loans in LoanOS | 817+ | 817+ | 0 |
+| n8n workflows live | 5 | 5 | 0 |
+| email_opt_out enforcement in milestone route | ❌ Not enforced | ✅ Enforced | Fixed |
+| Contacts count indicator | ❌ Shows loaded only | ✅ Shows X of Y | Fixed |
+| Pipeline research complete | 0 | 1 file | +1 |
+
+### Queue Position
+Current: Contact Data Architecture Review (awaiting Adam's 8 answers)
+Parallel research: Loan Pipeline Organization — COMPLETE, ready for spec
+Advance queue: NO — still waiting on Adam decisions for contact schema
+
+### Quality Ratings (1-5)
+Research: 4 | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### BLOCKERS
+None — all work was safe (additive only, no schema changes, no data risk).
+
+**Adam TODO (pending from prior sessions, still open):**
+- [ ] Answer 8 contact schema questions (tasks/crm/research/2026-03-25-contact-data-architecture.md)
+- [ ] Confirm email_opt_out enforcement is now live in milestone workflow ✓ (done this session)
+- [ ] Answer 5 pipeline questions (tasks/crm/research/2026-03-26-loan-pipeline-organization.md)
+  1. Pipeline default sort preference (closing date? stage? last activity?)
+  2. Which statuses count as "active" for summary bar?
+  3. Is rate lock date available from Arive webhooks?
+  4. Should Janie see the pipeline page or only docs/conditions?
+  5. Has Adam ever wanted a Kanban view for loans?
+
+### Next Session Instructions
+Priority 1 (Builder): Pipeline summary bar — active loan count, total pipeline value, closings-this-week
+  → Source: loans table, existing columns, no schema change
+Priority 2 (Builder): Days-to-close countdown on loans page — color coded, uses existing `closing_date`
+Priority 3 (Builder): Last-milestone-sent column — JOIN to loan_milestone_events, shows communication recency
+Priority 4 (Adam): Answer 8 contact schema questions to unblock Contact Data Architecture spec
+Priority 5 (Architect): Once Adam answers contact questions → write full contact schema improvement spec
+
+### Data Integrity Status
+- email_opt_out: 321 contacts (13.5%) opted out — NOW ENFORCED in milestone route (fixed this session)
+- Contact stages: clean (regression fixed 2026-03-26 PM)
+- Loan statuses: per Arive sync via WF2 — no issues identified
+---

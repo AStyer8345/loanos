@@ -1,4 +1,8 @@
-# Mission Brief — 2026-03-26 PM
+# Mission Brief — 2026-03-26 AM (scheduled)
+
+---
+
+## Mission Brief — 2026-03-26 PM
 
 ## Domain
 LoanOS CRM
@@ -46,3 +50,38 @@ the query `.in('stage', ['Closed'])` won't match contacts with `stage = 'Funded 
 - Do NOT change loan stage logic (getStageLabel is correct for loans).
 - Do NOT alter any Supabase migration or schema.
 - Existing contacts with stage = 'Closed' in DB are fine — only future writes were broken.
+
+---
+
+## Mission Brief — 2026-03-26 AM (automated scheduled session)
+
+### Domain
+LoanOS CRM
+
+### Focus Area
+1. COMPLIANCE: email_opt_out enforcement in n8n milestone email workflows
+2. UX: "X of Y contacts" count indicator on contacts page
+3. RESEARCH: Loan Pipeline Organization (next queue topic)
+
+### Session Type
+[x] Execute / Build (Tasks 1 + 2) — Sequence C
+[x] Research + Planning (Task 3) — Sequence A
+
+### Objectives
+1. Ensure n8n Milestone Communication Agent checks email_opt_out before firing — 321 opted-out contacts are at compliance risk
+2. Add "Showing X of Y contacts" indicator to contacts page — resolves pagination UX confusion
+3. Research loan pipeline organization best practices for mortgage LOs
+
+### Definition of Done
+1. n8n Milestone Communication Agent updated with email_opt_out filter
+2. "X of Y contacts" count appears on contacts page — npm run build passes
+3. Research file written at tasks/crm/research/2026-03-26-loan-pipeline-organization.md
+
+### Resources / Files in Scope
+- n8n workflow: LoanOS — Milestone Communication Agent (ID: 1hjOmS7inZcxEJQr)
+- src/app/(dashboard)/contacts/page.tsx
+- src/app/api/contacts/route.ts (may need count query)
+
+### HIGH RISK Items
+- n8n workflow update: adding opt-out filter reduces sends (safe direction, never expands)
+- Do NOT touch loan records, active borrower data, or schema

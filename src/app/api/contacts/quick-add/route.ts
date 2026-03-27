@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-parser'
-import { getStageLabel } from '@/lib/constants/loan-stages'
+import { normalizeContactStage } from '@/lib/constants/loan-stages'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import type { Database } from '@/lib/database.types'
@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
       last_name: extracted.last_name,
       email: extracted.email,
       phone: extracted.phone,
-      stage: getStageLabel(extracted.stage),
+      stage: normalizeContactStage(extracted.stage),
       contact_type: extracted.contact_type || 'borrower',
       referred_by: referredByResolved,
       lead_source: extracted.source || (referredByResolved ? 'Realtor Referral' : null),

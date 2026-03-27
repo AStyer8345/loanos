@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStageLabel } from '@/lib/constants/loan-stages'
+import { normalizeContactStage } from '@/lib/constants/loan-stages'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
       const { error } = await supabase
         .from('contacts')
-        .update({ stage: getStageLabel(value) })
+        .update({ stage: normalizeContactStage(value) })
         .in('id', contactIds)
         .eq('organization_id', organizationId)
 

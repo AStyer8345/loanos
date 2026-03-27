@@ -195,3 +195,75 @@ Priority 5 (Architect): Once Adam answers open questions, write contact schema i
 - last_touch_at: only 648 contacts (27%) populated — "Realtors Not Touched 30+ Days" smart list will be mostly noise until backfilled
 - co_borrower fields: data entry gap on forms — 260 co-borrower first names exist but 0 co-borrower emails
 ---
+
+---
+## Session: 2026-03-26 PM — LoanOS CRM
+Focus: Contact Stage Data Integrity Fix — getStageLabel regression
+Type: Execute (Sequence C)
+
+### Completed
+- **Root cause identified** — The 2026-03-25 Enterprise PM session deleted `stageNormalization.ts`
+  and incorrectly replaced all contact stage write calls with `getStageLabel()`, which is designed
+  for loan status labels. `getStageLabel('Closed')` returns `'Funded / Closed'`, not `'Closed'`.
+  This would corrupt any contact stage updated after 2026-03-25.
+- **`normalizeContactStage()` added** to `src/lib/constants/loan-stages.ts` — recreates the
+  deleted contact normalization logic. Handles canonical stages (pass-through), Salesforce aliases
+  (Closed Client → Closed), and unknown values (→ Other). Also maps 'Funded / Closed' → 'Closed'
+  to auto-heal any future import of corrupted values.
+- **6 call sites fixed across 4 files**: contacts/page.tsx (4 sites), bulk-action/route.ts,
+  quick-add/route.ts, import/contacts/route.ts — all now use `normalizeContactStage`.
+- **DB audit confirmed no data corruption** — 0 contacts with non-canonical stage values in
+  Adam's org. Regression was caught before any stage updates occurred with the bad code.
+- **Build verified** — `npm run build` passes with 0 TypeScript errors.
+- **Pagination investigation** — "500-record cap" is NOT a technical limit. Direct SQL at
+  OFFSET 500 returns results. DB and RLS are fine. The "cap" was a UX observation from a session
+  where Load More was clicked ~4 times. No code change needed; adding a "X of Y contacts"
+  count indicator would resolve the UX concern (deferred — Adam input needed on placement).
+
+### Deferred
+- **Contact Data Architecture Review** — 8 open questions from 2026-03-25 late session still
+  pending Adam's answers. Cannot write architecture spec until decisions made.
+- **email_opt_out enforcement in n8n** — HIGH compliance priority, deferred to next Builder session
+- **"X of Y contacts" UX indicator** — small UI addition, not urgent, deferred to next UI session
+- **Smart list improvements** (8 recommendations from research) — deferred pending schema decisions
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,331 | 2,331 | 0 (no data change) |
+| Loans in LoanOS | 817+ | 817+ | 0 |
+| n8n workflows live | 5 | 5 | 0 |
+| Contact stage write paths (broken) | 6 | 0 | -6 fixed |
+| Contact stage write paths (correct) | 0 | 6 | +6 |
+
+### Queue Position
+Current: Contact Data Architecture Review (active)
+Advance to next topic: NO — still waiting on 8 open questions from Adam
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: 5 | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- The Enterprise PM session that deleted stageNormalization.ts should have noted that
+  `getStageLabel` is loan-specific. Future sessions: when consolidating utility functions,
+  check for contact vs. loan domain separation — the two systems use different stage vocabularies.
+- Session ran without an AM session today — PM sessions should still be able to execute
+  Builder tasks when the work is clear from prior research.
+
+### BLOCKERS
+None — the stage regression is fixed. Contact data is clean.
+
+### Next Session Instructions
+Priority 1 (Adam): Answer the 8 open questions from 2026-03-25 late session research
+  (`tasks/crm/research/2026-03-25-contact-data-architecture.md`) — these gate the architecture spec
+Priority 2 (Builder): Add `email_opt_out` enforcement check to n8n milestone email workflows
+  (compliance gap — 321 opted-out contacts could receive emails today)
+Priority 3 (Builder): Add "X of Y contacts" count indicator to contacts page (UX improvement)
+Priority 4 (Research): Loan Pipeline Organization — next item in domain queue
+
+### Data Integrity Status
+- Contact stages: clean (0 corrupted records, regression fixed before any damage)
+- email_opt_out: 321 contacts (13.5%) opted out — n8n enforcement gap still open (HIGH priority)
+- Closed Borrowers: 842 contacts with stage = 'Closed' — smart list query is correct
+- Pagination: all 2,331 contacts reachable via Load More — no technical cap exists
+---

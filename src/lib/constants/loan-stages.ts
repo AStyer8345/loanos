@@ -185,6 +185,41 @@ export function rawStatusesForGroup(group: readonly StageKey[]): string[] {
 
 // Pre-computed arrays for common queries
 export const IN_PROCESS_STATUSES = rawStatusesForGroup(STAGE_GROUPS.IN_PROCESS)
+
+// ── Contact stage normalization ───────────────────────────────────────────────
+// Contacts use a separate, simpler stage system from loans.
+// These are the canonical values stored in the contacts.stage column.
+
+const CANONICAL_CONTACT_STAGES = [
+  'Lead', 'Pre-App', 'Application', 'Pre-Approved',
+  'In Process', 'Closing', 'Closed', 'Other',
+] as const
+
+const CONTACT_STAGE_MAP: Record<string, string> = {
+  'Closed Client':           'Closed',
+  'LOAN_FUNDED':             'Closed',
+  'Funded / Closed':         'Closed',
+  'Lead - Cold / Inactive':  'Lead',
+  'Lead - Contacted':        'Lead',
+  'Lead - New':              'Lead',
+  'Long Term':               'Lead',
+  'UNDERWRITING_SUBMITTED':  'In Process',
+  'DISCLOSURE_SENT':         'In Process',
+  'APPROVED_WITH_CONDITION': 'Pre-Approved',
+  'Not Qualified':           'Other',
+  'unsubscribed':            'Other',
+}
+
+/**
+ * Normalize any raw value to a canonical contact stage.
+ * Use this for all contact.stage writes — NOT getStageLabel (which is for loans).
+ * Returns 'Lead' for unknown/null values.
+ */
+export function normalizeContactStage(raw: string | null | undefined): string {
+  if (!raw) return 'Lead'
+  if ((CANONICAL_CONTACT_STAGES as readonly string[]).includes(raw)) return raw
+  return CONTACT_STAGE_MAP[raw] ?? CONTACT_STAGE_MAP[raw.toLowerCase()] ?? 'Other'
+}
 export const FUNDED_STATUSES = rawStatusesForGroup(STAGE_GROUPS.FUNDED)
 export const PRE_APPROVAL_STATUSES = rawStatusesForGroup(STAGE_GROUPS.PRE_APPROVAL)
 export const LEAD_STATUSES = rawStatusesForGroup(STAGE_GROUPS.LEADS)

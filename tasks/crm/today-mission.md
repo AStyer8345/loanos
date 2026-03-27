@@ -1,91 +1,48 @@
-## Mission Brief — 2026-03-25 AM (SUPERSEDED — see PM below)
+# Mission Brief — 2026-03-26 PM
 
-### Domain
-CRM (Salesforce/Jungo → LoanOS Migration)
-
-### Focus Area
-Week 2 — Contact Migration — Dedup Logic + Field Mapping Finalization
-
-### Session Type
-[x] Strategy / Architecture (Sequence B)
-
-**Status: COMPLETE. Spec written but DEPRECATED — Adam confirmed contacts/loans already migrated. Do not execute the dedup spec.**
-
----
-
-## Mission Brief — 2026-03-25 PM
-
-### Domain
-CRM (Salesforce/Jungo → LoanOS Migration)
-
-### Focus Area
-Decommission Audit — Confirm LoanOS Covers Everything, Cancel Salesforce
-
-### Session Type
-[x] Research + Planning (Sequence A)
-
-### Context Change (Post-AM Session)
-Adam confirmed in a post-AM-session conversation that:
-- Contacts are already in LoanOS (2,377 records)
-- Loans are already in LoanOS (817+ historical + Arive webhook for new)
-- n8n automations are mostly built
-- Data migration phases (dedup/sample run spec from AM session) are NO LONGER NEEDED
-- Goal revised: decommission audit → cancel Salesforce when ready
-
-The CSV migration spec (tasks/crm/specs/2026-03-25-contact-dedup-spec.md) is written but DO NOT EXECUTE.
-
-### Objectives
-1. Produce a complete Salesforce/Jungo automation inventory vs. n8n equivalent gap analysis
-2. Identify UI gaps currently blocking daily LoanOS use
-3. Document reporting gaps (anything Adam currently pulls from Salesforce not available in LoanOS)
-4. Define the sign-off checklist: what must be true for Adam to say "I don't need Salesforce anymore"
-
-### Definition of Done
-- Research file written: tasks/crm/research/2026-03-25-decommission-audit-research.md
-- Gap analysis table complete (Salesforce automation → n8n status)
-- UI gaps documented with severity
-- Next session has clear action list
-
-### Resources / Files in Scope
-- tasks/crm/domain-queue.md
-- 2026-03-12_LoanOS-Automation-Audit.md
-- MEMORY.md (n8n workflow IDs + status)
-- tasks/crm/notebooklm-pull-2026-03-25.md
-- CONTEXT.md (multi-tenancy status, outstanding items)
-
-### HIGH RISK Items
-NONE — this is a read-only audit session. No data migration, no Supabase writes, no n8n changes.
-
----
-
-## Mission Brief — 2026-03-25 PM Late (Session 2)
-
-### Domain
+## Domain
 LoanOS CRM
 
-### Focus Area
-Contact Data Architecture Review — what information actually matters for a mortgage LO contact record?
+## Focus Area
+Contact Stage Data Integrity — Fix `getStageLabel` regression + investigate pagination cap
 
-### Session Type
-[x] Research + Planning (Sequence A)
+## Session Type
+[x] Execute / Build (Sequence C)
 
-### Objectives
-1. Audit the LoanOS contacts table schema against what top-performing LOs actually track
-2. Identify fields that are empty/unused vs. fields that are missing but would add value
-3. Recommend smart list definitions that Adam should have as daily working views
-4. Identify UI organization improvements (what should be above the fold on a contact record?)
+## Background
+The 2026-03-25 Enterprise PM session deleted `stageNormalization.ts` and replaced all
+`normalizeStage()` calls with `getStageLabel()` from `loan-stages.ts`. This was correct
+for loans but WRONG for contacts. `getStageLabel('Closed')` returns 'Funded / Closed'
+(a loan display label), not 'Closed' (the canonical contact stage). Any contact whose stage
+is updated via the UI or API after 2026-03-25 would have 'Funded / Closed' written to the DB,
+making them invisible to the 'Closed Borrowers' smart list and causing stage data corruption.
 
-### Definition of Done
-- Research file written at tasks/crm/research/2026-03-25-contact-data-architecture.md
-- Field inventory completed (used vs. unused vs. missing)
-- Smart list recommendations written with query logic
-- Open questions for Adam documented
+The "Closed Borrowers" smart list showing 0 results (reported in prior session) is related:
+the query `.in('stage', ['Closed'])` won't match contacts with `stage = 'Funded / Closed'`.
 
-### Resources / Files in Scope
-- Supabase: contacts table (live schema query)
-- LoanOS contacts UI (src/app/contacts/)
-- n8n workflow index (CLAUDE.md)
-- domain-queue.md (scope definition)
+## Objectives
+1. Add `normalizeContactStage()` to loan-stages.ts (recreate deleted contact normalization logic)
+2. Fix all 4 affected files: contacts/page.tsx (3 sites), bulk-action/route.ts, quick-add/route.ts, import/contacts/route.ts
+3. Verify npm run build passes
+4. Investigate pagination cap — confirm whether it's a Supabase max_rows setting or frontend issue
 
-### HIGH RISK Items
-- None — research only, no schema changes or execution in this session
+## Definition of Done
+- `normalizeContactStage('Closed')` returns 'Closed'
+- `normalizeContactStage('Closed Client')` returns 'Closed'
+- `normalizeContactStage('LOAN_FUNDED')` returns 'Closed'
+- All 4 files use `normalizeContactStage` instead of `getStageLabel` for contact stage writes
+- npm run build passes 0 TypeScript errors
+- Pagination investigation complete with finding documented
+
+## Resources / Files in Scope
+- src/lib/constants/loan-stages.ts (add normalizeContactStage)
+- src/app/dashboard/contacts/page.tsx (3 call sites)
+- src/app/api/contacts/bulk-action/route.ts (1 call site)
+- src/app/api/contacts/quick-add/route.ts (1 call site)
+- src/app/api/import/contacts/route.ts (1 call site)
+
+## HIGH RISK Items
+- This touches all contact stage write paths. Do NOT change read paths or query logic.
+- Do NOT change loan stage logic (getStageLabel is correct for loans).
+- Do NOT alter any Supabase migration or schema.
+- Existing contacts with stage = 'Closed' in DB are fine — only future writes were broken.

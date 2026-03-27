@@ -380,3 +380,84 @@ Priority 5 (Research): Automation Coverage Audit — next item in domain-queue.m
 - email_opt_out: 321 contacts (13.5%) opted out — enforced in milestone route (2026-03-26 AM)
 - Loan milestone events: populating correctly via n8n WF1 + milestone route
 ---
+
+## Session Log Entry
+Date: 2026-03-27
+Time: ~04:00–04:35Z
+Focus: Contact Data Architecture — Schema Execution (migration 060)
+Session Type: Execute (Architect + Builder)
+
+### Trigger
+Adam answered all 8 blocking contact schema questions in the previous session.
+All decisions received — no further blockers for schema execution.
+
+### Completed
+
+#### Migration 060: Contact Schema Improvements (supabase/migrations/060_contact_schema_improvements.sql)
+
+**DDL — new columns added:**
+- `do_not_call` BOOLEAN NOT NULL DEFAULT false — TCPA compliance gate for SMS/call automations
+- `production_tier` TEXT CHECK('A','B','C') — replaces top_realtor/target_realtor booleans
+- `realtor_stage` TEXT CHECK('Active Partner','Prospecting','Lead') — realtor-specific pipeline stage
+- `current_rate` NUMERIC(5,3) — borrower's existing loan rate for refi scoring
+- `current_loan_balance` NUMERIC(12,2) — borrower's outstanding balance for refi scoring
+
+**DML — data migrations:**
+- Phone consolidation: 106 records updated (phone_mobile/home_phone → phone where phone was NULL)
+- production_tier backfill: 114 contacts → 'A' (top_realtor=true), 6 contacts → 'B' (target_realtor only)
+- realtor_email/realtor_phone cleanup: 1 sample contact cleared
+
+**Verified:** do_not_call col exists (2376 rows), tier_a=114 ✓, tier_b=6 ✓, realtor_fields_remaining=0 ✓, phone consolidation complete ✓
+
+#### UI Changes (contacts/page.tsx + ContactRecordView.tsx)
+- Removed deprecated columns from contacts list: Mobile (phone_mobile), Closing Date (contact-level), Realtor Email
+- Added new columns: Tier (A/B/C gold badge), Realtor Stage
+- Updated Top Realtors smart list: now filters by `production_tier NOT NULL` instead of top_realtor/target_realtor booleans
+- Removed phone_mobile from new contact form and quick-view panel
+- Removed Closing Date from contact edit form (deprecated — always pull from loan)
+- Added realtor edit fields: Tier (A/B/C), Realtor Stage
+- Added borrower edit fields: Current Rate, Current Balance
+- Added Do Not Call checkbox (all contact types) with red "✕ DO NOT CALL" badge in view mode
+- Added `handleSaveBoolField` in page.tsx for boolean field updates
+- Build: 0 TypeScript errors. Commit: 250807a
+
+### Next Session Instructions
+Priority 1 (Builder): Kanban view toggle for loans pipeline — no schema change needed, Adam confirmed interest
+Priority 2 (Builder): lock_expiry_date schema addition to loans + WF2 update to sync from Arive
+Priority 3 (Adam still open): Answer 5 pipeline questions (default sort, active status definition, rate lock webhook, Janie access, Kanban interest — actually Kanban confirmed, but other 4 still open)
+
+### Data Integrity Status
+- Contact stages: clean
+- email_opt_out: 321 contacts (13.5%) opted out — enforced in milestone route
+- Phone consolidation: COMPLETE — phone_mobile/home_phone retired (data migrated to phone)
+- production_tier: 114 tier-A, 6 tier-B backfilled from legacy booleans
+- do_not_call: column live, all contacts defaulted to false
+---
+
+---
+## Session Log Entry
+Date: 2026-03-27
+Time: 05:00Z
+Focus: Pipeline — Kanban Board View Toggle
+
+### Completed
+- **Kanban view toggle** added to loans/page.tsx (136 lines, 0 schema changes)
+  - ≡ List / ⊞ Board toggle button in control bar (next to COLUMNS picker)
+  - View mode persisted to `localStorage` key `loanos_loans_view_v1`
+  - Board mode: columns = pipeline stages when `activeList === 'inprocess'` (uses existing `PIPELINE_STAGES` constant + `statusHex()`)
+  - Board mode: columns = status groups (ordered by pipeline stage, then alpha) for all other lists
+  - Empty columns hidden; column header shows stage name + count badge in stage color
+  - Cards: borrower name, loan name (gold), amount (blue), closing date with urgency (red ≤7d, amber ≤14d), lender
+  - Red/amber left-border urgency on cards mirrors table row urgency
+  - Table view completely unchanged — toggle defaults to List
+  - Build: 0 TypeScript errors. Commit: 2c66178
+
+### Next Session Instructions
+Priority 1 (Builder): Add `lock_expiry_date` column to loans table (migration 061) + update WF2 to sync from Arive `rate_lock_expiration_date` field
+Priority 2 (Builder): Auto-sync `current_rate`/`current_loan_balance` to contacts via WF2 (deferred from contact schema session)
+Priority 3 (Adam still open): Answer 4 remaining pipeline questions (default sort, active status definition, Janie access)
+
+### Data Integrity Status
+- No schema changes this session
+- Kanban view is read-only (no drag-and-drop — status changes still go through table inline edit or loan detail)
+---

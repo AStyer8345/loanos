@@ -50,6 +50,39 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 ---
 
+## PM Session — 2026-03-26 (scenarios-am)
+
+**What was built:**
+- AI narrative personalization (`src/app/api/scenarios/generate-narrative/route.ts`, `NarrativeSection.tsx`, `ScenarioBuilder.tsx`)
+  - Extracts borrower first name from `borrowerName` field (handles "John & Jane Smith" → "John")
+  - Added `propertyAddress` to API request body and data context — Claude now knows the specific property
+  - Rewrote system prompt: paragraph 1 now opens with first name directly ("Sarah, Option A...")
+  - Possessive language throughout: "your monthly payment", "your closing costs", "your break-even"
+  - Removed "the borrower" references — narratives now address the borrower as "you"
+  - Fixed `dataContext` concatenation bug: purchase/refi blocks now use `+=` to preserve property line above
+
+**MC gap closed:** AI narrative now feels written for this specific borrower. Before: generic "Option A has a lower monthly payment." After: "Sarah, Option A saves you $127/month — your closing costs are recouped by month 18."
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `a4eb87f` — pushed to main
+**Vercel:** QUEUED at session close (expected READY)
+
+**Files touched:**
+- `src/app/api/scenarios/generate-narrative/route.ts`
+- `src/app/dashboard/scenarios/new/NarrativeSection.tsx`
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. 2-1 buydown scenario type (Tier 2) — show Year 1 / Year 2 / Year 3+ payments vs fixed, break-even on buydown cost
+2. Down payment comparison mode (3% / 5% / 10% / 20%) — PMI tier effects, monthly payment delta, cash required
+3. AI narrative: if narratives still feel generic in testing, consider adding loan purpose + borrower goal field to the input form
+
+**Domain queue updates:**
+- Tier 1 item 4 (AI narrative upgrade) — ✅ COMPLETE this session
+
+---
+
 ## AM Session — 2026-03-26 (scenarios-am)
 
 **What was built:**

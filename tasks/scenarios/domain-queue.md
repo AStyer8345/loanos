@@ -52,7 +52,7 @@ KNOWN GAPS (start here):
 - ~~**Input speed**: Pre-fill loan amount, rate, term from active contact/loan record~~ ✅ DONE (pre-existing)
 - ~~**Share page redesign**: Make it presentation-quality (borrower-facing, not LO-facing)~~ ✅ DONE 2026-03-25 AM
 - ~~**PDF redesign**: Branded, visual, something a borrower would actually read~~ ✅ DONE 2026-03-26 AM
-- **AI narrative upgrade**: More personalized, incorporate borrower name + specific numbers more naturally
+- ~~**AI narrative upgrade**: More personalized, incorporate borrower name + specific numbers more naturally~~ ✅ DONE 2026-03-26 PM
 
 ### Tier 2 — New scenario types
 - **2-1 buydown**: Show Year 1, Year 2, Year 3+ payments vs fixed rate

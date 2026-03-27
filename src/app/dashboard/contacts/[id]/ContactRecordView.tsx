@@ -117,6 +117,20 @@ export type EmailDraftRow = {
   created_at: string
 }
 
+export type DripEnrollment = {
+  id: string
+  contact_id: string
+  campaign_id: string
+  organization_id: string
+  status: 'active' | 'paused' | 'completed' | 'cancelled'
+  current_step: number
+  next_send_at: string | null
+  enrolled_at: string
+  cancelled_at: string | null
+  campaign_name: string
+  total_steps: number
+}
+
 export type ContactEmailRow = {
   id: string
   subject: string
@@ -238,6 +252,9 @@ type Props = {
   onSaveBoolField?: (field: keyof Contact, value: boolean) => Promise<void>
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
   onDeleteActivity?: (id: string) => Promise<void>
+  dripEnrollments?: DripEnrollment[]
+  onToggleDrip?: (enrollmentId: string, newStatus: 'active' | 'paused') => Promise<void>
+  onCancelDrip?: (enrollmentId: string) => Promise<void>
 }
 
 // Typeahead for referred_by — searches existing contacts by name
@@ -760,6 +777,9 @@ export function ContactRecordView(props: Props) {
     onSaveBoolField,
     onLogActivity,
     onDeleteActivity,
+    dripEnrollments = [],
+    onToggleDrip,
+    onCancelDrip,
   } = props
 
   const { setActiveRecord } = useOutreachChat()
@@ -1250,6 +1270,100 @@ export function ContactRecordView(props: Props) {
                     )}
                   </div>
                 </div>
+
+                {/* Drip Campaigns */}
+                {dripEnrollments.length > 0 && (
+                  <div style={cardStyle}>
+                    <div style={labelStyle}>DRIP CAMPAIGNS</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {dripEnrollments.map(enrollment => {
+                        const isActive = enrollment.status === 'active'
+                        const isPaused = enrollment.status === 'paused'
+                        const isCompleted = enrollment.status === 'completed'
+                        const statusColor = isActive ? '#10b981' : isPaused ? '#f59e0b' : isCompleted ? '#60a5fa' : '#ef4444'
+                        const statusBg = isActive ? '#10b98122' : isPaused ? '#f59e0b22' : isCompleted ? '#60a5fa22' : '#ef444422'
+                        const stepLabel = isCompleted
+                          ? `${enrollment.total_steps} of ${enrollment.total_steps}`
+                          : `${enrollment.current_step + 1} of ${enrollment.total_steps}`
+                        return (
+                          <div key={enrollment.id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)' }}>
+                                {enrollment.campaign_name}
+                              </span>
+                              <span style={{
+                                fontSize: 9, padding: '2px 6px', borderRadius: 4, fontFamily: 'var(--font-mono)',
+                                background: statusBg, color: statusColor, border: `1px solid ${statusColor}`,
+                                textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600,
+                              }}>
+                                {enrollment.status}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{
+                                flex: 1, height: 4, borderRadius: 2,
+                                background: 'var(--border)',
+                              }}>
+                                <div style={{
+                                  width: `${Math.round(((isCompleted ? enrollment.total_steps : enrollment.current_step + 1) / enrollment.total_steps) * 100)}%`,
+                                  height: '100%', borderRadius: 2, background: statusColor,
+                                  transition: 'width 0.3s ease',
+                                }} />
+                              </div>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                                Step {stepLabel}
+                              </span>
+                            </div>
+                            {enrollment.next_send_at && (isActive || isPaused) && (
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                                Next email: {new Date(enrollment.next_send_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                {isPaused && ' (paused)'}
+                              </div>
+                            )}
+                            {(isActive || isPaused) && (onToggleDrip || onCancelDrip) && (
+                              <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                                {onToggleDrip && (
+                                  <button
+                                    type="button"
+                                    onClick={() => onToggleDrip(enrollment.id, isActive ? 'paused' : 'active')}
+                                    style={{
+                                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                                      padding: '4px 10px', borderRadius: 3, cursor: 'pointer',
+                                      background: isActive ? '#f59e0b22' : '#10b98122',
+                                      color: isActive ? '#f59e0b' : '#10b981',
+                                      border: `1px solid ${isActive ? '#f59e0b' : '#10b981'}`,
+                                      letterSpacing: '0.04em',
+                                    }}
+                                  >
+                                    {isActive ? 'PAUSE' : 'RESUME'}
+                                  </button>
+                                )}
+                                {onCancelDrip && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (confirm('Cancel this drip campaign? This cannot be undone.')) {
+                                        onCancelDrip(enrollment.id)
+                                      }
+                                    }}
+                                    style={{
+                                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                                      padding: '4px 10px', borderRadius: 3, cursor: 'pointer',
+                                      background: 'transparent', color: '#ef4444',
+                                      border: '1px solid #ef444466', letterSpacing: '0.04em',
+                                    }}
+                                  >
+                                    CANCEL
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
               </div>
             )}

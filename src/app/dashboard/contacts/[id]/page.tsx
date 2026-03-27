@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
-import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow } from './ContactRecordView'
+import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow, type DripEnrollment } from './ContactRecordView'
 
 export default function ContactRecordPage() {
   const params = useParams()
@@ -25,6 +25,7 @@ export default function ContactRecordPage() {
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
   const [referredLoans, setReferredLoans] = useState<ContactLoan[]>([])
+  const [dripEnrollments, setDripEnrollments] = useState<DripEnrollment[]>([])
 
   const supabase = createClient()
 
@@ -55,6 +56,37 @@ export default function ContactRecordPage() {
       .or(`buyer_agent_contact_id.eq.${id},listing_agent_contact_id.eq.${id}`)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setReferredLoans((data ?? []) as unknown as ContactLoan[])
+  }, [id, supabase])
+
+  const fetchDripEnrollments = useCallback(async () => {
+    const { data } = await supabase
+      .from('drip_enrollments')
+      .select('id, contact_id, campaign_id, organization_id, status, current_step, next_send_at, enrolled_at, cancelled_at')
+      .eq('contact_id', id)
+      .order('enrolled_at', { ascending: false })
+    const rows = data ?? []
+    if (rows.length === 0) { setDripEnrollments([]); return }
+    const campaignIds = [...new Set(rows.map(e => e.campaign_id))]
+    const { data: campaigns } = await supabase
+      .from('drip_campaigns')
+      .select('id, name')
+      .in('id', campaignIds)
+    const { data: stepCounts } = await supabase
+      .from('drip_steps')
+      .select('campaign_id')
+      .in('campaign_id', campaignIds)
+    const campaignMap = new Map((campaigns ?? []).map(c => [c.id, c.name]))
+    const stepCountMap = new Map<string, number>()
+    for (const s of (stepCounts ?? [])) {
+      stepCountMap.set(s.campaign_id, (stepCountMap.get(s.campaign_id) ?? 0) + 1)
+    }
+    const enriched: DripEnrollment[] = rows.map(e => ({
+      ...e,
+      status: e.status as DripEnrollment['status'],
+      campaign_name: campaignMap.get(e.campaign_id) ?? 'Unknown Campaign',
+      total_steps: stepCountMap.get(e.campaign_id) ?? 0,
+    }))
+    setDripEnrollments(enriched)
   }, [id, supabase])
 
   const fetchActivity = useCallback(async () => {
@@ -131,7 +163,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(), fetchActivity(), fetchContactActivity()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -162,7 +194,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, resolveReferrer])
+  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -225,6 +257,26 @@ export default function ContactRecordPage() {
     await fetchContact()
   }
 
+  const handleToggleDrip = async (enrollmentId: string, newStatus: 'active' | 'paused') => {
+    const { error } = await supabase
+      .from('drip_enrollments')
+      .update({ status: newStatus })
+      .eq('id', enrollmentId)
+    if (!error) {
+      setDripEnrollments(prev => prev.map(e => e.id === enrollmentId ? { ...e, status: newStatus } : e))
+    }
+  }
+
+  const handleCancelDrip = async (enrollmentId: string) => {
+    const { error } = await supabase
+      .from('drip_enrollments')
+      .update({ status: 'cancelled' })
+      .eq('id', enrollmentId)
+    if (!error) {
+      setDripEnrollments(prev => prev.map(e => e.id === enrollmentId ? { ...e, status: 'cancelled' as const } : e))
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
@@ -269,6 +321,9 @@ export default function ContactRecordPage() {
       onSaveBoolField={handleSaveBoolField}
       onLogActivity={handleLogActivity}
       onDeleteActivity={handleDeleteActivity}
+      dripEnrollments={dripEnrollments}
+      onToggleDrip={handleToggleDrip}
+      onCancelDrip={handleCancelDrip}
     />
   )
 }

@@ -29,7 +29,7 @@ export type Database = {
           loan_id: string | null
           metadata: Json | null
           occurred_at: string | null
-          organization_id: string | null
+          organization_id: string
           raw_payload: Json | null
           subject: string | null
           summary: string | null
@@ -51,7 +51,7 @@ export type Database = {
           loan_id?: string | null
           metadata?: Json | null
           occurred_at?: string | null
-          organization_id?: string | null
+          organization_id?: string
           raw_payload?: Json | null
           subject?: string | null
           summary?: string | null
@@ -73,7 +73,7 @@ export type Database = {
           loan_id?: string | null
           metadata?: Json | null
           occurred_at?: string | null
-          organization_id?: string | null
+          organization_id?: string
           raw_payload?: Json | null
           subject?: string | null
           summary?: string | null
@@ -348,11 +348,15 @@ export type Database = {
           contact_type: string | null
           created_at: string
           created_date: string | null
+          current_loan_balance: number | null
+          current_rate: number | null
+          do_not_call: boolean
           email: string | null
           email_opt_out: boolean | null
           first_name: string
           group_tag: string | null
           home_phone: string | null
+          hot_lead_dismissed: boolean
           id: string
           last_activity_date: string | null
           last_activity_notes: string | null
@@ -370,8 +374,10 @@ export type Database = {
           organization_id: string
           phone: string | null
           phone_mobile: string | null
+          production_tier: string | null
           realtor_email: string | null
           realtor_phone: string | null
+          realtor_stage: string | null
           referral_type: string | null
           referred_by: string | null
           salesforce_created_date: string | null
@@ -398,11 +404,15 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_date?: string | null
+          current_loan_balance?: number | null
+          current_rate?: number | null
+          do_not_call?: boolean
           email?: string | null
           email_opt_out?: boolean | null
           first_name: string
           group_tag?: string | null
           home_phone?: string | null
+          hot_lead_dismissed?: boolean
           id?: string
           last_activity_date?: string | null
           last_activity_notes?: string | null
@@ -420,8 +430,10 @@ export type Database = {
           organization_id: string
           phone?: string | null
           phone_mobile?: string | null
+          production_tier?: string | null
           realtor_email?: string | null
           realtor_phone?: string | null
+          realtor_stage?: string | null
           referral_type?: string | null
           referred_by?: string | null
           salesforce_created_date?: string | null
@@ -448,11 +460,15 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_date?: string | null
+          current_loan_balance?: number | null
+          current_rate?: number | null
+          do_not_call?: boolean
           email?: string | null
           email_opt_out?: boolean | null
           first_name?: string
           group_tag?: string | null
           home_phone?: string | null
+          hot_lead_dismissed?: boolean
           id?: string
           last_activity_date?: string | null
           last_activity_notes?: string | null
@@ -470,8 +486,10 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           phone_mobile?: string | null
+          production_tier?: string | null
           realtor_email?: string | null
           realtor_phone?: string | null
+          realtor_stage?: string | null
           referral_type?: string | null
           referred_by?: string | null
           salesforce_created_date?: string | null
@@ -557,6 +575,152 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          slug: string
+          total_steps: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id: string
+          slug: string
+          total_steps?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          slug?: string
+          total_steps?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_enrollments: {
+        Row: {
+          campaign_id: string
+          cancelled_at: string | null
+          cancelled_reason: string | null
+          contact_id: string
+          current_step: number
+          enrolled_at: string
+          id: string
+          last_sent_at: string | null
+          next_send_at: string | null
+          organization_id: string
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          contact_id: string
+          current_step?: number
+          enrolled_at?: string
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          organization_id: string
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          contact_id?: string
+          current_step?: number
+          enrolled_at?: string
+          id?: string
+          last_sent_at?: string | null
+          next_send_at?: string | null
+          organization_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_enrollments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "drip_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_enrollments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_enrollments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_steps: {
+        Row: {
+          body_html: string
+          campaign_id: string
+          created_at: string
+          delay_days: number
+          id: string
+          step_number: number
+          subject: string
+        }
+        Insert: {
+          body_html: string
+          campaign_id: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          step_number: number
+          subject: string
+        }
+        Update: {
+          body_html?: string
+          campaign_id?: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          step_number?: number
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_steps_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "drip_campaigns"
             referencedColumns: ["id"]
           },
         ]
@@ -1887,19 +2051,19 @@ export type Database = {
       }
       system_admins: {
         Row: {
-          user_id: string
-          email: string
           created_at: string
+          email: string
+          user_id: string
         }
         Insert: {
-          user_id: string
-          email: string
           created_at?: string
+          email: string
+          user_id: string
         }
         Update: {
-          user_id?: string
-          email?: string
           created_at?: string
+          email?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2034,6 +2198,39 @@ export type Database = {
           },
         ]
       }
+      waitlist_signups: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          mailchimp_status: string
+          name: string
+          notes: string | null
+          source: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          mailchimp_status?: string
+          name: string
+          notes?: string | null
+          source?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          mailchimp_status?: string
+          name?: string
+          notes?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2049,6 +2246,25 @@ export type Database = {
           loan_id: string
           loan_status: string
           organization_id: string
+        }[]
+      }
+      get_due_drip_emails: {
+        Args: never
+        Returns: {
+          campaign_id: string
+          campaign_name: string
+          contact_id: string
+          current_step: number
+          email: string
+          enrolled_at: string
+          enrollment_id: string
+          first_name: string
+          last_name: string
+          next_step_delay_days: number
+          step_body_html: string
+          step_number: number
+          step_subject: string
+          total_steps: number
         }[]
       }
       get_my_organization_id: { Args: never; Returns: string }

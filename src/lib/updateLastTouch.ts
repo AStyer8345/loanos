@@ -44,7 +44,7 @@ export async function updateLastTouch(
       entity_type: 'contact',
       occurred_at: now,
       user_id: user.id,
-      organization_id: profile?.organization_id ?? null,
+      organization_id: profile?.organization_id ?? undefined,
       metadata: (metadata ?? null) as never,
     }),
   ])

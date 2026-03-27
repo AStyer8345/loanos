@@ -361,3 +361,68 @@ Files to read first:
 - tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md — Billing build (if Stripe ready)
 - tasks/enterprise/notebooklm-pull-2026-03-27.md — AM pull context
 ---
+
+---
+## Session Log Entry
+Date: 2026-03-27
+Time: AM (Scheduled)
+Focus: Phase 3 — Tenant Admin MVP Build
+Session Type: Build
+
+### Completed
+- **NotebookLM PULL executed** — 5 queries on billing/tenant admin topic. Pull report written. Staleness alert: notebook still references several resolved Phase 2 items.
+- **Migration 059 applied** — `system_admins` table created in Supabase. Adam's account seeded automatically via `auth.users` email lookup. No RLS (service role only).
+- **org_members table verified** — No `org_members` table exists. Membership is via `profiles` table with `organization_id` + `role` columns. Spec updated accordingly.
+- **Stripe check** — STRIPE_SECRET_KEY not in .env.local or Vercel. Build path: Tenant Admin MVP (Stripe-independent).
+- **requireAdmin() helper created** — `src/lib/admin/auth.ts` with `requireAdmin()` (returns user + serviceClient or error) and `isSystemAdmin()` (boolean, non-throwing for layouts).
+- **3 API routes created** — GET `/api/admin/tenants` (enriched with member counts + last activity), GET `/api/admin/tenants/[id]` (full detail with members, activity, loan/contact counts), POST `/api/admin/tenants/[id]/override-plan` (plan change with activity log).
+- **Admin layout created** — `src/app/admin/layout.tsx` with `isSystemAdmin()` guard, redirect to /dashboard if not admin, dark theme nav with LOANOS ADMIN branding.
+- **Tenant dashboard page created** — `src/app/admin/page.tsx` with stats cards (total tenants, pro count, MRR, starter count), searchable tenant table with plan badges, member counts, last active relative dates.
+- **Tenant detail page created** — `src/app/admin/tenants/[id]/page.tsx` with org info card, billing card with manual plan override buttons (bypass Stripe), member list with role badges, recent activity log (last 20 entries).
+- **database.types.ts updated** — `system_admins` table type added.
+- **Build verified** — `npm run build` passes with 0 TypeScript errors. All 5 admin routes appear in build output.
+
+### Incomplete / Deferred
+- Stripe build sessions (1-3): BLOCKED — Adam must add env vars
+- Billing columns on tenant detail: Will show subscription_status/period_end after migrations 057/058 (billing)
+- NotebookLM PUSH+CURATE: Deferred to PM session
+
+### What Was Built
+- `supabase/migrations/059_create_system_admins_table.sql` — created
+- `src/lib/admin/auth.ts` — created (requireAdmin + isSystemAdmin)
+- `src/app/api/admin/tenants/route.ts` — created (GET all tenants)
+- `src/app/api/admin/tenants/[id]/route.ts` — created (GET tenant detail)
+- `src/app/api/admin/tenants/[id]/override-plan/route.ts` — created (POST plan override)
+- `src/app/admin/layout.tsx` — created (admin layout with auth guard)
+- `src/app/admin/page.tsx` — created (tenant dashboard)
+- `src/app/admin/tenants/[id]/page.tsx` — created (tenant detail)
+- `src/lib/database.types.ts` — modified (system_admins type added)
+- `tasks/enterprise/notebooklm-pull-2026-03-27-am.md` — created (pull report)
+
+### Quality Assessment
+Build: 5/5 — All files created, build passes clean, follows existing codebase patterns exactly (createServiceClient, createClient, route handler structure, Tailwind dark theme).
+Review: 4/5 — Self-reviewed. Plan override correctly logs to activity_log. Admin guard uses separate system_admins table (not role-based). No RLS on system_admins (intentional, documented).
+QA: 5/5 — Build passes with 0 errors. All 5 routes in output.
+
+### BLOCKERS
+- **[ADAM ACTION REQUIRED]** Stripe Setup — STRIPE_SECRET_KEY + 4 other vars in Vercel. Billing build sessions still blocked.
+
+### Next Session Instructions
+**Master Orchestrator: Read this before doing anything else.**
+
+This session completed the Tenant Admin MVP build. Next steps:
+
+Priority 1: PUSH+CURATE — Run NotebookLM PM session (push today's files, staleness audit, web research, digest)
+
+Priority 2: CHECK — Is STRIPE_SECRET_KEY in Vercel yet? If yes, begin Billing Build Session 1.
+
+Priority 3: If Stripe still blocked — Begin LO Onboarding Flow architecture (next queue item). Read existing onboarding code at `/onboarding` and `/api/org/create`.
+
+Active focus area: Phase 3 — Tenant Admin MVP (COMPLETE) + Billing (blocked) + LO Onboarding (next)
+Advance queue: Tenant Admin MVP is done. Billing is next but blocked. Can start LO Onboarding architecture.
+
+Files the next session should read first:
+- src/app/admin/page.tsx — Tenant dashboard (just built)
+- tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md — Billing build (if Stripe ready)
+- tasks/enterprise/enterprise-queue.md — Queue status
+---

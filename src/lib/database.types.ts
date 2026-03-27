@@ -1885,6 +1885,24 @@ export type Database = {
         }
         Relationships: []
       }
+      system_admins: {
+        Row: {
+          user_id: string
+          email: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          email: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          email?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       system_prompts: {
         Row: {
           content: string

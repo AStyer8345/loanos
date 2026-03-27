@@ -50,12 +50,16 @@ export type Contact = {
   mailing_state: string | null
   mailing_zip: string | null
   mailing_country: string | null
-  phone_mobile: string | null
   title: string | null
   created_date: string | null
   last_activity_date: string | null
   last_activity_type: string | null
   last_activity_notes: string | null
+  do_not_call?: boolean | null
+  production_tier?: string | null
+  realtor_stage?: string | null
+  current_rate?: number | null
+  current_loan_balance?: number | null
 }
 
 export type ContactLoan = {
@@ -231,6 +235,7 @@ type Props = {
   savingNote: boolean
   onAddNote: () => void
   onSaveField?: (field: keyof Contact, value: string | null) => Promise<void>
+  onSaveBoolField?: (field: keyof Contact, value: boolean) => Promise<void>
   onLogActivity?: (type: ContactActivityRow['activity_type'], notes: string) => Promise<void>
   onDeleteActivity?: (id: string) => Promise<void>
 }
@@ -752,6 +757,7 @@ export function ContactRecordView(props: Props) {
     contactEmails = [],
     referrerContactId,
     onSaveField,
+    onSaveBoolField,
     onLogActivity,
     onDeleteActivity,
   } = props
@@ -777,7 +783,7 @@ export function ContactRecordView(props: Props) {
 
   const activityNotesRef = useRef<HTMLTextAreaElement>(null)
 
-  const phone = contact.phone || contact.phone_mobile || null
+  const phone = contact.phone || null
   const cityState = [contact.mailing_city, contact.mailing_state].filter(Boolean).join(', ')
   const mailingParts = [contact.mailing_street, cityState, contact.mailing_zip].filter(Boolean)
   const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
@@ -1091,18 +1097,52 @@ export function ContactRecordView(props: Props) {
                 <div style={cardStyle}>
                   <div style={labelStyle}>CONTACT INFO</div>
                   {onSaveField ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12 }}>
-                      <EditableContactField label="First Name"   value={contact.first_name}   field="first_name"   onSave={onSaveField} />
-                      <EditableContactField label="Last Name"    value={contact.last_name}    field="last_name"    onSave={onSaveField} />
-                      <EditableContactField label="Email"        value={contact.email}         field="email"        onSave={onSaveField} />
-                      <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} display={fmtPhone(contact.phone)} />
-                      <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
-                      <ContactTypeSelect value={contact.contact_type} onSave={onSaveField} />
-                      <ReferredByTypeahead value={contact.referred_by} onSave={onSaveField} />
-                      <ReferralTypeSelect value={contact.referral_type ?? null} onSave={onSaveField} />
-                      <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
-                      <EditableContactField label="Closing Date"  value={contact.closing_date}   field="closing_date"   onSave={onSaveField} />
-                    </div>
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12 }}>
+                        <EditableContactField label="First Name"   value={contact.first_name}   field="first_name"   onSave={onSaveField} />
+                        <EditableContactField label="Last Name"    value={contact.last_name}    field="last_name"    onSave={onSaveField} />
+                        <EditableContactField label="Email"        value={contact.email}         field="email"        onSave={onSaveField} />
+                        <EditableContactField label="Phone"        value={contact.phone}         field="phone"        onSave={onSaveField} display={fmtPhone(contact.phone)} />
+                        <EditableContactField label="Stage"        value={contact.stage}         field="stage"        onSave={onSaveField} />
+                        <ContactTypeSelect value={contact.contact_type} onSave={onSaveField} />
+                        <ReferredByTypeahead value={contact.referred_by} onSave={onSaveField} />
+                        <ReferralTypeSelect value={contact.referral_type ?? null} onSave={onSaveField} />
+                        <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
+                        {contact.contact_type === 'realtor' && (
+                          <>
+                            <EditableContactField label="Tier (A/B/C)"  value={contact.production_tier ?? null} field="production_tier" onSave={onSaveField} />
+                            <EditableContactField label="Realtor Stage"  value={contact.realtor_stage ?? null}   field="realtor_stage"   onSave={onSaveField} />
+                          </>
+                        )}
+                        {contact.contact_type === 'borrower' && (
+                          <>
+                            <EditableContactField label="Current Rate (%)" value={contact.current_rate != null ? String(contact.current_rate) : null} field="current_rate" onSave={onSaveField} />
+                            <EditableContactField label="Current Balance"  value={contact.current_loan_balance != null ? String(contact.current_loan_balance) : null} field="current_loan_balance" onSave={onSaveField} />
+                          </>
+                        )}
+                      </div>
+                      {onSaveBoolField && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <button
+                            type="button"
+                            onClick={() => onSaveBoolField('do_not_call', !(contact.do_not_call ?? false))}
+                            style={{
+                              width: 18, height: 18, borderRadius: 3,
+                              border: `1px solid ${contact.do_not_call ? '#ef4444' : 'var(--border)'}`,
+                              background: contact.do_not_call ? '#ef444422' : 'transparent',
+                              cursor: 'pointer', flexShrink: 0,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                            aria-label="Toggle Do Not Call"
+                          >
+                            {contact.do_not_call && <span style={{ color: '#ef4444', fontSize: 11, fontWeight: 700 }}>✕</span>}
+                          </button>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: contact.do_not_call ? '#ef4444' : 'var(--muted)' }}>
+                            DO NOT CALL (TCPA)
+                          </span>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {contact.email && (
@@ -1203,10 +1243,9 @@ export function ContactRecordView(props: Props) {
                       <span style={{ color: 'var(--muted)' }}>Last activity </span>
                       {contact.last_activity_date ? fmtDate(contact.last_activity_date) : (contact.last_touch ? fmtDate(contact.last_touch) : '-')}
                     </div>
-                    {contact.closing_date && (
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                        <span style={{ color: 'var(--muted)' }}>Closing date </span>
-                        {fmtDate(contact.closing_date)}
+                    {contact.do_not_call && (
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#ef4444', letterSpacing: '0.05em' }}>
+                        ✕ DO NOT CALL
                       </div>
                     )}
                   </div>

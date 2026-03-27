@@ -35,7 +35,6 @@ type Contact = {
   last_name: string | null
   email: string | null
   phone: string | null
-  phone_mobile: string | null
   contact_type: string | null
   stage: string | null
   lead_source: string | null
@@ -52,13 +51,12 @@ type Contact = {
   last_activity_date: string | null
   last_activity_notes: string | null
   last_activity_type: string | null
-  top_realtor: boolean | null
-  target_realtor: boolean | null
   salesforce_id: string | null
   closing_date: string | null
-  realtor_email: string | null
-  realtor_phone: string | null
   created_at: string | null
+  do_not_call: boolean | null
+  production_tier: string | null
+  realtor_stage: string | null
 }
 
 type SmartListDef = { id: string; label: string; section?: string }
@@ -247,7 +245,6 @@ const ALL_COLUMNS: ColumnDef[] = [
     ) },
   { id: 'type',         label: 'Type',             minWidth: 100, render: c => c.contact_type ?? '—' },
   { id: 'phone',        label: 'Phone',            minWidth: 140, render: c => <PhoneCell value={c.phone} /> },
-  { id: 'mobile',       label: 'Mobile',           minWidth: 140, render: c => <PhoneCell value={c.phone_mobile} /> },
   { id: 'email',        label: 'Email',            minWidth: 220, render: c => <EmailCell value={c.email} /> },
   { id: 'stage',        label: 'Stage',            minWidth: 120, render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      minWidth: 140, render: c => c.lead_source ?? '—' },
@@ -271,10 +268,12 @@ const ALL_COLUMNS: ColumnDef[] = [
       }
       return v
     } },
-  { id: 'last_touch',   label: 'Last Touch',       minWidth: 180, render: c => <LastTouchCell date={c.last_touch_at ?? c.last_activity_date} /> },
-  { id: 'closing_date', label: 'Closing Date',     minWidth: 140, render: c => fmtDateOnly(c.closing_date) },
-  { id: 'realtor_email',label: 'Realtor Email',    minWidth: 220, render: c => <EmailCell value={c.realtor_email} /> },
-  { id: 'created',      label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
+  { id: 'last_touch',      label: 'Last Touch',       minWidth: 180, render: c => <LastTouchCell date={c.last_touch_at ?? c.last_activity_date} /> },
+  { id: 'production_tier', label: 'Tier',             minWidth: 80,  render: c => c.production_tier
+      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(201,168,76,0.12)', color: '#c9a84c', fontWeight: 600 }}>{c.production_tier}</span>
+      : <span style={{ color: 'var(--muted)' }}>—</span> },
+  { id: 'realtor_stage',   label: 'Realtor Stage',    minWidth: 140, render: c => c.realtor_stage ?? '—' },
+  { id: 'created',         label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
 ]
 
 const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by', 'last_touch']
@@ -319,7 +318,7 @@ function applySmartList(query: any, listId: string): any {
     case 'all-realtors':
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
-      return query.eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true')
+      return query.eq('contact_type', 'realtor').not('production_tier', 'is', null)
     case 'unassigned':
       return query.or(
         'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
@@ -447,7 +446,7 @@ function ContactTypeahead({
 }
 
 const BLANK_CONTACT = {
-  first_name: '', last_name: '', email: '', phone: '', phone_mobile: '',
+  first_name: '', last_name: '', email: '', phone: '',
   contact_type: 'borrower' as string | null, stage: 'Lead',
   lead_source: '', referred_by: '', referral_type: null as string | null, company_name: '', notes: '',
   co_borrower_first: '', co_borrower_last: '', co_borrower_birthdate: '', co_borrower_mobile: '', co_borrower_email: '',
@@ -654,7 +653,7 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
       supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or('top_realtor.eq.true,target_realtor.eq.true'),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').not('production_tier', 'is', null),
       supabase.from('contacts').select('*', h).or(
         'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
         'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
@@ -1540,7 +1539,7 @@ export default function ContactsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {([
                   ['First Name', 'first_name'], ['Last Name', 'last_name'], ['Email', 'email'],
-                  ['Phone', 'phone'], ['Mobile', 'phone_mobile'], ['Stage', 'stage'],
+                  ['Phone', 'phone'], ['Stage', 'stage'],
                   ['Lead Source', 'lead_source'], ['Referred By', 'referred_by'],
                   ['Company', 'company_name'], ['Notes', 'notes'],
                 ] as [string, keyof Contact][]).map(([label, field]) => (
@@ -1581,7 +1580,6 @@ export default function ContactsPage() {
                 {([
                   ['Email', selectedContact.email],
                   ['Phone', selectedContact.phone, true],
-                  ['Mobile', selectedContact.phone_mobile, true],
                   ['Stage', selectedContact.stage],
                   ['Lead Source', selectedContact.lead_source], ['Referred By', selectedContact.referred_by],
                   ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthday],

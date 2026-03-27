@@ -191,6 +191,14 @@ export default function ContactRecordPage() {
     }
   }
 
+  const handleSaveBoolField = async (field: keyof Contact, value: boolean) => {
+    if (!contact) return
+    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
+    if (!error) {
+      setContact(prev => prev ? { ...prev, [field]: value } : null)
+    }
+  }
+
   const handleDeleteActivity = async (id: string) => {
     await supabase.from('contact_activity').delete().eq('id', id)
     setContactActivity(prev => prev.filter(a => a.id !== id))
@@ -258,6 +266,7 @@ export default function ContactRecordPage() {
       onAddNote={handleAddNote}
       referredLoans={referredLoans}
       onSaveField={handleSaveField}
+      onSaveBoolField={handleSaveBoolField}
       onLogActivity={handleLogActivity}
       onDeleteActivity={handleDeleteActivity}
     />

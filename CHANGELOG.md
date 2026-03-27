@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [4.7.0] — 2026-03-27 — Arive/LoanOS Separation + Dead Code Cleanup
+
+### Changed
+- **n8n Inbound Email Log (#4)** updated: added `organization_id` to all activity_log inserts, added "Find Active Loan" step to link emails to borrower's active loan, added `loan_name` to metadata
+- **Settings page**: replaced Outlook OAuth UI with simple "Email Sync — managed by n8n" status card
+
+### Removed
+- **6 dead API routes**: `outlook-auth`, `outlook-callback`, `outlook-disconnect`, `outlook-refresh`, `outlook-status`, `outlook-sync`
+- **Milestone agent route**: `/api/agents/milestone` (Arive handles milestone emails)
+- **Outlook lib**: `src/lib/outlook/refresh.ts`
+- **Outlook state/handlers** from settings page + unused imports
+
+### n8n Workflows
+- Archived: Milestone Communication Agent (#3), Outlook Email Sync (#5), TEMP Mailchimp Journeys (#18)
+
+---
+
 ## [4.6.0] — 2026-03-23 — Chat Intelligence + Attachments + Voice + Quick Actions
 
 ### New

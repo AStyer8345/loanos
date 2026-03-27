@@ -1,22 +1,14 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useState, useMemo } from 'react'
 import {
-  Mail, CheckCircle, XCircle, RefreshCw, Loader2, Unplug,
+  Mail, CheckCircle, Loader2,
   Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-
-type OutlookStatus = {
-  connected: boolean
-  email: string | null
-  expires_at: string | null
-  token_valid: boolean
-}
 
 interface Integrations {
   anthropic_api_key: string
@@ -168,14 +160,8 @@ function SectionCard({
 
 export default function SettingsPage() {
   const supabase = useSupabase()
-  const searchParams = useSearchParams()
   const { userId, loading: orgLoading, role: myRole, organizationId } = useOrg()
 
-  // ── Outlook ──
-  const [status, setStatus] = useState<OutlookStatus | null>(null)
-  const [outlookLoading, setOutlookLoading] = useState(true)
-  const [syncing, setSyncing] = useState(false)
-  const [syncResult, setSyncResult] = useState<string | null>(null)
   const [flashMsg, setFlashMsg] = useState<string | null>(null)
 
   // ── Section values ──
@@ -218,29 +204,8 @@ export default function SettingsPage() {
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const canManageMembers = myRole === 'owner' || myRole === 'admin'
 
-  // ── OAuth flash ──
-  useEffect(() => {
-    const outlook = searchParams.get('outlook')
-    if (outlook === 'connected') setFlashMsg('Outlook connected successfully.')
-    if (outlook === 'error')     setFlashMsg('Outlook connection failed. Try again.')
-  }, [searchParams])
-
-  // ── Load Outlook status ──
-  const fetchOutlookStatus = useCallback(async () => {
-    setOutlookLoading(true)
-    try {
-      const res = await fetch('/api/outlook-status')
-      setStatus(res.ok ? await res.json() : { connected: false, email: null, expires_at: null, token_valid: false })
-    } catch {
-      setStatus({ connected: false, email: null, expires_at: null, token_valid: false })
-    } finally {
-      setOutlookLoading(false)
-    }
-  }, [])
-
   // ── Load all settings ──
   useEffect(() => {
-    fetchOutlookStatus()
     if (orgLoading || !userId) return
     supabase
       .from('user_settings')
@@ -274,7 +239,7 @@ export default function SettingsPage() {
         if (d.updatedAt) setTimestamps(prev => ({ ...prev, outreach: d.updatedAt }))
       })
       .catch(() => {})
-  }, [fetchOutlookStatus, supabase, userId, orgLoading])
+  }, [supabase, userId, orgLoading])
 
   // ── Save AI prompt ──
   async function saveAiPrompt() {
@@ -389,36 +354,6 @@ export default function SettingsPage() {
     const data = await res.json()
     setFlashMsg(data.ok ? '✓ Mailchimp key is valid.' : `✗ Mailchimp: ${data.error}`)
   }
-
-  // ── Outlook handlers ──
-  async function handleSync() {
-    setSyncing(true); setSyncResult(null)
-    try {
-      const res = await fetch('/api/outlook-sync', { method: 'POST', headers: { 'x-sync-secret': '' } })
-      const data = await res.json()
-      if (data.ok) {
-        const { inserted, skipped, unmatched } = data.stats
-        setSyncResult(`Sync complete — ${inserted} new, ${skipped} duplicates, ${unmatched} unmatched.`)
-      } else {
-        setSyncResult(`Sync failed: ${data.error}`)
-      }
-    } catch {
-      setSyncResult('Sync error — check console.')
-    } finally {
-      setSyncing(false)
-    }
-  }
-
-  async function handleDisconnect() {
-    if (!confirm('Disconnect Outlook? Existing activity log entries will be preserved.')) return
-    const res = await fetch('/api/outlook-disconnect', { method: 'POST' })
-    if (res.ok) {
-      setStatus({ connected: false, email: null, expires_at: null, token_valid: false })
-      setFlashMsg('Outlook disconnected.')
-    }
-  }
-
-  const expiryLabel = status?.expires_at ? new Date(status.expires_at).toLocaleString() : null
 
   // ── Load org members ──
   useEffect(() => {
@@ -715,67 +650,23 @@ export default function SettingsPage() {
         {inviteSuccess && <p className="text-[#4ADE80] text-xs font-mono mt-2">Invite sent successfully.</p>}
       </div>
 
-      {/* ── OUTLOOK ── */}
+      {/* ── EMAIL SYNC ── */}
       <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
-              <Mail size={17} className="text-amber-400" />
-            </div>
-            <div>
-              <h2 className="text-sm font-mono font-semibold text-zinc-100">Outlook / Microsoft 365</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">Auto-log emails to matching contact activity timelines.</p>
-            </div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+            <Mail size={17} className="text-amber-400" />
           </div>
-          {!outlookLoading && (
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-              status?.connected
-                ? 'bg-[#4ADE80]/10 text-[#4ADE80] border border-[#4ADE80]/40'
-                : 'bg-zinc-800 text-zinc-500 border border-zinc-600'
-            }`}>
-              {status?.connected ? <><CheckCircle size={11} /> Connected</> : <><XCircle size={11} /> Not connected</>}
-            </span>
-          )}
+          <div>
+            <h2 className="text-sm font-mono font-semibold text-zinc-100">Email Sync</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Inbound emails are automatically logged to contact activity timelines.</p>
+          </div>
         </div>
-
-        {outlookLoading ? (
-          <div className="flex items-center gap-2 text-sm text-zinc-500 font-mono"><Loader2 size={14} className="animate-spin" /> Loading status…</div>
-        ) : status?.connected ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <div className="text-zinc-500 uppercase tracking-wide mb-0.5 font-mono">Account</div>
-                <div className="text-zinc-300 font-mono">{status.email}</div>
-              </div>
-              {expiryLabel && (
-                <div>
-                  <div className="text-zinc-500 uppercase tracking-wide mb-0.5 font-mono">Token expires</div>
-                  <div className="text-zinc-300">{expiryLabel}</div>
-                </div>
-              )}
-            </div>
-            {syncResult && (
-              <div className="text-xs px-3 py-2 rounded bg-zinc-800 border border-zinc-600 text-zinc-400 font-mono">{syncResult}</div>
-            )}
-            <div className="flex items-center gap-2 pt-1">
-              <button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 disabled:opacity-50 transition-colors">
-                {syncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                {syncing ? 'Syncing...' : 'Sync Now'}
-              </button>
-              <button onClick={handleDisconnect} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium border border-zinc-600 text-zinc-400 hover:bg-zinc-800 transition-colors">
-                <Unplug size={12} /> Disconnect
-              </button>
-            </div>
-            <p className="text-xs text-zinc-500 font-mono">Emails are synced automatically every 15 minutes via n8n.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-zinc-400 font-mono">Connect your Outlook account to automatically log emails to contact timelines.</p>
-            <a href="/api/outlook-auth" className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 transition-colors">
-              <Mail size={14} /> Connect Outlook
-            </a>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] border border-[#4ADE80]/40">
+            <CheckCircle size={11} /> Active
+          </span>
+          <span className="text-xs text-zinc-500 font-mono">Managed by n8n — polls Outlook every 5 minutes</span>
+        </div>
       </div>
     </div>
   )

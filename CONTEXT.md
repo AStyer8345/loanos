@@ -18,6 +18,24 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep).**
 
+## Arive/LoanOS Separation + Dead Code Cleanup — 2026-03-27
+
+**Goal:** Clean separation — Arive handles loan processing/milestones/docs, LoanOS handles marketing/CRM/communications/pipeline visibility/analytics.
+
+**n8n Workflows:**
+- **Archived** Milestone Communication Agent (#3, `1hjOmS7inZcxEJQr`) — overlaps with Arive milestone emails
+- **Archived** Outlook Email Sync (#5, `JMmstRl2C5ylmuIY`) — redundant with WF4 n8n Outlook trigger
+- **Archived** TEMP Mailchimp Journeys (#18, `5CkBP28mJSZCJjxl`) — temp utility
+- **Updated** Inbound Email Log (#4, `qgb99Eh2ziy0INMk`) — added `organization_id` to both activity_log inserts (fixes NOT NULL constraint), added "Find Active Loan" step to link emails to borrower's active loan, added `loan_name` to metadata
+
+**LoanOS Dead Code Removed:**
+- Deleted 6 API routes: `/api/outlook-auth`, `/api/outlook-callback`, `/api/outlook-disconnect`, `/api/outlook-refresh`, `/api/outlook-status`, `/api/outlook-sync`
+- Deleted `/api/agents/milestone` (Arive handles milestone emails)
+- Deleted `src/lib/outlook/refresh.ts` (no remaining imports)
+- Replaced Outlook OAuth UI in settings page with simple "Email Sync — managed by n8n" status card
+- Removed `OutlookStatus` type, Outlook state variables/handlers, unused imports (`useCallback`, `useSearchParams`, `XCircle`, `RefreshCw`, `Unplug`)
+- Removed `api/outlook-sync` from middleware matcher exceptions
+
 ## Daily Audit 2026-03-25 (scheduled)
 
 **Audited:**

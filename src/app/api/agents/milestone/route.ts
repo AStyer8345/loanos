@@ -133,9 +133,6 @@ export async function POST(req: NextRequest) {
     const anthropic = await getAnthropicClient()
 
     // ── 2. Draft borrower email (if email provided and not opted out) ─────────
-    if (borrowerOptedOut) {
-      console.log(`[milestone] Skipping borrower email — contact ${contactId} has email_opt_out = true`)
-    }
     if (borrower_email && !borrowerOptedOut) {
       const borrowerPrompt = `You are Adam Styer, a senior mortgage broker in Austin, TX. Write a short, warm email to a homebuyer about their loan milestone.
 

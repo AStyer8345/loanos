@@ -41,10 +41,12 @@ _Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, dail
 - [ ] **Performance page to Supabase** — currently stores all financial data in localStorage (`loanDashboard2026`). Device-specific, lost on browser clear. Move to Supabase before licensing.
 - [ ] **Kanban board** — contacts page has LIST | KANBAN toggle. Verify drag-and-drop works after last `@hello-pangea/dnd` install.
 - [x] **Dead API route `/api/pipeline/stats`** — Deleted 2026-03-23 morning audit. Confirmed no callers anywhere in src/.
-- [ ] **Dark theme violations in nav** — `TopNav.tsx`, `NavDropdown.tsx`, `NavItem.tsx` use `bg-white`/`bg-slate-*`. Visible on every page. Should match dark zinc theme.
-- [ ] **Dark theme violations in scenarios** — `ScenarioCard.tsx`, `StatementUpload.tsx`, `ScenarioList.tsx` use `bg-white`. Should match dark zinc theme.
+- [x] **Dark theme violations in nav** — Fixed (confirmed 0 violations as of 2026-03-27 audit).
+- [x] **Dark theme violations in scenarios** — Fixed (confirmed 0 violations as of 2026-03-27 audit).
 - [ ] **Status normalization** — 22 distinct non-terminal status values with case/format duplicates (`Closed` vs `closed`, `APPLICATION_INTAKE` vs `application`). Stale loan queries unreliable. Consider normalizing to lowercase snake_case.
-- [ ] **n8n MCP configuration** — MCP server returns 0 workflows on all searches. Credential/instance mismatch. Adam should verify.
+- [x] **n8n MCP configuration** — n8n MCP now returns all 18 workflows correctly (resolved as of 2026-03-27 audit).
+- [ ] **Confirm n8n workflow active status** — `eJG4wckrj6SmSpm1` (Weekly Testimonial) and `AK1fBcaX1cPcdlGx` (Review Request Email) show active in n8n but MEMORY marks them intentionally inactive. Update MEMORY.md to match reality.
+- [ ] **Stale loans from 2026-03-17 bulk import** — 20+ loans stuck in "Started"/"On Hold"/"Suspended" with no activity. Adam should review and mark dead/cancelled if not active files.
 
 ---
 

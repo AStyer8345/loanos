@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
       console.error('[emails/link] dismiss: no rows matched for id:', emailId)
       return NextResponse.json({ error: 'Email not found' }, { status: 404 })
     }
-    console.log('[emails/link] dismissed:', emailId)
     return NextResponse.json({ ok: true })
   }
 
@@ -90,8 +89,6 @@ export async function POST(request: NextRequest) {
       console.error('[emails/link] link-to-loan: no rows matched for id:', emailId)
       return NextResponse.json({ error: 'Email not found' }, { status: 404 })
     }
-
-    console.log('[emails/link] linked email', emailId, '→ loan', loanId, 'contact', loanContactId)
 
     // Update loans.updated_at so loan detail reflects recent activity
     await svc
@@ -140,8 +137,6 @@ export async function POST(request: NextRequest) {
       console.error('[emails/link] link-to-contact: no rows matched for id:', emailId)
       return NextResponse.json({ error: 'Email not found' }, { status: 404 })
     }
-
-    console.log('[emails/link] linked email', emailId, '→ contact', contactId, 'loan', activeLoanId)
 
     await svc
       .from('contacts')

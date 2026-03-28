@@ -306,3 +306,27 @@ Session note created: YES
 Daily digest: SENT — Zapier success (019d315e-01e0-558f-28ca-58335ac8526f)
 Timestamp: 2026-03-27T18:35:00Z
 SESSION FULLY COMPLETE ✓
+
+SESSION_START — 2026-03-28T13:03:08Z
+
+SESSION START: 2026-03-28 AM
+Mode: AM
+Focus: email_opt_out Enforcement (2 borrower-facing n8n workflows) + Realtor Relationship System Research
+MASTER: Context loaded. NotebookLM pull confirmed (report: tasks/crm/notebooklm-pull-2026-03-28.md). Activating Sequence C (Execute) for email_opt_out + Sequence A (Research) for Realtor.
+
+BUILDER SUBAGENT: COMPLETE — 2026-03-28 AM
+Output 1: n8n workflow AK1fBcaX1cPcdlGx (Review Request Email) — email_opt_out=eq.false filter added to contacts Supabase query
+Output 2: n8n workflow YbgDnTpPdefcazKy (Referral Intro Email) — opt-out check added at top of Build Referral Email code node; fail-open
+Skipped: utMvZpkdRwIRZ51u + SkzrWeR0bHZs8kWX (draft to Adam only — low compliance risk)
+Build: PASS (validate_workflow valid:true for both)
+Schema changes: 0 | Records migrated: 0 | n8n workflows updated: 2
+
+RESEARCH SUBAGENT: COMPLETE — 2026-03-28 AM
+Output: tasks/crm/research/2026-03-28-realtor-relationship-system.md
+Open questions requiring Adam: 7
+Key findings: referred_by stores text (not UUIDs) — attribution broken; 943/1060 realtors have no tier/stage; schema mid-migration (boolean flags + production_tier coexist); 0 automated realtor touchpoints; 8 workflows recommended
+
+REPORTER SUBAGENT: COMPLETE — 2026-03-28 AM
+SESSION COMPLETE ✓
+Queue advanced: NO — 11 total open questions pending Adam (4 automation + 7 realtor)
+Adam action items added: 0 new (existing questions already in ADAM-TODO)

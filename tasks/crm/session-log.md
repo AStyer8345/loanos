@@ -576,3 +576,87 @@ Priority 5 (Research): Realtor Relationship System — next queue item; focus on
 - drip_enrollments: 0 active — drip infrastructure built but no auto-enrollment wired
 - loan_milestone_events: 1 record (conditional_approval) — nearly empty; Arive webhooks are the actual source
 ---
+
+---
+## Session: 2026-03-28 AM — email_opt_out Enforcement (2 workflows) + Realtor Relationship System Research
+Focus: (1) Add email_opt_out enforcement to borrower-facing n8n workflows; (2) Realtor Relationship System research
+Type: Execute (Builder) + Research (Sequence C + A combined)
+
+### Completed
+
+**NotebookLM PULL**
+- Pull report: `tasks/crm/notebooklm-pull-2026-03-28.md`
+- Active topics confirmed: email_opt_out enforcement (4 workflows), Realtor Relationship System research
+
+**email_opt_out Enforcement — n8n Workflows**
+
+Risk triage: 4 workflows flagged in prior session. On review, only 2 email borrowers directly:
+- **Closed Loan — Review Request Email (AK1fBcaX1cPcdlGx)** — emails borrowers from contacts table ← HIGH PRIORITY
+- **LoanOS — Referral Intro Email (YbgDnTpPdefcazKy)** — emails borrower from webhook body ← HIGH PRIORITY
+- **LoanOS — Pre-Approval Email (utMvZpkdRwIRZ51u)** — drafts to `adam@thestyerteam.com` only ← LOW RISK, SKIPPED
+- **LoanOS — Final CD Email (SkzrWeR0bHZs8kWX)** — drafts to `adam@thestyerteam.com` only ← LOW RISK, SKIPPED
+
+**WF: Review Request Email (AK1fBcaX1cPcdlGx) — UPDATED ✅**
+- Fix: added `email_opt_out=eq.false` filter to Supabase contacts query URL in `Fetch Eligible Loans + Contacts` Code node
+- Pattern: opted-out contacts simply don't appear in results → no draft created → clean and no IF node needed
+- Build: valid:true → update_workflow successful → credential auto-assigned (Microsoft Outlook account)
+
+**WF: Referral Intro Email (YbgDnTpPdefcazKy) — UPDATED ✅**
+- Fix: added email_opt_out check at top of `Build Referral Email` Code node
+- Pattern: queries Supabase contacts by `email=eq.<borrowerEmail>&email_opt_out=eq.true`; if found → `return []` stops workflow silently (blocks both Draft and Update Loan Record); fail-open on error
+- Build: valid:true (7 warnings — all pre-existing non-blocking: HARDCODED_CREDENTIALS on HTTP nodes, INVALID_PARAMETER on microsoftOutlook) → update_workflow successful → credential auto-assigned
+
+**email_opt_out compliance status after this session:**
+| Workflow | Compliance |
+|----------|-----------|
+| milestone route.ts (Next.js) | ✅ Enforced (prior session) |
+| Review Request Email (AK1fBcaX1cPcdlGx) | ✅ Enforced (this session) |
+| Referral Intro Email (YbgDnTpPdefcazKy) | ✅ Enforced (this session) |
+| Pre-Approval Email (utMvZpkdRwIRZ51u) | ⚪ Drafts to Adam only — low risk, not changed |
+| Final CD Email (SkzrWeR0bHZs8kWX) | ⚪ Drafts to Adam only — low risk, not changed |
+
+**Realtor Relationship System Research — COMPLETE ✅**
+- Output: `tasks/crm/research/2026-03-28-realtor-relationship-system.md`
+- Key findings:
+  - `referred_by` column stores plain text names, NOT UUIDs — referral attribution is broken; cannot programmatically link borrowers to realtor contact records
+  - Crystal Kilpatrick: 53 text-matched referrals (highest volume), but no structured FK link to her contact record
+  - 943 of 1,060 realtors have no production_tier, no realtor_stage, no last outreach date
+  - `realtor_stage` column exists but has 0 rows populated across all 1,060 realtor records
+  - Schema mid-migration: old boolean flags (`top_realtor`, `target_realtor`) + new `production_tier` field coexist — never fully reconciled
+  - `buyer_agent_contact_id` FK on loans table exists but only populated on 30 of 406 loans that have a buyer agent name
+  - 0 automated touchpoints currently going to any realtor (no WF touches realtors)
+  - 8 automation workflows recommended (WF-R1 through WF-R8) in priority order
+  - 7 open questions for Adam before building
+
+### What Was Skipped / Deferred
+- Pre-Approval Email + CD Email email_opt_out enforcement: deferred — these draft to Adam's inbox only; Adam reviews before sending; compliance risk is low
+- Automation Coverage Audit builder sequence: deferred — 4 Adam decisions still pending before mid-funnel milestone chain can be built
+- Realtor Relationship System build phase: deferred — 7 open questions need Adam's decisions first
+
+### Open Questions Added to ADAM-TODO
+None added this session — the 4 automation coverage questions (from 2026-03-27) already exist in ADAM-TODO.md. Realtor research open questions are documented in the research file but are lower priority than the 4 existing questions.
+
+### Queue Position
+Current queue item: Realtor Relationship System — research COMPLETE
+Next queue item: Smart Lists + Segmentation (after Adam answers realtor open questions) OR Automation Coverage Audit build phase (after Adam answers 4 open questions from 2026-03-27)
+Advance queue: NO — 11 total open questions pending Adam decisions (4 automation + 7 realtor)
+
+### Quality Ratings (1-5)
+Research: 5 | Strategy: N/A | Execution: 5 | Review: N/A | QA: N/A
+
+### Data Integrity Status
+- Contacts: 2,376 (unchanged) | Loans: 854 (unchanged)
+- email_opt_out: NOW enforced in Review Request + Referral Intro n8n workflows (in addition to milestone route.ts)
+- realtor records: 1,060 total; 943 with no tier/stage; referred_by FK gap documented
+- drip_enrollments: 0 active (unchanged — enrollment trigger still not wired, pending Adam's decision)
+
+### Next Session Instructions
+Priority 1 (Adam — required before build): Answer 4 automation coverage questions in `tasks/crm/research/2026-03-27-automation-coverage-audit.md`
+Priority 2 (Adam — required before realtor build): Answer 7 realtor questions in `tasks/crm/research/2026-03-28-realtor-relationship-system.md` → especially `referred_by` UUID backfill and `buyer_agent_contact_id` population plan
+Priority 3 (Builder — available now): Fix `top_realtor`/`target_realtor` boolean deprecation — add migration to drop or NULL those columns since `production_tier` supersedes them
+Priority 4 (Builder — available now): Smart Lists + Segmentation — next queue item, no Adam decisions required to begin research
+Priority 5 (Builder — available now): Wire drip enrollment trigger (easy win, no schema change)
+
+### BLOCKERS
+None for research. Builder sequence for automations and realtor features gates on Adam's open questions.
+---

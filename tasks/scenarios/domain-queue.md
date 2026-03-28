@@ -37,7 +37,7 @@ KNOWN GAPS (start here):
 - [ ] No 2-1 buydown scenario type
 - [ ] No ARM vs fixed comparison
 - [ ] No rent vs own mode
-- [ ] No down payment comparison mode (3% vs 5% vs 10% vs 20%)
+- [x] Down payment comparison mode — COMPLETE 2026-03-28 AM
 - [ ] Share page is bare — borrowers land on data, not a story
 - [ ] No mobile-optimized view
 - [ ] Charts don't communicate urgency or emotion
@@ -56,7 +56,7 @@ KNOWN GAPS (start here):
 
 ### Tier 2 — New scenario types
 - ~~**2-1 buydown**: Show Year 1, Year 2, Year 3+ payments vs fixed rate~~ ✅ DONE 2026-03-27 AM
-- **Down payment comparison**: Same loan at 3% / 5% / 10% / 20% down — PMI tier effects
+- ~~**Down payment comparison**: Same loan at 3% / 5% / 10% / 20% down — PMI tier effects~~ ✅ DONE 2026-03-28 AM
 - **Rent vs own**: Monthly rent vs PITI + equity build, 5-year breakeven
 
 ### Tier 3 — Workflow integration

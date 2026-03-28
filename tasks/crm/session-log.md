@@ -660,3 +660,53 @@ Priority 5 (Builder — available now): Wire drip enrollment trigger (easy win, 
 ### BLOCKERS
 None for research. Builder sequence for automations and realtor features gates on Adam's open questions.
 ---
+
+---
+## Session: 2026-03-28 PM — LoanOS CRM
+Focus: PUSH+CURATE — Realtor Relationship System research push + daily digest
+Type: Maintenance / Knowledge Curation (PM session)
+
+### Completed
+- **NotebookLM staleness audit** — removed 3 enterprise domain files (phase3-billing-ui, phase3-tenant-admin-spec, phase3-webhook-impl) from CRM notebook; they belong in tasks/enterprise/specs/, not the CRM Intelligence notebook
+- **contact-schema-improvement-spec.md added** — key architectural spec (5 new columns, 120+ records migrated 2026-03-27) was missing from the notebook; now added
+- **Web research sweep: Realtor Relationship System** — 3 queries on realtor CRM best practices; 2 authoritative sources added to notebook (Homebot LO Playbook, HousingWire referral strategies); web research saved to tasks/crm/web-research/2026-03-28-realtor-crm-web.md
+- **Staleness audit report written** — tasks/crm/notebooklm-audit-2026-03-28.md
+- **Daily digest generated and sent** — Zapier dispatch to adam@thestyerteam.com; covers AM + PM sessions
+- **Master system log updated** — tasks/crm/session-log.md + /Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md
+
+### Deferred
+- **Realtor Relationship System build** — blocked on 7 Adam decisions (schema questions). Builder cannot proceed without answers. See tasks/crm/research/2026-03-28-realtor-relationship-system.md
+- **Automation Coverage build** — blocked on 4 Adam decisions (drip trigger, WF2 architecture, review request, rate watch source)
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| NotebookLM sources | 45 | 43 | -3 removed (wrong domain), +1 added (schema spec), +2 web = net -2 |
+| Open Adam questions | 11 | 11 | 0 — no new questions resolved today |
+| n8n workflows updated | 0 | 0 | 0 (PM session only — no builder work) |
+
+### Queue Position
+Active topic: Realtor Relationship System — research complete, awaiting Adam's 7 decisions
+Advance to next topic: NO — 7 questions unanswered; schema spec cannot begin
+Secondary queue: Automation Coverage — 4 questions unanswered
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: N/A | Review: N/A | QA: N/A | Curation: 5
+
+### System Improvement Notes
+- Phase3 enterprise files appeared in the CRM notebook — likely cross-contaminated when multiple agent domains ran in close proximity. Staleness audit correctly caught these. Consider adding a domain check step to PUSH+CURATE that flags any source file living outside tasks/crm/.
+- 11 open Adam questions are now the primary bottleneck. Both Realtor and Automation Coverage domains are fully researched and waiting. A single Adam review session answering these 11 questions would unlock at least 2-3 builder sessions worth of work.
+
+### BLOCKERS
+None (research is complete; build is blocked on Adam decisions — not a system blocker)
+
+### Next Session Instructions
+Priority 1: Adam answers 7 realtor schema questions (tasks/crm/research/2026-03-28-realtor-relationship-system.md) OR 4 automation questions (tasks/crm/research/2026-03-27-automation-coverage-audit.md) → unlock Builder sequence
+Priority 2: If no Adam answers available → advance to "Smart Lists + Segmentation" domain (next in queue) — pure research, no Adam dependency
+Priority 3: Review `referred_by` text-to-UUID FK migration strategy (key data integrity fix — Crystal Kilpatrick's 53 referrals currently invisible to SQL)
+
+### Data Integrity Status
+- `referred_by` text field (not FK): 53 referrals from Crystal Kilpatrick and others cannot be queried by realtor ID — highest data integrity gap in the realtor domain
+- `buyer_agent_contact_id` populated on only 3.5% of loans — realtor production tracking is broken for 94% of loan history
+- `realtor_stage` column: 100% NULL — relationship lifecycle untracked for all 1,060 realtors
+---

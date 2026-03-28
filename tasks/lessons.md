@@ -144,7 +144,10 @@ Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check co
 ### Orphan check must search all of src/, not just src/app/ (2026-03-27)
 Searching only `src/app/` for component imports produces false orphan positives. Components in `src/components/` import each other (e.g., `TopNav.tsx` imports `NavDropdown`, `NavItem`, `GlobalSearch`). Correct command: `grep -rl "$name" src/ --include="*.tsx"`.
 
-### TOMORROW_PRIORITY may already be done (2026-03-27)
+### `as any` grep false positives — check preceding line for eslint-disable (2026-03-28)
+`grep -v "eslint-disable"` only excludes lines containing the comment on the same line as the match. If the eslint-disable comment is on the preceding line, `as any` will still appear in results as a false positive. Use `grep -B1 "as any"` to see context, or treat any count as potentially overstated.
+
+### TOMORROW_PRIORITY may already be done (2026-03-27 — confirmed again 2026-03-28)
 If prior run flagged something as TOMORROW_PRIORITY, always verify actual current state before starting the fix. The issue may have been resolved in a session between runs. The metrics (grep output) will confirm — don't assume.
 
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)

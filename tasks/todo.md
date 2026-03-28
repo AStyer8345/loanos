@@ -45,7 +45,7 @@ _Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, dail
 - [x] **Dark theme violations in scenarios** — Fixed (confirmed 0 violations as of 2026-03-27 audit).
 - [ ] **Status normalization** — 22 distinct non-terminal status values with case/format duplicates (`Closed` vs `closed`, `APPLICATION_INTAKE` vs `application`). Stale loan queries unreliable. Consider normalizing to lowercase snake_case.
 - [x] **n8n MCP configuration** — n8n MCP now returns all 18 workflows correctly (resolved as of 2026-03-27 audit).
-- [ ] **Confirm n8n workflow active status** — `eJG4wckrj6SmSpm1` (Weekly Testimonial) and `AK1fBcaX1cPcdlGx` (Review Request Email) show active in n8n but MEMORY marks them intentionally inactive. Update MEMORY.md to match reality.
+- [x] **Confirm n8n workflow active status** — Confirmed 2026-03-28. All 17 workflows active. eJG4wckrj6SmSpm1 ✅, AK1fBcaX1cPcdlGx ✅, J9Pe24vUi6fpZtdZ ✅ (updated from Inactive → Active in MEMORY.md).
 - [ ] **Stale loans from 2026-03-17 bulk import** — 20+ loans stuck in "Started"/"On Hold"/"Suspended" with no activity. Adam should review and mark dead/cancelled if not active files.
 
 ---

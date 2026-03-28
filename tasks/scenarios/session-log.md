@@ -146,3 +146,37 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Tier 2 item 1 (2-1 buydown display) — ✅ COMPLETE this session
 
+---
+
+## AM Session — 2026-03-28 (scenarios-am)
+
+**What was built:**
+- Down Payment Comparison (`src/app/dashboard/scenarios/new/DownPaymentSection.tsx`, `ScenarioBuilder.tsx`)
+  - New self-contained component — takes `purchaseScenarios[0]` as the base loan (rate, term, purchase price, taxes, HOI, HOA)
+  - Computes 4 down payment tiers: 3% / 5% / 10% / 20% with no API call (pure client-side math)
+  - Shows per tier: Loan Amount, LTV, Monthly P&I, PMI (estimated by LTV tier), Total Monthly, Cash to Close, PMI auto-cancel month
+  - PMI tiers: 3% → ~1.10% annual, 5% → ~0.90%, 10% → ~0.70%, 20% → none
+  - PMI cancel month: computed via amortization simulation to 78% LTV threshold
+  - Highlights: gold on lowest total monthly payment, green on lowest cash to close
+  - Returns null when purchasePrice or interestRate = 0 (no render on empty form)
+  - Compliance note present: estimates are illustrative, FHA MIP note, subject to UW
+  - Renders in purchase mode results, after BuydownSection, before TotalInterestChart
+
+**MC gap closed:** Adam no longer needs to manually build 4 separate scenarios to answer "should I put more down?" One calculation generates the full comparison table automatically.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `989a434` — pushed to main
+**Vercel:** `dpl_BKUEeL9KWq3xfLzz6p1Yptnk8xLs` — ✅ READY
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/DownPaymentSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Rent vs own mode — monthly rent vs PITI + equity build, 5-year breakeven (Tier 2 item 3)
+2. Email from builder — send scenario link to borrower directly from results tab (Tier 3 item 1)
+
+**Domain queue updates:**
+- Tier 2 item 2 (Down payment comparison) — ✅ COMPLETE this session
+

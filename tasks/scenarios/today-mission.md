@@ -1,4 +1,4 @@
-## Scenarios Mission Brief — 2026-03-27 AM
+## Scenarios Mission Brief — 2026-03-28 AM
 
 ### Focus Area
 2-1 Buydown Scenario Display — expose the year-by-year payment schedule that's already calculated but never shown

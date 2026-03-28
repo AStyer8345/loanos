@@ -18,6 +18,7 @@ import { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart } from 
 import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
 import BuydownSection from './BuydownSection'
+import DownPaymentSection from './DownPaymentSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
@@ -520,6 +521,14 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                       {/* ── Buydown Schedule (purchase only, when any scenario has buydown) ── */}
                       {displayData.mode === 'purchase' && (
                         <BuydownSection rows={displayData.rows} />
+                      )}
+
+                      {/* ── Down Payment Comparison (purchase only) ── */}
+                      {displayData.mode === 'purchase' && (
+                        <DownPaymentSection
+                          purchaseScenarios={purchaseScenarios}
+                          propertyValue={propertyValue}
+                        />
                       )}
 
                       {/* ── Row 3: Total Interest Paid ──────────────────────── */}

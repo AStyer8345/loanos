@@ -1710,8 +1710,13 @@ export type Database = {
           los_type: string | null
           mailchimp_list_ids: Json | null
           n8n_webhook_url: string | null
+          onboarding_completed: boolean
+          onboarding_step: number
           organization_id: string
           outlook_email: string | null
+          setup_arive_done: boolean
+          setup_automations_done: boolean
+          setup_import_done: boolean
           updated_at: string
         }
         Insert: {
@@ -1721,8 +1726,13 @@ export type Database = {
           los_type?: string | null
           mailchimp_list_ids?: Json | null
           n8n_webhook_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
           organization_id: string
           outlook_email?: string | null
+          setup_arive_done?: boolean
+          setup_automations_done?: boolean
+          setup_import_done?: boolean
           updated_at?: string
         }
         Update: {
@@ -1732,8 +1742,13 @@ export type Database = {
           los_type?: string | null
           mailchimp_list_ids?: Json | null
           n8n_webhook_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
           organization_id?: string
           outlook_email?: string | null
+          setup_arive_done?: boolean
+          setup_automations_done?: boolean
+          setup_import_done?: boolean
           updated_at?: string
         }
         Relationships: [

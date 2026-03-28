@@ -491,3 +491,72 @@ Advance queue: YES — move LO Onboarding to ACTIVE. Tenant Admin MVP is COMPLET
 Files to read first:
 - tasks/enterprise/specs/2026-03-27-phase3-lo-onboarding-spec.md — LO Onboarding build spec (primary path)
 - tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md — Billing build (if Stripe ready)
+---
+## Session Log Entry
+Date: 2026-03-28
+Time: PM
+Focus: Phase 3 — LO Onboarding Flow Build Session 1 (Backend APIs)
+Session Type: Build
+
+### Completed
+- **SESSION_END appended** to subagent-status.md — PM mode confirmed
+- **AM session had no build output** — AM only ran PULL step (confirmed in git log and subagent-status.md). PM session picked up the build.
+- **Migration 060 applied** — 5 onboarding tracking columns added to `org_settings`: `onboarding_completed`, `onboarding_step`, `setup_arive_done`, `setup_import_done`, `setup_automations_done`. Applied via Supabase MCP + SQL file created.
+- **papaparse installed** — `npm install papaparse @types/papaparse`
+- **`POST /api/onboarding/step` created** — Updates the correct `org_settings` column when wizard step completes (arive/import/automations/complete). Uses `STEP_COLUMN` map, service client, validates step input.
+- **`POST /api/contacts/csv-import` created** — Full pipeline: papaparse parse, 7-field auto-mapping, email dedup (normalized lowercase), batch insert in chunks of 100, returns `{ imported, duplicates, errors }`.
+- **Middleware updated** — `/dashboard` root redirects to `/dashboard/getting-started` when `onboarding_completed = false`. Only fires on exact `/dashboard` path (never sub-paths).
+- **database.types.ts updated** — org_settings Row/Insert/Update types include all 5 new columns.
+- **Build verified** — 0 TypeScript errors. Both routes in build output.
+- **NotebookLM PUSH+CURATE** — 5 stale sources removed (2 duplicate System Logs, duplicate Stripe URL, old pull report, Scaling Postgres). 5 sources added (AM pull report, PapaParse docs, Appcues onboarding, Better Stack CSV, web research). Master log synced. Notebook at 50 sources.
+- **Daily digest sent** — adam@thestyerteam.com via Zapier. Status: success.
+
+### Incomplete / Deferred
+- Session 2: `GettingStartedWizard.tsx` UI component (4 steps) — deferred to AM
+- Session 2: `getting-started/page.tsx` server wrapper — deferred to AM
+- Session 2: Dashboard banner — deferred to AM
+- Stripe build sessions (1-3): BLOCKED — Adam must add env vars
+- system_admins seed: BLOCKED — Adam must run INSERT after migration 059 deploys
+
+### What Was Built
+- `supabase/migrations/060_org_settings_onboarding_tracking.sql` — created
+- `src/app/api/onboarding/step/route.ts` — created
+- `src/app/api/contacts/csv-import/route.ts` — created
+- `src/middleware.ts` — modified (onboarding redirect)
+- `src/lib/database.types.ts` — modified (org_settings types)
+- `tasks/enterprise/web-research/2026-03-28-lo-onboarding-build-web.md` — created
+- `tasks/enterprise/notebooklm-audit-2026-03-28.md` — created
+- `tasks/enterprise/digests/2026-03-28-digest.md` — created + sent
+
+### Quality Assessment
+Build: 5/5 — All backend files created, build passes clean, follows existing codebase patterns (getOrganization, createServiceClient, type casts). TypeScript error caught and fixed (null vs undefined in ContactInsert).
+Middleware: 4/5 — Redirect logic is correct and path-scoped. Could not add `getting-started` to middleware matcher exclusions yet (no UI exists to exclude), but only fires when `onboarding_completed = false` so loop risk is minimal.
+NotebookLM: 5/5 — Clean curation, 50 sources (at limit but no cruft).
+
+### BLOCKERS
+- **[ADAM ACTION REQUIRED]** Stripe env vars in Vercel (see billing spec)
+- **[ADAM ACTION REQUIRED]** system_admins INSERT SQL (see tenant admin spec)
+- **[ADAM INPUT NEEDED]** Arive webhook: shared or per-tenant URL?
+
+### Next Session Instructions
+**Master Orchestrator: Read this before doing anything else.**
+
+Priority 1: CHECK Stripe env vars (`vercel env pull` → grep STRIPE_SECRET_KEY)
+
+IF Stripe ready:
+  → BEGIN Billing Build Session 1: `npm install stripe` → migration 057 → migration 058 → `src/lib/billing/stripe.ts` → `src/lib/billing/entitlements.ts`
+  → Spec: `tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md`
+
+IF Stripe still blocked (most likely):
+  → BEGIN LO Onboarding Session 2: GettingStartedWizard.tsx + getting-started/page.tsx + dashboard banner
+  → Spec: `tasks/enterprise/specs/2026-03-27-phase3-lo-onboarding-spec.md` (Session 2 section)
+  → After Session 2: run `npm run build` — verify 0 errors
+  → Note: middleware redirect needs `getting-started` excluded from the matcher if it causes loop; verify after build
+
+Active focus area: Phase 3 — LO Onboarding Flow (Session 2 of 3 next)
+Advance queue: NO
+
+Files to read first:
+- `tasks/enterprise/specs/2026-03-27-phase3-lo-onboarding-spec.md` — Session 2 section (Wizard UI)
+- `src/app/api/onboarding/step/route.ts` — backend API already built (Session 1)
+- `src/app/api/contacts/csv-import/route.ts` — backend API already built (Session 1)

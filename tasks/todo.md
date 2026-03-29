@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-29 (daily audit — emails/link org scoping fix)_
+_Last updated: 2026-03-30 (daily audit — redundant auth call removed from contacts/activity route)_
 
 ---
 

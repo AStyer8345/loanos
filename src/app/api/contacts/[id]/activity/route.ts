@@ -42,8 +42,6 @@ export async function POST(
       )
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
-
     const { data, error } = await supabase
       .from('contact_activity')
       .insert({
@@ -52,7 +50,7 @@ export async function POST(
         notes: notes || null,
         loan_id: loan_id || null,
         user_id: userId,
-        created_by: user?.email ?? userId,
+        created_by: userId,
         organization_id: organizationId,
       })
       .select()

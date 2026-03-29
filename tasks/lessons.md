@@ -147,6 +147,9 @@ Searching only `src/app/` for component imports produces false orphan positives.
 ### emails/link service-role without org scoping (2026-03-29)
 Route authenticated via `createClient().auth.getUser()` directly instead of `getOrganization()`, then used service role for all mutations with no `organization_id` filter. Risk: any authenticated user could dismiss/relink activity_log rows from other orgs by UUID. Pattern: any route that uses `createClient().auth.getUser()` directly (instead of `getOrganization()`) AND then uses service-role mutations is at risk of missing org scoping. `getOrganization()` is the correct pattern — provides both auth + org context in one call.
 
+### Dead `created_by` double auth round-trip (2026-03-30)
+If a route calls `getOrganization()` (which internally calls `auth.getUser()`), check whether any subsequent direct `supabase.auth.getUser()` call is still necessary. Often the user object is fetched a second time to populate one field (like `created_by`) that turns out to be unrendered in the UI. Pattern: search for routes that call both `getOrganization()` and `supabase.auth.getUser()` — the second call is almost always redundant.
+
 ### `as any` grep false positives — check preceding line for eslint-disable (2026-03-28)
 `grep -v "eslint-disable"` only excludes lines containing the comment on the same line as the match. If the eslint-disable comment is on the preceding line, `as any` will still appear in results as a false positive. Use `grep -B1 "as any"` to see context, or treat any count as potentially overstated.
 

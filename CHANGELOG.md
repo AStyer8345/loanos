@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [4.9.0] — 2026-03-29 — Social Media Dashboard
+
+### Added
+- **SOCIAL tab** in Marketing: email-client-style layout with draft list + detail panel for reviewing agent-generated posts
+- **Compose mode**: prompt input, platform picker (IG/LI/FB/All), format picker (single/carousel/video/reel/text/Claude decides), media upload zone
+- **Scoped Claude chat** (`/api/chat/social`): Claude sees selected draft + voice guide automatically; supports compose, edit, and general chat modes
+- **Activity feed**: horizontal scrolling strip showing recent agent actions
+- **Voice Guide editor** (full tab): edit voice/workflow markdown directly in UI
+- **Voice Guide drawer**: slide-out panel from draft detail for quick voice guide reference
+- 3 new Supabase tables: `social_drafts`, `social_activity`, `social_settings` (all with RLS)
+- 4 new API routes: `/api/chat/social`, `/api/social/drafts`, `/api/social/activity`, `/api/social/settings`
+- Design spec: `docs/superpowers/specs/2026-03-29-social-media-dashboard-design.md`
+
+### Changed
+- Marketing page default tab changed from SEND to SOCIAL
+- TopNav Marketing dropdown: added "Social Media" as first item
+
 ## [4.8.0] — 2026-03-29 — Realtor Relationship System
 
 ### Added

@@ -38,18 +38,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/onboarding', request.url))
   }
 
-  // Redirect first-time users to getting-started wizard (dashboard root only)
-  if (pathname === '/dashboard') {
-    const { data: settings } = await supabase
-      .from('org_settings')
-      .select('onboarding_completed')
-      .eq('organization_id', profile.organization_id)
-      .single()
-
-    if (settings && settings.onboarding_completed === false) {
-      return NextResponse.redirect(new URL('/dashboard/getting-started', request.url))
-    }
-  }
+  // TODO: Redirect first-time users to getting-started wizard once page is built
+  // if (pathname === '/dashboard') {
+  //   const { data: settings } = await supabase
+  //     .from('org_settings')
+  //     .select('onboarding_completed')
+  //     .eq('organization_id', profile.organization_id)
+  //     .single()
+  //   if (settings && settings.onboarding_completed === false) {
+  //     return NextResponse.redirect(new URL('/dashboard/getting-started', request.url))
+  //   }
+  // }
 
   return response
 }

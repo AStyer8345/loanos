@@ -3,7 +3,7 @@
 // Uses service role to bypass RLS — activity_log has no UPDATE policy by design.
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
 
 type LinkEmailBody = {
@@ -16,11 +16,11 @@ type LinkEmailBody = {
 const TERMINAL_STATUSES = '("Closed","Cancelled","Denied","Withdrawn","Funded","LOAN_FUNDED")'
 
 export async function POST(request: NextRequest) {
-  // Require authenticated session
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    console.error('[emails/link] No authenticated user')
+  let organizationId: string
+  try {
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+  } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
       .from('activity_log')
       .update({ dismissed: true })
       .eq('id', emailId)
+      .eq('organization_id', organizationId)
       .select('id')
     if (error) {
       console.error('[emails/link] dismiss error:', error)
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
       .from('loans')
       .select('id, contact_id')
       .eq('id', loanId)
+      .eq('organization_id', organizationId)
       .single()
 
     if (loanErr || !loan) {
@@ -79,6 +81,7 @@ export async function POST(request: NextRequest) {
         ...(loanContactId ? { contact_id: loanContactId } : {}),
       })
       .eq('id', emailId)
+      .eq('organization_id', organizationId)
       .select('id')
 
     if (updateError) {
@@ -95,6 +98,7 @@ export async function POST(request: NextRequest) {
       .from('loans')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', loanId)
+      .eq('organization_id', organizationId)
 
     // Update last_touch_at on the contact if we have one
     if (loanContactId) {
@@ -102,6 +106,7 @@ export async function POST(request: NextRequest) {
         .from('contacts')
         .update({ last_touch_at: new Date().toISOString() })
         .eq('id', loanContactId)
+        .eq('organization_id', organizationId)
     }
 
     return NextResponse.json({ ok: true })
@@ -114,6 +119,7 @@ export async function POST(request: NextRequest) {
       .from('loans')
       .select('id')
       .eq('contact_id', contactId)
+      .eq('organization_id', organizationId)
       .not('status', 'in', TERMINAL_STATUSES)
       .order('updated_at', { ascending: false })
       .limit(1)
@@ -127,6 +133,7 @@ export async function POST(request: NextRequest) {
         ...(activeLoanId ? { loan_id: activeLoanId } : {}),
       })
       .eq('id', emailId)
+      .eq('organization_id', organizationId)
       .select('id')
 
     if (updateError) {
@@ -142,6 +149,7 @@ export async function POST(request: NextRequest) {
       .from('contacts')
       .update({ last_touch_at: new Date().toISOString() })
       .eq('id', contactId)
+      .eq('organization_id', organizationId)
 
     // Update loan's updated_at if we linked to one
     if (activeLoanId) {
@@ -149,6 +157,7 @@ export async function POST(request: NextRequest) {
         .from('loans')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', activeLoanId)
+        .eq('organization_id', organizationId)
     }
 
     return NextResponse.json({ ok: true })

@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, daily-briefing milestone scoping fix)_
+_Last updated: 2026-03-29 (daily audit — emails/link org scoping fix)_
 
 ---
 
@@ -22,6 +22,7 @@ _Last updated: 2026-03-25 (daily prep — NOT NULL hardening migration 053, dail
 - [x] **contact_activity missing org_id** — Fixed 2026-03-24. Migration 048 applied: added `organization_id` column, backfilled from contacts, upgraded from user_id-scoped to org-scoped RLS (SELECT + INSERT). 15 tables now fully org-scoped.
 - [x] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync is decommissioned. Azure not being used. Delete any email_inbound null-org rows; do not fix the workflow.**
 - [x] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync decommissioned. Azure App Registration not needed.**
+- [x] **emails/link org scoping** — Fixed 2026-03-29. Route replaced `createClient().auth.getUser()` with `getOrganization()`, added `.eq('organization_id', organizationId)` to all 6 service-role queries (activity_log dismiss, activity_log link-to-loan, activity_log link-to-contact, loans fetch, loans update, contacts update).
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 
 ---

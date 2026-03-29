@@ -144,6 +144,9 @@ Final CD Email workflow (`SkzrWeR0bHZs8kWX`) was failing with `violates check co
 ### Orphan check must search all of src/, not just src/app/ (2026-03-27)
 Searching only `src/app/` for component imports produces false orphan positives. Components in `src/components/` import each other (e.g., `TopNav.tsx` imports `NavDropdown`, `NavItem`, `GlobalSearch`). Correct command: `grep -rl "$name" src/ --include="*.tsx"`.
 
+### emails/link service-role without org scoping (2026-03-29)
+Route authenticated via `createClient().auth.getUser()` directly instead of `getOrganization()`, then used service role for all mutations with no `organization_id` filter. Risk: any authenticated user could dismiss/relink activity_log rows from other orgs by UUID. Pattern: any route that uses `createClient().auth.getUser()` directly (instead of `getOrganization()`) AND then uses service-role mutations is at risk of missing org scoping. `getOrganization()` is the correct pattern — provides both auth + org context in one call.
+
 ### `as any` grep false positives — check preceding line for eslint-disable (2026-03-28)
 `grep -v "eslint-disable"` only excludes lines containing the comment on the same line as the match. If the eslint-disable comment is on the preceding line, `as any` will still appear in results as a false positive. Use `grep -B1 "as any"` to see context, or treat any count as potentially overstated.
 

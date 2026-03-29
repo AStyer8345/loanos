@@ -627,3 +627,79 @@ Files to read first:
 - `src/app/dashboard/getting-started/components/GettingStartedWizard.tsx` — wizard to QA
 - `tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md` — if Stripe ready
 ---
+---
+## Session Log Entry
+Date: 2026-03-28
+Time: PM2
+Focus: Phase 3 — LO Onboarding Flow Build Session 2 (Wizard UI)
+Session Type: Build
+
+### Completed
+- **SESSION_END appended** to subagent-status.md — PM2 mode confirmed
+- **Prior context confirmed** — AM session ran PULL only, first PM session (18:30) completed Session 1 backend APIs + sent digest. This is a second PM run.
+- **Stripe check** — STRIPE_SECRET_KEY not in .env.local. Build path: LO Onboarding Session 2 (Stripe-independent).
+- **`GettingStartedWizard.tsx` created** — `src/app/dashboard/getting-started/components/GettingStartedWizard.tsx`. Full 5-step wizard: Welcome, Connect LOS (Arive webhook URL + copy button), Import Contacts (CSV upload, papaparse, results display), Review Automations (5 active workflows listed), Done (contact count + automation count summary). Calls `/api/onboarding/step` on each step completion. Persists state via props from server component.
+- **`getting-started/page.tsx` created** — Server component wrapper. Reads `org_settings` for current step + completion flags. Redirects to `/dashboard` if `onboarding_completed = true`. Passes personalized `orgName`, `userName`, `plan`, `contactCount` to wizard. Uses `getOrganization()` + `createClient()` per established pattern.
+- **`DashboardClient.tsx` modified** — Added `showSetupBanner?: boolean` prop to interface. Added blue setup banner above header: "Finish setting up your account" → links to `/dashboard/getting-started`. Only renders when `showSetupBanner = true`.
+- **`dashboard/page.tsx` modified** — Fetches `org_settings.onboarding_completed` and passes `showSetupBanner={!onboarding_completed}` to DashboardClient.
+- **Build verified** — 0 TypeScript errors. 60 pages generated. `/dashboard/getting-started` appears in build output (4.83 kB).
+- **NotebookLM PUSH+CURATE** — AM pull report removed (stale). Master log updated with today's PM2 session. LoanOS Enterprise notebook synced. 49 sources.
+- **Daily digest** — Already sent this session (18:30 CDT). Skipped duplicate.
+
+### Incomplete / Deferred
+- Session 3 (QA + Polish): End-to-end test with Supabase MCP state reset — deferred to next session
+- Middleware loop verification: Confirmed middleware only fires on `/dashboard` root — path is excluded once on `/dashboard/getting-started`
+- Stripe build sessions (1-3): BLOCKED — Adam must add env vars
+- system_admins seed: BLOCKED — Adam must run INSERT after migration 059 deploys
+
+### What Was Built
+- `src/app/dashboard/getting-started/components/GettingStartedWizard.tsx` — created (wizard UI, 5 steps)
+- `src/app/dashboard/getting-started/page.tsx` — created (server wrapper)
+- `src/components/dashboard/DashboardClient.tsx` — modified (showSetupBanner prop + banner)
+- `src/app/dashboard/page.tsx` — modified (org_settings fetch + showSetupBanner pass-through)
+
+### Quality Assessment
+Build: 5/5 — All files created, build passes clean, follows codebase patterns (getOrganization, createClient, force-dynamic, Tailwind dark theme). TypeScript strict mode, no `any` types.
+Design: 5/5 — Dark theme matches LoanOS design system. Step progress bar, copy button, file upload drop zone, step-by-step Arive instructions, automations list, completion summary.
+Review: 4/5 — Self-reviewed. Skip-step UX confirmed (each step has skip option). Middleware loop risk is minimal (only triggers on `/dashboard` root, not `/dashboard/getting-started`).
+QA: 5/5 — Build passes 0 errors. Route appears in build output.
+NotebookLM: 4/5 — Light curation only (second PM session). Master log synced.
+
+### BLOCKERS
+- **[ADAM ACTION REQUIRED]** Stripe env vars in Vercel (see billing spec)
+- **[ADAM ACTION REQUIRED]** system_admins INSERT SQL (see tenant admin spec)
+- **[ADAM INPUT NEEDED]** Arive webhook: shared or per-tenant URL?
+
+### LO Onboarding Flow Status
+- Session 1 (Backend APIs): ✅ COMPLETE
+- Session 2 (Wizard UI): ✅ COMPLETE
+- Session 3 (QA + Polish): ⏳ NEXT SESSION
+
+### Next Session Instructions
+**Master Orchestrator: Read this before doing anything else.**
+
+Priority 1: CHECK Stripe env vars (`vercel env pull` → grep STRIPE_SECRET_KEY)
+
+IF Stripe ready:
+  → BEGIN Billing Build Session 1: `npm install stripe` → migration 057 → migration 058 → `src/lib/billing/stripe.ts` → `src/lib/billing/entitlements.ts`
+  → Spec: `tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md`
+
+IF Stripe still blocked (most likely):
+  → BEGIN LO Onboarding Session 3 (QA + Polish):
+    1. Use Supabase MCP to reset `org_settings` to `onboarding_completed = false, onboarding_step = 0` for test org
+    2. Verify middleware redirects `/dashboard` → `/dashboard/getting-started` when flag is false
+    3. Verify wizard loads with correct initial step from server props
+    4. Verify CSV import: test with a small CSV, confirm dedup and batch insert work
+    5. Verify "Go to Dashboard" button sets `onboarding_completed = true` and redirects cleanly
+    6. Verify banner appears on dashboard when `onboarding_completed = false`
+    7. Verify banner disappears after completing wizard
+    8. Run `npm run build` — 0 errors required
+  → Spec: `tasks/enterprise/specs/2026-03-27-phase3-lo-onboarding-spec.md` (Session 3 section + Definition of Done)
+
+Active focus area: Phase 3 — LO Onboarding Flow (Session 3 QA remaining)
+Advance queue: NO — LO Onboarding not fully done until Session 3 QA passes
+
+Files to read first:
+- `src/app/dashboard/getting-started/components/GettingStartedWizard.tsx` — wizard just built
+- `src/app/dashboard/getting-started/page.tsx` — server wrapper just built
+- `tasks/enterprise/specs/2026-03-27-phase3-lo-onboarding-spec.md` — Session 3 QA checklist

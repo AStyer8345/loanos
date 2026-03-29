@@ -1,40 +1,40 @@
-## Mission Brief — 2026-03-27 PM
+## Mission Brief — 2026-03-29 AM
 
 ### Domain
 LoanOS CRM
 
 ### Focus Area
-Automation Coverage Audit — map every meaningful borrower lifecycle event against existing n8n workflows, identify gaps, and prioritize what to build next.
+Realtor Relationship System — Architecture Spec (migration 061 + smart lists + WF-R1)
 
 ### Session Type
-[x] Research + Planning (Sequence A)
+[x] Strategy / Architecture (Sequence B)
+
+### Context
+Adam answered all 7 Realtor Relationship System questions on 2026-03-28 at 18:45Z.
+Adam also answered all 4 Automation Coverage questions (drip=manual, WF2=Arive, review=Arive fund, rate=rate update email comparison).
+Both domains fully unblocked. Today: write the full architecture spec for Realtor Relationship System.
+Builder can execute in next session without follow-up questions.
 
 ### Objectives
-1. Inventory every touchpoint in a borrower's lifecycle (from lead to 1yr anniversary) and determine if an n8n automation exists for it
-2. Map each lifecycle event to the n8n workflows in MEMORY.md — confirm which are live, which are built but inactive, and which have no automation yet
-3. Prioritize gaps by impact (ROI, compliance, relationship quality) and complexity (low vs. high effort to build)
+1. Write migration 061 spec — DDL (new columns + last_touch_at trigger) + DML (backfill + boolean deprecation)
+2. Define 4 new smart lists using the new realtor fields
+3. Write WF-R1 (Referral Thank-You) n8n workflow spec — trigger + logic + node map
 
 ### Definition of Done
-- Research file written to tasks/crm/research/2026-03-27-automation-coverage-audit.md
-- Every borrower lifecycle event accounted for (live coverage, gap, or intentional skip)
-- Top 3-5 automation gaps identified with priority ranking and estimated build complexity
-- Open questions for Adam documented (what we can't decide without his input)
+- `tasks/crm/specs/2026-03-29-realtor-relationship-spec.md` exists and covers all 3 objectives
+- Spec is executable by Builder without follow-up questions (includes exact SQL, node names, credential IDs)
+- Session log entry written
+- NotebookLM PUSH complete
 
 ### Resources / Files in Scope
-- /Users/adamstyer/Documents/CLAUDE.md — n8n workflow index (source of truth for what's built)
-- tasks/crm/session-log.md — prior automation work and context
-- tasks/crm/research/2026-03-25-decommission-audit-research.md — prior automation gap analysis
-- tasks/crm/domain-queue.md — queue context
-- Live Supabase query — contacts/loans counts, activity_log for recent milestone events
-- n8n via MCP — live workflow status check
+- `supabase/migrations/` — adding migration 061
+- `src/app/dashboard/contacts/page.tsx` — smart list additions
+- `src/app/api/import/contacts/route.ts` — remove top_realtor/target_realtor references
+- `src/lib/database.types.ts` — type updates (auto-generated — note for Builder)
+- `tasks/crm/research/2026-03-28-realtor-relationship-system.md` — source research
 
 ### HIGH RISK Items
-None — this is a research-only session. No schema changes, no workflow activations.
-
-### Context from Prior Sessions
-- AM session (2026-03-27): WF2 now syncs closing_date + contact current_rate/current_loan_balance on fund
-- 2026-03-25 PM decommission audit found: 5 live automations, 7 needing action, 6 not built, 1 blocked
-- email_opt_out enforcement added to milestone route (2026-03-26 AM)
-- Contacts: 2,376 | Loans: 854 total (841 active) | do_not_call column live (all false)
-- Pipeline UI: summary bar, Kanban toggle, Last Milestone column all built
-- Next queue item after Automation Coverage Audit: Realtor Relationship System
+- Dropping `top_realtor`/`target_realtor` columns: code references exist in import API and database.types.ts
+  → Builder MUST grep and remove all code references BEFORE dropping DB columns
+- `referred_by_contact_id` backfill: text-to-UUID match is fuzzy; spec must include count-check step
+- `last_touch_at` trigger: must fire on INSERT only (not UPDATE), to avoid recursive loops

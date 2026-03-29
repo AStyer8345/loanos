@@ -75,6 +75,7 @@ interface DashboardClientProps {
   recentApplications: RecentApplication[]
   newLeads: NewLead[]
   hotLeads: HotLead[]
+  showSetupBanner?: boolean
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -116,6 +117,25 @@ export default function DashboardClient(props: DashboardClientProps) {
 
   return (
     <div className="min-h-screen bg-[#060b18] p-4 lg:p-6 space-y-4">
+
+      {/* ── Setup Banner ── */}
+      {props.showSetupBanner && (
+        <Link
+          href="/dashboard/getting-started"
+          className="flex items-center justify-between gap-3 bg-blue-900/30 border border-blue-700/60 rounded-xl px-4 py-3 hover:bg-blue-900/50 transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-600/30 flex items-center justify-center shrink-0">
+              <ListChecks className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-blue-200">Finish setting up your account</p>
+              <p className="text-xs text-blue-400/80">Connect your LOS, import contacts, and review automations</p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform shrink-0" />
+        </Link>
+      )}
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">

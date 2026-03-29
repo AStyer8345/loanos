@@ -37,7 +37,7 @@ Study top-performing mortgage lead generation systems:
 ### 3. Platform / Channel Best Practices
 - **Landing pages (Netlify/HTML):** Form field minimization research (5 fields max: name, email, phone, purchase price, timeline), above-fold CTA placement, social proof placement (loan count, reviews, years in business), mobile-first design
 - **Mailchimp automation:** Welcome sequence best practices, behavioral triggers, segmentation by buyer vs. refi vs. investor, open rate optimization (subject line formulas), unsubscribe management
-- **Zapier/n8n lead routing:** Webhook form capture patterns, Salesforce lead creation via Zapier, n8n lead notification workflows, 5-minute response automation design
+- **n8n lead routing:** Webhook form capture patterns, LoanOS contact creation via n8n, lead notification workflows, 5-minute response automation design
 - **Netlify Forms:** Configuration for static HTML forms, submission webhooks, spam filtering, confirmation redirects
 - **UTM parameter tracking:** Standard UTM structure for mortgage lead sources (utm_source, utm_medium, utm_campaign, utm_content)
 
@@ -52,7 +52,7 @@ Study top-performing mortgage lead generation systems:
 ### 5. Performance Data — Adam's Current State
 Check available data sources:
 - **Mailchimp:** What audiences exist? What sequences are active? Open rates, click rates, unsubscribes for each sequence. What is the list size?
-- **Salesforce/Jungo:** What is the current lead source breakdown? How many leads from website vs. referral vs. Zillow? What is close rate by source?
+- **LoanOS contacts table:** What is the current lead source breakdown? Query Supabase for closed loans by lead source. How many leads from website vs. referral vs. Zillow? What is close rate by source?
 - **Website (styermortgage.com):** What forms exist? Is Netlify Forms configured? Any analytics data available? What is the current /get-preapproved page conversion?
 - **n8n:** What workflows currently touch leads? Check CONTEXT.md for n8n workflow status. Are there live notification workflows for new leads?
 - **Existing funnels:** Are there any Mailchimp automations currently active for lead nurture? What is the current nurture sequence vs. what's planned?

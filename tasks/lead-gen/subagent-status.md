@@ -24,6 +24,20 @@ Timestamp: 2026-03-25 15:00:00
 SESSION FULLY COMPLETE ✓
 ```
 
+## NotebookLM PUSH+CURATE (AM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 4 (2026-03-27-pre-approval-funnel-research.md, 2026-03-27-pre-approval-funnel-spec.md, MPA broker AI scale article, Mailchimp email sequence guide)
+Stale sources removed: 0
+Web sources added: 2
+Session note created: YES (ID: 7e0e6833-c2ce-4d02-8da2-aec7c5013626)
+Master notebook updated: YES (ID: 957a248b-6a68-4fdc-99d7-f9199e028dba)
+Daily digest: PENDING — AM session only; PM session will generate and send
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-27.md
+Timestamp: 2026-03-27 04:00:00
+SESSION FULLY COMPLETE ✓
+```
+
 ## Reporter Subagent
 ```
 REPORTER SUBAGENT: COMPLETE — 2026-03-25 14:55:00
@@ -44,4 +58,251 @@ Notebook: LoanOS Lead Gen Intelligence (CREATED — first session)
 ID: 4213513c-22ac-45af-96c1-3365ba3477eb
 Foundational sources added: domain-queue.md, lessons.md, CONTEXT.md
 Pull report: tasks/lead-gen/notebooklm-pull-2026-03-25.md
+```
+
+## SESSION_END
+- **Datetime**: 2026-03-25 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Daily 10:00 PM
+
+## NotebookLM PUSH+CURATE (PM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 4 (HousingWire FCC lead gen loophole, Mailchimp nurture guide, Scotsman Guide closing ratios, 2026-03-25-lead-flow-web.md)
+Stale sources removed: 1 (Backlinko 404 — id: 88d9b40a)
+Web sources added: 3 authoritative URLs
+Session note created: YES (id: d3882671-86ee-44d1-8f5c-f19de70aa4e0)
+Master notebook updated: YES (id: 5b3825cf)
+Daily digest: SENT — adam@thestyerteam.com — Zapier status: success
+Timestamp: 2026-03-25 22:15:00
+SESSION FULLY COMPLETE ✓
+```
+
+---
+
+## SESSION_START
+- **Datetime**: 2026-03-26 03:05:51
+- **Mode**: AM
+- **Session**: Lead Gen AM — Daily 3:00 AM
+
+```
+SESSION START: 2026-03-26 03:05:51
+Mode: AM
+Focus: Week 1 — Lead Flow Audit + Activation (open questions + TCPA fix prep)
+MASTER: Context loaded. Activating NotebookLM pull.
+```
+
+## NotebookLM PULL (AM)
+```
+NOTEBOOKLM (PULL): COMPLETE — 2026-03-26 03:15:00
+Notebook: LoanOS Lead Gen Intelligence (existing)
+ID: 4213513c-22ac-45af-96c1-3365ba3477eb
+Pull report: tasks/lead-gen/notebooklm-pull-2026-03-26.md
+```
+
+## Research Subagent
+```
+RESEARCH SUBAGENT: COMPLETE — 2026-03-26 03:30:00
+Output: tasks/lead-gen/research/2026-03-26-form-destination-audit.md
+BLOCKER WRITTEN: BLOCKER-002 — prequal.html form data goes nowhere (CRITICAL)
+TCPA FIX SNIPPET: written in research file, ready for Adam to deploy
+```
+
+## Reporter Subagent
+```
+REPORTER SUBAGENT: COMPLETE — 2026-03-26 03:35:00
+Session log: tasks/lead-gen/session-log.md
+SESSION COMPLETE ✓
+```
+
+## NotebookLM PUSH+CURATE (AM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 1 (2026-03-26-form-destination-audit.md)
+Stale sources removed: 2 (ERROR status NMN article + Cloudflare-blocked HousingWire)
+Web sources added: 0 (code audit session — no industry web research needed)
+Session note created: YES (id: 2a026e83-5bb0-42f2-9619-fcbb292e94e5)
+Master notebook updated: YES (id: ce6b2c9c)
+Daily digest: PENDING — AM session only; PM session will generate and send
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-26.md
+Timestamp: 2026-03-26 03:40:00
+SESSION FULLY COMPLETE ✓
+```
+
+---
+
+## SESSION_END
+- **Datetime**: 2026-03-26 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Daily 10:00 PM
+
+## NotebookLM PUSH+CURATE (PM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 5 (4 web sources + 2026-03-26-pm-web-research.md)
+  - Unbounce average conversion rates (Q4 2024) — id: 10b1f5bc
+  - Mailchimp landing page best practices — id: bcfe9aaa
+  - Scotsman Guide — flip the script on mortgage lead gen — id: 6a4d53e5
+  - Scotsman Guide — lenders turn to automation 2026 — id: f9fad3f5
+  - 2026-03-26-pm-web-research.md — id: 1ba29751
+Stale sources removed: 0 (AM removed 2; PM audit found no additional removals warranted)
+Web sources added: 4 authoritative URLs
+Session note created: YES (id: 936d671b-66d0-4611-813f-7327e9583e76)
+Master notebook updated: YES (id: b4748d21-ce04-43e2-b82c-fcbe15234e66)
+Daily digest: SENT — adam@thestyerteam.com — Zapier status: success
+Timestamp: 2026-03-26 22:15:00
+SESSION FULLY COMPLETE ✓
+```
+
+---
+
+## SESSION_START
+- **Datetime**: 2026-03-27 03:00:00
+- **Mode**: AM
+- **Session**: Lead Gen AM — Daily 3:00 AM
+
+```
+SESSION START: 2026-03-27 03:00:00
+Mode: AM
+Focus: TBD — loading context
+MASTER: Context loaded. Activating NotebookLM pull.
+```
+
+## NotebookLM PULL (AM)
+```
+NOTEBOOKLM (PULL): COMPLETE — 2026-03-27 03:15:00
+Notebook: LoanOS Lead Gen Intelligence (existing)
+ID: 4213513c-22ac-45af-96c1-3365ba3477eb
+Pull report: tasks/lead-gen/notebooklm-pull-2026-03-27.md
+```
+
+## Research Subagent
+RESEARCH SUBAGENT: COMPLETE — 2026-03-27 03:30:00
+Output: tasks/lead-gen/research/2026-03-27-pre-approval-funnel-research.md
+
+## Architect Subagent
+ARCHITECT SUBAGENT: COMPLETE — 2026-03-27 03:45:00
+Output: tasks/lead-gen/specs/2026-03-27-pre-approval-funnel-spec.md
+
+## Reporter Subagent
+REPORTER SUBAGENT: COMPLETE — 2026-03-27 03:50:00
+Session log: tasks/lead-gen/session-log.md
+SESSION COMPLETE ✓
+Adam action items added: 1 (env var confirmation + spec ready to build)
+
+## NotebookLM PUSH+CURATE (AM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 4 (2026-03-27-pre-approval-funnel-research.md, 2026-03-27-pre-approval-funnel-spec.md, MPA AI/scale article id: 6d7a73a8, Mailchimp email sequence docs id: 82fd08ba)
+Stale sources removed: 0 (3 flagged for future audit — all < 3 days old, age threshold not met)
+Web sources added: 2 (1 failed — NMN paywalled, logged to notebooklm-errors.md)
+Session note created: YES (id: 7e0e6833)
+Master notebook updated: YES (id: 957a248b)
+Daily digest: PENDING — AM session only; PM session will generate and send
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-27.md
+Timestamp: 2026-03-27 04:00:00
+SESSION FULLY COMPLETE ✓
+```
+
+---
+
+## SESSION_START
+- **Datetime**: 2026-03-28 03:00:00
+- **Mode**: AM
+- **Session**: Lead Gen AM — Daily 3:00 AM
+
+```
+SESSION START: 2026-03-28 03:00:00
+Mode: AM
+Focus: Pre-Approval Funnel Reviewer/QA + BLOCKER-002 prequal.html Fix + Rate Alert Funnel Research
+MASTER: Context loaded. Activating NotebookLM pull.
+```
+
+## NotebookLM PULL (AM)
+```
+NOTEBOOKLM (PULL): COMPLETE — 2026-03-28 03:15:00
+Notebook: LoanOS Lead Gen Intelligence (existing)
+ID: 4213513c-22ac-45af-96c1-3365ba3477eb
+Pull report: tasks/lead-gen/notebooklm-pull-2026-03-28.md
+```
+
+## QA Subagent (2026-03-28 AM)
+```
+QA SUBAGENT: PASS WITH CAVEATS — 2026-03-28 04:00:00
+QA Report: tasks/lead-gen/qa-reports/2026-03-28-pre-approval-funnel-qa.md
+n8n workflow J9Pe24vUi6fpZtdZ: ACTIVE ✅ (corrects build report which said inactive)
+Deployment blocked on: Adam git push + Mailchimp Journey creation
+BLOCKER-002: CONFIRMED RESOLVED in script.js — fetch() call present
+```
+
+## Reviewer Subagent (2026-03-28 AM)
+```
+REVIEWER SUBAGENT: APPROVED WITH NOTES — 2026-03-28 03:45:00
+Review: tasks/lead-gen/reviews/2026-03-28-pre-approval-funnel-review.md
+Key finding: BLOCKER-002 already resolved in script.js — fetch() call present. Pending deploy.
+Non-blocking notes: 3 data quality bugs + 2 architectural gaps logged for next build cycle.
+```
+
+## Builder Subagent
+```
+BUILDER SUBAGENT: COMPLETE — 2026-03-27 14:30:00
+Output: tasks/lead-gen/build-reports/2026-03-27-pre-approval-funnel-build.md
+n8n workflow created: J9Pe24vUi6fpZtdZ (LoanOS — Pre-Approval Lead Notify)
+Webhook URL: https://styer.app.n8n.cloud/webhook/pre-approval-lead
+HTML/JS: Already complete from prior sessions
+Mailchimp automation: DEFERRED — must create in Mailchimp UI
+Adam action items: 5 (see build report)
+```
+
+## Research Subagent (2026-03-28 AM)
+```
+RESEARCH SUBAGENT: COMPLETE — 2026-03-28 05:00:00
+Output: tasks/lead-gen/research/2026-03-28-rate-alert-funnel-research.md
+Key findings: HPA bans trigger leads (effective March 5 2026) — owned list more defensible. subscribe-lead.js requires ZERO changes for Rate Alert Funnel.
+```
+
+## Reporter Subagent (2026-03-28 AM)
+```
+REPORTER SUBAGENT: COMPLETE — 2026-03-28 05:15:00
+Session log: tasks/lead-gen/session-log.md
+Digest: tasks/lead-gen/digests/2026-03-28-digest.md
+SESSION COMPLETE ✓
+```
+
+## NotebookLM PUSH+CURATE (2026-03-28 AM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 6 (3 files + 3 web)
+  - 2026-03-28-rate-alert-funnel-research.md — id: d10265f7
+  - 2026-03-28-pre-approval-funnel-review.md — id: 7e7680d1
+  - 2026-03-28-pre-approval-funnel-qa.md — id: 74ff0a0a
+  - HousingWire trigger lead ban — id: 63437ae7
+  - Scotsman Guide trigger leads law — id: 5557b6c9
+  - HousingWire mortgage lead gen ideas — id: d434f16c
+Stale sources removed: 0 (no sources exceeded threshold)
+Session note created: YES (id: a182ad6a)
+Master notebook updated: YES (Styer Mortgage Master 5348ff90) — note id: 00c13a8a
+Daily digest: PENDING — AM session only; PM session will send
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-28.md
+Timestamp: 2026-03-28 05:30:00
+SESSION FULLY COMPLETE ✓
+```
+
+## SESSION_END
+- **Datetime**: 2026-03-27 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Daily 10:00 PM
+
+## NotebookLM PUSH+CURATE (PM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 4 (2026-03-27-pre-approval-funnel-build.md, Mailchimp Customer Journey Builder id: 0d5b5f0b, Netlify Forms docs id: eba34114, Scotsman Guide marketing automation id: 67e7b163)
+Stale sources removed: 2 (NMN paywall ERROR id: fadf2210, Cloudflare-blocked MPA id: 6d7a73a8)
+Web sources added: 3 authoritative URLs
+Session note created: YES (appended to Styer_Growth_Log.md id: 18efcfd4)
+Master notebook updated: YES (Styer Mortgage Master 5348ff90)
+Daily digest: SENT — adam@thestyerteam.com — Zapier status: success
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-27-pm.md
+Timestamp: 2026-03-27 22:15:00
+SESSION FULLY COMPLETE ✓
 ```

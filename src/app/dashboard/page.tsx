@@ -21,6 +21,14 @@ export default async function DashboardPage() {
   }
   const supabase = createClient()
 
+  // Check onboarding state for setup banner
+  const { data: orgSettings } = await supabase
+    .from('org_settings')
+    .select('onboarding_completed')
+    .eq('organization_id', organizationId)
+    .single()
+  const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
+
   const { data: loans = [] } = await supabase
     .from('loans')
     .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
@@ -314,6 +322,7 @@ export default async function DashboardPage() {
       recentApplications={recentApplications ?? []}
       newLeads={newLeads ?? []}
       hotLeads={hotLeads}
+      showSetupBanner={showSetupBanner}
     />
   )
 }

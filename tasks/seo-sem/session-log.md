@@ -175,3 +175,112 @@ Priority 4: Ask Adam about blog/2026-03-10-temp-placeholder.html — real conten
 
 Advance queue: YES — move into on-page implementation execution
 ---
+---
+## Session: 2026-03-27 AM — SEO + SEM
+Focus: Week 3 — On-Page Implementation (Full Execution)
+Type: Execution (ZERO_RISK + LOW_RISK + MEDIUM_RISK)
+
+### Completed
+
+**robots.txt (ZERO_RISK):**
+- Added Disallow: /hero-test.html
+- Added Disallow: /blog/2026-03-06-temp-placeholder.html
+- Added Disallow: /blog/2026-03-10-temp-placeholder.html
+
+**Homepage (LOW_RISK):**
+- Title: "Austin TX Mortgage Lender" → "Mortgage Broker Austin TX" — keyword-front, accurate (Adam is a broker)
+- Meta description: 173 chars → 138 chars (was truncated by Google, now within limit)
+- Note: H1 was already updated in a prior run (2026-03-26 PM). Context file was correct; verified in source file.
+
+**P0 — Data-driven (LOW_RISK):**
+- /wrap-mortgage-calculator.html: meta description 190→141 chars — position 8.75, was getting 0 clicks due to truncation
+
+**Suburb meta description batch (LOW_RISK) — 18 pages trimmed to ≤155 chars:**
+- round-rock, cedar-park, georgetown, pflugerville (160-164 chars → 147-148 chars)
+- marble-falls (230→143), elgin (212→153), spicewood (207→155), jarrell (205→149)
+- smithville (195→152), buda (194→148), westlake (191→147), florence (193→149)
+- dripping-springs (168→142), new-braunfels (165→139), lakeway (165→145), hutto (164→145)
+- liberty-hill (179→143)
+- loans/va.html (159→133)
+
+**Other pages — meta description trim (LOW_RISK):**
+- calculators.html (184→133), about.html (161→130), first-time-home-buyer.html (185→131)
+- fixed-vs-adjustable.html (162→137)
+
+**Title tag fixes (LOW_RISK):**
+- NMLS #513013 added to: contact, testimonials, realtors, realtor-resources, fixed-vs-adjustable, mortgage-broker-vs-bank, dscr-loan-austin-tx
+- 2025→2026 updated in: austin-down-payment-assistance, closing-costs-texas
+
+**Schema additions (LOW_RISK):**
+- loans/refinance.html: BreadcrumbList schema added (was the only loan page missing it)
+- westlake-mortgage-lender.html: AggregateRating added to LocalBusiness (5.0, 136 reviews)
+- buda-mortgage-lender.html: AggregateRating added to LocalBusiness (5.0, 136 reviews)
+
+**Canonical fix (LOW_RISK):**
+- first-time-home-buyer.html: canonical changed from `.../first-time-home-buyer` to `.../first-time-home-buyer.html`
+
+**Blog/content cleanup (LOW_RISK):**
+- ai-trap blog: title casing fixed — "the ai trap i walked right into" → "The AI Trap I Walked Right Into"
+- 2026-03-06-temp-placeholder.html: noindex, nofollow added
+- 2026-03-10-temp-placeholder.html: noindex, nofollow added
+
+**Stale content (MEDIUM_RISK):**
+- austin-housing-market-2025.html: noindex, nofollow added (Option C interim — redirect to /austin-mortgage-rates still pending Adam decision)
+
+**Git commit:** 359c6e3 — 38 files changed, pushed to GitHub, Netlify auto-deploying.
+
+### Deferred
+- Sitemap lastmod dates: 38 pages were updated — sitemap.xml lastmod entries should be updated for all of them. Next session P1.
+- /contact-us 404 redirect: needs verification that it was already added in commit ac3afc9 (2026-03-26 PM). If not, add to _redirects.
+- /prequal.html robots.txt Disallow: MEDIUM_RISK, deferred
+- GSC data: still 8-day window only. Need 30+ days for meaningful position data.
+- /self-employed-mortgage-austin.html: new page, Week 4 content.
+
+### Next Session Instructions (PM or next AM)
+Priority 1: Update sitemap.xml lastmod dates for all 38 pages changed today
+Priority 2: Verify /contact-us redirect exists in _redirects. If not, add it.
+Priority 3: Begin /self-employed-mortgage-austin.html page brief (highest ROI content gap)
+Priority 4: Check if duplicate URL split (_redirects extensionless→.html) was already done in ac3afc9 — if not, it's still P0
+
+Advance queue: YES — Week 3 execution complete.
+---
+---
+## Session: 2026-03-28 AM — SEO + SEM
+Focus: MEDIUM_RISK fixes + new blog content (AI Overview target)
+Type: Execution
+
+### Completed
+
+**thank-you.html noindex (MEDIUM_RISK):**
+- Added `<meta name="robots" content="noindex, nofollow">` to thank-you.html
+- Had been removed during a prior redesign session — flagged for Adam but clearly correct to restore
+- Rationale: organic visitors landing on /thank-you without converting skew bounce/conversion data; not a page that should appear in search results
+
+**robots.txt /prequal.html Disallow (MEDIUM_RISK):**
+- Added `Disallow: /prequal.html` to robots.txt
+- /prequal.html already had noindex meta tag but was not in robots.txt Disallow
+- Rationale: belt-and-suspenders; noindex in meta + Disallow in robots.txt is the correct pattern for internal crawl-budget pages
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-03-28-how-long-does-mortgage-pre-approval-take.html
+- Title: "Mortgage Pre-Approval Austin TX | Adam Styer NMLS #513013" (57 chars)
+- Meta: "Mortgage pre-approval in Austin takes same-day to 3 business days. Here's exactly what to expect and how to speed it up. NMLS #513013." (134 chars)
+- H1: "How Long Does Mortgage Pre-Approval Take in Austin TX?"
+- Content: answer-first format targeting AI Overview capture for "how long does mortgage pre-approval take" query cluster
+- Schema: Article + FAQPage (6 questions covering timeline, documents needed, pre-qual vs pre-approval, credit impact, validity, pre-approving before search)
+- Internal links: /first-time-home-buyer.html, /mortgage-pre-approval-austin.html, /get-preapproved, Calendly
+- Added to sitemap.xml (lastmod 2026-03-28) and blog/manifest.json
+- Git commit: 7879b14
+
+### Deferred
+- austin-housing-market-2025.html redirect: still needs Adam decision on 301 → /austin-mortgage-rates
+- Suburb quick-form conversion tracking: GTM config change still blocked (FLAG_FOR_ADAM)
+- GSC data: will be more meaningful in 30+ days when pages have had time to index
+
+### Next Session Instructions
+Priority 1: Check Netlify deployment for commit 7879b14 — verify new blog post is live
+Priority 2: Begin "FHA vs Conventional Austin TX" blog post brief (next highest ROI content gap)
+Priority 3: Suburb page content audit — are the 15 new-to-sitemap pages strong enough or thin?
+
+Advance queue: YES — content pipeline now active
+---

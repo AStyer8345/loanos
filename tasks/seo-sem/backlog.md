@@ -4,40 +4,37 @@
 
 ---
 
-## P0 — DATA-DRIVEN URGENT (GSC validated — act first)
+## P0 — DATA-DRIVEN URGENT — ALL CLEAR ✅
 
-- [MEDIUM_RISK] **Fix duplicate URL split** — Netlify serving both `/loans/fha` and `/loans/fha.html` as live URLs. Same for `/loans/jumbo` and `/round-rock-mortgage-lender`. Add 301 redirects in `_redirects`: extensionless → .html for all loan + suburb pages. This is splitting impressions and link equity. (Source: GSC 2026-03-26)
-- [LOW_RISK] **Optimize /wrap-mortgage-calculator.html meta description** — ranking position 8.75 for "wraparound mortgage calculator" with 0 clicks. Best ranking on the site. Fix the meta description (currently 188 chars, truncated). This is the fastest path to a first page 1 result.
-- [LOW_RISK] **Investigate /contact-us 404** — GSC shows impressions for a URL that doesn't exist. Add redirect in `_redirects`: `/contact-us` → `/contact.html`
+- ~~[MEDIUM_RISK] Fix duplicate URL split~~ ✅ DONE 2026-03-26 PM (commit ac3afc9) — extensionless→.html redirects confirmed in _redirects for all loan + suburb pages
+- ~~[LOW_RISK] Optimize /wrap-mortgage-calculator.html meta description~~ ✅ DONE 2026-03-27 — trimmed 190→141 chars
+- ~~[LOW_RISK] /contact-us 404 redirect~~ ✅ DONE 2026-03-26 PM (commit ac3afc9) — `/contact-us → /contact.html 301` confirmed in _redirects
 
 ## P1 — ZERO_RISK (implement immediately, no approval)
 
 - [ZERO_RISK] ~~Add 15 suburb pages + 3 blog posts to sitemap.xml~~ ✅ DONE 2026-03-26
-- [ZERO_RISK] Add lastmod dates to sitemap entries as pages are updated (ongoing)
-- [ZERO_RISK] Add `/hero-test.html` and `/blog/2026-03-10-temp-placeholder.html` to robots.txt Disallow
-- [ZERO_RISK] Add `blog/2026-03-06-temp-placeholder.html` to sitemap if it has real content, or add noindex if placeholder
+- ~~[ZERO_RISK] Update sitemap.xml lastmod dates for all pages updated in 2026-03-27 commit (38 files changed)~~ ✅ DONE 2026-03-27 — commit 9779ef6, removed noindexed austin-housing-market-2025.html from sitemap
+- [ZERO_RISK] ~~Add `/hero-test.html` and placeholder blog pages to robots.txt Disallow~~ ✅ DONE 2026-03-27
 
 ## P2 — LOW_RISK (implement, log what changed)
 
-- [LOW_RISK] Rewrite homepage meta description (173 chars → ≤155) — highest traffic page, pure CTR improvement
-- [LOW_RISK] Fix blog post title casing: "the ai trap i walked right into" → proper title case
-- [LOW_RISK] Fix canonical on first-time-home-buyer.html: remove trailing slash / add .html for consistency
-- [LOW_RISK] Add BreadcrumbList schema to /loans/refinance.html (all other loan pages have it)
-- [LOW_RISK] Add AggregateRating to westlake-mortgage-lender.html LocalBusiness schema
-- [LOW_RISK] Add AggregateRating to buda-mortgage-lender.html LocalBusiness schema
-- [LOW_RISK] Rewrite meta descriptions >155 chars — batch by page type:
-  - Batch A (suburb pages): marble-falls (230), elgin (212), spicewood (207), jarrell (205), smithville (195), buda (194), westlake (193), florence (191), dripping-springs (168), new-braunfels (166), lakeway (165), pflugerville (164), hutto (164)
-  - Batch B (core pages): calculators (184), liberty-hill (179), about (161)
-  - Batch C (conversion pages): first-time-home-buyer (185), wrap-calculator (188)
-- [LOW_RISK] Update stale "2025" year in titles: austin-down-payment-assistance, closing-costs-texas
-- [LOW_RISK] Add NMLS #513013 to title tags missing it: contact, realtor-resources, testimonials, realtors, fixed-vs-adjustable, mortgage-broker-vs-bank, resources/index
+- ~~[LOW_RISK] Rewrite homepage meta description~~ ✅ DONE 2026-03-27 — 173→138 chars
+- ~~[LOW_RISK] Fix blog post title casing: ai-trap~~ ✅ DONE 2026-03-27
+- ~~[LOW_RISK] Fix canonical on first-time-home-buyer.html~~ ✅ DONE 2026-03-27 — added .html
+- ~~[LOW_RISK] Add BreadcrumbList schema to /loans/refinance.html~~ ✅ DONE 2026-03-27
+- ~~[LOW_RISK] Add AggregateRating to westlake + buda suburb pages~~ ✅ DONE 2026-03-27
+- ~~[LOW_RISK] Batch meta description rewrites (18+ pages)~~ ✅ DONE 2026-03-27
+- ~~[LOW_RISK] Update stale "2025" year in titles~~ ✅ DONE 2026-03-27 — austin-down-payment, closing-costs
+- ~~[LOW_RISK] Add NMLS #513013 to title tags~~ ✅ DONE 2026-03-27 — contact, testimonials, realtors, realtor-resources, fixed-vs-adjustable, mortgage-broker-vs-bank, dscr
+- ~~[LOW_RISK] Blog placeholder noindex~~ ✅ DONE 2026-03-27 — both 2026-03-06 and 2026-03-10
 
 ## P3 — MEDIUM_RISK (implement with rationale logged)
 
-- [MEDIUM_RISK] Update austin-housing-market-2025.html title + consider /austin-housing-market-2026.html with 301
-- [MEDIUM_RISK] Homepage H1 — "Your Austin Home Loan Simplified" doesn't include "mortgage broker" keyword. Plan change carefully — assess ranking risk first.
-- [MEDIUM_RISK] Add /prequal.html to robots.txt Disallow (has noindex but not disallowed)
-- [MEDIUM_RISK] Decide on blog/2026-03-10-temp-placeholder.html — real content or delete?
+- ~~[MEDIUM_RISK] Update sitemap.xml lastmod dates for all 38 pages changed 2026-03-27~~ ✅ DONE — promoted to P1 ZERO_RISK, completed commit 9779ef6
+- [MEDIUM_RISK] austin-housing-market-2025.html — ✅ noindex added 2026-03-27 (Option C). Redirect to /austin-mortgage-rates is STILL pending — need Adam decision on whether to do 301 redirect
+- ~~[MEDIUM_RISK] Homepage H1~~ ✅ DONE in prior session (2026-03-26 PM) — "Mortgage Broker Austin TX — Adam Styer | NMLS #513013"
+- ~~[MEDIUM_RISK] Add /prequal.html to robots.txt Disallow~~ ✅ DONE 2026-03-28 — commit 7879b14
+- ~~[MEDIUM_RISK] Verify /contact-us 404 redirect is in _redirects — if not, add it~~ ✅ Confirmed done in prior commit ac3afc9
 
 ## P4 — NEEDS GSC DATA (blocked until Adam provides export)
 
@@ -47,9 +44,13 @@
 
 ## P5 — FUTURE CONTENT (Week 4+)
 
-- Evergreen /austin-mortgage-rates page (blog post is temporary — need a permanent URL)
-- Blog post briefs: first-time buyer deep dive, FHA vs conventional, VA eligibility guide
+- ~~New page: /self-employed-mortgage-austin.html~~ ✅ DONE 2026-03-27 — commit 9203d1f, full non-QM landing page, FAQPage + BreadcrumbList + FinancialProduct schema, added to sitemap
+- ~~Blog post: "How Long Does Mortgage Pre-Approval Take in Austin TX?"~~ ✅ DONE 2026-03-28 — commit 7879b14, FAQPage schema (6 questions), added to sitemap + manifest
+- Blog post: "FHA vs Conventional Loan Austin TX — Which Is Right for You?" — comparison format, targets buyers deciding between the two
+- Blog post: "VA Loan Eligibility in Texas — Who Qualifies and How to Use Your Benefit" — veteran buyers, high-intent
+- Blog post: "First-Time Home Buyer Programs Austin TX 2026" — complements DPA post, more process-focused
 - Suburb page content audit: are the 15 new-to-sitemap pages strong enough or thin?
+- thank-you.html: noindex removed during redesign ✅ FIXED 2026-03-28 — commit 7879b14
 
 ---
 
@@ -57,3 +58,4 @@
 
 - ✅ Full technical SEO audit — 56 issues documented (2026-03-25 AM)
 - ✅ sitemap.xml — added 15 suburb pages + 3 blog posts + 4 other pages (2026-03-26)
+- ✅ Week 3 on-page optimization batch — 38 files, commit 359c6e3 (2026-03-27 AM)

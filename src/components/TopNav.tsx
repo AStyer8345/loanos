@@ -113,6 +113,10 @@ export default function TopNav() {
             onToggle={() => toggleDropdown('marketing')}
             items={[
               {
+                label: 'Social Media',
+                onClick: () => navigate('/dashboard/marketing'),
+              },
+              {
                 label: 'Marketing Command Center',
                 onClick: () => navigate('/dashboard/marketing'),
               },

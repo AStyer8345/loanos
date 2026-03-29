@@ -5,15 +5,17 @@ import { useMCCState, mergedState } from './_components/useMCCState'
 import SendTab    from './_components/SendTab'
 import CallsTab   from './_components/CallsTab'
 import HistoryTab from './_components/HistoryTab'
+import SocialTab  from './_components/SocialTab'
+import VoiceGuideEditor from './_components/VoiceGuideEditor'
 
 const GOLD = '#C9A84C'
 
-type Tab = 'SEND' | 'CALLS' | 'HISTORY'
+type Tab = 'SEND' | 'CALLS' | 'HISTORY' | 'SOCIAL' | 'VOICE GUIDE'
 
-const TABS: Tab[] = ['SEND', 'CALLS', 'HISTORY']
+const TABS: Tab[] = ['SOCIAL', 'SEND', 'CALLS', 'HISTORY', 'VOICE GUIDE']
 
 export default function MarketingPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('SEND')
+  const [activeTab, setActiveTab] = useState<Tab>('SOCIAL')
   const { state, loading, error, saveState } = useMCCState()
 
   const mcc = mergedState(state)
@@ -73,6 +75,12 @@ export default function MarketingPage() {
       </div>
 
       {/* Tab content */}
+      {activeTab === 'SOCIAL' && (
+        <SocialTab onSwitchToVoiceGuide={() => setActiveTab('VOICE GUIDE')} />
+      )}
+      {activeTab === 'VOICE GUIDE' && (
+        <VoiceGuideEditor />
+      )}
       <div className="max-w-3xl">
         {activeTab === 'SEND' && (
           <SendTab mccState={mcc} onSave={saveState} />

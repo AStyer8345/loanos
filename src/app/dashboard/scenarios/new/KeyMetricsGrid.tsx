@@ -231,17 +231,17 @@ function SavingsCard({
 
   return (
     <div
-      className="rounded-[14px] p-5 flex flex-col"
+      className="rounded-[14px] p-5 flex flex-col min-w-0 overflow-hidden"
       style={{
         background: 'var(--sc-card)',
         border: `1px solid ${positive ? 'rgba(42,122,75,0.3)' : 'var(--sc-border)'}`,
         minHeight: 110,
       }}
     >
-      <p className="text-[10px] font-medium uppercase tracking-wider mb-2" style={{ color: 'var(--sc-muted)' }}>
+      <p className="text-[10px] font-medium uppercase tracking-wider mb-2 truncate" style={{ color: 'var(--sc-muted)' }}>
         {label}
       </p>
-      <p className="text-2xl font-bold flex-1" style={{
+      <p className="text-xl font-bold flex-1 break-words" style={{
         fontFamily: "'IBM Plex Mono', monospace",
         color: positive ? '#4CC98A' : 'var(--sc-text)',
       }}>
@@ -359,7 +359,7 @@ export default function KeyMetricsGrid({
       <h3 className="text-sm font-semibold mb-4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
         Key Metrics — Best Scenario
       </h3>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
         <SavingsCard
           label="Monthly Savings"
           value={fmtCurrency(metrics.monthlySavings) + '/mo'}

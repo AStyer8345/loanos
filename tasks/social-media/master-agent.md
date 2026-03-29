@@ -30,7 +30,7 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 
 ## CRITICAL RULES — SOCIAL MEDIA DOMAIN
 
-- NEVER publish a post live. All output goes into scheduling tool (Publer) as DRAFTS.
+- NEVER publish a post live. All post content goes into the social_drafts Supabase table. Adam reviews and publishes from the LoanOS Marketing → Social tab.
 - NEVER publish rate-related content without NMLS# 513013 present.
 - NEVER post guaranteed approval language — blocked by RESPA/Reg Z.
 - NEVER use "The Styer Team" — always "Adam Styer | Mortgage Solutions LP".
@@ -47,10 +47,10 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 00-notebooklm.md  (PULL mode)   ← pulls prior context
 01-research.md                   ← social media research
 02-architect.md                  ← content plan / strategy
-03-builder.md                    ← write posts, generate Canva prompts, schedule drafts
+03-builder.md                    ← write posts to social_drafts table, generate Canva prompts
 03b-quality.md                   ← brand & quality polish (score/rewrite until ≥7/10)
 04-reviewer.md                   ← compliance + spec review (gets polished copy only)
-05-qa.md                         ← verify posts are queued correctly in Publer
+05-qa.md                         ← verify posts appear in social_drafts table
 06-reporter.md                   ← session log
 00-notebooklm.md  (PUSH mode)   ← pushes knowledge to NotebookLM
 ```
@@ -63,7 +63,7 @@ Read in order:
 1. `tasks/social-media/session-log.md` — last session report
 2. `tasks/social-media/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
 3. `tasks/social-media/domain-queue.md` — active focus area
-4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: Publer account IDs (Facebook, Instagram, LinkedIn, GBP), n8n workflow table, existing tool inventory. Do NOT assume something hasn't been set up — check here first.**
+4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: n8n workflow table, existing tool inventory, Supabase project details. Do NOT assume something hasn't been set up — check here first.**
 5. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
 6. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
@@ -181,9 +181,9 @@ Write BLOCKER to `tasks/social-media/BLOCKERS.md` if:
 - Post goes live before compliance review
 - NMLS# 513013 is missing from any rate-related content
 - Reviewer rejects content AND Builder cannot fix without Adam input
-- Builder cannot access scheduling tool (Publer) and posts cannot be queued as drafts
+- Builder cannot access Supabase REST API and posts cannot be written to social_drafts
 - A post contains guaranteed approval language, specific rates without APR, or discriminatory targeting
-- QA fails verification and posts cannot be confirmed as drafts
+- QA fails verification and posts cannot be confirmed in social_drafts table
 
 ---
 
@@ -211,9 +211,9 @@ Switch back to domain notebook:
 - [ ] NotebookLM pull report exists
 - [ ] Research written (if applicable)
 - [ ] Content strategy/calendar written (if applicable)
-- [ ] Posts written and queued as drafts (if execution ran)
+- [ ] Posts written to social_drafts table in Supabase (if execution ran)
 - [ ] Reviewer approved all posts (if execution ran)
-- [ ] QA confirmed drafts in scheduling tool (if execution ran)
+- [ ] QA confirmed drafts appear in LoanOS Marketing → Social tab (if execution ran)
 - [ ] Session log updated
 - [ ] NotebookLM push complete
 - [ ] Daily digest sent (PM session)

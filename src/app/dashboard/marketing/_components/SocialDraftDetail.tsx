@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { SocialDraft } from './SocialDraftList'
 
 const GOLD = '#C9A84C'
@@ -28,6 +28,9 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [mediaIndex, setMediaIndex] = useState(0)
+  const mediaScrollRef = useRef<HTMLDivElement>(null)
 
   // Reset edit state when draft changes
   const [prevId, setPrevId] = useState(draft.id)
@@ -37,6 +40,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
     setEditContent(draft.content || '')
     setMessages([])
     setChatInput('')
+    setMediaIndex(0)
   }
 
   function handleEdit() {
@@ -55,6 +59,27 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
 
   function handleReject() {
     onUpdate({ ...draft, status: 'rejected' })
+  }
+
+  async function handlePublish() {
+    setPublishing(true)
+    try {
+      const res = await fetch('/api/social/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draftId: draft.id }),
+      })
+      if (!res.ok) throw new Error('Publish failed')
+      onUpdate({ ...draft, status: 'posted' })
+    } catch {
+      // Let user retry
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  function isVideo(url: string): boolean {
+    return /\.(mp4|mov|webm)(\?|$)/i.test(url)
   }
 
   async function handleChatSend() {
@@ -174,6 +199,114 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
           )}
         </div>
 
+        {/* Media preview */}
+        {draft.media_urls && draft.media_urls.length > 0 && (
+          <div>
+            <div
+              className="font-bold mb-2"
+              style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
+            >
+              MEDIA
+            </div>
+
+            {draft.media_urls.length === 1 ? (
+              // Single media — full width
+              <div
+                className="rounded-md border border-zinc-800 overflow-hidden"
+                style={{ background: '#111118' }}
+              >
+                {isVideo(draft.media_urls[0]) ? (
+                  <video
+                    src={draft.media_urls[0]}
+                    controls
+                    className="w-full"
+                    style={{ maxHeight: 300, objectFit: 'contain', background: '#000' }}
+                  />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={draft.media_urls[0]}
+                    alt="Post media"
+                    className="w-full"
+                    style={{ maxHeight: 300, objectFit: 'contain' }}
+                  />
+                )}
+              </div>
+            ) : (
+              // Multiple media — carousel with arrows
+              <div className="relative">
+                <div
+                  ref={mediaScrollRef}
+                  className="flex gap-2 overflow-x-auto rounded-md border border-zinc-800 p-2"
+                  style={{ background: '#111118', scrollBehavior: 'smooth' }}
+                >
+                  {draft.media_urls.map((url, i) => (
+                    <div
+                      key={i}
+                      className="flex-shrink-0 rounded overflow-hidden border"
+                      style={{
+                        borderColor: i === mediaIndex ? GOLD : '#27272a',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => setMediaIndex(i)}
+                    >
+                      {isVideo(url) ? (
+                        <video
+                          src={url}
+                          controls={i === mediaIndex}
+                          muted
+                          style={{ height: 200, width: 'auto', objectFit: 'cover', background: '#000' }}
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={url}
+                          alt={`Media ${i + 1}`}
+                          style={{ height: 200, width: 'auto', objectFit: 'cover' }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Arrow buttons */}
+                <button
+                  onClick={() => {
+                    const prev = Math.max(0, mediaIndex - 1)
+                    setMediaIndex(prev)
+                    mediaScrollRef.current?.children[prev]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+                  }}
+                  disabled={mediaIndex === 0}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
+                  style={{ background: '#09090bCC', color: '#fff', border: '1px solid #3f3f46' }}
+                >
+                  &larr;
+                </button>
+                <button
+                  onClick={() => {
+                    const next = Math.min((draft.media_urls?.length ?? 1) - 1, mediaIndex + 1)
+                    setMediaIndex(next)
+                    mediaScrollRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+                  }}
+                  disabled={mediaIndex === (draft.media_urls?.length ?? 1) - 1}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
+                  style={{ background: '#09090bCC', color: '#fff', border: '1px solid #3f3f46' }}
+                >
+                  &rarr;
+                </button>
+
+                {/* Index indicator */}
+                <div
+                  className="text-center mt-1.5 font-bold"
+                  style={{ color: '#71717a', fontSize: 10, letterSpacing: '0.1em' }}
+                >
+                  {mediaIndex + 1} / {draft.media_urls.length}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Action buttons */}
         {!editing && (
           <div className="flex gap-2">
@@ -213,6 +346,20 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
             >
               REJECT
             </button>
+            {draft.status === 'approved' && (
+              <button
+                onClick={handlePublish}
+                disabled={publishing}
+                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
+                style={{
+                  background: GOLD,
+                  color: '#09090b',
+                  fontFamily: 'inherit',
+                }}
+              >
+                {publishing ? 'PUBLISHING...' : 'PUBLISH TO PUBLER'}
+              </button>
+            )}
           </div>
         )}
 

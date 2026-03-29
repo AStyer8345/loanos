@@ -81,6 +81,32 @@ Advance queue to next topic: [YES/NO — reason]
 ---
 ```
 
+## LOG ACTIVITY TO SUPABASE
+
+After writing the session log, log the session activity to the `social_activity` table:
+
+```bash
+# Log session activity to social_activity table
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_activity" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "action": "<generated_posts|research|scheduled|error|compose>",
+    "detail": "<human-readable summary, e.g. Generated 3 posts: 1 LinkedIn education, 1 Instagram reel script, 1 Facebook market update>"
+  }'
+```
+
+Use these action values:
+- `generated_posts` — posts were written to social_drafts
+- `research` — research-only session, no posts written
+- `scheduled` — posts moved to scheduled status (rare — usually happens from dashboard)
+- `error` — session encountered a blocker or failure
+- `compose` — strategy/spec was created but no posts written yet
+
+---
+
 ## SELF-IMPROVEMENT
 After writing the session log, review today's output and propose any prompt improvements:
 

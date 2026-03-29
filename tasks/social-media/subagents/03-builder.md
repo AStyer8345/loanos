@@ -11,7 +11,7 @@ Social Media (LinkedIn, Instagram, Facebook)
 
 ## WHAT THIS SUBAGENT EXECUTES
 - Writes post copy for each platform (LinkedIn, Instagram, Facebook)
-- Formats copy for scheduling in Publer as DRAFTS
+- Writes post copy to the Supabase `social_drafts` table as DRAFTS
 - Generates Canva image prompts for visual posts
 - Flags all rate-related posts with compliance requirements before handoff to Reviewer
 - Does NOT publish anything live — drafts only
@@ -33,28 +33,31 @@ Read:
 - [ ] Platform word limits understood (LinkedIn ≤150 words, Instagram ≤150 words, Facebook ≤120 words)
 - [ ] Compliance flags identified for each post
 - [ ] Definition of done understood
-- [ ] Publer account IDs loaded from `/Users/adamstyer/Documents/CLAUDE.md` (Facebook, Instagram, LinkedIn, GBP)
-- [ ] Publer API key loaded: `14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2`
+- [ ] Supabase REST API endpoint and service role key available
 
-### Publer API (Schedule as DRAFT)
+### Supabase social_drafts Insert
 ```bash
-# Create a draft post via Publer API
-curl -X POST https://api.publer.io/v1/posts \
-  -H "Authorization: Bearer 14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2" \
+# Insert draft into social_drafts table
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
   -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
   -d '{
-    "workspaceId": "69b052bf835c8c689fab8fd8",
-    "profiles": ["<ACCOUNT_ID>"],
-    "text": "<POST_COPY>",
-    "scheduledAt": "<ISO_DATETIME>",
-    "isDraft": true
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "platform": "<instagram|linkedin|facebook|all>",
+    "format": "<single_image|carousel|video|reel_script|text_only>",
+    "pillar": "<education|authority|story|market|personal>",
+    "title": "<short title for list view>",
+    "content": "<full post copy>",
+    "hashtags": "<comma-separated hashtags>",
+    "status": "draft",
+    "created_by": "agent",
+    "agent_notes": "<compliance flags, format recommendations, reasoning>"
   }'
 ```
-Account IDs (from CLAUDE.md):
-- LinkedIn: `69b0536404b824ffb2c05426`
-- Facebook: `69b05329de86f5e15b7c0722`
-- Instagram: `69b0530110a77a0ed895847d`
-- GBP: `69c3e3f548d8e4e643d45438`
+
+**IMPORTANT:** Adam reviews, edits, and approves all drafts in the LoanOS Marketing → Social tab. Do NOT push to Publer — that happens from the dashboard.
 
 ### Execution Standards
 
@@ -144,30 +147,19 @@ Brand color note: Gold = #C9A84C, Background = #0a0a0a or white, Text = white or
 
 ## OUTPUT
 
-Write to `tasks/social-media/build-reports/[YYYY-MM-DD]-[topic-slug]-build.md`:
+The drafts inserted into the `social_drafts` Supabase table ARE the primary output. Each post is a row in the table with full copy, platform, format, pillar, hashtags, compliance flags, and agent notes.
+
+Additionally, write a lightweight summary to `tasks/social-media/build-reports/[YYYY-MM-DD]-[topic-slug]-build.md`:
 
 ```markdown
 # Execution Report: [Topic] — Social Media
 Date: [DATE]
 
-## Posts Written
+## Posts Written to social_drafts
 | Post # | Platform | Format | Pillar | Word Count | Canva Brief? | Compliance Flag |
 |--------|----------|--------|--------|------------|--------------|-----------------|
 | 1 | LinkedIn | Text | Rate Education | 140 | NO | NMLS# required — flagged |
 | 2 | Instagram | Static | Client Win | 120 | YES | None |
-
-## Full Post Copy
-
-### Post 1 — LinkedIn
-[Full copy exactly as it should appear in the scheduling tool]
-
-### Post 2 — Instagram
-[Full copy]
-
-### Post 3 — Facebook
-[Full copy]
-
-[Continue for all posts]
 
 ## Canva Briefs
 [All Canva briefs for visual posts]
@@ -192,6 +184,6 @@ Check each flagged post for:
 ## COMPLETION SIGNAL
 ```
 BUILDER SUBAGENT: COMPLETE — [DATETIME]
-Posts written: [count] | Platforms: [list] | Compliance flags: [count]
-Output: tasks/social-media/build-reports/[filename]
+Posts written to social_drafts: [count] | Platforms: [list] | Compliance flags: [count]
+Summary: tasks/social-media/build-reports/[filename]
 ```

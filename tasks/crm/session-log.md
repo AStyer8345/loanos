@@ -802,3 +802,72 @@ Priority 3 (next research): Smart Lists + Segmentation — next domain-queue ite
 - Contacts: 2,376 | schema clean post-migration 060 | production_tier: 120 tiered (117 + Crystal pending)
 - Realtor stage: 0 populated (changes pending Builder executing migration 061)
 - referred_by_contact_id: 0 populated (changes pending Builder executing migration 061)
+
+---
+## Session: 2026-03-29 AM — Realtor Relationship System Builder
+Focus: Migration 061 — Realtor Relationship Schema + Smart Lists + WF-R1
+Type: Execute / Build (Sequence C)
+Triggered-by: Scheduled task `loanos-crm-am`
+
+### Completed
+- **Migration 061 DDL applied** — `supabase/migrations/061_realtor_relationship_schema.sql`
+  - 9 new columns on contacts: `referred_by_contact_id`, `referral_ytd_count`, `referral_lifetime_count`, `last_referral_date`, `deals_ytd_count`, `deals_lifetime_count`, `last_deal_closed_date`, `last_outreach_date`, `referral_source_notes`
+  - 1 new column on loans: `referral_contact_id`
+  - Trigger `trg_activity_log_update_last_touch` + function `fn_update_contact_last_touch_at` live
+- **Migration 062 DDL applied** — `supabase/migrations/062_drop_boolean_realtor_columns.sql`
+  - Dropped `top_realtor` and `target_realtor` columns after code cleanup
+- **6 DML backfills complete**
+  1. referred_by_contact_id linked: 123 contacts
+  2. referral_ytd_count + referral_lifetime_count backfilled from existing referred_by text matches
+  3. last_referral_date set from most recent loan closing_date per realtor
+  4. Crystal Kilpatrick set to Tier A manually (53 referrals confirmed)
+  5. realtor_stage → Active Partner for 117 tiered realtors
+  6. deals_ytd_count + deals_lifetime_count seeded from loans
+- **Boolean deprecation complete**
+  - Removed `top_realtor` / `target_realtor` from `src/app/api/import/contacts/route.ts`
+  - Added `production_tier` mapping from legacy CSV columns
+  - npm build passed pre- and post-DROP
+- **database.types.ts regenerated** — all 9 new columns in Row/Insert/Update types; booleans removed
+- **4 new smart lists added** to `src/app/dashboard/contacts/page.tsx`
+  - Active Deal Partners (`deals_ytd_count >= 1`)
+  - Top Producers YTD (≥ 2 referrals)
+  - Due for Outreach (60+ days)
+  - Tier A — Not This Month
+  - Contact type updated with all 9 new fields; fetchCounts + ALL_COLUMNS updated
+- **WF-R1 extended** — workflow `J9Pe24vUi6fpZtdZ` updated via n8n REST API (PUT)
+  - 6 new nodes added: Check Has Referral → Fetch Realtor Contact → Check Realtor Found → Build Thank-You Email → Draft Thank-You to Realtor → Log Referral Outreach
+  - Normalize Payload updated to pass `referred_by` field through
+  - Notify Adam email updated to display referred_by
+  - Workflow active, 10 nodes, versionId = activeVersionId ✅
+  - **ACTION REQUIRED**: Set Microsoft Outlook credential on "Draft Thank-You to Realtor" node in n8n UI
+
+### SQL Verification (all pass)
+- 11 new columns exist on contacts ✅
+- top_realtor / target_realtor dropped ✅
+- trigger on activity_log INSERT ✅
+- 123 referrals linked, 120 tiered, 117 staged ✅
+- Crystal Kilpatrick: Tier A / Active Partner / 53 lifetime referrals ✅
+- Smart lists: top_producers=17, tier_a_not_this_month=111 ✅
+
+### Build Status
+- npm build: PASS (confirmed pre- and post-DROP COLUMN)
+- Vercel: deploy pending (git push in this session)
+
+### Blocker / Known Issue
+- n8n MCP `validate_workflow` has a bug: plain object exports fail with "builder.regenerateNodeIds is not a function". Workaround: used n8n REST API PUT `/api/v1/workflows/{id}` directly. SDK discovery: `workflow()` global + `.add()` method work but connection API is non-functional in current MCP version.
+- "Draft Thank-You to Realtor" Outlook node has no credential binding — must be set manually in n8n UI before the referral branch fires.
+
+### Queue Position
+- Realtor Relationship System: COMPLETE ✅
+- Next priority: Automation Coverage Audit — Verify `AK1fBcaX1cPcdlGx` trigger timing vs Arive fund event
+- Next research: Smart Lists + Segmentation
+
+### Data Integrity Status
+- Contacts: 2,376 | 1,060 realtors | 120 tiered | 117 staged
+- referred_by_contact_id: 123 linked
+- deals_ytd_count: all 0 (new column — will populate from future loans)
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 4 | QA: 5
+
+Advance queue: YES → Automation Coverage Audit

@@ -57,6 +57,15 @@ type Contact = {
   do_not_call: boolean | null
   production_tier: string | null
   realtor_stage: string | null
+  referred_by_contact_id: string | null
+  referral_ytd_count: number | null
+  referral_lifetime_count: number | null
+  last_referral_date: string | null
+  deals_ytd_count: number | null
+  deals_lifetime_count: number | null
+  last_deal_closed_date: string | null
+  last_outreach_date: string | null
+  referral_source_notes: string | null
 }
 
 type SmartListDef = { id: string; label: string; section?: string }
@@ -172,9 +181,13 @@ const SMART_LISTS: SmartListDef[] = [
   { id: 'new-apps',       label: 'New Applications' },
   { id: 'in-process',     label: 'In Process' },
   { id: 'closed',         label: 'Closed Borrowers' },
-  { id: 'all-realtors',   label: 'All Realtors',           section: 'REALTORS' },
-  { id: 'top-realtors',   label: 'Top / Target' },
-  { id: 'unassigned',     label: 'Unassigned / Other',     section: 'OTHER' },
+  { id: 'all-realtors',         label: 'All Realtors',                section: 'REALTORS' },
+  { id: 'top-realtors',         label: 'Top / Target' },
+  { id: 'active_deal_partners', label: 'Active Deal Partners' },
+  { id: 'top_producers',        label: 'Top Producers (YTD ≥ 2)' },
+  { id: 'due_for_outreach',     label: 'Due for Outreach (60+ days)' },
+  { id: 'tier_a_not_this_month', label: 'Tier A — Not This Month' },
+  { id: 'unassigned',           label: 'Unassigned / Other',          section: 'OTHER' },
 ]
 
 // ── Quick filter dropdown options (maps to smart list IDs) ────────────────────
@@ -273,6 +286,9 @@ const ALL_COLUMNS: ColumnDef[] = [
       ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(201,168,76,0.12)', color: '#c9a84c', fontWeight: 600 }}>{c.production_tier}</span>
       : <span style={{ color: 'var(--muted)' }}>—</span> },
   { id: 'realtor_stage',   label: 'Realtor Stage',    minWidth: 140, render: c => c.realtor_stage ?? '—' },
+  { id: 'referral_lifetime', label: 'Referrals',      minWidth: 90,  render: c => c.referral_lifetime_count ? String(c.referral_lifetime_count) : null },
+  { id: 'last_referral',   label: 'Last Referral',    minWidth: 120, render: c => c.last_referral_date ? fmtDate(c.last_referral_date) : null },
+  { id: 'last_deal',       label: 'Last Deal',        minWidth: 120, render: c => c.last_deal_closed_date ? fmtDate(c.last_deal_closed_date) : null },
   { id: 'created',         label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
 ]
 
@@ -319,6 +335,19 @@ function applySmartList(query: any, listId: string): any {
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
       return query.eq('contact_type', 'realtor').not('production_tier', 'is', null)
+    case 'active_deal_partners':
+      return query.eq('contact_type', 'realtor').gte('deals_ytd_count', 1)
+    case 'top_producers':
+      return query.eq('contact_type', 'realtor').gte('referral_ytd_count', 2)
+    case 'due_for_outreach': {
+      const cutoff60 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      return query.eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${cutoff60}`)
+    }
+    case 'tier_a_not_this_month': {
+      const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0)
+      const startOfMonth = d.toISOString().split('T')[0]
+      return query.eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${startOfMonth}`)
+    }
     case 'unassigned':
       return query.or(
         'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
@@ -658,8 +687,12 @@ export default function ContactsPage() {
         'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
         'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
       ),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').gte('deals_ytd_count', 1),
+      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').gte('referral_ytd_count', 2),
+      (() => { const c = new Date(Date.now() - 60*24*60*60*1000).toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${c}`) })(),
+      (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); const s = d.toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${s}`) })(),
     ]
-    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned']
+    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned', 'active_deal_partners', 'top_producers', 'due_for_outreach', 'tier_a_not_this_month']
     const results = await Promise.all(base)
     const next: Record<string, number> = {}
     builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })

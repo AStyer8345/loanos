@@ -35,7 +35,53 @@ CURRENT STATE (as of 2026-03-25):
 
 ---
 
-ACTIVE: Contact Data Architecture Review
+ACTIVE: Loan Record UI — Simplification Sprint (4 sessions)
+
+  PROBLEM: The loan record currently has too much going on — too many fields, sections, and data
+  visible at once. It's cognitively overwhelming and slows down daily use.
+
+  GOAL: Research best practices for mortgage LO CRM loan detail views, then systematically
+  simplify and reorganize the loan record UI over 4 sessions — one section per session.
+
+  SESSION 1 — Research + Audit (Sequence B)
+    → Research how leading mortgage CRMs structure loan detail views:
+      Salesforce (Encompass integration), Arive, SimpleNexus, Total Expert, Shape CRM
+    → Audit the current LoanOS loan record: read the loan detail page code, list every field,
+      section, and tab currently rendered
+    → Identify: what's above the fold, what's buried, what's never used, what's duplicated
+    → Propose a new information hierarchy:
+        Critical (always visible): borrower name, loan amount, status, rate, close date, LO notes
+        Secondary (collapsed/tabbed): documents, timeline, conditions, contacts
+        Archive (hide or remove): fields that are empty 90%+ of the time
+    → Output: a written spec (tasks/crm/loan-record-redesign-spec.md) with before/after layout,
+      component list, and implementation order. Flag for Adam to review before Session 2 executes.
+
+  SESSION 2 — Implement: Above-the-Fold Redesign (Sequence C)
+    → Implement the "Critical" section from the spec: clean, scannable header with key loan facts
+    → Apply dark theme consistently, use shadcn/ui Card + Badge + Separator components
+    → Remove or collapse any field that isn't in the critical tier
+    → Commit, push, verify Vercel deployment
+
+  SESSION 3 — Implement: Tabbed Secondary Sections (Sequence C)
+    → Implement tabbed layout for secondary info (docs, timeline, conditions, contacts)
+    → Each tab should only show what's relevant to that context — no duplication
+    → Confirm mobile-responsive behavior
+    → Commit, push, verify Vercel deployment
+
+  SESSION 4 — Polish + Data Gaps (Sequence C)
+    → Review sessions 2-3 output against the spec — anything missed or off?
+    → Address any fields that are always empty: either pull real data or hide them
+    → Add any quick-win UX improvements (loading states, empty states, copy clarity)
+    → Update NotebookLM with what changed and why
+    → Mark this sprint COMPLETE in domain-queue.md, advance to next queue item
+
+  NOTE FOR ADAM: After Session 1 writes the spec (tasks/crm/loan-record-redesign-spec.md),
+  review it before Session 2 runs. The agent will flag it in ADAM-TODO.md. If you want changes
+  to the plan, edit the spec before the next session fires.
+
+---
+
+NEXT: Contact Data Architecture Review
 
   The question: what information actually matters for a mortgage LO contact record?
   What should every contact have? What's optional? What's irrelevant?

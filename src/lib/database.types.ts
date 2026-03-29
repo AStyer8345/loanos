@@ -350,6 +350,8 @@ export type Database = {
           created_date: string | null
           current_loan_balance: number | null
           current_rate: number | null
+          deals_lifetime_count: number
+          deals_ytd_count: number
           do_not_call: boolean
           email: string | null
           email_opt_out: boolean | null
@@ -361,7 +363,10 @@ export type Database = {
           last_activity_date: string | null
           last_activity_notes: string | null
           last_activity_type: string | null
+          last_deal_closed_date: string | null
           last_name: string
+          last_outreach_date: string | null
+          last_referral_date: string | null
           last_touch: string | null
           last_touch_at: string | null
           lead_source: string | null
@@ -378,15 +383,17 @@ export type Database = {
           realtor_email: string | null
           realtor_phone: string | null
           realtor_stage: string | null
+          referral_lifetime_count: number
+          referral_source_notes: string | null
           referral_type: string | null
+          referral_ytd_count: number
           referred_by: string | null
+          referred_by_contact_id: string | null
           salesforce_created_date: string | null
           salesforce_id: string | null
           source: string | null
           stage: string | null
-          target_realtor: boolean | null
           title: string | null
-          top_realtor: boolean | null
           updated_at: string
           user_id: string
         }
@@ -406,6 +413,8 @@ export type Database = {
           created_date?: string | null
           current_loan_balance?: number | null
           current_rate?: number | null
+          deals_lifetime_count?: number
+          deals_ytd_count?: number
           do_not_call?: boolean
           email?: string | null
           email_opt_out?: boolean | null
@@ -417,7 +426,10 @@ export type Database = {
           last_activity_date?: string | null
           last_activity_notes?: string | null
           last_activity_type?: string | null
+          last_deal_closed_date?: string | null
           last_name: string
+          last_outreach_date?: string | null
+          last_referral_date?: string | null
           last_touch?: string | null
           last_touch_at?: string | null
           lead_source?: string | null
@@ -434,15 +446,17 @@ export type Database = {
           realtor_email?: string | null
           realtor_phone?: string | null
           realtor_stage?: string | null
+          referral_lifetime_count?: number
+          referral_source_notes?: string | null
           referral_type?: string | null
+          referral_ytd_count?: number
           referred_by?: string | null
+          referred_by_contact_id?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
           source?: string | null
           stage?: string | null
-          target_realtor?: boolean | null
           title?: string | null
-          top_realtor?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -462,6 +476,8 @@ export type Database = {
           created_date?: string | null
           current_loan_balance?: number | null
           current_rate?: number | null
+          deals_lifetime_count?: number
+          deals_ytd_count?: number
           do_not_call?: boolean
           email?: string | null
           email_opt_out?: boolean | null
@@ -473,7 +489,10 @@ export type Database = {
           last_activity_date?: string | null
           last_activity_notes?: string | null
           last_activity_type?: string | null
+          last_deal_closed_date?: string | null
           last_name?: string
+          last_outreach_date?: string | null
+          last_referral_date?: string | null
           last_touch?: string | null
           last_touch_at?: string | null
           lead_source?: string | null
@@ -490,15 +509,17 @@ export type Database = {
           realtor_email?: string | null
           realtor_phone?: string | null
           realtor_stage?: string | null
+          referral_lifetime_count?: number
+          referral_source_notes?: string | null
           referral_type?: string | null
+          referral_ytd_count?: number
           referred_by?: string | null
+          referred_by_contact_id?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
           source?: string | null
           stage?: string | null
-          target_realtor?: boolean | null
           title?: string | null
-          top_realtor?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -508,6 +529,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_referred_by_contact_id_fkey"
+            columns: ["referred_by_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
         ]
@@ -1083,6 +1111,7 @@ export type Database = {
           rate_lock_days: number | null
           rate_lock_expiration: string | null
           raw_payload: Json | null
+          referral_contact_id: string | null
           referral_source: string | null
           referring_agent_email: string | null
           referring_agent_name: string | null
@@ -1295,6 +1324,7 @@ export type Database = {
           rate_lock_days?: number | null
           rate_lock_expiration?: string | null
           raw_payload?: Json | null
+          referral_contact_id?: string | null
           referral_source?: string | null
           referring_agent_email?: string | null
           referring_agent_name?: string | null
@@ -1507,6 +1537,7 @@ export type Database = {
           rate_lock_days?: number | null
           rate_lock_expiration?: string | null
           raw_payload?: Json | null
+          referral_contact_id?: string | null
           referral_source?: string | null
           referring_agent_email?: string | null
           referring_agent_name?: string | null
@@ -1566,6 +1597,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_referral_contact_id_fkey"
+            columns: ["referral_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
         ]
@@ -2263,6 +2301,28 @@ export type Database = {
           organization_id: string
         }[]
       }
+      find_contact_by_phone: {
+        Args: { phone_digits: string }
+        Returns: {
+          contact_type: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          phone_mobile: string
+        }[]
+      }
+      find_loan_by_phone: {
+        Args: { phone_digits: string }
+        Returns: {
+          borrower_last_name: string
+          contact_id: string
+          id: string
+          loan_name: string
+          status: string
+        }[]
+      }
       get_due_drip_emails: {
         Args: never
         Returns: {
@@ -2416,3 +2476,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

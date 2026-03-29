@@ -51,8 +51,13 @@ function mapRow(raw: RawRow, userId: string, organizationId: string): Record<str
     co_borrower_email:    g('Email (Co Borrower)')      ?? g('co_borrower_email'),
     closing_date:         parseDate(g('Closing Date')   ?? g('closing_date')),
     last_touch:             g('Last Touch')   ?? g('last_touch'),
-    top_realtor:      parseBool(g('Top Realtor')   ?? g('top_realtor')),
-    target_realtor:   parseBool(g('Target Realtor') ?? g('target_realtor')),
+    production_tier:  (
+      parseBool(g('Top Realtor') ?? g('top_realtor'))
+        ? 'A'
+        : parseBool(g('Target Realtor') ?? g('target_realtor'))
+          ? 'B'
+          : undefined
+    ) ?? undefined,
     realtor_email:          g('Realtor Email') ?? g('realtor_email'),
     realtor_phone:          g('Realtor Phone') ?? g('realtor_phone'),
   }

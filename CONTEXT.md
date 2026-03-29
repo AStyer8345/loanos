@@ -20,6 +20,22 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 
 ## Arive/LoanOS Separation + Dead Code Cleanup — 2026-03-27
 
+## Realtor Relationship System — 2026-03-29 AM (Builder Execution)
+
+**Migrations applied:** 061 (DDL: 9 new contacts columns + loans.referral_contact_id + last_touch_at trigger) + 062 (DROP top_realtor, target_realtor)
+
+**DML backfills complete:** 123 referral links, 120 tiered, 117 staged, Crystal Kilpatrick: Tier A / Active Partner / 53 lifetime referrals
+
+**Smart lists added (contacts/page.tsx):** Active Deal Partners, Top Producers YTD ≥ 2, Due for Outreach (60+ days), Tier A — Not This Month
+
+**WF-R1 extended (J9Pe24vUi6fpZtdZ):** 10 nodes active. New branch: Check Has Referral → Fetch Realtor Contact → Check Realtor Found → Build Thank-You Email → Draft Thank-You to Realtor → Log Referral Outreach. **ACTION REQUIRED: Set Outlook credential on "Draft Thank-You to Realtor" node in n8n UI.**
+
+**database.types.ts regenerated.** npm build passes.
+
+---
+
+## Arive/LoanOS Separation + Dead Code Cleanup — 2026-03-27
+
 **Goal:** Clean separation — Arive handles loan processing/milestones/docs, LoanOS handles marketing/CRM/communications/pipeline visibility/analytics.
 
 **n8n Workflows:**

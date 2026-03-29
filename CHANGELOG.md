@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [4.8.0] — 2026-03-29 — Realtor Relationship System
+
+### Added
+- Migration 061: 9 new contacts columns (referral counts, dates, stage, tier, notes), loans.referral_contact_id, activity_log last_touch_at trigger
+- Migration 062: Dropped top_realtor and target_realtor boolean columns
+- 4 new smart lists in contacts page: Active Deal Partners, Top Producers YTD ≥ 2, Due for Outreach (60d), Tier A — Not This Month
+- WF-R1 referral thank-you branch in n8n workflow J9Pe24vUi6fpZtdZ (6 new nodes)
+
+### Changed
+- database.types.ts regenerated with new columns; booleans removed
+- import/contacts/route.ts: removed boolean fields, added production_tier mapping from legacy CSV
+- Contacts page Contact type + ALL_COLUMNS updated
+
+### Data
+- 123 referred_by_contact_id links backfilled; 120 realtors tiered; 117 staged Active Partner
+
 ## [4.7.0] — 2026-03-27 — Arive/LoanOS Separation + Dead Code Cleanup
 
 ### Changed

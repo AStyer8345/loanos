@@ -4,6 +4,31 @@ import { useState, useRef } from 'react'
 import type { SocialDraft } from './SocialDraftList'
 
 const GOLD = '#C9A84C'
+const BRAND_BG = '#0a0a0a'
+const BRAND_GOLD = '#C9A84C'
+
+/** Parse "SLIDE N" blocks from post content for carousel preview */
+function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
+  // Match patterns like "SLIDE 1:", "SLIDE 1 —", "SLIDE 1 — HOOK", etc.
+  const slideRegex = /(?:^|\n)\s*(?:\*\*)?SLIDE\s+(\d+)(?:\s*[—–:-]\s*([^\n*]*))?(?:\*\*)?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*)?SLIDE\s+\d)|$)/gi
+  const slides: { num: number; title: string; body: string }[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = slideRegex.exec(content)) !== null) {
+    const num = parseInt(match[1], 10)
+    const title = (match[2] || '').trim().replace(/\*\*/g, '')
+    const body = (match[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
+    if (body || title) {
+      slides.push({ num, title, body })
+    }
+  }
+
+  // Extract intro text (everything before first SLIDE reference)
+  const firstSlideIdx = content.search(/(?:^|\n)\s*(?:\*\*)?SLIDE\s+1\b/i)
+  const intro = firstSlideIdx > 0 ? content.substring(0, firstSlideIdx).trim() : ''
+
+  return { intro, slides }
+}
 
 type Props = {
   draft: SocialDraft
@@ -22,6 +47,235 @@ function formatDate(iso: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+/** Branded slide card — renders one carousel slide as a visual preview */
+function SlideCard({ slide, total }: { slide: { num: number; title: string; body: string }; total: number }) {
+  const isFirst = slide.num === 1
+  const isLast = slide.num === total
+  const isTLDR = /tl;?dr/i.test(slide.title) || /tl;?dr/i.test(slide.body.substring(0, 20))
+  const isCTA = isLast || /cta/i.test(slide.title)
+
+  return (
+    <div
+      className="rounded-lg overflow-hidden flex flex-col justify-between"
+      style={{
+        background: BRAND_BG,
+        border: `1px solid ${isCTA ? BRAND_GOLD : '#1a1a1a'}`,
+        aspectRatio: '1 / 1',
+        width: '100%',
+        maxWidth: 400,
+        padding: isFirst ? '32px 28px' : '24px 24px',
+        fontFamily: "'IBM Plex Sans', 'Inter', system-ui, sans-serif",
+      }}
+    >
+      {/* Top: slide number badge */}
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="text-xs font-bold tracking-wider"
+          style={{ color: '#52525b', fontSize: 9, letterSpacing: '0.15em' }}
+        >
+          SLIDE {slide.num} OF {total}
+        </span>
+        {slide.title && !isFirst && (
+          <span
+            className="text-xs font-bold tracking-wider"
+            style={{ color: BRAND_GOLD, fontSize: 9, letterSpacing: '0.1em' }}
+          >
+            {slide.title.toUpperCase()}
+          </span>
+        )}
+      </div>
+
+      {/* Middle: content */}
+      <div className="flex-1 flex flex-col justify-center">
+        {isFirst ? (
+          // First slide — hero treatment
+          <>
+            <div
+              className="font-bold leading-tight mb-3"
+              style={{ color: BRAND_GOLD, fontSize: 20, lineHeight: 1.25 }}
+            >
+              {slide.body.split('\n')[0]}
+            </div>
+            {slide.body.split('\n').slice(1).join('\n').trim() && (
+              <div
+                className="leading-relaxed"
+                style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.6 }}
+              >
+                {slide.body.split('\n').slice(1).join('\n').trim()}
+              </div>
+            )}
+          </>
+        ) : isTLDR ? (
+          // TL;DR slide — bullet style
+          <>
+            <div
+              className="font-bold mb-3"
+              style={{ color: BRAND_GOLD, fontSize: 16 }}
+            >
+              TL;DR
+            </div>
+            <div style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.8 }}>
+              {slide.body.split('\n').filter(Boolean).map((line, i) => (
+                <div key={i} className="flex gap-2 mb-1">
+                  <span style={{ color: BRAND_GOLD, flexShrink: 0 }}>•</span>
+                  <span>{line.replace(/^[•·-]\s*/, '')}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : isCTA ? (
+          // CTA slide — gold accent heavy
+          <div className="text-center">
+            {slide.body.split('\n').filter(Boolean).map((line, i) => (
+              <div
+                key={i}
+                className="mb-2"
+                style={{
+                  color: i === 0 ? BRAND_GOLD : '#a1a1aa',
+                  fontSize: i === 0 ? 16 : 12,
+                  fontWeight: i === 0 ? 700 : 400,
+                  lineHeight: 1.5,
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Normal content slide
+          <div
+            className="whitespace-pre-wrap leading-relaxed"
+            style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.7 }}
+          >
+            {slide.body}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom: branding bar */}
+      <div
+        className="flex items-center justify-between pt-3 mt-3"
+        style={{ borderTop: `1px solid #1a1a1a` }}
+      >
+        <span style={{ color: '#52525b', fontSize: 9, letterSpacing: '0.05em' }}>
+          Adam Styer | Mortgage Solutions LP
+        </span>
+        {isCTA && (
+          <span style={{ color: BRAND_GOLD, fontSize: 9, fontWeight: 700 }}>
+            NMLS# 513013
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** Shows branded slide carousel for carousel/multi-slide posts, plain text for others */
+function SlidePreviewOrText({
+  draft,
+  slideIndex,
+  setSlideIndex,
+}: {
+  draft: SocialDraft
+  slideIndex: number
+  setSlideIndex: (i: number) => void
+}) {
+  const { intro, slides } = parseSlides(draft.content || '')
+  const hasSlides = slides.length >= 2
+
+  if (!hasSlides) {
+    // No slides detected — show plain text
+    return (
+      <div
+        className="rounded-md border border-zinc-800 px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
+        style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
+      >
+        {draft.content || '(empty)'}
+      </div>
+    )
+  }
+
+  const safeIndex = Math.min(slideIndex, slides.length - 1)
+  const currentSlide = slides[safeIndex]
+
+  return (
+    <div className="space-y-3">
+      {/* Caption / intro text */}
+      {intro && (
+        <div>
+          <div
+            className="font-bold mb-1"
+            style={{ color: '#71717a', fontSize: 9, letterSpacing: '0.15em' }}
+          >
+            CAPTION
+          </div>
+          <div
+            className="rounded-md border border-zinc-800 px-3 py-2 text-zinc-300 whitespace-pre-wrap"
+            style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
+          >
+            {intro}
+          </div>
+        </div>
+      )}
+
+      {/* Slide visual preview */}
+      <div>
+        <div
+          className="font-bold mb-2 flex items-center justify-between"
+          style={{ color: '#71717a', fontSize: 9, letterSpacing: '0.15em' }}
+        >
+          <span>SLIDE PREVIEW</span>
+          <span style={{ color: BRAND_GOLD }}>
+            {safeIndex + 1} / {slides.length}
+          </span>
+        </div>
+
+        {/* The branded slide card */}
+        <div className="flex justify-center">
+          <SlideCard slide={currentSlide} total={slides.length} />
+        </div>
+
+        {/* Navigation arrows */}
+        <div className="flex items-center justify-center gap-3 mt-3">
+          <button
+            onClick={() => setSlideIndex(Math.max(0, safeIndex - 1))}
+            disabled={safeIndex === 0}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
+            style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+          >
+            ←
+          </button>
+
+          {/* Dot indicators */}
+          <div className="flex gap-1.5">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideIndex(i)}
+                className="rounded-full transition-all"
+                style={{
+                  width: i === safeIndex ? 16 : 6,
+                  height: 6,
+                  background: i === safeIndex ? BRAND_GOLD : '#3f3f46',
+                }}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => setSlideIndex(Math.min(slides.length - 1, safeIndex + 1))}
+            disabled={safeIndex === slides.length - 1}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
+            style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+          >
+            →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }: Props) {
   const [editing, setEditing] = useState(false)
   const [editContent, setEditContent] = useState(draft.content || '')
@@ -30,6 +284,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   const [chatLoading, setChatLoading] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [mediaIndex, setMediaIndex] = useState(0)
+  const [slideIndex, setSlideIndex] = useState(0)
   const mediaScrollRef = useRef<HTMLDivElement>(null)
 
   // Reset edit state when draft changes
@@ -41,6 +296,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
     setMessages([])
     setChatInput('')
     setMediaIndex(0)
+    setSlideIndex(0)
   }
 
   function handleEdit() {
@@ -190,12 +446,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
               </div>
             </div>
           ) : (
-            <div
-              className="rounded-md border border-zinc-800 px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
-              style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
-            >
-              {draft.content || '(empty)'}
-            </div>
+            <SlidePreviewOrText draft={draft} slideIndex={slideIndex} setSlideIndex={setSlideIndex} />
           )}
         </div>
 

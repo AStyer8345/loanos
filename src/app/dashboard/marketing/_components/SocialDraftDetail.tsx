@@ -283,6 +283,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [publishError, setPublishError] = useState<string | null>(null)
   const [mediaIndex, setMediaIndex] = useState(0)
   const [slideIndex, setSlideIndex] = useState(0)
   const mediaScrollRef = useRef<HTMLDivElement>(null)
@@ -297,6 +298,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
     setChatInput('')
     setMediaIndex(0)
     setSlideIndex(0)
+    setPublishError(null)
   }
 
   function handleEdit() {
@@ -319,16 +321,21 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
 
   async function handlePublish() {
     setPublishing(true)
+    setPublishError(null)
     try {
       const res = await fetch('/api/social/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ draftId: draft.id }),
       })
-      if (!res.ok) throw new Error('Publish failed')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Unknown error' }))
+        setPublishError(data.error || `Publish failed (${res.status})`)
+        return
+      }
       onUpdate({ ...draft, status: 'posted' })
     } catch {
-      // Let user retry
+      setPublishError('Network error — could not reach publish API')
     } finally {
       setPublishing(false)
     }
@@ -560,58 +567,68 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
 
         {/* Action buttons */}
         {!editing && (
-          <div className="flex gap-2">
-            <button
-              onClick={handleApprove}
-              className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-              style={{
-                background: 'transparent',
-                color: '#4CAF82',
-                border: '1px solid #4CAF82',
-                fontFamily: 'inherit',
-              }}
-            >
-              APPROVE
-            </button>
-            <button
-              onClick={handleEdit}
-              className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-              style={{
-                background: 'transparent',
-                color: '#3B82F6',
-                border: '1px solid #3B82F6',
-                fontFamily: 'inherit',
-              }}
-            >
-              EDIT
-            </button>
-            <button
-              onClick={handleReject}
-              className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-              style={{
-                background: 'transparent',
-                color: '#E05252',
-                border: '1px solid #E05252',
-                fontFamily: 'inherit',
-              }}
-            >
-              REJECT
-            </button>
-            {draft.status === 'approved' && (
+          <>
+            <div className="flex gap-2">
               <button
-                onClick={handlePublish}
-                disabled={publishing}
-                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
+                onClick={handleApprove}
+                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
                 style={{
-                  background: GOLD,
-                  color: '#09090b',
+                  background: 'transparent',
+                  color: '#4CAF82',
+                  border: '1px solid #4CAF82',
                   fontFamily: 'inherit',
                 }}
               >
-                {publishing ? 'PUBLISHING...' : 'PUBLISH TO PUBLER'}
+                APPROVE
               </button>
+              <button
+                onClick={handleEdit}
+                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
+                style={{
+                  background: 'transparent',
+                  color: '#3B82F6',
+                  border: '1px solid #3B82F6',
+                  fontFamily: 'inherit',
+                }}
+              >
+                EDIT
+              </button>
+              <button
+                onClick={handleReject}
+                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
+                style={{
+                  background: 'transparent',
+                  color: '#E05252',
+                  border: '1px solid #E05252',
+                  fontFamily: 'inherit',
+                }}
+              >
+                REJECT
+              </button>
+              {draft.status === 'approved' && (
+                <button
+                  onClick={handlePublish}
+                  disabled={publishing}
+                  className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
+                  style={{
+                    background: GOLD,
+                    color: '#09090b',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {publishing ? 'PUBLISHING...' : 'PUBLISH TO PUBLER'}
+                </button>
+              )}
+            </div>
+            {publishError && (
+              <div
+                className="rounded-sm px-3 py-2 text-xs font-bold"
+                style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
+              >
+                {publishError}
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Agent notes */}

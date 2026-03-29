@@ -63,12 +63,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No platform accounts configured' }, { status: 400 })
     }
 
-    // Build the Publer post body
+    // Build the Publer post body — uses api.publer.io, not app.publer.com
     const publerBody: Record<string, unknown> = {
-      workspace_id: PUBLER_WORKSPACE,
-      account_ids: profiles,
+      workspaceId: PUBLER_WORKSPACE,
+      profiles,
       text: draft.content,
-      is_draft: true, // Still creates as draft in Publer for final review
+      isDraft: true, // Creates as draft in Publer for final review
+    }
+
+    // Add scheduled time if set
+    if (draft.scheduled_for) {
+      publerBody.scheduledAt = draft.scheduled_for
     }
 
     // Add media if present
@@ -77,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Push to Publer
-    const publerRes = await fetch('https://app.publer.com/api/v1/posts/create', {
+    const publerRes = await fetch('https://api.publer.io/v1/posts', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${PUBLER_API_KEY}`,
@@ -86,13 +91,19 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(publerBody),
     })
 
-    let publerPostId: string | null = null
-    if (publerRes.ok) {
-      const publerData = await publerRes.json()
-      publerPostId = publerData.id || publerData.post_id || null
+    if (!publerRes.ok) {
+      const errorText = await publerRes.text().catch(() => 'Unknown error')
+      console.error('[social/publish] Publer API error:', publerRes.status, errorText)
+      return NextResponse.json(
+        { error: `Publer API error: ${publerRes.status}`, detail: errorText },
+        { status: 502 }
+      )
     }
 
-    // Update draft status to 'posted'
+    const publerData = await publerRes.json()
+    const publerPostId = publerData.id || publerData.post_id || null
+
+    // Only update draft status to 'posted' after Publer confirms
     await supabase
       .from('social_drafts')
       .update({

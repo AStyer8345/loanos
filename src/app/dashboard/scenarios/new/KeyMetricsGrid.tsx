@@ -182,7 +182,6 @@ function MoreInfoModal({
                 {isPurchase && dataRow('Equity at 15 Years', rows.map(r => r.horizonAnalysis?.equity15yr ?? 0))}
                 {dataRow('Total Principal Paid', rows.map(r => r.horizonAnalysis?.principalPaid15yr ?? 0))}
                 {dataRow('Total PITI (180 payments)', rows.map(r => r.horizonAnalysis?.totalPITI15yr ?? 0))}
-                {dataRow('Total Interest & MI', rows.map(r => r.horizonAnalysis?.interestMIPaid15yr ?? 0))}
                 {totalRow('Net Savings vs. Baseline', netSavings15yr)}
               </tbody>
             </table>
@@ -231,7 +230,7 @@ function SavingsCard({
 
   return (
     <div
-      className="rounded-[14px] p-5 flex flex-col min-w-0 overflow-hidden"
+      className="rounded-[14px] p-5 flex flex-col min-w-0"
       style={{
         background: 'var(--sc-card)',
         border: `1px solid ${positive ? 'rgba(42,122,75,0.3)' : 'var(--sc-border)'}`,
@@ -241,7 +240,7 @@ function SavingsCard({
       <p className="text-[10px] font-medium uppercase tracking-wider mb-2 truncate" style={{ color: 'var(--sc-muted)' }}>
         {label}
       </p>
-      <p className="text-xl font-bold flex-1 break-words" style={{
+      <p className="text-base font-bold flex-1 whitespace-nowrap overflow-hidden text-ellipsis" style={{
         fontFamily: "'IBM Plex Mono', monospace",
         color: positive ? '#4CC98A' : 'var(--sc-text)',
       }}>
@@ -343,15 +342,6 @@ export default function KeyMetricsGrid({
     `See "More Info" for net figures.`,
   ].join('\n')
 
-  const interestNote = [
-    `Cumulative interest paid through`,
-    `month 180 (year 15) on the best`,
-    `performing scenario.`,
-    ``,
-    `From the amortization schedule —`,
-    `not total lifetime interest.`,
-  ].join('\n')
-
   const openModal = rows?.length ? () => setModalOpen(true) : undefined
 
   return (
@@ -359,7 +349,7 @@ export default function KeyMetricsGrid({
       <h3 className="text-sm font-semibold mb-4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
         Key Metrics — Best Scenario
       </h3>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0">
         <SavingsCard
           label="Monthly Savings"
           value={fmtCurrency(metrics.monthlySavings) + '/mo'}
@@ -383,12 +373,6 @@ export default function KeyMetricsGrid({
           mathNote={savings15yrNote}
           positive={hasSavings}
           onMoreInfo={openModal}
-        />
-        <SavingsCard
-          label="Interest at 15 Years"
-          value={fmtCurrency(metrics.interestAt15yrBest)}
-          subLabel="best option, through year 15"
-          mathNote={interestNote}
         />
       </div>
 

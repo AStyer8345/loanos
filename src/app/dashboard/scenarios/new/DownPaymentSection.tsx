@@ -1,18 +1,43 @@
 'use client'
 
+import { useState } from 'react'
 import type { PurchaseScenarioInput } from '@/lib/scenarios/types'
 
 // ─── Constants ──────────────────────────────────────────────────────
 
 const DOWN_PCTS = [3, 5, 10, 20] as const
 
-// PMI annual rate as % of loan amount, by LTV tier (conventional, estimated)
-function estimatePMIRate(ltv: number): number {
+// PMI annual rate as % of loan amount — MGIC-based estimates (borrower-paid monthly, 30-yr fixed)
+// Rows: credit score buckets (descending). Cols: LTV buckets [>80–85, >85–90, >90–95, >95–97]
+const PMI_RATES: Record<string, [number, number, number, number]> = {
+  '760': [0.15, 0.21, 0.30, 0.41],
+  '740': [0.19, 0.27, 0.38, 0.52],
+  '720': [0.25, 0.36, 0.50, 0.67],
+  '700': [0.32, 0.45, 0.63, 0.85],
+  '680': [0.39, 0.55, 0.76, 1.03],
+  '660': [0.46, 0.64, 0.90, 1.21],
+  '640': [0.57, 0.79, 1.10, 1.48],
+  '620': [0.67, 0.94, 1.31, 1.75],
+}
+
+const CREDIT_SCORE_BUCKETS = [
+  { label: '760+', key: '760' },
+  { label: '740–759', key: '740' },
+  { label: '720–739', key: '720' },
+  { label: '700–719', key: '700' },
+  { label: '680–699', key: '680' },
+  { label: '660–679', key: '660' },
+  { label: '640–659', key: '640' },
+  { label: '620–639', key: '620' },
+]
+
+function estimatePMIRate(ltv: number, creditScoreKey: string): number {
   if (ltv <= 80) return 0
-  if (ltv <= 85) return 0.55
-  if (ltv <= 90) return 0.70
-  if (ltv <= 95) return 0.90
-  return 1.10 // 95–97% LTV
+  const rates = PMI_RATES[creditScoreKey] ?? PMI_RATES['740']
+  if (ltv <= 85) return rates[0]
+  if (ltv <= 90) return rates[1]
+  if (ltv <= 95) return rates[2]
+  return rates[3] // 95–97% LTV
 }
 
 // Standard monthly P&I formula: M = P[r(1+r)^n]/[(1+r)^n-1]
@@ -68,6 +93,8 @@ interface DownPaymentSectionProps {
 }
 
 export default function DownPaymentSection({ purchaseScenarios, propertyValue }: DownPaymentSectionProps) {
+  const [creditScoreKey, setCreditScoreKey] = useState('740')
+
   const base = purchaseScenarios[0]
   if (!base) return null
 
@@ -80,7 +107,7 @@ export default function DownPaymentSection({ purchaseScenarios, propertyValue }:
     const loanAmt = purchasePrice - downAmt
     const ltv = (loanAmt / purchasePrice) * 100
     const pi = calcPI(loanAmt, base.interestRate, base.loanTerm)
-    const pmiRate = estimatePMIRate(ltv)
+    const pmiRate = estimatePMIRate(ltv, creditScoreKey)
     const pmiMonthly = pmiRate > 0 ? Math.round(loanAmt * pmiRate / 100 / 12) : 0
     const totalMonthly = pi + pmiMonthly + base.propertyTaxes + base.homeownersInsurance + base.hoa
     // Cash to close = down payment + closing costs already on scenario (net seller credits)
@@ -131,13 +158,39 @@ export default function DownPaymentSection({ purchaseScenarios, propertyValue }:
   return (
     <div className="rounded-[14px] overflow-hidden" style={{ border: '1px solid var(--sc-border)' }}>
       {/* Header */}
-      <div className="px-5 py-4" style={{ background: 'var(--sc-card)' }}>
-        <h3 className="text-sm font-semibold" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-          Down Payment Comparison
-        </h3>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
-          Same rate &amp; term at 4 down payment tiers — {base.interestRate.toFixed(3)}% · {base.loanTerm}-yr · {fmtCurrency(purchasePrice)}
-        </p>
+      <div className="px-5 py-4 flex flex-wrap items-start justify-between gap-3" style={{ background: 'var(--sc-card)' }}>
+        <div>
+          <h3 className="text-sm font-semibold" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+            Down Payment Comparison
+          </h3>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
+            Same rate &amp; term at 4 down payment tiers — {base.interestRate.toFixed(3)}% · {base.loanTerm}-yr · {fmtCurrency(purchasePrice)}
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <label style={{ fontSize: 10, color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace", whiteSpace: 'nowrap' }}>
+            Credit Score
+          </label>
+          <select
+            value={creditScoreKey}
+            onChange={e => setCreditScoreKey(e.target.value)}
+            style={{
+              background: 'var(--sc-card-alt)',
+              border: '1px solid var(--sc-border)',
+              borderRadius: 6,
+              padding: '3px 8px',
+              fontSize: 11,
+              color: 'var(--sc-text)',
+              fontFamily: "'IBM Plex Mono', monospace",
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {CREDIT_SCORE_BUCKETS.map(b => (
+              <option key={b.key} value={b.key}>{b.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div style={{ overflowX: 'auto' }}>
@@ -300,7 +353,7 @@ export default function DownPaymentSection({ purchaseScenarios, propertyValue }:
       {/* Compliance note */}
       <div className="px-5 py-3" style={{ background: 'var(--sc-card)', borderTop: '1px solid var(--sc-border)' }}>
         <p className="text-[10px] italic" style={{ color: 'var(--sc-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>
-          PMI rates are estimates based on LTV tier and will vary by lender, credit score, and loan type. PMI auto-cancels when the loan balance reaches 78% of the original purchase price (conventional only). FHA loans carry MIP for the life of the loan if down payment is &lt; 10%. All figures are illustrative — approval and eligibility subject to underwriting.
+          PMI rates are MGIC-based estimates for the selected credit score tier and LTV. Actual rates vary by lender, loan type, and full credit profile. PMI auto-cancels when the loan balance reaches 78% of the original purchase price (conventional only). FHA loans carry MIP for the life of the loan if down payment is &lt; 10%. All figures are illustrative — approval and eligibility subject to underwriting.
         </p>
       </div>
     </div>

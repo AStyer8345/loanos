@@ -180,3 +180,40 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Tier 2 item 2 (Down payment comparison) — ✅ COMPLETE this session
 
+
+---
+
+## AM Session — 2026-03-29 (scenarios-am)
+
+**What was built:**
+- Rent vs Own Analysis (`src/app/dashboard/scenarios/new/RentVsOwnSection.tsx`)
+  - Local state for monthly rent input — user types their current rent, all math recomputes live
+  - Break-even year hero stat in gold: "Break even in Year X" (or ">30 yrs" in red if it doesn't break even)
+  - 3-card monthly summary: Current Rent / Monthly PITI / Monthly Cost Difference (green if owning costs less, red if more)
+  - Year 5 / Year 10 / Year 15 wealth snapshot table:
+    - Renting: cumulative rent paid, $0 equity
+    - Owning: total PITI paid, equity built (down + principal + 3% annual appreciation), net owning cost
+    - Net advantage row: gold if owning wins, red if not — with "owning wins" label
+  - Assumes 3% annual appreciation — noted in compliance footer
+  - Returns null when purchase price / rate / loan amount = 0 (no render on empty form)
+  - Compliance note: illustrative only, no approval implication
+
+**MC gap closed:** Borrowers can now see the break-even year and wealth comparison without Adam manually running it in Mortgage Coach. Before: this required opening MC and building a separate scenario. After: enter rent → see "Break even in Year 7" in gold with a full 5/10/15-year wealth table.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `cfd695b` — pushed to main
+**Vercel:** `dpl_ps8xapEswJvZD1cbjyRfP1nLvoCy` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/RentVsOwnSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Email from builder (Tier 3 item 1) — send scenario share link directly from the results tab to the borrower's email. No n8n workflow needed — direct Supabase query for borrower email + Resend API call.
+2. ARM vs Fixed comparison — show initial savings of 5/1 ARM vs 30yr fixed with break-even year if rates rise
+3. Total cost of waiting — "What does waiting 6 months cost?" tool
+
+**Domain queue updates:**
+- Tier 2 item 3 (Rent vs Own) — ✅ COMPLETE this session
+

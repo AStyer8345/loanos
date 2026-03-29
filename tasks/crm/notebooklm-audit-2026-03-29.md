@@ -30,8 +30,30 @@
 | `https://setshape.com/mortgage` | Web | Shape CRM mortgage loan detail view — next domain topic (Loan Record UI sprint) |
 | `https://mortgageworkspace.com/blog/tracking-your-mortgage-pipeline-like-a-pro-integrating-across-systems-for-maximum-efficiency` | Web | Loan record organization best practices for mortgage LOs |
 
-## Net Change
+## Net Change (PM Session 1 — 07:55Z)
 
 | Before | After | Delta |
 |--------|-------|-------|
 | 47 sources | 46 sources | -4 removed, +3 added, LoanOS_System_Log re-added = net -1 |
+
+---
+
+## PM Session 2 Audit — 2026-03-29T17:02Z
+
+### Sources Removed
+| Source | Source ID | Reason |
+|--------|-----------|--------|
+| `https://setshape.com/mortgage` | `718378f9` | Error status — page failed to load; added in PM1 but never became ready |
+| `LoanOS_System_Log.md` (stale) | `97b95976` | Updated at 10:36Z by scenarios-pm session — refreshed below |
+
+### Sources Added
+| Source | ID | Reason |
+|--------|-----|--------|
+| `LoanOS_System_Log.md` (refreshed) | `e6cdea76` | Updated version (10:36Z — includes scenarios-pm entry) |
+| `https://www.zeitro.com/blog/best-crm-for-loan-officers` | `7705945b` | Loan record UI research — next sprint topic |
+| `https://www.thinkaidium.com/` | `d812e87b` | Aidium mortgage CRM — loan detail view patterns |
+
+### Net Change (PM2)
+| Before | After | Delta |
+|--------|-------|-------|
+| 46 sources | 46 sources | -2 removed (error + stale log), +3 added (refreshed log + 2 web) = net +1 |

@@ -939,3 +939,53 @@ Priority 1 (Research): Loan Record UI — Simplification Sprint Session 1
 Priority 2 (Quick verify): Confirm AK1fBcaX1cPcdlGx (Review Request Email) fires on Arive fund event — check current trigger vs. Adam's confirmed intent
 Priority 3 (Adam): Set Outlook credential on WF-R1 "Draft Thank-You to Realtor" node in n8n
 ---
+
+---
+## Session: 2026-03-29 PM2 — LoanOS CRM
+Focus: PUSH+CURATE — Loan Record UI prep + knowledge refresh (second PM session)
+Type: Maintenance / Knowledge Curation
+Triggered-by: Scheduled task `loanos-crm-pm` (17:02Z run)
+
+### Context
+Prior PM session (07:55Z) already ran PUSH+CURATE and sent the daily digest covering the Realtor Relationship System build. No new build sessions ran between 07:55Z and 17:02Z. This PM2 session performs a second PUSH+CURATE cycle focused on next-topic preparation.
+
+### Completed
+
+**Staleness Audit**
+- Error source removed: `setshape.com/mortgage` (ID: 718378f9 — status: error since PM1 added it)
+- LoanOS_System_Log.md refreshed — scenarios-pm had updated it at 10:36Z; re-synced to CRM Intelligence + Enterprise notebooks
+
+**Web Research Sweep — Loan Record UI Sprint Prep**
+- Topic: Loan Record UI — Simplification Sprint (Session 1 next)
+- Sources added: Zeitro best-CRM-for-loan-officers + Aidium mortgage CRM
+- Shape CRM blog: blocked by Cloudflare — not added
+- Web research file: `tasks/crm/web-research/2026-03-29-loan-record-ui-web.md`
+
+**Daily Digest:** SKIPPED — already sent at 07:55Z (019d39a6-1e97-baaa-4ef4-6ff490bfa30f)
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| NotebookLM sources | 46 | 46 | -2 removed, +3 added = net +1 |
+| Stale sources removed | — | 1 | -1 (error-status URL) |
+| Web sources added | — | 2 | +2 (Loan Record UI prep) |
+| System log synced | stale (10:36 update not in notebook) | current | ✅ |
+
+### Queue Position
+Current: Loan Record UI — Simplification Sprint (Session 1: Research + Audit — not yet started)
+Advance: NO (no build work this session)
+
+### Quality Ratings (1-5)
+Curation: 4
+
+### BLOCKERS
+None.
+
+### Next Session Instructions
+Priority 1 (Research): Loan Record UI — Simplification Sprint Session 1
+  - Research how leading mortgage CRMs structure loan detail views
+  - Audit current LoanOS loan record (read loan detail page code, list every field/section/tab)
+  - Propose Critical/Secondary/Archive information hierarchy
+  - Output: tasks/crm/loan-record-redesign-spec.md + flag in ADAM-TODO for review before Session 2 builds
+Priority 2 (Adam): Set Outlook credential on WF-R1 "Draft Thank-You to Realtor" node in n8n UI
+---

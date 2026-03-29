@@ -27,17 +27,21 @@ PHASE 2 — MULTI-TENANCY: COMPLETE ✅
 
 ---
 
-ACTIVE: Phase 3 — White-Label Options (Billing blocked) / Billing (when Stripe unblocked)
+ACTIVE: Phase 3 — White-Label Options (building) / Billing (when Stripe unblocked)
 
-  Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md
-  Decision: Fixed-tier billing (Starter free, Professional $99/mo). Per-seat deferred to Phase 5.
+  White-Label Options:
+    Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-29-phase3-whitelabel-spec.md
+    Build sequence (3 sessions):
+      Session 1: Branding Engine — migration 063, getBranding.ts, CSS var injection, branding settings page
+      Session 2: Subdomain Routing — middleware extension, getTenantFromHostname.ts, domain API
+      Session 3: Settings UI + polish — branding tab, entitlement gates, QA
+    ADAM DECISION NEEDED before Session 2:
+      - [ ] Confirm loanos.app DNS method (Vercel nameservers required for *.loanos.app wildcard)
 
-  Build sequence (3 sessions):
-    Session 1: Infrastructure — stripe package, migrations 057+058, entitlements helper
-    Session 2: Webhook + Checkout — webhook handler, checkout/portal routes, org/create modification
-    Session 3: UI + Polish — billing settings page, feature gating in components, upgrade prompts
-
-  ADAM ACTION REQUIRED before build can start:
+  Billing (blocked):
+    Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md
+    Decision: Fixed-tier billing (Starter free, Professional $99/mo). Per-seat deferred to Phase 5.
+    ADAM ACTION REQUIRED before build can start:
     - [ ] Create Stripe account (or use existing)
     - [ ] Create Product "LoanOS Professional" + Price $99/mo in Stripe Dashboard
     - [ ] Configure webhook endpoint: https://loanos.vercel.app/api/webhooks/stripe

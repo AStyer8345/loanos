@@ -20,7 +20,7 @@ import {
   Mail, Phone, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
-import { normalizeToStageKey } from '@/lib/constants/loan-stages'
+import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
 
 const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
@@ -669,19 +669,19 @@ export default function LoanDetailPage() {
             })()}
           </div>
 
-          {/* Row 3: Vital Signs — flat inline stats, no boxes */}
+          {/* Row 3: Vital Signs — color-coded inline stats */}
           <div className="flex items-center gap-6 text-sm font-mono pb-3 overflow-x-auto">
             {loan.loan_amount != null && (
-              <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} highlight />
+              <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
             )}
             {loan.interest_rate != null && (
-              <VitalStat label="Rate" value={fmtPct(loan.interest_rate)} highlight />
+              <VitalStat label="Rate" value={fmtPct(loan.interest_rate)} color="#4ADE80" />
             )}
             {loan.ltv != null && (
-              <VitalStat label="LTV" value={fmtPct(loan.ltv)} />
+              <VitalStat label="LTV" value={fmtPct(loan.ltv)} color="#A855F7" />
             )}
             {(loan.front_end_dti || loan.back_end_dti) && (
-              <VitalStat label="DTI" value={`${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}`} />
+              <VitalStat label="DTI" value={`${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}`} color="#F59E0B" />
             )}
             <VitalStatEditable
               label="Lock Exp"
@@ -727,26 +727,30 @@ export default function LoanDetailPage() {
           <PipelineProgressBar status={loan.status} />
         </div>
 
-        {/* Tab bar */}
+        {/* Tab bar — active tab uses loan status color */}
         <div className="px-6 flex gap-0 border-t border-zinc-800/40">
           {([
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length + inboundEmails.length})` },
-          ] as const).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-[11px] font-mono font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-zinc-100 text-zinc-100'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ] as const).map(tab => {
+            const tabHex = statusHex(loan.status)
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-[11px] font-mono font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'text-zinc-100'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+                style={activeTab === tab.id ? { borderBottomColor: tabHex } : undefined}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -808,6 +812,15 @@ export default function LoanDetailPage() {
 
 // ── Pipeline stepped milestone pills ───────────────────────────────────────────
 
+// Stage colors for the pipeline bar — maps each pipeline label to its hex from PIPELINE_STAGE_DEFS
+const PIPELINE_HEX: Record<string, string> = {
+  Application: '#60A5FA',   // blue
+  Processing:  '#D97706',   // amber
+  Underwriting: '#7C3AED',  // purple
+  CTC:         '#16A34A',   // green
+  Funding:     '#C9A84C',   // gold
+}
+
 function PipelineProgressBar({ status }: { status: string | null }) {
   const currentIdx = getStageIndex(status)
 
@@ -817,23 +830,26 @@ function PipelineProgressBar({ status }: { status: string | null }) {
         const done = i < currentIdx
         const active = i === currentIdx
         const isLast = i === PIPELINE_STAGES.length - 1
+        const hex = PIPELINE_HEX[stage] ?? '#52525B'
         return (
           <div key={stage} className="flex items-center">
             <span
-              className={`inline-flex items-center px-2.5 py-1 text-[10px] font-mono font-medium rounded-sm transition-all duration-200 ${
+              className="inline-flex items-center px-2.5 py-1 text-[10px] font-mono font-medium rounded-sm transition-all duration-200 border"
+              style={
                 active
-                  ? 'bg-[#C9A84C]/20 text-[#C9A84C] border border-[#C9A84C]/50'
+                  ? { background: `${hex}22`, color: hex, borderColor: `${hex}80` }
                   : done
-                  ? 'bg-[#C9A84C]/10 text-zinc-400 border border-[#C9A84C]/20'
-                  : 'bg-zinc-800/40 text-zinc-600 border border-zinc-700/50'
-              }`}
+                  ? { background: `${hex}15`, color: `${hex}AA`, borderColor: `${hex}30` }
+                  : { background: 'rgba(39,39,42,0.4)', color: '#52525b', borderColor: 'rgba(63,63,70,0.5)' }
+              }
             >
               {stage}
             </span>
             {!isLast && (
               <ChevronRight
                 size={10}
-                className={`mx-0.5 shrink-0 ${done ? 'text-[#C9A84C]/40' : 'text-zinc-700'}`}
+                className="mx-0.5 shrink-0"
+                style={{ color: done ? `${hex}66` : '#3f3f46' }}
               />
             )}
           </div>
@@ -845,11 +861,17 @@ function PipelineProgressBar({ status }: { status: string | null }) {
 
 // ── Vital stat helpers (header) ────────────────────────────────────────────────
 
-function VitalStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function VitalStat({ label, value, highlight, color }: { label: string; value: string; highlight?: boolean; color?: string }) {
   return (
     <div className="shrink-0">
       <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
-      <p className={`text-sm font-mono font-semibold leading-none ${highlight ? 'text-zinc-100' : 'text-zinc-300'}`}>{value}</p>
+      <p
+        className="text-sm font-mono font-semibold leading-none"
+        style={color ? { color } : undefined}
+      >
+        {!color && <span className={highlight ? 'text-zinc-100' : 'text-zinc-300'}>{value}</span>}
+        {color && value}
+      </p>
     </div>
   )
 }
@@ -1097,17 +1119,28 @@ function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRo
     }
   }
 
+  // Role-specific colors for party cards
+  const ROLE_HEX: Record<string, string> = {
+    'Borrower':        '#60A5FA',  // blue
+    'Co-Borrower':     '#818CF8',  // indigo
+    "Buyer's Agent":   '#4ADE80',  // green
+    'Listing Agent':   '#F59E0B',  // amber
+    'Title':           '#A855F7',  // purple
+    'Referring Agent': '#C9A84C',  // gold
+  }
+
   return (
     <div>
       <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Parties</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {parties.map(p => {
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
+          const roleHex = ROLE_HEX[p.role] ?? '#6B7280'
           return (
-            <div key={p.role} className="group">
+            <div key={p.role} className="group rounded-lg p-2.5 border border-zinc-800/60 hover:border-zinc-700 transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
               {/* Name + Role */}
               <div className="mb-2">
-                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide leading-none">{p.role}</p>
+                <p className="text-[10px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
                 {p.contactId ? (
                   <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-zinc-100 hover:text-zinc-300 transition-colors truncate block mt-0.5">
                     {p.name || '—'}
@@ -1117,13 +1150,16 @@ function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRo
                 )}
               </div>
 
-              {/* Action icons — inline, always visible */}
+              {/* Action icons — colored on hover */}
               <div className="flex items-center gap-1.5 mb-1.5">
                 {p.phone && (
                   <a
                     href={`tel:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
+                    style={{ ['--hover-bg' as string]: roleHex }}
                     title={`Call ${fmtPhone(p.phone)}`}
+                    onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
+                    onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
                     <Phone size={11} />
                   </a>
@@ -1131,8 +1167,10 @@ function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRo
                 {p.phone && (
                   <a
                     href={`sms:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
                     title={`Text ${fmtPhone(p.phone)}`}
+                    onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
+                    onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
                     <MessageSquare size={11} />
                   </a>
@@ -1140,8 +1178,10 @@ function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRo
                 {p.email && (
                   <a
                     href={`mailto:${p.email}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
                     title={`Email ${p.email}`}
+                    onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
+                    onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
                     <Mail size={11} />
                   </a>
@@ -1240,13 +1280,13 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
   const [editValue, setEditValue] = useState('')
 
   const dates = [
-    { label: 'Application', field: 'application_date', value: loan.application_date },
-    { label: 'Submission', field: 'submission_date', value: loan.submission_date },
-    { label: 'Approval', field: 'approval_date', value: loan.approval_date },
-    { label: 'Est. Close', field: 'estimated_closing_date', value: loan.estimated_closing_date },
-    { label: 'Rate Lock', field: 'rate_lock_date', value: loan.rate_lock_date },
-    { label: 'Lock Expiry', field: 'rate_lock_expiration', value: loan.rate_lock_expiration },
-    { label: 'Funded', field: 'funding_date', value: loan.funding_date },
+    { label: 'Application', field: 'application_date', value: loan.application_date, hex: '#60A5FA' },
+    { label: 'Submission', field: 'submission_date', value: loan.submission_date, hex: '#7C3AED' },
+    { label: 'Approval', field: 'approval_date', value: loan.approval_date, hex: '#0891B2' },
+    { label: 'Est. Close', field: 'estimated_closing_date', value: loan.estimated_closing_date, hex: '#F59E0B' },
+    { label: 'Rate Lock', field: 'rate_lock_date', value: loan.rate_lock_date, hex: '#4ADE80' },
+    { label: 'Lock Expiry', field: 'rate_lock_expiration', value: loan.rate_lock_expiration, hex: '#EF4444' },
+    { label: 'Funded', field: 'funding_date', value: loan.funding_date, hex: '#C9A84C' },
   ]
 
   const handleSave = (field: string) => {
@@ -1260,7 +1300,10 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
       <div className="space-y-0">
         {dates.map(d => (
           <div key={d.field} className="flex items-center justify-between gap-3 py-2 border-b border-zinc-800/30 last:border-0 group">
-            <span className="text-[11px] font-mono text-zinc-500">{d.label}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: d.value ? d.hex : '#3f3f46' }} />
+              <span className="text-[11px] font-mono" style={{ color: d.value ? d.hex : '#71717a' }}>{d.label}</span>
+            </div>
             {editing === d.field ? (
               <input
                 autoFocus
@@ -1273,10 +1316,11 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
               />
             ) : (
               <span
-                className="text-xs font-mono text-zinc-300 cursor-pointer hover:text-zinc-100 transition-colors"
+                className="text-xs font-mono cursor-pointer hover:text-zinc-100 transition-colors"
+                style={{ color: d.value ? '#e4e4e7' : '#3f3f46' }}
                 onClick={() => { setEditValue(d.value ?? ''); setEditing(d.field) }}
               >
-                {fmtDate(d.value) || <span className="text-zinc-700">—</span>}
+                {fmtDate(d.value) || '—'}
               </span>
             )}
           </div>
@@ -2256,19 +2300,27 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact, onReassignC
 function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: ActivityRow[] }) {
   const currentKey = normalizeToStageKey(loan.status)
 
+  // Hex colors per milestone stage
+  const MILESTONE_HEX: Record<StageKey, string> = {
+    lead: '#6B7280', new_application: '#60A5FA', pre_approval: '#818CF8',
+    setup: '#64748B', disclosed: '#7C3AED', submitted: '#2563EB',
+    approved: '#0891B2', resubmit: '#D97706', underwriting: '#0E7490',
+    processing: '#D97706', clear_to_close: '#16A34A', funded: '#C9A84C',
+  }
+
   // Each milestone maps to a canonical StageKey — complete when loan has reached or passed that stage
-  const milestones: { label: string; date: string | null; est?: string | null; reachedAt: StageKey; activeAt: StageKey; notifyLabel?: string }[] = [
-    { label: 'Application',               date: loan.application_date,      reachedAt: 'new_application', activeAt: 'new_application' },
-    { label: 'Disclosures (LE)',           date: null,                       reachedAt: 'disclosed',       activeAt: 'setup' },
-    { label: 'Processing',                date: loan.submission_date,       reachedAt: 'processing',      activeAt: 'disclosed', notifyLabel: 'Agents notified' },
-    { label: 'Underwriting',              date: null,                       reachedAt: 'submitted',       activeAt: 'processing', notifyLabel: 'Agents notified' },
-    { label: 'Approved w/ Cond.',          date: loan.approval_date,         reachedAt: 'approved',        activeAt: 'submitted', notifyLabel: 'Agents notified' },
-    { label: 'CTC',                        date: null,                       reachedAt: 'clear_to_close',  activeAt: 'approved', notifyLabel: 'Agents notified' },
+  const milestones: { label: string; date: string | null; est?: string | null; reachedAt: StageKey; activeAt: StageKey; notifyLabel?: string; hex: string }[] = [
+    { label: 'Application',               date: loan.application_date,      reachedAt: 'new_application', activeAt: 'new_application', hex: MILESTONE_HEX.new_application },
+    { label: 'Disclosures (LE)',           date: null,                       reachedAt: 'disclosed',       activeAt: 'setup', hex: MILESTONE_HEX.disclosed },
+    { label: 'Processing',                date: loan.submission_date,       reachedAt: 'processing',      activeAt: 'disclosed', notifyLabel: 'Agents notified', hex: MILESTONE_HEX.processing },
+    { label: 'Underwriting',              date: null,                       reachedAt: 'submitted',       activeAt: 'processing', notifyLabel: 'Agents notified', hex: MILESTONE_HEX.submitted },
+    { label: 'Approved w/ Cond.',          date: loan.approval_date,         reachedAt: 'approved',        activeAt: 'submitted', notifyLabel: 'Agents notified', hex: MILESTONE_HEX.approved },
+    { label: 'CTC',                        date: null,                       reachedAt: 'clear_to_close',  activeAt: 'approved', notifyLabel: 'Agents notified', hex: MILESTONE_HEX.clear_to_close },
     { label: 'Closing Docs',               date: null,                       reachedAt: 'clear_to_close',  activeAt: 'clear_to_close',
-      est: loan.estimated_closing_date },
+      est: loan.estimated_closing_date, hex: MILESTONE_HEX.clear_to_close },
     { label: 'Funded',
       date: loan.funding_date || loan.closing_date,                         reachedAt: 'funded',          activeAt: 'clear_to_close',
-      est: loan.closing_date || loan.estimated_closing_date },
+      est: loan.closing_date || loan.estimated_closing_date, hex: MILESTONE_HEX.funded },
   ]
 
   // Check if agents were notified for a milestone by looking at activity log
@@ -2312,24 +2364,33 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
           return (
             <div key={m.label} className="contents">
               <div className="flex flex-col items-center shrink-0 w-[5rem] sm:w-[5.5rem] px-0.5">
-                {/* Indicator */}
+                {/* Indicator — stage-colored */}
                 <div className="flex justify-center mb-1.5">
                   {isComplete ? (
-                    <div className="w-5 h-5 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
-                      <Check size={10} className="text-zinc-900" strokeWidth={3} />
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: m.hex }}
+                    >
+                      <Check size={10} className="text-white" strokeWidth={3} />
                     </div>
                   ) : isActive ? (
-                    <div className="w-5 h-5 rounded-full border-2 border-zinc-100 flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-100 animate-pulse" />
+                    <div
+                      className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                      style={{ borderColor: m.hex }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: m.hex }} />
                     </div>
                   ) : (
                     <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
                   )}
                 </div>
-                {/* Label */}
-                <p className={`text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
-                  isComplete ? 'text-zinc-200' : isActive ? 'text-zinc-300' : 'text-zinc-600'
-                }`}>
+                {/* Label — colored when complete/active */}
+                <p
+                  className={`text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
+                    isPending ? 'text-zinc-600' : ''
+                  }`}
+                  style={isComplete ? { color: m.hex } : isActive ? { color: m.hex } : undefined}
+                >
                   {m.label}
                 </p>
                 {/* Sub-line: date or status */}
@@ -2351,7 +2412,8 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
               </div>
               {i < milestones.length - 1 && (
                 <div
-                  className={`shrink-0 self-start mt-[9px] h-px w-2 sm:w-3 ${isComplete ? 'bg-zinc-500' : 'bg-zinc-800'}`}
+                  className="shrink-0 self-start mt-[9px] h-px w-2 sm:w-3"
+                  style={{ background: isComplete ? `${m.hex}66` : '#27272a' }}
                 />
               )}
             </div>

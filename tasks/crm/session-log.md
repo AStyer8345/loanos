@@ -710,3 +710,95 @@ Priority 3: Review `referred_by` text-to-UUID FK migration strategy (key data in
 - `buyer_agent_contact_id` populated on only 3.5% of loans — realtor production tracking is broken for 94% of loan history
 - `realtor_stage` column: 100% NULL — relationship lifecycle untracked for all 1,060 realtors
 ---
+
+---
+## Session: 2026-03-29 AM — LoanOS CRM
+Focus: Realtor Relationship System — Architecture Spec
+Type: Strategy (Sequence B — Architect)
+
+### Trigger
+Adam answered all 7 Realtor Relationship System questions on 2026-03-28 at 18:45Z.
+All decisions received — realtor builder fully unblocked.
+
+### Completed
+
+**NotebookLM PULL** — pull report at `tasks/crm/notebooklm-pull-2026-03-29.md`
+
+**Architecture Spec: Realtor Relationship System** — `tasks/crm/specs/2026-03-29-realtor-relationship-spec.md`
+
+Full spec includes:
+- **Migration 061** — 9 new columns on `contacts`:
+  `referred_by_contact_id` (UUID FK), `referral_ytd_count`, `referral_lifetime_count`,
+  `last_referral_date`, `deals_ytd_count`, `deals_lifetime_count`, `last_deal_closed_date`,
+  `last_outreach_date`, `referral_source_notes`
+  Plus 1 new column on `loans`: `referral_contact_id` (UUID FK)
+- **last_touch_at auto-trigger** — PostgreSQL function + AFTER INSERT trigger on activity_log
+  Updates `contacts.last_touch_at` on every activity log entry for that contact
+- **Boolean deprecation path** — full sequence: remove from import API → update production_tier
+  mapping in CSV import → run npm build → DROP COLUMN top_realtor/target_realtor → regen types
+- **6 DML backfill operations** — referred_by_contact_id text→UUID match, referral_lifetime_count,
+  referral_ytd_count, last_referral_date, Crystal Kilpatrick tier A, realtor_stage for tiered contacts,
+  deals_lifetime_count + last_deal_closed_date from loans
+- **4 new smart lists** — Due for Outreach (60+ days), Top Producers (YTD ≥2), Tier A Not This Month,
+  Active Deal Partners (proxy: deals_ytd > 0)
+- **WF-R1: Referral Thank-You** — node map for extending J9Pe24vUi6fpZtdZ (Pre-Approval Lead Notify):
+  5 new nodes (Check Has Referral → Fetch Realtor → Check Found → Build Email → Draft in Outlook → Log)
+- **TypeScript type additions** for all new fields in contacts/page.tsx
+- **Verification checklist** — SQL queries Builder/QA runs to confirm all changes applied
+
+### What Was Not Built (Deferred)
+- WF-R2 (Loan Milestone Update to Realtor) — gated on buyer_agent_contact_id population (3.5% today)
+- WF-R3 (Rate Update to Realtors) — integrates with existing Mailchimp; deferred
+- WF-R4 through WF-R8 — medium/low priority
+- "Active Deal Partners" smart list via SQL JOIN — needs Supabase RPC approach
+
+### HIGH RISK Notes
+1. **Boolean drop sequence** — `top_realtor`/`target_realtor` columns have live code references in
+   `src/app/api/import/contacts/route.ts` and `src/lib/database.types.ts`. Builder MUST remove code
+   references and pass npm build BEFORE running DROP COLUMN. Spec includes the exact sequence.
+2. **Backfill dry-run** — referred_by text→UUID match must be previewed (count check) before applying.
+   Expected: 300–800 matched records. Abort if count is unexpectedly low (<100) or high (>2000).
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| Contacts in LoanOS | 2,376 | 2,376 | 0 (spec only) |
+| Realtor contacts with spec'd fields | 0 | 1,060 (pending migration) | +1,060 (pending) |
+| Architecture specs written | 3 | 4 | +1 |
+| Smart lists specced | existing | +4 new | +4 |
+| WF-R workflows specced | 0 | 1 (WF-R1) | +1 |
+
+### Queue Position
+Current: Realtor Relationship System — spec COMPLETE, ready for Builder to execute
+Next: Builder executes migration 061 + smart lists + WF-R1
+Secondary: Automation Coverage Audit builder sequence (all 4 Adam questions answered — also unblocked)
+Advance queue: NO — execution pending (next session)
+
+### Quality Ratings (1-5)
+Research: N/A (done prior session) | Strategy: 5 | Execution: N/A | Review: N/A | QA: N/A
+
+### BLOCKERS
+None — spec is self-contained. Builder can proceed immediately.
+
+### Next Session Instructions
+Priority 1 (Builder — ready now): Execute migration 061 — follow spec exactly:
+  1. Apply DDL (new columns + trigger) via Supabase MCP `apply_migration`
+  2. Backfill all 6 DML operations (dry-run count check first)
+  3. Remove top_realtor/target_realtor from import API → run npm build
+  4. Apply DROP COLUMN → regenerate database.types.ts → run npm build again
+  5. Add 4 smart lists to contacts/page.tsx
+  6. Modify J9Pe24vUi6fpZtdZ to add WF-R1 referral thank-you logic
+  Spec: tasks/crm/specs/2026-03-29-realtor-relationship-spec.md
+
+Priority 2 (Builder — also unblocked): Automation Coverage gaps:
+  - Drip enrollment is MANUAL (no auto-wire needed per Adam)
+  - Review Request: already live (AK1fBcaX1cPcdlGx) and fires via scheduled Supabase query; Adam said trigger = Arive fund event. Investigate current trigger and update if needed.
+  - Rate watch: defer (compare to rate update email — needs rate update email pipeline first)
+  Priority builder action: Verify AK1fBcaX1cPcdlGx trigger timing matches "Arive fund event"
+
+Priority 3 (next research): Smart Lists + Segmentation — next domain-queue item, no Adam decisions needed
+
+### Data Integrity Status
+- Contacts: 2,376 | schema clean post-migration 060 | production_tier: 120 tiered (117 + Crystal pending)
+- Realtor stage: 0 populated (changes pending Builder executing migration 061)
+- referred_by_contact_id: 0 populated (changes pending Builder executing migration 061)

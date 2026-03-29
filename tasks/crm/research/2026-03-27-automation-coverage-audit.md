@@ -210,3 +210,5 @@ LoanOS has solid automation coverage for the top of funnel (lead intake, referra
 | 4 | Rate watch source | Compare against rate update email Adam already sends |
 
 **Status:** 3 of 4 answered. Q2 (WF2 architecture) still pending Adam's response.
+
+**Q2 ANSWERED — 2026-03-28 (follow-up):** Arive already sends borrower milestone emails — keep using Arive for that. Do NOT add milestone emails to WF2 or build separate milestone workflows. WF2 remains a data sync only. The automation build focuses on gaps Arive doesn't cover: drip, review request, rate watch.

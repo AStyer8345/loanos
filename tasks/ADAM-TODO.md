@@ -18,6 +18,5 @@
 - [ ] [CRM] 2026-03-26 — Answer 8 contact schema questions in `tasks/crm/research/2026-03-25-contact-data-architecture.md` — these gate the Contact Data Architecture spec and all smart list / schema improvements
 - [x] [CRM] 2026-03-26 — Confirm email_opt_out is enforced in n8n milestone email workflows — FIXED 2026-03-26 AM session: enforcement now in milestone route.ts
 - [x] [CRM] 2026-03-26 — Answer 5 loan pipeline questions — ANSWERED 2026-03-27: sort=closing date, active=app_received→closing_scheduled, rate lock=yes in Arive+add closing_date to webhook, Janie=Arive only, Kanban=yes build it
-- [ ] [CRM] 2026-03-28 — Answer 1 remaining automation question: WF2 architecture — add outbound milestone emails to WF2 (the Arive sync workflow), or build separate milestone-triggered workflows? Option A = simpler, all in one place. Option B = cleaner separation, emails easier to edit independently. (Q1 drip=manual, Q3 review=Arive fund event, Q4 rate=compare to rate update email — already answered 2026-03-28)
-- [x] [CRM] 2026-03-27 — Answer 4 automation coverage questions — PARTIALLY ANSWERED 2026-03-28: drip=manual, review=Arive fund, rate=compare to rate update email. WF2 architecture still pending.
+- [x] [CRM] 2026-03-27 — Answer 4 automation coverage questions — FULLY ANSWERED 2026-03-28: drip=manual, WF2=Arive handles milestone emails (no change to WF2), review=Arive fund event, rate=compare to rate update email. Automation builder UNBLOCKED.
 

@@ -27,7 +27,7 @@ PHASE 2 — MULTI-TENANCY: COMPLETE ✅
 
 ---
 
-ACTIVE: Phase 3 — Billing + Subscriptions
+ACTIVE: Phase 3 — White-Label Options (Billing blocked) / Billing (when Stripe unblocked)
 
   Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md
   Decision: Fixed-tier billing (Starter free, Professional $99/mo). Per-seat deferred to Phase 5.
@@ -71,6 +71,8 @@ QUEUE (Phase 3 build sequence):
 COMPLETED:
 - Phase 1: Full core CRM + automations ✅
 - Phase 2: Multi-tenancy RLS + onboarding ✅ (pending 5 items above)
+- Phase 3: Tenant Admin MVP ✅ (2026-03-27)
+- Phase 3: LO Onboarding Flow ✅ (2026-03-28 — all 3 sessions)
 - Chat v4 with attachments, voice, AI extraction ✅
 - Scenario Builder with branded PDF ✅
 - Performance + reporting pages ✅

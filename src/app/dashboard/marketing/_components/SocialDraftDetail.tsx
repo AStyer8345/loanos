@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 
 const GOLD = '#C9A84C'
@@ -288,6 +289,51 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   const [slideIndex, setSlideIndex] = useState(0)
   const mediaScrollRef = useRef<HTMLDivElement>(null)
 
+  // Signed URLs for media (bucket is authenticated, raw URLs don't work)
+  const [signedMediaUrls, setSignedMediaUrls] = useState<string[]>([])
+
+  useEffect(() => {
+    const urls = draft.media_urls
+    if (!urls || urls.length === 0) {
+      setSignedMediaUrls([])
+      return
+    }
+
+    let cancelled = false
+    async function resolveUrls() {
+      const supabase = createClient()
+      const resolved: string[] = []
+      for (const urlOrPath of urls!) {
+        // If it's already a signed URL or external URL, use as-is
+        if (urlOrPath.includes('token=') || !urlOrPath.includes('supabase') && urlOrPath.startsWith('http') && !urlOrPath.includes('/storage/v1/')) {
+          resolved.push(urlOrPath)
+          continue
+        }
+        // Extract the storage path from a full Supabase URL or use as bare path
+        let storagePath = urlOrPath
+        const storageIdx = urlOrPath.indexOf('/storage/v1/object/')
+        if (storageIdx !== -1) {
+          // Format: .../storage/v1/object/public/documents/path or .../authenticated/documents/path
+          const afterStorage = urlOrPath.substring(storageIdx + '/storage/v1/object/'.length)
+          // Remove "public/documents/" or "authenticated/documents/" prefix
+          storagePath = afterStorage.replace(/^(public|authenticated)\/documents\//, '')
+        }
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(storagePath, 3600)
+        if (!error && data?.signedUrl) {
+          resolved.push(data.signedUrl)
+        } else {
+          // Fallback — use original URL (may still be broken but better than nothing)
+          resolved.push(urlOrPath)
+        }
+      }
+      if (!cancelled) setSignedMediaUrls(resolved)
+    }
+    resolveUrls()
+    return () => { cancelled = true }
+  }, [draft.media_urls])
+
   // Reset edit state when draft changes
   const [prevId, setPrevId] = useState(draft.id)
   if (draft.id !== prevId) {
@@ -458,7 +504,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
         </div>
 
         {/* Media preview */}
-        {draft.media_urls && draft.media_urls.length > 0 && (
+        {signedMediaUrls.length > 0 && (
           <div>
             <div
               className="font-bold mb-2"
@@ -467,15 +513,15 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
               MEDIA
             </div>
 
-            {draft.media_urls.length === 1 ? (
+            {signedMediaUrls.length === 1 ? (
               // Single media — full width
               <div
                 className="rounded-md border border-zinc-800 overflow-hidden"
                 style={{ background: '#111118' }}
               >
-                {isVideo(draft.media_urls[0]) ? (
+                {isVideo(signedMediaUrls[0]) ? (
                   <video
-                    src={draft.media_urls[0]}
+                    src={signedMediaUrls[0]}
                     controls
                     className="w-full"
                     style={{ maxHeight: 300, objectFit: 'contain', background: '#000' }}
@@ -483,7 +529,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={draft.media_urls[0]}
+                    src={signedMediaUrls[0]}
                     alt="Post media"
                     className="w-full"
                     style={{ maxHeight: 300, objectFit: 'contain' }}
@@ -498,7 +544,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                   className="flex gap-2 overflow-x-auto rounded-md border border-zinc-800 p-2"
                   style={{ background: '#111118', scrollBehavior: 'smooth' }}
                 >
-                  {draft.media_urls.map((url, i) => (
+                  {signedMediaUrls.map((url, i) => (
                     <div
                       key={i}
                       className="flex-shrink-0 rounded overflow-hidden border"
@@ -542,11 +588,11 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                 </button>
                 <button
                   onClick={() => {
-                    const next = Math.min((draft.media_urls?.length ?? 1) - 1, mediaIndex + 1)
+                    const next = Math.min(signedMediaUrls.length - 1, mediaIndex + 1)
                     setMediaIndex(next)
                     mediaScrollRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
                   }}
-                  disabled={mediaIndex === (draft.media_urls?.length ?? 1) - 1}
+                  disabled={mediaIndex === signedMediaUrls.length - 1}
                   className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
                   style={{ background: '#09090bCC', color: '#fff', border: '1px solid #3f3f46' }}
                 >
@@ -558,7 +604,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                   className="text-center mt-1.5 font-bold"
                   style={{ color: '#71717a', fontSize: 10, letterSpacing: '0.1em' }}
                 >
-                  {mediaIndex + 1} / {draft.media_urls.length}
+                  {mediaIndex + 1} / {signedMediaUrls.length}
                 </div>
               </div>
             )}

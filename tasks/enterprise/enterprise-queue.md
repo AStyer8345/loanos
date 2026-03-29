@@ -50,6 +50,12 @@ ACTIVE: Phase 3 — White-Label Options (building) / Billing (when Stripe unbloc
 ---
 
 QUEUE (Phase 3 build sequence):
+- Enterprise Social Media (multi-tenant customization)
+    Architecture spec COMPLETE: tasks/enterprise/specs/2026-03-29-enterprise-social-media-spec.md
+    5 components: Voice Guide Wizard, Content Pillar Picker, Platform Connections (Publer per-org),
+    Compliance Profile, Auto-Generate Starter Posts. ~6 hours across 2-3 sessions.
+    Goal: New LO goes from zero to voice guide + 7 draft posts in <15 minutes.
+    Build sequence: Migration → Data seed → Platform connections → Compliance → Pillars → Wizard → Batch gen
 - Billing + Subscriptions
     Stripe webhook setup. Plan tier enforcement (starter/pro/enterprise).
     Subscription management page. Failed payment handling. Usage metering.

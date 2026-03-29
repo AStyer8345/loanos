@@ -26,11 +26,21 @@ const PLATFORMS = ['Instagram', 'LinkedIn', 'Facebook', 'All'] as const
 const FORMATS = ['Single Image', 'Carousel', 'Video', 'Reel Script', 'Text Only'] as const
 const CLAUDE_FORMAT = '\u2728 Let Claude Decide' as const
 
+/** Map display format names to DB-compatible snake_case values */
+const FORMAT_TO_DB: Record<string, string> = {
+  'Single Image': 'single_image',
+  'Carousel': 'carousel',
+  'Video': 'video',
+  'Reel Script': 'reel_script',
+  'Text Only': 'text_only',
+}
+
 export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
   const [prompt, setPrompt] = useState('')
   const [platform, setPlatform] = useState<string>('All')
   const [format, setFormat] = useState<string | null>(null) // null = let Claude decide
   const [loading, setLoading] = useState(false)
+  const [generateError, setGenerateError] = useState<string | null>(null)
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -72,14 +82,20 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           continue
         }
 
-        const { data: urlData } = supabase.storage
+        // Generate a signed URL (bucket is authenticated, getPublicUrl won't work)
+        const { data: signedData, error: signError } = await supabase.storage
           .from('documents')
-          .getPublicUrl(storagePath)
+          .createSignedUrl(storagePath, 3600) // 1 hour expiry for preview
+
+        if (signError || !signedData?.signedUrl) {
+          setUploadError(`Could not generate preview URL: ${signError?.message || 'Unknown'}`)
+          continue
+        }
 
         uploaded.push({
           name: file.name,
           path: storagePath,
-          url: urlData.publicUrl,
+          url: signedData.signedUrl,
           size: file.size,
           type: file.type,
         })
@@ -108,8 +124,12 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
   async function handleGenerate() {
     if (!prompt.trim()) return
     setLoading(true)
+    setGenerateError(null)
 
-    const mediaUrls = files.length > 0 ? files.map((f) => f.url) : undefined
+    // Store storage paths (not URLs) — bucket is authenticated
+    const mediaPaths = files.length > 0 ? files.map((f) => f.path) : undefined
+    // Map format display name to DB-compatible value
+    const dbFormat = format ? FORMAT_TO_DB[format] || null : null
 
     try {
       const res = await fetch('/api/chat/social', {
@@ -119,13 +139,22 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           messages: [{ role: 'user', content: prompt }],
           compose: true,
           platform: platform.toLowerCase(),
-          format,
-          mediaUrls,
+          format: dbFormat,
+          mediaUrls: mediaPaths,
         }),
       })
 
-      if (!res.ok) throw new Error('Generate failed')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        setGenerateError(errData.error || `Generate failed (${res.status})`)
+        return
+      }
       const data = await res.json()
+
+      if (data.error) {
+        setGenerateError(data.error)
+        return
+      }
 
       if (data.draftId) {
         // Fetch the full draft to pass back
@@ -143,12 +172,12 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
         onDraftCreated({
           id: data.draftId,
           platform: platform.toLowerCase(),
-          format,
+          format: dbFormat,
           pillar: null,
           title: data.message?.content?.split('\n')[0]?.slice(0, 40) || 'Untitled post',
           content: data.message?.content || '',
           hashtags: null,
-          media_urls: mediaUrls || null,
+          media_urls: mediaPaths || null,
           status: 'draft',
           scheduled_for: null,
           agent_notes: 'Created via compose mode',
@@ -157,9 +186,11 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
+      } else {
+        setGenerateError('Post was generated but could not be saved. Try again.')
       }
-    } catch {
-      // Silently fail — user sees no change
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : 'Network error — could not reach server')
     } finally {
       setLoading(false)
     }
@@ -354,6 +385,16 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Generate error */}
+      {generateError && (
+        <div
+          className="rounded-sm px-3 py-2 text-xs font-bold"
+          style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
+        >
+          {generateError}
+        </div>
+      )}
 
       {/* Generate button */}
       <div className="pt-4">

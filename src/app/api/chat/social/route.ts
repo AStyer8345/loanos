@@ -113,12 +113,20 @@ export async function POST(req: NextRequest) {
     if (compose) {
       const title = text.split('\n')[0]?.slice(0, 40) || 'Untitled post'
 
-      const { data: newDraft } = await supabase
+      // Validate format against DB check constraint
+      const VALID_FORMATS = ['single_image', 'carousel', 'video', 'reel_script', 'text_only']
+      const safeFormat = format && VALID_FORMATS.includes(format) ? format : null
+
+      // Validate platform
+      const VALID_PLATFORMS = ['instagram', 'linkedin', 'facebook', 'all']
+      const safePlatform = platform && VALID_PLATFORMS.includes(platform) ? platform : 'all'
+
+      const { data: newDraft, error: insertError } = await supabase
         .from('social_drafts')
         .insert({
           organization_id: organizationId,
-          platform: platform || 'all',
-          format: format || null,
+          platform: safePlatform,
+          format: safeFormat,
           title,
           content: text,
           media_urls: mediaUrls?.length ? mediaUrls : null,
@@ -128,6 +136,14 @@ export async function POST(req: NextRequest) {
         })
         .select('id')
         .single()
+
+      if (insertError) {
+        console.error('[chat/social] Draft insert error:', insertError)
+        return NextResponse.json({
+          error: `Failed to save draft: ${insertError.message}`,
+          message: assistantMessage,
+        }, { status: 500 })
+      }
 
       return NextResponse.json({
         message: assistantMessage,

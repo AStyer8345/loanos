@@ -19,6 +19,7 @@ import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
 import BuydownSection from './BuydownSection'
 import DownPaymentSection from './DownPaymentSection'
+import RentVsOwnSection from './RentVsOwnSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
@@ -526,6 +527,14 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                       {/* ── Down Payment Comparison (purchase only) ── */}
                       {displayData.mode === 'purchase' && (
                         <DownPaymentSection
+                          purchaseScenarios={purchaseScenarios}
+                          propertyValue={propertyValue}
+                        />
+                      )}
+
+                      {/* ── Rent vs. Own Analysis (purchase only) ── */}
+                      {displayData.mode === 'purchase' && (
+                        <RentVsOwnSection
                           purchaseScenarios={purchaseScenarios}
                           propertyValue={propertyValue}
                         />

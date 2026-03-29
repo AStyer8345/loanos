@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { messages, draftId, compose, platform, format } = await req.json()
+    const { messages, draftId, compose, platform, format, mediaUrls } = await req.json()
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Messages array required' }, { status: 400 })
@@ -121,6 +121,7 @@ export async function POST(req: NextRequest) {
           format: format || null,
           title,
           content: text,
+          media_urls: mediaUrls?.length ? mediaUrls : null,
           status: 'draft',
           created_by: 'user',
           agent_notes: 'Created via compose mode',

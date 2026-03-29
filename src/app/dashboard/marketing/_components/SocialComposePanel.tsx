@@ -1,9 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 
 const GOLD = '#C9A84C'
+const ACCEPTED_TYPES = 'image/*,video/*'
+const MAX_FILES = 10
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
+
+type UploadedFile = {
+  name: string
+  path: string
+  url: string
+  size: number
+  type: string
+}
 
 type Props = {
   onDraftCreated: (draft: SocialDraft) => void
@@ -19,10 +31,85 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
   const [platform, setPlatform] = useState<string>('All')
   const [format, setFormat] = useState<string | null>(null) // null = let Claude decide
   const [loading, setLoading] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const uploadFiles = useCallback(async (fileList: FileList | File[]) => {
+    const toUpload = Array.from(fileList)
+    if (files.length + toUpload.length > MAX_FILES) {
+      setUploadError(`Maximum ${MAX_FILES} files allowed`)
+      return
+    }
+
+    const oversized = toUpload.find((f) => f.size > MAX_FILE_SIZE)
+    if (oversized) {
+      setUploadError(`${oversized.name} exceeds 50 MB limit`)
+      return
+    }
+
+    setUploadError(null)
+    setUploading(true)
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setUploadError('Not authenticated'); return }
+
+      const uploaded: UploadedFile[] = []
+      for (const file of toUpload) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const storagePath = `social/${user.id}/${Date.now()}_${safeName}`
+
+        const { error } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, file, { contentType: file.type })
+
+        if (error) {
+          setUploadError(`Upload failed: ${error.message}`)
+          continue
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(storagePath)
+
+        uploaded.push({
+          name: file.name,
+          path: storagePath,
+          url: urlData.publicUrl,
+          size: file.size,
+          type: file.type,
+        })
+      }
+
+      setFiles((prev) => [...prev, ...uploaded])
+    } catch {
+      setUploadError('Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }, [files.length])
+
+  const removeFile = useCallback((index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    if (e.dataTransfer.files.length > 0) {
+      uploadFiles(e.dataTransfer.files)
+    }
+  }, [uploadFiles])
 
   async function handleGenerate() {
     if (!prompt.trim()) return
     setLoading(true)
+
+    const mediaUrls = files.length > 0 ? files.map((f) => f.url) : undefined
 
     try {
       const res = await fetch('/api/chat/social', {
@@ -33,6 +120,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           compose: true,
           platform: platform.toLowerCase(),
           format,
+          mediaUrls,
         }),
       })
 
@@ -60,7 +148,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           title: data.message?.content?.split('\n')[0]?.slice(0, 40) || 'Untitled post',
           content: data.message?.content || '',
           hashtags: null,
-          media_urls: null,
+          media_urls: mediaUrls || null,
           status: 'draft',
           scheduled_for: null,
           agent_notes: 'Created via compose mode',
@@ -118,22 +206,86 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           />
         </div>
 
-        {/* Media upload (future) */}
+        {/* Media upload */}
         <div>
           <label
             className="block font-bold mb-1.5"
             style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
           >
-            MEDIA (COMING SOON)
+            MEDIA (OPTIONAL)
           </label>
           <div
-            className="rounded-md border border-dashed border-zinc-700 px-4 py-6 text-center"
-            style={{ background: '#0a0a14' }}
+            className={`rounded-md border border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
+              dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-zinc-700'
+            }`}
+            style={{ background: dragOver ? undefined : '#0a0a14' }}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
           >
-            <span className="text-zinc-600" style={{ fontSize: 11 }}>
-              📎 Photo/video upload coming soon
-            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_TYPES}
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.length) uploadFiles(e.target.files)
+                e.target.value = ''
+              }}
+            />
+            {uploading ? (
+              <span className="text-zinc-400" style={{ fontSize: 11 }}>
+                Uploading...
+              </span>
+            ) : (
+              <span className="text-zinc-500" style={{ fontSize: 11 }}>
+                📎 Drag photos or video here, or click to browse
+              </span>
+            )}
           </div>
+          {uploadError && (
+            <p className="text-red-400 mt-1" style={{ fontSize: 10 }}>
+              {uploadError}
+            </p>
+          )}
+          {files.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {files.map((f, i) => (
+                <div
+                  key={f.path}
+                  className="relative group rounded-md border border-zinc-700 overflow-hidden"
+                  style={{ width: 72, height: 72 }}
+                >
+                  {f.type.startsWith('video/') ? (
+                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+                      <span className="text-zinc-500 text-lg">🎬</span>
+                    </div>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={f.url}
+                      alt={f.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeFile(i) }}
+                    className="absolute top-0 right-0 bg-black/70 text-zinc-300 hover:text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    &times;
+                  </button>
+                  <div
+                    className="absolute bottom-0 inset-x-0 bg-black/70 px-1 py-0.5 truncate"
+                    style={{ fontSize: 8 }}
+                  >
+                    <span className="text-zinc-400">{f.name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Platform picker */}

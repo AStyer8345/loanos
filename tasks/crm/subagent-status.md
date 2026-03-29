@@ -361,3 +361,9 @@ Master log updated: YES — LoanOS_System_Log.md + synced to Enterprise notebook
 Daily digest: SENT — Zapier success (019d367d-5fef-c114-c878-0b4400ab5e99)
 Timestamp: 2026-03-28T18:35:00Z
 SESSION FULLY COMPLETE ✓
+
+ADAM ANSWERS LOGGED — 2026-03-28T18:45:00Z
+Realtor Q5-Q11: all answered (referred_by=add UUID FK, deprecate booleans, last_touch_at=auto, Crystal=tier A, cadence=A weekly/B monthly/rest monthly, no co-marketing fields, no preferred contact method)
+Automation Q1,Q3,Q4: answered (drip=manual, review=Arive fund, rate=compare to rate update email)
+Automation Q2 (WF2 architecture): PENDING — Adam asked for clarification; awaiting response before builder can proceed on milestone emails
+Realtor builder: UNBLOCKED — 7/7 answers received

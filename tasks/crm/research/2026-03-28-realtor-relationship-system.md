@@ -401,3 +401,19 @@ These are decisions Adam needs to make before building can proceed:
 | Top realtor by referred_by volume | Crystal Kilpatrick (53 referrals, no UUID link) |
 | Top realtor by closed deals (loan FK) | Paul Jennings (5 deals, tier B) |
 | Tier A with most confirmed deals | Vanessa Torres (4 deals), Kim Nakamura (3 deals) |
+
+---
+
+## Adam's Answers — 2026-03-28
+
+| # | Question | Answer |
+|---|----------|--------|
+| 5 | referred_by fix | Add UUID FK column (keep text column, add new `referred_by_contact_id uuid FK`) |
+| 6 | Schema cleanup — deprecate booleans? | Yes — production_tier is the canonical system; deprecate `top_realtor`/`target_realtor` |
+| 7 | last_touch_at auto-update | Yes — auto-update when n8n sends |
+| 8 | Crystal Kilpatrick tier | Yes — assign to production_tier A |
+| 9 | Outreach cadence | A-tier weekly, B-tier monthly, everyone else monthly |
+| 10 | Co-marketing tracking | No — skip co_marketing_sent_count and co_marketing_active |
+| 11 | Preferred contact method field | Skip |
+
+**Status:** All 7 realtor questions answered. Builder can proceed.

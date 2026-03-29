@@ -8,10 +8,16 @@
 ## PENDING
 
 <!-- Agents append new items below this line -->
+- [ ] [SOCIAL] 2026-03-28 — Run 7 Publer curl commands to create Week 1 post DRAFTS — commands in tasks/social-media/qa-reports/2026-03-28-week1-qa.md (use corrected commands for Posts 2, 4, 5)
+- [ ] [SOCIAL] 2026-03-28 — Replace placeholder market data in Posts 5, 6, & 7 before April 7 — pull live figures from unlockmls.com/housing-stats/ on or after 2026-04-02
+- [ ] [SOCIAL] 2026-03-28 — Create Canva assets: Post 1 (12-slide PDF), Post 5 (10-slide PDF), Post 6 (5-slide carousel) — design briefs in tasks/social-media/build-reports/2026-03-28-week1-build.md
+- [ ] [SOCIAL] 2026-03-28 — Film vertical video for Posts 2 & 4 — scripts (with timecodes) in tasks/social-media/build-reports/2026-03-28-week1-build.md
+- [ ] [SOCIAL] 2026-03-28 — Complete NMLS# 513013 profile audit on all 4 social platforms (LinkedIn, Instagram, Facebook, Google Business Profile) before April 7 publish date
 - [ ] [CRM] 2026-03-27 — WARNING: WF2 will overwrite closing_date with Arive's estimated date on next webhook. 5 loans currently have closing_date ≠ est_closing_date — if any were manually set to an intentional actual closing date, check them before a new Arive webhook fires. To prevent this long-term, investigate whether Arive exposes `keyDates_actualFundingDate` in the webhook payload.
 - [ ] [LEAD-GEN] 2026-03-27 — Pre-Approval Funnel spec is ready to build. Confirm 3 Netlify env vars are set (MAILCHIMP_API_KEY, MAILCHIMP_BORROWER_LIST_ID, LOANOS_AGENT_SECRET) on styermortgage.com in Netlify dashboard → Builder can execute immediately after confirmation. Spec: tasks/lead-gen/specs/2026-03-27-pre-approval-funnel-spec.md
 - [ ] [CRM] 2026-03-26 — Answer 8 contact schema questions in `tasks/crm/research/2026-03-25-contact-data-architecture.md` — these gate the Contact Data Architecture spec and all smart list / schema improvements
 - [x] [CRM] 2026-03-26 — Confirm email_opt_out is enforced in n8n milestone email workflows — FIXED 2026-03-26 AM session: enforcement now in milestone route.ts
 - [x] [CRM] 2026-03-26 — Answer 5 loan pipeline questions — ANSWERED 2026-03-27: sort=closing date, active=app_received→closing_scheduled, rate lock=yes in Arive+add closing_date to webhook, Janie=Arive only, Kanban=yes build it
-- [ ] [CRM] 2026-03-27 — Answer 4 automation coverage questions before builder sequence can start: (1) Drip enrollment trigger — auto on Pre-Approval Lead Notify webhook or manual stage change? (2) WF2 architecture — add outbound emails to WF2 or build separate milestone-triggered workflows? (3) Review Request trigger — is it manual, Arive fund event, or scheduled? (4) Rate watch source — Adam enters rate weekly, pull from rate API, or compare to rate update email? See: tasks/crm/research/2026-03-27-automation-coverage-audit.md#open-questions
+- [ ] [CRM] 2026-03-28 — Answer 1 remaining automation question: WF2 architecture — add outbound milestone emails to WF2 (the Arive sync workflow), or build separate milestone-triggered workflows? Option A = simpler, all in one place. Option B = cleaner separation, emails easier to edit independently. (Q1 drip=manual, Q3 review=Arive fund event, Q4 rate=compare to rate update email — already answered 2026-03-28)
+- [x] [CRM] 2026-03-27 — Answer 4 automation coverage questions — PARTIALLY ANSWERED 2026-03-28: drip=manual, review=Arive fund, rate=compare to rate update email. WF2 architecture still pending.
 

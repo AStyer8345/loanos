@@ -197,3 +197,16 @@ LoanOS has solid automation coverage for the top of funnel (lead intake, referra
 3. **Review Request trigger**: The Closed Loan Review Request Email is Active — what triggers it? Is it Adam running it manually, Arive firing on fund, or a scheduled query? If manual, it's not truly automated and should be wired to WF2's fund detection. (Affects: Gap status accuracy for post-close)
 
 4. **Rate watch input source**: For refi watch (Gap #9), where does today's market rate come from? Options: (a) Adam enters weekly via LoanOS UI, (b) pull from a rate API (Optimal Blue, Polly), (c) compare against the rate Adam sends in weekly rate update email. Affects build approach significantly.
+
+---
+
+## Adam's Answers — 2026-03-28
+
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | Drip enrollment trigger | Manual stage change (not auto on webhook) |
+| 2 | WF2 architecture | PENDING — needs clarification (see subagent-status.md) |
+| 3 | Review Request trigger | Arive fund event |
+| 4 | Rate watch source | Compare against rate update email Adam already sends |
+
+**Status:** 3 of 4 answered. Q2 (WF2 architecture) still pending Adam's response.

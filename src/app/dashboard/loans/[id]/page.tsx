@@ -17,7 +17,7 @@ import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
   GripVertical, EyeOff, Eye, Settings2,
-  Mail, Phone, MapPin, Calendar, Users, MessageSquare, StickyNote, Trash2,
+  Mail, Phone, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { normalizeToStageKey } from '@/lib/constants/loan-stages'
@@ -548,64 +548,26 @@ export default function LoanDetailPage() {
   return (
     <>
     <div className="flex flex-col h-full">
-      {/* ── Header ── */}
-      <div className="border-b border-zinc-800 shrink-0" style={{ background: 'linear-gradient(160deg, #0a0a0c 0%, #0d111e 100%)' }}>
-        <div className="px-6 pt-4 pb-0">
-          {/* Breadcrumb */}
-          <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 font-mono mb-3 transition-colors">
-            <ArrowLeft size={12} /> Loans
-          </Link>
-
-          {/* Name row */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="font-mono font-bold uppercase tracking-wider text-zinc-100 text-2xl leading-tight">
-                {loan.loan_name || displayName}
-              </h1>
-              <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                {loan.contact_id ? (
-                  <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-[#C9A84C] transition-colors">
-                    {displayName}
-                  </Link>
-                ) : displayName}
-                {loan.loan_number ? ` · #${loan.loan_number}` : ''}
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              {/* Days to Close — right-aligned in header */}
-              {(() => {
-                const target = loan.estimated_closing_date || loan.closing_date
-                const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
-                if (dtc == null) return null
-                const color = dtc < 0 ? 'text-red-400' : dtc <= 7 ? 'text-amber-300' : 'text-[#C9A84C]'
-                const border = dtc < 0 ? 'border-red-800' : dtc <= 7 ? 'border-amber-800' : 'border-[#C9A84C]/30'
-                const bg = dtc < 0 ? 'bg-red-950/30' : dtc <= 7 ? 'bg-amber-950/30' : 'bg-[#C9A84C]/5'
-                return (
-                  <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg border ${border} ${bg}`}>
-                    <span className={`text-2xl font-mono font-bold leading-none ${color}`}>{Math.abs(dtc)}</span>
-                    <div>
-                      <p className={`text-[9px] font-mono font-semibold ${color} leading-tight`}>
-                        {dtc < 0 ? 'DAYS PAST' : dtc === 0 ? 'CLOSES' : 'DAYS TO'}
-                      </p>
-                      <p className={`text-[9px] font-mono font-semibold ${color} leading-tight`}>
-                        {dtc < 0 ? 'EST. CLOSE' : dtc === 0 ? 'TODAY' : 'CLOSE'}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })()}
+      {/* ── Header — slim, consolidated ── */}
+      <div className="border-b border-zinc-800/60 shrink-0 bg-[#0a0a0c]">
+        <div className="px-6 pt-3 pb-0">
+          {/* Row 1: Breadcrumb + Actions */}
+          <div className="flex items-center justify-between mb-2">
+            <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 font-mono transition-colors">
+              <ArrowLeft size={11} /> Loans
+            </Link>
+            <div className="flex items-center gap-2">
               <InlineStatusSelect
                 status={loan.status}
                 loanId={loanId}
                 onUpdate={s => setLoan(l => l ? { ...l, status: s } : l)}
               />
-              {/* Actions dropdown */}
               <div className="relative" ref={actionsRef}>
                 <button
                   onClick={() => setActionsOpen(prev => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#C9A84C] hover:bg-[#B89340] text-zinc-900 rounded transition-colors font-mono font-semibold"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded border border-zinc-700 transition-colors font-mono"
                 >
-                  Actions <ChevronDown size={11} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                  Actions <ChevronDown size={10} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                 </button>
                 {actionsOpen && (
                   <div className="absolute right-0 top-full mt-1 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
@@ -625,7 +587,7 @@ export default function LoanDetailPage() {
                         onClick={() => { setActiveTab('automations'); setSelectedAutomationId(automationId); setActionsOpen(false) }}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
                       >
-                        <Zap size={12} className="text-[#C9A84C] shrink-0" />
+                        <Zap size={12} className="text-zinc-500 shrink-0" />
                         {label}
                       </button>
                     ))}
@@ -636,7 +598,7 @@ export default function LoanDetailPage() {
                         onClick={() => setActionsOpen(false)}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
                       >
-                        <span className="text-[#C9A84C] shrink-0">📐</span>
+                        <span className="shrink-0">📐</span>
                         Create Scenario
                       </Link>
                     </div>
@@ -673,169 +635,92 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Meta chips — single row, tight spacing */}
-          <div className="flex flex-nowrap gap-2 mt-3 pb-4 overflow-x-auto">
+          {/* Row 2: Name + Days to Close */}
+          <div className="flex items-baseline justify-between gap-4 mb-3">
+            <div className="min-w-0">
+              <h1 className="font-mono font-bold text-zinc-100 text-lg leading-tight truncate">
+                {loan.loan_name || displayName}
+              </h1>
+              <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                {loan.contact_id ? (
+                  <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-zinc-300 transition-colors">
+                    {displayName}
+                  </Link>
+                ) : displayName}
+                {loan.loan_number ? <span className="text-zinc-600"> · #{loan.loan_number}</span> : ''}
+                {productLabel ? <span className="text-zinc-600"> · {productLabel}</span> : ''}
+              </p>
+            </div>
+            {(() => {
+              const target = loan.estimated_closing_date || loan.closing_date
+              const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
+              if (dtc == null) return null
+              const isUrgent = dtc < 0 || dtc <= 7
+              return (
+                <div className="shrink-0 text-right">
+                  <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
+                    {Math.abs(dtc)}
+                  </span>
+                  <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
+                    {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
+                  </p>
+                </div>
+              )
+            })()}
+          </div>
 
-            {/* Loan Amount — gold highlight */}
-            {loan.loan_amount && (
-              <div className="shrink-0 bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Loan Amount</p>
-                <p className="text-[16px] font-mono font-semibold text-[#C9A84C]">{fmtCurrency(loan.loan_amount)}</p>
-              </div>
+          {/* Row 3: Vital Signs — flat inline stats, no boxes */}
+          <div className="flex items-center gap-6 text-sm font-mono pb-3 overflow-x-auto">
+            {loan.loan_amount != null && (
+              <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} highlight />
             )}
-
-            {productLabel && (
-              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Product</p>
-                <p className="text-[16px] font-mono font-semibold text-zinc-100">{productLabel}</p>
-              </div>
+            {loan.interest_rate != null && (
+              <VitalStat label="Rate" value={fmtPct(loan.interest_rate)} highlight />
             )}
-
-            {/* Rate — gold highlight */}
-            {loan.interest_rate && (
-              <div className="shrink-0 bg-[#C9A84C]/10 border border-[#C9A84C]/25 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate</p>
-                <p className="text-[16px] font-mono font-semibold text-[#C9A84C]">{fmtPct(loan.interest_rate)}</p>
-              </div>
+            {loan.ltv != null && (
+              <VitalStat label="LTV" value={fmtPct(loan.ltv)} />
             )}
-
-            {loan.ltv && (
-              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">LTV</p>
-                <p className="text-[16px] font-mono font-semibold text-zinc-100">{fmtPct(loan.ltv)}</p>
-              </div>
-            )}
-
             {(loan.front_end_dti || loan.back_end_dti) && (
-              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">DTI</p>
-                <p className="text-[16px] font-mono font-semibold text-zinc-100">
-                  {fmtPct(loan.front_end_dti)} / {fmtPct(loan.back_end_dti)}
-                </p>
-              </div>
+              <VitalStat label="DTI" value={`${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}`} />
             )}
-
+            <VitalStatEditable
+              label="Lock Exp"
+              value={fmtDate(loan.rate_lock_expiration)}
+              field="rate_lock_expiration"
+              rawValue={loan.rate_lock_expiration}
+              editingHeader={editingHeader}
+              headerInput={headerInput}
+              setEditingHeader={setEditingHeader}
+              setHeaderInput={setHeaderInput}
+              saveHeaderField={saveHeaderField}
+              warning={lockExpiryWarning}
+            />
+            <VitalStatEditable
+              label="Est. Close"
+              value={fmtDate(loan.estimated_closing_date)}
+              field="estimated_closing_date"
+              rawValue={loan.estimated_closing_date}
+              editingHeader={editingHeader}
+              headerInput={headerInput}
+              setEditingHeader={setEditingHeader}
+              setHeaderInput={setHeaderInput}
+              saveHeaderField={saveHeaderField}
+            />
             {loan.referring_agent_name && (
-              <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Realtor</p>
+              <div className="shrink-0">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
                 <Link
                   href={
                     referringAgentContactId
                       ? `/dashboard/contacts/${referringAgentContactId}`
                       : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
                   }
-                  className="text-[16px] font-mono font-semibold text-zinc-100 hover:text-[#C9A84C] transition-colors underline-offset-2 hover:underline block truncate max-w-[11rem]"
+                  className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[10rem]"
                 >
                   {loan.referring_agent_name}
                 </Link>
               </div>
             )}
-
-            {/* Est. Close Date — editable */}
-            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Est. Close</p>
-              {editingHeader === 'estimated_closing_date' ? (
-                <input
-                  autoFocus
-                  type="date"
-                  value={headerInput}
-                  onChange={e => setHeaderInput(e.target.value)}
-                  onBlur={() => saveHeaderField('estimated_closing_date', headerInput || null)}
-                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
-                />
-              ) : (
-                <p
-                  className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
-                  onClick={() => { setHeaderInput(loan.estimated_closing_date ?? ''); setEditingHeader('estimated_closing_date') }}
-                >
-                  {fmtDate(loan.estimated_closing_date)}
-                </p>
-              )}
-            </div>
-
-            {/* Rate Lock Date — editable */}
-            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Rate Lock Date</p>
-              {editingHeader === 'rate_lock_date' ? (
-                <input
-                  autoFocus
-                  type="date"
-                  value={headerInput}
-                  onChange={e => setHeaderInput(e.target.value)}
-                  onBlur={() => saveHeaderField('rate_lock_date', headerInput || null)}
-                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                  className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
-                />
-              ) : (
-                <p
-                  className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
-                  onClick={() => { setHeaderInput(loan.rate_lock_date ?? ''); setEditingHeader('rate_lock_date') }}
-                >
-                  {fmtDate(loan.rate_lock_date)}
-                </p>
-              )}
-            </div>
-
-            {/* Lock Expiry — editable */}
-            <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-              <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Lock Expiry</p>
-              <div className="flex items-center gap-2">
-                {editingHeader === 'rate_lock_expiration' ? (
-                  <input
-                    autoFocus
-                    type="date"
-                    value={headerInput}
-                    onChange={e => setHeaderInput(e.target.value)}
-                    onBlur={() => saveHeaderField('rate_lock_expiration', headerInput || null)}
-                    onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-                    className="w-36 text-[16px] font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
-                  />
-                ) : (
-                  <p
-                    className="text-[16px] font-mono font-semibold text-zinc-100 cursor-pointer hover:text-[#C9A84C] transition-colors"
-                    onClick={() => { setHeaderInput(loan.rate_lock_expiration ?? ''); setEditingHeader('rate_lock_expiration') }}
-                  >
-                    {fmtDate(loan.rate_lock_expiration)}
-                  </p>
-                )}
-                {lockExpiryWarning && (
-                  <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded ${
-                    lockExpiryWarning.type === 'expired'
-                      ? 'bg-red-900/40 text-red-400 border border-red-800'
-                      : 'bg-amber-900/40 text-amber-400 border border-amber-800'
-                  }`}>
-                    {lockExpiryWarning.text}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Days Locked */}
-            {(() => {
-              if (!loan.rate_lock_expiration) return (
-                <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
-                  <p className="text-[16px] font-mono font-semibold text-zinc-500">—</p>
-                </div>
-              )
-              const lockStart = loan.rate_lock_date ? new Date(loan.rate_lock_date + 'T00:00:00') : null
-              const today = new Date(); today.setHours(0,0,0,0)
-              const daysLocked = lockStart ? Math.max(0, Math.floor((today.getTime() - lockStart.getTime()) / 86400000)) : null
-              const exp = new Date(loan.rate_lock_expiration + 'T00:00:00')
-              const daysUntilExpiry = Math.ceil((exp.getTime() - today.getTime()) / 86400000)
-              const expired = daysUntilExpiry < 0
-              const display = daysLocked != null ? `${daysLocked} days` : expired ? `${Math.abs(daysUntilExpiry)} days ago` : `${daysUntilExpiry} days`
-              return (
-                <div className="shrink-0 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-0.5">Days Locked</p>
-                  <p className={`text-[16px] font-mono font-semibold ${expired ? 'text-red-400' : 'text-zinc-100'}`}>
-                    {display}
-                  </p>
-                </div>
-              )
-            })()}
-
           </div>
 
           {/* Pipeline progress bar */}
@@ -843,7 +728,7 @@ export default function LoanDetailPage() {
         </div>
 
         {/* Tab bar */}
-        <div className="px-6 flex gap-0">
+        <div className="px-6 flex gap-0 border-t border-zinc-800/40">
           {([
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
@@ -853,9 +738,9 @@ export default function LoanDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 text-sm font-mono font-medium border-b-2 transition-colors ${
+              className={`px-4 py-2 text-[11px] font-mono font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-[#C9A84C] text-[#C9A84C]'
+                  ? 'border-zinc-100 text-zinc-100'
                   : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -958,6 +843,65 @@ function PipelineProgressBar({ status }: { status: string | null }) {
   )
 }
 
+// ── Vital stat helpers (header) ────────────────────────────────────────────────
+
+function VitalStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className="shrink-0">
+      <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className={`text-sm font-mono font-semibold leading-none ${highlight ? 'text-zinc-100' : 'text-zinc-300'}`}>{value}</p>
+    </div>
+  )
+}
+
+function VitalStatEditable({ label, value, field, rawValue, editingHeader, headerInput, setEditingHeader, setHeaderInput, saveHeaderField, warning }: {
+  label: string
+  value: string
+  field: string
+  rawValue: string | null | undefined
+  editingHeader: string | null
+  headerInput: string
+  setEditingHeader: (v: string | null) => void
+  setHeaderInput: (v: string) => void
+  saveHeaderField: (field: string, value: string | number | null) => void
+  warning?: { type: 'expired' | 'warning'; text: string } | null
+}) {
+  return (
+    <div className="shrink-0">
+      <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <div className="flex items-center gap-1.5">
+        {editingHeader === field ? (
+          <input
+            autoFocus
+            type="date"
+            value={headerInput}
+            onChange={e => setHeaderInput(e.target.value)}
+            onBlur={() => saveHeaderField(field, headerInput || null)}
+            onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
+            className="w-32 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+          />
+        ) : (
+          <p
+            className="text-sm font-mono font-semibold text-zinc-300 cursor-pointer hover:text-zinc-100 transition-colors leading-none"
+            onClick={() => { setHeaderInput(rawValue ?? ''); setEditingHeader(field) }}
+          >
+            {value}
+          </p>
+        )}
+        {warning && (
+          <span className={`text-[9px] font-mono font-semibold px-1 py-0.5 rounded leading-none ${
+            warning.type === 'expired'
+              ? 'bg-red-950/60 text-red-400'
+              : 'bg-amber-950/60 text-amber-400'
+          }`}>
+            {warning.text}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
 function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, onRefresh }: {
@@ -991,37 +935,36 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   }, [loanId, onRefresh])
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-0">
 
-      {/* ── 3-column command grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+      {/* ── Section 1: Parties (Communication Hub) — full width, no box ── */}
+      <CommunicationHub loan={loan} activity={activity} />
 
-        {/* ── Col 1 — Dark Identity Sidebar ── */}
-        <div className="bg-zinc-900 rounded-xl overflow-hidden flex flex-col">
-          <BorrowerProfileCard loan={loan} contact={contact} />
-          <LoanEssentialsPanel loan={loan} />
-          <PropertySummaryCard loan={loan} />
-        </div>
+      <div className="border-t border-zinc-800/40 my-6" />
 
-        {/* ── Col 2 — Milestones + Key Dates / Partners ── */}
+      {/* ── Section 2: Milestones ── */}
+      <MilestoneTimeline loan={loan} activity={activity} />
+
+      <div className="border-t border-zinc-800/40 my-6" />
+
+      {/* ── Section 3: Two-column — Key Dates + Borrower Identity ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
         <div className="space-y-6">
-          <MilestoneTimeline loan={loan} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KeyDatesPanel loan={loan} onSave={handleSaveField} />
-            <PartnerContactsPanel loan={loan} />
-          </div>
+          <KeyDatesPanel loan={loan} onSave={handleSaveField} />
+          {/* To-Do */}
+          <LoanTodoList loanId={loanId} />
         </div>
-
-        {/* ── Col 3 — Documents + Activity/Notes ── */}
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <BorrowerProfileCard loan={loan} contact={contact} />
           <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
           <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} onRefresh={onRefresh} />
         </div>
-
       </div>
 
-      {/* ── To-Do (full width, below grid) ── */}
-      <LoanTodoList loanId={loanId} />
+      <div className="border-t border-zinc-800/40 my-6" />
+
+      {/* ── Section 4: Property + Loan Details (collapsible) ── */}
+      <PropertyDetailsToggle loan={loan} />
 
       {/* ── Full info grid (draggable cards) ── */}
       <LoanInfoGrid loan={loan} loanId={loanId} onSave={handleSaveField} onSaveMultiple={handleSaveMultiple} />
@@ -1043,57 +986,43 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
   const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   return (
-    <div className="p-5 space-y-4">
-      {/* Avatar + name + quick actions */}
-      <div className="flex flex-col items-center text-center gap-3">
-        <div className="w-16 h-16 rounded-full bg-[#C9A84C]/20 border-2 border-[#C9A84C]/50 flex items-center justify-center shrink-0">
-          <span className="text-xl font-mono font-bold text-[#C9A84C]">{initials}</span>
+    <div>
+      <h3 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Borrower</h3>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+          <span className="text-sm font-mono font-bold text-zinc-300">{initials}</span>
         </div>
-        <div className="min-w-0 w-full">
-          <p className="text-base font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
-          {loan.contact_id && contact && (
-            <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-500 hover:text-[#C9A84C] transition-colors">
-              View Contact →
-            </Link>
-          )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
+          <div className="flex items-center gap-3 mt-0.5">
+            {loan.borrower_email && (
+              <a href={`mailto:${loan.borrower_email}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
+                {loan.borrower_email}
+              </a>
+            )}
+          </div>
         </div>
-        {/* Quick-action icons */}
-        <div className="flex items-center gap-3">
-          {loan.borrower_phone && (
-            <a
-              href={`tel:${loan.borrower_phone.replace(/\D/g, '')}`}
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-[#C9A84C] hover:border-[#C9A84C]/50 transition-colors"
-              title={fmtPhone(loan.borrower_phone) ?? 'Call'}
-            >
-              <Phone size={13} />
-            </a>
-          )}
-          {loan.borrower_email && (
-            <a
-              href={`mailto:${loan.borrower_email}`}
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-[#C9A84C] hover:border-[#C9A84C]/50 transition-colors"
-              title={loan.borrower_email}
-            >
-              <Mail size={13} />
-            </a>
-          )}
-        </div>
+        {loan.contact_id && contact && (
+          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors shrink-0">
+            View →
+          </Link>
+        )}
       </div>
 
-      {/* Co-borrower */}
+      {/* Co-borrower — only if exists */}
       {loan.co_borrower_name && (
-        <div className="pt-3 border-t border-zinc-800 space-y-1">
-          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Co-Borrower</p>
-          <p className="text-xs font-mono text-zinc-200">{loan.co_borrower_name}</p>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="pt-2 border-t border-zinc-800/40">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono text-zinc-600">Co-Borrower:</span>
+            <span className="text-xs font-mono text-zinc-300">{loan.co_borrower_name}</span>
             {loan.co_borrower_phone && (
-              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-zinc-400 hover:text-[#C9A84C] transition-colors">
-                <Phone size={11} />
+              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-zinc-600 hover:text-zinc-400 transition-colors">
+                <Phone size={10} />
               </a>
             )}
             {loan.co_borrower_email && (
-              <a href={`mailto:${loan.co_borrower_email}`} className="text-zinc-400 hover:text-[#C9A84C] transition-colors">
-                <Mail size={11} />
+              <a href={`mailto:${loan.co_borrower_email}`} className="text-zinc-600 hover:text-zinc-400 transition-colors">
+                <Mail size={10} />
               </a>
             )}
           </div>
@@ -1103,66 +1032,206 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
   )
 }
 
-// ── LoanEssentialsPanel — key numbers in the dark sidebar ────────────────────
+// ── CommunicationHub — Contact Cards with one-click actions ──────────────────
 
-function LoanEssentialsPanel({ loan }: { loan: Loan }) {
-  const productLabel = [loan.loan_program || loan.loan_type, loan.loan_term ? `${Math.round(loan.loan_term / 12)}yr` : null].filter(Boolean).join(' ')
-  const items = [
-    { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount), gold: true },
-    { label: 'Rate',        value: loan.interest_rate ? fmtPct(loan.interest_rate) : '—', gold: true },
-    { label: 'Program',     value: productLabel || '—', gold: false },
-    { label: 'LTV',         value: loan.ltv ? fmtPct(loan.ltv) : '—', gold: false },
+function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRow[] }) {
+  // Build party list — only show parties that have data
+  const parties: {
+    role: string
+    name: string | null
+    email: string | null
+    phone: string | null
+    contactId: string | null
+  }[] = [
+    {
+      role: 'Borrower',
+      name: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name,
+      email: loan.borrower_email,
+      phone: loan.borrower_phone,
+      contactId: loan.contact_id,
+    },
+    ...(loan.co_borrower_name ? [{
+      role: 'Co-Borrower',
+      name: loan.co_borrower_name,
+      email: loan.co_borrower_email,
+      phone: loan.co_borrower_phone,
+      contactId: null as string | null,
+    }] : []),
+    ...(loan.buyers_agent_name || loan.buyer_agent_name ? [{
+      role: "Buyer's Agent",
+      name: loan.buyers_agent_name || loan.buyer_agent_name,
+      email: loan.buyers_agent_email || loan.buyer_agent_email,
+      phone: loan.buyers_agent_phone,
+      contactId: loan.buyer_agent_contact_id,
+    }] : []),
+    ...(loan.listing_agent_name ? [{
+      role: 'Listing Agent',
+      name: loan.listing_agent_name,
+      email: loan.listing_agent_email,
+      phone: loan.listing_agent_phone,
+      contactId: loan.listing_agent_contact_id,
+    }] : []),
+    ...(loan.title_company || loan.title_contact ? [{
+      role: 'Title',
+      name: loan.title_contact || loan.title_company,
+      email: loan.title_email,
+      phone: null as string | null,
+      contactId: null as string | null,
+    }] : []),
+    ...(loan.referring_agent_name ? [{
+      role: 'Referring Agent',
+      name: loan.referring_agent_name,
+      email: loan.referring_agent_email,
+      phone: loan.referring_agent_phone,
+      contactId: null as string | null,
+    }] : []),
   ]
 
+  // Derive "last contacted" from activity log per email address
+  const lastContactedMap = new Map<string, string>()
+  for (const a of activity) {
+    const meta = a.metadata as Record<string, string> | null
+    const email = meta?.recipient_email ?? meta?.to ?? meta?.email ?? null
+    if (email && !lastContactedMap.has(email.toLowerCase())) {
+      lastContactedMap.set(email.toLowerCase(), a.created_at)
+    }
+  }
+
   return (
-    <div className="border-t border-zinc-800 px-5 py-4 space-y-3">
-      {items.map(item => (
-        <div key={item.label} className="flex items-baseline justify-between gap-2">
-          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider shrink-0">{item.label}</span>
-          <span className={`text-sm font-mono font-semibold ${item.gold ? 'text-[#C9A84C]' : 'text-zinc-100'}`}>{item.value}</span>
-        </div>
-      ))}
+    <div>
+      <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Parties</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {parties.map(p => {
+          const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
+          return (
+            <div key={p.role} className="group">
+              {/* Name + Role */}
+              <div className="mb-2">
+                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide leading-none">{p.role}</p>
+                {p.contactId ? (
+                  <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-zinc-100 hover:text-zinc-300 transition-colors truncate block mt-0.5">
+                    {p.name || '—'}
+                  </Link>
+                ) : (
+                  <p className="text-sm font-mono font-medium text-zinc-100 truncate mt-0.5">{p.name || '—'}</p>
+                )}
+              </div>
+
+              {/* Action icons — inline, always visible */}
+              <div className="flex items-center gap-1.5 mb-1.5">
+                {p.phone && (
+                  <a
+                    href={`tel:${p.phone.replace(/\D/g, '')}`}
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    title={`Call ${fmtPhone(p.phone)}`}
+                  >
+                    <Phone size={11} />
+                  </a>
+                )}
+                {p.phone && (
+                  <a
+                    href={`sms:${p.phone.replace(/\D/g, '')}`}
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    title={`Text ${fmtPhone(p.phone)}`}
+                  >
+                    <MessageSquare size={11} />
+                  </a>
+                )}
+                {p.email && (
+                  <a
+                    href={`mailto:${p.email}`}
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                    title={`Email ${p.email}`}
+                  >
+                    <Mail size={11} />
+                  </a>
+                )}
+              </div>
+
+              {/* Last Contacted timestamp */}
+              {lastContacted ? (
+                <p className="text-[9px] font-mono text-zinc-600">Last contacted {fmtRelative(lastContacted)}</p>
+              ) : (
+                <p className="text-[9px] font-mono text-zinc-700">No contact logged</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// ── PropertySummaryCard ───────────────────────────────────────────────────────
+// ── PropertyDetailsToggle — collapsible secondary data ───────────────────────
 
-function PropertySummaryCard({ loan }: { loan: Loan }) {
+function PropertyDetailsToggle({ loan }: { loan: Loan }) {
+  const [open, setOpen] = useState(false)
+
   const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
-  const downPayment = loan.down_payment
-    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
-    : '—'
+  const hasAddress = !!fullAddress
 
-  const fields = [
-    { label: 'Address', value: fullAddress || '—' },
-    { label: 'Type', value: loan.property_type || '—' },
-    { label: 'Occupancy', value: loan.occupancy_type || loan.occupancy || '—' },
-    { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
-    { label: 'Appraised', value: fmtCurrency(loan.appraised_value) },
-    { label: 'Down Payment', value: downPayment },
-    { label: 'LTV', value: fmtPct(loan.ltv) },
-  ]
+  // Primary row — always visible
+  const primaryFields = [
+    hasAddress ? { label: 'Address', value: fullAddress } : null,
+    loan.purchase_price ? { label: 'Purchase', value: fmtCurrency(loan.purchase_price) } : null,
+    loan.appraised_value ? { label: 'Appraised', value: fmtCurrency(loan.appraised_value) } : null,
+    loan.down_payment ? { label: 'Down', value: `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}` } : null,
+  ].filter(Boolean) as { label: string; value: string }[]
+
+  // Secondary fields — hidden by default
+  const secondaryFields = [
+    loan.property_county ? { label: 'County', value: loan.property_county } : null,
+    loan.property_type ? { label: 'Property Type', value: loan.property_type } : null,
+    loan.occupancy_type || loan.occupancy ? { label: 'Occupancy', value: loan.occupancy_type || loan.occupancy || '' } : null,
+    loan.credit_score ? { label: 'Credit Score', value: String(loan.credit_score) } : null,
+    loan.monthly_payment ? { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) } : null,
+    loan.piti ? { label: 'PITI', value: fmtCurrency(loan.piti) } : null,
+    loan.cash_to_close ? { label: 'Cash to Close', value: fmtCurrency(loan.cash_to_close) } : null,
+    loan.lender_name ? { label: 'Lender', value: loan.lender_name } : null,
+    loan.aus_result ? { label: 'AUS', value: loan.aus_result } : null,
+    loan.lead_source ? { label: 'Lead Source', value: loan.lead_source } : null,
+  ].filter(Boolean) as { label: string; value: string }[]
+
+  if (primaryFields.length === 0 && secondaryFields.length === 0) return null
 
   return (
-    <div className="border-t border-zinc-800">
-      <div className="px-5 py-3 flex items-center gap-2 border-b border-zinc-800/60">
-        <MapPin size={11} className="text-[#C9A84C]" />
-        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Property</h3>
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Property & Details</h2>
+        {secondaryFields.length > 0 && (
+          <button
+            onClick={() => setOpen(o => !o)}
+            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
+          >
+            {open ? 'Less' : 'More'} <ChevronDown size={10} className={open ? 'rotate-180 transition-transform' : 'transition-transform'} />
+          </button>
+        )}
       </div>
-      <div className="divide-y divide-zinc-800/40">
-        {fields.map(f => (
-          <div key={f.label} className="flex items-baseline justify-between gap-3 px-5 py-2 min-w-0">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{f.label}</span>
-            <span className="text-xs font-mono text-zinc-200 text-right truncate">{f.value}</span>
+
+      {/* Primary — flat inline */}
+      <div className="flex flex-wrap gap-x-8 gap-y-2">
+        {primaryFields.map(f => (
+          <div key={f.label}>
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{f.label}</span>
+            <p className="text-sm font-mono text-zinc-200">{f.value}</p>
           </div>
         ))}
       </div>
+
+      {/* Secondary — toggled */}
+      {open && secondaryFields.length > 0 && (
+        <div className="flex flex-wrap gap-x-8 gap-y-2 mt-3 pt-3 border-t border-zinc-800/40">
+          {secondaryFields.map(f => (
+            <div key={f.label}>
+              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{f.label}</span>
+              <p className="text-sm font-mono text-zinc-200">{f.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
-
-// (LoanVitalCards removed — Days to Close moved to header, Loan Stage in status badge)
 
 // ── KeyDatesPanel (inline-editable) ──────────────────────────────────────────
 
@@ -1186,18 +1255,12 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
   }
 
   return (
-    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
-        <Calendar size={11} className="text-[#C9A84C]" />
-        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Key Dates</h3>
-      </div>
-      <div className="divide-y divide-zinc-800/60">
+    <div>
+      <h3 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Key Dates</h3>
+      <div className="space-y-0">
         {dates.map(d => (
-          <div key={d.field} className="flex items-center justify-between gap-3 px-4 py-2.5 group">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Calendar size={9} className="text-zinc-600" />
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{d.label}</span>
-            </div>
+          <div key={d.field} className="flex items-center justify-between gap-3 py-2 border-b border-zinc-800/30 last:border-0 group">
+            <span className="text-[11px] font-mono text-zinc-500">{d.label}</span>
             {editing === d.field ? (
               <input
                 autoFocus
@@ -1210,10 +1273,10 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
               />
             ) : (
               <span
-                className="text-xs font-mono text-zinc-200 cursor-pointer hover:text-[#C9A84C] transition-colors"
+                className="text-xs font-mono text-zinc-300 cursor-pointer hover:text-zinc-100 transition-colors"
                 onClick={() => { setEditValue(d.value ?? ''); setEditing(d.field) }}
               >
-                {fmtDate(d.value) || <span className="text-zinc-600">—</span>}
+                {fmtDate(d.value) || <span className="text-zinc-700">—</span>}
               </span>
             )}
           </div>
@@ -1223,45 +1286,7 @@ function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, v
   )
 }
 
-// ── PartnerContactsPanel ──────────────────────────────────────────────────────
-
-function PartnerContactsPanel({ loan }: { loan: Loan }) {
-  const partners = [
-    { role: 'Realtor', name: loan.referring_agent_name, email: loan.referring_agent_email, phone: loan.referring_agent_phone, color: 'text-amber-400' },
-    { role: "Buyer's Agent", name: loan.buyers_agent_name || loan.buyer_agent_name, email: loan.buyers_agent_email || loan.buyer_agent_email, phone: loan.buyers_agent_phone, color: 'text-blue-400' },
-    { role: 'Listing Agent', name: loan.listing_agent_name, email: loan.listing_agent_email, phone: loan.listing_agent_phone, color: 'text-sky-400' },
-    { role: 'Title', name: loan.title_company || loan.title_contact, email: loan.title_email, phone: null as string | null, color: 'text-zinc-300' },
-  ].filter(p => p.name || p.email)
-
-  if (partners.length === 0) return null
-
-  return (
-    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 flex items-center gap-2 border-b border-zinc-800/60">
-        <Users size={11} className="text-[#C9A84C]" />
-        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Partners</h3>
-      </div>
-      <div className="divide-y divide-zinc-800/60">
-        {partners.map(p => (
-          <div key={p.role} className="px-4 py-2.5 space-y-1">
-            <p className={`text-[10px] font-mono uppercase tracking-wide ${p.color}`}>{p.role}</p>
-            {p.name && <p className="text-xs font-mono text-zinc-200 truncate">{p.name}</p>}
-            {p.email && (
-              <a href={`mailto:${p.email}`} className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 hover:text-[#C9A84C] transition-colors">
-                <Mail size={9} className="shrink-0" /> <span className="truncate">{p.email}</span>
-              </a>
-            )}
-            {p.phone && (
-              <a href={`tel:${p.phone.replace(/\D/g, '')}`} className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 hover:text-[#C9A84C] transition-colors">
-                <Phone size={9} className="shrink-0" /> {fmtPhone(p.phone)}
-              </a>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+// (PartnerContactsPanel replaced by CommunicationHub above)
 
 // ── LoanTodoList — localStorage-backed per-loan checklist ────────────────────
 
@@ -2228,98 +2253,110 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact, onReassignC
 
 // ── Milestone timeline ────────────────────────────────────────────────────────
 
-function MilestoneTimeline({ loan }: { loan: Loan }) {
+function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: ActivityRow[] }) {
   const currentKey = normalizeToStageKey(loan.status)
 
   // Each milestone maps to a canonical StageKey — complete when loan has reached or passed that stage
-  const milestones: { label: string; date: string | null; est?: string | null; reachedAt: StageKey; activeAt: StageKey }[] = [
-    { label: 'Application Received',      date: loan.application_date,      reachedAt: 'new_application', activeAt: 'new_application' },
-    { label: 'Disclosures Sent (LE)',      date: null,                       reachedAt: 'disclosed',       activeAt: 'setup' },
-    { label: 'Submitted to Processing',   date: loan.submission_date,       reachedAt: 'processing',      activeAt: 'disclosed' },
-    { label: 'Submitted to Underwriting', date: null,                       reachedAt: 'submitted',       activeAt: 'processing' },
-    { label: 'Approved w/ Conditions',    date: loan.approval_date,         reachedAt: 'approved',        activeAt: 'submitted' },
-    { label: 'CTC Issued',               date: null,                       reachedAt: 'clear_to_close',  activeAt: 'approved' },
-    { label: 'Closing Docs Drawn',        date: null,                       reachedAt: 'clear_to_close',  activeAt: 'clear_to_close',
+  const milestones: { label: string; date: string | null; est?: string | null; reachedAt: StageKey; activeAt: StageKey; notifyLabel?: string }[] = [
+    { label: 'Application',               date: loan.application_date,      reachedAt: 'new_application', activeAt: 'new_application' },
+    { label: 'Disclosures (LE)',           date: null,                       reachedAt: 'disclosed',       activeAt: 'setup' },
+    { label: 'Processing',                date: loan.submission_date,       reachedAt: 'processing',      activeAt: 'disclosed', notifyLabel: 'Agents notified' },
+    { label: 'Underwriting',              date: null,                       reachedAt: 'submitted',       activeAt: 'processing', notifyLabel: 'Agents notified' },
+    { label: 'Approved w/ Cond.',          date: loan.approval_date,         reachedAt: 'approved',        activeAt: 'submitted', notifyLabel: 'Agents notified' },
+    { label: 'CTC',                        date: null,                       reachedAt: 'clear_to_close',  activeAt: 'approved', notifyLabel: 'Agents notified' },
+    { label: 'Closing Docs',               date: null,                       reachedAt: 'clear_to_close',  activeAt: 'clear_to_close',
       est: loan.estimated_closing_date },
     { label: 'Funded',
       date: loan.funding_date || loan.closing_date,                         reachedAt: 'funded',          activeAt: 'clear_to_close',
       est: loan.closing_date || loan.estimated_closing_date },
   ]
 
-  const gold = '#C9A84C'
-  const goldMuted = 'rgba(201,168,76,0.35)'
+  // Check if agents were notified for a milestone by looking at activity log
+  const notifiedStages = new Set<string>()
+  if (activity) {
+    for (const a of activity) {
+      const action = a.action ?? ''
+      if (action.includes('status_updated') || action.includes('email') || action.includes('milestone')) {
+        const meta = a.metadata as Record<string, string> | null
+        const to = meta?.new_status ?? meta?.status ?? meta?.milestone ?? null
+        if (to) {
+          const key = normalizeToStageKey(to)
+          notifiedStages.add(key)
+        }
+      }
+    }
+  }
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-3 py-2 bg-zinc-800/80 border-b border-zinc-700">
-        <h2 className="text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">Milestones</h2>
-      </div>
-      <div className="px-2 py-2 overflow-x-auto">
-        <div className="flex flex-nowrap items-start min-w-min">
-          {milestones.map((m, i) => {
-            const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
-            const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
-            const isPending = !isComplete && !isActive
-            const estDate = m.est ?? null
+    <div>
+      <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Milestones</h2>
+      <div className="flex flex-nowrap items-start gap-0 overflow-x-auto">
+        {milestones.map((m, i) => {
+          const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
+          const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
+          const isPending = !isComplete && !isActive
+          const estDate = m.est ?? null
+          const wasNotified = isComplete && m.notifyLabel && notifiedStages.has(m.reachedAt)
 
-            const sub =
-              isComplete && m.date
-                ? fmtDate(m.date)
-                : isComplete && !m.date
-                  ? 'Completed'
-                  : isActive
-                    ? (m.date ? `${fmtDate(m.date)} · active` : 'In progress')
-                    : isPending && estDate
-                      ? `Est. ${fmtDate(estDate)}`
-                      : null
+          const sub =
+            isComplete && m.date
+              ? fmtDate(m.date)
+              : isComplete && !m.date
+                ? 'Done'
+                : isActive
+                  ? 'In progress'
+                  : isPending && estDate
+                    ? `Est. ${fmtDate(estDate)}`
+                    : null
 
-            const lineDone = isComplete
-
-            return (
-              <div key={m.label} className="contents">
-                <div className="flex flex-col items-center shrink-0 w-[4.75rem] sm:w-[5.25rem] px-0.5">
-                  <div className="flex justify-center mb-1">
-                    {isComplete ? (
-                      <div
-                        className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-                        style={{ background: gold }}
-                      >
-                        <Check size={9} className="text-zinc-900" strokeWidth={3} />
-                      </div>
-                    ) : isActive ? (
-                      <div
-                        className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
-                        style={{ borderColor: gold }}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: gold }} />
-                      </div>
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border border-zinc-600 shrink-0 bg-zinc-900/80" />
-                    )}
-                  </div>
-                  <p
-                    className={`text-[9px] sm:text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
-                      isComplete || isActive ? 'text-zinc-200' : 'text-zinc-500'
-                    }`}
-                  >
-                    {m.label}
-                  </p>
-                  {sub && (
-                    <p className="text-[8px] font-mono text-zinc-500 text-center leading-tight mt-0.5 line-clamp-2 w-full">
-                      {sub}
-                    </p>
+          return (
+            <div key={m.label} className="contents">
+              <div className="flex flex-col items-center shrink-0 w-[5rem] sm:w-[5.5rem] px-0.5">
+                {/* Indicator */}
+                <div className="flex justify-center mb-1.5">
+                  {isComplete ? (
+                    <div className="w-5 h-5 rounded-full bg-zinc-100 flex items-center justify-center shrink-0">
+                      <Check size={10} className="text-zinc-900" strokeWidth={3} />
+                    </div>
+                  ) : isActive ? (
+                    <div className="w-5 h-5 rounded-full border-2 border-zinc-100 flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-100 animate-pulse" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
                   )}
                 </div>
-                {i < milestones.length - 1 && (
-                  <div
-                    className="shrink-0 self-start mt-[7px] h-0.5 w-2 sm:w-3 rounded-full"
-                    style={{ background: lineDone ? goldMuted : '#3f3f46' }}
-                  />
+                {/* Label */}
+                <p className={`text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
+                  isComplete ? 'text-zinc-200' : isActive ? 'text-zinc-300' : 'text-zinc-600'
+                }`}>
+                  {m.label}
+                </p>
+                {/* Sub-line: date or status */}
+                {sub && (
+                  <p className={`text-[9px] font-mono text-center leading-tight mt-0.5 ${
+                    isActive ? 'text-zinc-400' : 'text-zinc-600'
+                  }`}>
+                    {sub}
+                  </p>
+                )}
+                {/* Agent notification indicator */}
+                {isComplete && m.notifyLabel && (
+                  <p className={`text-[8px] font-mono text-center leading-tight mt-0.5 ${
+                    wasNotified ? 'text-emerald-500' : 'text-amber-400'
+                  }`}>
+                    {wasNotified ? '✓ Notified' : '⚠ Not sent'}
+                  </p>
                 )}
               </div>
-            )
-          })}
-        </div>
+              {i < milestones.length - 1 && (
+                <div
+                  className={`shrink-0 self-start mt-[9px] h-px w-2 sm:w-3 ${isComplete ? 'bg-zinc-500' : 'bg-zinc-800'}`}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

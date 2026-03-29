@@ -871,3 +871,71 @@ Triggered-by: Scheduled task `loanos-crm-am`
 Research: N/A | Strategy: N/A | Execution: 5 | Review: 4 | QA: 5
 
 Advance queue: YES → Automation Coverage Audit
+
+---
+## Session: 2026-03-29 PM — LoanOS CRM
+Focus: PUSH+CURATE — Realtor Relationship System build report + knowledge sync + daily digest
+Type: Maintenance / Knowledge Curation (PM session)
+Triggered-by: Scheduled task `loanos-crm-pm`
+
+### Completed
+
+**Build Report Written**
+- `tasks/crm/build-reports/2026-03-29-realtor-relationship-build.md` — full record of AM session: migrations 061+062, 6 DML backfills, 4 smart lists, WF-R1 extension. Previously missing from file system.
+
+**NotebookLM Staleness Audit**
+- Audit report: `tasks/crm/notebooklm-audit-2026-03-29.md`
+- Removed 4 stale sources:
+  - `2026-03-25-contact-dedup-spec.md` — cancelled migration spec, no longer relevant
+  - `2026-03-25-dedup-field-mapping.md` — research for the same cancelled migration
+  - Cloudflare-blocked HousingWire page — content was Cloudflare challenge, not article
+  - `LoanOS_System_Log.md` (stale version) — removed to re-add updated version
+
+**Web Research Sweep — Loan Record UI**
+- Topic: Loan Record UI — Simplification Sprint (next active domain-queue item)
+- Added: Mortgage Workspace pipeline integration best practices article (setshape.com failed to load)
+- Web research file: not written separately (only 1 source added — below threshold for dedicated file)
+
+**Session Files Pushed**
+- `2026-03-29-realtor-relationship-build.md` → NotebookLM (source ID: 5445b6ba)
+- `LoanOS_System_Log.md` (updated) → CRM Intelligence notebook (source ID: 97b95976)
+- `LoanOS_System_Log.md` (updated) → Enterprise notebook (source ID: f9147ea7)
+
+**Master System Log Updated**
+- `/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md` — today's PM summary appended
+- Synced to both CRM Intelligence + LoanOS Enterprise notebooks
+
+**Daily Digest Sent**
+- Zapier success: `019d39a6-1e97-baaa-4ef4-6ff490bfa30f`
+- Recipient: adam@thestyerteam.com
+- Subject: LoanOS CRM Migration Digest — 2026-03-29
+- Saved: tasks/crm/digests/2026-03-29-digest.md
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| NotebookLM sources | 47 | 46 | -4 removed, +3 added (build report, Mortgage Workspace web, updated system log) |
+| Stale sources removed | — | 4 | -4 |
+| Build reports documented | 3 | 4 | +1 (AM session build report) |
+| Daily digest sent | PENDING | SENT | ✅ |
+
+### Queue Position
+Current: Loan Record UI — Simplification Sprint (Session 1 next: Research + Audit)
+Advance: YES — Realtor Relationship System COMPLETE; queue advanced to Loan Record UI Sprint
+Secondary: Automation Coverage — verify AK1fBcaX1cPcdlGx trigger timing (quick check)
+
+### Quality Ratings (1-5)
+Curation: 5
+
+### BLOCKERS
+None.
+
+### Next Session Instructions
+Priority 1 (Research): Loan Record UI — Simplification Sprint Session 1
+  - Research how leading mortgage CRMs structure loan detail views (Total Expert, Shape, SimpleNexus, Encompass)
+  - Audit current LoanOS loan record: read the loan detail page code, list every field/section/tab
+  - Propose new information hierarchy (Critical / Secondary / Archive)
+  - Output: tasks/crm/loan-record-redesign-spec.md + add to ADAM-TODO for review before Session 2 builds
+Priority 2 (Quick verify): Confirm AK1fBcaX1cPcdlGx (Review Request Email) fires on Arive fund event — check current trigger vs. Adam's confirmed intent
+Priority 3 (Adam): Set Outlook credential on WF-R1 "Draft Thank-You to Realtor" node in n8n
+---

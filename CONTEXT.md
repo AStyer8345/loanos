@@ -49,6 +49,16 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 
 **Design spec:** `docs/superpowers/specs/2026-03-29-social-media-dashboard-design.md`
 
+**Post-build enhancements (same session):**
+- **Real media upload** in SocialComposePanel: drag-and-drop or click, uploads to Supabase Storage at `{userId}/social/{timestamp}_{filename}`, thumbnails with remove buttons
+- **Storage RLS fix**: upload path changed from `social/{userId}/...` to `{userId}/social/...` (first folder must match `auth.uid()`)
+- **Voice guide seeded**: inserted full `adam-voice-and-workflow.md` content into `social_settings` table via Supabase MCP
+- **APPLY TO POST button**: Claude chat responses no longer auto-overwrite draft content — each assistant message has an explicit "APPLY TO POST" button
+- **Media preview in draft detail**: single image full-width (max 300px), carousel with left/right arrows + index indicator, video with controls
+- **PUBLISH TO PUBLER button**: gold button on approved drafts, calls `/api/social/publish` which pushes to Publer API as draft, updates status to `posted`, logs to `social_activity`
+- **New API route**: `src/app/api/social/publish/route.ts` — maps platform to Publer account IDs, handles "all" platform, creates as Publer draft (`is_draft: true`)
+- **Agent prompt updates**: `tasks/social-media/subagents/03-builder.md` now writes to `social_drafts` table via Supabase REST instead of Publer/PRs; `06-reporter.md` logs to `social_activity`; `master-agent.md` references Supabase dashboard workflow
+
 ---
 
 ## Realtor Relationship System — 2026-03-29 AM (Builder Execution)

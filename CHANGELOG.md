@@ -12,10 +12,22 @@
 - 3 new Supabase tables: `social_drafts`, `social_activity`, `social_settings` (all with RLS)
 - 4 new API routes: `/api/chat/social`, `/api/social/drafts`, `/api/social/activity`, `/api/social/settings`
 - Design spec: `docs/superpowers/specs/2026-03-29-social-media-dashboard-design.md`
+- **Real media upload** in compose panel: drag-and-drop + click to upload to Supabase Storage, thumbnails with remove buttons
+- **Media preview** in draft detail: single image full-width, carousel with arrows + index indicator, video with controls
+- **APPLY TO POST** button on Claude chat responses (replaces auto-overwrite behavior)
+- **PUBLISH TO PUBLER** button on approved drafts — pushes to Publer API as draft, updates status to `posted`
+- `/api/social/publish` route: maps platform to Publer account IDs, logs activity
 
 ### Changed
 - Marketing page default tab changed from SEND to SOCIAL
 - TopNav Marketing dropdown: added "Social Media" as first item
+- Agent builder subagent (`03-builder.md`) now writes to `social_drafts` table instead of Publer/PRs
+- Agent reporter subagent (`06-reporter.md`) logs to `social_activity` table
+- Master agent (`master-agent.md`) references Supabase dashboard workflow
+
+### Fixed
+- Storage RLS violation on media upload: changed path from `social/{userId}/...` to `{userId}/social/...`
+- Voice guide missing: seeded `social_settings` with full voice + workflow guide content
 
 ## [4.8.0] — 2026-03-29 — Realtor Relationship System
 

@@ -83,8 +83,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
       if (data.message) {
         const assistantMsg: ChatMessage = { role: 'assistant', content: data.message.content }
         setMessages([...nextMessages, assistantMsg])
-        // Update the displayed content with Claude's edit
-        onUpdate({ ...draft, content: data.message.content })
       }
     } catch {
       setMessages([
@@ -259,9 +257,26 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                   borderLeft: msg.role === 'assistant' ? `2px solid ${GOLD}` : '2px solid #3f3f46',
                 }}
               >
-                <span className="font-bold" style={{ fontSize: 9, color: msg.role === 'user' ? '#71717a' : GOLD }}>
-                  {msg.role === 'user' ? 'YOU' : 'CLAUDE'}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold" style={{ fontSize: 9, color: msg.role === 'user' ? '#71717a' : GOLD }}>
+                    {msg.role === 'user' ? 'YOU' : 'CLAUDE'}
+                  </span>
+                  {msg.role === 'assistant' && (
+                    <button
+                      onClick={() => onUpdate({ ...draft, content: msg.content })}
+                      className="px-2 py-0.5 rounded-sm font-bold transition-opacity hover:opacity-80"
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: '0.1em',
+                        background: GOLD,
+                        color: '#09090b',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      APPLY TO POST
+                    </button>
+                  )}
+                </div>
                 <div className="mt-0.5 whitespace-pre-wrap">{msg.content}</div>
               </div>
             ))}

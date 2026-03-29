@@ -61,7 +61,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
       const uploaded: UploadedFile[] = []
       for (const file of toUpload) {
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const storagePath = `social/${user.id}/${Date.now()}_${safeName}`
+        const storagePath = `${user.id}/social/${Date.now()}_${safeName}`
 
         const { error } = await supabase.storage
           .from('documents')

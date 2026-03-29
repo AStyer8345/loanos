@@ -131,10 +131,24 @@ curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/todo_items" \
 
 Run one POST per action item. Replace the placeholder text with the actual action description. Set `is_urgent: true` only for time-sensitive items.
 
+## TASK COMMAND CENTER REPORT
+
+After writing the session log, follow the reporting instructions in:
+```
+/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/task-reporting-prompt.md
+```
+
+This writes a structured report to `task-reports.json` so the Task Command Center dashboard stays current. Your `taskId` is `social-media-build`. If it doesn't exist in `tasks[]` yet, add it first.
+
+Do not skip this step. The dashboard is how Adam monitors what this system is doing.
+
+---
+
 ## COMPLETION SIGNAL
 ```
 REPORTER SUBAGENT: COMPLETE — [DATETIME]
 SESSION COMPLETE ✓
 Posts this session: [count] | Platforms covered: [list] | Compliance issues: [count]
 Adam action items added: [count or "none"]
+Task Command Center report: written
 ```

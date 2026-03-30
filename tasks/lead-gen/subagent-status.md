@@ -1,6 +1,20 @@
 # Subagent Status — Lead Generation
 
 ## SESSION_START
+- **Datetime**: 2026-03-30 03:00:00
+- **Mode**: AM
+- **Session**: Lead Gen AM — Daily 3:00 AM
+
+```
+SESSION START: 2026-03-30 03:00:00
+Mode: AM
+Focus: Week 3 Post-Deploy QA — Rate Alert Funnel + PA Funnel live verification
+MASTER: Context loaded. BLOCKER-003 resolved (both funnels deployed 2026-03-29). Activating NotebookLM pull.
+```
+
+---
+
+## SESSION_START
 - **Datetime**: 2026-03-25 14:30:41
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM
@@ -477,6 +491,28 @@ SESSION FULLY COMPLETE ✓
 - **Mode**: PM
 - **Session**: Lead Gen PM — Daily 10:00 PM
 
+---
+
+## SESSION_END (Run 2)
+- **Datetime**: 2026-03-29 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Daily 10:00 PM (duplicate scheduled run)
+
+## NotebookLM PUSH+CURATE (PM Run 2)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 2 (Scotsman Guide FTB markets 2026 id: 2a16c7af, Mailchimp real estate lead gen id: e4fdaf86)
+Stale sources removed: 2 (Cloudflare-blocked HousingWire FTB sources from PM run 1 — ids: 04a9e2bb, 8498b724)
+Web sources added: 2 (Scotsman Guide, Mailchimp — both loaded successfully)
+Session note created: YES (appended to Styer_Growth_Log.md)
+Master notebook updated: YES (Styer Mortgage Master 5348ff90) — old log removed id: b143cfa8, new added id: 4d3ed807
+Daily digest: SKIPPED — already sent by AM session (2026-03-29-digest.md exists)
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-29-pm2.md
+Notebook count: 47 sources
+Timestamp: 2026-03-29 22:15:00
+SESSION FULLY COMPLETE ✓
+```
+
 ## NotebookLM PUSH+CURATE (PM)
 ```
 NOTEBOOKLM (PUSH+CURATE): COMPLETE
@@ -489,5 +525,54 @@ Daily digest: SKIPPED — already sent by AM session (2026-03-29-digest.md exist
 Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-29-pm.md
 Notebook count: 48 sources
 Timestamp: 2026-03-29 22:15:00
+SESSION FULLY COMPLETE ✓
+```
+
+## NotebookLM PULL (2026-03-30 AM)
+```
+NOTEBOOKLM (PULL): COMPLETE — 2026-03-30 03:15:00
+Notebook: LoanOS Lead Gen Intelligence (existing)
+ID: 4213513c-22ac-45af-96c1-3365ba3477eb
+Pull report: tasks/lead-gen/notebooklm-pull-2026-03-30.md
+Key context: BLOCKER-003 confirmed resolved. Both funnels deployed 2026-03-29. Post-deploy QA is today's priority.
+```
+
+## QA Subagent (2026-03-30 AM)
+```
+QA SUBAGENT: PASS WITH BLOCKERS — 2026-03-30 04:00:00
+QA Report: tasks/lead-gen/qa-reports/2026-03-30-post-deploy-qa.md
+Pages live: rate-alert.html ✅ austin-mortgage-rates.html CTA ✅ thank-you.html branching ✅ get-preapproved.html ✅
+Mailchimp tagging: WORKING for both funnels ✅
+n8n PA webhook: LIVE — direct test confirmed ✅
+Rate Alert regression (PA notify must NOT fire): PASS ✅
+LoanOS contact creation: FAILING — BLOCKER-004 (wrong LOANOS_URL hardcoded) ❌
+n8n PA notify from subscribe-lead.js: FAILING — BLOCKER-005 (fire-and-forget async bug) ❌
+BLOCKER-003: CLOSED
+BLOCKER-004: OPENED
+BLOCKER-005: OPENED
+```
+
+## Reporter Subagent (2026-03-30 AM)
+```
+REPORTER SUBAGENT: COMPLETE — 2026-03-30 04:15:00
+Session log: tasks/lead-gen/session-log.md
+Prompt improvements: tasks/lead-gen/prompt-improvements.md
+Adam action items added: 4 (LOANOS_URL env var, redeploy after fix, LOANOS_SYSTEM_USER_ID check, git push)
+LoanOS todo_items posted: YES — 3 items (BLOCKER-004 urgent, BLOCKER-005 urgent, LOANOS_SYSTEM_USER_ID check)
+SESSION COMPLETE ✓
+```
+
+## NotebookLM PUSH+CURATE (2026-03-30 AM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 2 (2026-03-30-post-deploy-qa.md id: 2efdd7e7, Scotsman Guide 5-moves-optimize id: 53d70850)
+Stale sources removed: 4 (Register page c6252f0c, TDHCA duplicate 38753c4d, Google structured data 2625e66b, Cloudflare block 0bf88995)
+Web sources added: 1 (Scotsman Guide — HousingWire Cloudflare-blocked, NMN paywalled)
+Session note: YES — appended to Styer_Growth_Log.md
+Master notebook updated: YES (Styer Mortgage Master 5348ff90) — old log removed id: 0e16f4ee, new added id: 12efdda2
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-30.md
+Daily digest: SENT — adam@thestyerteam.com — Zapier status: success (019d3e00-03ce-f524-e3f3-ef9e4f38660e)
+Notebook count: 47 sources
+Timestamp: 2026-03-30 04:30:00
 SESSION FULLY COMPLETE ✓
 ```

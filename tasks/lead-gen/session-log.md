@@ -2,6 +2,68 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-03-30 AM — Lead Generation
+Focus: Week 3 Post-Deploy QA — Rate Alert Funnel + Pre-Approval Funnel live verification
+Type: Execute / Build (Sequence C — QA-only sub-session)
+Week in Queue: Week 3 of 8
+
+### Completed
+- Confirmed BLOCKER-003 resolved (commit `1b3f0be`, 2026-03-29 10:00 AM CT) via git log
+- Verified all 4 pages live via WebFetch: rate-alert.html ✅, thank-you.html query param branching ✅, austin-mortgage-rates.html CTA ✅, get-preapproved.html ✅
+- Ran live end-to-end form submissions for both funnels via direct POST to subscribe-lead.js
+- Confirmed Mailchimp tagging works for both funnels (`mailchimp: "ok"` on both tests)
+- Confirmed n8n PA webhook is live (direct POST returns `{"message":"Workflow was started"}`)
+- Confirmed regression gate PASSED: PA notify did NOT fire for rate-alert submission
+- Discovered BLOCKER-004: `LOANOS_URL` hardcoded as `https://loanos.vercel.app` in subscribe-lead.js — this domain returns Next.js 404; correct domain is `loanos-astyer8345s-projects.vercel.app`
+- Discovered BLOCKER-005: `notifyPreApprovalLead()` called without `await` — fire-and-forget terminates before n8n call completes in Netlify serverless context
+- Closed BLOCKER-003 in BLOCKERS.md
+- Filed BLOCKER-004 and BLOCKER-005 in BLOCKERS.md
+- Wrote QA report: tasks/lead-gen/qa-reports/2026-03-30-post-deploy-qa.md
+- Added 4 new Adam action items to ADAM-TODO.md (LOANOS_URL env var, redeploy after fix, LOANOS_SYSTEM_USER_ID check, git push after Builder fix)
+
+### Deferred
+- subscribe-lead.js code fixes (BLOCKER-004 + BLOCKER-005): deferred to next Builder session — requires Adam to add Netlify env var + git push after fix
+- Mailchimp Customer Journey creation (PA + Rate Alert): Adam must do in UI — existing item
+- Confirm LOANOS_SYSTEM_USER_ID env var in Vercel: added to ADAM-TODO.md
+
+### Output Produced
+- Research: None
+- Spec: None
+- Build: None
+- Review: None
+- QA: tasks/lead-gen/qa-reports/2026-03-30-post-deploy-qa.md — PASS WITH BLOCKERS
+- BLOCKERS.md: BLOCKER-003 closed; BLOCKER-004 + BLOCKER-005 opened
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (FTB Guide, Pre-Approval, Rate Alert) — all 3 pages live as of 2026-03-29
+- Email sequences active: 1 (FTB Guide Welcome Email via n8n) — Mailchimp journeys not yet created
+- Estimated leads/month from owned channels: ~5–10 (Mailchimp capture working; LoanOS sync and PA notify broken pending fixes)
+
+### Compliance Checks Passed
+- N/A this session (QA-only — no new code written). Prior compliance review: APPROVED 2026-03-29.
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 4 | Review: N/A | QA: 5
+
+### System Improvement Notes
+- **05-qa.md post-deploy protocol** should add: "For any Netlify function that calls an external service (LoanOS, n8n, etc.), verify each call individually by checking the response body sub-keys (e.g., `mailchimp`, `loanos`). A `success: true` top-level response masks partial failures." The LoanOS failure was hidden behind `success: true` and required reading `loanos: "failed"` in the response body.
+- **05-qa.md** should require: "For any async function called in a serverless handler, check whether it is awaited. Fire-and-forget in serverless = silent failure." The `notifyPreApprovalLead()` bug was not caught in code-level QA because it wasn't in scope.
+- **03-builder.md** should add to its subscribe-lead.js checklist: "Verify the LOANOS_URL constant and confirm it matches a real, reachable Vercel project domain. If hardcoded, flag it as a deploy risk."
+
+### BLOCKERS
+- BLOCKER-001: TCPA on homepage forms — LOW (no SMS live)
+- BLOCKER-004: LOANOS_URL wrong in subscribe-lead.js — HIGH (LoanOS contact creation failing)
+- BLOCKER-005: notifyPreApprovalLead() fire-and-forget — HIGH (PA speed-to-lead broken)
+
+### Next Session Instructions
+Priority 1: **Builder session** — Fix BLOCKER-004 (LOANOS_URL env var + code change in subscribe-lead.js) + BLOCKER-005 (add `await` before `notifyPreApprovalLead()` call). After fix: Adam deploys (`git push`) + re-run post-deploy QA to confirm both bugs resolved.
+Priority 2: **Week 4 planning** — After BLOCKER-004/005 resolved, decide: First-Time Buyer Guide enhancement vs Homepage Form Wiring (BLOCKER-001 partial resolution)
+Priority 3: **Adam confirms** Mailchimp Customer Journeys created (PA Welcome Series + Rate Watch Welcome Series) — gates Week 3 full completion declaration
+
+Advance queue to next topic: NO — BLOCKER-004 and BLOCKER-005 require resolution first. Week 3 is not fully complete until LoanOS sync and PA notify are confirmed working end-to-end.
+---
+
+---
 ## Session Log Entry
 Date: 2026-03-25
 Time: INIT

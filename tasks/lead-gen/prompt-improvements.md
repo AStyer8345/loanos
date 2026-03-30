@@ -39,3 +39,11 @@
 - **05-qa.md** should add fallback note: "If `mcp__n8n-mcp__get_workflow_details` returns 'Workflow is not available in MCP' (workflows with `availableInMCP: false`), fall back to `mcp__n8n-mcp__search_workflows` with the workflow name as query. The search result will show `active: true/false`."
 - **03-builder.md** should add explicit Step 1 for any session that introduces new funnels or touches subscribe-lead.js: "Read `netlify/functions/subscribe-lead.js` and verify the `lead_source` gate conditions before writing any new HTML or JS. Document which functions will and will NOT fire for the new funnel's lead_source value."
 - **04-reviewer.md** Quality input validation: The 03b Quality → 04 Reviewer ordering worked well this session — 0 rewrites required at review stage because 03b had already cleared all quality issues. Add a line to the Reviewer prompt: "Quality subagent (03b) has already reviewed copy. Do not re-score copy quality. Focus exclusively on compliance, spec adherence, brand, and technical correctness."
+
+---
+## 2026-03-30 Improvement Suggestions
+
+### From this session:
+- **05-qa.md post-deploy protocol** should add: "For any Netlify function that calls external services, check EACH service's sub-key in the response body separately (e.g., `mailchimp: "ok"`, `loanos: "failed"`). A top-level `success: true` is deceptive — it reflects Netlify function completion, not end-to-end success. A partial failure will be hidden unless sub-keys are read." The LOANOS failure was missed by surface-level response inspection.
+- **05-qa.md** should include a serverless async code review step during post-deploy QA: "For any async function invoked inside a serverless handler (Netlify, Vercel, AWS Lambda), verify it is awaited. If not awaited, flag as BLOCKER — fire-and-forget in serverless terminates before the async call completes." The `notifyPreApprovalLead()` bug escaped code-level QA.
+- **03-builder.md** subscribe-lead.js checklist should require: "Verify the `LOANOS_URL` constant resolves to a real, reachable Vercel project domain. If hardcoded, look up actual Vercel project domains via `mcp__ffdaa602-...list_projects` and confirm match. Flag hardcoded URLs as deploy risks if they cannot be externally verified."

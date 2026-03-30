@@ -18,24 +18,63 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
-## Email Automation Panel — 2026-03-29
+## Automation Command Center — 2026-03-30
 
-**14 email automations** integrated into contact and loan records — generate, refine, and send email drafts powered by Claude.
+**Replaced `/dashboard/automations`** with a unified Command Center controlling all 37 automations (17 Claude Code agents, 18 n8n workflows, 2 chatbot prompts) from one page.
 
-**New files (7):**
-- `src/lib/automations/definitions.ts` — 4 contact + 10 loan automations with stage filtering
-- `src/lib/automations/prompts.ts` — prompt builder for all 14 automations with safe fallbacks
-- `src/app/api/automations/generate/route.ts` — Claude generates email draft, saves to email_drafts
-- `src/app/api/automations/refine/route.ts` — Claude refines draft based on user instruction
-- `src/app/api/automations/send/route.ts` — sends draft to n8n webhook for Outlook draft creation
-- `src/components/automations/AutomationPanel.tsx` — container, queries sent state on mount
-- `src/components/automations/AutomationCard.tsx` — full lifecycle: idle → generating → draft → refining → sending → sent
+**Database (3 migrations applied):**
+- `064_automation_registry.sql` — `automation_registry` + `automation_runs` tables, `email_drafts` columns added
+- `065_automation_registry_rls.sql` — RLS policies for both tables
+- `066_seed_automation_registry.sql` — 37 seed rows across 9 groups
 
-**Modified files (2):**
-- `src/app/dashboard/contacts/[id]/ContactRecordView.tsx` — added AutomationPanel in Overview tab
-- `src/app/dashboard/loans/[id]/page.tsx` — added AutomationPanel in Automations tab (below existing workflow cards)
+**New files (20):**
+- `src/lib/automations/types.ts` — TypeScript types for registry, runs, config
+- `src/lib/automations/groups.ts` — 9 function group definitions with display order
+- `src/app/api/automations/registry/route.ts` — GET all automations
+- `src/app/api/automations/registry/[id]/route.ts` — GET/PATCH single automation
+- `src/app/api/automations/registry/[id]/runs/route.ts` — GET paginated run history
+- `src/app/api/automations/registry/[id]/run-now/route.ts` — POST trigger n8n execution
+- `src/app/api/automations/registry/[id]/ask-claude/route.ts` — POST natural language → config JSON
+- `src/app/api/automations/bulk-action/route.ts` — POST pause/resume all
+- `src/app/api/automations/email/generate/route.ts` — POST generate via n8n webhook
+- `src/app/api/automations/email/[draftId]/route.ts` — PATCH update draft
+- `src/app/api/automations/email/[draftId]/send/route.ts` — POST send via n8n → Outlook
+- `src/app/api/automations/email/[draftId]/refine/route.ts` — POST Claude refinement
+- `src/components/automations/StatusBar.tsx` — active/paused/errored counts + bulk actions
+- `src/components/automations/AutomationRow.tsx` — compact row with status dot, badges
+- `src/components/automations/AutomationGroup.tsx` — collapsible group with detail panel routing
+- `src/components/automations/GuidedControls.tsx` — focus chips, tone/length, avoid/priority
+- `src/components/automations/AskClaudePanel.tsx` — natural language config editor with diff preview
+- `src/components/automations/RunHistoryList.tsx` — paginated run history
+- `src/components/automations/SendHistoryList.tsx` — email send history from activity_log
+- `src/components/automations/AgentDetailPanel.tsx` — 3-tab panel for Claude Code agents
+- `src/components/automations/EmailDetailPanel.tsx` — 4-tab panel for email automations
+- `src/components/automations/EmailTemplateEditor.tsx` — template editor with {{variable}} pills
+- `src/components/automations/AssistantDetailPanel.tsx` — 2-tab panel for chatbot prompts
+- `src/components/automations/InlineDraftEditor.tsx` — inline draft editor for loan/contact records
 
-**Architecture:** Contact record shows 4 automations (referral thank-you, referral intro, application link, nurture follow-up). Loan record shows stage-relevant automations (current stage ± 1 stage in pipeline). Sent state persists via email_drafts table. Send route requires `N8N_OUTLOOK_DRAFT_WEBHOOK_URL` env var — panel works for draft generation without it.
+**Modified files:**
+- `src/app/dashboard/automations/page.tsx` — completely replaced with Command Center
+- `src/components/automations/AutomationPanel.tsx` — now queries `automation_registry` instead of `definitions.ts`
+- `src/components/automations/AutomationCard.tsx` — uses `AutomationRegistryRow`, calls new API routes
+- `src/lib/database.types.ts` — regenerated with new tables
+
+**Deleted files:**
+- `src/lib/automations/definitions.ts` — replaced by `automation_registry` table
+- `src/lib/automations/prompts.ts` — replaced by registry `config` + `prompt_snapshot` fields
+- `src/app/api/automations/generate/route.ts` — replaced by `email/generate`
+- `src/app/api/automations/refine/route.ts` — replaced by `email/[draftId]/refine`
+- `src/app/api/automations/send/route.ts` — replaced by `email/[draftId]/send`
+
+**Architecture:** `automation_registry` is the single source of truth. Claude Code agents read config at runtime. n8n workflows get paused/resumed via n8n API. Email generation routed through n8n webhooks. "Ask Claude" panel lets users modify config via natural language with diff preview. Detail panels differentiate by source type (claude_code → Agent, n8n → Email, supabase_setting → Assistant).
+
+**Env vars needed (not yet in Vercel):** `N8N_API_KEY`, `N8N_WEBHOOK_BASE`
+
+---
+
+## Email Automation Panel — 2026-03-29 (SUPERSEDED by Automation Command Center)
+
+Legacy email automation panel — definitions.ts and prompts.ts deleted, replaced by automation_registry.
 
 ---
 

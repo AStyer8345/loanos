@@ -1,5 +1,28 @@
 # LoanOS Changelog
 
+## [5.0.0] — 2026-03-30 — Automation Command Center
+
+### Added
+- **Automation Command Center** (`/dashboard/automations`) — unified control for all 37 automations (17 Claude Code, 18 n8n, 2 chatbot prompts)
+- `automation_registry` + `automation_runs` tables (migrations 064-066) with RLS policies and 37 seed rows
+- 6 registry API routes: list, get/patch, run history, run-now, ask-claude, bulk pause/resume
+- 4 email API routes: generate via n8n, update draft, send via n8n, refine via Claude
+- 12 new UI components: StatusBar, AutomationRow, AutomationGroup, GuidedControls, AskClaudePanel, RunHistoryList, SendHistoryList, AgentDetailPanel, EmailDetailPanel, EmailTemplateEditor, AssistantDetailPanel, InlineDraftEditor
+- "Ask Claude" panel: natural language → config changes with diff preview
+- Source-specific detail panels: Agent (3 tabs), Email (4 tabs), Assistant (2 tabs)
+
+### Changed
+- `AutomationPanel` now queries `automation_registry` instead of hardcoded `definitions.ts`
+- `AutomationCard` calls new email API routes, accepts `AutomationRegistryRow`
+- Regenerated `database.types.ts` with new tables
+
+### Removed
+- `src/lib/automations/definitions.ts` — replaced by `automation_registry` table
+- `src/lib/automations/prompts.ts` — replaced by registry config + prompt_snapshot
+- `src/app/api/automations/generate/route.ts` — replaced by `email/generate`
+- `src/app/api/automations/refine/route.ts` — replaced by `email/[draftId]/refine`
+- `src/app/api/automations/send/route.ts` — replaced by `email/[draftId]/send`
+
 ## [4.9.5] — 2026-03-29 — Build Unblock + Missing Source Files
 
 ### Fixed

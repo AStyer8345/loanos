@@ -138,6 +138,143 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_registry: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string
+          email_mode: string | null
+          email_template: string | null
+          email_test_data: Json | null
+          email_variables: Json | null
+          group_name: string
+          id: string
+          last_run_at: string | null
+          last_run_status: string | null
+          last_run_summary: string | null
+          name: string
+          org_id: string
+          prompt_snapshot: string | null
+          schedule: string | null
+          source: string
+          source_id: string
+          source_node_id: string | null
+          status: string
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string
+          email_mode?: string | null
+          email_template?: string | null
+          email_test_data?: Json | null
+          email_variables?: Json | null
+          group_name: string
+          id?: string
+          last_run_at?: string | null
+          last_run_status?: string | null
+          last_run_summary?: string | null
+          name: string
+          org_id: string
+          prompt_snapshot?: string | null
+          schedule?: string | null
+          source: string
+          source_id: string
+          source_node_id?: string | null
+          status?: string
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string
+          email_mode?: string | null
+          email_template?: string | null
+          email_test_data?: Json | null
+          email_variables?: Json | null
+          group_name?: string
+          id?: string
+          last_run_at?: string | null
+          last_run_status?: string | null
+          last_run_summary?: string | null
+          name?: string
+          org_id?: string
+          prompt_snapshot?: string | null
+          schedule?: string | null
+          source?: string
+          source_id?: string
+          source_node_id?: string | null
+          status?: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_registry_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_runs: {
+        Row: {
+          automation_id: string
+          changes_made: Json | null
+          completed_at: string | null
+          created_at: string
+          full_log: string | null
+          id: string
+          org_id: string
+          started_at: string
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          automation_id: string
+          changes_made?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          full_log?: string | null
+          id?: string
+          org_id: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          automation_id?: string
+          changes_made?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          full_log?: string | null
+          id?: string
+          org_id?: string
+          started_at?: string
+          status?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automation_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
           created_at: string | null
@@ -755,6 +892,7 @@ export type Database = {
       }
       email_drafts: {
         Row: {
+          automation_id: string | null
           automation_name: string
           body_html: string
           body_preview: string | null
@@ -764,6 +902,7 @@ export type Database = {
           loan_id: string | null
           organization_id: string
           outlook_draft_id: string | null
+          personalization_notes: string | null
           recipient_email: string
           recipient_name: string | null
           status: string
@@ -772,6 +911,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          automation_id?: string | null
           automation_name: string
           body_html: string
           body_preview?: string | null
@@ -781,6 +921,7 @@ export type Database = {
           loan_id?: string | null
           organization_id: string
           outlook_draft_id?: string | null
+          personalization_notes?: string | null
           recipient_email: string
           recipient_name?: string | null
           status?: string
@@ -789,6 +930,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          automation_id?: string | null
           automation_name?: string
           body_html?: string
           body_preview?: string | null
@@ -798,6 +940,7 @@ export type Database = {
           loan_id?: string | null
           organization_id?: string
           outlook_draft_id?: string | null
+          personalization_notes?: string | null
           recipient_email?: string
           recipient_name?: string | null
           status?: string
@@ -806,6 +949,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "email_drafts_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automation_registry"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "email_drafts_contact_id_fkey"
             columns: ["contact_id"]
@@ -2104,6 +2254,138 @@ export type Database = {
           resource_id?: string | null
         }
         Relationships: []
+      }
+      social_activity: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string
+          id: string
+          organization_id: string
+          session_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail: string
+          id?: string
+          organization_id: string
+          session_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string
+          id?: string
+          organization_id?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_activity_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_drafts: {
+        Row: {
+          agent_notes: string | null
+          content: string
+          created_at: string
+          created_by: string
+          format: string | null
+          hashtags: string | null
+          id: string
+          media_urls: string[] | null
+          organization_id: string
+          pillar: string | null
+          platform: string
+          publer_post_id: string | null
+          scheduled_for: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_notes?: string | null
+          content: string
+          created_at?: string
+          created_by?: string
+          format?: string | null
+          hashtags?: string | null
+          id?: string
+          media_urls?: string[] | null
+          organization_id: string
+          pillar?: string | null
+          platform: string
+          publer_post_id?: string | null
+          scheduled_for?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agent_notes?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string
+          format?: string | null
+          hashtags?: string | null
+          id?: string
+          media_urls?: string[] | null
+          organization_id?: string
+          pillar?: string | null
+          platform?: string
+          publer_post_id?: string | null
+          scheduled_for?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_settings: {
+        Row: {
+          id: string
+          key: string
+          organization_id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          organization_id: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          organization_id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_admins: {
         Row: {

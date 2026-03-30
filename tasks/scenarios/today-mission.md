@@ -1,39 +1,35 @@
-## Scenarios Mission Brief — 2026-03-29 AM
+## Scenarios Mission Brief — 2026-03-30 AM
 
 ### Focus Area
-Rent vs Own comparison mode — client-side component that answers "should I keep renting or buy now?"
+Email from Builder — send scenario share link directly to borrower from the results tab
 
 ### Why This Matters
-This is the highest-impact "emotional" scenario MC uses to create urgency. MC anchors on a clean "Break even in Year X" headline and shows equity growth vs. $0 equity from renting. LoanOS has no equivalent. Every time Adam runs this comparison today, he manually does it in MC.
+Mortgage Coach lets LOs send the presentation with one click from inside the tool.
+LoanOS currently requires Adam to: (1) copy the share link, (2) open Outlook, (3) compose email, (4) paste link.
+That 4-step friction prevents the feature from being used consistently.
+This closes the single biggest workflow gap vs MC.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Build `RentVsOwnSection.tsx` — client-side component, no API call, renders in purchase mode results after DownPaymentSection
-2. Inputs pulled from existing ScenarioBuilder state: purchasePrice, downPaymentPercent (from first scenario), rate, term, taxes, HOI, HOA + one new input: monthly rent
-3. Outputs: break-even year, monthly rent vs PITI comparison, equity at year 5/10/15, total cost of renting vs owning over 10 years
-4. Hero metric displayed in gold: "Break even in Year X"
-5. Build passes with 0 TypeScript errors
+1. "Email Borrower" button in ActionsBar — saves scenario (if needed), shows inline email input
+2. Adam enters borrower email → hits Send → Outlook draft created via n8n webhook
+3. Build passes, no TypeScript errors
 
 ### Files in Scope
-- `src/app/dashboard/scenarios/new/RentVsOwnSection.tsx` (new)
-- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render only)
-
-Everything else is OFF LIMITS.
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx` — add Email button + inline input
+- `src/app/api/scenarios/send-email/route.ts` — new API route
 
 ### Definition of Done
-- `npm run build` passes, 0 TypeScript errors
-- Component renders in purchase mode results after DownPaymentSection
-- Hero "Break even in Year X" visible, gold-styled
-- Monthly rent vs PITI table shows clearly
-- Equity build at years 5, 10, 15 shown
-- Compliance note present
-- Git committed and pushed to main
-- Vercel deployment READY
+- Email button appears in ActionsBar alongside PDF/Share/Save buttons
+- Clicking opens an inline email input panel (not a modal — stays in-page)
+- Adam enters email, clicks Send → success state shown
+- API route calls N8N_OUTLOOK_DRAFT_WEBHOOK_URL with share URL + borrower name
+- `npm run build` passes with 0 TypeScript errors
+- No auth/RLS/multi-tenant changes
 
 ### Subagents to Activate
-[ ] Research Subagent — SKIP (enough context from NotebookLM)
-[x] Builder Subagent
-[x] QA Subagent
-[x] Reporter Subagent
+[x] Builder (direct build — no research needed, pattern already established)
+[x] QA
+[x] Reporter

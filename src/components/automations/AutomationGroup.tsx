@@ -4,6 +4,9 @@ import { useState } from 'react'
 import type { AutomationRegistryRow } from '@/lib/automations/types'
 import { getGroupLabel } from '@/lib/automations/groups'
 import AutomationRow from './AutomationRow'
+import AgentDetailPanel from './AgentDetailPanel'
+import EmailDetailPanel from './EmailDetailPanel'
+import AssistantDetailPanel from './AssistantDetailPanel'
 
 const GOLD = '#C9A84C'
 const MONO = "'IBM Plex Mono', 'Courier New', monospace"
@@ -14,6 +17,7 @@ interface AutomationGroupProps {
   expandedId: string | null
   onToggle: (id: string) => void
   onUpdate: (id: string, data: Partial<AutomationRegistryRow>) => void
+  savingId?: string | null
 }
 
 export default function AutomationGroup({
@@ -21,6 +25,8 @@ export default function AutomationGroup({
   automations,
   expandedId,
   onToggle,
+  onUpdate,
+  savingId,
 }: AutomationGroupProps) {
   const [groupOpen, setGroupOpen] = useState(true)
   const label = getGroupLabel(groupName)
@@ -60,11 +66,28 @@ export default function AutomationGroup({
                 onToggle={() => onToggle(automation.id)}
               />
               {expandedId === automation.id && (
-                <div
-                  className="px-4 py-3 border-t border-zinc-800/50 text-zinc-600"
-                  style={{ fontSize: 11, fontFamily: MONO, background: '#09090b' }}
-                >
-                  Detail panel loading...
+                <div className="border-t border-zinc-800/50">
+                  {automation.source === 'claude_code' && (
+                    <AgentDetailPanel
+                      automation={automation}
+                      onSave={(updates) => onUpdate(automation.id, updates)}
+                      saving={savingId === automation.id}
+                    />
+                  )}
+                  {automation.source === 'n8n' && (
+                    <EmailDetailPanel
+                      automation={automation}
+                      onSave={(updates) => onUpdate(automation.id, updates)}
+                      saving={savingId === automation.id}
+                    />
+                  )}
+                  {automation.source === 'supabase_setting' && (
+                    <AssistantDetailPanel
+                      automation={automation}
+                      onSave={(updates) => onUpdate(automation.id, updates)}
+                      saving={savingId === automation.id}
+                    />
+                  )}
                 </div>
               )}
             </div>

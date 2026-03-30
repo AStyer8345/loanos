@@ -2,19 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import {
-  CONTACT_AUTOMATIONS,
-  LOAN_AUTOMATIONS,
-  type AutomationDef,
-} from '@/lib/automations/definitions'
+import type { AutomationRegistryRow } from '@/lib/automations/types'
 import AutomationCard from './AutomationCard'
 
 const GOLD = '#C9A84C'
-
-interface SentDraft {
-  automation_name: string
-  created_at: string
-}
 
 interface Props {
   recordType: 'contact' | 'loan'
@@ -31,20 +22,37 @@ export default function AutomationPanel({
   contactId,
   loanId,
 }: Props) {
+  // sentMap keys are automation_name (matches email_drafts.automation_name)
   const [sentMap, setSentMap] = useState<Record<string, string>>({})
-  const [automations, setAutomations] = useState<AutomationDef[]>([])
+  const [automations, setAutomations] = useState<AutomationRegistryRow[]>([])
   const [loaded, setLoaded] = useState(false)
 
-  // Determine which automations to show — all loan automations always visible
+  // Fetch email automations from automation_registry
   useEffect(() => {
-    if (recordType === 'contact') {
-      setAutomations(CONTACT_AUTOMATIONS)
-    } else {
-      setAutomations(LOAN_AUTOMATIONS)
-    }
-  }, [recordType])
+    let cancelled = false
 
-  // Query sent state from email_drafts
+    async function fetchAutomations() {
+      const supabase = createClient()
+
+      // automation_registry is not in generated types yet — cast to bypass
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase as any)
+        .from('automation_registry')
+        .select('*')
+        .eq('source', 'n8n')
+        .not('email_mode', 'is', null)
+        .order('name')
+
+      if (!cancelled && data) {
+        setAutomations(data as AutomationRegistryRow[])
+      }
+    }
+
+    fetchAutomations()
+    return () => { cancelled = true }
+  }, [])
+
+  // Query sent state from email_drafts — keyed by automation_name
   useEffect(() => {
     let cancelled = false
 
@@ -66,10 +74,10 @@ export default function AutomationPanel({
 
       if (!cancelled && data) {
         const map: Record<string, string> = {}
-        for (const row of data as SentDraft[]) {
-          // Keep the most recent sent timestamp per automation
-          if (!map[row.automation_name]) {
-            map[row.automation_name] = row.created_at
+        for (const row of data) {
+          const name = row.automation_name
+          if (name && !map[name]) {
+            map[name] = row.created_at ?? ''
           }
         }
         setSentMap(map)
@@ -104,8 +112,8 @@ export default function AutomationPanel({
             automation={a}
             recordType={recordType}
             recordId={recordId}
-            initialSent={!!sentMap[a.id]}
-            sentAt={sentMap[a.id] ?? null}
+            initialSent={!!sentMap[a.name]}
+            sentAt={sentMap[a.name] ?? null}
           />
         ))}
       </div>

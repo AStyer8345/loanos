@@ -899,3 +899,77 @@ Advance queue: NO — starting Session 1 of 3 for White-Label
 BLOCKERS TO CHECK FIRST:
 - Adam's DNS confirmation for loanos.app (needed for Session 2 — not Session 1)
 - Stripe env vars (needed for billing — not white-label)
+
+---
+## Session Log Entry
+Date: 2026-03-30
+Time: AM (Scheduled)
+Focus: Phase 3 — White-Label Options Build Session 1 (Branding Engine)
+Session Type: Build
+
+### Completed
+- **NotebookLM PULL executed** — 3 queries on White-Label topic. Pull report written. Confirmed: spec is complete, no blockers for Session 1.
+- **Stripe check** — STRIPE_SECRET_KEY not in .env.local. Billing still blocked.
+- **Migration 063 applied** — `organizations.slug` UNIQUE constraint + `org_settings.custom_email_reply_to` column added. Applied via Supabase MCP. Migration file saved locally.
+- **`src/lib/branding/getBranding.ts` created** — Server helper that loads org's `brand_color`, `logo_url`, `slug`, `name`. Falls back to DEFAULT_BRANDING (LoanOS gold #C9A84C) for unauthenticated users or orgs without custom branding. Reuses existing `createClient()` from supabase/server.
+- **`src/lib/billing/entitlements.ts` created** — Stub `canAccessFeature()` function. Returns true for Professional plan features (`customBranding`, `customDomain`, `customEmailReplyTo`, `advancedReporting`). Starter plan returns false. Will be replaced when Stripe billing is built.
+- **`src/app/layout.tsx` modified** — Root layout is now async. Calls `getBranding()` and injects `--brand-primary` CSS custom property via `<style>` tag in `<head>`. Uses `dangerouslySetInnerHTML` (safe — hex validated before storage). Falls back gracefully when no user is logged in.
+- **`src/app/api/org/settings/branding/route.ts` created** — GET returns current branding (color, logo, slug, name, plan). PATCH validates hex color via regex (`/^#[0-9A-Fa-f]{6}$/`), validates logo URL, updates organizations table. Requires owner/admin role. Returns updated branding object.
+- **`src/app/dashboard/settings/branding/page.tsx` created** — Full branding settings page: color picker (native `<input type="color">` + hex text input), live preview with mock nav bar showing brand color on buttons/accents/progress bars, upgrade prompt for Starter plan users, current branding info panel, back link to main settings. Follows existing settings page design system (SectionCard pattern, amber accents, zinc dark theme, IBM Plex Mono).
+- **`src/lib/database.types.ts` modified** — Added `custom_email_reply_to: string | null` to org_settings Row/Insert/Update types.
+- **Build verified** — `npm run build` passes with 0 TypeScript errors. 68 routes in output. `/api/org/settings/branding` and `/dashboard/settings/branding` (3.35 kB) both present.
+
+### Incomplete / Deferred
+- Logo upload: Deferred — `@vercel/blob` not installed. Color branding only this session. Logo upload will be added when @vercel/blob is installed.
+- Stripe build sessions (1-3): BLOCKED — Adam must add env vars
+- system_admins seed: BLOCKED — Adam must run INSERT
+- White-Label Session 2 (Subdomain Routing): Blocked on Adam confirming DNS method for loanos.app
+- White-Label Session 3 (Settings UI + Polish): After Sessions 1+2
+
+### What Was Built
+- `supabase/migrations/063_whitelabel_slug_and_email.sql` — created
+- `src/lib/branding/getBranding.ts` — created (server branding helper)
+- `src/lib/billing/entitlements.ts` — created (feature entitlement stub)
+- `src/app/layout.tsx` — modified (async, CSS var injection)
+- `src/app/api/org/settings/branding/route.ts` — created (GET + PATCH)
+- `src/app/dashboard/settings/branding/page.tsx` — created (branding settings UI)
+- `src/lib/database.types.ts` — modified (custom_email_reply_to added)
+- `tasks/enterprise/notebooklm-pull-2026-03-30.md` — created (pull report)
+- `tasks/enterprise/today-mission.md` — updated (mission brief)
+
+### Quality Assessment
+Build: 5/5 — All files created, build passes clean, follows existing codebase patterns exactly (getOrganization, createClient, route handler structure, Tailwind dark theme, IBM Plex Mono, amber accents).
+Review: 4/5 — Self-reviewed. Hex validation prevents XSS via dangerouslySetInnerHTML. Role check on PATCH. Graceful fallback for unauthenticated users.
+QA: 5/5 — Build passes 0 errors. Both routes in output. Page follows same pattern as existing settings page.
+
+### BLOCKERS
+- **[ADAM ACTION REQUIRED]** Stripe env vars in Vercel (see billing spec)
+- **[ADAM ACTION REQUIRED]** system_admins INSERT SQL
+- **[ADAM DECISION NEEDED]** DNS method for loanos.app — Vercel nameservers required for wildcard *.loanos.app (Session 2 blocker)
+- **[ADAM INPUT NEEDED]** Arive webhook: shared or per-tenant URL?
+
+### White-Label Options Status
+- Architecture: ✅ COMPLETE — Spec ready
+- Session 1 (Branding Engine): ✅ COMPLETE — migration, getBranding, CSS var injection, API route, settings page
+- Session 2 (Subdomain Routing): ⏳ Blocked on DNS confirmation from Adam
+- Session 3 (Settings UI + Polish): ⏳ After Sessions 1+2
+
+### Next Session Instructions
+**Master Orchestrator: Read this before doing anything else.**
+
+Priority 1: PUSH+CURATE — Run NotebookLM PM session (push today's files, staleness audit, web research, digest)
+
+Priority 2: CHECK — Has Adam confirmed DNS method for loanos.app? If yes, begin White-Label Session 2.
+
+Priority 3: If DNS not confirmed — Begin Enterprise Social Media Build Session 1 (migration for social_profiles + voice_guides tables).
+  → Spec: `tasks/enterprise/specs/2026-03-29-enterprise-social-media-spec.md`
+
+Priority 4 (if Stripe env vars arrive): Billing Build Session 1 takes priority.
+  → Spec: `tasks/enterprise/specs/2026-03-26-phase3-billing-spec.md`
+
+Active focus area: Phase 3 — White-Label Options (Session 1 COMPLETE, Session 2 blocked on DNS)
+Advance queue: NO — White-Label not fully done
+
+Files to read first:
+- `tasks/enterprise/specs/2026-03-29-phase3-whitelabel-spec.md` — Session 2 section (if DNS confirmed)
+- `tasks/enterprise/specs/2026-03-29-enterprise-social-media-spec.md` — fallback build target

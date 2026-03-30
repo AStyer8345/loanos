@@ -1744,6 +1744,7 @@ export type Database = {
         Row: {
           arive_webhook_url: string | null
           created_at: string
+          custom_email_reply_to: string | null
           id: string
           los_type: string | null
           mailchimp_list_ids: Json | null
@@ -1760,6 +1761,7 @@ export type Database = {
         Insert: {
           arive_webhook_url?: string | null
           created_at?: string
+          custom_email_reply_to?: string | null
           id?: string
           los_type?: string | null
           mailchimp_list_ids?: Json | null
@@ -1776,6 +1778,7 @@ export type Database = {
         Update: {
           arive_webhook_url?: string | null
           created_at?: string
+          custom_email_reply_to?: string | null
           id?: string
           los_type?: string | null
           mailchimp_list_ids?: Json | null

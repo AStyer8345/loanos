@@ -358,3 +358,41 @@ Priority 3: Monitor GSC for VA + FHA + pre-approval posts impressions (after Apr
 
 Advance queue: YES — VA eligibility post complete, suburb thin-content cleared
 ---
+---
+## Session: 2026-03-30 AM — SEO + SEM
+Focus: Post-deploy QA on Rate Alert Funnel + FTB Programs 2026 blog post
+Type: Execution (LOW_RISK QA fixes + MEDIUM_RISK new content)
+
+### Completed
+
+**Rate Alert Funnel QA (LOW_RISK):**
+- rate-alert.html: title 79 chars → "Austin Rate Watch | Mortgage Rate Alerts | NMLS #513013" (55 chars ✓)
+- rate-alert.html: canonical fixed from `styermortgage.com/rate-alert` → `.../rate-alert.html` (per site convention)
+- rate-alert.html: og:url fixed to match canonical
+- thank-you.html: QA pass — noindex ✓, GTM ✓, title 45 chars ✓
+- austin-mortgage-rates.html: meta desc trimmed 158 → 151 chars ✓
+- austin-mortgage-rates.html: canonical + og:url fixed from `/austin-mortgage-rates` → `.../austin-mortgage-rates.html`
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-03-30-first-time-home-buyer-programs-austin-tx-2026.html
+- Title: "First-Time Buyer Programs Austin TX 2026 | NMLS #513013" (55 chars ✓)
+- Meta: "Texas first-time home buyer programs in 2026: TSAHC grants, TDHCA assistance, MCC tax credits, and how to stack them to buy in Austin. NMLS #513013." (148 chars ✓)
+- H1: "First-Time Home Buyer Programs Austin TX 2026 — What's Still Available"
+- Content: TSAHC (Home Sweet Texas + Homes for Texas Heroes), TDHCA My First Texas Home, MCC tax credit mechanics (real dollar examples), City of Austin American Dream Program, stacking table, first-time buyer definition clarification
+- Schema: Article + FAQPage (6 questions covering TSAHC, repayment, FHA compatibility, MCC savings, eligibility definition, program stacking)
+- Internal links: /first-time-home-buyer.html, /get-preapproved, /austin-down-payment-assistance.html, /blog/2026-03-27-down-payment-assistance-texas-2026.html
+- Added to sitemap.xml (lastmod 2026-03-30) and blog/manifest.json (first position)
+- Git commit: dd5dea0 — 5 files changed, pushed to GitHub, Netlify auto-deploying
+
+### Deferred
+- austin-housing-market-2025.html 301 redirect: still needs Adam decision (page is noindexed — low urgency)
+- GSC data: check after April 5 for early impressions on new blog posts
+- GSC URL submission: VA, FHA vs conventional, pre-approval, and FTB posts all good candidates for manual indexing request
+
+### Next Session Instructions
+Priority 1: Monitor GSC for impressions on 4 new blog posts (after April 5) — note positions 4-20 for optimization
+Priority 2: Write next blog post — "DSCR Loans in Texas 2026" or "How to Choose a Mortgage Lender in Austin TX" (both target high-intent buyers)
+Priority 3: Begin suburb page content improvements — inline CTAs and local H2/H3 keyword density (schema + copy level)
+
+Advance queue: YES — FTB Programs post complete, Rate Alert funnel QA clear
+---

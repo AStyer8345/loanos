@@ -1,0 +1,167 @@
+<h2>Automation Command Center — Page Layout</h2>
+<p class="subtitle">Replaces /dashboard/automations. One page, everything in one place.</p>
+
+<div class="mockup">
+  <div class="mockup-header">LoanOS — Automation Command Center</div>
+  <div class="mockup-body" style="background:#0a0a0a; color:#e5e5e5; font-family:monospace; padding:0;">
+
+    <!-- Top bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid #3f3f46;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span style="font-size:18px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#D4AF37;">Automation Command Center</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <span style="background:#27272a; border:1px solid #3f3f46; padding:4px 12px; border-radius:4px; font-size:12px; color:#a1a1aa;">Pause All</span>
+        <span style="background:#27272a; border:1px solid #3f3f46; padding:4px 12px; border-radius:4px; font-size:12px; color:#a1a1aa;">Resume All</span>
+      </div>
+    </div>
+
+    <!-- Status summary bar -->
+    <div style="display:flex; gap:16px; padding:12px 24px; background:#18181b; border-bottom:1px solid #27272a;">
+      <span style="font-size:12px; color:#4ADE80;">● 34 Active</span>
+      <span style="font-size:12px; color:#fbbf24;">● 2 Paused</span>
+      <span style="font-size:12px; color:#ef4444;">● 2 Errored</span>
+      <span style="font-size:12px; color:#a1a1aa;">Last run: SEO/SEM Agent — 12 min ago</span>
+    </div>
+
+    <!-- Function groups -->
+    <div style="padding:24px;">
+
+      <!-- Group: Loan Pipeline -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#D4AF37; border-left:3px solid #D4AF37; padding-left:10px;">Loan Pipeline</span>
+          <span style="font-size:11px; color:#71717a;">5 automations</span>
+        </div>
+
+        <!-- Automation row -->
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">Arive New Loan → Supabase</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">webhook</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 2h ago</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">Arive Status Update → Supabase</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">webhook</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 45m ago</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">New Application Received</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">webhook</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 1d ago</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group: Email Automations -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#D4AF37; border-left:3px solid #D4AF37; padding-left:10px;">Email Automations</span>
+          <span style="font-size:11px; color:#71717a;">7 automations</span>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">Pre-Approval Email</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">webhook</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 3d ago</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">Drip Email Scheduler</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">hourly</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 22m ago</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group: SEO / SEM -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#D4AF37; border-left:3px solid #D4AF37; padding-left:10px;">SEO / SEM</span>
+          <span style="font-size:11px; color:#71717a;">4 automations</span>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">SEO/SEM Agent (AM + PM)</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">claude</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">2x daily</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: 4:40 AM</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+
+        <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; padding:12px 16px; gap:12px;">
+            <span style="color:#4ADE80; font-size:10px;">●</span>
+            <span style="flex:1; font-size:13px; color:#e5e5e5;">Competitive Intel</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">claude</span>
+            <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">weekly</span>
+            <span style="font-size:11px; color:#a1a1aa;">Last: Mon</span>
+            <span style="color:#D4AF37; font-size:12px; cursor:pointer;">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- More groups indicated -->
+      <div style="color:#71717a; font-size:12px; text-align:center; padding:12px;">
+        + Social Media · Lead Gen · Content · LoanOS Core · Communication Logging
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:32px;">What you're seeing</h3>
+<p>The main page — grouped by function, each automation as a compact row. Click the gold arrow (▸) to expand any row into its detail panel where you can see run history, edit controls, email previews, etc.</p>
+<p><strong>Key elements:</strong></p>
+<ul>
+  <li>Status dot (green/yellow/red) at a glance</li>
+  <li>System badge (n8n vs claude) so you know where it lives</li>
+  <li>Trigger type badge (webhook, hourly, daily, weekly)</li>
+  <li>Last run timestamp</li>
+  <li>Pause All / Resume All at the top</li>
+  <li>AM+PM pairs collapsed into one row (they're the same agent, just two sessions)</li>
+</ul>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>This layout works</h3>
+      <p>Move on to the detail/edit panel design</p>
+    </div>
+  </div>
+  <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content">
+      <h3>Needs changes</h3>
+      <p>I'll describe what to adjust</p>
+    </div>
+  </div>
+</div>

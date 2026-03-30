@@ -1,0 +1,66 @@
+<h2>Social Media Dashboard — Layout</h2>
+<p class="subtitle">This will live as a new tab inside your Marketing page, next to SEND, CALLS, and HISTORY</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>List + Side Panel</h3>
+      <p>Left side: scrollable list of all drafts (newest first) with status badges (Draft, Approved, Scheduled, Posted). Click a draft → right side opens a detail panel with preview, inline editor, and Claude chat. Similar to an email client layout.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #1a1a2e; border-radius: 6px; font-family: monospace; font-size: 11px; color: #888;">
+        ┌──────────────┬─────────────────────────────┐<br>
+        │ Draft List   │  Preview / Edit / Chat       │<br>
+        │              │                              │<br>
+        │ ▸ Post #12   │  [Instagram] Wed Apr 9       │<br>
+        │   Post #11   │                              │<br>
+        │   Post #10   │  "When people are fearful..."│<br>
+        │   Post #9    │                              │<br>
+        │   ...        │  [EDIT] [APPROVE] [REJECT]   │<br>
+        │              │                              │<br>
+        │              │  ─── Chat with Claude ───    │<br>
+        │              │  "Make this punchier"        │<br>
+        └──────────────┴─────────────────────────────┘
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Calendar View</h3>
+      <p>Monthly calendar grid showing scheduled slots. Click a day → see the posts for that day. Good for seeing the big picture of what's planned, but harder to quickly scan/edit individual posts.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #1a1a2e; border-radius: 6px; font-family: monospace; font-size: 11px; color: #888;">
+        ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐<br>
+        │ Mon │ Tue │ Wed │ Thu │ Fri │ Sat │ Sun │<br>
+        ├─────┼─────┼─────┼─────┼─────┼─────┼─────┤<br>
+        │ LI  │     │ LI  │     │ LI  │     │     │<br>
+        │ IG  │     │ IG  │     │ IG  │     │     │<br>
+        │     │     │     │     │ FB  │     │     │<br>
+        ├─────┼─────┼─────┼─────┼─────┼─────┼─────┤<br>
+        │ LI  │     │ LI  │     │ LI  │     │     │<br>
+        │ IG  │     │ IG  │     │ IG  │     │     │<br>
+        └─────┴─────┴─────┴─────┴─────┴─────┴─────┘<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click a cell to open post details
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Kanban Board</h3>
+      <p>Columns for each status: Draft → In Review → Approved → Scheduled → Posted. Drag posts between columns. Visual workflow, but takes more screen space and less info density than the list view.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #1a1a2e; border-radius: 6px; font-family: monospace; font-size: 11px; color: #888;">
+        ┌──────────┬──────────┬──────────┬──────────┐<br>
+        │ DRAFT    │ REVIEW   │ APPROVED │ SCHEDULED│<br>
+        ├──────────┼──────────┼──────────┼──────────┤<br>
+        │ Post #12 │ Post #10 │ Post #8  │ Post #5  │<br>
+        │ Post #11 │          │ Post #7  │ Post #4  │<br>
+        │          │          │ Post #6  │          │<br>
+        └──────────┴──────────┴──────────┴──────────┘
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 24px; color: #888; font-size: 13px;"><strong>My recommendation: Option A (List + Side Panel).</strong> It's the fastest for reviewing and editing posts one by one — which is your primary workflow. Calendar can be a secondary view toggle later. Kanban looks nice but adds friction for a solo operator.</p>

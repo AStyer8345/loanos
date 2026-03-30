@@ -1,7 +1,7 @@
-## Mission Brief — 2026-03-29 AM
+## Mission Brief — 2026-03-30 AM
 
-Date: 2026-03-29 | Mode: AM | Focus: VA blog post + lead-gen pending deploy
+Date: 2026-03-30 | Mode: AM | Focus: Rate Alert Funnel QA + FTB Programs blog post
 
-1. Deploy pending lead-gen files (rate-alert.html, thank-you.html mods, austin-mortgage-rates.html mods) — code-complete per ADAM-TODO
-2. VA Loan Eligibility Texas blog post — next in content queue, veteran buyer high-intent cluster
-3. Suburb thin-content spot check (jarrell, florence — smaller cities, higher risk)
+1. QA rate-alert.html + austin-mortgage-rates.html (title/meta/canonical) — DONE, commit dd5dea0
+2. Write "First-Time Home Buyer Programs Austin TX 2026" — DONE, commit dd5dea0
+3. Update sitemap.xml + manifest.json — DONE, pushed to GitHub

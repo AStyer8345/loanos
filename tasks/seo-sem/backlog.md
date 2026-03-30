@@ -31,7 +31,9 @@
 ## P3 — MEDIUM_RISK (implement with rationale logged)
 
 - ~~[MEDIUM_RISK] Update sitemap.xml lastmod dates for all 38 pages changed 2026-03-27~~ ✅ DONE — promoted to P1 ZERO_RISK, completed commit 9779ef6
-- [MEDIUM_RISK] austin-housing-market-2025.html — ✅ noindex added 2026-03-27 (Option C). Redirect to /austin-mortgage-rates is STILL pending — need Adam decision on whether to do 301 redirect
+- [MEDIUM_RISK] austin-housing-market-2025.html — ✅ noindex added 2026-03-27. Redirect to /austin-mortgage-rates still pending Adam decision (LOW priority — page is noindexed, no urgency)
+- [LOW_RISK] ~~rate-alert.html title (79 chars) + canonical (.html fix)~~ ✅ DONE 2026-03-30 — commit dd5dea0
+- [LOW_RISK] ~~austin-mortgage-rates.html meta desc (158 chars → 151) + canonical (.html fix)~~ ✅ DONE 2026-03-30 — commit dd5dea0
 - ~~[MEDIUM_RISK] Homepage H1~~ ✅ DONE in prior session (2026-03-26 PM) — "Mortgage Broker Austin TX — Adam Styer | NMLS #513013"
 - ~~[MEDIUM_RISK] Add /prequal.html to robots.txt Disallow~~ ✅ DONE 2026-03-28 — commit 7879b14
 - ~~[MEDIUM_RISK] Verify /contact-us 404 redirect is in _redirects — if not, add it~~ ✅ Confirmed done in prior commit ac3afc9
@@ -48,7 +50,7 @@
 - ~~Blog post: "How Long Does Mortgage Pre-Approval Take in Austin TX?"~~ ✅ DONE 2026-03-28 — commit 7879b14, FAQPage schema (6 questions), added to sitemap + manifest
 - ~~Blog post: "FHA vs Conventional Loan Austin TX — Which Is Right for You?"~~ ✅ DONE 2026-03-28 — commit 45c8f2f, FAQPage schema (6 questions), comparison table, added to sitemap + manifest
 - ~~Blog post: "VA Loan Eligibility in Texas — Who Qualifies and How to Use Your Benefit"~~ ✅ DONE 2026-03-29 — commit 1b3f0be, FAQPage schema (6 questions), service table, added to sitemap + manifest
-- Blog post: "First-Time Home Buyer Programs Austin TX 2026" — complements DPA post, more process-focused
+- ~~Blog post: "First-Time Home Buyer Programs Austin TX 2026"~~ ✅ DONE 2026-03-30 — commit dd5dea0, FAQPage 6 questions, MCC/TSAHC/TDHCA coverage, comparison table, added to sitemap + manifest
 - ~~Suburb page content audit: are the 15 new-to-sitemap pages strong enough or thin?~~ ✅ SPOT CHECK DONE 2026-03-29 — Jarrell (522 lines, 41 content elements) and Florence (522 lines, 41 content elements) both substantive — NOT thin. All suburb pages appear to be using the same strong template.
 - thank-you.html: noindex removed during redesign ✅ FIXED 2026-03-28 — commit 7879b14
 

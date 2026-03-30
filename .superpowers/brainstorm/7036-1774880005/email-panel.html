@@ -1,0 +1,156 @@
+<h2>Email Automation — Expanded View</h2>
+<p class="subtitle">What you see when you click into an email-type automation</p>
+
+<div class="mockup">
+  <div class="mockup-header">Pre-Approval Email — Expanded View</div>
+  <div class="mockup-body" style="background:#0a0a0a; color:#e5e5e5; font-family:monospace; padding:0;">
+
+    <!-- Collapsed row -->
+    <div style="display:flex; align-items:center; padding:12px 16px; gap:12px; background:#1a1a1f; border-bottom:1px solid #D4AF37;">
+      <span style="color:#4ADE80; font-size:10px;">●</span>
+      <span style="flex:1; font-size:13px; color:#e5e5e5; font-weight:bold;">Pre-Approval Email</span>
+      <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">n8n</span>
+      <span style="font-size:11px; color:#71717a; background:#27272a; padding:2px 8px; border-radius:3px;">webhook</span>
+      <span style="font-size:11px; color:#a1a1aa;">Last sent: Mar 27</span>
+      <span style="color:#D4AF37; font-size:12px;">▾</span>
+    </div>
+
+    <!-- Expanded panel -->
+    <div style="padding:20px 24px; background:#111114; border-bottom:2px solid #27272a;">
+
+      <!-- Tab bar -->
+      <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid #27272a;">
+        <span style="padding:8px 16px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#D4AF37; border-bottom:2px solid #D4AF37;">Email Preview</span>
+        <span style="padding:8px 16px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#71717a;">AI Prompt</span>
+        <span style="padding:8px 16px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#71717a;">Send History</span>
+        <span style="padding:8px 16px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#71717a;">Controls</span>
+      </div>
+
+      <!-- EMAIL PREVIEW TAB -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+        <!-- Left: email preview -->
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#D4AF37; margin-bottom:10px;">Last Email Sent — Mar 27</div>
+          <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; overflow:hidden;">
+            <!-- Email header -->
+            <div style="padding:12px 16px; border-bottom:1px solid #27272a;">
+              <div style="font-size:11px; color:#71717a; margin-bottom:4px;">TO</div>
+              <div style="font-size:12px; color:#e5e5e5;">david.annen@email.com</div>
+              <div style="font-size:11px; color:#71717a; margin-top:8px; margin-bottom:4px;">SUBJECT</div>
+              <div style="font-size:12px; color:#e5e5e5;">Great news — you're pre-approved!</div>
+            </div>
+            <!-- Email body -->
+            <div style="padding:16px; font-size:12px; color:#d4d4d8; line-height:1.6; max-height:240px; overflow-y:auto;">
+              Hey David,<br><br>
+              Great news — you're pre-approved for up to $425,000! This is a solid position to be in as you start your home search in Austin.<br><br>
+              Here's what this means:<br>
+              • You can make offers with confidence<br>
+              • Sellers and agents take you seriously<br>
+              • We've already verified your income and credit<br><br>
+              Your pre-approval is valid for 90 days. If rates shift or your situation changes, just reach out and we'll update it.<br><br>
+              Next step: send this to your realtor so they know you're ready to go. If you need a recommendation, I've got a few great agents I work with regularly.<br><br>
+              Let me know if you have any questions.<br><br>
+              Adam Styer<br>
+              NMLS #513013<br>
+              Adam Styer | Mortgage Solutions LP
+            </div>
+          </div>
+
+          <!-- Mode toggle -->
+          <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a;">Mode:</div>
+            <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:bold;">AI Generated</span>
+            <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:4px; font-size:11px;">Fixed Template</span>
+          </div>
+          <div style="font-size:11px; color:#71717a; margin-top:6px;">AI Generated = Claude writes each email fresh. Fixed Template = use exact wording every time.</div>
+        </div>
+
+        <!-- Right: quick adjustments -->
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#D4AF37; margin-bottom:10px;">Quick Adjustments</div>
+
+          <!-- Tone -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a; margin-bottom:4px;">Tone</div>
+            <div style="display:flex; gap:6px;">
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">Formal</span>
+              <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:12px; font-size:11px;">Conversational</span>
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">Casual</span>
+            </div>
+          </div>
+
+          <!-- Length -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a; margin-bottom:4px;">Length</div>
+            <div style="display:flex; gap:6px;">
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">Short</span>
+              <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:12px; font-size:11px;">Medium</span>
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">Long</span>
+            </div>
+          </div>
+
+          <!-- Always include -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a; margin-bottom:4px;">Always Include</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:12px; font-size:11px;">Realtor name</span>
+              <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:12px; font-size:11px;">Pre-approval amount</span>
+              <span style="background:#D4AF37; color:#0a0a0a; padding:3px 10px; border-radius:12px; font-size:11px;">NMLS signature</span>
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">+ Add</span>
+            </div>
+          </div>
+
+          <!-- Never include -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a; margin-bottom:4px;">Never Include</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">Interest rates</span>
+              <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:3px 10px; border-radius:12px; font-size:11px;">+ Add</span>
+            </div>
+          </div>
+
+          <!-- Ask Claude -->
+          <div style="margin-top:16px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#71717a; margin-bottom:4px;">Or Tell Claude What to Change</div>
+            <div style="background:#18181b; border:1px solid #27272a; border-radius:4px; padding:10px 12px; font-size:12px; min-height:60px;">
+              <span style="color:#71717a;">e.g. "Make it warmer. Mention that I'll personally follow up in 48 hours."</span>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+              <span style="background:#D4AF37; color:#0a0a0a; padding:5px 14px; border-radius:4px; font-size:11px; font-weight:bold;">Update Prompt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save bar -->
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid #27272a;">
+        <span style="background:#27272a; border:1px solid #3f3f46; color:#a1a1aa; padding:6px 16px; border-radius:4px; font-size:12px;">Send Test Email</span>
+        <span style="background:#D4AF37; color:#0a0a0a; padding:6px 16px; border-radius:4px; font-size:12px; font-weight:bold;">Save Changes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top:24px;">Email automation tabs</h3>
+<p><strong>Email Preview</strong> (shown) — see the last email that went out, toggle between AI Generated and Fixed Template mode, quick adjustment chips for tone/length/inclusions, plus Ask Claude for free-form changes.</p>
+<p><strong>AI Prompt</strong> — the full prompt that generates the email (read-only reference).</p>
+<p><strong>Send History</strong> — list of every email sent by this automation with date, recipient, and subject. Click to see the full email.</p>
+<p><strong>Controls</strong> — same as the agent panel: status toggle, schedule, pause/resume.</p>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Email panel works</h3>
+      <p>Move on to the chatbot prompt section</p>
+    </div>
+  </div>
+  <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content">
+      <h3>Needs changes</h3>
+      <p>I'll describe what to adjust</p>
+    </div>
+  </div>
+</div>

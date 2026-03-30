@@ -46,3 +46,28 @@ None.
 - Google Business Profile posting strategy for local businesses — not covered
 - Short-form video strategy for mortgage LOs (LinkedIn + Instagram combined) — only partially covered
 - Instagram hashtag strategy update for 2026 — covered by SME article but could be supplemented
+
+---
+
+## PM Session 2 Audit — 2026-03-29 21:25 PM
+
+### Sources Added (2 new — filling Austin data gap)
+| Source | ID | Type |
+|--------|----|----|
+| 2026-03-29-austin-market-data-web.md | 52a351a8 | Local research file |
+| February 2026 Central Texas Housing Report — Unlock MLS | 8fc25a98 | Web page |
+
+### Stale Sources Removed
+None. Total sources now: 44. All within 0–4 day add age.
+
+### Web Research Findings
+**Austin Market Data (February 2026, Unlock MLS):**
+- Active listings: ~10,000 (-4.8% YoY)
+- Pending sales: 2,690 (+13.9% YoY)
+- Close-to-list ratio: 92.0% (up from 90.6% in Dec 2025)
+- Fills placeholder `~` data in Posts 5, 6, 7, 12, 13, 14
+
+**Facebook Reels 2026 (not added — existing Facebook coverage sufficient):**
+- Meta Oct 2025: recommendation engine shows ~50% more same-day Reels
+- Short-form (≤1 min) + platform-specific content = best organic reach
+- Engagement (comment replies, questions) increases algorithmic distribution

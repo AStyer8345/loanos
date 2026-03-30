@@ -6,7 +6,7 @@ import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 import { createServiceClient } from '@/lib/supabase/service'
 import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 import { getAutomationById } from '@/lib/automations/definitions'
-import { buildAutomationPrompt } from '@/lib/automations/prompts'
+import { buildAutomationPrompt, EXTRACTION_PROMPTS } from '@/lib/automations/prompts'
 import type { AutomationRecord } from '@/lib/automations/prompts'
 
 export async function POST(req: NextRequest) {
@@ -26,7 +26,25 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { automationId, recordType, recordId } = await req.json()
+    // Support both JSON (no-upload automations) and FormData (PDF-upload automations)
+    let automationId: string
+    let recordType: string
+    let recordId: string
+    let pdfFile: File | null = null
+
+    const contentType = req.headers.get('content-type') || ''
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData()
+      automationId = formData.get('automationId') as string
+      recordType = formData.get('recordType') as string
+      recordId = formData.get('recordId') as string
+      pdfFile = formData.get('pdf') as File | null
+    } else {
+      const json = await req.json()
+      automationId = json.automationId
+      recordType = json.recordType
+      recordId = json.recordId
+    }
 
     if (!automationId || !recordType || !recordId) {
       return NextResponse.json({ error: 'Missing required fields: automationId, recordType, recordId' }, { status: 400 })
@@ -157,7 +175,111 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Build prompt and call Claude
+    // ── PDF handling: upload to storage + extract fields ───────────────────────
+    let extractedFields: Record<string, string | number | null> | undefined
+    let documentId: string | undefined
+
+    if (pdfFile && pdfFile.size > 0) {
+      const arrayBuffer = await pdfFile.arrayBuffer()
+      const pdfBuffer = Buffer.from(arrayBuffer)
+      const base64Pdf = pdfBuffer.toString('base64')
+
+      // 1. Upload PDF to Supabase storage
+      const storagePath = `${userId}/${recordId}/${Date.now()}_${pdfFile.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(storagePath, pdfBuffer, {
+          contentType: 'application/pdf',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error('[automations/generate] Storage upload error:', uploadError)
+        // Non-fatal — continue with extraction even if storage fails
+      }
+
+      // 2. Insert documents table row
+      if (!uploadError) {
+        const { data: docRow } = await supabase
+          .from('documents')
+          .insert({
+            user_id: userId,
+            loan_id: recordType === 'loan' ? recordId : null,
+            file_name: pdfFile.name,
+            file_path: storagePath,
+            file_size: pdfFile.size,
+            doc_type: def.docType || 'other',
+            organization_id: organizationId,
+          })
+          .select('id')
+          .single()
+
+        documentId = docRow?.id
+      }
+
+      // 3. Extract fields from PDF using Claude vision
+      const extractionPrompt = EXTRACTION_PROMPTS[automationId]
+      if (extractionPrompt) {
+        try {
+          const anthropic = await getAnthropicClient()
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const extractionResponse = await (anthropic.messages.create as any)(
+            {
+              model: CLAUDE_MODEL,
+              max_tokens: 1024,
+              messages: [
+                {
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'document',
+                      source: {
+                        type: 'base64',
+                        media_type: 'application/pdf',
+                        data: base64Pdf,
+                      },
+                    },
+                    {
+                      type: 'text',
+                      text: extractionPrompt,
+                    },
+                  ],
+                },
+              ],
+            },
+            { headers: { 'anthropic-beta': 'pdfs-2024-09-25' } }
+          )
+
+          const rawText = (extractionResponse.content?.[0] as { type: string; text: string })?.text ?? ''
+          const jsonMatch = rawText.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            extractedFields = JSON.parse(jsonMatch[0])
+            record.extractedFields = extractedFields
+          }
+        } catch (extractErr) {
+          console.error('[automations/generate] PDF extraction error:', extractErr)
+          // Non-fatal — continue with email generation using DB fields only
+        }
+      }
+
+      // 4. Log document upload activity
+      const loanContactId = recordType === 'loan' ? await getLoanContactId(supabase, recordId) : undefined
+      await supabase.from('activity_log').insert({
+        contact_id: recordType === 'contact' ? recordId : (loanContactId || null),
+        loan_id: recordType === 'loan' ? recordId : null,
+        action: 'document.uploaded',
+        type: 'document',
+        summary: `${def.docType || 'Document'} uploaded: ${pdfFile.name}`,
+        entity_type: recordType,
+        occurred_at: new Date().toISOString(),
+        user_id: userId,
+        organization_id: organizationId,
+        metadata: { automation_id: automationId, document_id: documentId, file_name: pdfFile.name },
+      })
+    }
+
+    // ── Generate email draft ────────────────────────────────────────────────────
     const { system, userMessage } = buildAutomationPrompt(automationId, record)
     const anthropic = await getAnthropicClient()
 
@@ -211,7 +333,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to save draft' }, { status: 500 })
     }
 
-    return NextResponse.json({ subject, body, draftId: draft.id })
+    return NextResponse.json({
+      subject,
+      body,
+      draftId: draft.id,
+      extractedFields: extractedFields || null,
+      documentId: documentId || null,
+    })
   } catch (error) {
     console.error('[automations/generate] Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -1,5 +1,7 @@
 import type { StageKey } from '@/lib/constants/loan-stages'
 
+export type TriggerType = 'pdf' | 'form' | 'generate'
+
 export interface AutomationDef {
   id: string
   label: string
@@ -7,6 +9,11 @@ export interface AutomationDef {
   surface: 'contact' | 'loan'
   stageKey?: StageKey
   recipient: 'borrower' | 'agent'
+  triggerType: TriggerType
+  /** Button label for upload/form trigger (e.g. "Upload PA Letter") */
+  triggerLabel?: string
+  /** doc_type value for documents table when a PDF is uploaded */
+  docType?: string
 }
 
 // ── Contact-level automations ────────────────────────────────────────────────
@@ -18,6 +25,7 @@ export const CONTACT_AUTOMATIONS: AutomationDef[] = [
     description: 'Thank the referring agent',
     surface: 'contact',
     recipient: 'agent',
+    triggerType: 'generate',
   },
   {
     id: 'referral-intro',
@@ -25,6 +33,7 @@ export const CONTACT_AUTOMATIONS: AutomationDef[] = [
     description: 'Welcome email to referred borrower',
     surface: 'contact',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'application-link',
@@ -32,6 +41,7 @@ export const CONTACT_AUTOMATIONS: AutomationDef[] = [
     description: 'Send the loan application link',
     surface: 'contact',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'nurture-followup',
@@ -39,6 +49,7 @@ export const CONTACT_AUTOMATIONS: AutomationDef[] = [
     description: 'Casual check-in on a cold lead',
     surface: 'contact',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
 ]
 
@@ -48,10 +59,13 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
   {
     id: 'app-received',
     label: 'Application Received',
-    description: 'Confirm we got their app',
+    description: 'Upload 1003 — Claude extracts borrower info and drafts a welcome email',
     surface: 'loan',
     stageKey: 'new_application',
     recipient: 'borrower',
+    triggerType: 'pdf',
+    triggerLabel: 'Upload 1003 PDF',
+    docType: 'loan_application',
   },
   {
     id: 'doc-request',
@@ -60,14 +74,18 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'pre_approval',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'pre-approval-email',
     label: 'Pre-Approval Letter',
-    description: 'Congrats, you\u2019re pre-approved',
+    description: 'Upload PA letter — Claude extracts details and drafts a congratulations email',
     surface: 'loan',
     stageKey: 'pre_approval',
     recipient: 'borrower',
+    triggerType: 'pdf',
+    triggerLabel: 'Upload PA Letter',
+    docType: 'pre_approval_letter',
   },
   {
     id: 'pre-approval-agent',
@@ -76,6 +94,7 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'pre_approval',
     recipient: 'agent',
+    triggerType: 'generate',
   },
   {
     id: 'processing-update',
@@ -84,6 +103,7 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'processing',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'conditional-approval',
@@ -92,14 +112,18 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'approved',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'cd-email',
     label: 'Closing Disclosure',
-    description: 'Final CD numbers email',
+    description: 'Upload CD — Claude extracts final numbers and drafts the closing email',
     surface: 'loan',
     stageKey: 'clear_to_close',
     recipient: 'borrower',
+    triggerType: 'pdf',
+    triggerLabel: 'Upload CD',
+    docType: 'closing_disclosure',
   },
   {
     id: 'closing-prep',
@@ -108,6 +132,18 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'clear_to_close',
     recipient: 'borrower',
+    triggerType: 'generate',
+  },
+  {
+    id: 'contract-received',
+    label: 'Contract Received',
+    description: 'Upload executed contract — Claude extracts key fields and drafts a reply-all',
+    surface: 'loan',
+    stageKey: 'setup',
+    recipient: 'borrower',
+    triggerType: 'pdf',
+    triggerLabel: 'Upload Contract',
+    docType: 'purchase_contract',
   },
   {
     id: 'thank-you',
@@ -116,6 +152,7 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'funded',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
   {
     id: 'review-request',
@@ -124,6 +161,7 @@ export const LOAN_AUTOMATIONS: AutomationDef[] = [
     surface: 'loan',
     stageKey: 'funded',
     recipient: 'borrower',
+    triggerType: 'generate',
   },
 ]
 

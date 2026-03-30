@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import type { AutomationDef } from '@/lib/automations/definitions'
 
 const GOLD = '#C9A84C'
 
-type CardState = 'idle' | 'generating' | 'draft' | 'refining' | 'sending' | 'sent'
+type CardState = 'idle' | 'uploading' | 'extracting' | 'generating' | 'draft' | 'refining' | 'sending' | 'sent'
 
 interface Props {
   automation: AutomationDef
@@ -13,6 +13,7 @@ interface Props {
   recordId: string
   initialSent?: boolean
   sentAt?: string | null
+  onDocumentUploaded?: () => void
 }
 
 export default function AutomationCard({
@@ -21,6 +22,7 @@ export default function AutomationCard({
   recordId,
   initialSent,
   sentAt,
+  onDocumentUploaded,
 }: Props) {
   const [state, setState] = useState<CardState>(initialSent ? 'sent' : 'idle')
   const [subject, setSubject] = useState('')
@@ -29,22 +31,74 @@ export default function AutomationCard({
   const [refineInput, setRefineInput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [sentTimestamp, setSentTimestamp] = useState<string | null>(sentAt ?? null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  async function handleGenerate() {
-    setState('generating')
+  const isPdf = automation.triggerType === 'pdf'
+
+  const handleTrigger = useCallback(() => {
+    if (isPdf) {
+      // Open file picker
+      fileInputRef.current?.click()
+    } else {
+      // Generate directly from DB data
+      handleGenerate(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPdf])
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate PDF
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+      setError('Please upload a PDF file')
+      return
+    }
+
+    setFileName(file.name)
+    handleGenerate(file)
+
+    // Reset file input so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleGenerate(file: File | null) {
+    setState(file ? 'uploading' : 'generating')
     setError(null)
 
     try {
-      const res = await fetch('/api/automations/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ automationId: automation.id, recordType, recordId }),
-      })
+      let res: Response
+
+      if (file) {
+        // Send as FormData with PDF
+        setState('extracting')
+        const fd = new FormData()
+        fd.append('automationId', automation.id)
+        fd.append('recordType', recordType)
+        fd.append('recordId', recordId)
+        fd.append('pdf', file)
+
+        res = await fetch('/api/automations/generate', {
+          method: 'POST',
+          body: fd,
+        })
+      } else {
+        // Send as JSON (no file)
+        setState('generating')
+        res = await fetch('/api/automations/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ automationId: automation.id, recordType, recordId }),
+        })
+      }
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }))
         setError(data.error || `Generate failed (${res.status})`)
         setState('idle')
+        setFileName(null)
         return
       }
 
@@ -53,9 +107,15 @@ export default function AutomationCard({
       setBody(data.body || '')
       setDraftId(data.draftId || null)
       setState('draft')
+
+      // Notify parent that a document was uploaded (refresh docs list)
+      if (file && onDocumentUploaded) {
+        onDocumentUploaded()
+      }
     } catch {
       setError('Network error — could not reach server')
       setState('idle')
+      setFileName(null)
     }
   }
 
@@ -128,7 +188,31 @@ export default function AutomationCard({
     setDraftId(null)
     setRefineInput('')
     setError(null)
+    setFileName(null)
   }
+
+  // Status label for in-progress states
+  function statusLabel(): string {
+    switch (state) {
+      case 'uploading': return 'Uploading document...'
+      case 'extracting': return `Extracting fields from ${fileName || 'PDF'}...`
+      case 'generating': return 'Generating draft...'
+      case 'refining': return 'Refining...'
+      case 'sending': return 'Sending to Outlook...'
+      default: return ''
+    }
+  }
+
+  // ── Hidden file input for PDF automations ─────────────────────────────────
+  const fileInput = isPdf ? (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="application/pdf,.pdf"
+      onChange={handleFileSelect}
+      className="hidden"
+    />
+  ) : null
 
   // ── Sent state ─────────────────────────────────────────────────────────────
   if (state === 'sent') {
@@ -137,6 +221,7 @@ export default function AutomationCard({
         className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
+        {fileInput}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-emerald-400 text-xs">&#10003;</span>
@@ -159,38 +244,39 @@ export default function AutomationCard({
     )
   }
 
-  // ── Idle / Generating state ────────────────────────────────────────────────
-  if (state === 'idle' || state === 'generating') {
+  // ── Idle state ─────────────────────────────────────────────────────────────
+  if (state === 'idle') {
     return (
       <div
         className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
+        {fileInput}
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1 min-w-0 mr-3">
             <div className="text-zinc-100 text-xs font-bold">{automation.label}</div>
             <div className="text-zinc-500 mt-0.5" style={{ fontSize: 11 }}>
               {automation.description}
             </div>
           </div>
           <button
-            onClick={handleGenerate}
-            disabled={state === 'generating'}
-            className="px-3 py-1.5 rounded text-xs font-bold tracking-wider transition-opacity hover:opacity-80 disabled:opacity-40 flex-shrink-0"
+            onClick={handleTrigger}
+            className="px-3 py-1.5 rounded text-xs font-bold tracking-wider transition-opacity hover:opacity-80 flex-shrink-0 flex items-center gap-1.5"
             style={{
               background: 'transparent',
               color: GOLD,
               border: `1px solid ${GOLD}`,
             }}
           >
-            {state === 'generating' ? (
-              <span className="flex items-center gap-1.5">
-                <span
-                  className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
-                  style={{ background: GOLD }}
-                />
-                DRAFTING...
-              </span>
+            {isPdf ? (
+              <>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                {automation.triggerLabel || 'Upload PDF'}
+              </>
             ) : (
               'GENERATE'
             )}
@@ -205,19 +291,61 @@ export default function AutomationCard({
     )
   }
 
+  // ── In-progress states (uploading, extracting, generating) ─────────────────
+  if (state === 'uploading' || state === 'extracting' || state === 'generating') {
+    return (
+      <div
+        className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
+        style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
+      >
+        {fileInput}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-zinc-100 text-xs font-bold">{automation.label}</div>
+            <div className="text-zinc-500 mt-0.5" style={{ fontSize: 11 }}>
+              {automation.description}
+            </div>
+          </div>
+          <div
+            className="px-3 py-1.5 rounded text-xs font-bold tracking-wider flex-shrink-0 flex items-center gap-1.5 opacity-70"
+            style={{ color: GOLD, border: `1px solid ${GOLD}33` }}
+          >
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ background: GOLD }}
+            />
+            {state === 'uploading' ? 'UPLOADING...' : state === 'extracting' ? 'EXTRACTING...' : 'DRAFTING...'}
+          </div>
+        </div>
+        <div className="mt-2 text-zinc-500" style={{ fontSize: 11 }}>
+          {statusLabel()}
+        </div>
+      </div>
+    )
+  }
+
   // ── Draft / Refining / Sending state ───────────────────────────────────────
   return (
     <div
       className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4 space-y-3"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
+      {fileInput}
+
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div
-          className="font-bold"
-          style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-        >
-          {automation.label.toUpperCase()}
+        <div className="flex items-center gap-2">
+          <div
+            className="font-bold"
+            style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
+          >
+            {automation.label.toUpperCase()}
+          </div>
+          {fileName && (
+            <span className="text-zinc-600" style={{ fontSize: 10 }}>
+              from {fileName}
+            </span>
+          )}
         </div>
         <span
           className="text-xs px-2 py-0.5 rounded"

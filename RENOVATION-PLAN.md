@@ -45,8 +45,8 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 **Goal:** 4 tabs only — Dashboard, Pipeline, Contacts, Settings
 **Session:** Next session after this plan is locked in
 **Tasks:**
-- [ ] Remove nav links for: Social, Voice Guide, Automations, Scenarios, Marketing, Kids
-- [ ] Simplify sidebar/nav to 4 items
+- [x] Strip nav to 7 tabs: Dashboard, Pipeline, Contacts, Scenarios, Voice Guide, Admin, Settings (2026-03-30)
+- [x] Removed: Inbox Review, Reports, Marketing dropdown, Beta Waitlist from nav
 - [ ] Remove or hide unused page routes (don't delete files)
 - [ ] Clean up dashboard to show only: funded MTD/YTD, volume MTD/YTD, commission MTD/YTD, active loan count
 - [ ] Remove hot leads / new leads / recent apps widgets if they're broken; keep if they work
@@ -58,13 +58,20 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 **Goal:** Loans in process with communication built in
 **Session:** After Phase 1 confirmed working
 **Tasks:**
-- [ ] Pipeline view: borrower name, status, loan amount, rate, est closing, last activity, next action
-- [ ] Each row: text button, email button, call button (tel: link)
-- [ ] Filter by status: All, Pre-Approved, In Process, Clear to Close
-- [ ] Color-coded urgency: stale (red), rate lock expiring (yellow), closing soon (blue)
+- [x] Pipeline view: borrower name, status, loan amount, rate, closing, location — already existed, defaults updated (2026-03-30)
+- [x] Each row: call, text, email buttons on hover — added actions column (2026-03-30)
+- [x] Filter by status: All, In Process, Closed, Pre-Approval, Other — already existed via smart lists
+- [x] Color-coded urgency: closing <7d=red, <14d=amber, rate lock expiring — already existed
 - [ ] Loan detail page: simplified, communication-first
-- [ ] Verify Arive sync is feeding data correctly (spot-check 3 loans)
-- [ ] Deploy and verify
+- [x] Verify Arive sync — spot-checked 3 loans. Gaps found (2026-03-30):
+  - `loan_number` — NEVER populated (big gap)
+  - `loan_type`, `loan_program` — NEVER populated (Conv/FHA/VA missing)
+  - `milestone` — NEVER populated (status works, milestone doesn't)
+  - `rate_lock_date` — NEVER populated (expiration works, lock date doesn't)
+  - `estimated_closing_date` vs `est_closing_date` — duplicate columns, only est_closing_date used
+  - `property_zip` — sometimes string "null" instead of actual NULL
+  - **Action needed**: Update Arive sync n8n workflows to map these fields
+- [x] Deploy and verify — deployed, READY
 - [ ] Adam reviews and confirms
 
 ### Phase 3: Follow-Up List

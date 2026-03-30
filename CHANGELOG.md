@@ -1,5 +1,45 @@
 # LoanOS Changelog
 
+## [4.9.3] — 2026-03-29 — Social Dashboard Bug Fixes + Enterprise Spec
+
+### Fixed
+- **Broken image thumbnails** in SocialComposePanel: replaced `getPublicUrl()` with `createSignedUrl()` for authenticated Supabase Storage
+- **Silent generate failure**: empty `catch {}` replaced with proper error state + red banner display
+- **Broken media display** in SocialDraftDetail: added `useEffect` to resolve signed URLs from stored paths
+- **DB constraint violation**: added `FORMAT_TO_DB` mapping (display names → snake_case DB values) and `VALID_FORMATS`/`VALID_PLATFORMS` validation in chat/social API
+
+### Added
+- Enterprise Social Media multi-tenant spec (`tasks/enterprise/specs/2026-03-29-enterprise-social-media-spec.md`)
+- Email Automation Panel build prompt (`tasks/automation-panel-prompt.md`) — 14 automations, generate/refine/send workflow
+
+## [4.9.2] — 2026-03-29 — Loan Record View Color Coding
+
+### Changed
+- Pipeline progress bar: each stage uses its own color (blue/amber/purple/green/gold) instead of all-gold
+- Milestone timeline: colored circles and labels per stage (was white)
+- Communication hub: colored left border + role labels per party type
+- Vital stats: color-coded (Amount=blue, Rate=green, LTV=purple, DTI=amber)
+- Key dates: colored dot + label for filled dates, dim for empty
+- Tab bar: active tab underline matches loan status color via `statusHex()`
+
+### Fixed
+- Pre-push git hook: added retry on failure for intermittent Next.js 14.2.35 manifest race condition
+
+## [4.9.1] — 2026-03-29 — Loan Record View Redesign
+
+### Added
+- CommunicationHub: full-width contact cards with one-click Phone/SMS/Email + "Last Contacted" timestamps from activity log
+- Actionable milestones: shows agent notification status (✓ Notified / ⚠ Not sent) per completed stage
+- PropertyDetailsToggle: primary fields always visible, secondary data behind More/Less toggle
+- VitalStat + VitalStatEditable components for slim header vital signs
+
+### Changed
+- Header: consolidated from scrollable chip boxes to slim 3-row layout (breadcrumb + name + inline vital stats)
+- DashboardTab layout: linear flow with thin dividers instead of nested bordered containers
+
+### Removed
+- LoanEssentialsPanel, PropertySummaryCard, PartnerContactsPanel (replaced by new components)
+
 ## [4.9.0] — 2026-03-29 — Social Media Dashboard
 
 ### Added

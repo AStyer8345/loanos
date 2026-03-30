@@ -16,7 +16,53 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM.**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29.**
+
+## Social Dashboard Bug Fixes + Enterprise Spec + Automation Panel Prompt — 2026-03-29
+
+**3 social dashboard bugs fixed:**
+1. **Broken image thumbnails** in SocialComposePanel: `getPublicUrl()` returns dead URLs for authenticated Supabase Storage. Replaced with `createSignedUrl()` (1-hour expiry).
+2. **Silent generate failure**: Empty `catch {}` block in `handleGenerate()` hid all errors. Added `generateError` state, proper error checking, and red error banner.
+3. **Broken media display** in SocialDraftDetail: Added `useEffect` hook that resolves signed URLs from stored paths/broken public URLs.
+
+**API validation fix** (`/api/chat/social`): Added `VALID_FORMATS` and `VALID_PLATFORMS` arrays + `FORMAT_TO_DB` mapping to prevent DB check constraint violations on insert.
+
+**New files:**
+- `tasks/enterprise/specs/2026-03-29-enterprise-social-media-spec.md` — Multi-tenant social media customization spec (voice wizard, pillar picker, platform connections, compliance profile, starter post generation)
+- `tasks/enterprise/enterprise-queue.md` — Updated with Enterprise Social Media as next build
+- `tasks/automation-panel-prompt.md` — Email Automation Panel build prompt: 14 automations (4 contact-level, 10 loan-level with stage filtering), generate/refine/send API routes, AutomationPanel + AutomationCard components
+
+**Modified files:**
+- `src/app/dashboard/marketing/_components/SocialComposePanel.tsx` — signed URLs, FORMAT_TO_DB, error state
+- `src/app/dashboard/marketing/_components/SocialDraftDetail.tsx` — signed URL resolution in useEffect
+- `src/app/api/chat/social/route.ts` — format/platform validation, insert error handling
+
+---
+
+## Loan Record View Redesign + Color Coding — 2026-03-29
+
+**Two commits, both deployed:**
+
+1. **Flat layout redesign** (`cb095fb`):
+   - Consolidated header: slim vital signs row replaces scrollable chip boxes
+   - CommunicationHub: full-width contact cards with one-click Phone/SMS/Email + "Last Contacted" from activity log
+   - Actionable milestones: shows agent notification status (✓ Notified / ⚠ Not sent) per completed stage
+   - PropertyDetailsToggle: primary fields visible, secondary behind More/Less
+   - Removed: LoanEssentialsPanel, PropertySummaryCard, PartnerContactsPanel
+
+2. **Color coding** (`93c87f9`):
+   - Pipeline progress bar: each stage gets its own color (blue → amber → purple → green → gold) instead of all-gold
+   - Milestone timeline: colored circles per stage, colored labels when complete/active
+   - Communication hub: colored left border + role labels per party type (Borrower=blue, Buyer's Agent=green, Listing Agent=amber, Title=purple, Referring Agent=gold)
+   - Vital stats: Amount=blue, Rate=green, LTV=purple, DTI=amber
+   - Key dates: colored dot + label for filled dates, dim gray for empty
+   - Tab bar: active tab underline matches loan's current status color via `statusHex()`
+
+**Files modified:** `src/app/dashboard/loans/[id]/page.tsx` (both commits)
+
+**Note:** Pre-push hook updated to retry on failure — Next.js 14.2.35 has an intermittent race condition creating manifest files during local builds. Vercel builds are unaffected.
+
+---
 
 ## Arive/LoanOS Separation + Dead Code Cleanup — 2026-03-27
 

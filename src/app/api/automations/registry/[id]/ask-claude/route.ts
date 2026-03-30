@@ -72,7 +72,22 @@ Apply the user's instruction to produce an updated config object. Return ONLY th
 
     let proposedConfig: unknown
     try {
-      proposedConfig = JSON.parse(rawText)
+      // Strip markdown code fences if Claude wrapped the JSON
+      let cleaned = rawText
+      if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+      }
+      // Try direct parse first, then extract JSON object via regex
+      try {
+        proposedConfig = JSON.parse(cleaned)
+      } catch {
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          proposedConfig = JSON.parse(jsonMatch[0])
+        } else {
+          throw new Error('No JSON object found')
+        }
+      }
     } catch {
       console.error('Claude returned invalid JSON:', rawText)
       return NextResponse.json(

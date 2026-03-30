@@ -4,27 +4,20 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Settings } from 'lucide-react'
 import { NavItem } from './NavItem'
-import { NavDropdown } from './NavDropdown'
 import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'contacts' | 'loans' | 'scenarios' | 'reports' | 'marketing' | 'emails' | 'settings'
+type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'voice-guide' | 'admin' | 'settings'
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
   if (pathname.startsWith('/dashboard/briefing')) return 'dashboard'
+  if (pathname.startsWith('/dashboard/loans')) return 'pipeline'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
-  if (pathname.startsWith('/dashboard/loans')) return 'loans'
   if (pathname.startsWith('/dashboard/scenarios')) return 'scenarios'
-  if (pathname.startsWith('/dashboard/performance')) return 'reports'
-  if (pathname.startsWith('/dashboard/emails')) return 'emails'
-  if (
-    pathname.startsWith('/dashboard/marketing') ||
-    pathname.startsWith('/dashboard/automations')
-  ) {
-    return 'marketing'
-  }
+  if (pathname.startsWith('/dashboard/marketing')) return 'voice-guide'
+  if (pathname.startsWith('/dashboard/automations')) return 'admin'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null
 }
@@ -32,19 +25,13 @@ function sectionFromPath(pathname: string): Section | null {
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const currentSection = sectionFromPath(pathname || '')
 
   const navigate = (href: string) => {
     router.push(href)
-    setOpenDropdown(null)
     setMobileOpen(false)
-  }
-
-  const toggleDropdown = (id: string) => {
-    setOpenDropdown((prev) => (prev === id ? null : id))
   }
 
   return (
@@ -72,9 +59,9 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Loans"
+            label="Pipeline"
             icon="📋"
-            isActive={currentSection === 'loans'}
+            isActive={currentSection === 'pipeline'}
             onClick={() => navigate('/dashboard/loans')}
           />
 
@@ -86,13 +73,6 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Inbox Review"
-            icon="📧"
-            isActive={currentSection === 'emails'}
-            onClick={() => navigate('/dashboard/emails/unmatched')}
-          />
-
-          <NavItem
             label="Scenarios"
             icon="📐"
             isActive={currentSection === 'scenarios'}
@@ -100,35 +80,17 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Reports"
-            icon="📈"
-            isActive={currentSection === 'reports'}
-            onClick={() => navigate('/dashboard/performance')}
+            label="Voice Guide"
+            icon="🎙️"
+            isActive={currentSection === 'voice-guide'}
+            onClick={() => navigate('/dashboard/marketing')}
           />
 
-          <NavDropdown
-            label="Marketing"
-            icon="📢"
-            isOpen={openDropdown === 'marketing'}
-            onToggle={() => toggleDropdown('marketing')}
-            items={[
-              {
-                label: 'Social Media',
-                onClick: () => navigate('/dashboard/marketing'),
-              },
-              {
-                label: 'Marketing Command Center',
-                onClick: () => navigate('/dashboard/marketing'),
-              },
-              {
-                label: 'Automations (n8n, Zapier)',
-                onClick: () => navigate('/dashboard/automations'),
-              },
-              {
-                label: 'Beta Waitlist',
-                onClick: () => navigate('/dashboard/waitlist'),
-              },
-            ]}
+          <NavItem
+            label="Admin"
+            icon="⚙️"
+            isActive={currentSection === 'admin'}
+            onClick={() => navigate('/dashboard/automations')}
           />
         </div>
 
@@ -217,13 +179,13 @@ export default function TopNav() {
               type="button"
               onClick={() => navigate('/dashboard/loans')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'loans'
+                currentSection === 'pipeline'
                   ? 'bg-amber-500/20 text-amber-200'
                   : 'text-zinc-400'
               }`}
             >
               <span className="text-base">📋</span>
-              <span>Loans</span>
+              <span>Pipeline</span>
             </button>
 
             <button
@@ -241,19 +203,6 @@ export default function TopNav() {
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/emails/unmatched')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'emails'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
-            >
-              <span className="text-base">📧</span>
-              <span>Inbox Review</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => navigate('/dashboard/scenarios')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
                 currentSection === 'scenarios'
@@ -267,43 +216,29 @@ export default function TopNav() {
 
             <button
               type="button"
-              onClick={() => navigate('/dashboard/performance')}
+              onClick={() => navigate('/dashboard/marketing')}
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'reports'
+                currentSection === 'voice-guide'
                   ? 'bg-amber-500/20 text-amber-200'
                   : 'text-zinc-400'
               }`}
             >
-              <span className="text-base">📈</span>
-              <span>Reports</span>
+              <span className="text-base">🎙️</span>
+              <span>Voice Guide</span>
             </button>
 
-            <div className="mt-2">
-              <p className="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
-                Marketing
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/marketing')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
-              >
-                <span>Marketing Command Center</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/automations')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
-              >
-                <span>Automations</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/waitlist')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
-              >
-                <span>Beta Waitlist</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/automations')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
+                currentSection === 'admin'
+                  ? 'bg-amber-500/20 text-amber-200'
+                  : 'text-zinc-400'
+              }`}
+            >
+              <span className="text-base">⚙️</span>
+              <span>Admin</span>
+            </button>
 
             <div className="mt-2 border-t border-zinc-800 pt-2">
               <button

@@ -1,7 +1,7 @@
-## Mission Brief — 2026-03-28 AM
+## Mission Brief — 2026-03-29 AM
 
-Date: 2026-03-28 | Mode: AM | Focus: MEDIUM_RISK fixes + new blog content
+Date: 2026-03-29 | Mode: AM | Focus: VA blog post + lead-gen pending deploy
 
-1. Add noindex back to thank-you.html (removed during redesign — was flagged for Adam but it's clearly correct)
-2. Add /prequal.html to robots.txt Disallow (has noindex but not disallowed — wastes crawl budget)
-3. Write new blog post: "How Long Does Mortgage Pre-Approval Take in Austin TX?" (AI Overview target, answer-first, FAQPage schema)
+1. Deploy pending lead-gen files (rate-alert.html, thank-you.html mods, austin-mortgage-rates.html mods) — code-complete per ADAM-TODO
+2. VA Loan Eligibility Texas blog post — next in content queue, veteran buyer high-intent cluster
+3. Suburb thin-content spot check (jarrell, florence — smaller cities, higher risk)

@@ -284,3 +284,77 @@ Priority 3: Suburb page content audit — are the 15 new-to-sitemap pages strong
 
 Advance queue: YES — content pipeline now active
 ---
+---
+## Session: 2026-03-28 AM (run 2) — SEO + SEM
+Focus: FHA vs Conventional blog post
+Type: Execution (MEDIUM_RISK — new content)
+
+### Completed
+
+**Deployment verify:**
+- Commit 7879b14 confirmed in git log (6 commits back from HEAD) — Netlify auto-deploys on push, blog post live
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-03-28-fha-vs-conventional-loan-austin-tx.html
+- Title: "FHA vs Conventional Loan Austin TX | NMLS #513013" (49 chars)
+- Meta: "FHA vs conventional loan in Austin TX — credit scores, down payments, PMI, and loan limits compared. Which one is right for your purchase? NMLS #513013." (152 chars)
+- H1: "FHA vs Conventional Loan in Austin TX — Which Is Right for You?"
+- Content: answer-first format, side-by-side comparison table, 5 topic sections (mortgage insurance deep-dive, when FHA wins, when conventional wins, hybrid refi path, Austin-specific context)
+- Schema: Article + FAQPage (6 questions)
+- Internal links: /loans/fha.html, /products.html, /first-time-home-buyer.html, /get-preapproved, Calendly
+- Added to sitemap.xml (lastmod 2026-03-28) and blog/manifest.json (first entry)
+- Git commit: 45c8f2f (cherry-picked from feature branch to main, pushed to origin)
+
+### Deferred
+- Suburb page content audit: 15 new-to-sitemap pages — thin content risk. Next session.
+- VA Loan Eligibility blog post: next in content queue
+- First-Time Home Buyer Programs 2026 blog post: queued after VA
+
+### Next Session Instructions
+Priority 1: VA Loan Eligibility in Texas blog post (veteran buyers, high-intent query cluster)
+Priority 2: Suburb page content audit — spot check 3-4 pages for thin content risk
+Priority 3: First-Time Home Buyer Programs Austin TX 2026
+
+Advance queue: YES — FHA/conventional post complete
+---
+---
+## Session: 2026-03-29 AM — SEO + SEM
+Focus: VA Loan Eligibility blog post + lead-gen pending deploy
+Type: Execution (MEDIUM_RISK — new content + pending deploy)
+
+### Completed
+
+**Lead-gen pending deploy (MEDIUM_RISK):**
+- Deployed ADAM-TODO 2026-03-29 items: rate-alert.html (new), thank-you.html (modified), austin-mortgage-rates.html (modified)
+- These were code-complete and QA-passed per lead-gen agent — committed alongside SEO changes in commit 1b3f0be
+- Note: post-deploy QA checklist in tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md — PM session or next AM should run it
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-03-29-va-loan-eligibility-texas.html
+- Title: "VA Loan Eligibility Texas 2026 | Adam Styer | NMLS #513013" (58 chars)
+- Meta: "VA loan eligibility in Texas: who qualifies, service requirements, surviving spouses, and how to use your VA benefit to buy a home. NMLS #513013." (145 chars)
+- H1: "VA Loan Eligibility in Texas — Who Qualifies and How to Use Your Benefit"
+- Content: answer-first format, service requirements table by era, National Guard/Reserve section, surviving spouse eligibility, COE guide, entitlement explained, VA benefits breakdown, Austin-specific context
+- Schema: Article + FAQPage (6 questions: who qualifies, Guard eligibility, TX loan limits, surviving spouse, reusability, COE)
+- Internal links: /loans/va.html, /get-preapproved, Calendly
+- Added to sitemap.xml (lastmod 2026-03-29) and blog/manifest.json (first position)
+- Git commit: 1b3f0be — 11 files changed, pushed to GitHub, Netlify auto-deploying
+
+**Suburb thin-content audit (spot check):**
+- Jarrell: 522 lines, 41 content elements — substantive, not thin
+- Florence: 522 lines, 41 content elements — substantive, not thin
+- Assessment: all suburb pages appear built from the same strong template — thin content is NOT a risk
+
+### Deferred
+- Post-deploy QA for Rate Alert Funnel (rate-alert.html, thank-you.html, austin-mortgage-rates.html) — checklist in tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md
+- austin-housing-market-2025.html 301 redirect: still needs Adam decision
+- GSC data: 8-day window still too narrow for meaningful position analysis. Check again after April 5.
+- First-Time Home Buyer Programs Austin TX 2026 blog post: next in queue
+
+### Next Session Instructions
+Priority 1: Run post-deploy QA on Rate Alert Funnel (tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md)
+Priority 2: Blog post — "First-Time Home Buyer Programs Austin TX 2026"
+Priority 3: Monitor GSC for VA + FHA + pre-approval posts impressions (after April 5)
+
+Advance queue: YES — VA eligibility post complete, suburb thin-content cleared
+---

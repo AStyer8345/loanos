@@ -20,3 +20,6 @@
 - [x] [CRM] 2026-03-26 — Answer 5 loan pipeline questions — ANSWERED 2026-03-27: sort=closing date, active=app_received→closing_scheduled, rate lock=yes in Arive+add closing_date to webhook, Janie=Arive only, Kanban=yes build it
 - [x] [CRM] 2026-03-27 — Answer 4 automation coverage questions — FULLY ANSWERED 2026-03-28: drip=manual, WF2=Arive handles milestone emails (no change to WF2), review=Arive fund event, rate=compare to rate update email. Automation builder UNBLOCKED.
 
+- [ ] [LEAD-GEN] 2026-03-28 — Create "Rate Watch Welcome Series" Customer Journey in Mailchimp UI: Trigger = tag `rate-alert`, 4-email sequence (Days 0/3/7/14) with full copy in tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md
+- [ ] [LEAD-GEN] 2026-03-28 — Create recurring weekly Friday 9:00 AM CT Mailchimp campaign to send rate update to all `rate-alert` tagged subscribers — use template in spec
+- [ ] [LEAD-GEN] 2026-03-29 — DEPLOY: `git push` from `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site` — bundles BLOCKER-003 (PA Funnel) + new Rate Alert Funnel files (rate-alert.html, thank-you.html modified, austin-mortgage-rates.html modified). Both funnels are code-complete and QA-passed (code-level). After push: notify next session to run post-deploy QA (checklist in tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md).

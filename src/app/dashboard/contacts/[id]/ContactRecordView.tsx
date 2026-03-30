@@ -21,6 +21,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
+import AutomationPanel from '@/components/automations/AutomationPanel'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 
@@ -1364,6 +1365,15 @@ export function ContactRecordView(props: Props) {
                     </div>
                   </div>
                 )}
+
+                {/* ── Email Automations ── */}
+                <div style={cardStyle}>
+                  <AutomationPanel
+                    recordType="contact"
+                    recordId={contact.id}
+                    contactId={contact.id}
+                  />
+                </div>
 
               </div>
             )}

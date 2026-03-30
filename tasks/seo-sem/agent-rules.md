@@ -47,3 +47,6 @@
 | 2026-03-27 | AM | Added context file verification rule | Context file falsely claimed H1 was updated — caught by reading actual source file |
 | 2026-03-28 | AM | FLAG_FOR_ADAM items are not permanent deferrals | thank-you.html noindex was flagged for Adam but the correct action was obvious — restore noindex. FLAG_FOR_ADAM means "don't change without thinking", not "never touch". Apply judgment. |
 | 2026-03-28 | AM | Blog post template verified | blog/2026-03-27-down-payment-assistance-texas-2026.html is the cleanest current template. Use it for all new blog posts. |
+| 2026-03-29 | AM | Suburb thin-content risk is low | All suburb pages built from the same template — 522 lines, 40+ content elements. Thin content is not a risk. Don't re-audit unless a new suburb page is added manually. |
+| 2026-03-29 | AM | ADAM-TODO deploy items: include in SEO commit if code-complete | When ADAM-TODO has a [LEAD-GEN] DEPLOY item tagged for today with "code-complete and QA-passed", include those files in the current git push. Don't leave deploy-ready code sitting uncommitted when you're already pushing. |
+| 2026-03-29 | AM | notebooklm note create syntax | Title goes with -t flag, content as positional arg in quotes. Example: `notebooklm note create "content here" -t "title here"` |

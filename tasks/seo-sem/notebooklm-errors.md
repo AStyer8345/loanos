@@ -8,3 +8,4 @@
 
 
 [2026-03-26 PM] URL ADD TIMEOUT: https://www.searchenginejournal.com/how-to-use-schema-for-local-seo-a-complete-guide/294973/ — "Request timed out calling ADD_SOURCE" after 30s. Retry next session.
+SEJ timeout - URL: https://www.searchenginejournal.com/local-seo-content-strategy/431651/ — timed out 3 times on 2026-03-29

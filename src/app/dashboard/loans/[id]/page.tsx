@@ -20,6 +20,7 @@ import {
   Mail, Phone, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
+import AutomationPanel from '@/components/automations/AutomationPanel'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
 
@@ -2729,6 +2730,17 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
             </button>
           </div>
         ))}
+      </div>
+
+      {/* ── Email Automations ── */}
+      <div className="mt-8">
+        <AutomationPanel
+          recordType="loan"
+          recordId={loan.id}
+          contactId={loan.contact_id ?? ''}
+          loanId={loan.id}
+          currentStage={loan.status ?? ''}
+        />
       </div>
 
       {activeModal && (

@@ -296,3 +296,157 @@ Priority 4: Homepage forms audit — Quick Quote + Quick Contact TCPA compliance
 
 Advance queue to next topic: YES — Week 2 (PA Funnel execution) is FUNCTIONALLY COMPLETE. Code done, QA passed, n8n active. Advance to Week 3 Rate Alert Funnel Architect.
 ---
+
+---
+## Session: 2026-03-28 AM (Session 2) — Lead Generation
+Focus: Week 3 — Rate Alert Funnel Architecture
+Type: Strategy (Sequence B)
+Week in Queue: Week 3 of 8
+
+### Completed
+- Loaded context from today's earlier AM session (Session 1) — confirmed focus on Rate Alert Funnel Architect
+- Queried NotebookLM: confirmed rate-alert research indexed, architecture decisions available
+- Checked site repo: confirmed no existing `rate-alert.html`; `austin-mortgage-rates.html` exists (SEO page, natural promotion point); `rate-buydown-calculator.html` exists (no conflict)
+- Confirmed `thank-you.html` does NOT currently support `?type=rate-alert` query param — modification spec written
+- Designed complete Rate Alert Funnel spec:
+  - Landing page: `rate-alert.html` — 2-field form (first name + email), frictionless opt-in, "Austin Rate Watch" offer
+  - Zero backend changes: subscribe-lead.js handles `tag='rate-alert'` + `lead_source='Rate Alert Funnel'` unchanged
+  - Thank-you page: minor mod to `thank-you.html` to show Rate Alert-specific copy on `?type=rate-alert`
+  - Secondary CTA spec for `austin-mortgage-rates.html`
+  - 4-email Mailchimp welcome sequence with FULL COPY (Days 0, 3, 7, 14)
+  - Automation map: Mailchimp tag-triggered Customer Journey + LoanOS contact creation, no n8n LO notification
+  - Complete compliance checklist: email-only funnel, no SMS TCPA checkbox needed
+- Wrote spec file: tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md
+
+### Deferred
+- `rate-alert.html` build: Builder session (Week 3 Session 2) — spec is READY FOR EXECUTION
+- Mailchimp `Rate Watch Welcome Series` Customer Journey: must be created by Adam in Mailchimp UI (cannot be done via API)
+- Weekly Friday rate email campaign: Adam creates recurring campaign in Mailchimp (after welcome sequence is set up)
+- Homepage hero secondary CTA ("Get Weekly Rate Updates →"): deferred to homepage build session
+- Optimal Blue / Freddie Mac rate API automation: Month 3+ (start with Adam composing manually)
+
+### Output Produced
+- Research: None (used 2026-03-28 Session 1 research file)
+- Spec: tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md
+- Build: None (strategy session)
+- Review: N/A
+- QA: N/A
+
+### Lead Gen Metrics Updated
+- Funnels live: 0 (PA funnel pending Adam deploy; Rate Alert pending build)
+- Email sequences active: 0 (Rate Watch Welcome Series not yet created in Mailchimp)
+- Funnel readiness: Rate Alert Funnel spec COMPLETE — ready for Builder
+- Queue advancement: Week 3 spec complete; next = Builder execution
+
+### Compliance Checks Passed
+- TCPA: Rate Alert is email-only — no SMS opt-in checkbox required at this stage ✅
+- CAN-SPAM: Physical address + unsubscribe footer specified in all 4 email templates ✅
+- NMLS #513013: Required in landing page title, subheadline, and footer ✅
+- Equal Housing Lender: Required in landing page footer and all email footers ✅
+- No guaranteed approval language: Spec copy verified clean ✅
+- No protected class targeting: No geographic or demographic segmentation ✅
+- Regulation Z: Landing page does not quote specific rate; email footer includes "Not an offer to lend" ✅
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: 5 | Execution: N/A | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- Architect should explicitly check for existing pages that overlap with the new funnel (e.g., `austin-mortgage-rates.html` as natural promotion point) — this session added organic discovery of the SEO page that becomes the primary traffic driver. Add this as a "check site for related pages" step in 02-architect.md.
+- The "frictionless vs. segmented opt-in" decision (email-only vs. email+phone) is now established pattern for early-funnel pages. Future architect sessions should reference this decision as a principle: collect phone only when lead has shown higher intent (PA funnel, prequal).
+
+### BLOCKERS
+- BLOCKER-003: ACTIVE — PA Funnel not deployed (Adam must git push from styerteam-mortgage-site repo). This also gates Rate Alert deploy. Can be bundled.
+- BLOCKER-001: PARTIALLY RESOLVED — Homepage Quick Quote + Quick Contact TCPA audit still pending (separate ticket)
+
+### Adam Action Items
+1. REQUIRED FOR RATE ALERT: Create `Rate Watch Welcome Series` Customer Journey in Mailchimp UI — trigger: tag `rate-alert`, 4-email sequence with copy from tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md
+2. REQUIRED FOR RATE ALERT: Create recurring weekly Friday 9:00 AM CT campaign to `rate-alert` tagged subscribers (manual rate template in spec)
+3. REMINDER (still pending): `git push` from styerteam-mortgage-site repo to deploy PA funnel + prequal fix (BLOCKER-003)
+
+### Next Session Instructions
+Priority 1: Builder executes Rate Alert Funnel spec — create `rate-alert.html`, modify `thank-you.html`, add CTA to `austin-mortgage-rates.html`. Spec is at tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md — READY FOR EXECUTION
+Priority 2: Confirm PA funnel deployed (verify Adam's git push resolved BLOCKER-003) before running Rate Alert QA
+Priority 3: Homepage forms audit — Quick Quote + Quick Contact TCPA compliance + wiring (BLOCKER-001 remaining, low urgency since no SMS live)
+
+Advance queue to next topic: NO — Rate Alert Funnel Builder execution is Week 3 Session 2. Architecture complete this session.
+---
+
+---
+## Session: 2026-03-29 AM — Lead Generation
+Focus: Week 3 — Rate Alert Funnel Builder + Review + QA
+Type: Execute (Sequence C)
+Week in Queue: Week 3 of 8
+
+### Completed
+- Loaded NotebookLM PULL — briefing at tasks/lead-gen/notebooklm-pull-2026-03-29.md
+- Executed complete Rate Alert Funnel build from spec (tasks/lead-gen/specs/2026-03-28-rate-alert-funnel-spec.md):
+  - CREATED: `rate-alert.html` — standalone "Austin Rate Watch" landing page
+    - 2-field form (fname + email only, no phone), "Get My Weekly Rate Updates →" CTA
+    - `name="rate-alert-form"`, `data-netlify="true"`, honeypot, `action="javascript:void(0)"`
+    - JS submit handler: calls `/.netlify/functions/subscribe-lead`, hardcodes tag='rate-alert' + lead_source='Rate Alert Funnel', redirects to `/thank-you.html?type=rate-alert` on both success and catch
+    - Google Ads conversion event + GTM `generate_lead`/`rate_alert_signup` dataLayer event on submit
+    - noindex ABSENT (page is indexable — targets "Austin mortgage rate alerts" SEO)
+    - LP header: nav links hidden (consistent with get-preapproved.html pattern)
+    - 4 sections: hero with form card, "What You Get" (3 cards), sample email preview with APR disclosure mockup, credibility stats
+    - NMLS #513013, Equal Housing Lender, physical address in footer
+  - MODIFIED: `thank-you.html` — added query param branching for `?type=rate-alert`
+    - JS block: when type=rate-alert, replaces H1, body copy, phone CTA; hides Calendly widget
+    - PA funnel copy 100% preserved for all other query param states
+  - MODIFIED: `austin-mortgage-rates.html` — inserted "Never Miss a Rate Move" CTA section
+    - Inserted before existing bg-navy CTA; styled with gold border + site CSS variables
+    - Links to `/rate-alert` with NMLS disclaimer line
+  - VERIFIED READ-ONLY: `subscribe-lead.js` — `notifyPreApprovalLead()` and `enrollInDrip()` both gated on `lead_source === "Pre-Approval Funnel"` — Rate Alert will NOT trigger either function ✅
+- Ran Quality subagent (03b): all 4 emails ≥7/10, all 11 landing page sections ≥7/10. 0 rewrites required, 0 items flagged for Adam
+- Ran Reviewer subagent (04): APPROVED WITH NOTES — all compliance checks pass. 3 non-blocking notes: (1) Emails 2+3 rely on Mailchimp footer for physical address — confirm account address in Mailchimp when setting up Journey; (2) /thank-you vs /thank-you.html URL extension inconsistency (non-breaking); (3) sendGuideEmail guard needed when FTB funnel is built
+- Ran QA subagent (05): PASS WITH CAVEATS — all 22 code-level checks pass. Live end-to-end test deferred pending deployment. n8n workflow J9Pe24vUi6fpZtdZ confirmed ACTIVE via MCP (active: true). Pre-approval non-fire regression: code-level pass; execution-level confirm needed post-deploy
+
+### Deferred
+- Live form submission end-to-end test: requires deployment (Adam git push BLOCKER-003) → run next session post-deploy
+- Email sequence QA: Mailchimp "Rate Watch Welcome Series" Customer Journey must be created by Adam in UI before QA can run → Week 3 Session 3 (post-deploy)
+- n8n non-fire regression test: code confirms gate is correct; execution-level confirmation requires live test submission post-deploy
+- Homepage forms TCPA + wiring (BLOCKER-001 partial): low urgency, no SMS live → Week 4+
+
+### Output Produced
+- Research: None (used 2026-03-28 research file)
+- Spec: None (used 2026-03-28 spec file)
+- Build: rate-alert.html (NEW), thank-you.html (MODIFIED), austin-mortgage-rates.html (MODIFIED)
+- Build report: tasks/lead-gen/build-reports/2026-03-29-rate-alert-funnel-build.md
+- Review: tasks/lead-gen/reviews/2026-03-29-rate-alert-funnel-review.md — APPROVED WITH NOTES
+- QA: tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md — PASS WITH CAVEATS
+
+### Lead Gen Metrics Updated
+- Funnels live: 0 (Rate Alert code complete; pending Adam deploy + Mailchimp Journey)
+- Email sequences active: 0 (Mailchimp Journey must be created by Adam)
+- Funnel readiness: Rate Alert Funnel 95% complete — code DONE, QA PASSED (code-level), pending deploy + Mailchimp Journey
+- Code-complete funnels awaiting deploy: 2 (PA Funnel + Rate Alert Funnel — can bundle in single git push)
+- Estimated leads/month from owned channels: ~0 (deployment still pending)
+
+### Compliance Checks Passed
+- TCPA: N/A for Rate Alert (email-only funnel, no phone/SMS collected) ✅
+- CAN-SPAM: Mailchimp auto-appends unsubscribe + physical address; Emails 1 and 4 include physical address in copy ✅
+- NMLS #513013: Present in page title, trust chips, and footer of rate-alert.html ✅
+- Equal Housing Lender: Present in landing page footer ✅
+- No guaranteed approval language: Confirmed absent ✅
+- Regulation Z: No specific rate quoted on landing page; APR present in sample email preview with disclaimer ✅
+- Fair lending: No protected class targeting, no geographic redlining ✅
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- QA subagent ran into `mcp__n8n-mcp__get_workflow_details` returning "Workflow is not available in MCP" for workflows with `availableInMCP: false`. Fallback to `search_workflows` worked. Add explicit fallback note to 05-qa.md: "If get_workflow_details returns 'not available in MCP', use search_workflows with workflow name as fallback."
+- Builder correctly verified subscribe-lead.js READ-ONLY before building. This should be explicitly Step 1 in 03-builder.md for any session touching subscribe-lead.js or introducing new funnels: "Read subscribe-lead.js and verify the lead_source gates before writing any new HTML."
+- The 03b Quality → 04 Reviewer ordering (Reviewer only sees polished copy) worked well. 0 rewrites required at review stage because 03b had already cleared all quality issues. This validates the ordering.
+
+### BLOCKERS
+- BLOCKER-003: ACTIVE — Both PA Funnel and Rate Alert Funnel code complete, pending deploy. Adam must `git push` from `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site`. Both funnels can be bundled in a single push.
+- BLOCKER-001: PARTIALLY ACTIVE — Homepage Quick Quote + Quick Contact TCPA audit pending (non-urgent, no SMS live)
+
+### Next Session Instructions
+Priority 1: Confirm BLOCKER-003 resolved (check if Adam has deployed). If deployed, run post-deploy QA for Rate Alert Funnel using checklist in tasks/lead-gen/qa-reports/2026-03-29-rate-alert-funnel-qa.md — submit test form, verify Supabase contact, verify n8n pre-approval workflow did NOT fire, verify Mailchimp tag applied, verify thank-you page shows Rate Alert copy.
+Priority 2: Run post-deploy QA for PA Funnel (deferred from 2026-03-28) — same test checklist in tasks/lead-gen/qa-reports/2026-03-28-pre-approval-funnel-qa.md.
+Priority 3: If deploy still pending, move to Week 4 planning — check domain-queue.md for next topic. Candidate: First-Time Buyer Guide enhancement or homepage forms wiring.
+Priority 4: Homepage Quick Quote + Quick Contact forms — TCPA fix + subscribe-lead.js wiring (BLOCKER-001 partial) — bundle with next deploy.
+
+Advance queue to next topic: NO — Rate Alert Funnel build is code-complete; live QA deferred pending deploy. Declare Week 3 complete only after post-deploy QA passes.
+---

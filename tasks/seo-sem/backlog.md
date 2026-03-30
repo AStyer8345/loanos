@@ -46,10 +46,10 @@
 
 - ~~New page: /self-employed-mortgage-austin.html~~ ✅ DONE 2026-03-27 — commit 9203d1f, full non-QM landing page, FAQPage + BreadcrumbList + FinancialProduct schema, added to sitemap
 - ~~Blog post: "How Long Does Mortgage Pre-Approval Take in Austin TX?"~~ ✅ DONE 2026-03-28 — commit 7879b14, FAQPage schema (6 questions), added to sitemap + manifest
-- Blog post: "FHA vs Conventional Loan Austin TX — Which Is Right for You?" — comparison format, targets buyers deciding between the two
-- Blog post: "VA Loan Eligibility in Texas — Who Qualifies and How to Use Your Benefit" — veteran buyers, high-intent
+- ~~Blog post: "FHA vs Conventional Loan Austin TX — Which Is Right for You?"~~ ✅ DONE 2026-03-28 — commit 45c8f2f, FAQPage schema (6 questions), comparison table, added to sitemap + manifest
+- ~~Blog post: "VA Loan Eligibility in Texas — Who Qualifies and How to Use Your Benefit"~~ ✅ DONE 2026-03-29 — commit 1b3f0be, FAQPage schema (6 questions), service table, added to sitemap + manifest
 - Blog post: "First-Time Home Buyer Programs Austin TX 2026" — complements DPA post, more process-focused
-- Suburb page content audit: are the 15 new-to-sitemap pages strong enough or thin?
+- ~~Suburb page content audit: are the 15 new-to-sitemap pages strong enough or thin?~~ ✅ SPOT CHECK DONE 2026-03-29 — Jarrell (522 lines, 41 content elements) and Florence (522 lines, 41 content elements) both substantive — NOT thin. All suburb pages appear to be using the same strong template.
 - thank-you.html: noindex removed during redesign ✅ FIXED 2026-03-28 — commit 7879b14
 
 ---

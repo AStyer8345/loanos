@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X } from 'lucide-react'
+import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X, Phone, Mail, MessageSquare } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import {
   IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
@@ -173,9 +173,10 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
   { id: 'borrower_phone',       label: 'Borrower Phone',      key: null },
   { id: 'commission_amount',    label: 'Commission',          key: null },
   { id: 'last_milestone',      label: 'Last Milestone',       key: null },
+  { id: 'actions',             label: '',                     key: null },
 ]
 
-const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'loan_purpose', 'closing_date', 'location', 'loan_program', 'contact_email', 'contact_phone']
+const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'closing_date', 'interest_rate', 'location', 'actions']
 const LS_LOAN_COLUMNS_KEY = 'loanos_loans_columns_v1'
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
 const LS_LOAN_VIEW_KEY = 'loanos_loans_view_v1'
@@ -1611,6 +1612,37 @@ export default function LoansPage() {
                             <span className={msAgeDays !== null && msAgeDays > 30 ? 'text-amber-400' : 'text-[#999999]'}>
                               {fmtRelativeDate(ms)}
                             </span>
+                          </td>
+                        )
+                      }
+                      if (col.id === 'actions') {
+                        const phone = loan.borrower_phone || loan.contact_phone
+                        const email = loan.borrower_email || loan.contact_email
+                        const tel = telHref(phone)
+                        const mailto = mailtoHref(email)
+                        const smsHref = phone ? `sms:${String(phone).replace(/\D/g, '')}` : null
+                        return (
+                          <td key={col.id} className="px-2 py-3" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center gap-1 opacity-40 group-hover/row:opacity-100 transition-opacity">
+                              {tel && (
+                                <a href={tel} title={`Call ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-green-500/20 text-zinc-400 hover:text-green-400 transition-colors">
+                                  <Phone size={14} />
+                                </a>
+                              )}
+                              {smsHref && (
+                                <a href={smsHref} title={`Text ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-blue-500/20 text-zinc-400 hover:text-blue-400 transition-colors">
+                                  <MessageSquare size={14} />
+                                </a>
+                              )}
+                              {mailto && (
+                                <a href={mailto} title={`Email ${email}`} className="p-1.5 rounded hover:bg-amber-500/20 text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                                  <Mail size={14} />
+                                </a>
+                              )}
+                              {!tel && !smsHref && !mailto && (
+                                <span className="text-[10px] font-mono text-zinc-600">No contact</span>
+                              )}
+                            </div>
                           </td>
                         )
                       }

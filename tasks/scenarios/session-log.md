@@ -217,3 +217,37 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Tier 2 item 3 (Rent vs Own) — ✅ COMPLETE this session
 
+
+---
+
+## AM Session — 2026-03-30 (scenarios-am)
+
+**What was built:**
+- Email from Builder (`src/app/dashboard/scenarios/new/ActionsBar.tsx`, `src/app/api/scenarios/send-email/route.ts`)
+  - "Email Borrower" button added to ActionsBar alongside PDF/Share/Save
+  - Clicking toggles an inline email input panel (no modal — stays in-page)
+  - Adam types borrower email, hits Send (or Enter) → API saves scenario if not yet saved, fetches share_token, posts to n8n webhook
+  - API route builds branded HTML email: dark bg (#0a0a0a), gold CTA button, IBM Plex Mono, borrower first name personalization, property address in subject line
+  - n8n webhook creates Outlook draft in Adam's inbox — he reviews and sends from there
+  - Success state: button turns green "Draft Created!" for 4 seconds
+  - Error state: red inline error message
+  - No new dependencies — reuses existing N8N_OUTLOOK_DRAFT_WEBHOOK_URL pattern from automations/send
+
+**MC gap closed:** Adam no longer needs to copy the share link, open Outlook, compose a new email, and paste the link. Now: type email → Send → Outlook draft appears in inbox. One step instead of four.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `c44dba5` — pushed to main
+**Vercel:** `dpl_52ddPH7nGQWAtRUsU3SXU8SmLXKa` — ✅ READY
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx`
+- `src/app/api/scenarios/send-email/route.ts` (new)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. ARM vs Fixed comparison (Tier 3 item 2) — show initial savings of 5/1 ARM vs 30yr fixed with break-even year if rates rise
+2. Total cost of waiting (Tier 3 item 3) — "What does waiting 6 months cost?" tool
+3. Engagement tracking — log when borrower views the share page (view_count already in schema — just needs display in builder after save)
+
+**Domain queue updates:**
+- Tier 3 item 1 (Email from builder) — ✅ COMPLETE this session

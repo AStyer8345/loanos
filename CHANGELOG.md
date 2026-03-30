@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [4.9.5] — 2026-03-29 — Build Unblock + Missing Source Files
+
+### Fixed
+- **Local build failure**: `npm ci` resolved corrupted `node_modules` causing `pages-manifest.json` ENOENT on every local build
+- **Vercel build failure**: Committed 5 source files that existed locally but were never pushed to git — `src/lib/automations/definitions.ts`, `src/lib/automations/prompts.ts`, `src/app/api/automations/refine/route.ts`, `src/app/api/automations/send/route.ts`, `src/lib/stageNormalization.ts`
+- **ESLint error**: Removed unused `contactId` variable in `api/automations/generate/route.ts`
+
+### Added
+- `scripts/imessage-sync.py` — iMessage sync utility
+- `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` — system knowledge base
+- 100+ task files committed (enterprise, lead-gen, seo-sem, social-media sessions)
+
 ## [4.9.4] — 2026-03-29 — Email Automation Panel
 
 ### Added

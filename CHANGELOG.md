@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [4.9.4] — 2026-03-29 — Email Automation Panel
+
+### Added
+- **Email Automation Panel** on contact and loan records — 14 automations (4 contact-level, 10 loan-level with stage filtering)
+- `AutomationPanel` component — lists available automations, queries sent state from `email_drafts` on mount
+- `AutomationCard` component — full lifecycle: idle → generating → draft (editable subject/body + refine via Claude) → sending → sent
+- `POST /api/automations/generate` — fetches record data, builds prompt, calls Claude, saves draft
+- `POST /api/automations/refine` — refines existing draft via Claude instruction
+- `POST /api/automations/send` — sends draft to n8n webhook for Outlook draft creation, logs activity
+- Automation definitions (`src/lib/automations/definitions.ts`) — pure data, stage-aware filtering
+- Prompt builder (`src/lib/automations/prompts.ts`) — 14 per-automation prompts with safe fallbacks, multi-tenant LO identity
+
+### Changed
+- Contact record Overview tab — added Email Automations section at bottom
+- Loan record Automations tab — added Email Automations section below existing PDF-upload workflow cards
+
 ## [4.9.3] — 2026-03-29 — Social Dashboard Bug Fixes + Enterprise Spec
 
 ### Fixed

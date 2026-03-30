@@ -5,9 +5,11 @@ import { getAutomationById } from '@/lib/automations/definitions'
 
 export async function POST(req: NextRequest) {
   let organizationId: string
+  let userId: string
   try {
     const ctx = await getOrganization()
     organizationId = ctx.organizationId
+    userId = ctx.userId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -79,9 +81,6 @@ export async function POST(req: NextRequest) {
     const automationLabel = def?.label || draft.automation_name
 
     if (draft.contact_id) {
-      // Get user for activity log
-      const { data: { user } } = await supabase.auth.getUser()
-
       await Promise.all([
         supabase
           .from('contacts')
@@ -95,7 +94,7 @@ export async function POST(req: NextRequest) {
           summary: `${automationLabel} sent to ${draft.recipient_name || draft.recipient_email}`,
           entity_type: 'contact',
           occurred_at: new Date().toISOString(),
-          user_id: user?.id || null,
+          user_id: userId,
           organization_id: organizationId,
           metadata: { automation_id: draft.automation_name, subject: draft.subject } as never,
         }),

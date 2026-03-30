@@ -18,6 +18,27 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29.**
 
+## Email Automation Panel — 2026-03-29
+
+**14 email automations** integrated into contact and loan records — generate, refine, and send email drafts powered by Claude.
+
+**New files (7):**
+- `src/lib/automations/definitions.ts` — 4 contact + 10 loan automations with stage filtering
+- `src/lib/automations/prompts.ts` — prompt builder for all 14 automations with safe fallbacks
+- `src/app/api/automations/generate/route.ts` — Claude generates email draft, saves to email_drafts
+- `src/app/api/automations/refine/route.ts` — Claude refines draft based on user instruction
+- `src/app/api/automations/send/route.ts` — sends draft to n8n webhook for Outlook draft creation
+- `src/components/automations/AutomationPanel.tsx` — container, queries sent state on mount
+- `src/components/automations/AutomationCard.tsx` — full lifecycle: idle → generating → draft → refining → sending → sent
+
+**Modified files (2):**
+- `src/app/dashboard/contacts/[id]/ContactRecordView.tsx` — added AutomationPanel in Overview tab
+- `src/app/dashboard/loans/[id]/page.tsx` — added AutomationPanel in Automations tab (below existing workflow cards)
+
+**Architecture:** Contact record shows 4 automations (referral thank-you, referral intro, application link, nurture follow-up). Loan record shows stage-relevant automations (current stage ± 1 stage in pipeline). Sent state persists via email_drafts table. Send route requires `N8N_OUTLOOK_DRAFT_WEBHOOK_URL` env var — panel works for draft generation without it.
+
+---
+
 ## Social Dashboard Bug Fixes + Enterprise Spec + Automation Panel Prompt — 2026-03-29
 
 **3 social dashboard bugs fixed:**

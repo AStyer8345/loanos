@@ -147,6 +147,16 @@ Searching only `src/app/` for component imports produces false orphan positives.
 ### emails/link service-role without org scoping (2026-03-29)
 Route authenticated via `createClient().auth.getUser()` directly instead of `getOrganization()`, then used service role for all mutations with no `organization_id` filter. Risk: any authenticated user could dismiss/relink activity_log rows from other orgs by UUID. Pattern: any route that uses `createClient().auth.getUser()` directly (instead of `getOrganization()`) AND then uses service-role mutations is at risk of missing org scoping. `getOrganization()` is the correct pattern — provides both auth + org context in one call.
 
+### Sibling route auth gap (2026-03-30)
+When a directory has sibling routes (`import/parse`, `import/loans`, `import/contacts`), verify ALL routes have auth — not just the "main" ones. The prototype/utility route is often the one that gets skipped. When adding auth to one route in a directory, grep the siblings and confirm they follow the same pattern. `import/parse` had no auth for ~2 weeks while its siblings did.
+
+### `getOrganization()` throws, not returns error (2026-03-30)
+`getOrganization()` throws on auth failure — it does NOT return `{ error }`. Destructuring `{ error }` from it produces a TypeScript error. Correct pattern:
+```ts
+try { await getOrganization() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+```
+This is the same pattern used by `import/loans` and `import/contacts`.
+
 ### Dead `created_by` double auth round-trip (2026-03-30)
 If a route calls `getOrganization()` (which internally calls `auth.getUser()`), check whether any subsequent direct `supabase.auth.getUser()` call is still necessary. Often the user object is fetched a second time to populate one field (like `created_by`) that turns out to be unrendered in the UI. Pattern: search for routes that call both `getOrganization()` and `supabase.auth.getUser()` — the second call is almost always redundant.
 

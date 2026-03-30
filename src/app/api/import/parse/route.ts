@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getOrganization } from '@/lib/getOrganization'
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
 
 // ── HTML-XLS parser (no external deps) ───────────────────────────────────────
 // Salesforce exports .xls files that are actually HTML tables.
@@ -59,11 +62,21 @@ function parseCSV(text: string): { columns: string[]; rows: string[][] } {
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
+    await getOrganization()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
     const formData = await req.formData()
     const file = formData.get('file') as File | null
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 413 })
     }
 
     const text = await file.text()

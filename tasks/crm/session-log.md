@@ -989,3 +989,81 @@ Priority 1 (Research): Loan Record UI — Simplification Sprint Session 1
   - Output: tasks/crm/loan-record-redesign-spec.md + flag in ADAM-TODO for review before Session 2 builds
 Priority 2 (Adam): Set Outlook credential on WF-R1 "Draft Thank-You to Realtor" node in n8n UI
 ---
+
+---
+## Session: 2026-03-30 PM — LoanOS CRM
+Focus: PUSH+CURATE — Loan Record UI Sprint knowledge prep + daily digest
+Type: Maintenance / Knowledge Curation (PM session — no AM session today)
+Triggered-by: Scheduled task `loanos-crm-pm`
+
+### Context
+No AM session ran 2026-03-30. Prior session was 2026-03-29 PM2 (Loan Record UI prep PUSH+CURATE). This PM session continues the pre-sprint knowledge curation and sends the daily digest.
+
+### Completed
+
+**NotebookLM Staleness Audit**
+- Audit report: `tasks/crm/notebooklm-audit-2026-03-30.md`
+- Removed error-status source: `setshape.com/blog/is-a-complicated-ui...` (ID: 519041d6 — Cloudflare block, content never loaded)
+- Removed + refreshed: `domain-queue.md` (ID: 71e22fbc — stale 2026-03-26 version; re-added current content, ID: 2ee0a278)
+- Net change: 49 → 50 sources (−2 removed, +1 re-added domain-queue, +2 new web sources)
+- Source count at cap (50) — staleness audit required before next addition
+
+**Web Research Sweep — Loan Record UI Sprint**
+- Web research file: `tasks/crm/web-research/2026-03-30-loan-record-ui-web.md`
+- 3 queries run on mortgage CRM loan detail view UI, LO information hierarchy, Total Expert/Shape features
+- Sources added to NotebookLM:
+  - `ijungo.com/mortgage-crm-strategies-to-improve-loan-officer-productivity-in-2026/` (ID: 33c0f5ee)
+  - `monday.com/blog/crm-and-sales/mortgage-crm/` (ID: 7eba54c9)
+- Key findings:
+  - LOs spend 60% of week on admin tasks — UI goal is friction reduction, not more data fields
+  - Leading CRMs surface: status + borrower name + amount + rate + close date above the fold; communication history as a dedicated tab; compliance deadlines prominent
+  - AI summarization of deal context is a 2026 differentiator not yet in LoanOS
+
+**Master System Log Updated**
+- `/Users/adamstyer/Documents/memory/loanos/LoanOS_System_Log.md` — today's PM summary appended
+- Synced to LoanOS Enterprise notebook (old source replaced)
+
+**Daily Digest Sent**
+- Zapier success: `019d3d91-38dc-7237-a1e8-62fa351f1c83`
+- Recipient: adam@thestyerteam.com
+- Subject: LoanOS CRM Migration Digest — 2026-03-30
+- Saved: `tasks/crm/digests/2026-03-30-digest.md`
+
+### What Was Not Done
+- No build work — PM session only. Loan Record UI Sprint Session 1 remains the next active execution item.
+- No NotebookLM PULL (PM session — no research requiring prior context pull)
+
+### CRM Progress
+| Asset | Before | After | Delta |
+|-------|--------|-------|-------|
+| NotebookLM sources | 49 | 50 | −2 stale, +1 domain-queue refresh, +2 web = net +1 |
+| Stale sources removed | — | 2 | −2 |
+| Web sources added | — | 2 | +2 (Loan Record UI Sprint prep) |
+| Daily digest sent | PENDING | SENT ✅ | |
+
+### Queue Position
+Current: Loan Record UI — Simplification Sprint (Session 1: Research + Audit — not yet started)
+Advance: NO (no build work this session)
+Secondary: Automation Coverage Audit builder sequence (verify AK1fBcaX1cPcdlGx trigger timing)
+
+### Quality Ratings (1-5)
+Curation: 5
+
+### BLOCKERS
+None.
+
+### Next Session Instructions
+Priority 1 (Research): Loan Record UI — Simplification Sprint **Session 1**
+  - Read the loan detail page code: `src/app/dashboard/loans/[id]/`
+  - Audit every field, section, and tab currently rendered
+  - Research how leading mortgage CRMs (Total Expert, SimpleNexus, Shape) structure their loan detail view
+  - Run Supabase query to find fields that are empty >90% of the time
+  - Propose Critical / Secondary / Archive information hierarchy
+  - Output: `tasks/crm/loan-record-redesign-spec.md` — flag in ADAM-TODO for review before Session 2 builds
+Priority 2 (Quick check): Verify `AK1fBcaX1cPcdlGx` (Review Request Email) trigger timing — confirm it fires on Arive fund event as Adam intended
+Priority 3 (Adam): Set Outlook credential on WF-R1 "Draft Thank-You to Realtor" node in n8n UI
+
+### Data Integrity Status
+- Contacts: 2,376 | Loans: 841 active — no changes this session
+- Schema: migrations 060+061+062 all applied and stable
+- WF-R1 referral thank-you: live but Outlook credential unbound (Adam must set in n8n UI)

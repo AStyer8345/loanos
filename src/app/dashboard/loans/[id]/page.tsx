@@ -986,6 +986,9 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
 
       <div className="border-t border-zinc-800/40 my-6" />
 
+      {/* ── Email Automations ── */}
+      <AutomationPanel recordType="loan" recordId={loan.id} contactId={loan.contact_id ?? ''} loanId={loan.id} currentStage={loan.status ?? ''} />
+
       {/* ── Section 4: Property + Loan Details (collapsible) ── */}
       <PropertyDetailsToggle loan={loan} />
 

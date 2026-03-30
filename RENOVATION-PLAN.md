@@ -1,0 +1,140 @@
+# LoanOS Renovation Plan
+
+> Created: 2026-03-30
+> Status: IN PROGRESS
+> Rule: Nothing gets deleted. We hide, not destroy. Every feature can be restored.
+
+## Why
+
+LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social dashboards, kids gamification, automation command center, scenario builder — all while the core (see numbers, manage pipeline, follow up with leads, communicate) isn't reliable. Webhooks break, links break, features don't work session to session.
+
+## What Adam Actually Needs (5 Things)
+
+1. **Dashboard** — funded count, volume, commission (MTD + YTD). Clean numbers, no clutter.
+2. **Pipeline** — active loans with status, next action, and ability to text/email/call from the row.
+3. **Follow-up list** — leads not under contract, sorted by who needs attention, one-click communication.
+4. **Contacts** — basic info, activity timeline (merged), referred-by tracking, realtor performance metrics.
+5. **Templated emails** — the 6-7 n8n email workflows wired to buttons that actually fire and deliver.
+
+## What Gets Hidden
+
+- Social media dashboard (SOCIAL tab)
+- Kids gamification (challenges, kids, responses tables)
+- Automation Command Center (replace with simplified Admin Panel — see below)
+- ~~Voice Guide tab~~ KEEPING — Adam needs in-app guidance to remember workflows
+- MCC state
+- Marketing tab (if separate from core)
+- Multi-tenant UI complexity (keep in DB, remove from UI)
+
+## What Gets Kept
+
+- Dashboard (simplified)
+- Pipeline / Loans views
+- Contacts
+- AI Chatbot (for adding contacts, quick actions)
+- Scenario Builder (close to done — polish in a later phase)
+- Voice Guide (helps Adam remember how to use things — improve, don't hide)
+- Admin Panel (replaces Automation Command Center — lean version: list automations, edit prompts, see status, no bulk actions/run history bloat)
+- Settings (minimal)
+- All n8n workflows (running in background as-is)
+- All Supabase data (untouched)
+
+## Phases
+
+### Phase 1: Strip the UI
+**Goal:** 4 tabs only — Dashboard, Pipeline, Contacts, Settings
+**Session:** Next session after this plan is locked in
+**Tasks:**
+- [ ] Remove nav links for: Social, Voice Guide, Automations, Scenarios, Marketing, Kids
+- [ ] Simplify sidebar/nav to 4 items
+- [ ] Remove or hide unused page routes (don't delete files)
+- [ ] Clean up dashboard to show only: funded MTD/YTD, volume MTD/YTD, commission MTD/YTD, active loan count
+- [ ] Remove hot leads / new leads / recent apps widgets if they're broken; keep if they work
+- [ ] Verify build passes
+- [ ] Deploy and verify on Vercel
+- [ ] Adam reviews and confirms
+
+### Phase 2: Make Pipeline Bulletproof
+**Goal:** Loans in process with communication built in
+**Session:** After Phase 1 confirmed working
+**Tasks:**
+- [ ] Pipeline view: borrower name, status, loan amount, rate, est closing, last activity, next action
+- [ ] Each row: text button, email button, call button (tel: link)
+- [ ] Filter by status: All, Pre-Approved, In Process, Clear to Close
+- [ ] Color-coded urgency: stale (red), rate lock expiring (yellow), closing soon (blue)
+- [ ] Loan detail page: simplified, communication-first
+- [ ] Verify Arive sync is feeding data correctly (spot-check 3 loans)
+- [ ] Deploy and verify
+- [ ] Adam reviews and confirms
+
+### Phase 3: Follow-Up List
+**Goal:** Never miss a lead or stale borrower
+**Session:** After Phase 2 confirmed working
+**Tasks:**
+- [ ] Dedicated follow-up view (could be a tab within Pipeline or its own section)
+- [ ] Segments: New leads (no contract), Stale contacts (7+ days no activity), Pre-approved still shopping
+- [ ] Each row: last contact date, source, referral info, one-click text/email/call
+- [ ] Smart sort: most urgent first
+- [ ] Deploy and verify
+- [ ] Adam reviews and confirms
+
+### Phase 4: Contacts That Work
+**Goal:** See everything about a person in one place
+**Session:** After Phase 3 confirmed working
+**Tasks:**
+- [ ] Contact detail: name, phone, email, referred by, type, stage
+- [ ] Merged activity timeline (activity_log + contact_activity in one feed)
+- [ ] Realtor view: referral count, closed count, conversion rate, deal history
+- [ ] Quick-add contact from AI chatbot (verify it works end-to-end)
+- [ ] Import from website leads (verify web lead → contact flow)
+- [ ] Deploy and verify
+- [ ] Adam reviews and confirms
+
+### Phase 5: Email Templates + Drip
+**Goal:** Send real emails with one click, drip campaigns that actually enroll people
+**Session:** After Phase 4 confirmed working
+**Tasks:**
+- [ ] Wire UI buttons to the 6 n8n email workflows (PA, CD, referral intro, refi intake, review request, web lead)
+- [ ] Test EVERY email end-to-end: click button → email lands in inbox → links work → content correct
+- [ ] Set up 1 working drip campaign with real enrollments
+- [ ] Newsletter send flow: test end-to-end including all links
+- [ ] Deploy and verify
+- [ ] Adam reviews and confirms
+
+### Phase 6: Metrics + Verification
+**Goal:** Track what matters, verify everything works
+**Session:** After Phase 5 confirmed working
+**Tasks:**
+- [ ] Metrics dashboard: conversion rate, realtor leaderboard, deals closed/lost, pipeline velocity
+- [ ] Full app walkthrough as Adam: every button, every flow, every email
+- [ ] Fix anything that breaks
+- [ ] Write 1-page "How to Use LoanOS" quick reference
+- [ ] Final deploy and confirm
+
+### Known Issue: Arive Sync Gaps
+**Adam suspects not all data is coming over from Arive.** Before Phase 2 (Pipeline), audit what fields the Arive webhook actually sends vs what the loans table expects. Map the gaps and fix the sync so pipeline data is complete.
+
+## STAY ON TASK
+
+Adam's instruction: Make the basics bulletproof first. Do not add features, do not scope creep, do not polish things that aren't in the current phase. If something cool comes up, add it to a "Later" list and move on.
+
+## Session Protocol
+
+Every session working on this plan:
+1. Read this file first
+2. Check which phase we're on
+3. Do the work for that phase ONLY
+4. Verify it works (build, deploy, click through)
+5. Update this file marking tasks complete
+6. Adam confirms before moving to next phase
+7. Update CONTEXT.md + CHANGELOG.md
+8. git add, commit, push
+
+## Paused LoanOS Scheduled Tasks (to re-enable later)
+- loanos-enterprise-am / pm
+- loanos-crm-am / pm
+- loanos-daily
+- loanos-knowledge-base
+- scenarios-am / pm
+- loanos-aesthetics (was already disabled)
+- loanos-build-watchdog (was already disabled)

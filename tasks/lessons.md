@@ -166,5 +166,11 @@ If a route calls `getOrganization()` (which internally calls `auth.getUser()`), 
 ### TOMORROW_PRIORITY may already be done (2026-03-27 — confirmed again 2026-03-28)
 If prior run flagged something as TOMORROW_PRIORITY, always verify actual current state before starting the fix. The issue may have been resolved in a session between runs. The metrics (grep output) will confirm — don't assume.
 
+### Stale .next cache causes spurious build failures (2026-03-31)
+After large feature additions (social dashboard, automation panel), `.next/types/` accumulates stale generated files. These cause two classes of failure: `ENOENT: pages-manifest.json` (manifest race condition) and `File not found` TypeScript errors for deleted/renamed route files. If `npm run build` fails with either error on this local Mac environment, run `rm -rf .next` before retrying. Vercel builds always start clean and are unaffected.
+
+### Import route row cap: row count not byte count (2026-03-31)
+`import/parse` caps by file size (10 MB). `import/loans` and `import/contacts` receive JSON row arrays — there's no `File` object to measure. Use a `MAX_ROWS` constant (5000) instead of a byte check. Return 413 with a descriptive message. Consistent with the parse route's 10 MB cap (10 MB / ~2KB per row ≈ 5000 rows).
+
 ### n8n column name drift causes silent 400s every 30 minutes (2026-03-16)
 The Review Request Email workflow (`AK1fBcaX1cPcdlGx`) used `close_date` in its Supabase REST query. Column doesn't exist — correct name is `closing_date`. The workflow was active and running on a 30-minute schedule, failing silently in n8n logs. Always verify column names against Supabase schema before writing n8n Supabase queries. The `est_closing_date` column also does not exist — use `estimated_closing_date` for Arive-synced loans.

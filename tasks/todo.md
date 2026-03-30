@@ -1,6 +1,6 @@
 # LoanOS — Task Backlog
 
-_Last updated: 2026-03-30 (daily audit run 2 — import/parse auth + file size limit added)_
+_Last updated: 2026-03-31 (daily audit — import/loans + import/contacts row cap added)_
 
 ---
 
@@ -23,7 +23,7 @@ _Last updated: 2026-03-30 (daily audit run 2 — import/parse auth + file size l
 - [x] **n8n activity_log null org — Outlook Email Sync** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync is decommissioned. Azure not being used. Delete any email_inbound null-org rows; do not fix the workflow.**
 - [x] **n8n Outlook Email Sync credentials** (`JMmstRl2C5ylmuIY`) — **CLOSED. Outlook Email Sync decommissioned. Azure App Registration not needed.**
 - [x] **emails/link org scoping** — Fixed 2026-03-29. Route replaced `createClient().auth.getUser()` with `getOrganization()`, added `.eq('organization_id', organizationId)` to all 6 service-role queries (activity_log dismiss, activity_log link-to-loan, activity_log link-to-contact, loans fetch, loans update, contacts update).
-- [ ] **Add file size limits to import/loans and import/contacts routes** — `import/parse` was fixed 2026-03-30 (10 MB cap + auth). The downstream routes accept full row arrays in POST body with no size check. Add a row count or byte cap consistent with parse limit before licensing.
+- [x] **Add file size limits to import/loans and import/contacts routes** — Fixed 2026-03-31. Added `MAX_ROWS = 5000` constant and 413 guard to both routes. Consistent with `import/parse` 10 MB cap.
 - [ ] **Wire logEmailDraft to pre-approval automation** — n8n workflow `utMvZpkdRwIRZ51u` needs a node to POST draft payload to `/api/email-drafts` (or a new `/api/email-drafts/log` route) after building the email body. Requires n8n access.
 
 ---

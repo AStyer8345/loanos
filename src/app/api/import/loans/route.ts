@@ -67,12 +67,17 @@ function normStr(s: string | null) {
   return (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
+const MAX_ROWS = 5000
+
 // ── Route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as { rows: RawRow[] }
     if (!Array.isArray(body.rows) || body.rows.length === 0) {
       return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
+    }
+    if (body.rows.length > MAX_ROWS) {
+      return NextResponse.json({ error: `Too many rows. Maximum is ${MAX_ROWS}.` }, { status: 413 })
     }
 
     const supabase = createClient()

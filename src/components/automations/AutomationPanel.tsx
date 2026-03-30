@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { normalizeToStageKey } from '@/lib/constants/loan-stages'
 import {
   CONTACT_AUTOMATIONS,
-  getLoanAutomationsForStage,
+  LOAN_AUTOMATIONS,
   type AutomationDef,
 } from '@/lib/automations/definitions'
 import AutomationCard from './AutomationCard'
@@ -22,6 +21,7 @@ interface Props {
   recordId: string
   contactId: string
   loanId?: string
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   currentStage?: string
 }
 
@@ -30,21 +30,19 @@ export default function AutomationPanel({
   recordId,
   contactId,
   loanId,
-  currentStage,
 }: Props) {
   const [sentMap, setSentMap] = useState<Record<string, string>>({})
   const [automations, setAutomations] = useState<AutomationDef[]>([])
   const [loaded, setLoaded] = useState(false)
 
-  // Determine which automations to show
+  // Determine which automations to show — all loan automations always visible
   useEffect(() => {
     if (recordType === 'contact') {
       setAutomations(CONTACT_AUTOMATIONS)
     } else {
-      const stageKey = normalizeToStageKey(currentStage)
-      setAutomations(getLoanAutomationsForStage(stageKey))
+      setAutomations(LOAN_AUTOMATIONS)
     }
-  }, [recordType, currentStage])
+  }, [recordType])
 
   // Query sent state from email_drafts
   useEffect(() => {

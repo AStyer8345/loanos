@@ -722,6 +722,9 @@ export default function LoanDetailPage() {
                 </Link>
               </div>
             )}
+            <div className="ml-auto shrink-0">
+              <VitalStat label="Commission" value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'} color="#C9A84C" />
+            </div>
           </div>
 
           {/* Pipeline progress bar */}
@@ -1992,7 +1995,6 @@ function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
       case 'origination':
         return <InfoCard title="Origination" fields={[
           { label: 'AUS Result',              value: loan.aus_result || loan.milestone },
-          { label: 'Originator Compensation', value: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : null },
           { label: 'Credit Score',            value: loan.credit_score != null ? String(loan.credit_score) : null },
           { label: 'DTI (F/B)',               value: (loan.front_end_dti || loan.back_end_dti) ? `${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}` : null },
           { label: 'Lender',                  value: loan.lender_name },
@@ -2176,7 +2178,6 @@ function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact, onReassignC
 
           <EditableSectionCard title="Origination" onSave={onSave} fields={[
             { label: 'AUS Result',              displayValue: loan.aus_result,     field: 'aus_result',     rawValue: loan.aus_result },
-            { label: 'Originator Compensation', displayValue: loan.originator_comp != null ? fmtCurrency(loan.originator_comp) : '—', field: 'originator_comp', rawValue: loan.originator_comp, type: 'number', labelColor: 'text-[#C9A84C]' },
           ]} />
 
           <EditableSectionCard title="Financials" onSave={onSave} fields={[

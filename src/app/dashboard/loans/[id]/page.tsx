@@ -723,7 +723,19 @@ export default function LoanDetailPage() {
               </div>
             )}
             <div className="ml-auto shrink-0">
-              <VitalStat label="Commission" value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'} color="#C9A84C" />
+              <VitalStatEditable
+                label="Commission"
+                value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
+                field="commission_amount"
+                rawValue={loan.commission_amount}
+                editingHeader={editingHeader}
+                headerInput={headerInput}
+                setEditingHeader={setEditingHeader}
+                setHeaderInput={setHeaderInput}
+                saveHeaderField={saveHeaderField}
+                inputType="number"
+                color="#C9A84C"
+              />
             </div>
           </div>
 
@@ -880,17 +892,19 @@ function VitalStat({ label, value, highlight, color }: { label: string; value: s
   )
 }
 
-function VitalStatEditable({ label, value, field, rawValue, editingHeader, headerInput, setEditingHeader, setHeaderInput, saveHeaderField, warning }: {
+function VitalStatEditable({ label, value, field, rawValue, editingHeader, headerInput, setEditingHeader, setHeaderInput, saveHeaderField, warning, inputType = 'date', color }: {
   label: string
   value: string
   field: string
-  rawValue: string | null | undefined
+  rawValue: string | number | null | undefined
   editingHeader: string | null
   headerInput: string
   setEditingHeader: (v: string | null) => void
   setHeaderInput: (v: string) => void
   saveHeaderField: (field: string, value: string | number | null) => void
   warning?: { type: 'expired' | 'warning'; text: string } | null
+  inputType?: 'date' | 'number' | 'text'
+  color?: string
 }) {
   return (
     <div className="shrink-0">
@@ -899,17 +913,19 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
         {editingHeader === field ? (
           <input
             autoFocus
-            type="date"
+            type={inputType}
+            step={inputType === 'number' ? '0.01' : undefined}
             value={headerInput}
             onChange={e => setHeaderInput(e.target.value)}
-            onBlur={() => saveHeaderField(field, headerInput || null)}
+            onBlur={() => saveHeaderField(field, inputType === 'number' ? (headerInput ? parseFloat(headerInput) : null) : (headerInput || null))}
             onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
             className="w-32 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
           />
         ) : (
           <p
-            className="text-sm font-mono font-semibold text-zinc-300 cursor-pointer hover:text-zinc-100 transition-colors leading-none"
-            onClick={() => { setHeaderInput(rawValue ?? ''); setEditingHeader(field) }}
+            className="text-sm font-mono font-semibold cursor-pointer hover:text-zinc-100 transition-colors leading-none"
+            style={color ? { color } : undefined}
+            onClick={() => { setHeaderInput(rawValue != null ? String(rawValue) : ''); setEditingHeader(field) }}
           >
             {value}
           </p>

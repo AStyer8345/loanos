@@ -4,7 +4,22 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, ChevronDown, ChevronUp, AlertCircle, Trash2, X, Phone, Mail, MessageSquare } from 'lucide-react'
+import { Search, AlertCircle, Trash2, X, Phone, Mail, MessageSquare, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import {
   IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
@@ -178,8 +193,11 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
 
 const DEFAULT_LOAN_COLUMNS = ['borrower_name', 'loan_amount', 'status', 'closing_date', 'interest_rate', 'location', 'actions']
 const LS_LOAN_COLUMNS_KEY = 'loanos_loans_columns_v1'
+const LS_LOAN_COL_ORDER_KEY = 'loanos_loans_col_order_v1'
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
 const LS_LOAN_VIEW_KEY = 'loanos_loans_view_v1'
+// IDs of non-borrower (draggable) columns in their default order
+const DRAGGABLE_LOAN_COL_IDS = LOAN_COLUMNS.filter(c => c.id !== 'borrower_name').map(c => c.id)
 
 // ── Custom lists (filter builder) ───────────────────────────────────────────
 type CustomListRule = { field: string; operator: string; value: string }
@@ -252,6 +270,51 @@ const STAGE_TO_LIST: Record<string, string> = {
   'Funded': 'closed',
 }
 
+// ── Sortable column header (for @dnd-kit drag reorder) ────────────────────────
+function SortableLoanColumnHeader({
+  col, sortKey, sortDir, onSort,
+}: {
+  col: { id: string; label: string; key: SortKey | null }
+  sortKey: SortKey
+  sortDir: SortDir
+  onSort: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: col.id })
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : col.key ? 'pointer' : 'default',
+  }
+
+  return (
+    <th
+      ref={setNodeRef}
+      style={style}
+      onClick={onSort}
+      className={`text-left px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wide select-none bg-[#161616] ${
+        col.key === sortKey ? 'text-[#C9A84C]' : 'text-[#666666]'
+      } ${col.key ? 'hover:text-[#F0F0F0]' : ''}`}
+    >
+      <div className="flex items-center gap-1">
+        <span
+          {...attributes}
+          {...listeners}
+          onClick={e => e.stopPropagation()}
+          style={{ cursor: 'grab', color: 'var(--muted, #666)', opacity: 0, display: 'flex', alignItems: 'center', padding: '0 2px' }}
+          className="col-drag-handle"
+        >
+          <GripVertical size={12} />
+        </span>
+        <span className="flex items-center gap-0.5">
+          {col.label}
+          {col.key && col.key === sortKey && (sortDir === 'asc' ? ' ▲' : ' ▼')}
+        </span>
+      </div>
+    </th>
+  )
+}
+
 export default function LoansPage() {
   const supabase = createClient()
   const searchParams = useSearchParams()
@@ -269,6 +332,7 @@ export default function LoansPage() {
   const [sortKey, setSortKey] = useState<SortKey>('closing_date')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_LOAN_COLUMNS)
+  const [columnOrder, setColumnOrder] = useState<string[]>(DRAGGABLE_LOAN_COL_IDS)
   const [showColPicker, setShowColPicker] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
@@ -301,6 +365,7 @@ export default function LoansPage() {
   const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null)
   const [editingCommissionValue, setEditingCommissionValue] = useState<string>('')
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
+  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   // Fetch distinct status + lender values for filter dropdowns
   useEffect(() => {
@@ -320,7 +385,7 @@ export default function LoansPage() {
     })
   }, [supabase])
 
-  // Restore column visibility from localStorage
+  // Restore column visibility + order from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LS_LOAN_COLUMNS_KEY)
@@ -328,6 +393,18 @@ export default function LoansPage() {
         const parsed = JSON.parse(stored) as string[]
         if (Array.isArray(parsed) && parsed.length > 0)
           setVisibleColumns(parsed.filter(id => LOAN_COLUMNS.some(c => c.id === id)))
+      }
+    } catch {}
+    try {
+      const storedOrder = localStorage.getItem(LS_LOAN_COL_ORDER_KEY)
+      if (storedOrder) {
+        const parsed: string[] = JSON.parse(storedOrder)
+        // Merge: keep stored order, add any new columns at the end
+        const merged = [
+          ...parsed.filter(id => DRAGGABLE_LOAN_COL_IDS.includes(id)),
+          ...DRAGGABLE_LOAN_COL_IDS.filter(id => !parsed.includes(id)),
+        ]
+        setColumnOrder(merged)
       }
     } catch {}
   }, [])
@@ -366,6 +443,19 @@ export default function LoansPage() {
         ? prev.filter(c => c !== id)
         : [...prev, id]
       try { localStorage.setItem(LS_LOAN_COLUMNS_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }
+
+  // ── Column reorder handler ────────────────────────────────────────────────
+  function handleColDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setColumnOrder(prev => {
+      const oldIdx = prev.indexOf(active.id as string)
+      const newIdx = prev.indexOf(over.id as string)
+      const next = arrayMove(prev, oldIdx, newIdx)
+      localStorage.setItem(LS_LOAN_COL_ORDER_KEY, JSON.stringify(next))
       return next
     })
   }
@@ -693,14 +783,6 @@ export default function LoansPage() {
     try { localStorage.setItem(LS_LOAN_VIEW_KEY, mode) } catch {}
   }
 
-  // ── Sort icon ──────────────────────────────────────────────────────────
-  const SortIcon = ({ k }: { k: SortKey }) => {
-    if (sortKey !== k) return <ChevronDown size={12} className="text-[#666666] ml-0.5" />
-    return sortDir === 'asc'
-      ? <ChevronUp size={12} className="text-[#C9A84C] ml-0.5" />
-      : <ChevronDown size={12} className="text-[#C9A84C] ml-0.5" />
-  }
-
   // ── Property location ──────────────────────────────────────────────────
   const loanLocation = (l: Loan) => {
     const parts = [l.property_city, l.property_state].filter(Boolean)
@@ -766,7 +848,12 @@ export default function LoansPage() {
     }
   }
 
-  const colDefs = LOAN_COLUMNS.filter(c => visibleColumns.includes(c.id))
+  // Borrower is always pinned first; other visible columns follow columnOrder
+  const borrowerColDef = LOAN_COLUMNS.find(c => c.id === 'borrower_name')!
+  const draggableColDefs = columnOrder
+    .map(id => LOAN_COLUMNS.find(c => c.id === id))
+    .filter((c): c is typeof LOAN_COLUMNS[number] => !!c && c.id !== 'borrower_name' && visibleColumns.includes(c.id))
+  const colDefs = [borrowerColDef, ...draggableColDefs].filter(c => visibleColumns.includes(c.id))
   const activeListLabel = activeList.startsWith('custom-')
     ? (customLists.find(l => l.id === activeList)?.name ?? 'Custom List')
     : (SMART_LISTS.find(l => l.id === activeList)?.label ?? 'All Loans')
@@ -1374,6 +1461,8 @@ export default function LoansPage() {
         )}
 
         {/* ── Table ─────────────────────────────────────────────────────── */}
+        <style>{`th:hover .col-drag-handle { opacity: 1 !important; }`}</style>
+        <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
         <div
           className={`loans-scroll flex-1 w-0 min-w-full overflow-auto${viewMode === 'kanban' ? ' hidden' : ''}`}
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
@@ -1388,8 +1477,9 @@ export default function LoansPage() {
           ) : (
             <table className="min-w-max text-sm">
               <thead>
+                <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                 <tr className="border-b border-[#2A2A2A] bg-[#161616]">
-                  <th className="w-8 px-2 py-2.5">
+                  <th className="w-8 px-2 py-2.5 bg-[#161616] sticky top-0 z-10">
                     <input
                       type="checkbox"
                       checked={filtered.length > 0 && selected.size === filtered.length}
@@ -1397,21 +1487,32 @@ export default function LoansPage() {
                       className="rounded border-[#2A2A2A] accent-[#C9A84C] focus:ring-[#C9A84C]"
                     />
                   </th>
-                  {colDefs.map(col => (
+                  {/* Borrower column — pinned, not draggable */}
+                  {visibleColumns.includes('borrower_name') && (
                     <th
-                      key={col.id}
-                      onClick={() => col.key && handleSort(col.key)}
-                      className={`text-left px-4 py-2.5 text-xs font-mono font-semibold text-[#666666] uppercase tracking-wide select-none ${
-                        col.key ? 'cursor-pointer hover:text-[#F0F0F0]' : ''
+                      onClick={() => handleSort('borrower_name')}
+                      className={`text-left px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wide select-none cursor-pointer bg-[#161616] sticky top-0 z-10 ${
+                        sortKey === 'borrower_name' ? 'text-[#C9A84C]' : 'text-[#666666] hover:text-[#F0F0F0]'
                       }`}
                     >
                       <span className="flex items-center gap-0.5">
-                        {col.label}
-                        {col.key && <SortIcon k={col.key} />}
+                        {borrowerColDef.label}
+                        {sortKey === 'borrower_name' && (sortDir === 'asc' ? ' ▲' : ' ▼')}
                       </span>
                     </th>
+                  )}
+                  {/* Draggable column headers */}
+                  {draggableColDefs.map(col => (
+                    <SortableLoanColumnHeader
+                      key={col.id}
+                      col={col}
+                      sortKey={sortKey}
+                      sortDir={sortDir}
+                      onSort={() => col.key && handleSort(col.key)}
+                    />
                   ))}
                 </tr>
+                </SortableContext>
               </thead>
               <tbody>
                 {filtered.map(loan => {
@@ -1667,6 +1768,7 @@ export default function LoansPage() {
             </div>
           )}
         </div>
+        </DndContext>
       </div>
 
       {/* New List (custom filter) modal */}

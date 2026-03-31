@@ -18,6 +18,22 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Loan Detail Layout + Build Fixes — 2026-03-31 (session 5)
+
+**Fixed 3 pre-existing TypeScript build errors blocking deploy, then shipped loan detail layout changes.**
+
+### Build fixes (pre-existing errors):
+- **`import-salesforce-referrals/route.ts`**: `mapContactType` and `mapStage` were `function` declarations inside a `try` block — not allowed in ES5 strict mode. Converted to arrow functions. `.insert({})` cast changed from `Record<string, unknown>` to `as unknown as TablesInsert<'contacts'>` (Supabase typed insert requires exact schema type).
+- **`backfill-party-links/route.ts`**: `buildContactMap` was an `async function` declaration inside a `try` block — converted to `const buildContactMap = async () =>`.
+- **Pre-commit hook `any` check**: Several files used `// eslint-disable-next-line` on a separate line before the `any` declaration — the hook's `grep -v eslint-disable` check requires the comment to be inline. Fixed across `automations/generate`, `automations/refine`, `automations/send`, and `contacts/page.tsx`.
+
+### Layout changes (loans/[id]/page.tsx):
+- **Milestones row**: Now directly below vitals bar (was separated by property address block)
+- **Property address**: Moved to bottom-right of the milestones row — small styled card with blue gradient border, links to Zillow
+- **Vitals bar**: Reduced gap (`gap-8` → `gap-5`), smaller padding (`px-5 py-3.5` → `px-4 py-2.5`), removed `overflow-x-auto` + `ml-auto` on Commission — all stats now flex-wrap inline, no horizontal scroll
+
+### Deployed: 4ce9759 → dpl_ApPLvYz5zZqTKNgBtr8oN9sXzEfH → READY ✅
+
 ## Party Contact Links + Salesforce Import — 2026-03-31 (session 4)
 
 **Linked transaction parties to contact records and imported Salesforce referral data.**

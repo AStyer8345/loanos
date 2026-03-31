@@ -18,6 +18,13 @@ Reporter Subagent appends suggested improvements here each session.
 
 **domain-queue.md — Update to reflect calendar skeleton complete:** The 30-Day Content Calendar item should be moved from QUEUE to IN PROGRESS now that the skeleton spec exists. The next step is Builder writing copy for Week 1.
 ---
+## Session: 2026-03-31 AM
+
+**03-builder.md — LinkedIn hashtag count (recurring):** This is the second session flagging LinkedIn hashtag count violations (Posts 10 and 12 both had 6 hashtags; max is 5). The existing platform spec states ≤5 but Builder continues to over-count. Add a bold warning directly before the LinkedIn hashtag spec: "**STOP: Count your LinkedIn hashtags before writing. Maximum is 5. If you wrote more than 5, delete down to 5 before continuing.**" Making the count-check explicit prevents repeated Reviewer rejection.
+
+**master-agent.md — Sequence C: Reviewer must run same session as Builder:** This session ran Reviewer on Week 2 posts 3 days after Builder wrote them. Posts sat in social_drafts unreviewed for 3 days. Add to Sequence C definition: "Builder and Reviewer MUST complete in the same session. If session runs long and Reviewer cannot run, note it as a DEFERRED item in session-log and write 'REVIEWER PENDING — WEEK [X]' to BLOCKERS.md so the next session picks it up immediately."
+
+---
 ## Session: 2026-03-28
 
 **03-builder.md — Add explicit Instagram hashtag requirement:** In the Instagram platform spec section, add an explicit line item: "Instagram captions MUST include 5–10 relevant hashtags. This is a hard platform spec requirement — posts with zero hashtags will be auto-rejected by Reviewer." Builder wrote all three Instagram captions (Posts 2, 4, 6) without any hashtags in Round 1. All three were rejected, requiring a full fix pass. Adding this as a named requirement prevents a wasted Reviewer round.

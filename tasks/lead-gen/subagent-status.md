@@ -576,3 +576,48 @@ Notebook count: 47 sources
 Timestamp: 2026-03-30 04:30:00
 SESSION FULLY COMPLETE ✓
 ```
+
+---
+
+## SESSION_START
+- **Datetime**: 2026-03-31 03:00:00
+- **Mode**: AM
+- **Session**: Lead Gen AM — Daily 3:00 AM
+
+```
+SESSION START: 2026-03-31 03:00:00
+Mode: AM
+Focus: Builder session — Fix BLOCKER-004 (LOANOS_URL env var) + BLOCKER-005 (await notifyPreApprovalLead) in subscribe-lead.js
+MASTER: Context loaded. Activating NotebookLM pull.
+```
+
+## NotebookLM PULL (2026-03-31 AM)
+```
+NOTEBOOKLM (PULL): COMPLETE — 2026-03-31 03:30:00
+Notebook: LoanOS Lead Gen Intelligence (existing)
+ID: 4213513c-22ac-45af-96c1-3365ba3477eb
+Pull report: tasks/lead-gen/notebooklm-pull-2026-03-31.md
+Key context: BLOCKER-004 + BLOCKER-005 active. Builder fixes required in subscribe-lead.js. Adam must add Netlify env var + git push after fix.
+```
+
+---
+
+## SESSION_END
+- **Datetime**: 2026-03-30 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Daily 10:00 PM
+
+## NotebookLM PUSH+CURATE (PM)
+```
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 5 (Scotsman Guide lead gen tool id: 403851ed, Mailchimp drip examples id: c8bff1a2, Scotsman Guide direct mail id: e65326be, 2026-03-30-pm-web-research.md id: f921ecaf, CONTEXT.md refreshed id: ecb5e723)
+Stale sources removed: 4 (NMN ERROR id: 52a594dc, NMN ERROR id: 043b989a, CONTEXT.md stale id: 8f68b74c, week1-baseline-web.md superseded id: 1a34b5b2)
+Web sources added: 3 (Scotsman Guide x2, Mailchimp drip examples)
+Session note created: YES — appended to Styer_Growth_Log.md
+Master notebook updated: YES (Styer Mortgage Master 5348ff90) — 3 duplicate Growth_Log entries removed, new added id: 3682f991
+Daily digest: SKIPPED — already sent by AM session (2026-03-30-digest.md exists)
+Staleness audit: tasks/lead-gen/notebooklm-audit-2026-03-30-pm.md
+Notebook count: 50 sources (at max — must remove before adding next session)
+Timestamp: 2026-03-30 22:15:00
+SESSION FULLY COMPLETE ✓
+```

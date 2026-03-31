@@ -1,3 +1,47 @@
+## Mission Brief — 2026-03-31 AM
+
+### Domain
+Social Media
+
+### Focus Area
+Week 2 Compliance Review + QA — Posts 8–14 (April 13–17, 2026)
+
+### Session Type
+[x] Execute / Build (Sequence C — continuation)
+Posts 8–14 were built in the 2026-03-28 AM run 2 session but Reviewer and QA were never completed.
+Today completes the chain: Reviewer → QA → social_drafts verification → Reporter → NotebookLM PUSH
+
+### Objectives
+1. Run compliance + spec review (Reviewer subagent) on all 7 Week 2 posts (Posts 8–14)
+2. Verify Posts 8–14 exist in social_drafts Supabase table — insert any missing
+3. Complete QA report confirming all 7 posts are queryable from LoanOS Marketing → Social tab
+4. Update session log for the completed Week 2 execution chain
+
+### Definition of Done
+- Reviewer has approved all 7 Week 2 posts (or flagged specific blocks with fix instructions)
+- All 7 posts confirmed in social_drafts Supabase table
+- QA report written
+- Session log updated with Week 2 completion entry
+- NotebookLM PUSH complete
+
+### Resources / Files in Scope
+- tasks/social-media/build-reports/2026-03-28-week2-build.md — build output to review
+- tasks/social-media/specs/2026-03-27-30day-calendar-skeleton.md — original calendar brief
+- Supabase social_drafts table (project: uuqedsvjlkeszrbwzizl)
+- tasks/social-media/reviews/ — write 2026-03-31-week2-review.md
+- tasks/social-media/qa-reports/ — write 2026-03-31-week2-qa.md
+- tasks/social-media/subagent-status.md — status signals
+- tasks/social-media/session-log.md — session summary append
+
+### HIGH RISK Items
+- Posts 8 and 9: Rate Education — HIGH compliance risk. Must confirm no specific rate percentages, directional language only, NMLS# 513013 in caption
+- Posts 12–14: Placeholder stats (~[~PLACEHOLDER]) — do NOT flag as blocking; expected. Must confirm tilde prefix is present
+- NEVER write posts live to Publer — curl commands for Adam only
+- social_drafts inserts must use status: 'draft' — never 'scheduled' or 'published'
+
+---
+
+## PRIOR SESSION MISSION (2026-03-28 AM run 2 — COMPLETED)
 ## Mission Brief — 2026-03-28 AM (run 2 — Week 2 Execution)
 
 ### Domain

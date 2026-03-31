@@ -1293,6 +1293,7 @@ export type Database = {
           term_months: number | null
           title_company: string | null
           title_contact: string | null
+          title_contact_id: string | null
           title_date: string | null
           title_email: string | null
           title_ordered_date: string | null
@@ -1516,6 +1517,7 @@ export type Database = {
           term_months?: number | null
           title_company?: string | null
           title_contact?: string | null
+          title_contact_id?: string | null
           title_date?: string | null
           title_email?: string | null
           title_ordered_date?: string | null
@@ -1739,6 +1741,7 @@ export type Database = {
           term_months?: number | null
           title_company?: string | null
           title_contact?: string | null
+          title_contact_id?: string | null
           title_date?: string | null
           title_email?: string | null
           title_ordered_date?: string | null
@@ -1789,6 +1792,13 @@ export type Database = {
           {
             foreignKeyName: "loans_referral_contact_id_fkey"
             columns: ["referral_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_title_contact_id_fkey"
+            columns: ["title_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]

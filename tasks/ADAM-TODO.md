@@ -8,6 +8,10 @@
 ## PENDING
 
 <!-- Agents append new items below this line -->
+- [ ] [SOCIAL] 2026-03-31 — Run 3 Publer curl commands for Week 2 text posts (Posts 9, 11, 14) — commands in tasks/social-media/qa-reports/2026-03-31-week2-qa.md (run from local terminal, API unreachable from agent)
+- [ ] [SOCIAL] 2026-03-31 — Create Canva assets for Week 2 carousel posts: Post 8 (12 slides), Post 10 (8 slides), Post 12 (10 slides), Post 13 (6 slides) — design briefs in tasks/social-media/build-reports/2026-03-28-week2-build.md
+- [ ] [SOCIAL] 2026-03-31 — Film vertical videos for Week 2: Post 9 (30-sec Reel, rate lock questions) + Post 11 (30-45 sec, why I became a broker) — scripts with timecodes in tasks/social-media/build-reports/2026-03-28-week2-build.md
+- [ ] [SOCIAL] 2026-03-31 — Replace placeholder county market data in Week 2 Posts 12 & 13 on/after April 16 — pull from unlockmls.com/housing-stats; replace all ~[~PLACEHOLDER] values in Supabase social_drafts and Publer draft before April 17 publish
 - [ ] [SOCIAL] 2026-03-28 — Run 7 Publer curl commands to create Week 1 post DRAFTS — commands in tasks/social-media/qa-reports/2026-03-28-week1-qa.md (use corrected commands for Posts 2, 4, 5)
 - [ ] [SOCIAL] 2026-03-28 — Replace placeholder market data in Posts 5, 6, & 7 before April 7 — pull live figures from unlockmls.com/housing-stats/ on or after 2026-04-02
 - [ ] [SOCIAL] 2026-03-28 — Create Canva assets: Post 1 (12-slide PDF), Post 5 (10-slide PDF), Post 6 (5-slide carousel) — design briefs in tasks/social-media/build-reports/2026-03-28-week1-build.md

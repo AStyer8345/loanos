@@ -114,8 +114,10 @@ interface Loan {
   buyer_agent_email: string | null
   buyer_agent_contact_id: string | null
   listing_agent_contact_id: string | null
+  referral_contact_id: string | null
   title_company: string | null
   title_contact: string | null
+  title_contact_id: string | null
   title_email: string | null
   escrow_officer: string | null
   processor_name: string | null
@@ -141,6 +143,7 @@ interface Loan {
   co_borrower_work_phone: string | null
   co_borrower_birthdate: string | null
   co_borrower_marital_status: string | null
+  co_borrower_contact_id: string | null
   // Revenue
   gross_loan_revenue: number | null
   net_loan_revenue: number | null
@@ -392,7 +395,7 @@ export default function LoanDetailPage() {
   // commission editing in Financials EditableSectionCard
   const [editingHeader, setEditingHeader] = useState<string | null>(null)
   const [headerInput, setHeaderInput] = useState('')
-  const [referringAgentContactId, setReferringAgentContactId] = useState<string | null>(null)
+  // referral_contact_id FK now lives on the loan row directly
   const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -407,7 +410,6 @@ export default function LoanDetailPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    setReferringAgentContactId(null)
     const [loanRes, docsRes, actRes, draftsRes, contactEmailsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
@@ -441,41 +443,6 @@ export default function LoanDetailPage() {
         setInboundEmails((inbound || []) as InboundEmailRow[])
       }
 
-      // Resolve referring realtor → contact id (email match, then name match within org)
-      const ld = loanRes.data as unknown as Loan
-      let realtorId: string | null = null
-      if (organizationId) {
-        if (ld.referring_agent_email?.trim()) {
-          const em = ld.referring_agent_email.trim()
-          const { data: byEmail } = await supabase
-            .from('contacts')
-            .select('id')
-            .eq('organization_id', organizationId)
-            .ilike('email', em)
-            .limit(1)
-            .maybeSingle()
-          if (byEmail?.id) realtorId = byEmail.id
-        }
-        if (!realtorId && ld.referring_agent_name?.trim()) {
-          const name = ld.referring_agent_name.trim()
-          const parts = name.split(/\s+/).filter(Boolean)
-          const firstName = parts[0] ?? ''
-          const lastName = parts.slice(1).join(' ') || ''
-          let q = supabase
-            .from('contacts')
-            .select('id, first_name, last_name')
-            .eq('organization_id', organizationId)
-          if (firstName) q = q.ilike('first_name', firstName)
-          if (lastName) q = q.ilike('last_name', lastName)
-          const { data: list } = await q.limit(50)
-          const match = (list ?? []).find(
-            c =>
-              `${(c.first_name ?? '').trim()} ${(c.last_name ?? '').trim()}`.trim().toLowerCase() === name.toLowerCase()
-          )
-          if (match?.id) realtorId = match.id
-        }
-      }
-      setReferringAgentContactId(realtorId)
     }
     setDocs(docsRes.data || [])
     setActivity((actRes.data || []) as ActivityRow[])
@@ -665,9 +632,9 @@ export default function LoanDetailPage() {
             })()}
           </div>
 
-          {/* Row 3: Vital Signs — card with subtle background */}
-          <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/50 px-5 py-3.5 mb-3">
-            <div className="flex items-center gap-8 text-sm font-mono overflow-x-auto">
+          {/* Row 3: Vital Signs — compact, all items visible */}
+          <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/50 px-4 py-2.5 mb-2">
+            <div className="flex items-center gap-5 flex-wrap text-sm font-mono">
               {loan.loan_amount != null && (
                 <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
               )}
@@ -708,58 +675,54 @@ export default function LoanDetailPage() {
                   <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
                   <Link
                     href={
-                      referringAgentContactId
-                        ? `/dashboard/contacts/${referringAgentContactId}`
+                      loan.referral_contact_id
+                        ? `/dashboard/contacts/${loan.referral_contact_id}`
                         : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
                     }
-                    className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[10rem]"
+                    className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[9rem]"
                   >
                     {loan.referring_agent_name}
                   </Link>
                 </div>
               )}
-              <div className="ml-auto shrink-0">
-                <VitalStatEditable
-                  label="Commission"
-                  value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
-                  field="commission_amount"
-                  rawValue={loan.commission_amount}
-                  editingHeader={editingHeader}
-                  headerInput={headerInput}
-                  setEditingHeader={setEditingHeader}
-                  setHeaderInput={setHeaderInput}
-                  saveHeaderField={saveHeaderField}
-                  inputType="number"
-                  color="#C9A84C"
-                />
-              </div>
+              <VitalStatEditable
+                label="Commission"
+                value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
+                field="commission_amount"
+                rawValue={loan.commission_amount}
+                editingHeader={editingHeader}
+                headerInput={headerInput}
+                setEditingHeader={setEditingHeader}
+                setHeaderInput={setHeaderInput}
+                saveHeaderField={saveHeaderField}
+                inputType="number"
+                color="#C9A84C"
+              />
             </div>
           </div>
 
-          {/* Property address — bottom right */}
-          {loan.property_address && (
-            <div className="flex justify-end mb-2">
+          {/* Row 4: Milestones (left) + Property address (bottom right) */}
+          <div className="flex items-end gap-3 pt-2 pb-1">
+            <div className="flex-1 min-w-0">
+              <MilestoneTimeline loan={loan} activity={activity} />
+            </div>
+            {loan.property_address && (
               <a
                 href={`https://www.zillow.com/homes/${encodeURIComponent(
                   `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
                 )}_rb/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-start rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-4 py-2"
+                className="shrink-0 flex flex-col items-start rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-3 py-1.5"
                 title="View on Zillow"
               >
-                <span className="text-[10px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-1">Property</span>
-                <span className="text-sm font-mono text-blue-100 leading-tight font-medium">{loan.property_address}</span>
-                <span className="text-xs font-mono text-blue-300/70 leading-tight mt-0.5">
+                <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
+                <span className="text-xs font-mono text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
+                <span className="text-[10px] font-mono text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
                   {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
                 </span>
               </a>
-            </div>
-          )}
-
-          {/* Milestones — above tab bar so it's visible on every tab */}
-          <div className="pt-3 pb-1">
-            <MilestoneTimeline loan={loan} activity={activity} />
+            )}
           </div>
         </div>
 
@@ -1158,22 +1121,6 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 // ── CommunicationHub — Contact Cards with one-click actions ──────────────────
 
 function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: ActivityRow[]; contact: ContactRow | null }) {
-  const [referringAgentContactId, setReferringAgentContactId] = useState<string | null>(null)
-  const hubSupabase = createClient()
-
-  useEffect(() => {
-    async function resolve() {
-      if (!loan.referring_agent_email?.trim()) return
-      const { data } = await hubSupabase
-        .from('contacts')
-        .select('id')
-        .eq('email', loan.referring_agent_email.trim())
-        .maybeSingle()
-      if (data?.id) setReferringAgentContactId(data.id)
-    }
-    resolve()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loan.referring_agent_email])
 
   // Build party list — fall back to linked contact when loan borrower fields are empty
   const parties: {
@@ -1195,7 +1142,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
       name: loan.co_borrower_name,
       email: loan.co_borrower_email,
       phone: loan.co_borrower_phone,
-      contactId: null as string | null,
+      contactId: loan.co_borrower_contact_id,
     }] : []),
     ...(loan.buyers_agent_name || loan.buyer_agent_name ? [{
       role: "Buyer's Agent",
@@ -1216,14 +1163,14 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
       name: loan.title_contact || loan.title_company,
       email: loan.title_email,
       phone: null as string | null,
-      contactId: null as string | null,
+      contactId: loan.title_contact_id,
     }] : []),
     ...(loan.referring_agent_name ? [{
       role: 'Referring Agent',
       name: loan.referring_agent_name,
       email: loan.referring_agent_email,
       phone: loan.referring_agent_phone,
-      contactId: referringAgentContactId,
+      contactId: loan.referral_contact_id,
     }] : []),
   ]
 

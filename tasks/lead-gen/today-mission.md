@@ -1,3 +1,40 @@
+## Mission Brief — 2026-03-31 AM
+
+### Domain
+Lead Generation
+
+### Focus Area
+BLOCKER Resolution — subscribe-lead.js code fixes (BLOCKER-004 + BLOCKER-005)
+
+### Session Type
+[x] Execute / Build (Sequence C)
+
+### Objectives
+1. Fix BLOCKER-004: Replace hardcoded `https://loanos.vercel.app` with `process.env.LOANOS_URL || "https://loanos-astyer8345s-projects.vercel.app"` in subscribe-lead.js
+2. Fix BLOCKER-005: Add `await` before `notifyPreApprovalLead(contactData)` call in subscribe-lead.js
+3. Commit changes, deploy (git push from website repo), and run post-deploy QA to confirm both bugs resolved
+
+### Definition of Done
+- subscribe-lead.js contains env-var-driven LOANOS_URL (no hardcoded wrong domain)
+- subscribe-lead.js awaits notifyPreApprovalLead() before returning
+- Code deployed to Netlify (git push from styerteam-mortgage-site)
+- Live form test returns `{"loanos": "ok"}` (or auth-gated response confirming routing works, not 404)
+- n8n workflow J9Pe24vUi6fpZtdZ triggerCount increments after PA form test
+- Both funnels regression-tested: Rate Alert form does NOT trigger PA notify
+
+### Resources / Files in Scope
+- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/netlify/functions/subscribe-lead.js` — PRIMARY
+- `tasks/lead-gen/BLOCKERS.md` — blocker context + fix specifications
+- `tasks/lead-gen/qa-reports/2026-03-30-post-deploy-qa.md` — prior QA baseline
+
+### HIGH RISK Items
+- Do NOT change the Mailchimp integration logic — it is working (mailchimp: "ok" confirmed)
+- Do NOT change the TCPA opt-in logic — already reviewed and approved
+- Regression gate: Rate Alert submissions MUST NOT trigger notifyPreApprovalLead() — verify after `await` change
+- Do NOT change the subscribe-lead.js function signature or response format — frontend depends on it
+
+---
+
 ## Mission Brief — 2026-03-30 AM
 
 ### Domain

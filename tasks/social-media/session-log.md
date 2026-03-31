@@ -2,6 +2,76 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-03-31 AM — Social Media
+Focus: Week 2 Compliance Review + QA — Posts 8–14 (April 13–17, 2026)
+Type: Execute (Sequence C — continuation of 2026-03-28 AM run 2)
+
+### Completed
+- NotebookLM PULL executed — 4 queries run, pull report written to `notebooklm-pull-2026-03-31.md`
+- Reviewer subagent run on all 7 Week 2 posts (Posts 8–14) — Round 1 flagged Posts 10 and 12 for LinkedIn hashtag count (6 instead of ≤5)
+- Hashtag fixes applied inline: Post 10 removed #AustinMortgage; Post 12 removed #AustinHousing — both updated in build report AND Supabase DB
+- Round 2 review: all 7 posts APPROVED WITH NOTES — 0 compliance failures
+- QA confirmed all 7 Week 2 posts present in social_drafts Supabase table with status 'draft'
+- QA report written: tasks/social-media/qa-reports/2026-03-31-week2-qa.md
+- Review report written: tasks/social-media/reviews/2026-03-31-week2-review.md
+- Week 2 execution chain fully complete: Build (03-28) → Review → QA (03-31)
+
+### Deferred
+- Publer draft creation for Posts 9, 11, 14 (text-only): Curl commands in QA report — Adam must run from local terminal (API unreachable from agent)
+- Carousel Publer drafts (Posts 8, 10, 12, 13): Must be created in Publer UI after Canva exports
+- Canva asset creation: Posts 8 (12 slides), 10 (8 slides), 12 (10 slides), 13 (6 slides) — briefs in build report
+- Video filming: Posts 9 (30-sec Reel) and 11 (30–45 sec video) — scripts in build report
+- Unlock MLS data pull: Posts 12 & 13 contain ~[~PLACEHOLDER] county stats — Adam replaces on/after April 16
+- Week 1 Publer curl commands (7): still outstanding from 2026-03-28 AM session
+
+### Output Produced
+- Research: none
+- Strategy spec: none
+- Build report: none (posts were built in prior session 2026-03-28 AM run 2)
+- Review report: tasks/social-media/reviews/2026-03-31-week2-review.md
+- QA report: tasks/social-media/qa-reports/2026-03-31-week2-qa.md
+- Posts written: 0 new (7 existing Week 2 posts verified)
+- Posts in social_drafts: 7 confirmed (all status: draft)
+
+### Content Created This Session
+No new content written. Review + QA only.
+Week 2 posts now fully approved and confirmed in database:
+- Post 8 (LinkedIn Carousel, Apr 14): Rate lock/float framework, HIGH compliance, approved
+- Post 9 (Instagram Reel, Apr 14): 3 questions before locking, approved
+- Post 10 (LinkedIn Carousel, Apr 16): FHA vs. Conventional math, approved
+- Post 11 (Instagram Video, Apr 16): Why I became a broker — personal brand story, approved
+- Post 12 (LinkedIn Carousel, Apr 17): Austin county breakdown (Travis/Williamson/Hays), placeholder data
+- Post 13 (Instagram Carousel, Apr 17): Austin county breakdown Instagram version, placeholder data
+- Post 14 (Facebook, Apr 17): Cross-post from Post 13, approved
+
+### Compliance Summary
+- Posts 8 & 9: Rate Education — HIGH compliance verified. No specific rates, directional language only, NMLS# 513013 in all captions
+- Posts 12–14: Placeholder market stats confirmed with ~[~PLACEHOLDER] prefix — non-blocking per spec
+- Post 14: First-comment-only NMLS# strategy confirmed compliant
+- 0 regulatory compliance failures this session
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: N/A | Review: 5 | QA: 5
+
+### System Improvement Notes
+1. **Builder hashtag count discipline** — This is the second session where Builder wrote LinkedIn captions with 6 hashtags (max 5). The 03-builder.md prompt explicitly states ≤5 for LinkedIn but Builder is over-indexing on tags. Add a "STOP — count your LinkedIn hashtags before writing them" reminder before the hashtag spec in 03-builder.md.
+2. **Build → Review in same session** — Week 2 posts were built in one session but Reviewer and QA were not run. This creates a gap where posts sit unreviewed in the DB. The master-agent.md Sequence C should be updated to make Reviewer mandatory in the same session as Builder, not deferred to the next session.
+
+### BLOCKERS
+None active.
+
+### Next Session Instructions
+Priority 1: **Begin Week 3 content execution (Posts 15–21, April 20–24)** — use `specs/2026-03-27-30day-calendar-skeleton.md` as the brief. Sequence C.
+Priority 2: **Confirm Adam has run Week 1 + Week 2 text-only curl commands** — check subagent-status or session notes before building Week 3. If Adam hasn't run Week 1 curls yet (April 7 is only 7 days away), flag as urgent.
+Priority 3: **NMLS# profile audit reminder** — April 7 publish date is approaching. If this is still outstanding, add a BLOCKER to BLOCKERS.md.
+
+Content focus for next session: Realtor Resources (Posts 15–16 are LinkedIn targeting realtors) + Personal Brand (Post 17 is an Instagram Reel)
+Platform to prioritize: LinkedIn (2 posts in Week 3 targeting realtor referral audience)
+Algorithm change to research: None active — all research established through March 30 PM session
+
+Advance queue to next topic: YES — proceed to Week 3 execution (Posts 15–21)
+---
+
 ## Session: 2026-03-28 AM — Social Media
 Focus: Week 1 Content Execution — Posts 1–7 (April 6–10, 2026)
 Type: Execute (Sequence C)

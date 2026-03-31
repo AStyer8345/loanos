@@ -12,6 +12,7 @@ import { updateLastTouch } from '@/lib/updateLastTouch'
 import { fmtCurrency, fmtDate, fmtDateOnly } from '@/lib/formatters'
 import { Trash2, Pencil, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
+import DuplicateMergeModal from './DuplicateMergeModal'
 import {
   DndContext,
   closestCenter,
@@ -221,8 +222,7 @@ const FILTER_OPERATORS = [
   { id: 'after', label: 'after' },
 ] as const
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyCustomListRulesContact(query: any, rules: CustomListRule[]): any {
+function applyCustomListRulesContact(query: any, rules: CustomListRule[]): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   let q = query
   for (const r of rules) {
     if (!r.value?.trim()) continue
@@ -318,8 +318,7 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
 }
 
 // ── applySmartList ─────────────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applySmartList(query: any, listId: string): any {
+function applySmartList(query: any, listId: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   switch (listId) {
     case 'new-apps':
       return query.eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application'])
@@ -608,6 +607,7 @@ export default function ContactsPage() {
   const [newListRules, setNewListRules] = useState<CustomListRule[]>([{ field: 'stage', operator: 'is', value: '' }])
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
   const [editingListId, setEditingListId] = useState<string | null>(null)
+  const [showDuplicates, setShowDuplicates] = useState(false)
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
   const [kanbanContacts, setKanbanContacts] = useState<Record<string, Contact[]>>({})
   const [kanbanLoading, setKanbanLoading] = useState(false)
@@ -706,8 +706,7 @@ export default function ContactsPage() {
   }, [supabase, customLists])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const buildContactQuery = useCallback((q: any) => {
+  const buildContactQuery = useCallback((q: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (activeList.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === activeList)
       if (custom?.rules?.length) q = applyCustomListRulesContact(q, custom.rules)
@@ -1174,6 +1173,11 @@ export default function ContactsPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowDuplicates(true)} style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
+              background: 'transparent', color: 'var(--muted)', padding: '8px 16px', borderRadius: 4,
+              border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 600,
+            }}>FIND DUPES</button>
             <button onClick={() => setShowImport(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
               background: 'transparent', color: '#c9a84c', padding: '8px 16px', borderRadius: 4,
@@ -2212,6 +2216,13 @@ export default function ContactsPage() {
           {importBanner}
         </div>
       )}
+
+      {/* ── Duplicate merge modal ── */}
+      <DuplicateMergeModal
+        open={showDuplicates}
+        onClose={() => setShowDuplicates(false)}
+        onMerged={() => fetchContacts()}
+      />
 
       {/* ── Column picker backdrop (click outside to close) ── */}
       {showColPicker && (

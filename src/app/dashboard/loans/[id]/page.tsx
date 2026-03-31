@@ -654,7 +654,7 @@ export default function LoanDetailPage() {
                     {displayName}
                   </Link>
                 ) : displayName}
-                {loan.loan_number ? <span className="text-zinc-600"> · #{loan.loan_number}</span> : ''}
+                {(loan.loan_number || loan.arive_loan_id) ? <span className="text-zinc-600"> · #{loan.loan_number || loan.arive_loan_id}</span> : ''}
                 {productLabel ? <span className="text-zinc-600"> · {productLabel}</span> : ''}
               </p>
             </div>

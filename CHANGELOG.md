@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [5.0.2] — 2026-03-31 — Contact Record Cleanup (Phase 4)
+
+### Added
+- **Merged activity timeline** — `activity_log` (system events) and `contact_activity` (user outreach) now display in a single chronological feed with All/Outreach/System filter toggles
+- **Realtor Performance card** — referral count, closed count, conversion rate %, total volume for realtor contacts
+- **Notes card** on contact overview — existing notes display + textarea to add new notes
+- **DOB field** for borrower contacts (inline-editable)
+- **SystemActivityItem component** for rendering system activity entries
+- **UnifiedFeedItem type** — discriminated union for merged feed
+- **LinkedContactCard component** on loan detail page
+
+### Changed
+- Contact loan cards now show `loan_program`, `employer_name`, `monthly_income` when available
+- Loans query includes `estimated_closing_date`, `loan_program`, `employer_name`, `monthly_income`
+- Referred loans query includes `interest_rate`, `property_address`, `property_city`, `property_state`, `loan_purpose`, `loan_type`
+
+### Fixed
+- **Loan detail build errors** — restored DnD + icon imports removed in prior session, fixed `KeyDatesGrid` → `KeyDatesPanel` reference, added type casts for extended loan fields
+- Removed dead `activeTab`/`setActiveTab` props from ContactRecordView
+
 ## [5.0.1] — 2026-03-30 — Arive Sync Overhaul
 
 ### Added

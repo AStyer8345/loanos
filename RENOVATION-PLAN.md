@@ -97,12 +97,12 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 **Goal:** See everything about a person in one place
 **Session:** After Phase 3 confirmed working
 **Tasks:**
-- [ ] Contact detail: name, phone, email, referred by, type, stage
-- [ ] Merged activity timeline (activity_log + contact_activity in one feed)
-- [ ] Realtor view: referral count, closed count, conversion rate, deal history
-- [ ] Quick-add contact from AI chatbot (verify it works end-to-end)
+- [x] Contact detail: name, phone, email, referred by, type, stage (2026-03-31)
+- [x] Merged activity timeline (activity_log + contact_activity in one feed) (2026-03-31)
+- [x] Realtor view: referral count, closed count, conversion rate, deal history (2026-03-31)
+- [x] Quick-add contact from AI chatbot (verify it works end-to-end) — verified, works with Claude extraction + regex fallback + dedup (2026-03-31)
 - [ ] Import from website leads (verify web lead → contact flow)
-- [ ] Deploy and verify
+- [x] Deploy and verify (2026-03-31)
 - [ ] Adam reviews and confirms
 
 ### Phase 5: Email Templates + Drip

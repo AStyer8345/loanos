@@ -729,20 +729,21 @@ export default function LoanDetailPage() {
               </div>
             )}
             {loan.property_address && (
-              <div className="shrink-0">
-                <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Property</p>
-                <a
-                  href={`https://www.zillow.com/homes/${encodeURIComponent(
-                    `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
-                  )}_rb/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono text-zinc-300 hover:text-blue-400 transition-colors border border-zinc-700 rounded px-2 py-0.5 inline-block max-w-[16rem] truncate"
-                  title="View on Zillow"
-                >
-                  {loan.property_address}{loan.property_city ? `, ${loan.property_city}` : ''}{loan.property_state ? `, ${loan.property_state}` : ''}
-                </a>
-              </div>
+              <a
+                href={`https://www.zillow.com/homes/${encodeURIComponent(
+                  `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
+                )}_rb/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 ml-auto mr-2 flex flex-col items-center justify-center w-[11rem] h-[3.2rem] rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-blue-500/40 hover:bg-zinc-800 transition-colors px-3 py-1 text-center"
+                title="View on Zillow"
+              >
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Property</span>
+                <span className="text-[11px] font-mono text-zinc-200 leading-tight">{loan.property_address}</span>
+                <span className="text-[10px] font-mono text-zinc-400 leading-tight">
+                  {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
+                </span>
+              </a>
             )}
             <div className="ml-auto shrink-0">
               <VitalStatEditable
@@ -763,6 +764,11 @@ export default function LoanDetailPage() {
 
           {/* Pipeline progress bar */}
           <PipelineProgressBar status={loan.status} />
+
+          {/* Milestones — above tab bar so it's visible on every tab */}
+          <div className="pt-3 pb-1">
+            <MilestoneTimeline loan={loan} activity={activity} />
+          </div>
         </div>
 
         {/* Tab bar — active tab uses loan status color */}
@@ -1001,13 +1007,11 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   return (
     <div className="p-6 space-y-0">
 
-      {/* ── Section 1: Parties (Communication Hub) — full width ── */}
-      <CommunicationHub loan={loan} activity={activity} contact={contact} />
-
-      <div className="border-t border-zinc-800/40 my-6" />
-
-      {/* ── Section 2: Milestones ── */}
-      <MilestoneTimeline loan={loan} activity={activity} />
+      {/* ── Section 1: Parties (Communication Hub) + Documents ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+        <CommunicationHub loan={loan} activity={activity} contact={contact} />
+        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+      </div>
 
       <div className="border-t border-zinc-800/40 my-6" />
 
@@ -1017,33 +1021,35 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
           {/* Key Dates — compact grid from raw_payload + loan columns */}
           <KeyDatesGrid loan={loan} onSave={handleSaveField} />
 
-          {/* Unified loan details — inline-editable grouped sections */}
-          <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
-            { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
-            { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
-            { label: 'Email',          displayValue: <EmailLink email={loan.borrower_email} />, field: 'borrower_email', rawValue: loan.borrower_email },
-            { label: 'Phone',          displayValue: <PhoneLink phone={loan.borrower_phone} />, field: 'borrower_phone', rawValue: loan.borrower_phone },
-            { label: 'DOB',            displayValue: loan.borrower_birthdate || null, field: 'borrower_birthdate', rawValue: loan.borrower_birthdate },
-            { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
-            { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
-            { label: 'Position',       displayValue: loan.position_description, field: 'position_description', rawValue: loan.position_description },
-            ...(loan.self_employed ? [{ label: 'Self-Employed', displayValue: 'Yes' as React.ReactNode }] : []),
-            { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' as const },
-            { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' as const },
-            { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' as const },
-          ]} />
-
-          {loan.co_borrower_name && (
-            <EditableSectionCard title="Co-Borrower" onSave={handleSaveField} fields={[
-              { label: 'Name',           displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
-              { label: 'Email',          displayValue: <EmailLink email={loan.co_borrower_email} />, field: 'co_borrower_email', rawValue: loan.co_borrower_email },
-              { label: 'Phone',          displayValue: <PhoneLink phone={loan.co_borrower_phone} />, field: 'co_borrower_phone', rawValue: loan.co_borrower_phone },
-              { label: 'Home Phone',     displayValue: <PhoneLink phone={loan.co_borrower_home_phone} />, field: 'co_borrower_home_phone', rawValue: loan.co_borrower_home_phone },
-              { label: 'Work Phone',     displayValue: <PhoneLink phone={loan.co_borrower_work_phone} />, field: 'co_borrower_work_phone', rawValue: loan.co_borrower_work_phone },
-              { label: 'DOB',            displayValue: loan.co_borrower_birthdate || null, field: 'co_borrower_birthdate', rawValue: loan.co_borrower_birthdate },
-              { label: 'Marital Status', displayValue: loan.co_borrower_marital_status, field: 'co_borrower_marital_status', rawValue: loan.co_borrower_marital_status },
+          {/* Borrower + Co-Borrower — side-by-side columns */}
+          <div className={`grid gap-6 ${loan.co_borrower_name ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+            <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
+              { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
+              { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
+              { label: 'Email',          displayValue: <EmailLink email={loan.borrower_email} />, field: 'borrower_email', rawValue: loan.borrower_email },
+              { label: 'Phone',          displayValue: <PhoneLink phone={loan.borrower_phone} />, field: 'borrower_phone', rawValue: loan.borrower_phone },
+              { label: 'DOB',            displayValue: loan.borrower_birthdate ? fmtDate(loan.borrower_birthdate) : null, field: 'borrower_birthdate', rawValue: loan.borrower_birthdate },
+              { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
+              { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
+              { label: 'Position',       displayValue: loan.position_description, field: 'position_description', rawValue: loan.position_description },
+              ...(loan.self_employed ? [{ label: 'Self-Employed', displayValue: 'Yes' as React.ReactNode }] : []),
+              { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' as const },
+              { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' as const },
+              { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' as const },
             ]} />
-          )}
+
+            {loan.co_borrower_name && (
+              <EditableSectionCard title="Co-Borrower" onSave={handleSaveField} fields={[
+                { label: 'Name',           displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
+                { label: 'Email',          displayValue: <EmailLink email={loan.co_borrower_email} />, field: 'co_borrower_email', rawValue: loan.co_borrower_email },
+                { label: 'Phone',          displayValue: <PhoneLink phone={loan.co_borrower_phone} />, field: 'co_borrower_phone', rawValue: loan.co_borrower_phone },
+                { label: 'Home Phone',     displayValue: <PhoneLink phone={loan.co_borrower_home_phone} />, field: 'co_borrower_home_phone', rawValue: loan.co_borrower_home_phone },
+                { label: 'Work Phone',     displayValue: <PhoneLink phone={loan.co_borrower_work_phone} />, field: 'co_borrower_work_phone', rawValue: loan.co_borrower_work_phone },
+                { label: 'DOB',            displayValue: loan.co_borrower_birthdate ? fmtDate(loan.co_borrower_birthdate) : null, field: 'co_borrower_birthdate', rawValue: loan.co_borrower_birthdate },
+                { label: 'Marital Status', displayValue: loan.co_borrower_marital_status, field: 'co_borrower_marital_status', rawValue: loan.co_borrower_marital_status },
+              ]} />
+            )}
+          </div>
 
           <EditableSectionCard title="Property" onSave={handleSaveField} fields={[
             { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
@@ -1079,8 +1085,8 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
             ...(loan.cash_to_close ? [{ label: 'Cash to Close', displayValue: fmtCurrency(loan.cash_to_close) as React.ReactNode, field: 'cash_to_close', rawValue: loan.cash_to_close, type: 'number' as const }] : []),
             ...(loan.seller_credits ? [{ label: 'Seller Credits', displayValue: fmtCurrency(loan.seller_credits) as React.ReactNode, field: 'seller_credits', rawValue: loan.seller_credits, type: 'number' as const }] : []),
             ...(loan.total_closing_costs ? [{ label: 'Total Closing', displayValue: fmtCurrency(loan.total_closing_costs) as React.ReactNode, field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' as const }] : []),
-            ...(loan.hoi_monthly ? [{ label: 'HOI Monthly', displayValue: fmtCurrency(loan.hoi_monthly) as React.ReactNode, field: 'hoi_monthly', rawValue: loan.hoi_monthly, type: 'number' as const }] : []),
-            ...(loan.property_taxes_monthly ? [{ label: 'Property Taxes', displayValue: fmtCurrency(loan.property_taxes_monthly) as React.ReactNode, field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' as const }] : []),
+            { label: 'HOI Monthly',    displayValue: fmtCurrency(loan.hoi_monthly),              field: 'hoi_monthly',              rawValue: loan.hoi_monthly,              type: 'number' as const },
+            { label: 'Property Taxes', displayValue: fmtCurrency(loan.property_taxes_monthly), field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' as const },
             ...(loan.hoa_dues ? [{ label: 'HOA Dues', displayValue: fmtCurrency(loan.hoa_dues) as React.ReactNode, field: 'hoa_dues', rawValue: loan.hoa_dues, type: 'number' as const }] : []),
           ]} />
 
@@ -1119,7 +1125,6 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
 
         <div className="space-y-6">
           <BorrowerProfileCard loan={loan} contact={contact} />
-          <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
           <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} onRefresh={onRefresh} />
         </div>
       </div>

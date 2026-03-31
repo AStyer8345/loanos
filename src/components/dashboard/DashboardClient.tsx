@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  AlertTriangle, Clock, Brain, ListChecks,
-  Phone, Mail, MessageSquare, FileText, Zap, ArrowRight, UserPlus,
+  AlertTriangle, Clock, Brain, ListChecks, ArrowRight,
 } from 'lucide-react'
 import SmartActionQueue from '@/components/SmartActionQueue'
 import type { ScoredLoan } from '@/lib/scoreLoans'
@@ -15,52 +14,15 @@ import {
 import DailyBriefingPanel from './DailyBriefingPanel'
 import DailyScheduleWidget from './DailyScheduleWidget'
 import TodoList from './TodoList'
-import { fmtCurrency, fmtK, fmtRelative } from '@/lib/formatters'
+import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
 interface UrgentFlag { id: string; name: string; flag: string; date: string }
-interface StaleLoan { id: string; name: string; daysSinceActivity: number }
-interface LoanRow {
-  id: string; borrower_first_name: string | null; borrower_last_name: string | null
-  loan_name: string | null; loan_amount: number | null; loan_type: string | null
-  loan_program: string | null; loan_term: number | null; status: string | null
-  estimated_closing_date: string | null; closing_date: string | null
-  commission_amount: number | null; contact_id: string | null
-}
-interface ActivityEntry {
-  id: string; created_at: string; type?: string | null; action?: string | null
-  summary?: string | null; contact_id?: string | null; loan_id?: string | null
-  metadata?: Record<string, unknown> | null
-}
+interface StaleLoan { id: string; name: string; daysSinceActivity: number; status: string | null; estimated_closing_date: string | null; loan_amount: number | null }
 interface ChartPoint { month: string; loans: number; volume: number; commission: number }
-
-interface RecentApplication {
-  id: string; loan_name: string | null; borrower_first_name: string | null
-  borrower_last_name: string | null; loan_amount: number | null
-  status: string | null; loan_type: string | null; created_at: string; contact_id: string | null
-}
-
-interface NewLead {
-  id: string; first_name: string | null; last_name: string | null
-  email: string | null; phone: string | null
-  referral_type: string | null; lead_source: string | null
-  created_at: string; stage: string | null
-}
-
-const REFERRAL_TYPE_LABELS: Record<string, string> = {
-  web_lead:                   'Web Lead',
-  realtor_referral:           'Realtor Referral',
-  client_referral:            'Client Referral',
-  past_client:                'Past Client',
-  friend_family:              'Friend / Family',
-  financial_advisor_referral: 'Financial Advisor',
-  builder_referral:           'Builder Referral',
-  open_house:                 'Open House',
-  other:                      'Other',
-}
 
 interface DashboardClientProps {
   totalActive: number; totalActiveVolume: number; totalActiveCommission: number
@@ -69,11 +31,8 @@ interface DashboardClientProps {
   volumeThisMonth: number; volumeYTD: number
   stageData: StageData[]
   urgentFlags: UrgentFlag[]; staleLoans: StaleLoan[]
-  recentLoans: LoanRow[]; activityEntries: ActivityEntry[]
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
-  recentApplications: RecentApplication[]
-  newLeads: NewLead[]
   hotLeads: HotLead[]
   showSetupBanner?: boolean
 }
@@ -100,20 +59,12 @@ function fmtDateShort(s: string | null): string {
   return new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const TYPE_ICONS: Record<string, React.ReactNode> = {
-  email: <Mail className="w-3.5 h-3.5" />,
-  call: <Phone className="w-3.5 h-3.5" />,
-  document: <FileText className="w-3.5 h-3.5" />,
-  automation: <Zap className="w-3.5 h-3.5" />,
-  note: <MessageSquare className="w-3.5 h-3.5" />,
-  text: <MessageSquare className="w-3.5 h-3.5" />,
-  task: <Clock className="w-3.5 h-3.5" />,
-}
-
 // ── Component ───────────────────────────────────────────────────────────
 export default function DashboardClient(props: DashboardClientProps) {
   const [tab, setTab] = useState<'pipeline' | 'performance' | 'briefing' | 'queue'>('pipeline')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+
+  const needsAttentionCount = props.urgentFlags.length + props.staleLoans.length
 
   return (
     <div className="min-h-screen bg-[#060b18] p-4 lg:p-6 space-y-4">
@@ -144,13 +95,12 @@ export default function DashboardClient(props: DashboardClientProps) {
           <p className="text-xs font-mono text-zinc-500 mt-0.5">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
-          {props.urgentFlags.length > 0 && (
+          {needsAttentionCount > 0 && (
             <div className="flex items-center gap-1.5 bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-xs font-mono text-amber-400">{props.urgentFlags.length} urgent</span>
+              <span className="text-xs font-mono text-amber-400">{needsAttentionCount} need attention</span>
             </div>
           )}
-          {/* Tab toggle */}
           <div className="flex bg-[#0f172a] border border-[#1e293b] rounded-lg p-1 gap-0.5">
             <button
               onClick={() => setTab('pipeline')}
@@ -175,270 +125,109 @@ export default function DashboardClient(props: DashboardClientProps) {
       {/* ═══ PIPELINE TAB ═══ */}
       {tab === 'pipeline' && (
         <div className="space-y-4">
-          {/* Top-level KPI cards */}
+          {/* ── KPI Cards ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Link href="/dashboard/loans?stage=funded&period=ytd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#10b981] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Commission Earned</div>
+              <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
+            </Link>
+            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Commission</div>
+              <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.totalActiveCommission)}</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.totalActive} loans · {fmtK(props.totalActiveVolume)} volume</div>
+            </Link>
+            <Link href="/dashboard/loans?stage=funded&period=mtd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Closed This Month</div>
+              <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
+            </Link>
             <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#3b82f6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Loans</div>
               <div className="text-2xl font-mono font-bold text-zinc-100">{props.totalActive}</div>
               <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtK(props.totalActiveVolume)} volume</div>
             </Link>
-            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Gross Commission</div>
-              <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.totalActiveCommission)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">In pipeline</div>
-            </Link>
-            <Link href="/dashboard/loans?stage=funded&period=ytd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#10b981] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Commission YTD</div>
-              <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedYTD} loans funded</div>
-            </Link>
-            <Link href="/dashboard/loans?stage=funded&period=mtd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">This Month</div>
-              <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)}</div>
-            </Link>
           </div>
 
-          {/* Stage pipeline cards */}
-          <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Loans by Stage</span>
-              <Link href="/dashboard/loans" className="flex items-center gap-1 text-xs font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                View all <ArrowRight size={11} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {props.stageData.map(s => {
-                const barPct = props.totalActiveVolume > 0 ? Math.min(100, (s.volume / props.totalActiveVolume) * 100) : 0
-                const color = statusHex(s.stage)
-                return (
-                  <Link
-                    key={s.stage}
-                    href={`/dashboard/loans?stage=${encodeURIComponent(s.stage)}`}
-                    className="block hover:bg-[#1e293b]/50 rounded-lg p-3 -m-3 transition-colors cursor-pointer"
-                  >
-                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">{s.stage}</p>
-                    <p className="text-2xl font-mono font-bold text-zinc-100">{s.count}</p>
-                    <p className="text-xs font-mono mt-0.5" style={{ color }}>{s.volume > 0 ? fmtK(s.volume) : '—'}</p>
-                    {s.commission > 0 && (
-                      <p className="text-[10px] font-mono text-[#C9A84C] mt-0.5">{fmt(s.commission)} comm.</p>
-                    )}
-                    <div className="mt-2 h-0.5 bg-[#1e293b] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barPct}%`, backgroundColor: color }} />
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Urgent flags */}
-          {props.urgentFlags.length > 0 && (
+          {/* ── Needs Attention (merged urgent + stale) ── */}
+          {needsAttentionCount > 0 && (
             <div className="bg-amber-950/20 border border-amber-800/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={14} className="text-amber-400" />
-                <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Urgent Attention</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={14} className="text-amber-400" />
+                  <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Needs Attention</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{needsAttentionCount} items</span>
+                </div>
+                <Link href="/dashboard/loans" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                  View pipeline <ArrowRight size={9} />
+                </Link>
               </div>
-              <div className="space-y-2">
-                {props.urgentFlags.map(f => (
-                  <Link key={f.id + f.flag} href={`/dashboard/loans/${f.id}`} className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-2 py-1.5 -mx-2 transition-colors">
-                    <span className="text-zinc-200">{f.name}</span>
-                    <span className="text-amber-400">{f.flag} — {fmtDateShort(f.date)}</span>
-                  </Link>
-                ))}
-              </div>
+
+              {/* Urgent flags — rate locks, past closing, expiring pre-approvals */}
+              {props.urgentFlags.length > 0 && (
+                <div className="space-y-1 mb-3">
+                  {props.urgentFlags.map(f => (
+                    <Link
+                      key={f.id + f.flag}
+                      href={`/dashboard/loans/${f.id}`}
+                      className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-3 py-2 -mx-1 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                        <span className="text-zinc-200">{f.name}</span>
+                      </div>
+                      <span className="text-amber-400">{f.flag} — {fmtDateShort(f.date)}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Stale loans — 7+ days no human touch */}
+              {props.staleLoans.length > 0 && (
+                <>
+                  {props.urgentFlags.length > 0 && (
+                    <div className="border-t border-amber-800/30 my-2" />
+                  )}
+                  <div className="flex items-center gap-2 mb-2 px-2">
+                    <Clock size={11} className="text-orange-400" />
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">No activity 7+ days</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    {props.staleLoans.slice(0, 12).map(l => (
+                      <Link
+                        key={l.id}
+                        href={`/dashboard/loans/${l.id}`}
+                        className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-3 py-2 -mx-1 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                          <span className="text-zinc-300 truncate">{l.name}</span>
+                          {l.status && <StageBadge status={l.status} />}
+                        </div>
+                        <div className="flex items-center gap-3 ml-2 flex-shrink-0">
+                          {l.estimated_closing_date && (
+                            <span className="text-zinc-600 text-[10px]">close {fmtDateShort(l.estimated_closing_date)}</span>
+                          )}
+                          <span className="text-orange-400">{l.daysSinceActivity}d idle</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* Hot Leads */}
+          {/* ── Hot Leads ── */}
           <HotLeadsWidget hotLeads={props.hotLeads} />
 
-          {/* Needs Attention — full width */}
-          <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock size={14} className="text-orange-400" />
-              <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Needs Attention</span>
-              <span className="text-[10px] font-mono text-zinc-600">7+ days no activity</span>
-              {props.staleLoans.length > 0 && (
-                <Link href="/dashboard/loans?filter=no_activity_3days" className="ml-auto flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  View all <ArrowRight size={9} />
-                </Link>
-              )}
-            </div>
-            {props.staleLoans.length === 0 ? (
-              <p className="text-xs font-mono text-zinc-600">All loans are up to date</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
-                {props.staleLoans.slice(0, 12).map(l => (
-                  <Link key={l.id} href={`/dashboard/loans/${l.id}`} className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors">
-                    <span className="text-zinc-300 truncate">{l.name}</span>
-                    <span className="text-orange-400 ml-2 flex-shrink-0">{l.daysSinceActivity}d idle</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Applications */}
-          {props.recentApplications.length > 0 && (
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-emerald-500 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <FileText size={14} className="text-emerald-400" />
-                  <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">New Applications</span>
-                  <span className="text-[10px] font-mono text-zinc-600">last 30 days</span>
-                </div>
-                <Link href="/dashboard/loans?filter=new_apps" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  View all <ArrowRight size={9} />
-                </Link>
-              </div>
-              <div className="space-y-1">
-                {props.recentApplications.map(app => {
-                  const name = [app.borrower_first_name, app.borrower_last_name].filter(Boolean).join(' ') || app.loan_name || '(unnamed)'
-                  const daysAgo = Math.floor((Date.now() - new Date(app.created_at).getTime()) / (1000 * 60 * 60 * 24))
-                  return (
-                    <Link
-                      key={app.id}
-                      href={`/dashboard/loans/${app.id}`}
-                      className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors"
-                    >
-                      <span className="text-zinc-200 truncate">{name}</span>
-                      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-                        {app.loan_amount ? <span className="text-[#C9A84C]">{fmtK(app.loan_amount)}</span> : null}
-                        {app.loan_type && <span className="text-zinc-500">{app.loan_type}</span>}
-                        <span className="text-emerald-400">{daysAgo === 0 ? 'today' : `${daysAgo}d ago`}</span>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* New Leads — contacts without a loan yet */}
-          {props.newLeads.length > 0 && (
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-blue-500 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <UserPlus size={14} className="text-blue-400" />
-                  <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">New Leads</span>
-                  <span className="text-[10px] font-mono text-zinc-600">last 30 days · no application yet</span>
-                </div>
-                <Link href="/dashboard/contacts" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  View all <ArrowRight size={9} />
-                </Link>
-              </div>
-              <div className="space-y-1">
-                {props.newLeads.map(lead => {
-                  const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || '(unnamed)'
-                  const daysAgo = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24))
-                  const typeLabel = REFERRAL_TYPE_LABELS[lead.referral_type ?? ''] ?? lead.lead_source ?? 'Lead'
-                  return (
-                    <Link
-                      key={lead.id}
-                      href={`/dashboard/contacts/${lead.id}`}
-                      className="flex items-center justify-between text-xs font-mono hover:bg-[#1e293b]/50 rounded px-2 py-1.5 transition-colors"
-                    >
-                      <span className="text-zinc-200 truncate">{name}</span>
-                      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-                        <span className="text-blue-400 text-[10px]">{typeLabel}</span>
-                        <span className="text-zinc-500">{daysAgo === 0 ? 'today' : `${daysAgo}d ago`}</span>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Daily Schedule */}
-          <DailyScheduleWidget />
-
-          {/* Recent Loans + Activity */}
+          {/* ── Today's Priorities: Marketing Schedule + To-Do ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-[#0f172a] border border-[#1e293b] rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e293b]">
-                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Active Loans</span>
-                <Link href="/dashboard/loans" className="flex items-center gap-1 text-xs font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  View all <ArrowRight size={11} />
-                </Link>
-              </div>
-              {props.recentLoans.length === 0 ? (
-                <div className="py-12 text-center text-xs font-mono text-zinc-600">No active loans</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs font-mono">
-                    <thead>
-                      <tr className="border-b border-[#1e293b]">
-                        <th className="text-left px-4 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Borrower</th>
-                        <th className="text-right px-4 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Amount</th>
-                        <th className="text-left px-4 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Stage</th>
-                        <th className="text-right px-4 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider hidden md:table-cell">Commission</th>
-                        <th className="text-right px-4 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider hidden md:table-cell">Close</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {props.recentLoans.map((loan, i) => {
-                        const name = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.loan_name || '(unnamed)'
-                        return (
-                          <tr key={loan.id} className={`hover:bg-[#1e293b]/30 ${i > 0 ? 'border-t border-[#1e293b]' : ''}`}>
-                            <td className="px-4 py-2.5">
-                              <Link href={`/dashboard/loans/${loan.id}`} className="text-zinc-200 hover:text-[#C9A84C] transition-colors">{name}</Link>
-                            </td>
-                            <td className="px-4 py-2.5 text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</td>
-                            <td className="px-4 py-2.5"><StageBadge status={loan.status} /></td>
-                            <td className="px-4 py-2.5 text-right text-[#C9A84C] hidden md:table-cell">{loan.commission_amount ? fmt(loan.commission_amount) : '—'}</td>
-                            <td className="px-4 py-2.5 text-right text-zinc-500 hidden md:table-cell">{fmtDateShort(loan.estimated_closing_date || loan.closing_date)}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+            <div className="lg:col-span-2">
+              <DailyScheduleWidget />
             </div>
-
-            {/* Activity feed */}
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#1e293b]">
-                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Activity</span>
-              </div>
-              {props.activityEntries.length === 0 ? (
-                <div className="py-10 text-center text-xs font-mono text-zinc-600">No activity in last 7 days</div>
-              ) : (
-                <div className="divide-y divide-[#1e293b] overflow-y-auto max-h-96">
-                  {props.activityEntries.slice(0, 15).map(entry => {
-                    const type = (entry.type || entry.action || 'task').toLowerCase()
-                    const icon = TYPE_ICONS[type] ?? <Clock className="w-3.5 h-3.5" />
-                    const summary = entry.summary || entry.action || 'Activity logged'
-                    const href = entry.loan_id
-                      ? `/dashboard/loans/${entry.loan_id}`
-                      : entry.contact_id
-                      ? `/dashboard/contacts/${entry.contact_id}`
-                      : null
-                    const Inner = (
-                      <>
-                        <span className="p-1 rounded text-zinc-400 bg-[#1e293b] flex-shrink-0 mt-0.5">{icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="text-xs font-mono text-zinc-200 leading-snug">{summary}</div>
-                            <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{fmtRelative(entry.created_at)}</span>
-                          </div>
-                        </div>
-                      </>
-                    )
-                    return href ? (
-                      <Link key={entry.id} href={href} className="flex items-start gap-2.5 px-4 py-3 hover:bg-[#1e293b]/40 transition-colors">
-                        {Inner}
-                      </Link>
-                    ) : (
-                      <div key={entry.id} className="flex items-start gap-2.5 px-4 py-3">
-                        {Inner}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+            <div>
+              <TodoList />
             </div>
           </div>
         </div>
@@ -586,7 +375,7 @@ function StageBadge({ status }: { status: string | null }) {
   const hex = statusHex(status)
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium border"
+      className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium border"
       style={{
         background: `${hex}22`,
         color: hex,

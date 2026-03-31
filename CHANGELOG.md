@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [5.0.7] — 2026-03-31 — Dashboard Redesign: Command Center
+
+### Changed
+- **KPI cards reordered**: Commission Earned (YTD), Pipeline Commission, Closed This Month, Pipeline Loans — each shows loan count + volume
+- **Needs Attention merged**: Urgent flags (rate lock, closing date, pre-approval) and stale loans (7+ days idle) combined into one panel with status badges and closing dates
+- **Hot Leads upgraded**: Inline call/text/email action icons, notes shown below each lead, dismiss on hover
+- **Today's Priorities section**: Daily Marketing Schedule + To-Do list side-by-side (2/3 + 1/3 grid)
+
+### Removed
+- Active Loans table from dashboard (redundant with Pipeline page)
+- Activity feed widget (7-day log)
+- New Applications list
+- New Leads list (merged into Hot Leads)
+- Stage pipeline cards from Pipeline tab (still on Performance tab)
+- ~60 lines of unused server queries
+
 ## [5.0.6] — 2026-03-31 — Loan Detail Layout + Build Fixes
 
 ### Fixed

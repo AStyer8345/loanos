@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
-import type { ActivityEntry } from '@/app/dashboard/contacts/[id]/ContactRecordView'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
 export const dynamic = 'force-dynamic'
@@ -45,7 +44,7 @@ export default async function DashboardPage() {
   let fundedThisMonth = 0, fundedYTD = 0
   let volumeThisMonth = 0, volumeYTD = 0
   const urgentFlags: Array<{ id: string; name: string; flag: string; date: string }> = []
-  const staleLoans: Array<{ id: string; name: string; daysSinceActivity: number }> = []
+  const staleLoans: Array<{ id: string; name: string; daysSinceActivity: number; status: string | null; estimated_closing_date: string | null; loan_amount: number | null }> = []
 
   for (const loan of loans ?? []) {
     const rawStatus = (loan.status ?? 'unknown').toLowerCase()
@@ -114,9 +113,7 @@ export default async function DashboardPage() {
     commission: stageCounts[stage]?.commission ?? 0,
   }))
 
-  const recentLoans = (loans ?? [])
-    .filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
-    .slice(0, 8)
+  // recentLoans removed — pipeline tab no longer shows Active Loans table
 
   // ── Smart Action Queue: last human touch per active loan ─────────────────
   const activeLoans = (loans ?? []).filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
@@ -152,7 +149,14 @@ export default async function DashboardPage() {
     if (compareDate) {
       const daysSince = Math.floor((now.getTime() - new Date(compareDate).getTime()) / (1000 * 60 * 60 * 24))
       if (daysSince >= 7) {
-        staleLoans.push({ id: loan.id, name: borrowerName, daysSinceActivity: daysSince })
+        staleLoans.push({
+          id: loan.id,
+          name: borrowerName,
+          daysSinceActivity: daysSince,
+          status: loan.status,
+          estimated_closing_date: loan.estimated_closing_date,
+          loan_amount: loan.loan_amount,
+        })
       }
     }
   }
@@ -173,9 +177,6 @@ export default async function DashboardPage() {
   }))
 
   const scoredLoans = rankLoans(loansForScoring)
-
-  // ── New Leads (contacts without a loan, last 30 days) ────────────────────
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
   // ── Hot Leads — all Lead-stage contacts, created within 14 days, not dismissed ─
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
@@ -224,64 +225,7 @@ export default async function DashboardPage() {
     score: 0,
   }))
 
-  // Get all contact_ids already tied to a loan so we can exclude them
-  const { data: loanContactRows = [] } = await supabase
-    .from('loans')
-    .select('contact_id')
-    .eq('organization_id', organizationId)
-    .not('contact_id', 'is', null)
-
-  const contactIdsWithLoans = (loanContactRows ?? [])
-    .map(r => r.contact_id as string)
-    .filter(Boolean)
-
-  // Cast via unknown — referral_type/lead_source not yet in generated DB types
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const contactsTable = supabase.from('contacts') as any
-
-  let leadsQuery = contactsTable
-    .select('id, first_name, last_name, email, phone, referral_type, lead_source, created_at, stage')
-    .eq('organization_id', organizationId)
-    .gte('created_at', thirtyDaysAgo.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if (contactIdsWithLoans.length > 0) {
-    leadsQuery = leadsQuery.not('id', 'in', `(${contactIdsWithLoans.join(',')})`)
-  }
-
-  const { data: newLeads = [] } = await leadsQuery as { data: Array<{
-    id: string; first_name: string | null; last_name: string | null
-    email: string | null; phone: string | null; created_at: string
-    stage: string | null; referral_type: string | null; lead_source: string | null
-  }> | null }
-
-  // ── Recent Applications (new loans in last 30 days) ───────────────────────
-  const { data: recentApplications = [] } = await supabase
-    .from('loans')
-    .select('id, loan_name, borrower_first_name, borrower_last_name, loan_amount, status, loan_type, created_at, contact_id')
-    .eq('organization_id', organizationId)
-    .gte('created_at', thirtyDaysAgo.toISOString())
-    .not('status', 'in', '("Closed","Funded","Cancelled","Denied","Withdrawn")')
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  // ── Activity feed ─────────────────────────────────────────────────────────
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const { data: rawActivity = [] } = await supabase
-    .from('activity_log')
-    .select('id, created_at, type, action, summary, contact_id, loan_id, metadata')
-    .gte('created_at', sevenDaysAgo.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(100)
-
-  const activityEntries = ((rawActivity ?? []).filter(e => {
-    const action = (e.action ?? '').toLowerCase()
-    const summary = (e.summary ?? '').toLowerCase()
-    return !action.includes('webhook.error') && !action.includes('error_loan_not_found')
-      && !action.startsWith('arive.webhook') && !summary.includes('webhook error')
-      && !action.includes('error_')
-  }) as unknown as ActivityEntry[])
+  // newLeads, recentApplications, activityEntries removed — dashboard redesign
 
   // Monthly funded data for performance charts
   const monthlyMap: Record<string, { loans: number; volume: number; commission: number }> = {}
@@ -315,12 +259,8 @@ export default async function DashboardPage() {
       stageData={stageData}
       urgentFlags={urgentFlags}
       staleLoans={staleLoans}
-      recentLoans={recentLoans}
-      activityEntries={activityEntries}
       chartData={chartData}
       scoredLoans={scoredLoans}
-      recentApplications={recentApplications ?? []}
-      newLeads={newLeads ?? []}
       hotLeads={hotLeads}
       showSetupBanner={showSetupBanner}
     />

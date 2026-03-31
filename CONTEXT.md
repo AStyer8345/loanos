@@ -18,6 +18,39 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Dashboard Redesign — 2026-03-31 (session 6)
+
+**Redesigned the main dashboard to be a command center focused on money, urgency, and marketing priorities.**
+
+### KPI Cards (top row):
+- Reordered: Commission Earned (YTD) → Pipeline Commission → Closed This Month → Pipeline Loans
+- Each card now shows loan count + volume in subtitle
+
+### Needs Attention (merged section):
+- Combined "Urgent Flags" (rate lock expiring, past closing date, pre-approval expiring) with "Needs Attention" (7+ days no human activity) into one amber warning panel
+- Stale loans now show status badge, closing date, and days idle
+- Red dots for urgent items, orange dots for stale
+
+### Hot Leads (upgraded):
+- Inline call, text, email action icons (Phone/MessageSquare/Mail from lucide) — one click to reach the lead
+- Notes shown inline below each lead name
+- Referred-by and age shown as metadata
+- Dismiss button appears on hover
+
+### Today's Priorities (new section):
+- Daily Marketing Schedule (existing DailyScheduleWidget) and To-Do list shown side-by-side in 2/3 + 1/3 grid
+
+### Removed from Pipeline tab:
+- Active Loans table (redundant with Pipeline page)
+- Activity feed (7-day log — rarely useful on dashboard)
+- New Applications list (already visible in Pipeline)
+- New Leads list (merged into Hot Leads widget)
+- Stage pipeline cards (moved to Performance tab only)
+
+### Server page cleanup:
+- Removed ~60 lines of unused queries (newLeads, recentApplications, activityEntries)
+- Enriched staleLoans with status, estimated_closing_date, loan_amount
+
 ## Loan Detail Layout + Build Fixes — 2026-03-31 (session 5)
 
 **Fixed 3 pre-existing TypeScript build errors blocking deploy, then shipped loan detail layout changes.**

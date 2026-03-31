@@ -347,8 +347,6 @@ function EmailLink({ email }: { email: string | null | undefined }) {
 
 // ── Pipeline helpers (canonical stage ordering) ──────────────────────────────
 
-const PIPELINE_STAGES = ['Application', 'Processing', 'Underwriting', 'CTC', 'Funding']
-
 // Ordered stage keys from earliest to latest in the pipeline
 const STAGE_ORDER: StageKey[] = [
   'lead', 'new_application', 'pre_approval',
@@ -357,15 +355,6 @@ const STAGE_ORDER: StageKey[] = [
   'clear_to_close',
   'funded',
 ]
-
-function getStageIndex(status: string | null): number {
-  const key = normalizeToStageKey(status)
-  if (key === 'funded') return 4
-  if (key === 'clear_to_close') return 3
-  if (['submitted', 'underwriting', 'approved', 'resubmit'].includes(key)) return 2
-  if (['setup', 'disclosed', 'processing', 'pre_approval'].includes(key)) return 1
-  return 0
-}
 
 // Milestone completion: a milestone is complete when the loan has reached or passed the target stage
 function hasReachedStage(status: string | null, target: StageKey): boolean {
@@ -676,94 +665,97 @@ export default function LoanDetailPage() {
             })()}
           </div>
 
-          {/* Row 3: Vital Signs — color-coded inline stats */}
-          <div className="flex items-center gap-6 text-sm font-mono pb-3 overflow-x-auto">
-            {loan.loan_amount != null && (
-              <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
-            )}
-            {loan.interest_rate != null && (
-              <VitalStat label="Rate" value={fmtPct(loan.interest_rate)} color="#4ADE80" />
-            )}
-            {loan.ltv != null && (
-              <VitalStat label="LTV" value={fmtPct(loan.ltv)} color="#A855F7" />
-            )}
-            {(loan.front_end_dti || loan.back_end_dti) && (
-              <VitalStat label="DTI" value={`${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}`} color="#F59E0B" />
-            )}
-            <VitalStatEditable
-              label="Lock Exp"
-              value={fmtDate(loan.rate_lock_expiration)}
-              field="rate_lock_expiration"
-              rawValue={loan.rate_lock_expiration}
-              editingHeader={editingHeader}
-              headerInput={headerInput}
-              setEditingHeader={setEditingHeader}
-              setHeaderInput={setHeaderInput}
-              saveHeaderField={saveHeaderField}
-              warning={lockExpiryWarning}
-            />
-            <VitalStatEditable
-              label="Est. Close"
-              value={fmtDate(loan.estimated_closing_date)}
-              field="estimated_closing_date"
-              rawValue={loan.estimated_closing_date}
-              editingHeader={editingHeader}
-              headerInput={headerInput}
-              setEditingHeader={setEditingHeader}
-              setHeaderInput={setHeaderInput}
-              saveHeaderField={saveHeaderField}
-            />
-            {loan.referring_agent_name && (
-              <div className="shrink-0">
-                <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
-                <Link
-                  href={
-                    referringAgentContactId
-                      ? `/dashboard/contacts/${referringAgentContactId}`
-                      : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
-                  }
-                  className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[10rem]"
-                >
-                  {loan.referring_agent_name}
-                </Link>
-              </div>
-            )}
-            <div className="ml-auto shrink-0 flex flex-col items-end gap-2">
+          {/* Row 3: Vital Signs — card with subtle background */}
+          <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/50 px-5 py-3.5 mb-3">
+            <div className="flex items-center gap-8 text-sm font-mono overflow-x-auto">
+              {loan.loan_amount != null && (
+                <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
+              )}
+              {loan.interest_rate != null && (
+                <VitalStat label="Rate" value={fmtPct(loan.interest_rate)} color="#4ADE80" />
+              )}
+              {loan.ltv != null && (
+                <VitalStat label="LTV" value={fmtPct(loan.ltv)} color="#A855F7" />
+              )}
+              {(loan.front_end_dti || loan.back_end_dti) && (
+                <VitalStat label="DTI" value={`${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}`} color="#F59E0B" />
+              )}
               <VitalStatEditable
-                label="Commission"
-                value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
-                field="commission_amount"
-                rawValue={loan.commission_amount}
+                label="Lock Exp"
+                value={fmtDate(loan.rate_lock_expiration)}
+                field="rate_lock_expiration"
+                rawValue={loan.rate_lock_expiration}
                 editingHeader={editingHeader}
                 headerInput={headerInput}
                 setEditingHeader={setEditingHeader}
                 setHeaderInput={setHeaderInput}
                 saveHeaderField={saveHeaderField}
-                inputType="number"
-                color="#C9A84C"
+                warning={lockExpiryWarning}
               />
-              {loan.property_address && (
-                <a
-                  href={`https://www.zillow.com/homes/${encodeURIComponent(
-                    `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
-                  )}_rb/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-end rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-3 py-1.5 text-right whitespace-nowrap"
-                  title="View on Zillow"
-                >
-                  <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
-                  <span className="text-[11px] font-mono text-blue-100 leading-tight">{loan.property_address}</span>
-                  <span className="text-[10px] font-mono text-blue-300/70 leading-tight">
-                    {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
-                  </span>
-                </a>
+              <VitalStatEditable
+                label="Est. Close"
+                value={fmtDate(loan.estimated_closing_date)}
+                field="estimated_closing_date"
+                rawValue={loan.estimated_closing_date}
+                editingHeader={editingHeader}
+                headerInput={headerInput}
+                setEditingHeader={setEditingHeader}
+                setHeaderInput={setHeaderInput}
+                saveHeaderField={saveHeaderField}
+              />
+              {loan.referring_agent_name && (
+                <div className="shrink-0">
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
+                  <Link
+                    href={
+                      referringAgentContactId
+                        ? `/dashboard/contacts/${referringAgentContactId}`
+                        : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
+                    }
+                    className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[10rem]"
+                  >
+                    {loan.referring_agent_name}
+                  </Link>
+                </div>
               )}
+              <div className="ml-auto shrink-0">
+                <VitalStatEditable
+                  label="Commission"
+                  value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
+                  field="commission_amount"
+                  rawValue={loan.commission_amount}
+                  editingHeader={editingHeader}
+                  headerInput={headerInput}
+                  setEditingHeader={setEditingHeader}
+                  setHeaderInput={setHeaderInput}
+                  saveHeaderField={saveHeaderField}
+                  inputType="number"
+                  color="#C9A84C"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Pipeline progress bar */}
-          <PipelineProgressBar status={loan.status} />
+          {/* Property address — bottom right */}
+          {loan.property_address && (
+            <div className="flex justify-end mb-2">
+              <a
+                href={`https://www.zillow.com/homes/${encodeURIComponent(
+                  `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
+                )}_rb/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-start rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-4 py-2"
+                title="View on Zillow"
+              >
+                <span className="text-[10px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-1">Property</span>
+                <span className="text-sm font-mono text-blue-100 leading-tight font-medium">{loan.property_address}</span>
+                <span className="text-xs font-mono text-blue-300/70 leading-tight mt-0.5">
+                  {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
+                </span>
+              </a>
+            </div>
+          )}
 
           {/* Milestones — above tab bar so it's visible on every tab */}
           <div className="pt-3 pb-1">
@@ -851,55 +843,6 @@ export default function LoanDetailPage() {
       </div>
     )}
     </>
-  )
-}
-
-// ── Pipeline stepped milestone pills ───────────────────────────────────────────
-
-// Stage colors for the pipeline bar — maps each pipeline label to its hex from PIPELINE_STAGE_DEFS
-const PIPELINE_HEX: Record<string, string> = {
-  Application: '#60A5FA',   // blue
-  Processing:  '#D97706',   // amber
-  Underwriting: '#7C3AED',  // purple
-  CTC:         '#16A34A',   // green
-  Funding:     '#C9A84C',   // gold
-}
-
-function PipelineProgressBar({ status }: { status: string | null }) {
-  const currentIdx = getStageIndex(status)
-
-  return (
-    <div className="flex items-center gap-0 py-2">
-      {PIPELINE_STAGES.map((stage, i) => {
-        const done = i < currentIdx
-        const active = i === currentIdx
-        const isLast = i === PIPELINE_STAGES.length - 1
-        const hex = PIPELINE_HEX[stage] ?? '#52525B'
-        return (
-          <div key={stage} className="flex items-center">
-            <span
-              className="inline-flex items-center px-2.5 py-1 text-[10px] font-mono font-medium rounded-sm transition-all duration-200 border"
-              style={
-                active
-                  ? { background: `${hex}22`, color: hex, borderColor: `${hex}80` }
-                  : done
-                  ? { background: `${hex}15`, color: `${hex}AA`, borderColor: `${hex}30` }
-                  : { background: 'rgba(39,39,42,0.4)', color: '#52525b', borderColor: 'rgba(63,63,70,0.5)' }
-              }
-            >
-              {stage}
-            </span>
-            {!isLast && (
-              <ChevronRight
-                size={10}
-                className="mx-0.5 shrink-0"
-                style={{ color: done ? `${hex}66` : '#3f3f46' }}
-              />
-            )}
-          </div>
-        )
-      })}
-    </div>
   )
 }
 

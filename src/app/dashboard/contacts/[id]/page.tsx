@@ -18,7 +18,6 @@ export default function ContactRecordPage() {
   const [contactActivity, setContactActivity] = useState<ContactActivityRow[]>([])
   const [referrerContactId, setReferrerContactId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'activity' | 'emails'>('overview')
   const [emailDrafts, setEmailDrafts] = useState<EmailDraftRow[]>([])
   const [inboundEmails, setInboundEmails] = useState<InboundEmailRow[]>([])
   const [contactEmails, setContactEmails] = useState<ContactEmailRow[]>([])
@@ -42,7 +41,7 @@ export default function ContactRecordPage() {
   const fetchLoans = useCallback(async () => {
     const { data } = await supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, property_address, property_city, property_state, loan_purpose, loan_type, created_at')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program, employer_name, monthly_income, created_at')
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setLoans((data as ContactLoan[]) ?? [])
@@ -52,7 +51,7 @@ export default function ContactRecordPage() {
   const fetchReferredLoans = useCallback(async () => {
     const { data } = await supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type')
       .or(`buyer_agent_contact_id.eq.${id},listing_agent_contact_id.eq.${id}`)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setReferredLoans((data ?? []) as unknown as ContactLoan[])
@@ -310,8 +309,6 @@ export default function ContactRecordPage() {
       inboundEmails={inboundEmails}
       contactEmails={contactEmails}
       referrerContactId={referrerContactId}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
       newNote={newNote}
       setNewNote={setNewNote}
       savingNote={savingNote}

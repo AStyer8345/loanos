@@ -36,6 +36,7 @@ export type Contact = {
   referred_by: string | null
   referral_type?: string | null
   lead_source?: string | null
+  birthdate?: string | null
   co_borrower_first?: string | null
   co_borrower_last?: string | null
   co_borrower_birthdate?: string | null
@@ -73,11 +74,15 @@ export type ContactLoan = {
   loan_amount: number | null
   interest_rate: number | null
   closing_date: string | null
+  estimated_closing_date?: string | null
   property_address: string | null
   property_city: string | null
   property_state: string | null
   loan_purpose: string | null
   loan_type: string | null
+  loan_program?: string | null
+  employer_name?: string | null
+  monthly_income?: number | null
 }
 
 export type ActivityEntry = {
@@ -243,8 +248,6 @@ type Props = {
   inboundEmails: InboundEmailRow[]
   contactEmails?: ContactEmailRow[]
   referrerContactId: string | null
-  activeTab: 'overview' | 'loans' | 'activity' | 'emails'
-  setActiveTab: (t: 'overview' | 'loans' | 'activity' | 'emails') => void
   newNote: string
   setNewNote: (s: string) => void
   savingNote: boolean
@@ -654,8 +657,10 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
           {[
             { label: 'Loan Amt', value: fmtCurrency(loan.loan_amount) },
             { label: 'Rate', value: loan.interest_rate != null ? `${Number(loan.interest_rate).toFixed(3)}%` : '-' },
-            { label: 'Type', value: loan.loan_type || loan.loan_purpose || '-' },
-            { label: 'Closing', value: fmtDate(loan.closing_date) },
+            { label: 'Program', value: loan.loan_program || loan.loan_type || loan.loan_purpose || '-' },
+            { label: 'Closing', value: fmtDate(loan.closing_date || loan.estimated_closing_date) },
+            ...(loan.employer_name ? [{ label: 'Employer', value: loan.employer_name }] : []),
+            ...(loan.monthly_income ? [{ label: 'Income', value: fmtCurrency(loan.monthly_income) + '/mo' }] : []),
           ].map(({ label, value }) => (
             <div key={label}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label}</div>
@@ -674,6 +679,55 @@ const ACTIVITY_TYPE_CONFIG: Record<string, { icon: typeof Phone; color: string; 
   text:  { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
   email: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
   note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
+}
+
+// ── System activity feed item (activity_log entries) ────────────────────────
+function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
+  const ts = new Date(entry.created_at)
+  const now = new Date()
+  const diffDays = Math.floor((now.getTime() - ts.getTime()) / 86400000)
+  const timeLabel = diffDays === 0
+    ? ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    : diffDays === 1 ? 'Yesterday'
+    : diffDays < 7 ? `${diffDays}d ago`
+    : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+  const description = entry.summary || entry.action || 'System event'
+  const sourceLabel = entry._source ? ` · ${entry._source}` : ''
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)', padding: '8px 0' }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Clock size={12} style={{ color: 'var(--muted)' }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
+              {description}{sourceLabel}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, opacity: 0.6 }}>
+              {timeLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Unified feed item — wraps either source ─────────────────────────────────
+type UnifiedFeedItem =
+  | { kind: 'user'; item: ContactActivityRow }
+  | { kind: 'system'; item: ActivityEntry }
+
+function getUnifiedTime(item: UnifiedFeedItem): number {
+  return item.kind === 'user'
+    ? new Date(item.item.logged_at).getTime()
+    : new Date(item.item.created_at).getTime()
 }
 
 // ── Activity feed item ───────────────────────────────────────────────────────
@@ -769,6 +823,7 @@ export function ContactRecordView(props: Props) {
     contact,
     loans,
     referredLoans = [],
+    activity,
     contactActivity,
     emailDrafts,
     inboundEmails,
@@ -781,7 +836,17 @@ export function ContactRecordView(props: Props) {
     dripEnrollments = [],
     onToggleDrip,
     onCancelDrip,
+    newNote,
+    setNewNote,
+    savingNote,
+    onAddNote,
   } = props
+
+  // Merge contact_activity + activity_log into one chronological feed
+  const unifiedFeed: UnifiedFeedItem[] = [
+    ...contactActivity.map(item => ({ kind: 'user' as const, item })),
+    ...activity.map(item => ({ kind: 'system' as const, item })),
+  ].sort((a, b) => getUnifiedTime(b) - getUnifiedTime(a))
 
   const { setActiveRecord } = useOutreachChat()
 
@@ -797,6 +862,7 @@ export function ContactRecordView(props: Props) {
   const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
   const [activityNotes, setActivityNotes] = useState('')
   const [activitySaving, setActivitySaving] = useState(false)
+  const [feedFilter, setFeedFilter] = useState<'all' | 'outreach' | 'system'>('all')
   const [activityError, setActivityError] = useState<string | null>(null)
 
   // Log prompt after Call/Text/Email click
@@ -1049,8 +1115,38 @@ export function ContactRecordView(props: Props) {
                   )}
                 </div>
 
-                {/* ── Referred Borrowers (realtors only) ── */}
-                {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (
+                {/* ── Realtor Performance + Referred Borrowers ── */}
+                {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (() => {
+                  const closedLoans = referredLoans.filter(l => {
+                    const s = (l.status ?? '').toLowerCase()
+                    return s.includes('closed') || s.includes('funded')
+                  })
+                  const totalReferred = referredLoans.length
+                  const closedCount = closedLoans.length
+                  const conversionRate = totalReferred > 0 ? Math.round((closedCount / totalReferred) * 100) : 0
+                  const totalVolume = closedLoans.reduce((sum, l) => sum + (l.loan_amount ?? 0), 0)
+                  return (
+                  <>
+                  {/* Realtor metrics summary */}
+                  {contact.contact_type?.toLowerCase().includes('realtor') && (
+                    <div style={cardStyle}>
+                      <div style={labelStyle}>REALTOR PERFORMANCE</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 8 }}>
+                        {[
+                          { label: 'Referred', value: String(totalReferred), color: '#c9a84c' },
+                          { label: 'Closed', value: String(closedCount), color: '#10b981' },
+                          { label: 'Conv Rate', value: `${conversionRate}%`, color: '#60a5fa' },
+                          { label: 'Volume', value: fmtCurrency(totalVolume || null), color: '#a78bfa' },
+                        ].map(({ label, value, color }) => (
+                          <div key={label} style={{ textAlign: 'center' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, color, lineHeight: 1.2 }}>{value}</div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.08em', marginTop: 4 }}>{label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div style={cardStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                       <div style={labelStyle}>REFERRED BORROWERS</div>
@@ -1112,7 +1208,9 @@ export function ContactRecordView(props: Props) {
                       </div>
                     )}
                   </div>
-                )}
+                  </>
+                  )
+                })()}
 
                 {/* Contact info */}
                 <div style={cardStyle}>
@@ -1137,6 +1235,7 @@ export function ContactRecordView(props: Props) {
                         )}
                         {contact.contact_type === 'borrower' && (
                           <>
+                            <EditableContactField label="Date of Birth" value={contact.birthdate ?? null} field="birthdate" onSave={onSaveField} />
                             <EditableContactField label="Current Rate (%)" value={contact.current_rate != null ? String(contact.current_rate) : null} field="current_rate" onSave={onSaveField} />
                             <EditableContactField label="Current Balance"  value={contact.current_loan_balance != null ? String(contact.current_loan_balance) : null} field="current_loan_balance" onSave={onSaveField} />
                           </>
@@ -1269,6 +1368,49 @@ export function ContactRecordView(props: Props) {
                         ✕ DO NOT CALL
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div style={cardStyle}>
+                  <div style={labelStyle}>NOTES</div>
+                  {contact.notes && (
+                    <div style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)',
+                      lineHeight: 1.7, whiteSpace: 'pre-wrap', marginBottom: 12,
+                      maxHeight: 200, overflowY: 'auto',
+                      padding: '8px 0',
+                    }}>
+                      {contact.notes}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <textarea
+                      value={newNote}
+                      onChange={e => setNewNote(e.target.value)}
+                      placeholder="Add a note..."
+                      rows={2}
+                      style={{
+                        flex: 1, background: 'var(--bg)', color: 'var(--fg)',
+                        border: '1px solid var(--border)', borderRadius: 4,
+                        padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11,
+                        resize: 'vertical', boxSizing: 'border-box',
+                      }}
+                    />
+                    <button
+                      onClick={onAddNote}
+                      disabled={savingNote || !newNote.trim()}
+                      style={{
+                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                        background: savingNote || !newNote.trim() ? 'var(--surface)' : '#c9a84c',
+                        color: savingNote || !newNote.trim() ? 'var(--muted)' : '#000',
+                        border: 'none', padding: '6px 14px', borderRadius: 4,
+                        cursor: savingNote || !newNote.trim() ? 'default' : 'pointer',
+                        alignSelf: 'flex-end',
+                      }}
+                    >
+                      {savingNote ? 'Saving…' : 'Add'}
+                    </button>
                   </div>
                 </div>
 
@@ -1405,14 +1547,32 @@ export function ContactRecordView(props: Props) {
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
 
-          {/* Sticky header with count */}
+          {/* Sticky header with count + filter */}
           <div style={{
             flexShrink: 0, padding: '12px 20px',
             borderBottom: '1px solid var(--border)', background: 'var(--bg)',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <div style={{ ...labelStyle, marginBottom: 0 }}>
-              ACTIVITY {contactActivity.length > 0 && `(${contactActivity.length})`}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ ...labelStyle, marginBottom: 0 }}>
+                ACTIVITY ({unifiedFeed.length})
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {([['all', 'All'], ['outreach', 'Outreach'], ['system', 'System']] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setFeedFilter(key)}
+                  style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                    letterSpacing: '0.06em', padding: '3px 8px', borderRadius: 3,
+                    cursor: 'pointer', border: 'none',
+                    background: feedFilter === key ? 'rgba(201,168,76,0.15)' : 'transparent',
+                    color: feedFilter === key ? '#c9a84c' : 'var(--muted)',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -1499,17 +1659,27 @@ export function ContactRecordView(props: Props) {
             )}
           </div>
 
-          {/* Scrollable activity feed */}
+          {/* Scrollable unified activity feed */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 40px' }}>
-            {contactActivity.length === 0 ? (
-              <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
-                No activity yet — log a call, text, or email above.
-              </div>
-            ) : (
-              contactActivity.map(item => (
-                <ActivityFeedItem key={item.id} item={item} onDelete={onDeleteActivity} />
-              ))
-            )}
+            {(() => {
+              const filtered = unifiedFeed.filter(item => {
+                if (feedFilter === 'outreach') return item.kind === 'user'
+                if (feedFilter === 'system') return item.kind === 'system'
+                return true
+              })
+              if (filtered.length === 0) {
+                return (
+                  <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                    {feedFilter === 'all' ? 'No activity yet — log a call, text, or email above.' : `No ${feedFilter} activity.`}
+                  </div>
+                )
+              }
+              return filtered.map(entry =>
+                entry.kind === 'user'
+                  ? <ActivityFeedItem key={`ca-${entry.item.id}`} item={entry.item} onDelete={onDeleteActivity} />
+                  : <SystemActivityItem key={`al-${entry.item.id}`} entry={entry.item} />
+              )
+            })()}
           </div>
 
         </div>

@@ -728,24 +728,7 @@ export default function LoanDetailPage() {
                 </Link>
               </div>
             )}
-            {loan.property_address && (
-              <a
-                href={`https://www.zillow.com/homes/${encodeURIComponent(
-                  `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
-                )}_rb/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 ml-auto mr-2 flex flex-col items-center justify-center w-[11rem] h-[3.2rem] rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-blue-500/40 hover:bg-zinc-800 transition-colors px-3 py-1 text-center"
-                title="View on Zillow"
-              >
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Property</span>
-                <span className="text-[11px] font-mono text-zinc-200 leading-tight">{loan.property_address}</span>
-                <span className="text-[10px] font-mono text-zinc-400 leading-tight">
-                  {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
-                </span>
-              </a>
-            )}
-            <div className="ml-auto shrink-0">
+            <div className="ml-auto shrink-0 flex flex-col items-end gap-2">
               <VitalStatEditable
                 label="Commission"
                 value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
@@ -759,6 +742,23 @@ export default function LoanDetailPage() {
                 inputType="number"
                 color="#C9A84C"
               />
+              {loan.property_address && (
+                <a
+                  href={`https://www.zillow.com/homes/${encodeURIComponent(
+                    `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
+                  )}_rb/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-end rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-3 py-1.5 text-right whitespace-nowrap"
+                  title="View on Zillow"
+                >
+                  <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
+                  <span className="text-[11px] font-mono text-blue-100 leading-tight">{loan.property_address}</span>
+                  <span className="text-[10px] font-mono text-blue-300/70 leading-tight">
+                    {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
+                  </span>
+                </a>
+              )}
             </div>
           </div>
 

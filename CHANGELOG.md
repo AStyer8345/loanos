@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [5.0.3] — 2026-03-31 — Loan Record Redesign
+
+### Removed
+- **729 lines of dead code**: LoanTodoList, PropertyDetailsToggle, InfoCard, PartiesCard, SortableCardWrapper, LoanInfoGrid, CollapsibleDetails and associated constants/interfaces
+- DnD imports (@dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities) — no longer needed
+
+### Added
+- **KeyDatesGrid**: 9 primary dates + 24 secondary dates from Arive `raw_payload.keyDates_*` (expandable, only shows populated)
+- **Employment display** in BorrowerProfileCard (employer, position, self-employed badge)
+- **Descriptive activity summaries** in n8n WF1 + WF2 (e.g. "Status: Processing → Underwriting | Rate: 6.5%")
+- **contacts.last_activity_date** updated by both Arive sync workflows on every sync
+
+### Changed
+- Loan detail uses unified EditableSectionCard layout — no more duplicate card + edit views
+
 ## [5.0.2] — 2026-03-31 — Contact Record Cleanup (Phase 4)
 
 ### Added

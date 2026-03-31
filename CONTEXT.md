@@ -18,6 +18,24 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Loan Record Redesign — 2026-03-31 (session 2)
+
+**Cleaned up /dashboard/loans/[id] — removed dead code, unified layout, added key dates from Arive raw_payload.**
+
+### page.tsx changes:
+- **Removed 729 lines of dead code**: LoanTodoList, PropertyDetailsToggle, InfoCard, PartiesCard, SortableCardWrapper, LoanInfoGrid, CollapsibleDetails, and associated constants/interfaces
+- **Removed DnD imports**: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities — no longer needed after card grid removal
+- **New KeyDatesGrid**: 9 primary dates always visible + 24 secondary dates from `raw_payload.keyDates_*` in expandable section (only shows populated dates)
+- **BorrowerProfileCard**: now shows employment info (employer, position, self-employed badge via Briefcase icon)
+- **Unified layout**: DashboardTab uses EditableSectionCard for all data groups — no more duplicate card view + edit view
+
+### n8n workflow updates:
+- **WF2 (Arive Status Update)**: "Log Status Updated" now includes `summary` field with human-readable text ("Status: Processing → Underwriting | Rate: 6.5% | Lock date: 2026-04-15") and `type: 'system'`
+- **WF1 (Arive New Loan)**: "Log Activity" now includes `summary` ("New loan created: Smith — Purchase $450,000") and `type: 'system'`
+- **Both workflows**: Added "Update Contact Last Activity" node — PATCHes `contacts.last_activity_date` on every sync
+
+### Deployed: bce52fe → dpl_DhrSvtUTwi3G4TpV5LPMjKLpm4PJ → READY
+
 ## Contact Record Cleanup — 2026-03-31
 
 **Phase 4 (Contacts That Work) — mostly complete:**

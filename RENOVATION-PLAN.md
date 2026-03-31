@@ -62,7 +62,7 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 - [x] Each row: call, text, email buttons on hover — added actions column (2026-03-30)
 - [x] Filter by status: All, In Process, Closed, Pre-Approval, Other — already existed via smart lists
 - [x] Color-coded urgency: closing <7d=red, <14d=amber, rate lock expiring — already existed
-- [ ] Loan detail page: simplified, communication-first
+- [x] Loan detail page: simplified, communication-first (2026-03-31) — removed 729 lines dead code, unified EditableSectionCard layout, KeyDatesGrid with 33 dates from raw_payload, employment in BorrowerProfileCard, descriptive activity summaries in WF1+WF2, contacts.last_activity_date on every sync
 - [x] Verify Arive sync — spot-checked 3 loans. Gaps found (2026-03-30):
   - `loan_number` — NEVER populated (big gap)
   - `loan_type`, `loan_program` — NEVER populated (Conv/FHA/VA missing) → **FIXED: loan_program now mapped from lenderProductName**

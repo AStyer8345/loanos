@@ -1002,7 +1002,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
     <div className="p-6 space-y-0">
 
       {/* ── Section 1: Parties (Communication Hub) — full width ── */}
-      <CommunicationHub loan={loan} activity={activity} />
+      <CommunicationHub loan={loan} activity={activity} contact={contact} />
 
       <div className="border-t border-zinc-800/40 my-6" />
 
@@ -1132,10 +1132,13 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
 
 
 function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRow | null }) {
-  const firstName = loan.borrower_first_name ?? ''
-  const lastName = loan.borrower_last_name ?? ''
+  // Fall back to linked contact when loan borrower fields are empty (pre-import loans)
+  const firstName = loan.borrower_first_name ?? contact?.first_name ?? ''
+  const lastName = loan.borrower_last_name ?? contact?.last_name ?? ''
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || loan.borrower_name || '—'
   const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
+  const email = loan.borrower_email ?? contact?.email ?? null
+  const phone = loan.borrower_phone ?? contact?.phone ?? null
 
   return (
     <div>
@@ -1147,9 +1150,14 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
         <div className="min-w-0 flex-1">
           <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
           <div className="flex items-center gap-3 mt-0.5">
-            {loan.borrower_email && (
-              <a href={`mailto:${loan.borrower_email}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
-                {loan.borrower_email}
+            {email && (
+              <a href={`mailto:${email}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
+                {email}
+              </a>
+            )}
+            {phone && (
+              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors shrink-0">
+                {fmtPhone(phone)}
               </a>
             )}
           </div>
@@ -1201,8 +1209,8 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 
 // ── CommunicationHub — Contact Cards with one-click actions ──────────────────
 
-function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRow[] }) {
-  // Build party list — only show parties that have data
+function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: ActivityRow[]; contact: ContactRow | null }) {
+  // Build party list — fall back to linked contact when loan borrower fields are empty
   const parties: {
     role: string
     name: string | null
@@ -1212,9 +1220,9 @@ function CommunicationHub({ loan, activity }: { loan: Loan; activity: ActivityRo
   }[] = [
     {
       role: 'Borrower',
-      name: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name,
-      email: loan.borrower_email,
-      phone: loan.borrower_phone,
+      name: [loan.borrower_first_name ?? contact?.first_name, loan.borrower_last_name ?? contact?.last_name].filter(Boolean).join(' ') || loan.borrower_name || null,
+      email: loan.borrower_email ?? contact?.email ?? null,
+      phone: loan.borrower_phone ?? contact?.phone ?? null,
       contactId: loan.contact_id,
     },
     ...(loan.co_borrower_name ? [{
@@ -1402,10 +1410,17 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
   const [editValue, setEditValue] = useState('')
   const [expanded, setExpanded] = useState(false)
 
-  const rp = (loan.raw_payload ?? {}) as Record<string, string>
+  // raw_payload may be a JSON string (pre-import loans) or an object (webhook loans)
+  const rp: Record<string, string> = (() => {
+    const raw = loan.raw_payload
+    if (!raw) return {}
+    if (typeof raw === 'object' && !Array.isArray(raw)) return raw as Record<string, string>
+    if (typeof raw === 'string') { try { const p = JSON.parse(raw); return typeof p === 'object' && p ? p : {} } catch { return {} } }
+    return {}
+  })()
   const rpDate = (key: string): string | null => {
     const v = rp[key]
-    return v && v.trim() ? v.trim() : null
+    return v && typeof v === 'string' && v.trim() ? v.trim() : null
   }
 
   const primaryDates: { label: string; key: string; field?: string; value: string | null; hex: string }[] = [

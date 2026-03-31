@@ -85,6 +85,8 @@ export type ContactLoan = {
   loan_program?: string | null
   employer_name?: string | null
   monthly_income?: number | null
+  co_borrower_contact_id?: string | null
+  co_borrower_name?: string | null
 }
 
 export type ActivityEntry = {
@@ -244,6 +246,7 @@ type Props = {
   contact: Contact
   loans: ContactLoan[]
   referredLoans?: ContactLoan[]
+  coBorrowerLoans?: ContactLoan[]
   activity: ActivityEntry[]
   contactActivity: ContactActivityRow[]
   emailDrafts: EmailDraftRow[]
@@ -670,6 +673,24 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
             </div>
           ))}
         </div>
+        {loan.co_borrower_contact_id && loan.co_borrower_name && (
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-subtle, #2a2a2a)' }}>
+            <Link
+              href={`/dashboard/contacts/${loan.co_borrower_contact_id}`}
+              onClick={e => e.stopPropagation()}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontFamily: 'var(--font-mono)', fontSize: 10,
+                color: 'var(--muted)',
+                textDecoration: 'none',
+              }}
+            >
+              <span style={{ color: 'var(--muted)', opacity: 0.6 }}>Co-borrower</span>
+              <span style={{ color: '#7dd3fc' }}>{loan.co_borrower_name}</span>
+              <ExternalLink size={9} style={{ color: '#7dd3fc', opacity: 0.7 }} />
+            </Link>
+          </div>
+        )}
       </div>
     </Link>
   )
@@ -825,6 +846,7 @@ export function ContactRecordView(props: Props) {
     contact,
     loans,
     referredLoans = [],
+    coBorrowerLoans = [],
     activity,
     contactActivity,
     emailDrafts,
@@ -1379,6 +1401,53 @@ export function ContactRecordView(props: Props) {
                   </>
                   )
                 })()}
+
+                {/* ── Co-borrower on loans (shown when this contact is a co-borrower) ── */}
+                {coBorrowerLoans.length > 0 && (
+                  <div style={cardStyle}>
+                    <div style={labelStyle}>CO-BORROWER ON</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {coBorrowerLoans.map(loan => {
+                        const display = loan.property_address
+                          || [loan.property_city, loan.property_state].filter(Boolean).join(', ')
+                          || loan.loan_name
+                          || 'Untitled Loan'
+                        return (
+                          <Link
+                            key={loan.id}
+                            href={`/dashboard/loans/${loan.id}`}
+                            style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              background: 'var(--surface)', border: '1px solid var(--border)',
+                              borderLeft: '3px solid #7dd3fc', borderRadius: 6,
+                              padding: '10px 14px', textDecoration: 'none',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: '#7dd3fc', marginBottom: 4 }}>
+                                {display}
+                              </div>
+                              <div style={{ display: 'flex', gap: 16 }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                                  {`${loan.borrower_first_name ?? ''} ${loan.borrower_last_name ?? ''}`.trim() || loan.borrower_name || '—'}
+                                </span>
+                                {loan.loan_amount && (
+                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                                    {fmtCurrency(loan.loan_amount)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <LoanStageBadge status={loan.status} />
+                              <ExternalLink size={11} style={{ color: 'var(--muted)' }} />
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Contact info */}
                 <div style={cardStyle}>

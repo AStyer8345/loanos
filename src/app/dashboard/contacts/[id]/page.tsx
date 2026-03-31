@@ -24,6 +24,7 @@ export default function ContactRecordPage() {
   const [newNote, setNewNote] = useState('')
   const [savingNote, setSavingNote] = useState(false)
   const [referredLoans, setReferredLoans] = useState<ContactLoan[]>([])
+  const [coBorrowerLoans, setCoBorrowerLoans] = useState<ContactLoan[]>([])
   const [dripEnrollments, setDripEnrollments] = useState<DripEnrollment[]>([])
 
   const supabase = createClient()
@@ -41,10 +42,20 @@ export default function ContactRecordPage() {
   const fetchLoans = useCallback(async () => {
     const { data } = await supabase
       .from('loans')
-      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program, employer_name, monthly_income, created_at')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program, employer_name, monthly_income, co_borrower_contact_id, co_borrower_name, created_at')
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setLoans((data as ContactLoan[]) ?? [])
+  }, [id, supabase])
+
+  // Fetch loans where this contact is the co-borrower
+  const fetchCoBorrowerLoans = useCallback(async () => {
+    const { data } = await supabase
+      .from('loans')
+      .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program')
+      .eq('co_borrower_contact_id', id)
+      .order('closing_date', { ascending: false, nullsFirst: false })
+    setCoBorrowerLoans((data as ContactLoan[]) ?? [])
   }, [id, supabase])
 
   // Fetch loans referred by this agent — buyer/listing agent FK, or referring_agent_email match
@@ -169,7 +180,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -200,7 +211,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
+  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -321,6 +332,7 @@ export default function ContactRecordPage() {
       savingNote={savingNote}
       onAddNote={handleAddNote}
       referredLoans={referredLoans}
+      coBorrowerLoans={coBorrowerLoans}
       onSaveField={handleSaveField}
       onSaveBoolField={handleSaveBoolField}
       onLogActivity={handleLogActivity}

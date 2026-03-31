@@ -1103,6 +1103,7 @@ export type Database = {
           back_end_dti: number | null
           base_loan_amount: number | null
           borrower_applicant_type: string | null
+          borrower_birthdate: string | null
           borrower_email: string | null
           borrower_first_name: string | null
           borrower_home_phone: string | null
@@ -1132,9 +1133,14 @@ export type Database = {
           closing_contingency_date: string | null
           closing_date: string | null
           cltv: number | null
+          co_borrower_birthdate: string | null
+          co_borrower_contact_id: string | null
           co_borrower_email: string | null
+          co_borrower_home_phone: string | null
+          co_borrower_marital_status: string | null
           co_borrower_name: string | null
           co_borrower_phone: string | null
+          co_borrower_work_phone: string | null
           commission_amount: number | null
           commissions: number | null
           compensation_type: string | null
@@ -1169,6 +1175,7 @@ export type Database = {
           funding_date: string | null
           funding_wire_date: string | null
           funding_wire_status: string | null
+          gross_loan_revenue: number | null
           hazard_insurance: number | null
           hcltv: number | null
           hoa_dues: number | null
@@ -1228,6 +1235,7 @@ export type Database = {
           most_recent_cd_signed_date: string | null
           most_recent_le_sent_date: string | null
           most_recent_le_signed_date: string | null
+          net_loan_revenue: number | null
           notes: string | null
           occupancy: string | null
           occupancy_type: string | null
@@ -1240,6 +1248,7 @@ export type Database = {
           pi_payment: number | null
           piti: number | null
           points: number | null
+          position_description: string | null
           pre_approval_expiry_date: string | null
           prepaid_items: number | null
           prepay_penalty: boolean | null
@@ -1269,6 +1278,7 @@ export type Database = {
           refinance_type: string | null
           sales_contract_date: string | null
           sales_price: number | null
+          self_employed: boolean | null
           seller_concessions: number | null
           seller_credits: number | null
           signed_docs_date: string | null
@@ -1316,6 +1326,7 @@ export type Database = {
           back_end_dti?: number | null
           base_loan_amount?: number | null
           borrower_applicant_type?: string | null
+          borrower_birthdate?: string | null
           borrower_email?: string | null
           borrower_first_name?: string | null
           borrower_home_phone?: string | null
@@ -1345,9 +1356,14 @@ export type Database = {
           closing_contingency_date?: string | null
           closing_date?: string | null
           cltv?: number | null
+          co_borrower_birthdate?: string | null
+          co_borrower_contact_id?: string | null
           co_borrower_email?: string | null
+          co_borrower_home_phone?: string | null
+          co_borrower_marital_status?: string | null
           co_borrower_name?: string | null
           co_borrower_phone?: string | null
+          co_borrower_work_phone?: string | null
           commission_amount?: number | null
           commissions?: number | null
           compensation_type?: string | null
@@ -1382,6 +1398,7 @@ export type Database = {
           funding_date?: string | null
           funding_wire_date?: string | null
           funding_wire_status?: string | null
+          gross_loan_revenue?: number | null
           hazard_insurance?: number | null
           hcltv?: number | null
           hoa_dues?: number | null
@@ -1441,6 +1458,7 @@ export type Database = {
           most_recent_cd_signed_date?: string | null
           most_recent_le_sent_date?: string | null
           most_recent_le_signed_date?: string | null
+          net_loan_revenue?: number | null
           notes?: string | null
           occupancy?: string | null
           occupancy_type?: string | null
@@ -1453,6 +1471,7 @@ export type Database = {
           pi_payment?: number | null
           piti?: number | null
           points?: number | null
+          position_description?: string | null
           pre_approval_expiry_date?: string | null
           prepaid_items?: number | null
           prepay_penalty?: boolean | null
@@ -1482,6 +1501,7 @@ export type Database = {
           refinance_type?: string | null
           sales_contract_date?: string | null
           sales_price?: number | null
+          self_employed?: boolean | null
           seller_concessions?: number | null
           seller_credits?: number | null
           signed_docs_date?: string | null
@@ -1529,6 +1549,7 @@ export type Database = {
           back_end_dti?: number | null
           base_loan_amount?: number | null
           borrower_applicant_type?: string | null
+          borrower_birthdate?: string | null
           borrower_email?: string | null
           borrower_first_name?: string | null
           borrower_home_phone?: string | null
@@ -1558,9 +1579,14 @@ export type Database = {
           closing_contingency_date?: string | null
           closing_date?: string | null
           cltv?: number | null
+          co_borrower_birthdate?: string | null
+          co_borrower_contact_id?: string | null
           co_borrower_email?: string | null
+          co_borrower_home_phone?: string | null
+          co_borrower_marital_status?: string | null
           co_borrower_name?: string | null
           co_borrower_phone?: string | null
+          co_borrower_work_phone?: string | null
           commission_amount?: number | null
           commissions?: number | null
           compensation_type?: string | null
@@ -1595,6 +1621,7 @@ export type Database = {
           funding_date?: string | null
           funding_wire_date?: string | null
           funding_wire_status?: string | null
+          gross_loan_revenue?: number | null
           hazard_insurance?: number | null
           hcltv?: number | null
           hoa_dues?: number | null
@@ -1654,6 +1681,7 @@ export type Database = {
           most_recent_cd_signed_date?: string | null
           most_recent_le_sent_date?: string | null
           most_recent_le_signed_date?: string | null
+          net_loan_revenue?: number | null
           notes?: string | null
           occupancy?: string | null
           occupancy_type?: string | null
@@ -1666,6 +1694,7 @@ export type Database = {
           pi_payment?: number | null
           piti?: number | null
           points?: number | null
+          position_description?: string | null
           pre_approval_expiry_date?: string | null
           prepaid_items?: number | null
           prepay_penalty?: boolean | null
@@ -1695,6 +1724,7 @@ export type Database = {
           refinance_type?: string | null
           sales_contract_date?: string | null
           sales_price?: number | null
+          self_employed?: boolean | null
           seller_concessions?: number | null
           seller_credits?: number | null
           signed_docs_date?: string | null
@@ -1724,6 +1754,13 @@ export type Database = {
           {
             foreignKeyName: "loans_buyer_agent_contact_id_fkey"
             columns: ["buyer_agent_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_co_borrower_contact_id_fkey"
+            columns: ["co_borrower_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
@@ -2598,6 +2635,7 @@ export type Database = {
           phone_mobile: string
         }[]
       }
+      find_duplicate_contacts: { Args: { org_id: string }; Returns: Json }
       find_loan_by_phone: {
         Args: { phone_digits: string }
         Returns: {
@@ -2761,4 +2799,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

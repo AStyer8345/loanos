@@ -298,11 +298,23 @@ export async function POST(request: NextRequest) {
       ) ?? n(body.loanName),
       contact_id: contact.id,
 
-      borrower_first_name: n(body.borrowerFirstName),
-      borrower_last_name: n(body.borrowerLastName),
+      borrower_first_name: n(body.borrowerFirstName) ?? n(body['loanBorrower1_firstName']),
+      borrower_last_name: n(body.borrowerLastName) ?? n(body['loanBorrower1_lastName']),
       borrower_email: (email as string).toLowerCase().trim(),
-      borrower_phone: n(body.borrowerPhone),
-      co_borrower_name: n(body.coBorrowerFullName),
+      borrower_phone: n(body.borrowerPhone) ?? n(body['loanBorrower1_mobilePhone10digit']),
+
+      // Co-borrower — Arive sends these under loanBorrower2_* keys
+      co_borrower_name: n(body.coBorrowerFullName) ?? (
+        n(body['loanBorrower2_firstName'])
+          ? `${n(body['loanBorrower2_firstName'])} ${n(body['loanBorrower2_lastName']) ?? ''}`.trim()
+          : null
+      ),
+      co_borrower_email: n(body.coBorrowerEmail) ?? n(body['loanBorrower2_emailAddressText']),
+      co_borrower_phone: n(body.coBorrowerPhone) ?? n(body['loanBorrower2_mobilePhone10digit']),
+      co_borrower_home_phone: n(body['loanBorrower2_homePhone']),
+      co_borrower_work_phone: n(body['loanBorrower2_workPhone']),
+      co_borrower_marital_status: n(body['loanBorrower2_maritalStatusType']),
+      // DOB: Arive only sends dayOfBirth + monthOfBirth (no year) — do not store a partial date
 
       loan_amount: n(body.loanAmount),
       loan_purpose: n(body.loanPurpose),
@@ -507,16 +519,44 @@ export async function POST(request: NextRequest) {
       ),
     ])
 
-    // ── 3c. Link party contacts to loan via FK columns ──────────────────────
+    // ── 3c. Upsert co-borrower contact + link to loan and primary borrower ────
+    const coBorrowerEmail = n(body.coBorrowerEmail) ?? n(body['loanBorrower2_emailAddressText'])
+    const coBorrowerFirst = n(body['loanBorrower2_firstName']) as string | null
+    const coBorrowerLast = n(body['loanBorrower2_lastName']) as string | null
+
+    let coBorrowerContactId: string | null = null
+    if (coBorrowerEmail) {
+      try {
+        const coBorrowerContact = await sbUpsert('contacts', 'email', {
+          email: (coBorrowerEmail as string).toLowerCase().trim(),
+          first_name: coBorrowerFirst ?? '',
+          last_name: coBorrowerLast ?? '',
+          phone: n(body['loanBorrower2_mobilePhone10digit']),
+          group_tag: 'Client',
+          stage: 'Lead',
+          source: 'arive_webhook',
+          contact_type: 'borrower',
+          user_id: resolvedUserId,
+          organization_id: organizationId,
+          updated_at: now,
+        }) as { id: string } | null
+        coBorrowerContactId = coBorrowerContact?.id ?? null
+      } catch (err) {
+        console.warn('[arive-webhook] Failed to upsert co-borrower contact:', err)
+      }
+    }
+
+    // ── 3d. Link party contacts to loan via FK columns ──────────────────────
     const fkUpdates: Record<string, string> = {}
     if (buyerAgentContactId) fkUpdates.buyer_agent_contact_id = buyerAgentContactId
     if (listingAgentContactId) fkUpdates.listing_agent_contact_id = listingAgentContactId
+    if (coBorrowerContactId) fkUpdates.co_borrower_contact_id = coBorrowerContactId
 
     if (Object.keys(fkUpdates).length > 0) {
       await sbPatchNulls('loans', loan.id, fkUpdates)
     }
 
-    // ── 3d. Auto-derive key dates from status/milestone ─────────────────────
+    // ── 3e. Auto-derive key dates from status/milestone ─────────────────────
     // When Arive doesn't send explicit date fields, stamp them based on the
     // current status. Only fills nulls — never overwrites user-set dates.
     const status = String(n(body.status) ?? '').toUpperCase()

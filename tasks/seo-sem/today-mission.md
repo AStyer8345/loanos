@@ -1,7 +1,9 @@
-## Mission Brief — 2026-03-30 AM
+## Mission Brief — 2026-03-31 AM
 
-Date: 2026-03-30 | Mode: AM | Focus: Rate Alert Funnel QA + FTB Programs blog post
+Date: 2026-03-31 | Mode: AM | Focus: March 30 blog post QA + DSCR blog post
 
-1. QA rate-alert.html + austin-mortgage-rates.html (title/meta/canonical) — DONE, commit dd5dea0
-2. Write "First-Time Home Buyer Programs Austin TX 2026" — DONE, commit dd5dea0
-3. Update sitemap.xml + manifest.json — DONE, pushed to GitHub
+1. Fix 2 new March 30 blog posts: title >60 chars, meta >155 chars, noindex temp-placeholder, add to sitemap
+2. Write DSCR Loans Austin TX 2026 blog post (investor keyword cluster)
+3. Update sitemap.xml + manifest.json + robots.txt — git push
+
+GSC monitoring still blocked — window opens April 5.

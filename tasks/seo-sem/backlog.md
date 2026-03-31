@@ -61,3 +61,13 @@
 - ✅ Full technical SEO audit — 56 issues documented (2026-03-25 AM)
 - ✅ sitemap.xml — added 15 suburb pages + 3 blog posts + 4 other pages (2026-03-26)
 - ✅ Week 3 on-page optimization batch — 38 files, commit 359c6e3 (2026-03-27 AM)
+
+## ADDED 2026-03-31 AM
+
+- ~~[LOW_RISK] Fix 2026-03-30-why-rates-jumped title (86 chars) + meta (172 chars)~~ ✅ DONE 2026-03-31 — commit 46cfddb
+- ~~[MEDIUM_RISK] Noindex 2026-03-30-temp-placeholder.html + update canonical to proper URL~~ ✅ DONE 2026-03-31 — commit 46cfddb
+- ~~[ZERO_RISK] Add 2026-03-30-why-rates-jumped to sitemap + manifest~~ ✅ DONE 2026-03-31 — commit 46cfddb
+- ~~[ZERO_RISK] Add 2026-03-30-temp-placeholder to robots.txt Disallow~~ ✅ DONE 2026-03-31 — commit 46cfddb
+- ~~Blog post: "DSCR Loans Austin TX 2026 — The Complete Investor's Guide"~~ ✅ DONE 2026-03-31 — commit 46cfddb, FAQPage 6 questions, comparison table, Austin submarket analysis
+- [MEDIUM_RISK] Blog post: "How to Choose a Mortgage Lender in Austin TX" — high-intent bottom-of-funnel query (next AM session)
+- [P4 — GSC BLOCKED] Check impressions on 5 new blog posts (VA, FHA vs conventional, pre-approval, FTB, DSCR) — after April 5

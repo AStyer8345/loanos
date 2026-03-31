@@ -396,3 +396,45 @@ Priority 3: Begin suburb page content improvements — inline CTAs and local H2/
 
 Advance queue: YES — FTB Programs post complete, Rate Alert funnel QA clear
 ---
+---
+## Session: 2026-03-31 AM — SEO + SEM
+Focus: March 30 blog post QA + DSCR blog post
+Type: Execution (LOW_RISK QA fixes + MEDIUM_RISK new content)
+
+### Completed
+
+**March 30 blog post QA (LOW_RISK):**
+- Discovered 2 new blog files from March 30 not in prior session's QA:
+  - `2026-03-30-temp-placeholder.html` (real post, wrong slug, was indexable)
+  - `2026-03-30-why-rates-jumped-today-and-why-i-cant-predict-tomo.html` (proper slug, not in sitemap/manifest)
+- Both had identical title (86 chars — too long) and meta (172 chars — too long)
+- Fixes applied:
+  - `why-rates-jumped`: title fixed 86→60 chars ("Why Rates Improved Today (Not What You Think) | NMLS #513013"), meta fixed 172→148 chars
+  - `temp-placeholder`: noindex,nofollow added; canonical updated to point to why-rates-jumped URL
+  - `robots.txt`: `/blog/2026-03-30-temp-placeholder.html` added to Disallow
+  - `sitemap.xml`: `why-rates-jumped` added (was missing)
+  - `manifest.json`: temp-placeholder entry updated to proper why-rates-jumped slug/URL
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-03-31-dscr-loans-austin-tx-2026.html
+- Title: "DSCR Loans Austin TX 2026 — Investor Guide | NMLS #513013" (57 chars ✓)
+- Meta: "DSCR loans in Texas: qualify on rental income, not W-2s. How DSCR works, requirements, and who benefits in Austin's 2026 investor market. NMLS #513013." (151 chars ✓)
+- H1: "DSCR Loans Austin TX 2026 — The Complete Investor's Guide"
+- Content: DSCR ratio math + Austin examples, comparison table vs conventional, Austin 2026 market context by submarket, current requirements, prepayment penalty explanation, how to get started
+- Schema: Article + FAQPage (6 questions: DSCR ratio requirement, first-time investor eligibility, LLC title, gross vs net rent, down payment, rates vs conventional)
+- Internal links: /dscr-loan-austin-tx.html, /loans/investment, /get-preapproved, Calendly
+- Added to sitemap.xml (lastmod 2026-03-31) and blog/manifest.json (first position)
+- Git commit: 46cfddb — 13 files changed, pushed to GitHub, Netlify auto-deploying
+
+### Deferred
+- GSC monitoring: April 5 window not yet reached — check next week
+- austin-housing-market-2025.html redirect: still needs Adam decision
+- "How to Choose a Mortgage Lender in Austin TX" blog post: next in queue
+
+### Next Session Instructions
+Priority 1: Monitor GSC for impressions on 5 new blog posts (check April 5+) — VA, FHA vs conventional, pre-approval, FTB programs, DSCR
+Priority 2: Write "How to Choose a Mortgage Lender in Austin TX" blog post (next highest-intent content)
+Priority 3: Suburb page keyword density improvements — local H2/H3 copy
+
+Advance queue: YES — DSCR post complete
+---

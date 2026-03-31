@@ -47,14 +47,21 @@ export default function ContactRecordPage() {
     setLoans((data as ContactLoan[]) ?? [])
   }, [id, supabase])
 
-  // Fetch loans referred by this agent (buyer_agent or listing_agent on the loan)
-  const fetchReferredLoans = useCallback(async () => {
+  // Fetch loans referred by this agent — buyer/listing agent FK, or referring_agent_email match
+  const fetchReferredLoans = useCallback(async (contactEmail?: string | null) => {
+    const orParts = [`buyer_agent_contact_id.eq.${id}`, `listing_agent_contact_id.eq.${id}`]
+    if (contactEmail?.trim()) {
+      orParts.push(`referring_agent_email.eq.${contactEmail.trim()}`)
+    }
     const { data } = await supabase
       .from('loans')
       .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type')
-      .or(`buyer_agent_contact_id.eq.${id},listing_agent_contact_id.eq.${id}`)
+      .or(orParts.join(','))
       .order('closing_date', { ascending: false, nullsFirst: false })
-    setReferredLoans((data ?? []) as unknown as ContactLoan[])
+    // Deduplicate in case a loan matches multiple criteria
+    const seen = new Set<string>()
+    const unique = (data ?? []).filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
+    setReferredLoans(unique as unknown as ContactLoan[])
   }, [id, supabase])
 
   const fetchDripEnrollments = useCallback(async () => {
@@ -162,7 +169,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase

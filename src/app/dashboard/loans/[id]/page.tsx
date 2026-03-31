@@ -1215,6 +1215,23 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 // ── CommunicationHub — Contact Cards with one-click actions ──────────────────
 
 function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: ActivityRow[]; contact: ContactRow | null }) {
+  const [referringAgentContactId, setReferringAgentContactId] = useState<string | null>(null)
+  const hubSupabase = createClient()
+
+  useEffect(() => {
+    async function resolve() {
+      if (!loan.referring_agent_email?.trim()) return
+      const { data } = await hubSupabase
+        .from('contacts')
+        .select('id')
+        .eq('email', loan.referring_agent_email.trim())
+        .maybeSingle()
+      if (data?.id) setReferringAgentContactId(data.id)
+    }
+    resolve()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loan.referring_agent_email])
+
   // Build party list — fall back to linked contact when loan borrower fields are empty
   const parties: {
     role: string
@@ -1263,7 +1280,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
       name: loan.referring_agent_name,
       email: loan.referring_agent_email,
       phone: loan.referring_agent_phone,
-      contactId: null as string | null,
+      contactId: referringAgentContactId,
     }] : []),
   ]
 

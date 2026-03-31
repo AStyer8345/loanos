@@ -19,6 +19,8 @@ import {
   StickyNote,
   Plus,
   Trash2,
+  GitMerge,
+  Search,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
@@ -868,6 +870,48 @@ export function ContactRecordView(props: Props) {
   // Log prompt after Call/Text/Email click
   const [logPromptType, setLogPromptType] = useState<'call' | 'text' | 'email' | null>(null)
 
+  // Merge contacts
+  const [mergeOpen, setMergeOpen] = useState(false)
+  const [mergeQuery, setMergeQuery] = useState('')
+  const [mergeResults, setMergeResults] = useState<{ id: string; first_name: string | null; last_name: string | null; email: string | null; contact_type: string | null }[]>([])
+  const [mergeTarget, setMergeTarget] = useState<{ id: string; first_name: string | null; last_name: string | null; email: string | null } | null>(null)
+  const [mergeKeepId, setMergeKeepId] = useState<string>(contact.id)
+  const [merging, setMerging] = useState(false)
+  const [mergeError, setMergeError] = useState<string | null>(null)
+  const mergeSupabase = createClient()
+
+  async function searchMergeContacts(q: string) {
+    if (!q.trim()) { setMergeResults([]); return }
+    const { data } = await mergeSupabase
+      .from('contacts')
+      .select('id, first_name, last_name, email, contact_type')
+      .neq('id', contact.id)
+      .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
+      .limit(8)
+    setMergeResults(data ?? [])
+  }
+
+  async function executeMerge() {
+    if (!mergeTarget) return
+    setMerging(true)
+    setMergeError(null)
+    const keepId = mergeKeepId
+    const mergeId = mergeKeepId === contact.id ? mergeTarget.id : contact.id
+    try {
+      const res = await fetch('/api/contacts/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keepId, mergeId }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setMergeError(json.error || 'Merge failed'); setMerging(false); return }
+      // Navigate to the surviving contact
+      window.location.href = `/dashboard/contacts/${keepId}`
+    } catch {
+      setMergeError('Network error'); setMerging(false)
+    }
+  }
+
   const activityNotesRef = useRef<HTMLTextAreaElement>(null)
 
   const phone = contact.phone || null
@@ -1020,6 +1064,14 @@ export function ContactRecordView(props: Props) {
               Email
             </a>
           )}
+          <button
+            onClick={() => { setMergeOpen(o => !o); setMergeQuery(''); setMergeResults([]); setMergeTarget(null); setMergeError(null); setMergeKeepId(contact.id) }}
+            style={{ ...actionBtnBase, background: 'transparent', color: '#6b7280', border: '1.5px solid rgba(107,114,128,0.35)' }}
+            title="Merge duplicate contact"
+          >
+            <GitMerge size={13} />
+            Merge
+          </button>
         </div>
 
         {/* Log prompt after Call/Text/Email */}
@@ -1055,6 +1107,122 @@ export function ContactRecordView(props: Props) {
           </div>
         )}
       </div>
+
+      {/* ── Merge panel ─────────────────────────────────────────────────────── */}
+      {mergeOpen && (
+        <div style={{
+          margin: '10px 0 0', padding: '14px 16px',
+          background: 'var(--bg)', border: '1px solid rgba(107,114,128,0.3)',
+          borderRadius: 8,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Merge Duplicate Contact
+            </span>
+            <button onClick={() => setMergeOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}>
+              <X size={14} />
+            </button>
+          </div>
+
+          {!mergeTarget ? (
+            <>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>
+                Search for the duplicate contact to merge into this one.
+              </p>
+              <div style={{ position: 'relative', marginBottom: 8 }}>
+                <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  value={mergeQuery}
+                  onChange={e => { setMergeQuery(e.target.value); searchMergeContacts(e.target.value) }}
+                  placeholder="Name or email..."
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    paddingLeft: 28, paddingRight: 10, paddingTop: 7, paddingBottom: 7,
+                    fontFamily: 'var(--font-mono)', fontSize: 12,
+                    background: 'var(--bg-secondary, #111)', color: 'var(--fg)',
+                    border: '1px solid var(--border)', borderRadius: 6, outline: 'none',
+                  }}
+                />
+              </div>
+              {mergeResults.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {mergeResults.map(r => {
+                    const name = [r.first_name, r.last_name].filter(Boolean).join(' ') || '—'
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => { setMergeTarget(r); setMergeKeepId(contact.id) }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          background: 'transparent', border: '1px solid var(--border)',
+                          borderRadius: 6, padding: '7px 10px', cursor: 'pointer', textAlign: 'left',
+                        }}
+                      >
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', fontWeight: 600 }}>{name}</span>
+                        {r.email && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>{r.email}</span>}
+                        {r.contact_type && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6b7280', marginLeft: 'auto' }}>{r.contact_type}</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>
+                Choose which contact record to <strong style={{ color: 'var(--fg)' }}>keep</strong>. The other will be deleted and all loans/history transferred.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+                {[
+                  { id: contact.id, label: 'This contact', name: [contact.first_name, contact.last_name].filter(Boolean).join(' '), email: contact.email },
+                  { id: mergeTarget.id, label: 'Duplicate', name: [mergeTarget.first_name, mergeTarget.last_name].filter(Boolean).join(' '), email: mergeTarget.email },
+                ].map(opt => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="mergeKeep"
+                      value={opt.id}
+                      checked={mergeKeepId === opt.id}
+                      onChange={() => setMergeKeepId(opt.id)}
+                      style={{ accentColor: '#c9a84c' }}
+                    />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                      <span style={{ color: 'var(--fg)', fontWeight: 600 }}>{opt.name || '—'}</span>
+                      {opt.email && <span style={{ color: 'var(--muted)', marginLeft: 8 }}>{opt.email}</span>}
+                      <span style={{ color: '#6b7280', marginLeft: 8, fontSize: 10 }}>{opt.label}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {mergeError && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#f87171', marginBottom: 10 }}>{mergeError}</p>}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={executeMerge}
+                  disabled={merging}
+                  style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+                    background: merging ? '#374151' : '#c9a84c', color: merging ? '#9ca3af' : '#000',
+                    border: 'none', padding: '7px 18px', borderRadius: 6, cursor: merging ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {merging ? 'Merging…' : 'Confirm Merge'}
+                </button>
+                <button
+                  onClick={() => { setMergeTarget(null); setMergeQuery(''); setMergeResults([]) }}
+                  style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
+                    padding: '7px 14px', borderRadius: 6, cursor: 'pointer',
+                  }}
+                >
+                  Back
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Two-column body ──────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', marginTop: 0 }}>

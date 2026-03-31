@@ -119,6 +119,64 @@ function generateLoanName(lastName: unknown, propertyAddress: unknown): string |
   return null
 }
 
+// ─── Transaction party upsert helper ─────────────────────────────────────────
+
+interface PartyFields {
+  firstName: unknown
+  lastName: unknown
+  email: unknown
+  phone: unknown
+  companyName: unknown
+  streetAddress?: unknown
+  city?: unknown
+  state?: unknown
+  postalCode?: unknown
+}
+
+/**
+ * Upsert a transaction party (agent, title, escrow) as a contact.
+ * Returns the contact id, or null if no email was provided.
+ */
+async function upsertPartyContact(
+  party: PartyFields,
+  contactType: string,
+  resolvedUserId: string | null,
+  organizationId: string,
+  now: string
+): Promise<string | null> {
+  const email = n(party.email)
+  if (!email) return null // Can't upsert without an email
+
+  const contactData: Record<string, unknown> = {
+    email: (email as string).toLowerCase().trim(),
+    first_name: (n(party.firstName) as string) || '',
+    last_name: (n(party.lastName) as string) || '',
+    phone: n(party.phone),
+    contact_type: contactType,
+    group_tag: 'Realtor Database',
+    stage: 'Lead',
+    source: 'arive_webhook',
+    user_id: resolvedUserId,
+    organization_id: organizationId,
+    updated_at: now,
+  }
+
+  // Only set company/address if Arive provides them
+  if (n(party.companyName)) contactData.company_name = n(party.companyName)
+  if (n(party.streetAddress)) contactData.mailing_street = n(party.streetAddress)
+  if (n(party.city)) contactData.mailing_city = n(party.city)
+  if (n(party.state)) contactData.mailing_state = n(party.state)
+  if (n(party.postalCode)) contactData.mailing_zip = n(party.postalCode)
+
+  try {
+    const contact = await sbUpsert('contacts', 'email', contactData) as { id: string } | null
+    return contact?.id ?? null
+  } catch (err) {
+    console.warn(`[arive-webhook] Failed to upsert ${contactType} contact:`, err)
+    return null
+  }
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
@@ -299,10 +357,58 @@ export async function POST(request: NextRequest) {
       back_end_dti: n(body.backEndDti),
       monthly_debts: n(body.monthlyDebts),
 
-      referring_agent_name: n(body.referringAgentName),
-      referring_agent_email: n(body.referringAgentEmail),
+      referring_agent_name: n(body.referringAgentName) ?? n(body.referralContactSourceName),
+      referring_agent_email: n(body.referringAgentEmail) ?? n(body.referralContactSourceEmail),
+      referring_agent_phone: n(body.referringAgentPhone),
       lender_name: n(body.lenderName),
-      lead_source: n(body.leadSource),
+      lead_source: n(body.leadSource) ?? n(body.leadSource),
+
+      // Buyer's agent flat fields (only include when Arive sends data)
+      ...(n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName']) ? {
+        buyers_agent_name: `${n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName'])} ${n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_lastName']) || ''}`.trim(),
+        buyer_agent_name: `${n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName'])} ${n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_lastName']) || ''}`.trim(),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_emailAddressText']) ? {
+        buyers_agent_email: n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_emailAddressText']),
+        buyer_agent_email: n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_emailAddressText']),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_mobilePhone10digit']) ? {
+        buyers_agent_phone: n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_mobilePhone10digit']),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyName']) ? {
+        buyer_agent_brokerage: n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyName']),
+      } : {}),
+
+      // Listing/seller's agent flat fields
+      ...(n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_firstName']) ? {
+        listing_agent_name: `${n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_firstName'])} ${n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_lastName']) || ''}`.trim(),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_emailAddressText']) ? {
+        listing_agent_email: n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_emailAddressText']),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_mobilePhone10digit']) ? {
+        listing_agent_phone: n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_mobilePhone10digit']),
+      } : {}),
+      ...(n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyName']) ? {
+        listing_agent_brokerage: n(body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyName']),
+      } : {}),
+
+      // Title flat fields
+      ...(n(body['TITLE_AGENT_companyName']) ? { title_company: n(body['TITLE_AGENT_companyName']) } : {}),
+      ...(n(body['TITLE_AGENT_firstName']) ? {
+        title_contact: `${n(body['TITLE_AGENT_firstName'])} ${n(body['TITLE_AGENT_lastName']) || ''}`.trim(),
+      } : {}),
+      ...(n(body['TITLE_AGENT_emailAddressText']) ? { title_email: n(body['TITLE_AGENT_emailAddressText']) } : {}),
+
+      // Escrow flat fields
+      ...(n(body['ESCROW_AGENT_firstName']) ? {
+        escrow_officer: `${n(body['ESCROW_AGENT_firstName'])} ${n(body['ESCROW_AGENT_lastName']) || ''}`.trim(),
+      } : {}),
+      ...(n(body['ESCROW_AGENT_companyName']) ? { escrow_agent: n(body['ESCROW_AGENT_companyName']) } : {}),
+
+      // Processor
+      ...(n(body.loanProcessorName) ? { processor_name: n(body.loanProcessorName) } : {}),
+      ...(n(body.loanProcessorEmail) ? { processor_email: n(body.loanProcessorEmail) } : {}),
 
       // AUS + compensation — not reliably sent by Arive; null-safe
       aus_result: n(body.ausResult) ?? n(body.ausRecommendation) ?? n(body.aus_recommendation) ?? null,
@@ -323,7 +429,89 @@ export async function POST(request: NextRequest) {
 
     if (!loan?.id) throw new Error('Loan upsert returned no record')
 
-    // ── 3b. Auto-derive key dates from status/milestone ─────────────────────
+    // ── 3b. Auto-create contacts for transaction parties ────────────────────
+    // Title/escrow contacts are created but don't have FK columns on loans yet
+    const [buyerAgentContactId, listingAgentContactId] = await Promise.all([
+      upsertPartyContact(
+        {
+          firstName: body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName'],
+          lastName: body['REAL_ESTATE_AGENT_BUYERS_AGENT_lastName'],
+          email: body['REAL_ESTATE_AGENT_BUYERS_AGENT_emailAddressText'],
+          phone: body['REAL_ESTATE_AGENT_BUYERS_AGENT_mobilePhone10digit'],
+          companyName: body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyName'],
+          streetAddress: body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyMailingAddress_streetAddress'],
+          city: body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyMailingAddress_city'],
+          state: body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyMailingAddress_state'],
+          postalCode: body['REAL_ESTATE_AGENT_BUYERS_AGENT_companyMailingAddress_postalCode'],
+        },
+        'realtor',
+        resolvedUserId,
+        organizationId,
+        now
+      ),
+      upsertPartyContact(
+        {
+          firstName: body['REAL_ESTATE_AGENT_SELLERS_AGENT_firstName'],
+          lastName: body['REAL_ESTATE_AGENT_SELLERS_AGENT_lastName'],
+          email: body['REAL_ESTATE_AGENT_SELLERS_AGENT_emailAddressText'],
+          phone: body['REAL_ESTATE_AGENT_SELLERS_AGENT_mobilePhone10digit'],
+          companyName: body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyName'],
+          streetAddress: body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyMailingAddress_streetAddress'],
+          city: body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyMailingAddress_city'],
+          state: body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyMailingAddress_state'],
+          postalCode: body['REAL_ESTATE_AGENT_SELLERS_AGENT_companyMailingAddress_postalCode'],
+        },
+        'realtor',
+        resolvedUserId,
+        organizationId,
+        now
+      ),
+      upsertPartyContact(
+        {
+          firstName: body['TITLE_AGENT_firstName'],
+          lastName: body['TITLE_AGENT_lastName'],
+          email: body['TITLE_AGENT_emailAddressText'],
+          phone: body['TITLE_AGENT_mobilePhone10digit'],
+          companyName: body['TITLE_AGENT_companyName'],
+          streetAddress: body['TITLE_AGENT_companyMailingAddress_streetAddress'],
+          city: body['TITLE_AGENT_companyMailingAddress_city'],
+          state: body['TITLE_AGENT_companyMailingAddress_state'],
+          postalCode: body['TITLE_AGENT_companyMailingAddress_postalCode'],
+        },
+        'title',
+        resolvedUserId,
+        organizationId,
+        now
+      ),
+      upsertPartyContact(
+        {
+          firstName: body['ESCROW_AGENT_firstName'],
+          lastName: body['ESCROW_AGENT_lastName'],
+          email: body['ESCROW_AGENT_emailAddressText'],
+          phone: body['ESCROW_AGENT_mobilePhone10digit'],
+          companyName: body['ESCROW_AGENT_companyName'],
+          streetAddress: body['ESCROW_AGENT_companyMailingAddress_streetAddress'],
+          city: body['ESCROW_AGENT_companyMailingAddress_city'],
+          state: body['ESCROW_AGENT_companyMailingAddress_state'],
+          postalCode: body['ESCROW_AGENT_companyMailingAddress_postalCode'],
+        },
+        'title',
+        resolvedUserId,
+        organizationId,
+        now
+      ),
+    ])
+
+    // ── 3c. Link party contacts to loan via FK columns ──────────────────────
+    const fkUpdates: Record<string, string> = {}
+    if (buyerAgentContactId) fkUpdates.buyer_agent_contact_id = buyerAgentContactId
+    if (listingAgentContactId) fkUpdates.listing_agent_contact_id = listingAgentContactId
+
+    if (Object.keys(fkUpdates).length > 0) {
+      await sbPatchNulls('loans', loan.id, fkUpdates)
+    }
+
+    // ── 3d. Auto-derive key dates from status/milestone ─────────────────────
     // When Arive doesn't send explicit date fields, stamp them based on the
     // current status. Only fills nulls — never overwrites user-set dates.
     const status = String(n(body.status) ?? '').toUpperCase()

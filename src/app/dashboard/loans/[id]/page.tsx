@@ -1,13 +1,6 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import {
-  DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext, rectSortingStrategy, useSortable, arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -16,8 +9,7 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
-  GripVertical, EyeOff, Eye, Settings2,
-  Mail, Phone, MessageSquare, StickyNote, Trash2,
+  Mail, Phone, MessageSquare, StickyNote, Trash2, Briefcase,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
@@ -408,7 +400,7 @@ export default function LoanDetailPage() {
   const [deleting, setDeleting] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedAutomationId, setSelectedAutomationId] = useState<string | null>(null)
-  // commission editing moved to CollapsibleDetails > Financials section
+  // commission editing in Financials EditableSectionCard
   const [editingHeader, setEditingHeader] = useState<string | null>(null)
   const [headerInput, setHeaderInput] = useState('')
   const [referringAgentContactId, setReferringAgentContactId] = useState<string | null>(null)
@@ -1023,7 +1015,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
         <div className="space-y-6">
           {/* Key Dates — compact grid from raw_payload + loan columns */}
-          <KeyDatesPanel loan={loan} onSave={handleSaveField} />
+          <KeyDatesGrid loan={loan} onSave={handleSaveField} />
 
           {/* Unified loan details — inline-editable grouped sections */}
           <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
@@ -1168,6 +1160,21 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
           </Link>
         )}
       </div>
+
+      {/* Employment — only if exists */}
+      {(loan.employer_name || loan.position_description) && (
+        <div className="pt-2 border-t border-zinc-800/40">
+          <div className="flex items-center gap-2">
+            <Briefcase size={10} className="text-zinc-600 shrink-0" />
+            <span className="text-xs font-mono text-zinc-300 truncate">
+              {[loan.position_description, loan.employer_name].filter(Boolean).join(' at ')}
+            </span>
+            {loan.self_employed && (
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">SE</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Co-borrower — only if exists */}
       {loan.co_borrower_name && (
@@ -1388,253 +1395,126 @@ function LinkedContactCard({ loan, contact, onReassignContact }: {
   )
 }
 
-// ── PropertyDetailsToggle — collapsible secondary data ───────────────────────
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function PropertyDetailsToggle({ loan }: { loan: Loan }) {
-  const [open, setOpen] = useState(false)
+// ── KeyDatesGrid — compact grid from raw_payload + loan columns ──────────────
 
-  const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
-  const hasAddress = !!fullAddress
-
-  // Primary row — always visible
-  const primaryFields = [
-    hasAddress ? { label: 'Address', value: fullAddress } : null,
-    loan.purchase_price ? { label: 'Purchase', value: fmtCurrency(loan.purchase_price) } : null,
-    loan.appraised_value ? { label: 'Appraised', value: fmtCurrency(loan.appraised_value) } : null,
-    loan.down_payment ? { label: 'Down', value: `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}` } : null,
-  ].filter(Boolean) as { label: string; value: string }[]
-
-  // Secondary fields — hidden by default
-  const secondaryFields = [
-    loan.property_county ? { label: 'County', value: loan.property_county } : null,
-    loan.property_type ? { label: 'Property Type', value: loan.property_type } : null,
-    loan.occupancy_type || loan.occupancy ? { label: 'Occupancy', value: loan.occupancy_type || loan.occupancy || '' } : null,
-    loan.credit_score ? { label: 'Credit Score', value: String(loan.credit_score) } : null,
-    loan.monthly_payment ? { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) } : null,
-    loan.piti ? { label: 'PITI', value: fmtCurrency(loan.piti) } : null,
-    loan.cash_to_close ? { label: 'Cash to Close', value: fmtCurrency(loan.cash_to_close) } : null,
-    loan.lender_name ? { label: 'Lender', value: loan.lender_name } : null,
-    loan.aus_result ? { label: 'AUS', value: loan.aus_result } : null,
-    loan.lead_source ? { label: 'Lead Source', value: loan.lead_source } : null,
-  ].filter(Boolean) as { label: string; value: string }[]
-
-  if (primaryFields.length === 0 && secondaryFields.length === 0) return null
-
-  return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Property & Details</h2>
-        {secondaryFields.length > 0 && (
-          <button
-            onClick={() => setOpen(o => !o)}
-            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
-          >
-            {open ? 'Less' : 'More'} <ChevronDown size={10} className={open ? 'rotate-180 transition-transform' : 'transition-transform'} />
-          </button>
-        )}
-      </div>
-
-      {/* Primary — flat inline */}
-      <div className="flex flex-wrap gap-x-8 gap-y-2">
-        {primaryFields.map(f => (
-          <div key={f.label}>
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{f.label}</span>
-            <p className="text-sm font-mono text-zinc-200">{f.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Secondary — toggled */}
-      {open && secondaryFields.length > 0 && (
-        <div className="flex flex-wrap gap-x-8 gap-y-2 mt-3 pt-3 border-t border-zinc-800/40">
-          {secondaryFields.map(f => (
-            <div key={f.label}>
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide">{f.label}</span>
-              <p className="text-sm font-mono text-zinc-200">{f.value}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── KeyDatesPanel (inline-editable) ──────────────────────────────────────────
-
-function KeyDatesPanel({ loan, onSave }: { loan: Loan; onSave: (field: string, value: string | null) => void }) {
+function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, value: string | null) => void }) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [expanded, setExpanded] = useState(false)
 
-  const dates = [
-    { label: 'Application', field: 'application_date', value: loan.application_date, hex: '#60A5FA' },
-    { label: 'Submission', field: 'submission_date', value: loan.submission_date, hex: '#7C3AED' },
-    { label: 'Approval', field: 'approval_date', value: loan.approval_date, hex: '#0891B2' },
-    { label: 'Est. Close', field: 'estimated_closing_date', value: loan.estimated_closing_date, hex: '#F59E0B' },
-    { label: 'Rate Lock', field: 'rate_lock_date', value: loan.rate_lock_date, hex: '#4ADE80' },
-    { label: 'Lock Expiry', field: 'rate_lock_expiration', value: loan.rate_lock_expiration, hex: '#EF4444' },
-    { label: 'Funded', field: 'funding_date', value: loan.funding_date, hex: '#C9A84C' },
+  const rp = (loan.raw_payload ?? {}) as Record<string, string>
+  const rpDate = (key: string): string | null => {
+    const v = rp[key]
+    return v && v.trim() ? v.trim() : null
+  }
+
+  const primaryDates: { label: string; key: string; field?: string; value: string | null; hex: string }[] = [
+    { label: 'Application',        key: 'app',   field: 'application_date',       value: loan.application_date,       hex: '#60A5FA' },
+    { label: 'Sales Contract',     key: 'sc',    value: rpDate('keyDates_salesContractDate'), hex: '#818CF8' },
+    { label: 'Intent to Proceed',  key: 'itp',   value: rpDate('keyDates_intentToProceedDate'), hex: '#7C3AED' },
+    { label: 'Submission',         key: 'sub',   field: 'submission_date',        value: loan.submission_date,        hex: '#2563EB' },
+    { label: 'Approval',           key: 'apr',   field: 'approval_date',          value: loan.approval_date,          hex: '#0891B2' },
+    { label: 'Est. Close',         key: 'est',   field: 'estimated_closing_date', value: loan.estimated_closing_date, hex: '#F59E0B' },
+    { label: 'Funded',             key: 'fund',  field: 'funding_date',           value: loan.funding_date,           hex: '#C9A84C' },
+    { label: 'Rate Lock',          key: 'rl',    field: 'rate_lock_date',         value: loan.rate_lock_date,         hex: '#4ADE80' },
+    { label: 'Lock Expiry',        key: 'rle',   field: 'rate_lock_expiration',   value: loan.rate_lock_expiration,   hex: '#EF4444' },
   ]
+
+  const secondaryDates: { label: string; key: string; field?: string; value: string | null; hex: string }[] = [
+    { label: 'LE Sent',              key: 'les',   value: rpDate('keyDates_initialLESentDate'),       hex: '#60A5FA' },
+    { label: 'LE Signed',            key: 'lsg',   value: rpDate('keyDates_initialLESignedDate'),     hex: '#60A5FA' },
+    { label: 'Recent LE Sent',       key: 'rles',  value: rpDate('keyDates_mostRecentLESentDate'),    hex: '#818CF8' },
+    { label: 'Recent LE Signed',     key: 'rlsg',  value: rpDate('keyDates_mostRecentLESignedDate'),  hex: '#818CF8' },
+    { label: 'CD Sent',              key: 'cds',   value: rpDate('keyDates_initialCDSentDate'),       hex: '#7C3AED' },
+    { label: 'CD Signed',            key: 'cdsg',  value: rpDate('keyDates_initialCDSignedDate'),     hex: '#7C3AED' },
+    { label: 'Recent CD Sent',       key: 'rcds',  value: rpDate('keyDates_mostRecentCDSentDate'),    hex: '#A855F7' },
+    { label: 'Recent CD Signed',     key: 'rcdsg', value: rpDate('keyDates_mostRecentCDSignedDate'),  hex: '#A855F7' },
+    { label: 'Appraisal Ordered',    key: 'ao',    field: 'appraisal_ordered_date', value: loan.appraisal_ordered_date ?? rpDate('keyDates_appraisalOrderedDate'), hex: '#0891B2' },
+    { label: 'Appraisal Received',   key: 'ar',    value: rpDate('keyDates_appraisalDeliveryDate'),   hex: '#0891B2' },
+    { label: 'Appraisal Contingency',key: 'ac',    value: rpDate('keyDates_appraisalContingency'),    hex: '#0891B2' },
+    { label: 'Title Ordered',        key: 'to',    value: rpDate('keyDates_titleOrderedDate'),        hex: '#D97706' },
+    { label: 'Title Received',       key: 'tr',    value: rpDate('keyDates_titleReceivedDate'),       hex: '#D97706' },
+    { label: 'Credit Ordered',       key: 'co',    value: rpDate('keyDates_creditOrderDate'),         hex: '#F59E0B' },
+    { label: 'Credit Expires',       key: 'ce',    value: rpDate('keyDates_creditExpirationDate'),    hex: '#F59E0B' },
+    { label: 'HOI Ordered',          key: 'ho',    value: rpDate('keyDates_hoiOrderedDate'),          hex: '#34D399' },
+    { label: 'HOI Received',         key: 'hr',    value: rpDate('keyDates_hoiReceivedDate'),         hex: '#34D399' },
+    { label: 'TRID Date',            key: 'trid',  value: rpDate('keyDates_tridDate'),                hex: '#6B7280' },
+    { label: 'First Payment',        key: 'fp',    field: 'first_payment_date', value: loan.first_payment_date ?? rpDate('keyDates_firstPaymentDate'), hex: '#C9A84C' },
+    { label: 'Est. Funding',         key: 'ef',    value: rpDate('keyDates_estimatedFundingDate'),    hex: '#C9A84C' },
+    { label: 'PA Expiry',            key: 'pae',   value: rpDate('keyDates_preApprovalExpiryDate'),   hex: '#EF4444' },
+    { label: 'Loan Contingency',     key: 'lc',    value: rpDate('keyDates_loanContingency'),         hex: '#6B7280' },
+    { label: 'Closing Contingency',  key: 'cc',    value: rpDate('keyDates_closingContingency'),      hex: '#6B7280' },
+    { label: 'Avoid EPO',            key: 'epo',   value: rpDate('keyDates_dateToAvoidEPO'),          hex: '#EF4444' },
+  ]
+
+  const populatedSecondary = secondaryDates.filter(d => d.value)
 
   const handleSave = (field: string) => {
     onSave(field, editValue || null)
     setEditing(null)
   }
 
-  return (
-    <div>
-      <h3 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Key Dates</h3>
-      <div className="space-y-0">
-        {dates.map(d => (
-          <div key={d.field} className="flex items-center justify-between gap-3 py-2 border-b border-zinc-800/30 last:border-0 group">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: d.value ? d.hex : '#3f3f46' }} />
-              <span className="text-[11px] font-mono" style={{ color: d.value ? d.hex : '#71717a' }}>{d.label}</span>
-            </div>
-            {editing === d.field ? (
-              <input
-                autoFocus
-                type="date"
-                value={editValue}
-                onChange={e => setEditValue(e.target.value)}
-                onBlur={() => handleSave(d.field)}
-                onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(null) }}
-                className="w-32 text-xs font-mono text-zinc-200 bg-transparent border-b border-zinc-500 outline-none text-right"
-              />
-            ) : (
-              <span
-                className="text-xs font-mono cursor-pointer hover:text-zinc-100 transition-colors"
-                style={{ color: d.value ? '#e4e4e7' : '#3f3f46' }}
-                onClick={() => { setEditValue(d.value ?? ''); setEditing(d.field) }}
-              >
-                {fmtDate(d.value) || '—'}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// (PartnerContactsPanel replaced by CommunicationHub above)
-
-// ── LoanTodoList — localStorage-backed per-loan checklist ────────────────────
-
-interface TodoItem {
-  id: string
-  text: string
-  done: boolean
-}
-
-function getDefaultTodos(): TodoItem[] {
-  const items = [
-    'Collect paystubs (last 30 days)',
-    'Collect bank statements (last 2 months)',
-    'Order appraisal',
-    'Submit to underwriting',
-    'Clear UW conditions',
-    'Request CTC',
-    'Schedule closing date',
-    'Confirm wire instructions',
-  ]
-  return items.map((text, i) => ({ id: String(i), text, done: false }))
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function LoanTodoList({ loanId }: { loanId: string }) {
-  const storageKey = `loanos_todos_${loanId}`
-  const [todos, setTodos] = useState<TodoItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey)
-      if (saved) return JSON.parse(saved) as TodoItem[]
-    } catch { /* ignore */ }
-    return getDefaultTodos()
-  })
-  const [newText, setNewText] = useState('')
-  const [adding, setAdding] = useState(false)
-
-  function persist(items: TodoItem[]) {
-    setTodos(items)
-    try { localStorage.setItem(storageKey, JSON.stringify(items)) } catch { /* ignore */ }
-  }
-
-  const doneCount = todos.filter(t => t.done).length
-
-  return (
-    <div className="bg-zinc-900/60 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 flex items-center justify-between border-b border-zinc-800/60">
-        <div className="flex items-center gap-2">
-          <Inbox size={11} className="text-[#C9A84C]" />
-          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">To-Do</h3>
+  const renderDate = (d: { label: string; key: string; field?: string; value: string | null; hex: string }) => {
+    const canEdit = !!d.field
+    return (
+      <div key={d.key} className="flex items-center justify-between gap-2 py-1 group">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-1 h-1 rounded-full shrink-0" style={{ background: d.value ? d.hex : '#3f3f46' }} />
+          <span className="text-[10px] font-mono truncate" style={{ color: d.value ? d.hex : '#52525b' }}>{d.label}</span>
         </div>
-        <span className="text-[10px] font-mono text-zinc-500">{doneCount}/{todos.length}</span>
-      </div>
-
-      <div className="divide-y divide-zinc-800/60">
-        {todos.map(t => (
-          <div key={t.id} className="flex items-center gap-3 px-6 py-3.5 group hover:bg-zinc-800/30 transition-colors">
-            <button
-              onClick={() => persist(todos.map(x => x.id === t.id ? { ...x, done: !x.done } : x))}
-              className="shrink-0 text-zinc-500 hover:text-[#C9A84C] transition-colors"
-            >
-              {t.done
-                ? <Check size={14} className="text-[#C9A84C]" />
-                : <div className="w-3.5 h-3.5 rounded-sm border border-zinc-600" />
-              }
-            </button>
-            <span className={`flex-1 text-xs font-mono ${t.done ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>{t.text}</span>
-            <button
-              onClick={() => persist(todos.filter(x => x.id !== t.id))}
-              className="shrink-0 text-zinc-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-            >
-              <X size={10} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {adding ? (
-        <div className="flex items-center gap-2 px-6 py-3.5 border-t border-zinc-800/60">
+        {editing === d.field ? (
           <input
             autoFocus
-            value={newText}
-            onChange={e => setNewText(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                const text = newText.trim()
-                if (text) persist([...todos, { id: Date.now().toString(), text, done: false }])
-                setNewText(''); setAdding(false)
-              }
-              if (e.key === 'Escape') { setAdding(false); setNewText('') }
-            }}
-            placeholder="Add task…"
-            className="flex-1 text-xs font-mono bg-transparent text-zinc-200 placeholder-zinc-600 border-b border-zinc-600 focus:border-[#C9A84C] outline-none pb-0.5"
+            type="date"
+            value={editValue}
+            onChange={e => setEditValue(e.target.value)}
+            onBlur={() => handleSave(d.field!)}
+            onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(null) }}
+            className="w-28 text-[11px] font-mono text-zinc-200 bg-transparent border-b border-zinc-500 outline-none text-right"
           />
+        ) : (
+          <span
+            className={`text-[11px] font-mono text-right shrink-0 ${canEdit ? 'cursor-pointer hover:text-zinc-100' : ''} transition-colors`}
+            style={{ color: d.value ? '#d4d4d8' : '#3f3f46' }}
+            onClick={canEdit ? () => { setEditValue(d.value ?? ''); setEditing(d.field!) } : undefined}
+          >
+            {fmtDate(d.value)}
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+      <div className="px-4 py-2 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+          <Clock size={11} className="text-[#C9A84C]" /> Key Dates
+        </h2>
+        {populatedSecondary.length > 0 && (
           <button
-            onClick={() => {
-              const text = newText.trim()
-              if (text) persist([...todos, { id: Date.now().toString(), text, done: false }])
-              setNewText(''); setAdding(false)
-            }}
-            className="text-[10px] font-mono text-[#C9A84C] hover:text-amber-300"
-          >Add</button>
-          <button onClick={() => { setAdding(false); setNewText('') }} className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400">Cancel</button>
+            onClick={() => setExpanded(e => !e)}
+            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
+          >
+            {expanded ? 'Less' : `+${populatedSecondary.length} more`}
+            <ChevronDown size={10} className={expanded ? 'rotate-180 transition-transform' : 'transition-transform'} />
+          </button>
+        )}
+      </div>
+      <div className="px-4 py-1.5 grid grid-cols-2 gap-x-6">
+        <div>{primaryDates.slice(0, 5).map(renderDate)}</div>
+        <div>{primaryDates.slice(5).map(renderDate)}</div>
+      </div>
+      {expanded && populatedSecondary.length > 0 && (
+        <div className="px-4 pb-2 pt-1 border-t border-zinc-800/40 grid grid-cols-2 gap-x-6">
+          <div>{populatedSecondary.slice(0, Math.ceil(populatedSecondary.length / 2)).map(renderDate)}</div>
+          <div>{populatedSecondary.slice(Math.ceil(populatedSecondary.length / 2)).map(renderDate)}</div>
         </div>
-      ) : (
-        <button
-          onClick={() => setAdding(true)}
-          className="w-full px-6 py-3 text-left text-[10px] font-mono text-zinc-600 hover:text-zinc-400 border-t border-zinc-800/60 transition-colors"
-        >
-          + Add task
-        </button>
       )}
     </div>
   )
 }
 
-// (NotesSidebarPanel removed — replaced by LoanActivityPanel with Call/Text/Email/Note logging)
-
-// ── Activity / Notes panel (contact-record style) ────────────────────────────
 
 const LOAN_ACTIVITY_CONFIG: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
   call:  { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
@@ -1940,547 +1820,6 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
     </div>
   )
 }
-
-// ── LoanInfoGrid — 6-card 2-column grid ──────────────────────────────────────
-
-function InfoCard({ title, fields }: {
-  title: string
-  fields: { label: string; value: React.ReactNode }[]
-}) {
-  return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-zinc-700/70">
-        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">{title}</h3>
-      </div>
-      <div className="p-4 space-y-2.5">
-        {fields.map(f => (
-          <div key={f.label} className="flex items-baseline justify-between gap-3 min-w-0">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{f.label}</span>
-            <span className="text-xs font-mono text-zinc-200 text-right truncate">
-              {f.value ?? '—'}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function PartiesCard({
-  buyerName, buyerContactId, buyerPhone, buyerEmail,
-  listingName, listingContactId, listingPhone, listingEmail,
-  titleCompany, titleContact, titleEmail,
-}: {
-  buyerName: string | null
-  buyerContactId: string | null
-  buyerPhone: string | null
-  buyerEmail: string | null
-  listingName: string | null
-  listingContactId: string | null
-  listingPhone: string | null
-  listingEmail: string | null
-  titleCompany: string | null
-  titleContact: string | null
-  titleEmail: string | null
-}) {
-  const row = (label: string, value: React.ReactNode) => (
-    <div className="flex items-baseline justify-between gap-3 min-w-0">
-      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wide shrink-0">{label}</span>
-      <span className="text-xs font-mono text-zinc-200 text-right truncate">{value}</span>
-    </div>
-  )
-  const nameLink = (name: string | null, contactId: string | null) =>
-    name
-      ? contactId
-        ? <Link href={`/dashboard/contacts/${contactId}`} className="hover:underline text-zinc-200">{name}</Link>
-        : name
-      : <span className="text-zinc-600">—</span>
-
-  return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-zinc-700/70">
-        <h3 className="text-[10px] font-mono font-semibold uppercase tracking-widest text-[#C9A84C]">Parties</h3>
-      </div>
-      <div className="p-4 space-y-3">
-        {/* Buyer's Agent — emerald tint */}
-        <div className="rounded p-2.5 space-y-1.5 bg-blue-950/50 border border-blue-900/40">
-          {row("Buyer's Agent", nameLink(buyerName, buyerContactId))}
-          {row('BA Phone', <PhoneLink phone={buyerPhone} />)}
-          {row('BA Email', <EmailLink email={buyerEmail} />)}
-        </div>
-        {/* Listing Agent — sky tint */}
-        <div className="rounded p-2.5 space-y-1.5 bg-sky-950/50 border border-sky-900/40">
-          {row('Listing Agent', nameLink(listingName, listingContactId))}
-          {row('LA Phone', <PhoneLink phone={listingPhone} />)}
-          {row('LA Email', <EmailLink email={listingEmail} />)}
-        </div>
-        {/* Title — amber tint */}
-        <div className="rounded p-2.5 space-y-1.5 bg-amber-950/50 border border-amber-900/40">
-          {row('Title Company', titleCompany ?? <span className="text-zinc-600">—</span>)}
-          {row('Title Contact', titleContact ?? <span className="text-zinc-600">—</span>)}
-          {row('Title Email', <EmailLink email={titleEmail} />)}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Card layout constants ──────────────────────────────────────────────────────
-
-const DEFAULT_CARD_ORDER = ['borrower', 'loan-terms', 'property', 'origination', 'parties']
-const CARD_ORDER_KEY = 'loanos_card_order'
-const CARD_HIDDEN_KEY = 'loanos_card_hidden'
-
-// ── SortableCardWrapper ────────────────────────────────────────────────────────
-
-function SortableCardWrapper({
-  id, editLayout, isHidden, onToggleHide, children,
-}: {
-  id: string
-  editLayout: boolean
-  isHidden: boolean
-  onToggleHide: () => void
-  children: React.ReactNode
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.4 : isHidden ? 0.35 : 1,
-        position: 'relative',
-      }}
-    >
-      {editLayout && (
-        <div
-          style={{
-            position: 'absolute', top: 0, left: 0, right: 0,
-            height: 37, // matches card header height (py-2.5 + text)
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            paddingLeft: 10, paddingRight: 10, zIndex: 10,
-          }}
-        >
-          {/* Drag handle */}
-          <button
-            {...listeners} {...attributes}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab', color: '#71717a', padding: 2, lineHeight: 0 }}
-            className="hover:text-zinc-300 transition-colors"
-            title="Drag to reorder"
-          >
-            <GripVertical size={14} />
-          </button>
-          {/* Hide / show toggle */}
-          <button
-            onClick={onToggleHide}
-            style={{ color: isHidden ? '#C9A84C' : '#71717a', padding: 2, lineHeight: 0 }}
-            className="hover:text-zinc-300 transition-colors"
-            title={isHidden ? 'Show card' : 'Hide card'}
-          >
-            {isHidden ? <Eye size={13} /> : <EyeOff size={13} />}
-          </button>
-        </div>
-      )}
-      {children}
-    </div>
-  )
-}
-
-// ── LoanInfoGrid ───────────────────────────────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function LoanInfoGrid({ loan, loanId, onSave, onSaveMultiple }: {
-  loan: Loan
-  loanId: string
-  onSave: (field: string, value: string | number | null) => Promise<void>
-  onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
-}) {
-  void loanId; void onSave; void onSaveMultiple
-
-  const [cardOrder, setCardOrder] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(CARD_ORDER_KEY) ?? 'null') ?? DEFAULT_CARD_ORDER }
-    catch { return DEFAULT_CARD_ORDER }
-  })
-
-  const [hiddenCards, setHiddenCards] = useState<Set<string>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem(CARD_HIDDEN_KEY) ?? '[]') as string[]) }
-    catch { return new Set() }
-  })
-
-  const [editLayout, setEditLayout] = useState(false)
-
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const oldIdx = cardOrder.indexOf(active.id as string)
-    const newIdx = cardOrder.indexOf(over.id as string)
-    const next = arrayMove(cardOrder, oldIdx, newIdx)
-    setCardOrder(next)
-    localStorage.setItem(CARD_ORDER_KEY, JSON.stringify(next))
-  }
-
-  function toggleHidden(id: string) {
-    const next = new Set(hiddenCards)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    setHiddenCards(next)
-    localStorage.setItem(CARD_HIDDEN_KEY, JSON.stringify([...next]))
-  }
-
-  function resetLayout() {
-    setCardOrder(DEFAULT_CARD_ORDER)
-    setHiddenCards(new Set())
-    localStorage.removeItem(CARD_ORDER_KEY)
-    localStorage.removeItem(CARD_HIDDEN_KEY)
-  }
-
-  const fullAddress = [loan.property_address, loan.property_city, loan.property_state, loan.property_zip].filter(Boolean).join(', ')
-  const downPayment = loan.down_payment
-    ? `${fmtCurrency(loan.down_payment)}${loan.down_payment_pct ? ` (${fmtPct(loan.down_payment_pct)})` : ''}`
-    : null
-
-  function renderCardContent(id: string) {
-    switch (id) {
-      case 'borrower':
-        return <InfoCard title="Borrower" fields={[
-          { label: 'Name',          value: [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name },
-          { label: 'Co-Borrower',   value: loan.co_borrower_name },
-          { label: 'Email',         value: <EmailLink email={loan.borrower_email} /> },
-          { label: 'Phone',         value: <PhoneLink phone={loan.borrower_phone} /> },
-          { label: 'Co-Borr Email', value: <EmailLink email={loan.co_borrower_email} /> },
-          { label: 'Co-Borr Phone', value: <PhoneLink phone={loan.co_borrower_phone} /> },
-        ]} />
-      case 'loan-terms':
-        return <InfoCard title="Loan Terms" fields={[
-          { label: 'Loan Amount', value: fmtCurrency(loan.loan_amount) },
-          { label: 'Loan Type',   value: loan.loan_type },
-          { label: 'Program',     value: loan.loan_program },
-          { label: 'Rate / APR',  value: loan.interest_rate ? `${fmtPct(loan.interest_rate)}${loan.apr ? ` / ${fmtPct(loan.apr)}` : ''}` : null },
-          { label: 'Term',        value: loan.loan_term ? `${Math.round(loan.loan_term / 12)} years` : null },
-          { label: 'Monthly P&I', value: fmtCurrency(loan.monthly_payment) },
-        ]} />
-      case 'property':
-        return <InfoCard title="Property" fields={[
-          { label: 'Address',        value: fullAddress || loan.property_address },
-          { label: 'County',         value: loan.property_county },
-          { label: 'Type',           value: loan.property_type },
-          { label: 'Purchase Price', value: fmtCurrency(loan.purchase_price) },
-          { label: 'Appraised',      value: fmtCurrency(loan.appraised_value) },
-          { label: 'Down Payment',   value: downPayment },
-          { label: 'LTV',            value: fmtPct(loan.ltv) },
-        ]} />
-      case 'origination':
-        return <InfoCard title="Origination" fields={[
-          { label: 'AUS Result',              value: loan.aus_result || loan.milestone },
-          { label: 'Credit Score',            value: loan.credit_score != null ? String(loan.credit_score) : null },
-          { label: 'DTI (F/B)',               value: (loan.front_end_dti || loan.back_end_dti) ? `${fmtPct(loan.front_end_dti)} / ${fmtPct(loan.back_end_dti)}` : null },
-          { label: 'Lender',                  value: loan.lender_name },
-        ]} />
-      case 'parties':
-        return <PartiesCard
-          buyerName={loan.buyers_agent_name || loan.buyer_agent_name}
-          buyerContactId={loan.buyer_agent_contact_id}
-          buyerPhone={loan.buyers_agent_phone}
-          buyerEmail={loan.buyers_agent_email || loan.buyer_agent_email}
-          listingName={loan.listing_agent_name}
-          listingContactId={loan.listing_agent_contact_id}
-          listingPhone={loan.listing_agent_phone}
-          listingEmail={loan.listing_agent_email}
-          titleCompany={loan.title_company}
-          titleContact={loan.title_contact}
-          titleEmail={loan.title_email}
-        />
-      default:
-        return null
-    }
-  }
-
-  const visibleInEditMode = cardOrder // show all cards (dimmed if hidden) when editing
-  const visibleNormal = cardOrder.filter(id => !hiddenCards.has(id))
-  const displayOrder = editLayout ? visibleInEditMode : visibleNormal
-
-  return (
-    <div>
-      {/* Layout controls */}
-      <div className="flex items-center justify-end gap-3 mb-3">
-        {editLayout && hiddenCards.size > 0 && (
-          <button
-            onClick={resetLayout}
-            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors"
-          >
-            Reset
-          </button>
-        )}
-        <button
-          onClick={() => setEditLayout(prev => !prev)}
-          className={`inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border transition-colors ${
-            editLayout
-              ? 'border-[#C9A84C] text-[#C9A84C] bg-[#C9A84C]/10'
-              : 'border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-500'
-          }`}
-        >
-          <Settings2 size={11} />
-          {editLayout ? 'Done' : 'Edit layout'}
-        </button>
-      </div>
-
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={cardOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {displayOrder.map(id => (
-              <SortableCardWrapper
-                key={id}
-                id={id}
-                editLayout={editLayout}
-                isHidden={hiddenCards.has(id)}
-                onToggleHide={() => toggleHidden(id)}
-              >
-                {renderCardContent(id)}
-              </SortableCardWrapper>
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-    </div>
-  )
-}
-
-// ── CollapsibleDetails — wraps all EditableSectionCards ───────────────────────
-
-type ContactSearchResult = { id: string; first_name: string | null; last_name: string | null; email: string | null }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function CollapsibleDetails({ loan, onSave, onSaveMultiple, contact, onReassignContact }: {
-  loan: Loan
-  onSave: (field: string, value: string | number | null) => Promise<void>
-  onSaveMultiple: (fields: Record<string, string | null>) => Promise<void>
-  contact: ContactRow | null
-  onReassignContact: (contactId: string) => Promise<void>
-}) {
-  const supabase = createClient()
-  const [open, setOpen] = useState(false)
-  const [reassigning, setReassigning] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<ContactSearchResult[]>([])
-  const [searching, setSearching] = useState(false)
-
-  useEffect(() => {
-    if (!reassigning || !searchQuery.trim()) { setSearchResults([]); return }
-    const timer = setTimeout(async () => {
-      setSearching(true)
-      const q = searchQuery.trim()
-      const { data } = await supabase
-        .from('contacts')
-        .select('id, first_name, last_name, email')
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
-        .limit(8)
-      setSearchResults((data as ContactSearchResult[]) ?? [])
-      setSearching(false)
-    }, 250)
-    return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, reassigning])
-
-  return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-zinc-800/60 transition-colors"
-      >
-        <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Full Details &amp; Edit</span>
-        <ChevronDown size={14} className={`text-zinc-500 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div className="border-t border-zinc-700 space-y-5 p-5">
-          <EditableSectionCard title="Loan Terms" onSave={onSave} fields={[
-            { label: 'Loan Number',   displayValue: loan.loan_number,   field: 'loan_number',   rawValue: loan.loan_number },
-            { label: 'Arive Loan ID', displayValue: loan.arive_loan_id, field: 'arive_loan_id', rawValue: loan.arive_loan_id },
-            { label: 'Status',        displayValue: <StatusBadge status={loan.status} />, field: 'status', rawValue: loan.status, type: 'select', options: LOAN_STATUS_OPTS },
-            { label: 'Milestone',     displayValue: loan.milestone,     field: 'milestone',     rawValue: loan.milestone },
-            { label: 'Loan Amount',   displayValue: fmtCurrency(loan.loan_amount),   field: 'loan_amount',   rawValue: loan.loan_amount,   type: 'number' },
-            { label: 'Loan Purpose',  displayValue: loan.loan_purpose,  field: 'loan_purpose',  rawValue: loan.loan_purpose },
-            { label: 'Loan Type',     displayValue: loan.loan_type,     field: 'loan_type',     rawValue: loan.loan_type },
-            { label: 'Loan Program',  displayValue: loan.loan_program,  field: 'loan_program',  rawValue: loan.loan_program },
-            { label: 'Loan Term',     displayValue: loan.loan_term ? `${loan.loan_term} months` : null, field: 'loan_term', rawValue: loan.loan_term, type: 'number' },
-            { label: 'Interest Rate', displayValue: fmtPct(loan.interest_rate), field: 'interest_rate', rawValue: loan.interest_rate, type: 'percent' },
-            { label: 'APR',           displayValue: fmtPct(loan.apr),   field: 'apr',   rawValue: loan.apr,   type: 'percent' },
-            { label: 'Points',        displayValue: loan.points != null ? String(loan.points) : null, field: 'points', rawValue: loan.points, type: 'number' },
-            { label: 'Down Payment',  displayValue: fmtCurrency(loan.down_payment),  field: 'down_payment',  rawValue: loan.down_payment,  type: 'number' },
-            { label: 'Down Pmt %',    displayValue: fmtPct(loan.down_payment_pct),   field: 'down_payment_pct', rawValue: loan.down_payment_pct, type: 'percent' },
-            { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
-            { label: 'CLTV',          displayValue: fmtPct(loan.cltv),  field: 'cltv',  rawValue: loan.cltv,  type: 'percent' },
-          ]} />
-
-          <EditableSectionCard title="Property" onSave={onSave} fields={[
-            { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
-            { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
-            { label: 'State',          displayValue: loan.property_state,   field: 'property_state',   rawValue: loan.property_state },
-            { label: 'Zip',            displayValue: loan.property_zip,     field: 'property_zip',     rawValue: loan.property_zip },
-            { label: 'County',         displayValue: loan.property_county,  field: 'property_county',  rawValue: loan.property_county },
-            { label: 'Property Type',  displayValue: loan.property_type,    field: 'property_type',    rawValue: loan.property_type },
-            { label: 'Occupancy',      displayValue: loan.occupancy_type || loan.occupancy, field: 'occupancy_type', rawValue: loan.occupancy_type || loan.occupancy },
-            { label: 'Purchase Price', displayValue: fmtCurrency(loan.purchase_price),  field: 'purchase_price',  rawValue: loan.purchase_price,  type: 'number' },
-            { label: 'Appraised Value',displayValue: fmtCurrency(loan.appraised_value), field: 'appraised_value', rawValue: loan.appraised_value, type: 'number' },
-          ]} />
-
-          <EditableSectionCard title="Borrower" onSave={onSave} fields={[
-            { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
-            { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
-            { label: 'Email',          displayValue: loan.borrower_email,      field: 'borrower_email',      rawValue: loan.borrower_email },
-            { label: 'Phone',          displayValue: loan.borrower_phone,      field: 'borrower_phone',      rawValue: loan.borrower_phone },
-            { label: 'Co-Borrower',    displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
-            { label: 'Co-Borr Email',  displayValue: loan.co_borrower_email,   field: 'co_borrower_email',   rawValue: loan.co_borrower_email },
-            { label: 'Co-Borr Phone',  displayValue: loan.co_borrower_phone,   field: 'co_borrower_phone',   rawValue: loan.co_borrower_phone },
-            { label: 'Credit Score',   displayValue: loan.credit_score != null ? String(loan.credit_score) : null, field: 'credit_score', rawValue: loan.credit_score, type: 'number' },
-            { label: 'Middle Score',   displayValue: loan.middle_score != null ? String(loan.middle_score) : null, field: 'middle_score', rawValue: loan.middle_score, type: 'number' },
-            { label: 'Monthly Income', displayValue: fmtCurrency(loan.monthly_income), field: 'monthly_income', rawValue: loan.monthly_income, type: 'number' },
-            { label: 'Monthly Debts',  displayValue: fmtCurrency(loan.monthly_debts),  field: 'monthly_debts',  rawValue: loan.monthly_debts,  type: 'number' },
-            { label: 'Front DTI',      displayValue: fmtPct(loan.front_end_dti), field: 'front_end_dti', rawValue: loan.front_end_dti, type: 'percent' },
-            { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' },
-            { label: 'Employer',       displayValue: loan.employer_name, field: 'employer_name', rawValue: loan.employer_name },
-          ]} />
-
-          <EditableSectionCard title="Key Dates" onSave={onSave} fields={[
-            { label: 'Loan Created',      displayValue: fmtDate(loan.loan_created_date) },
-            { label: 'Application',       displayValue: fmtDate(loan.application_date),       field: 'application_date',       rawValue: loan.application_date,       type: 'date' },
-            { label: 'Submission',        displayValue: fmtDate(loan.submission_date),        field: 'submission_date',        rawValue: loan.submission_date,        type: 'date' },
-            { label: 'Approval',          displayValue: fmtDate(loan.approval_date),          field: 'approval_date',          rawValue: loan.approval_date,          type: 'date' },
-            { label: 'Est. Closing',      displayValue: fmtDate(loan.estimated_closing_date), field: 'estimated_closing_date', rawValue: loan.estimated_closing_date, type: 'date' },
-            { label: 'Closing',           displayValue: fmtDate(loan.closing_date),           field: 'closing_date',           rawValue: loan.closing_date,           type: 'date' },
-            { label: 'Funding',           displayValue: fmtDate(loan.funding_date),           field: 'funding_date',           rawValue: loan.funding_date,           type: 'date' },
-            { label: 'First Payment',     displayValue: fmtDate(loan.first_payment_date),     field: 'first_payment_date',     rawValue: loan.first_payment_date,     type: 'date' },
-            { label: 'Rate Lock',         displayValue: fmtDate(loan.rate_lock_date),         field: 'rate_lock_date',         rawValue: loan.rate_lock_date,         type: 'date' },
-            { label: 'Lock Expiry',       displayValue: fmtDate(loan.rate_lock_expiration),   field: 'rate_lock_expiration',   rawValue: loan.rate_lock_expiration,   type: 'date' },
-            { label: 'Appraisal Ordered', displayValue: fmtDate(loan.appraisal_ordered_date), field: 'appraisal_ordered_date', rawValue: loan.appraisal_ordered_date, type: 'date' },
-          ]} />
-
-          <EditableSectionCard title="Origination" onSave={onSave} fields={[
-            { label: 'AUS Result',              displayValue: loan.aus_result,     field: 'aus_result',     rawValue: loan.aus_result },
-          ]} />
-
-          <EditableSectionCard title="Financials" onSave={onSave} fields={[
-            { label: 'Commission',      displayValue: loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—', field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
-            { label: 'Monthly Payment', displayValue: fmtCurrency(loan.monthly_payment),     field: 'monthly_payment',     rawValue: loan.monthly_payment,     type: 'number' },
-            { label: 'PITI',            displayValue: fmtCurrency(loan.piti),                field: 'piti',                rawValue: loan.piti,                type: 'number' },
-            { label: 'Cash to Close',   displayValue: fmtCurrency(loan.cash_to_close),       field: 'cash_to_close',       rawValue: loan.cash_to_close,       type: 'number' },
-            { label: 'Seller Credits',  displayValue: fmtCurrency(loan.seller_credits),      field: 'seller_credits',      rawValue: loan.seller_credits,      type: 'number' },
-            { label: 'Lender Credits',  displayValue: fmtCurrency(loan.lender_credits),      field: 'lender_credits',      rawValue: loan.lender_credits,      type: 'number' },
-            { label: 'Loan Costs',      displayValue: fmtCurrency(loan.loan_costs),          field: 'loan_costs',          rawValue: loan.loan_costs,          type: 'number' },
-            { label: 'Total Closing',   displayValue: fmtCurrency(loan.total_closing_costs), field: 'total_closing_costs', rawValue: loan.total_closing_costs, type: 'number' },
-            { label: 'HOI Monthly',     displayValue: fmtCurrency(loan.hoi_monthly),         field: 'hoi_monthly',         rawValue: loan.hoi_monthly,         type: 'number' },
-            { label: 'Property Taxes',  displayValue: fmtCurrency(loan.property_taxes_monthly), field: 'property_taxes_monthly', rawValue: loan.property_taxes_monthly, type: 'number' },
-            { label: 'HOA Dues',        displayValue: fmtCurrency(loan.hoa_dues),            field: 'hoa_dues',            rawValue: loan.hoa_dues,            type: 'number' },
-          ]} />
-
-          <EditableSectionCard title="Parties" onSave={onSave} onSaveMultiple={onSaveMultiple} fields={[
-            { label: 'Referring Agent',   displayValue: loan.referring_agent_name,  field: 'referring_agent_name',  rawValue: loan.referring_agent_name,  searchContacts: true, relatedFields: { email: 'referring_agent_email', phone: 'referring_agent_phone' }, labelColor: 'text-amber-400' },
-            { label: 'Ref Agent Email',   displayValue: loan.referring_agent_email, field: 'referring_agent_email', rawValue: loan.referring_agent_email, labelColor: 'text-amber-400/70' },
-            { label: 'Ref Agent Phone',   displayValue: loan.referring_agent_phone, field: 'referring_agent_phone', rawValue: loan.referring_agent_phone, labelColor: 'text-amber-400/70' },
-            { label: 'Listing Agent',     displayValue: loan.listing_agent_name,    field: 'listing_agent_name',    rawValue: loan.listing_agent_name,    searchContacts: true, relatedFields: { email: 'listing_agent_email', phone: 'listing_agent_phone' }, labelColor: 'text-sky-400' },
-            { label: 'Listing Email',     displayValue: loan.listing_agent_email,   field: 'listing_agent_email',   rawValue: loan.listing_agent_email,   labelColor: 'text-sky-400/70' },
-            { label: 'Listing Phone',     displayValue: loan.listing_agent_phone,   field: 'listing_agent_phone',   rawValue: loan.listing_agent_phone,   labelColor: 'text-sky-400/70' },
-            { label: "Buyer's Agent",     displayValue: loan.buyers_agent_name || loan.buyer_agent_name, field: 'buyers_agent_name', rawValue: loan.buyers_agent_name || loan.buyer_agent_name, searchContacts: true, relatedFields: { email: 'buyers_agent_email', phone: 'buyers_agent_phone' }, labelColor: 'text-blue-400' },
-            { label: 'Buyer Agent Email', displayValue: loan.buyers_agent_email || loan.buyer_agent_email, field: 'buyers_agent_email', rawValue: loan.buyers_agent_email || loan.buyer_agent_email, labelColor: 'text-blue-400/70' },
-            { label: 'Buyer Agent Phone', displayValue: loan.buyers_agent_phone, field: 'buyers_agent_phone', rawValue: loan.buyers_agent_phone, labelColor: 'text-blue-400/70' },
-            { label: 'Title Company',     displayValue: loan.title_company,    field: 'title_company',    rawValue: loan.title_company },
-            { label: 'Title Contact',     displayValue: loan.title_contact,    field: 'title_contact',    rawValue: loan.title_contact },
-            { label: 'Title Email',       displayValue: loan.title_email,      field: 'title_email',      rawValue: loan.title_email },
-            { label: 'Escrow Officer',    displayValue: loan.escrow_officer,   field: 'escrow_officer',   rawValue: loan.escrow_officer },
-            { label: 'Processor',         displayValue: loan.processor_name,   field: 'processor_name',   rawValue: loan.processor_name },
-            { label: 'Underwriter',       displayValue: loan.underwriter_name, field: 'underwriter_name', rawValue: loan.underwriter_name },
-            { label: 'Lender',            displayValue: loan.lender_name,      field: 'lender_name',      rawValue: loan.lender_name },
-          ]} />
-
-          <EditableSectionCard title="Attribution" onSave={onSave} fields={[
-            { label: 'Lead Source',        displayValue: loan.lead_source,        field: 'lead_source',        rawValue: loan.lead_source },
-            { label: 'Referral Source',    displayValue: loan.referral_source,    field: 'referral_source',    rawValue: loan.referral_source },
-            { label: 'Marketing Campaign', displayValue: loan.marketing_campaign, field: 'marketing_campaign', rawValue: loan.marketing_campaign },
-          ]} />
-
-          {/* Linked Contact */}
-          <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
-            <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Linked Contact</h2>
-              <button
-                onClick={() => { setReassigning(r => !r); setSearchQuery(''); setSearchResults([]) }}
-                className="text-[11px] font-mono text-zinc-500 hover:text-amber-400 transition-colors"
-              >
-                {reassigning ? 'Cancel' : contact ? 'Reassign' : 'Link Contact'}
-              </button>
-            </div>
-            <div className="p-4">
-              {!reassigning ? (
-                contact ? (
-                  <>
-                    <Link href={`/dashboard/contacts/${contact.id}`} className="font-mono font-semibold text-zinc-100 hover:text-amber-400 transition-colors">
-                      {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
-                    </Link>
-                    {contact.email && <p className="text-sm text-zinc-500 mt-1 font-mono">{contact.email}</p>}
-                    {contact.phone && <p className="text-sm text-zinc-500 font-mono">{contact.phone}</p>}
-                    {contact.referred_by && (
-                      <div className="mt-3 pt-3 border-t border-zinc-700">
-                        <p className="text-xs text-zinc-500 font-mono">Referred by</p>
-                        <Link href={`/dashboard/referral/${encodeURIComponent(contact.referred_by)}`} className="text-sm text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 mt-0.5">
-                          {contact.referred_by}<ChevronRight size={12} />
-                        </Link>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-xs text-zinc-600 font-mono">No contact linked — use &quot;Link Contact&quot; to attach one.</p>
-                )
-              ) : (
-                <div>
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="Search by name or email…"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm font-mono text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500/60"
-                  />
-                  {searching && (
-                    <p className="text-xs text-zinc-600 font-mono mt-2">Searching…</p>
-                  )}
-                  {searchResults.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {searchResults.map(r => (
-                        <button
-                          key={r.id}
-                          onClick={async () => {
-                            await onReassignContact(r.id)
-                            setReassigning(false)
-                            setSearchQuery('')
-                            setSearchResults([])
-                          }}
-                          className="w-full text-left px-3 py-2 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-amber-500/40 transition-colors"
-                        >
-                          <p className="text-sm font-mono font-semibold text-zinc-100">
-                            {[r.first_name, r.last_name].filter(Boolean).join(' ') || '(no name)'}
-                          </p>
-                          {r.email && <p className="text-xs font-mono text-zinc-500">{r.email}</p>}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {!searching && searchQuery.trim() && searchResults.length === 0 && (
-                    <p className="text-xs text-zinc-600 font-mono mt-2">No contacts found.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-
 
 // ── Milestone timeline ────────────────────────────────────────────────────────
 

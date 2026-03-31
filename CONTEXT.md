@@ -18,6 +18,16 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Arive Sync Overhaul — 2026-03-30 (late session)
+
+**Both Arive n8n workflows updated to capture all available data:**
+- WF1 (New Loan `1tagvoU0UXtdDiMY`) — 16 nodes, added co-borrower fields, employment, compensation, loan program, borrower DOB, agent contact upserts
+- WF2 (Status Update `9JyzzwKac8v3uQ7d`) — 17 nodes, same new fields added to extract + update + sync contact
+- 9 new Supabase columns added: `borrower_birthdate`, `co_borrower_home_phone`, `co_borrower_work_phone`, `co_borrower_birthdate`, `co_borrower_marital_status`, `position_description`, `self_employed`, `gross_loan_revenue`, `net_loan_revenue`
+- Buyer's agent and listing agent now auto-upserted as `type='realtor'` contacts with IDs linked to loan record
+- Co-borrower data flows to both loans table AND contacts table (same contact page, not separate)
+- Fields populate on next Arive webhook fire — existing loans will update on next status change
+
 ## Automation Command Center — 2026-03-30
 
 **Replaced `/dashboard/automations`** with a unified Command Center controlling all 37 automations (17 Claude Code agents, 18 n8n workflows, 2 chatbot prompts) from one page.

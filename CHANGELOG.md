@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [5.0.1] — 2026-03-30 — Arive Sync Overhaul
+
+### Added
+- **Co-borrower support** in Arive sync — co-borrower data now flows to both contacts table (co_borrower_first/last/email/mobile/birthdate) and loans table (co_borrower_name/email/phone/home_phone/work_phone/birthdate/marital_status)
+- **Employment data** from Arive: employer_name, monthly_income, position_description, self_employed
+- **Compensation data**: commission_amount, gross_loan_revenue, net_loan_revenue
+- **Loan program** mapped from Arive's `lenderProductName`
+- **Borrower DOB** (partial — month/day only, Arive doesn't send year)
+- **Agent contact auto-upsert**: buyer's agent and listing agent from Arive are upserted as `type='realtor'` contacts with IDs linked to the loan record
+- 9 new Supabase columns via migrations: borrower_birthdate, co_borrower_home_phone, co_borrower_work_phone, co_borrower_birthdate, co_borrower_marital_status, position_description, self_employed, gross_loan_revenue, net_loan_revenue
+
+### Changed
+- **WF1** (Arive New Loan → Supabase): 13 → 16 nodes, added Upsert Agent Contacts node, expanded Extract Loan Fields and all upsert bodies
+- **WF2** (Arive Status Update → Supabase): updated Extract Status Fields, Update Loan Status, and Sync Contact nodes with all new fields
+
 ## [5.0.0] — 2026-03-30 — Automation Command Center
 
 ### Added

@@ -65,12 +65,20 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 - [ ] Loan detail page: simplified, communication-first
 - [x] Verify Arive sync — spot-checked 3 loans. Gaps found (2026-03-30):
   - `loan_number` — NEVER populated (big gap)
-  - `loan_type`, `loan_program` — NEVER populated (Conv/FHA/VA missing)
+  - `loan_type`, `loan_program` — NEVER populated (Conv/FHA/VA missing) → **FIXED: loan_program now mapped from lenderProductName**
   - `milestone` — NEVER populated (status works, milestone doesn't)
   - `rate_lock_date` — NEVER populated (expiration works, lock date doesn't)
   - `estimated_closing_date` vs `est_closing_date` — duplicate columns, only est_closing_date used
   - `property_zip` — sometimes string "null" instead of actual NULL
-  - **Action needed**: Update Arive sync n8n workflows to map these fields
+  - **Action needed**: ~~Update Arive sync n8n workflows to map these fields~~ **DONE (2026-03-30)**
+- [x] Arive sync overhaul — both n8n workflows updated (2026-03-30):
+  - Co-borrower data now flows to contacts (co_borrower_first/last/email/mobile/birthdate) AND loans (co_borrower_name/email/phone/home_phone/work_phone/birthdate/marital_status)
+  - Employment data: employer_name, monthly_income, position_description, self_employed
+  - Compensation: commission_amount, gross_loan_revenue, net_loan_revenue
+  - Loan program mapped from lenderProductName
+  - Borrower DOB (partial — month/day from Arive)
+  - Agent contacts: buyer's agent and listing agent auto-upserted as realtor contacts with contact_id linked to loan
+  - 9 new Supabase columns added via migrations (borrower_birthdate, co_borrower_*, position_description, self_employed, gross/net_loan_revenue)
 - [x] Deploy and verify — deployed, READY
 - [ ] Adam reviews and confirms
 

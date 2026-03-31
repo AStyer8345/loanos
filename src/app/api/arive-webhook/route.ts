@@ -423,6 +423,13 @@ export async function POST(request: NextRequest) {
       } : {}),
       ...(n(body['ESCROW_AGENT_companyName']) ? { escrow_agent: n(body['ESCROW_AGENT_companyName']) } : {}),
 
+      // Transaction coordinator flat fields
+      ...(n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_firstName']) ? {
+        transaction_coordinator_name: `${n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_firstName'])} ${n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_lastName']) || ''}`.trim(),
+      } : {}),
+      ...(n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_emailAddressText']) ? { transaction_coordinator_email: n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_emailAddressText']) } : {}),
+      ...(n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_mobilePhone10digit']) ? { transaction_coordinator_phone: n(body['TRANSACTION_COORDINATOR_BUYERS_AGENT_mobilePhone10digit']) } : {}),
+
       // Processor
       ...(n(body.loanProcessorName) ? { processor_name: n(body.loanProcessorName) } : {}),
       ...(n(body.loanProcessorEmail) ? { processor_email: n(body.loanProcessorEmail) } : {}),
@@ -447,8 +454,7 @@ export async function POST(request: NextRequest) {
     if (!loan?.id) throw new Error('Loan upsert returned no record')
 
     // ── 3b. Auto-create contacts for transaction parties ────────────────────
-    // Title/escrow contacts are created but don't have FK columns on loans yet
-    const [buyerAgentContactId, listingAgentContactId] = await Promise.all([
+    const [buyerAgentContactId, listingAgentContactId, titleContactId, escrowContactId, tcContactId] = await Promise.all([
       upsertPartyContact(
         {
           firstName: body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName'],
@@ -517,6 +523,19 @@ export async function POST(request: NextRequest) {
         organizationId,
         now
       ),
+      upsertPartyContact(
+        {
+          firstName: body['TRANSACTION_COORDINATOR_BUYERS_AGENT_firstName'],
+          lastName: body['TRANSACTION_COORDINATOR_BUYERS_AGENT_lastName'],
+          email: body['TRANSACTION_COORDINATOR_BUYERS_AGENT_emailAddressText'],
+          phone: body['TRANSACTION_COORDINATOR_BUYERS_AGENT_mobilePhone10digit'],
+          companyName: body['TRANSACTION_COORDINATOR_BUYERS_AGENT_companyName'],
+        },
+        'transaction_coordinator',
+        resolvedUserId,
+        organizationId,
+        now
+      ),
     ])
 
     // ── 3c. Upsert co-borrower contact + link to loan and primary borrower ────
@@ -550,6 +569,9 @@ export async function POST(request: NextRequest) {
     const fkUpdates: Record<string, string> = {}
     if (buyerAgentContactId) fkUpdates.buyer_agent_contact_id = buyerAgentContactId
     if (listingAgentContactId) fkUpdates.listing_agent_contact_id = listingAgentContactId
+    if (titleContactId) fkUpdates.title_contact_id = titleContactId
+    if (escrowContactId) fkUpdates.escrow_contact_id = escrowContactId
+    if (tcContactId) fkUpdates.transaction_coordinator_contact_id = tcContactId
     if (coBorrowerContactId) fkUpdates.co_borrower_contact_id = coBorrowerContactId
 
     if (Object.keys(fkUpdates).length > 0) {

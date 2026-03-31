@@ -120,6 +120,11 @@ interface Loan {
   title_contact_id: string | null
   title_email: string | null
   escrow_officer: string | null
+  escrow_contact_id: string | null
+  transaction_coordinator_name: string | null
+  transaction_coordinator_email: string | null
+  transaction_coordinator_phone: string | null
+  transaction_coordinator_contact_id: string | null
   processor_name: string | null
   underwriter_name: string | null
   lender_name: string | null
@@ -1158,12 +1163,26 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
       phone: loan.listing_agent_phone,
       contactId: loan.listing_agent_contact_id,
     }] : []),
+    ...(loan.transaction_coordinator_name ? [{
+      role: 'TC',
+      name: loan.transaction_coordinator_name,
+      email: loan.transaction_coordinator_email,
+      phone: loan.transaction_coordinator_phone,
+      contactId: loan.transaction_coordinator_contact_id,
+    }] : []),
     ...(loan.title_company || loan.title_contact ? [{
       role: 'Title',
       name: loan.title_contact || loan.title_company,
       email: loan.title_email,
       phone: null as string | null,
       contactId: loan.title_contact_id,
+    }] : []),
+    ...(loan.escrow_officer ? [{
+      role: 'Escrow',
+      name: loan.escrow_officer,
+      email: null as string | null,
+      phone: null as string | null,
+      contactId: loan.escrow_contact_id,
     }] : []),
     ...(loan.referring_agent_name ? [{
       role: 'Referring Agent',
@@ -1189,14 +1208,51 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
     'Borrower':        '#60A5FA',  // blue
     'Co-Borrower':     '#818CF8',  // indigo
     "Buyer's Agent":   '#4ADE80',  // green
+    'TC':              '#2DD4BF',  // teal
     'Listing Agent':   '#F59E0B',  // amber
     'Title':           '#A855F7',  // purple
+    'Escrow':          '#F472B6',  // pink
     'Referring Agent': '#C9A84C',  // gold
   }
 
+  // Group messaging helpers
+  const borrowers = parties.filter(p => p.role === 'Borrower' || p.role === 'Co-Borrower')
+  const agents    = parties.filter(p => p.role === "Buyer's Agent" || p.role === 'TC' || p.role === 'Listing Agent')
+  const allParties = parties
+
+  const emailHref = (list: typeof parties) => {
+    const emails = list.map(p => p.email).filter(Boolean).join(',')
+    return emails ? `mailto:${emails}` : null
+  }
+  const textHref = (list: typeof parties) => {
+    const phones = list.map(p => p.phone).filter(Boolean).map(ph => ph!.replace(/\D/g, '')).join(',')
+    return phones ? `sms:${phones}` : null
+  }
+
+  const groupButtons: { label: string; href: string | null; title: string }[] = [
+    { label: 'Email All',        href: emailHref(allParties), title: 'Email everyone on this loan' },
+    { label: 'Text Borrowers',   href: textHref(borrowers),  title: 'Text Doug + Tiffany' },
+    { label: 'Email Borrowers',  href: emailHref(borrowers), title: 'Email borrowers' },
+    { label: 'Email Agents + TC', href: emailHref(agents),   title: "Email buyer's agent + TC + listing agent" },
+  ]
+
   return (
     <div>
-      <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Parties</h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Parties</h2>
+        <div className="flex items-center gap-1.5">
+          {groupButtons.map(btn => btn.href && (
+            <a
+              key={btn.label}
+              href={btn.href}
+              title={btn.title}
+              className="text-[9px] font-mono px-2 py-0.5 rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors whitespace-nowrap"
+            >
+              {btn.label}
+            </a>
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {parties.map(p => {
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined

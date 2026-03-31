@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [5.0.4] — 2026-03-31 — Co-Borrower Sync Fix + Contact Records
+
+### Fixed
+- **Co-borrower data not syncing**: Arive sends `loanBorrower2_*` keys, not `coBorrower*` — all co-borrower fields were being silently dropped
+- **DOB showing "Aug 5, 1900"**: Arive only sends `dayOfBirth` + `monthOfBirth` (no year); bad 1900-08-05 cleared from DB, DOB no longer stored from partial data
+
+### Added
+- **Co-borrower contact records**: webhook now upserts a separate Supabase contact for the co-borrower (deduped on email, `contact_type: 'borrower'`) on every sync
+- **`co_borrower_contact_id` FK** on `loans` table — links to the co-borrower's contact record
+- **Co-borrower chip on LoanCard** — each loan card on a borrower's contact page shows a light-blue "Co-borrower: [Name] →" link when a co-borrower contact is linked
+- **"CO-BORROWER ON" section** on co-borrower's contact page — lists all loans they're co-borrower on with primary borrower name, loan amount, and status
+
+### DB Migration
+- `add_co_borrower_contact_id_and_fix_bad_dob` — adds FK column, clears bad DOB, adds index
+
 ## [5.0.3] — 2026-03-31 — Loan Record Redesign
 
 ### Removed

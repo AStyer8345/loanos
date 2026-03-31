@@ -722,6 +722,22 @@ export default function LoanDetailPage() {
                 </Link>
               </div>
             )}
+            {loan.property_address && (
+              <div className="shrink-0">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Property</p>
+                <a
+                  href={`https://www.zillow.com/homes/${encodeURIComponent(
+                    `${loan.property_address}${loan.property_city ? `, ${loan.property_city}` : ''}${loan.property_state ? `, ${loan.property_state}` : ''}${loan.property_zip ? ` ${loan.property_zip}` : ''}`
+                  )}_rb/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-zinc-300 hover:text-blue-400 transition-colors border border-zinc-700 rounded px-2 py-0.5 inline-block max-w-[16rem] truncate"
+                  title="View on Zillow"
+                >
+                  {loan.property_address}{loan.property_city ? `, ${loan.property_city}` : ''}{loan.property_state ? `, ${loan.property_state}` : ''}
+                </a>
+              </div>
+            )}
             <div className="ml-auto shrink-0">
               <VitalStatEditable
                 label="Commission"

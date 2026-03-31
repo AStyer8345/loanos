@@ -290,7 +290,12 @@ export async function POST(request: NextRequest) {
     const loanRecord: Record<string, unknown> = {
       arive_loan_id: ariveLoanId,
       loan_number: loanNumber,
-      loan_name: n(body.loanName) ?? generateLoanName(body.borrowerLastName, body.propertyAddress),
+      // Always regenerate loan_name from last name + address when address is available.
+      // Arive often sends stale names like "Harris - TBD" even after address is known.
+      loan_name: generateLoanName(
+        body.borrowerLastName ?? body['loanBorrower1_lastName'],
+        body.propertyAddress ?? body['subjectProperty_addressLineText']
+      ) ?? n(body.loanName),
       contact_id: contact.id,
 
       borrower_first_name: n(body.borrowerFirstName),

@@ -18,6 +18,32 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Party Contact Links + Salesforce Import — 2026-03-31 (session 4)
+
+**Linked transaction parties to contact records and imported Salesforce referral data.**
+
+### DB Changes:
+- **Migration**: `add_title_contact_id_to_loans` — added `title_contact_id UUID REFERENCES contacts(id)` + index
+- **Backfill**: 525 party-to-contact links created across all loans:
+  - 376 buyer agent links (409 total, 22 still unlinked — no matching contact)
+  - 115 listing agent links (123 total, 4 unlinked)
+  - 30 referring agent links (30 total, 1 unlinked)
+  - 4 title contact links (all linked)
+
+### Salesforce Import:
+- **148 contacts** from Salesforce export processed (11 new, 137 matched existing)
+- **144 `referred_by_contact_id` links** set — ties borrower contacts to referring realtors
+- 44 unique referrers, 39 matched to existing realtor contacts
+- 5 unmatched: Britney Jo Styer, David Bonnet, Greg Walker, Houston Morford, Melissa Brown
+
+### Code Changes:
+- **`loans/[id]/page.tsx`**: Added `title_contact_id`, `co_borrower_contact_id`, `referral_contact_id` to Loan interface; wired all party cards to use FK columns; removed ~40 lines of client-side referring agent email/name lookup (now uses `referral_contact_id` directly)
+- **`api/admin/backfill-party-links/route.ts`**: Re-runnable backfill route — matches agent names to contacts by case-insensitive name, sets FK columns on loans
+- **`api/admin/import-salesforce-referrals/route.ts`**: Import route for Salesforce HTML export — upserts contacts, matches "Referred By" to realtor contacts
+- **`database.types.ts`**: Regenerated with `title_contact_id`
+
+### Deployed: 2026-03-31 ✅
+
 ## Co-Borrower Sync Fix — 2026-03-31 (session 3)
 
 **Root cause:** Arive sends co-borrower data under `loanBorrower2_*` keys, not `coBorrower*`. Previous webhook looked for `coBorrowerFirstName` etc. — all null. DOB showed "1900-08-05" because Arive only sends `dayOfBirth`+`monthOfBirth` (no year).

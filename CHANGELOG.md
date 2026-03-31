@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [5.0.5] — 2026-03-31 — Party Contact Links + Salesforce Referral Import
+
+### Added
+- **Party card clickable links**: All party cards (buyer agent, listing agent, referring agent, title, co-borrower) on loan detail page are now clickable when a matching contact record exists
+- **`title_contact_id` FK** on `loans` table — links title contacts to their contact record
+- **Backfill API route** (`/api/admin/backfill-party-links`) — re-runnable route that matches agent name strings on loans to contact records by case-insensitive name match
+- **Salesforce import API route** (`/api/admin/import-salesforce-referrals`) — imports contacts from Salesforce HTML export with dedup and `referred_by_contact_id` linking
+
+### Changed
+- **Loan detail party cards** now use direct FK columns (`referral_contact_id`, `title_contact_id`, `co_borrower_contact_id`) instead of client-side email/name lookups — faster rendering, no extra Supabase queries
+- **Removed ~40 lines** of client-side referring agent resolution code (email match + name match useEffect) — replaced by server-side FK
+
+### Data
+- **525 party-to-contact links** backfilled across all loans (376 buyer agent, 115 listing agent, 30 referring agent, 4 title)
+- **148 Salesforce contacts** processed — 144 `referred_by_contact_id` links set to 39 unique realtors
+
+### DB Migration
+- `add_title_contact_id_to_loans` — adds `title_contact_id UUID REFERENCES contacts(id)` + index
+
 ## [5.0.4] — 2026-03-31 — Co-Borrower Sync Fix + Contact Records
 
 ### Fixed

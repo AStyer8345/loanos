@@ -623,22 +623,15 @@ export default function LoanDetailPage() {
               const target = loan.estimated_closing_date || loan.closing_date
               const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
               const isUrgent = dtc != null && (dtc < 0 || dtc <= 7)
-              if (dtc == null && !loan.lender_name) return null
+              if (dtc == null) return null
               return (
                 <div className="shrink-0 text-right">
-                  {dtc != null && (
-                    <>
-                      <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
-                        {Math.abs(dtc)}
-                      </span>
-                      <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
-                        {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
-                      </p>
-                    </>
-                  )}
-                  {loan.lender_name && (
-                    <p className="text-[10px] font-mono font-semibold text-zinc-400 mt-1 tracking-wide">{loan.lender_name}</p>
-                  )}
+                  <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
+                    {Math.abs(dtc)}
+                  </span>
+                  <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
+                    {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
+                  </p>
                 </div>
               )
             })()}
@@ -710,6 +703,11 @@ export default function LoanDetailPage() {
                 inputType="number"
                 color="#C9A84C"
               />
+              {loan.lender_name && (
+                <div className="ml-auto shrink-0">
+                  <VitalStat label="Lender" value={loan.lender_name} color="#F472B6" />
+                </div>
+              )}
             </div>
           </div>
 

@@ -8,6 +8,16 @@ const GOLD = '#C9A84C'
 const BRAND_BG = '#0a0a0a'
 const BRAND_GOLD = '#C9A84C'
 
+/** Lightweight inline markdown → HTML for social post preview.
+ *  Handles: **bold**, *italic*, --- hr, and lines starting with - as bullets. */
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #27272a;margin:8px 0" />')
+    .replace(/^- (.+)$/gm, '<span style="display:flex;gap:6px;margin-bottom:2px"><span style="color:#C9A84C;flex-shrink:0">•</span><span>$1</span></span>')
+}
+
 /** Parse "SLIDE N" blocks from post content for carousel preview */
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
   // Match patterns like "SLIDE 1:", "SLIDE 1 —", "SLIDE 1 — HOOK", etc.
@@ -148,9 +158,8 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
           <div
             className="whitespace-pre-wrap leading-relaxed"
             style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.7 }}
-          >
-            {slide.body}
-          </div>
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(slide.body) }}
+          />
         )}
       </div>
 
@@ -186,14 +195,13 @@ function SlidePreviewOrText({
   const hasSlides = slides.length >= 2
 
   if (!hasSlides) {
-    // No slides detected — show plain text
+    // No slides detected — render with lightweight markdown (bold, italic, hr, bullets)
     return (
       <div
         className="rounded-md border border-zinc-800 px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
         style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
-      >
-        {draft.content || '(empty)'}
-      </div>
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(draft.content || '(empty)') }}
+      />
     )
   }
 
@@ -214,9 +222,8 @@ function SlidePreviewOrText({
           <div
             className="rounded-md border border-zinc-800 px-3 py-2 text-zinc-300 whitespace-pre-wrap"
             style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
-          >
-            {intro}
-          </div>
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(intro) }}
+          />
         </div>
       )}
 

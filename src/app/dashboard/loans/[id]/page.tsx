@@ -622,16 +622,23 @@ export default function LoanDetailPage() {
             {(() => {
               const target = loan.estimated_closing_date || loan.closing_date
               const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
-              if (dtc == null) return null
-              const isUrgent = dtc < 0 || dtc <= 7
+              const isUrgent = dtc != null && (dtc < 0 || dtc <= 7)
+              if (dtc == null && !loan.lender_name) return null
               return (
                 <div className="shrink-0 text-right">
-                  <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
-                    {Math.abs(dtc)}
-                  </span>
-                  <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
-                    {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
-                  </p>
+                  {dtc != null && (
+                    <>
+                      <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
+                        {Math.abs(dtc)}
+                      </span>
+                      <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
+                        {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
+                      </p>
+                    </>
+                  )}
+                  {loan.lender_name && (
+                    <p className="text-[10px] font-mono font-semibold text-zinc-400 mt-1 tracking-wide">{loan.lender_name}</p>
+                  )}
                 </div>
               )
             })()}
@@ -639,7 +646,7 @@ export default function LoanDetailPage() {
 
           {/* Row 3: Vital Signs — compact, all items visible */}
           <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/50 px-4 py-2.5 mb-2">
-            <div className="flex items-center gap-5 flex-wrap text-sm font-mono">
+            <div className="flex items-center gap-7 flex-wrap text-sm font-mono">
               {loan.loan_amount != null && (
                 <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
               )}
@@ -761,7 +768,7 @@ export default function LoanDetailPage() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'dashboard' && (
-          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} onRefresh={fetchAll} />
+          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={fetchAll} />
         )}
         {activeTab === 'automations' && (
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
@@ -885,7 +892,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, emailDrafts, contactEmails, inboundEmails, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string
@@ -893,6 +900,9 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   activity: ActivityRow[]
   setActivity: (a: ActivityRow[]) => void
   contact: ContactRow | null
+  emailDrafts: EmailDraftRow[]
+  contactEmails: ContactEmailRow[]
+  inboundEmails: InboundEmailRow[]
   onRefresh: () => void
 }) {
   const supabase = createClient()
@@ -918,10 +928,13 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   return (
     <div className="p-6 space-y-0">
 
-      {/* ── Section 1: Parties (Communication Hub) + Documents ── */}
+      {/* ── Section 1: Parties (Communication Hub) + Borrower/Documents ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
         <CommunicationHub loan={loan} activity={activity} contact={contact} />
-        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+        <div className="space-y-6">
+          <BorrowerProfileCard loan={loan} contact={contact} />
+          <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+        </div>
       </div>
 
       <div className="border-t border-zinc-800/40 my-6" />
@@ -1035,8 +1048,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
         </div>
 
         <div className="space-y-6">
-          <BorrowerProfileCard loan={loan} contact={contact} />
-          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} onRefresh={onRefresh} />
+          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
         </div>
       </div>
 
@@ -1500,16 +1512,21 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
 
 
 const LOAN_ACTIVITY_CONFIG: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
-  call:  { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
-  text:  { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
-  email: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
-  note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
+  call:           { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
+  text:           { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
+  email:          { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
+  email_inbound:  { icon: Inbox,          color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',  label: 'Inbound' },
+  email_outbound: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Sent' },
+  note:           { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
 }
 
-function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
+function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contactEmails, inboundEmails, onRefresh }: {
   loanId: string
   activity: ActivityRow[]
   setActivity: (a: ActivityRow[]) => void
+  emailDrafts: EmailDraftRow[]
+  contactEmails: ContactEmailRow[]
+  inboundEmails: InboundEmailRow[]
   onRefresh: () => void
 }) {
   const supabase = createClient()
@@ -1569,11 +1586,43 @@ function LoanActivityPanel({ loanId, activity, setActivity, onRefresh }: {
     onRefresh()
   }
 
-  // Show manual logs + email type entries
-  const feedItems = activity.filter(a => {
-    const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
-    return ['call', 'text', 'email', 'note'].includes(aType ?? '')
-  })
+  // Merge manual activity + email sources into one chronological feed
+  const emailAsActivity: ActivityRow[] = [
+    ...inboundEmails.map(e => ({
+      id: `inbound-${e.id}`,
+      created_at: e.occurred_at ?? e.created_at,
+      action: e.subject ?? 'Inbound email',
+      type: 'email_inbound',
+      summary: `From: ${e.from_address ?? 'unknown'}\n${e.body_snippet ?? ''}`,
+      entity_type: 'email' as string | null,
+      metadata: null,
+    })),
+    ...emailDrafts.filter(d => d.status === 'sent').map(d => ({
+      id: `draft-${d.id}`,
+      created_at: d.created_at,
+      action: d.subject ?? d.automation_name,
+      type: 'email_outbound',
+      summary: `To: ${d.recipient_name ?? d.recipient_email}\n${d.body_preview ?? ''}`,
+      entity_type: 'email' as string | null,
+      metadata: null,
+    })),
+    ...contactEmails.map(e => ({
+      id: `sent-${e.id}`,
+      created_at: e.sent_at ?? e.created_at,
+      action: e.subject ?? 'Sent email',
+      type: 'email_outbound',
+      summary: e.body_text?.slice(0, 200) ?? '',
+      entity_type: 'email' as string | null,
+      metadata: null,
+    })),
+  ]
+  const allItems = [...activity, ...emailAsActivity]
+  const feedItems = allItems
+    .filter(a => {
+      const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
+      return ['call', 'text', 'email', 'note', 'email_inbound', 'email_outbound'].includes(aType ?? '')
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
     <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>

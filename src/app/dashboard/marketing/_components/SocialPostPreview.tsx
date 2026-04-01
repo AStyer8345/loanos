@@ -35,7 +35,7 @@ function parseContent(content: string | null): { postText: string; firstComment:
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index]
-    const match = line.match(/^\s*first comment\b\s*:?\s*(.*)$/i)
+    const match = line.match(/^\s*first comment\b(?:\s*\([^)]*\))?\s*:?\s*(.*)$/i)
     if (match) {
       commentIndex = index
       inlineComment = match[1]?.trim() ?? ''
@@ -43,9 +43,11 @@ function parseContent(content: string | null): { postText: string; firstComment:
     }
   }
 
-  const bodyLines = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines).map((line) =>
-    line.replace(/^\s*slide\s+\d+\s*:\s*/i, ''),
-  )
+  // Strip metadata lines (TITLE:, PLATFORM:, FORMAT:, CURRENT CONTENT:, CAPTION:) and SLIDE prefixes
+  const metadataPattern = /^\s*(TITLE|PLATFORM|FORMAT|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)\s*:/i
+  const bodyLines = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines)
+    .filter((line) => !metadataPattern.test(line))
+    .map((line) => line.replace(/^\s*slide\s+\d+\s*[—–:-]\s*/i, ''))
 
   const commentLines = commentIndex >= 0 ? lines.slice(commentIndex + 1) : []
   const firstComment = [inlineComment, ...commentLines].join('\n').trim() || null

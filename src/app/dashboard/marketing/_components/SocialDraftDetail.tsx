@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
+import MediaManager from './MediaManager'
+import SocialPostPreview from './SocialPostPreview'
 
 const GOLD = '#C9A84C'
 const BRAND_BG = '#0a0a0a'
@@ -285,6 +287,60 @@ function SlidePreviewOrText({
   )
 }
 
+const FORMAT_OPTIONS: { value: string; label: string }[] = [
+  { value: 'single_image', label: 'Single Image' },
+  { value: 'carousel', label: 'Carousel' },
+  { value: 'video', label: 'Video' },
+  { value: 'reel_script', label: 'Reel Script' },
+  { value: 'text_only', label: 'Text Only' },
+]
+
+function FormatSwitcher({ current, onChange }: { current: string | null; onChange: (fmt: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const label = FORMAT_OPTIONS.find((f) => f.value === current)?.label || current || 'No format'
+
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={() => setOpen(!open)}
+        className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors hover:opacity-80"
+        style={{
+          background: 'transparent',
+          color: GOLD,
+          border: `1px solid ${GOLD}`,
+          fontFamily: 'inherit',
+          fontSize: 10,
+          letterSpacing: '0.05em',
+        }}
+      >
+        {label.toUpperCase()} ▾
+      </button>
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-1 rounded-sm border border-zinc-700 py-1 z-50"
+          style={{ background: '#18181b', minWidth: 140 }}
+        >
+          {FORMAT_OPTIONS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => { onChange(f.value); setOpen(false) }}
+              className="block w-full text-left px-3 py-1.5 text-xs font-bold transition-colors hover:bg-zinc-800"
+              style={{
+                color: f.value === current ? GOLD : '#a1a1aa',
+                fontFamily: 'inherit',
+                fontSize: 10,
+                letterSpacing: '0.05em',
+              }}
+            >
+              {f.label.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoiceGuide }: Props) {
   const [editing, setEditing] = useState(false)
   const [editContent, setEditContent] = useState(draft.content || '')
@@ -295,9 +351,8 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
   const [publishError, setPublishError] = useState<string | null>(null)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
-  const [mediaIndex, setMediaIndex] = useState(0)
   const [slideIndex, setSlideIndex] = useState(0)
-  const mediaScrollRef = useRef<HTMLDivElement>(null)
+  const [showPreview, setShowPreview] = useState(false)
 
   // Signed URLs for media (bucket is authenticated, raw URLs don't work)
   const [signedMediaUrls, setSignedMediaUrls] = useState<string[]>([])
@@ -344,6 +399,15 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     return () => { cancelled = true }
   }, [draft.media_urls])
 
+  /** When media paths change via MediaManager, update the draft and re-resolve signed URLs */
+  const handleMediaChange = useCallback((newPaths: string[]) => {
+    onUpdate({ ...draft, media_urls: newPaths.length > 0 ? newPaths : null })
+  }, [draft, onUpdate])
+
+  const handleFormatChange = useCallback((fmt: string) => {
+    onUpdate({ ...draft, format: fmt })
+  }, [draft, onUpdate])
+
   // Reset edit state when draft changes (id or content)
   const [prevId, setPrevId] = useState(draft.id)
   const [prevContent, setPrevContent] = useState(draft.content || '')
@@ -354,7 +418,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     setEditContent(draft.content || '')
     setMessages([])
     setChatInput('')
-    setMediaIndex(0)
     setSlideIndex(0)
     setPublishError(null)
   } else if (draft.content !== prevContent && !editing) {
@@ -484,10 +547,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     }
   }
 
-  function isVideo(url: string): boolean {
-    return /\.(mp4|mov|webm)(\?|$)/i.test(url)
-  }
-
   async function handleChatSend() {
     const text = chatInput.trim()
     if (!text) return
@@ -540,8 +599,9 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           <div className="text-white font-bold" style={{ fontSize: 15 }}>
             {draft.title || 'Untitled'}
           </div>
-          <div className="text-zinc-500" style={{ fontSize: 11 }}>
-            {subtitle}
+          <div className="text-zinc-500 flex items-center gap-2" style={{ fontSize: 11 }}>
+            <span>{subtitle}</span>
+            <FormatSwitcher current={draft.format} onChange={handleFormatChange} />
           </div>
         </div>
         <button
@@ -600,118 +660,29 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           )}
         </div>
 
-        {/* Media preview */}
-        {signedMediaUrls.length > 0 && (
-          <div>
-            <div
-              className="font-bold mb-2"
-              style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-            >
-              MEDIA
-            </div>
-
-            {signedMediaUrls.length === 1 ? (
-              // Single media — full width
-              <div
-                className="rounded-md border border-zinc-800 overflow-hidden"
-                style={{ background: '#111118' }}
-              >
-                {isVideo(signedMediaUrls[0]) ? (
-                  <video
-                    src={signedMediaUrls[0]}
-                    controls
-                    className="w-full"
-                    style={{ maxHeight: 300, objectFit: 'contain', background: '#000' }}
-                  />
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={signedMediaUrls[0]}
-                    alt="Post media"
-                    className="w-full"
-                    style={{ maxHeight: 300, objectFit: 'contain' }}
-                  />
-                )}
-              </div>
-            ) : (
-              // Multiple media — carousel with arrows
-              <div className="relative">
-                <div
-                  ref={mediaScrollRef}
-                  className="flex gap-2 overflow-x-auto rounded-md border border-zinc-800 p-2"
-                  style={{ background: '#111118', scrollBehavior: 'smooth' }}
-                >
-                  {signedMediaUrls.map((url, i) => (
-                    <div
-                      key={i}
-                      className="flex-shrink-0 rounded overflow-hidden border"
-                      style={{
-                        borderColor: i === mediaIndex ? GOLD : '#27272a',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => setMediaIndex(i)}
-                    >
-                      {isVideo(url) ? (
-                        <video
-                          src={url}
-                          controls={i === mediaIndex}
-                          muted
-                          style={{ height: 200, width: 'auto', objectFit: 'cover', background: '#000' }}
-                        />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={url}
-                          alt={`Media ${i + 1}`}
-                          style={{ height: 200, width: 'auto', objectFit: 'cover' }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Arrow buttons */}
-                <button
-                  onClick={() => {
-                    const prev = Math.max(0, mediaIndex - 1)
-                    setMediaIndex(prev)
-                    mediaScrollRef.current?.children[prev]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-                  }}
-                  disabled={mediaIndex === 0}
-                  className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-                  style={{ background: '#09090bCC', color: '#fff', border: '1px solid #3f3f46' }}
-                >
-                  &larr;
-                </button>
-                <button
-                  onClick={() => {
-                    const next = Math.min(signedMediaUrls.length - 1, mediaIndex + 1)
-                    setMediaIndex(next)
-                    mediaScrollRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-                  }}
-                  disabled={mediaIndex === signedMediaUrls.length - 1}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-                  style={{ background: '#09090bCC', color: '#fff', border: '1px solid #3f3f46' }}
-                >
-                  &rarr;
-                </button>
-
-                {/* Index indicator */}
-                <div
-                  className="text-center mt-1.5 font-bold"
-                  style={{ color: '#71717a', fontSize: 10, letterSpacing: '0.1em' }}
-                >
-                  {mediaIndex + 1} / {signedMediaUrls.length}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Media manager — add, remove, reorder */}
+        <MediaManager
+          mediaPaths={draft.media_urls || []}
+          signedUrls={signedMediaUrls}
+          onChange={handleMediaChange}
+        />
 
         {/* Action buttons */}
         {!editing && (
           <>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setShowPreview(true)}
+                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
+                style={{
+                  background: 'transparent',
+                  color: '#8B5CF6',
+                  border: '1px solid #8B5CF6',
+                  fontFamily: 'inherit',
+                }}
+              >
+                PREVIEW
+              </button>
               <button
                 onClick={handleApprove}
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
@@ -942,6 +913,15 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           Claude sees this post + your voice guide automatically
         </div>
       </div>
+
+      {/* Platform preview modal */}
+      {showPreview && (
+        <SocialPostPreview
+          draft={draft}
+          signedMediaUrls={signedMediaUrls}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   )
 }

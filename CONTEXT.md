@@ -18,6 +18,33 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Social Media Dashboard Fixes — 2026-03-31 (session 7)
+
+**Audited and fixed the social media content pipeline — voice guide wasn't connected to scheduled agent, no feedback loop existed, media uploads were silently broken.**
+
+### Bugs Fixed:
+- **media_urls silently dropped on edit/approve**: `media_urls` was missing from the PATCH allowlist in `/api/social/drafts/route.ts` — any draft update stripped media. Added to allowedKeys.
+- **Publer credentials hardcoded**: API key and workspace ID were inline in publish route. Moved to env vars (`PUBLER_API_KEY`, `PUBLER_WORKSPACE`) with validation.
+
+### Voice Guide Connection:
+- **Scheduled agent disconnected from voice guide**: The `03-builder.md` subagent had generic hardcoded voice standards and never read Adam's voice guide from Supabase. Added mandatory Step 0: fetch `voice_guide`, `voice_feedback`, and rejected drafts via curl before writing any content.
+- **Dashboard Claude already connected**: `buildSocialSystemPrompt` in `/api/chat/social/route.ts` was already reading `voice_guide` — confirmed working.
+
+### Feedback Loop (new):
+- **Edit diff capture**: When Adam manually edits a draft in the dashboard, `SocialDraftDetail.tsx` now logs before/after content to `social_settings` key `voice_feedback` via the new append mode on `/api/social/settings/route.ts`.
+- **Rejection reason capture**: New rejection modal requires a reason. Reason stored on the draft (`rejection_reason` column) and appended to `voice_feedback` so both dashboard Claude and scheduled agent learn from rejections.
+- **Settings API append mode**: POST to `/api/social/settings` now accepts `appendEntry` — appends a new line to existing value instead of replacing, used for accumulating feedback entries.
+
+### DB Migration:
+- `ALTER TABLE social_drafts ADD COLUMN rejection_reason text;`
+
+### Deployed: 5326491 → dpl_3c6amNsfczTRBUTgvCtSYL4NAWZR → READY ✅
+
+### Remaining (user action needed):
+- Add Vercel env vars: `PUBLER_API_KEY` and `PUBLER_WORKSPACE` (values in MEMORY.md)
+- Review/finalize voice guide in LoanOS Marketing → Voice Guide tab
+- Carousel creation feature discussed but not yet built (black bg or single image bg with text overlaid on slides)
+
 ## Dashboard Redesign — 2026-03-31 (session 6)
 
 **Redesigned the main dashboard to be a command center focused on money, urgency, and marketing priorities.**

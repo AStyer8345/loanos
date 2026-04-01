@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [5.0.8] — 2026-03-31 — Social Media Dashboard Fixes + Voice Feedback Loop
+
+### Fixed
+- **media_urls silently dropped on edit/approve**: `media_urls` was missing from PATCH allowlist in `/api/social/drafts/route.ts` — added alongside `rejection_reason`
+- **Publer credentials hardcoded**: Moved API key + workspace ID to env vars (`PUBLER_API_KEY`, `PUBLER_WORKSPACE`) with pre-flight validation
+
+### Added
+- **Voice guide connection to scheduled agent**: `03-builder.md` now fetches `voice_guide`, `voice_feedback`, and rejected drafts from Supabase before writing content
+- **Edit diff capture**: Manual edits in SocialDraftDetail log before/after content to `voice_feedback` setting
+- **Rejection reason modal**: Reject button now opens a modal requiring an explanation — reason stored on draft + appended to `voice_feedback`
+- **Settings API append mode**: POST `/api/social/settings` accepts `appendEntry` to accumulate feedback entries without overwriting
+- **`rejection_reason` column** on `social_drafts` table
+- **Voice feedback in system prompts**: Both dashboard Claude (`/api/chat/social`) and scheduled agent read accumulated feedback to avoid repeating mistakes
+
+### Changed
+- `eslint-disable` comments in chat/social, publish, and settings routes converted from `next-line` to inline format (pre-commit hook compatibility)
+
 ## [5.0.7] — 2026-03-31 — Dashboard Redesign: Command Center
 
 ### Changed

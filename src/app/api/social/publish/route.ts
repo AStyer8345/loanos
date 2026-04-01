@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Push to Publer
-    const publerRes = await fetch('https://app.publer.io/api/v1/post', {
+    const publerRes = await fetch('https://app.publer.com/api/v1/posts/schedule', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${PUBLER_API_KEY}`,

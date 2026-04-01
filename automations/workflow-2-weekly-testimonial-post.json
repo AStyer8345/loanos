@@ -109,7 +109,7 @@
       "position": [1920, 300],
       "parameters": {
         "method": "POST",
-        "url": "https://app.publer.io/api/v1/post",
+        "url": "https://app.publer.com/api/v1/posts/schedule",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

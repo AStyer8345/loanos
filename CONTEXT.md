@@ -18,6 +18,34 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Send Tab Audit + Fix — 2026-04-01 (session 11)
+
+**Full audit and fix of Marketing → Send tab (rate update + newsletter flows) plus social publish History logging.**
+
+### Audit Findings (9 items, 5 fixed this session):
+1. **[FIXED] Race condition — 404 emails**: GitHub API returns ~100ms but Netlify deploy takes 15-60s. Emails sent before page exists. Added `waitForPageLive()` polling function (90s timeout, 5s interval) in `styerteam-mortgage-site/netlify/functions/lib/shared.js`.
+2. **[FIXED] Link corruption in emails**: `forceAbsoluteLinks()` replaced ALL relative .html links with the pageUrl instead of resolving to site root. Fixed to resolve against `https://styermortgage.com/` base.
+3. **[FIXED] Temp URL bug in newsletter custom prompt**: Used `temp-placeholder` slug initially, re-derived real slug after Claude responds, but return value still used original variables. Fixed to use `finalPageUrl`/`finalFilename`.
+4. **[FIXED] Weak voice rules in newsletter custom prompt mode**: Had 2-line minimal voice block vs. rate update's 16 banned phrases. Expanded to match rate-prompt-builder.js gold standard.
+5. **[FIXED] Social publish missing from History tab**: `/api/social/publish/route.ts` only logged to `social_activity`, not `mcc_state.log`. Added server-side History logging after successful Publer publish.
+6. **[DEFERRED] Voice guide Supabase ↔ Netlify disconnect**: Netlify functions hardcode voice instructions instead of reading from Supabase `social_settings`. Requires arch change (passing voice guide in payload).
+7. **[DEFERRED] Same-day rate update overwrites**: If two rate updates published same day, second overwrites first on website. Rare edge case.
+8. **Mailchimp error isolation**: Wrapped individual campaign sends in try-catch so one failure doesn't block others.
+9. **No n8n involvement**: Confirmed — Send tab flows run entirely through Netlify Functions, no n8n workflows involved.
+
+### Files Changed:
+- **styerteam-mortgage-site** (Netlify):
+  - `netlify/functions/lib/shared.js` — `waitForPageLive()`, `forceAbsoluteLinks()` fix
+  - `netlify/functions/generate-rate-update.js` — deploy gate + Mailchimp error isolation
+  - `netlify/functions/generate-newsletter.js` — deploy gate + temp URL fix + voice rules + error isolation
+- **loanos-clone** (Vercel):
+  - `src/app/api/social/publish/route.ts` — History tab logging via `mcc_state.log`
+  - `docs/superpowers/plans/2026-04-01-send-tab-fix.md` — implementation plan
+
+### Deployed:
+- Netlify: commits `abda751`, `87d7c8a` — deployed ✅
+- Vercel: commit `a5ef12d` → `dpl_EQeaeQgAGvHXKnVa1tfrHBU4j2vf` → READY ✅
+
 ## Marketing Dashboard Audit + Codex Review — 2026-04-01 (session 10)
 
 **Comprehensive audit of the marketing dashboard and social media scheduled tasks. Two-pass review: initial audit fixes + Codex verification pass.**

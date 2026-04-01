@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [5.1.2] — 2026-04-01 — Send Tab Audit + Fix
+
+### Fixed
+- **Race condition causing 404 emails**: Added `waitForPageLive()` deploy gate in shared.js — polls URL up to 90s before triggering Mailchimp sends (rate update + newsletter)
+- **Link corruption in teaser emails**: `forceAbsoluteLinks()` was replacing all relative .html links with the current pageUrl — fixed to resolve against `https://styermortgage.com/` base
+- **Newsletter temp URL bug**: Custom prompt mode returned `temp-placeholder` slug in response instead of final derived URL — now uses `finalPageUrl`/`finalFilename`
+- **Weak voice rules in newsletter custom prompt**: Expanded from 2-line minimal block to full 16-buzzword ban list matching rate-prompt-builder.js
+
+### Added
+- **Social publish → History tab**: `/api/social/publish/route.ts` now logs to `mcc_state.log` after successful Publer publish, with platform label and channel mapping
+- **Mailchimp error isolation**: Individual campaign sends wrapped in try-catch so one audience failure doesn't block others (both rate update + newsletter)
+
+### Notes
+- Deferred: Voice guide Supabase ↔ Netlify disconnect (requires arch change), same-day rate update file overwrites (rare edge case)
+- Netlify changes deployed in `styerteam-mortgage-site` repo (commits `abda751`, `87d7c8a`)
+
 ## [5.1.1] — 2026-04-01 — Marketing Dashboard Audit + Codex Review
 
 ### Fixed

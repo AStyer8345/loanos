@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES } from '@/lib/constants/loan-stages'
+import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
@@ -40,6 +40,7 @@ export default async function DashboardPage() {
 
   const stageCounts: Record<string, { count: number; volume: number; commission: number }> = {}
   let totalActive = 0, totalActiveVolume = 0, totalActiveCommission = 0
+  let pipelineCount = 0, pipelineVolume = 0, pipelineCommission = 0
   let commissionThisMonth = 0, commissionYTD = 0
   let fundedThisMonth = 0, fundedYTD = 0
   let volumeThisMonth = 0, volumeYTD = 0
@@ -62,6 +63,13 @@ export default async function DashboardPage() {
       totalActive++
       totalActiveVolume += amount
       totalActiveCommission += commission
+    }
+
+    // Pipeline = in-process only (excludes pre-approvals, leads, new apps)
+    if (isInStageGroup(loan.status, STAGE_GROUPS.IN_PROCESS)) {
+      pipelineCount++
+      pipelineVolume += amount
+      pipelineCommission += commission
     }
 
     const closingDate = loan.closing_date || loan.funding_date
@@ -249,6 +257,9 @@ export default async function DashboardPage() {
       totalActive={totalActive}
       totalActiveVolume={totalActiveVolume}
       totalActiveCommission={totalActiveCommission}
+      pipelineCount={pipelineCount}
+      pipelineVolume={pipelineVolume}
+      pipelineCommission={pipelineCommission}
       commissionThisMonth={commissionThisMonth}
       commissionYTD={commissionYTD}
       projectedCommission={totalActiveCommission}

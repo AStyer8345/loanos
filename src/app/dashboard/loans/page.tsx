@@ -672,17 +672,21 @@ export default function LoansPage() {
     }
 
     // Apply period filter (mtd = this month, ytd = this year)
+    // NOTE: Parse year/month from the date string directly to avoid timezone bugs.
+    // new Date('2026-04-01') is parsed as UTC midnight, which is March 31 in CT.
     if (urlFilterActive?.period && urlFilterActive?.stage === 'funded') {
       const now = new Date()
+      const nowYear = now.getFullYear()
+      const nowMonth = now.getMonth() + 1 // 1-indexed to match date string
       list = list.filter(l => {
         const cd = l.closing_date
         if (!cd) return false
-        const d = new Date(cd)
+        const [y, m] = cd.split('-').map(Number)
         if (urlFilterActive.period === 'mtd') {
-          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+          return y === nowYear && m === nowMonth
         }
         if (urlFilterActive.period === 'ytd') {
-          return d.getFullYear() === now.getFullYear()
+          return y === nowYear
         }
         return true
       })

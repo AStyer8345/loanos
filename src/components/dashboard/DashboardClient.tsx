@@ -26,6 +26,7 @@ interface ChartPoint { month: string; loans: number; volume: number; commission:
 
 interface DashboardClientProps {
   totalActive: number; totalActiveVolume: number; totalActiveCommission: number
+  pipelineCount?: number; pipelineVolume?: number; pipelineCommission?: number
   commissionThisMonth: number; commissionYTD: number; projectedCommission: number
   fundedThisMonth: number; fundedYTD: number
   volumeThisMonth: number; volumeYTD: number
@@ -134,8 +135,8 @@ export default function DashboardClient(props: DashboardClientProps) {
             </Link>
             <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Commission</div>
-              <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.totalActiveCommission)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.totalActive} loans · {fmtK(props.totalActiveVolume)} volume</div>
+              <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.pipelineCommission ?? props.totalActiveCommission)}</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
             </Link>
             <Link href="/dashboard/loans?stage=funded&period=mtd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Closed This Month</div>
@@ -144,8 +145,8 @@ export default function DashboardClient(props: DashboardClientProps) {
             </Link>
             <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#3b82f6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Loans</div>
-              <div className="text-2xl font-mono font-bold text-zinc-100">{props.totalActive}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtK(props.totalActiveVolume)} volume</div>
+              <div className="text-2xl font-mono font-bold text-zinc-100">{props.pipelineCount ?? props.totalActive}</div>
+              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
             </Link>
           </div>
 

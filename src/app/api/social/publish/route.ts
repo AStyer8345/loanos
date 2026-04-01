@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No platform accounts configured' }, { status: 400 })
     }
 
-    // Build the Publer post body — uses api.publer.io, not app.publer.com
+    // Build the Publer post body — uses app.publer.io/api
     const publerBody: Record<string, unknown> = {
       workspaceId: PUBLER_WORKSPACE,
       profiles,
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Push to Publer
-    const publerRes = await fetch('https://api.publer.io/v1/posts', {
+    const publerRes = await fetch('https://app.publer.io/api/v1/post', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${PUBLER_API_KEY}`,

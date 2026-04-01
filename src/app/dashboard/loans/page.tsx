@@ -57,6 +57,7 @@ interface Loan {
   contact_email?: string | null
   contact_phone?: string | null
   commission_amount?: number | null
+  purchase_price?: number | null
   doc_count?: number
   last_milestone_at?: string | null
 }
@@ -164,7 +165,7 @@ function closingUrgencyStyle(dateStr: string | null, isInProcess: boolean): Reco
   return {}
 }
 
-type SortKey = 'borrower_name' | 'loan_amount' | 'closing_date' | 'status'
+type SortKey = 'borrower_name' | 'loan_amount' | 'closing_date' | 'status' | 'interest_rate' | 'commission_amount' | 'purchase_price'
 type SortDir = 'asc' | 'desc'
 
 // ── Column definitions (toggleable) ───────────────────────────────────────────
@@ -172,11 +173,12 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
   { id: 'borrower_name',        label: 'Borrower',            key: 'borrower_name' },
   { id: 'loan_name',            label: 'Loan Name',           key: null },
   { id: 'loan_amount',          label: 'Amount',              key: 'loan_amount' },
+  { id: 'purchase_price',       label: 'Purchase Price',      key: 'purchase_price' },
   { id: 'status',               label: 'Status',              key: 'status' },
   { id: 'loan_purpose',         label: 'Purpose',             key: null },
   { id: 'loan_program',         label: 'Program',             key: null },
   { id: 'closing_date',         label: 'Closing',             key: 'closing_date' },
-  { id: 'interest_rate',        label: 'Rate',                key: null },
+  { id: 'interest_rate',        label: 'Rate',                key: 'interest_rate' },
   { id: 'lender',               label: 'Lender',              key: null },
   { id: 'rate_lock_expiration', label: 'Lock Exp',            key: null },
   { id: 'loan_number',          label: 'Loan #',              key: null },
@@ -186,7 +188,7 @@ const LOAN_COLUMNS: { id: string; label: string; key: SortKey | null }[] = [
   { id: 'contact_phone',        label: 'Phone',               key: null },
   { id: 'borrower_email',       label: 'Borrower Email',      key: null },
   { id: 'borrower_phone',       label: 'Borrower Phone',      key: null },
-  { id: 'commission_amount',    label: 'Commission',          key: null },
+  { id: 'commission_amount',    label: 'Commission',          key: 'commission_amount' },
   { id: 'last_milestone',      label: 'Last Milestone',       key: null },
   { id: 'actions',             label: '',                     key: null },
 ]
@@ -218,8 +220,7 @@ const FILTER_OPERATORS = [
   { id: 'after', label: 'after' },
 ] as const
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyCustomListRulesLoan(query: any, rules: CustomListRule[]): any {
+function applyCustomListRulesLoan(query: any, rules: CustomListRule[]): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   let q = query
   for (const r of rules) {
     if (!r.value?.trim()) continue
@@ -482,7 +483,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
@@ -730,6 +731,15 @@ export default function LoansPage() {
       const mul = sortDir === 'asc' ? 1 : -1
       if (sortKey === 'loan_amount') {
         return mul * ((a.loan_amount ?? 0) - (b.loan_amount ?? 0))
+      }
+      if (sortKey === 'purchase_price') {
+        return mul * ((a.purchase_price ?? 0) - (b.purchase_price ?? 0))
+      }
+      if (sortKey === 'interest_rate') {
+        return mul * ((a.interest_rate ?? 0) - (b.interest_rate ?? 0))
+      }
+      if (sortKey === 'commission_amount') {
+        return mul * ((a.commission_amount ?? 0) - (b.commission_amount ?? 0))
       }
       if (sortKey === 'closing_date') {
         const av = a.closing_date ?? ''
@@ -1591,6 +1601,7 @@ export default function LoansPage() {
                         )
                       }
                       if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 font-mono text-[#CCCCCC] whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
+                      if (col.id === 'purchase_price') return <td key={col.id} className="px-4 py-3 font-mono text-[#CCCCCC] whitespace-nowrap">{fmtCurrency(loan.purchase_price ?? null)}</td>
                       if (col.id === 'status') {
                         return (
                           <td key={col.id} className="px-4 py-3" onClick={e => e.stopPropagation()}>

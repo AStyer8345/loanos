@@ -18,6 +18,29 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Carousel Builder + Voice Guide Everywhere — 2026-03-31 (session 9)
+
+**Added visual carousel builder, wired voice guide into ALL content generation paths, regenerated all 22 existing drafts.**
+
+### New Features:
+- **Carousel Builder**: Full visual editor in Marketing dashboard — slide text editor (2-10 slides), black or image background, Canvas-rendered 1080x1080 PNGs, auto-labels (HOOK/CTA), uploads to Supabase storage, creates draft directly. Accessible from Compose panel when Carousel format selected.
+- **POST handler for social drafts API**: New POST endpoint enables direct draft creation (previously only GET/PATCH/DELETE existed).
+
+### Voice Guide Integration (all 6 content paths now connected):
+1. `/api/chat/social` — already connected (confirmed)
+2. `tasks/social-media/subagents/03-builder.md` — already connected (confirmed)
+3. `gbp-weekly-optimization/SKILL.md` — **added** voice guide fetch
+4. `styer-content-weekly/SKILL.md` — **added** voice guide fetch
+5. `/api/automations/generate/route.ts` — **added** via shared `fetchVoiceGuide` helper
+6. `/api/automations/refine/route.ts` — **added** via shared `fetchVoiceGuide` helper
+
+### Shared Infrastructure:
+- **`src/lib/voice/fetchVoiceGuide.ts`**: Shared helper that fetches voice_guide + voice_feedback from social_settings in parallel. Used by email automation generate/refine routes.
+- **`src/lib/automations/prompts.ts`**: `buildAutomationPrompt()` now accepts optional `voiceGuide` and `voiceFeedback` params — voice guide takes priority over hardcoded `VOICE_SYSTEM`.
+
+### Data Updates:
+- **22 draft-status posts regenerated** with updated voice guide via Claude API batch processing
+
 ## Social Dashboard Bug Fixes + UX Improvements — 2026-03-31 (session 8)
 
 **Fixed 3 bugs that have been silently broken since launch, added 3 UX improvements.**

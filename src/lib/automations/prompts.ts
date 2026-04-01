@@ -118,10 +118,24 @@ const AUTOMATION_INSTRUCTIONS: Record<string, (r: AutomationRecord) => string> =
 export function buildAutomationPrompt(
   automationId: string,
   record: AutomationRecord,
+  voiceGuide?: string,
+  voiceFeedback?: string,
 ): { system: string; userMessage: string } {
   const loFirst = loFirstName(record.loName)
 
-  const system = `${VOICE_SYSTEM}
+  // If a voice guide is available, use it as the primary voice authority
+  const voiceBlock = voiceGuide
+    ? `## Voice Guide (PRIMARY — follow this exactly)
+${voiceGuide}
+
+## Voice Feedback (patterns from past edits — do not repeat mistakes)
+${voiceFeedback || 'No feedback yet.'}
+
+## Baseline Rules
+${VOICE_SYSTEM}`
+    : VOICE_SYSTEM
+
+  const system = `${voiceBlock}
 
 You are writing on behalf of ${record.loName} at ${record.orgName}.
 Sign off as "${loFirst}" — nothing else after the sign-off.`

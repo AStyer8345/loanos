@@ -8,6 +8,7 @@ import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 import { getAutomationById } from '@/lib/automations/definitions'
 import { buildAutomationPrompt } from '@/lib/automations/prompts'
 import type { AutomationRecord } from '@/lib/automations/prompts'
+import { fetchVoiceGuide } from '@/lib/voice/fetchVoiceGuide'
 
 export async function POST(req: NextRequest) {
   let userId: string
@@ -156,8 +157,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Fetch voice guide for consistent brand voice
+    const { voiceGuide, voiceFeedback } = await fetchVoiceGuide(organizationId)
+
     // Build prompt and call Claude
-    const { system, userMessage } = buildAutomationPrompt(automationId, record)
+    const { system, userMessage } = buildAutomationPrompt(automationId, record, voiceGuide, voiceFeedback)
     const anthropic = await getAnthropicClient()
 
     const response = await anthropic.messages.create({

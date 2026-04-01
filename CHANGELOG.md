@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [5.1.0] — 2026-03-31 — Carousel Builder + Voice Guide Everywhere
+
+### Added
+- **Carousel Builder**: Visual slide editor for creating Instagram/social carousel posts — 2-10 slides, black or image background, Canvas-rendered 1080x1080 PNGs, auto-labeled HOOK/CTA, uploads to Supabase storage
+- **POST `/api/social/drafts`**: New endpoint for direct draft creation (carousel builder, future integrations)
+- **Shared `fetchVoiceGuide` helper** (`src/lib/voice/fetchVoiceGuide.ts`): Parallel fetch of voice_guide + voice_feedback from social_settings
+- **Voice guide in email automations**: `buildAutomationPrompt()` accepts voice guide, generate + refine routes fetch it automatically
+- **Voice guide in scheduled tasks**: Both `gbp-weekly-optimization` and `styer-content-weekly` SKILL.md files now fetch voice guide from Supabase before writing content
+
+### Changed
+- **`SocialComposePanel`**: Shows "BUILD CAROUSEL VISUALLY" button when Carousel format selected
+- **`SocialTab`**: Added carousel mode routing to CarouselBuilder component
+- **All 22 draft-status posts regenerated** with updated voice guide
+
 ## [5.0.9] — 2026-03-31 — Social Dashboard Bug Fixes + UX Improvements
 
 ### Fixed

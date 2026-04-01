@@ -20,29 +20,40 @@ function renderMarkdown(text: string): string {
 }
 
 /** Parse "SLIDE N" blocks from post content for carousel preview.
- *  Supports multiple formats:
- *    SLIDE 1 — HOOK         (carousel builder)
- *    **SLIDE 1 — HOOK**     (markdown bold)
- *    [Slide 1 — Hook]       (scheduled agent)
- *    [Slide 1: Hook]        (colon variant)
+ *  Supports ALL agent formats:
+ *    SLIDE 1 — HOOK           (carousel builder)
+ *    **SLIDE 1 — HOOK**       (bold markdown)
+ *    [Slide 1 — Hook]         (bracket format)
+ *    ## Slide 1 — Hook        (markdown header - agent format)
  */
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
-  const slideRegex = /(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
+  // Cut off content at design brief section (agent sometimes appends Canva specs)
+  let cleaned = content
+  const briefIdx = cleaned.search(/\n---\s*\n+\s*(?:#{1,3}\s+)?(?:CANVA|DESIGN)\s+(?:DESIGN\s+)?BRIEF/i)
+  if (briefIdx > 0) cleaned = cleaned.substring(0, briefIdx)
+  // Cut off at hashtag section divider
+  const hashIdx = cleaned.search(/\n---\s*\n+\s*\*\*Hashtags?\*\*\s*:/i)
+  if (hashIdx > 0) cleaned = cleaned.substring(0, hashIdx)
+  // Remove horizontal rules
+  cleaned = cleaned.replace(/^---\s*$/gm, '').replace(/\n{3,}/g, '\n\n')
+
+  const slideRegex = /(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n([\s\S]*?)(?=(?:\n\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
   const slides: { num: number; title: string; body: string }[] = []
   let match: RegExpExecArray | null
 
-  while ((match = slideRegex.exec(content)) !== null) {
+  while ((match = slideRegex.exec(cleaned)) !== null) {
     const num = parseInt(match[1], 10)
     const title = (match[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
-    const body = (match[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
+    let body = (match[3] || '').trim().replace(/^\n+|\n+$/g, '')
+    body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Extract intro text (everything before first SLIDE reference — either format)
-  const firstSlideIdx = content.search(/(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+1\b/i)
-  const intro = firstSlideIdx > 0 ? content.substring(0, firstSlideIdx).trim() : ''
+  // Extract intro text (everything before first SLIDE reference)
+  const firstSlideIdx = cleaned.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
+  const intro = firstSlideIdx > 0 ? cleaned.substring(0, firstSlideIdx).trim() : ''
 
   return { intro, slides }
 }

@@ -50,42 +50,64 @@ function parseContent(content: string | null): {
     }
   }
 
-  // Strip metadata lines (TITLE:, PLATFORM:, FORMAT:, CURRENT CONTENT:, CAPTION:)
-  const metadataPattern = /^\s*(TITLE|PLATFORM|FORMAT|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)\s*:/i
-  const bodyContent = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines)
-    .filter((line) => !metadataPattern.test(line))
+  // Strip metadata lines and design briefs
+  const metadataPattern = /^\s*(?:#{1,3}\s+)?(?:\*\*)?(?:TITLE|PLATFORM|FORMAT|PILLAR|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)(?:\*\*)?\s*:?/i
+  // Cut off content at design brief / hashtags section
+  const designBriefPattern = /\n---\s*\n+\s*(?:#{1,3}\s+)?(?:CANVA|DESIGN)\s+(?:DESIGN\s+)?BRIEF/i
+  const hashtagSectionPattern = /\n---\s*\n+\s*\*\*Hashtags?\*\*\s*:/i
+  // Also strip post title headers like "# Post 22 — VA Loan Myths"
+  const postTitlePattern = /^\s*#{1,3}\s+Post\s+\d+\s*[—–:-].*/i
+
+  let rawContent = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines).join('\n')
+
+  // Remove design brief and everything after it
+  const briefIdx = rawContent.search(designBriefPattern)
+  if (briefIdx > 0) rawContent = rawContent.substring(0, briefIdx)
+
+  // Remove hashtag section divider
+  const hashIdx = rawContent.search(hashtagSectionPattern)
+  if (hashIdx > 0) rawContent = rawContent.substring(0, hashIdx)
+
+  const bodyContent = rawContent
+    .split('\n')
+    .filter((line) => !metadataPattern.test(line) && !postTitlePattern.test(line))
     .join('\n')
+    .replace(/^---\s*$/gm, '') // remove horizontal rules
+    .replace(/\n{3,}/g, '\n\n') // collapse excess blank lines
     .trim()
 
   const commentLines = commentIndex >= 0 ? lines.slice(commentIndex + 1) : []
   const firstComment = [inlineComment, ...commentLines].join('\n').trim() || null
 
-  // Parse carousel slides — supports multiple formats:
-  //   SLIDE 1 — HOOK         (carousel builder format)
-  //   **SLIDE 1 — HOOK**     (markdown bold variant)
-  //   [Slide 1 — Hook]       (scheduled agent format)
-  //   [Slide 1: Hook]        (colon variant)
-  const slideRegex = /(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
+  // Parse carousel slides — supports ALL agent formats:
+  //   SLIDE 1 — HOOK           (carousel builder)
+  //   **SLIDE 1 — HOOK**       (bold markdown)
+  //   [Slide 1 — Hook]         (bracket format)
+  //   ## Slide 1 — Hook        (markdown header - agent format)
+  //   ## Slide 1: Hook         (colon variant)
+  const slideRegex = /(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n([\s\S]*?)(?=(?:\n\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
   const slides: ParsedSlide[] = []
   let slideMatch: RegExpExecArray | null
 
   while ((slideMatch = slideRegex.exec(bodyContent)) !== null) {
     const num = parseInt(slideMatch[1], 10)
     const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
-    const body = (slideMatch[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
+    let body = (slideMatch[3] || '').trim().replace(/^\n+|\n+$/g, '')
+    // Clean markdown bold from body content for display
+    body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Caption = everything before first SLIDE block (either format)
-  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+1\b/i)
+  // Caption = everything before first SLIDE block
+  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
   const caption = firstSlideIdx > 0 ? bodyContent.substring(0, firstSlideIdx).trim() : ''
 
   // For non-carousel: strip slide prefixes from body text
   const postText = slides.length >= 2
     ? caption
-    : bodyContent.replace(/^\s*\[?\s*slide\s+\d+\s*[—–:\-]\s*[^\]]*\]?\s*/gim, '').trim()
+    : bodyContent.replace(/^\s*(?:#{1,3}\s+)?\[?\s*slide\s+\d+\s*[—–:\-]\s*[^\]]*\]?\s*/gim, '').trim()
 
   return { postText, firstComment, caption, slides }
 }

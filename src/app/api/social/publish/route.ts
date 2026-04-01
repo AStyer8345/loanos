@@ -14,9 +14,11 @@ const PLATFORM_ACCOUNTS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   let organizationId: string
+  let userId: string
   try {
     const ctx = await getOrganization()
     organizationId = ctx.organizationId
+    userId = ctx.userId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -132,6 +134,51 @@ export async function POST(req: NextRequest) {
 
     if (activityError) {
       console.error('[social/publish] Failed to log activity:', activityError)
+    }
+
+    // Log to Marketing History (mcc_state.log) so it appears in the History tab
+    try {
+      const platformLabel = draft.platform === 'all' ? 'All Platforms' :
+        draft.platform.charAt(0).toUpperCase() + draft.platform.slice(1)
+
+      const channelMap: Record<string, string> = {
+        linkedin: 'LinkedIn',
+        facebook: 'Facebook',
+        instagram: 'Facebook', // History tab groups Instagram under Facebook
+        all: 'Facebook',       // Multi-platform defaults to Facebook channel
+      }
+
+      const logEntry = {
+        id: crypto.randomUUID(),
+        date: new Date().toISOString(),
+        activity: `Social post published — "${draft.title || 'Untitled'}" (${platformLabel})`,
+        channel: channelMap[draft.platform] || 'Other',
+        notes: draft.content?.substring(0, 120) || '',
+      }
+
+      // Read current mcc_state
+      const { data: mccRow } = await supabase
+        .from('mcc_state')
+        .select('value')
+        .eq('user_id', userId)
+        .eq('key', 'mcc')
+        .single()
+
+      const currentState = (mccRow?.value || { log: [], last: {} }) as { log: unknown[]; last: Record<string, string>; [k: string]: unknown }
+      const updatedState = {
+        ...currentState,
+        log: [logEntry, ...(currentState.log || [])],
+      }
+
+      await supabase
+        .from('mcc_state')
+        .upsert(
+          { user_id: userId, key: 'mcc', value: updatedState, updated_at: new Date().toISOString() } as Record<string, unknown>,
+          { onConflict: 'user_id,key' }
+        )
+    } catch (logErr) {
+      // Non-blocking — don't fail the publish because history logging failed
+      console.error('[social/publish] Failed to log to mcc_state:', logErr)
     }
 
     return NextResponse.json({ success: true, publerPostId })

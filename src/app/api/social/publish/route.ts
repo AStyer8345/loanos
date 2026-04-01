@@ -89,7 +89,8 @@ export async function POST(req: NextRequest) {
     const publerRes = await fetch('https://app.publer.com/api/v1/posts/schedule', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${PUBLER_API_KEY}`,
+        'Authorization': `Bearer-API ${PUBLER_API_KEY}`,
+        'Publer-Workspace-Id': PUBLER_WORKSPACE,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(publerBody),

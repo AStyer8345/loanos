@@ -113,7 +113,8 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Bearer a1adab72251a3fc861f7dfa0c97439955d28da23c423ec88" },
+            { "name": "Authorization", "value": "Bearer-API a1adab72251a3fc861f7dfa0c97439955d28da23c423ec88" },
+            { "name": "Publer-Workspace-Id", "value": "69b052bf835c8c689fab8fd8" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },

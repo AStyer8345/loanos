@@ -68,22 +68,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No platform accounts configured' }, { status: 400 })
     }
 
-    // Build the Publer post body — uses app.publer.io/api
+    // Build the Publer post body — matches working n8n workflow format
     const publerBody: Record<string, unknown> = {
-      workspaceId: PUBLER_WORKSPACE,
-      profiles,
+      accounts: profiles,
       text: draft.content,
-      isDraft: true, // Creates as draft in Publer for final review
+      is_draft: true, // Creates as draft in Publer for final review
     }
 
     // Add scheduled time if set
     if (draft.scheduled_for) {
-      publerBody.scheduledAt = draft.scheduled_for
+      publerBody.scheduled_at = draft.scheduled_for
     }
 
     // Add media if present
     if (draft.media_urls && draft.media_urls.length > 0) {
-      publerBody.media = draft.media_urls.map((url: string) => ({ url }))
+      publerBody.media = draft.media_urls.map((url: string) => ({ path: url }))
     }
 
     // Push to Publer

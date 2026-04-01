@@ -49,6 +49,7 @@ interface Loan {
   lender: string | null
   lender_name: string | null
   closing_date: string | null
+  estimated_closing_date: string | null
   rate_lock_expiration: string | null
   property_address: string | null
   property_city: string | null
@@ -146,6 +147,11 @@ function fmtRelativeDate(s: string | null | undefined): string {
 function borrowerDisplayName(loan: Pick<Loan, 'borrower_first_name' | 'borrower_last_name' | 'borrower_name' | 'loan_name'>): string {
   const full = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
   return full || loan.borrower_name || loan.loan_name || '(unnamed)'
+}
+
+/** Best closing date: prefer estimated_closing_date for display, fall back to closing_date */
+function effectiveClosingDate(loan: Pick<Loan, 'estimated_closing_date' | 'closing_date'>): string | null {
+  return loan.estimated_closing_date || loan.closing_date
 }
 
 function daysUntilClose(dateStr: string | null): number | null {
@@ -483,7 +489,7 @@ export default function LoansPage() {
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, estimated_closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
@@ -710,10 +716,10 @@ export default function LoansPage() {
       if (!isNaN(minRate)) list = list.filter(l => l.interest_rate != null && l.interest_rate > minRate)
     }
     if (filterDateFrom) {
-      list = list.filter(l => (l.closing_date ?? '') >= filterDateFrom)
+      list = list.filter(l => (effectiveClosingDate(l) ?? '') >= filterDateFrom)
     }
     if (filterDateTo) {
-      list = list.filter(l => (l.closing_date ?? '') <= filterDateTo)
+      list = list.filter(l => (effectiveClosingDate(l) ?? '') <= filterDateTo)
     }
 
     if (search.trim()) {
@@ -742,8 +748,8 @@ export default function LoansPage() {
         return mul * ((a.commission_amount ?? 0) - (b.commission_amount ?? 0))
       }
       if (sortKey === 'closing_date') {
-        const av = a.closing_date ?? ''
-        const bv = b.closing_date ?? ''
+        const av = effectiveClosingDate(a) ?? ''
+        const bv = effectiveClosingDate(b) ?? ''
         return mul * (av < bv ? -1 : av > bv ? 1 : 0)
       }
       if (sortKey === 'borrower_name') {
@@ -1062,7 +1068,7 @@ export default function LoansPage() {
                 const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
                 const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
                 const closingThisWeek = filtered.filter(l => {
-                  const d = daysUntilClose(l.closing_date)
+                  const d = daysUntilClose(effectiveClosingDate(l))
                   return d !== null && d >= 0 && d <= 7
                 }).length
                 return (
@@ -1435,7 +1441,8 @@ export default function LoansPage() {
                   {/* Cards */}
                   <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-2">
                     {col.loans.map(loan => {
-                      const days = daysUntilClose(loan.closing_date)
+                      const ecd = effectiveClosingDate(loan)
+                      const days = daysUntilClose(ecd)
                       const urgentClose = days !== null && days <= 7
                       const warnClose = days !== null && days > 7 && days <= 14
                       return (
@@ -1453,9 +1460,9 @@ export default function LoansPage() {
                           {loan.loan_name && <p className="text-[10px] font-mono text-[#C9A84C]/60 truncate mt-0.5">{loan.loan_name}</p>}
                           <div className="mt-2 flex items-center justify-between gap-2">
                             <span className="text-xs font-mono text-blue-400 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</span>
-                            {loan.closing_date && (
+                            {ecd && (
                               <span className={`text-[10px] font-mono whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-[#555555]'}`}>
-                                {fmtDate(loan.closing_date)}{days !== null && days <= 14 ? ` · ${days}d` : ''}
+                                {fmtDate(ecd)}{days !== null && days <= 14 ? ` · ${days}d` : ''}
                               </span>
                             )}
                           </div>
@@ -1526,8 +1533,9 @@ export default function LoansPage() {
               </thead>
               <tbody>
                 {filtered.map(loan => {
-                  const urgencyStyle = closingUrgencyStyle(loan.closing_date, activeList === 'inprocess')
-                  const days = activeList === 'inprocess' ? daysUntilClose(loan.closing_date) : null
+                  const ecd = effectiveClosingDate(loan)
+                  const urgencyStyle = closingUrgencyStyle(ecd, activeList === 'inprocess')
+                  const days = activeList === 'inprocess' ? daysUntilClose(ecd) : null
                   return (
                   <tr key={loan.id}
                     className={`group/row border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
@@ -1629,7 +1637,7 @@ export default function LoansPage() {
                       if (col.id === 'closing_date') return (
                         <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
                           <span className={days !== null && days <= 7 ? 'text-red-400' : days !== null && days <= 14 ? 'text-amber-400' : 'text-[#999999]'}>
-                            {fmtDate(loan.closing_date)}
+                            {fmtDate(ecd)}
                           </span>
                           {days !== null && days <= 14 && (
                             <span className={`ml-2 text-[10px] ${days <= 7 ? 'text-red-400' : 'text-amber-400'}`}>

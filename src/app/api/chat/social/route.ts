@@ -140,10 +140,10 @@ export async function POST(req: NextRequest) {
           content: text,
           media_urls: mediaUrls?.length ? mediaUrls : null,
           status: 'draft',
-          created_by: 'user',
+          created_by: 'human',
           agent_notes: 'Created via compose mode',
         })
-        .select('id')
+        .select('id, title, platform')
         .single()
 
       if (insertError) {
@@ -152,6 +152,18 @@ export async function POST(req: NextRequest) {
           error: `Failed to save draft: ${insertError.message}`,
           message: assistantMessage,
         }, { status: 500 })
+      }
+
+      const { error: activityError } = await supabase
+        .from('social_activity')
+        .insert({
+          organization_id: organizationId,
+          action: 'drafted',
+          detail: `New draft: "${newDraft?.title}" (${newDraft?.platform})`,
+        })
+
+      if (activityError) {
+        console.error('[chat/social] Activity insert error:', activityError)
       }
 
       return NextResponse.json({

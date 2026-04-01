@@ -384,7 +384,7 @@ export default function CarouselBuilder({ onDraftCreated, onClose }: Props) {
         scheduled_for: null,
         agent_notes: `Carousel built manually — ${slides.length} slides, bg: ${bgMode}`,
         publer_post_id: null,
-        created_by: 'user',
+        created_by: 'human',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }

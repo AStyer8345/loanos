@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
     for (const key of allowedKeys) {
       if (key in body) insert[key] = body[key]
     }
+    if (insert['created_by'] === undefined || insert['created_by'] === null) {
+      insert['created_by'] = 'human'
+    }
     insert['created_at'] = new Date().toISOString()
     insert['updated_at'] = new Date().toISOString()
 
@@ -27,13 +30,17 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     // Log activity
-    await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+    const { error: activityError } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       .from('social_activity')
       .insert({
         organization_id: organizationId,
         action: 'drafted',
         detail: `New draft: "${data.title}" (${data.platform})`,
       })
+
+    if (activityError) {
+      console.error('[social/drafts] failed to log create activity:', activityError)
+    }
 
     return NextResponse.json({ draft: data })
   } catch {
@@ -103,13 +110,17 @@ export async function PATCH(req: NextRequest) {
         posted: 'posted',
       }
       const action = actionMap[data.status] || 'updated'
-      await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      const { error: activityError } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         .from('social_activity')
         .insert({
           organization_id: organizationId,
           action,
           detail: `${action.charAt(0).toUpperCase() + action.slice(1)}: "${data.title}" (${data.platform})`,
         })
+
+      if (activityError) {
+        console.error('[social/drafts] failed to log status activity:', activityError)
+      }
     }
 
     return NextResponse.json({ draft: data })

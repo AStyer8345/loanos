@@ -71,6 +71,20 @@ const PLATFORM_LABELS: Record<string, string> = {
   all: 'ALL',
 }
 
+function normalizePlatform(platform: string | null): FilterPlatform | 'all' | null {
+  if (!platform) return null
+  const normalized = platform.toLowerCase()
+  if (normalized === 'all') return 'all'
+  if (normalized === 'instagram' || normalized === 'linkedin' || normalized === 'facebook') {
+    return normalized
+  }
+  return null
+}
+
+function normalizeCreatedBy(createdBy: string | null): FilterSource {
+  return createdBy === 'agent' ? 'agent' : 'human'
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -83,10 +97,16 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
   const [sourceFilter, setSourceFilter] = useState<FilterSource>('ALL')
 
   const filtered = drafts.filter((d) => {
+    const normalizedPlatform = normalizePlatform(d.platform)
+    const normalizedSource = normalizeCreatedBy(d.created_by)
+
     if (filter !== 'ALL' && d.status !== filter) return false
-    if (platformFilter !== 'ALL' && d.platform !== platformFilter && d.platform !== 'all') return false
-    if (sourceFilter === 'agent' && d.created_by !== 'agent') return false
-    if (sourceFilter === 'human' && d.created_by === 'agent') return false
+    if (
+      platformFilter !== 'ALL'
+      && normalizedPlatform !== platformFilter
+      && normalizedPlatform !== 'all'
+    ) return false
+    if (sourceFilter !== 'ALL' && normalizedSource !== sourceFilter) return false
     return true
   })
 

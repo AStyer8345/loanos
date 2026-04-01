@@ -13,12 +13,16 @@ export async function GET(req: NextRequest) {
 
     const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('social_settings')
       .select('value, updated_at')
       .eq('organization_id', organizationId)
       .eq('key', key)
       .maybeSingle()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json({
       value: data?.value ?? null,
@@ -43,17 +47,21 @@ export async function POST(req: NextRequest) {
 
     // Append mode: add a new line to existing value (used for voice_feedback log)
     if (appendEntry && typeof appendEntry === 'string') {
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('social_settings')
         .select('value')
         .eq('organization_id', organizationId)
         .eq('key', key)
         .maybeSingle()
 
+      if (existingError) {
+        return NextResponse.json({ error: existingError.message }, { status: 500 })
+      }
+
       const currentValue = existing?.value || ''
       const newValue = currentValue ? `${currentValue}\n${appendEntry}` : appendEntry
 
-      await supabase.from('social_settings').upsert(
+      const { error: upsertError } = await supabase.from('social_settings').upsert(
         {
           organization_id: organizationId,
           key,
@@ -64,6 +72,10 @@ export async function POST(req: NextRequest) {
         { onConflict: 'organization_id,key' }
       )
 
+      if (upsertError) {
+        return NextResponse.json({ error: upsertError.message }, { status: 500 })
+      }
+
       return NextResponse.json({ success: true })
     }
 
@@ -72,7 +84,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing value' }, { status: 400 })
     }
 
-    await supabase.from('social_settings').upsert(
+    const { error: upsertError } = await supabase.from('social_settings').upsert(
       {
         organization_id: organizationId,
         key,
@@ -82,6 +94,10 @@ export async function POST(req: NextRequest) {
       },
       { onConflict: 'organization_id,key' }
     )
+
+    if (upsertError) {
+      return NextResponse.json({ error: upsertError.message }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
   } catch {

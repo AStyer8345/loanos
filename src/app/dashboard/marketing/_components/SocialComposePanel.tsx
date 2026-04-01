@@ -183,7 +183,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
           scheduled_for: null,
           agent_notes: 'Created via compose mode',
           publer_post_id: null,
-          created_by: 'user',
+          created_by: 'human',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

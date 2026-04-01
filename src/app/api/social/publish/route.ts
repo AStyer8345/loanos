@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     const publerPostId = publerData.id || publerData.post_id || null
 
     // Only update draft status to 'posted' after Publer confirms
-    await supabase
+    const { error: updateError } = await supabase
       .from('social_drafts')
       .update({
         status: 'posted',
@@ -116,14 +116,23 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', draftId)
 
+    if (updateError) {
+      console.error('[social/publish] Failed to update draft status:', updateError)
+      return NextResponse.json({ error: 'Failed to update draft status' }, { status: 500 })
+    }
+
     // Log activity
-    await supabase
+    const { error: activityError } = await supabase
       .from('social_activity')
       .insert({
         organization_id: organizationId,
-        action: 'scheduled',
+        action: 'posted',
         detail: `Published "${draft.title}" to Publer (${draft.platform})`,
       })
+
+    if (activityError) {
+      console.error('[social/publish] Failed to log activity:', activityError)
+    }
 
     return NextResponse.json({ success: true, publerPostId })
   } catch (error) {

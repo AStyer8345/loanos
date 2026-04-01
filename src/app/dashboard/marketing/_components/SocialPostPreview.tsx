@@ -25,8 +25,15 @@ function normalizePlatform(platform: string | null | undefined): Platform | 'all
   return 'all'
 }
 
-function parseContent(content: string | null): { postText: string; firstComment: string | null } {
-  if (!content) return { postText: '', firstComment: null }
+type ParsedSlide = { num: number; title: string; body: string }
+
+function parseContent(content: string | null): {
+  postText: string
+  firstComment: string | null
+  caption: string
+  slides: ParsedSlide[]
+} {
+  if (!content) return { postText: '', firstComment: null, caption: '', slides: [] }
 
   const normalized = content.replace(/\r\n/g, '\n')
   const lines = normalized.split('\n')
@@ -43,19 +50,40 @@ function parseContent(content: string | null): { postText: string; firstComment:
     }
   }
 
-  // Strip metadata lines (TITLE:, PLATFORM:, FORMAT:, CURRENT CONTENT:, CAPTION:) and SLIDE prefixes
+  // Strip metadata lines (TITLE:, PLATFORM:, FORMAT:, CURRENT CONTENT:, CAPTION:)
   const metadataPattern = /^\s*(TITLE|PLATFORM|FORMAT|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)\s*:/i
-  const bodyLines = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines)
+  const bodyContent = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines)
     .filter((line) => !metadataPattern.test(line))
-    .map((line) => line.replace(/^\s*slide\s+\d+\s*[—–:-]\s*/i, ''))
+    .join('\n')
+    .trim()
 
   const commentLines = commentIndex >= 0 ? lines.slice(commentIndex + 1) : []
   const firstComment = [inlineComment, ...commentLines].join('\n').trim() || null
 
-  return {
-    postText: bodyLines.join('\n').trim(),
-    firstComment,
+  // Parse carousel slides
+  const slideRegex = /(?:^|\n)\s*(?:\*\*)?SLIDE\s+(\d+)(?:\s*[—–:-]\s*([^\n*]*))?(?:\*\*)?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*)?SLIDE\s+\d)|$)/gi
+  const slides: ParsedSlide[] = []
+  let slideMatch: RegExpExecArray | null
+
+  while ((slideMatch = slideRegex.exec(bodyContent)) !== null) {
+    const num = parseInt(slideMatch[1], 10)
+    const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '')
+    const body = (slideMatch[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
+    if (body || title) {
+      slides.push({ num, title, body })
+    }
   }
+
+  // Caption = everything before first SLIDE block
+  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:\*\*)?SLIDE\s+1\b/i)
+  const caption = firstSlideIdx > 0 ? bodyContent.substring(0, firstSlideIdx).trim() : ''
+
+  // For non-carousel: strip slide prefixes from body text
+  const postText = slides.length >= 2
+    ? caption
+    : bodyContent.replace(/^\s*slide\s+\d+\s*[—–:-]\s*/gim, '').trim()
+
+  return { postText, firstComment, caption, slides }
 }
 
 function getLineClamp(expanded: boolean): CSSProperties {
@@ -273,12 +301,171 @@ function MediaBlock({
   )
 }
 
+/** Branded carousel slide preview — matches the visual style of social carousel posts */
+function CarouselSlidePreview({
+  slide,
+  total,
+  slideIndex,
+  onPrev,
+  onNext,
+}: {
+  slide: ParsedSlide
+  total: number
+  slideIndex: number
+  onPrev: () => void
+  onNext: () => void
+}) {
+  const isFirst = slide.num === 1
+  const isLast = slide.num === total
+  const isCTA = isLast || /cta/i.test(slide.title)
+  const bodyLines = slide.body.split('\n').filter(Boolean)
+
+  return (
+    <div>
+      {/* The slide card */}
+      <div
+        style={{
+          background: '#0a0a0a',
+          borderRadius: 16,
+          border: isCTA ? `1px solid ${GOLD}` : '1px solid #1a1a1a',
+          aspectRatio: '1 / 1',
+          padding: isFirst ? '32px 28px' : '24px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          fontFamily: PREVIEW_FONT,
+        }}
+      >
+        {/* Top: slide number */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ color: '#52525b', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em' }}>
+            SLIDE {slide.num} OF {total}
+          </span>
+          {slide.title && !isFirst && (
+            <span style={{ color: GOLD, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em' }}>
+              {slide.title.toUpperCase()}
+            </span>
+          )}
+        </div>
+
+        {/* Middle: content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {isFirst ? (
+            <>
+              <div style={{ color: GOLD, fontSize: 20, fontWeight: 700, lineHeight: 1.25, marginBottom: 12 }}>
+                {bodyLines[0] || ''}
+              </div>
+              {bodyLines.length > 1 && (
+                <div style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.6 }}>
+                  {bodyLines.slice(1).join('\n')}
+                </div>
+              )}
+            </>
+          ) : isCTA ? (
+            <div style={{ textAlign: 'center' }}>
+              {bodyLines.map((line, i) => (
+                <div
+                  key={i}
+                  style={{
+                    color: i === 0 ? GOLD : '#a1a1aa',
+                    fontSize: i === 0 ? 16 : 12,
+                    fontWeight: i === 0 ? 700 : 400,
+                    lineHeight: 1.5,
+                    marginBottom: 8,
+                  }}
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              {slide.body}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom: branding */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid #1a1a1a' }}>
+          <span style={{ color: '#52525b', fontSize: 9, letterSpacing: '0.05em' }}>
+            Adam Styer | Mortgage Solutions LP
+          </span>
+          {isCTA && (
+            <span style={{ color: GOLD, fontSize: 9, fontWeight: 700 }}>NMLS# 513013</span>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 12 }}>
+        <button
+          onClick={onPrev}
+          disabled={slideIndex === 0}
+          style={{
+            appearance: 'none',
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid #3f3f46',
+            cursor: slideIndex === 0 ? 'default' : 'pointer',
+            opacity: slideIndex === 0 ? 0.2 : 1,
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          &#8592;
+        </button>
+
+        {/* Dot indicators */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Array.from({ length: total }).map((_, i) => (
+            <span
+              key={i}
+              style={{
+                width: i === slideIndex ? 16 : 6,
+                height: 6,
+                borderRadius: 3,
+                background: i === slideIndex ? GOLD : '#3f3f46',
+                transition: 'all 0.2s',
+                display: 'block',
+              }}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={onNext}
+          disabled={slideIndex === total - 1}
+          style={{
+            appearance: 'none',
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid #3f3f46',
+            cursor: slideIndex === total - 1 ? 'default' : 'pointer',
+            opacity: slideIndex === total - 1 ? 0.2 : 1,
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          &#8594;
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: Props) {
   const detectedPlatform = normalizePlatform(draft.platform)
   const [platform, setPlatform] = useState<Platform>(
     detectedPlatform === 'all' ? 'facebook' : detectedPlatform,
   )
   const [expanded, setExpanded] = useState(false)
+  const [slideIndex, setSlideIndex] = useState(0)
 
   useEffect(() => {
     setPlatform(detectedPlatform === 'all' ? 'facebook' : detectedPlatform)
@@ -286,6 +473,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
 
   useEffect(() => {
     setExpanded(false)
+    setSlideIndex(0)
   }, [draft.id, platform])
 
   useEffect(() => {
@@ -299,13 +487,15 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
     return () => window.removeEventListener('keydown', handleEscape)
   }, [onClose])
 
-  const { postText, firstComment } = useMemo(() => parseContent(draft.content), [draft.content])
+  const { postText, firstComment, caption, slides } = useMemo(() => parseContent(draft.content), [draft.content])
+  const isCarousel = slides.length >= 2
   const mediaUrls = useMemo(
     () => signedMediaUrls.filter((url): url is string => Boolean(url)),
     [signedMediaUrls],
   )
   const showTabs = detectedPlatform === 'all'
-  const showMore = postText.length > 280
+  const displayText = isCarousel ? caption : postText
+  const showMore = displayText.length > 280
 
   return (
     <div
@@ -400,29 +590,32 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
             <div style={{ padding: 18 }}>
               <ProfileBlock />
 
-              <div style={{ marginTop: 16, color: '#111118', fontSize: 15, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                <div style={getLineClamp(expanded)}>
-                  {postText || 'No post copy available.'}
+              {/* Caption / post text */}
+              {displayText && (
+                <div style={{ marginTop: 16, color: '#111118', fontSize: 15, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  <div style={getLineClamp(expanded)}>
+                    {displayText}
+                  </div>
+                  {!expanded && showMore && (
+                    <button
+                      onClick={() => setExpanded(true)}
+                      style={{
+                        appearance: 'none',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#6b7280',
+                        padding: 0,
+                        marginTop: 6,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ...more
+                    </button>
+                  )}
                 </div>
-                {!expanded && showMore && (
-                  <button
-                    onClick={() => setExpanded(true)}
-                    style={{
-                      appearance: 'none',
-                      border: 'none',
-                      background: 'transparent',
-                      color: '#6b7280',
-                      padding: 0,
-                      marginTop: 6,
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ...more
-                  </button>
-                )}
-              </div>
+              )}
 
               {draft.hashtags && (
                 <div
@@ -438,7 +631,20 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
                 </div>
               )}
 
-              <MediaBlock mediaUrls={mediaUrls} platform={platform} />
+              {/* Carousel slides or media */}
+              {isCarousel ? (
+                <div style={{ marginTop: 16 }}>
+                  <CarouselSlidePreview
+                    slide={slides[Math.min(slideIndex, slides.length - 1)]}
+                    total={slides.length}
+                    slideIndex={slideIndex}
+                    onPrev={() => setSlideIndex((i) => Math.max(0, i - 1))}
+                    onNext={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))}
+                  />
+                </div>
+              ) : (
+                <MediaBlock mediaUrls={mediaUrls} platform={platform} />
+              )}
 
               <div style={{ marginTop: 16 }}>
                 <EngagementBar platform={platform} />

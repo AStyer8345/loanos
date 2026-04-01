@@ -81,9 +81,11 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'pre-approval': 'pre_approval',
   'Started': 'pre_approval',
   'Started App': 'pre_approval',
+  'application': 'pre_approval',
   'Application': 'pre_approval',
   'application_intake': 'pre_approval',
   'APPLICATION_INTAKE': 'pre_approval',
+  'PREAPPROVED': 'pre_approval',
   'QUALIFICATION': 'pre_approval',
 
   // Loan Setup
@@ -95,6 +97,7 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'processing': 'processing',
   'Processing': 'processing',
   'In Process': 'processing',
+  'under_contract': 'processing',
   'Loan in Process': 'processing',
 
   // Disclosed
@@ -120,6 +123,7 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'Approved with Conditions': 'approved',
   'Approved w/ Conditions': 'approved',
   'APPROVED_WITH_CONDITIONS': 'approved',
+  'APPROVED_WITH_CONDITION': 'approved',
   'CONDITIONAL_APPROVAL': 'approved',
   'Conditional Approval': 'approved',
   'conditional-approval': 'approved',
@@ -330,6 +334,7 @@ export const STATUS_HEX: Record<string, string> = {
   'APPROVED':                 '#0891B2',
   'Approved':                 '#0891B2',
   'APPROVED_WITH_CONDITIONS': '#0891B2',
+  'APPROVED_WITH_CONDITION':  '#0891B2',
   'CONDITIONAL_APPROVAL':     '#0891B2',
   'Approved with Conditions': '#0891B2',
   'Approved w/ Conditions':   '#0891B2',
@@ -351,9 +356,11 @@ export const STATUS_HEX: Record<string, string> = {
   'Pre-Approved':             '#818CF8',
   'pre_approved':             '#818CF8',
   'pre-approval':             '#818CF8',
+  'application':              '#6366F1',
   'Application':              '#6366F1',
   'application_intake':       '#6366F1',
   'APPLICATION_INTAKE':       '#6366F1',
+  'PREAPPROVED':              '#818CF8',
   'QUALIFICATION':            '#6366F1',
   'New Application':          '#60A5FA',
   'new_application':          '#60A5FA',

@@ -300,6 +300,10 @@ export async function POST(request: NextRequest) {
 
       borrower_first_name: n(body.borrowerFirstName) ?? n(body['loanBorrower1_firstName']),
       borrower_last_name: n(body.borrowerLastName) ?? n(body['loanBorrower1_lastName']),
+      borrower_name: [
+        n(body.borrowerFirstName) ?? n(body['loanBorrower1_firstName']),
+        n(body.borrowerLastName) ?? n(body['loanBorrower1_lastName']),
+      ].filter(Boolean).join(' ') || null,
       borrower_email: (email as string).toLowerCase().trim(),
       borrower_phone: n(body.borrowerPhone) ?? n(body['loanBorrower1_mobilePhone10digit']),
 

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 
-const PUBLER_API_KEY = '14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2'
-const PUBLER_WORKSPACE = '69b052bf835c8c689fab8fd8'
+const PUBLER_API_KEY = process.env.PUBLER_API_KEY || ''
+const PUBLER_WORKSPACE = process.env.PUBLER_WORKSPACE || ''
 
 const PLATFORM_ACCOUNTS: Record<string, string> = {
   instagram: '69b0530110a77a0ed895847d',
@@ -22,13 +22,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    if (!PUBLER_API_KEY || !PUBLER_WORKSPACE) {
+      return NextResponse.json({ error: 'Publer credentials not configured — add PUBLER_API_KEY and PUBLER_WORKSPACE env vars' }, { status: 500 })
+    }
+
     const { draftId } = await req.json()
     if (!draftId) {
       return NextResponse.json({ error: 'draftId required' }, { status: 400 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Fetch the draft
     const { data: draft, error: fetchError } = await supabase

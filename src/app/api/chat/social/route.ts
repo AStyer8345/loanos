@@ -11,8 +11,7 @@ async function buildSocialSystemPrompt(
   draftId?: string,
   compose?: boolean
 ): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase: any = createServiceClient()
+  const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // Load voice guide from social_settings
   const { data: voiceRow } = await supabase
@@ -23,6 +22,16 @@ async function buildSocialSystemPrompt(
     .maybeSingle()
 
   const voiceGuide = voiceRow?.value || 'No voice guide configured yet.'
+
+  // Load voice feedback (learnings from Adam's edits and rejections)
+  const { data: feedbackRow } = await supabase
+    .from('social_settings')
+    .select('value')
+    .eq('organization_id', organizationId)
+    .eq('key', 'voice_feedback')
+    .maybeSingle()
+
+  const voiceFeedback = feedbackRow?.value || ''
 
   let draftContext = ''
   if (draftId) {
@@ -52,6 +61,7 @@ The user wants to create a new post. Generate a complete social media post based
 ## Voice & Workflow Guide
 ${voiceGuide}
 
+${voiceFeedback ? `## Feedback from Adam's Edits & Rejections\nLearn from these — do not repeat the same mistakes:\n${voiceFeedback}\n` : ''}
 ${draftContext}
 
 ## Rules
@@ -106,8 +116,7 @@ export async function POST(req: NextRequest) {
 
     const text = response.content.find((b) => b.type === 'text')?.text ?? ''
     const assistantMessage = { role: 'assistant' as const, content: text }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Compose mode — create a new draft from Claude's response
     if (compose) {

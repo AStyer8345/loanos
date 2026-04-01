@@ -36,7 +36,7 @@ export async function PATCH(req: NextRequest) {
 
     // Only allow specific fields to be updated
     const allowed: Record<string, unknown> = {}
-    const allowedKeys = ['status', 'content', 'title', 'hashtags', 'platform', 'format', 'scheduled_for']
+    const allowedKeys = ['status', 'content', 'title', 'hashtags', 'platform', 'format', 'scheduled_for', 'media_urls', 'rejection_reason']
     for (const key of allowedKeys) {
       if (key in fields) {
         allowed[key] = fields[key]

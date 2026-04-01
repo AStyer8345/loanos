@@ -26,9 +26,45 @@ Read:
 
 ---
 
+## STEP 0 — FETCH VOICE GUIDE + FEEDBACK (MANDATORY — do this BEFORE writing any content)
+
+Before writing ANY post content, fetch Adam's voice guide and recent feedback from Supabase. This is the source of truth for how to write — it overrides the generic voice standards below.
+
+```bash
+# Fetch voice guide
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_guide&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+```bash
+# Fetch voice feedback (learnings from Adam's edits and rejections)
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_feedback&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+```bash
+# Fetch recently rejected drafts with reasons (learn from what Adam doesn't like)
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.rejected&select=title,rejection_reason,content&order=updated_at.desc&limit=10" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+**Read the voice guide carefully.** It contains Adam's actual opinions, workflow, phrases, and topic preferences. The voice standards below are a fallback — the voice guide is the authority. If the voice guide says "Adam always recommends locking immediately," do NOT write posts debating lock-vs-float.
+
+**Read the voice feedback.** It contains patterns from Adam's edits — things the agent got wrong before. Learn from them. Do not repeat mistakes.
+
+**Read rejected drafts.** Understand WHY Adam rejected them. Avoid similar content, tone, or topics.
+
+---
+
 ## EXECUTION PROTOCOL
 
 ### Pre-Execution Checklist
+- [ ] Voice guide fetched from Supabase and read completely
+- [ ] Voice feedback fetched and patterns noted
+- [ ] Rejected drafts reviewed for anti-patterns
 - [ ] Full spec read
 - [ ] Platform word limits understood (LinkedIn ≤150 words, Instagram ≤150 words, Facebook ≤120 words)
 - [ ] Compliance flags identified for each post

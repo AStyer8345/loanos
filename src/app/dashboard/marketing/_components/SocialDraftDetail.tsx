@@ -285,6 +285,8 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   const [chatLoading, setChatLoading] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
   const [mediaIndex, setMediaIndex] = useState(0)
   const [slideIndex, setSlideIndex] = useState(0)
   const mediaScrollRef = useRef<HTMLDivElement>(null)
@@ -354,7 +356,18 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
 
   function handleSave() {
     setEditing(false)
+    const oldContent = draft.content || ''
+    const newContent = editContent
     onUpdate({ ...draft, content: editContent })
+    // If content actually changed, log the edit as feedback for the agent
+    if (oldContent !== newContent) {
+      const summary = `[${new Date().toISOString().slice(0, 10)}] EDITED "${draft.title}": Adam manually edited this post. Original started with: "${oldContent.slice(0, 80)}..." — Changed to start with: "${newContent.slice(0, 80)}..."`
+      fetch('/api/social/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'voice_feedback', appendEntry: summary }),
+      }).catch(() => { /* non-blocking */ })
+    }
   }
 
   function handleApprove() {
@@ -362,7 +375,23 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   }
 
   function handleReject() {
-    onUpdate({ ...draft, status: 'rejected' })
+    setShowRejectModal(true)
+    setRejectReason('')
+  }
+
+  async function handleRejectSubmit() {
+    if (!rejectReason.trim()) return
+    setShowRejectModal(false)
+    onUpdate({ ...draft, status: 'rejected', rejection_reason: rejectReason.trim() } as SocialDraft)
+    // Store feedback for the agent to learn from
+    try {
+      const res = await fetch('/api/social/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'voice_feedback', appendEntry: `[${new Date().toISOString().slice(0, 10)}] REJECTED "${draft.title}": ${rejectReason.trim()}` }),
+      })
+      if (!res.ok) console.error('Failed to save voice feedback')
+    } catch { /* non-blocking */ }
   }
 
   async function handlePublish() {
@@ -672,6 +701,50 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                 style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
               >
                 {publishError}
+              </div>
+            )}
+            {showRejectModal && (
+              <div
+                className="rounded-sm p-3 space-y-2"
+                style={{ background: '#1a0a0a', border: '1px solid #E05252' }}
+              >
+                <div className="text-xs font-bold" style={{ color: '#E05252', letterSpacing: '0.1em' }}>
+                  WHY ARE YOU REJECTING THIS?
+                </div>
+                <div className="text-xs" style={{ color: '#a1a1aa' }}>
+                  This helps the AI learn your voice. Be specific — e.g. &quot;I never debate lock vs float&quot; or &quot;too corporate sounding&quot;
+                </div>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="What's wrong with this post..."
+                  className="w-full rounded-sm p-2 text-sm resize-none"
+                  style={{
+                    background: '#09090b',
+                    color: '#fafafa',
+                    border: '1px solid #27272a',
+                    fontFamily: 'inherit',
+                    minHeight: 60,
+                  }}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleRejectSubmit}
+                    disabled={!rejectReason.trim()}
+                    className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-40"
+                    style={{ background: '#E05252', color: '#fff', fontFamily: 'inherit' }}
+                  >
+                    REJECT
+                  </button>
+                  <button
+                    onClick={() => setShowRejectModal(false)}
+                    className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
+                    style={{ background: 'transparent', color: '#71717a', border: '1px solid #27272a', fontFamily: 'inherit' }}
+                  >
+                    CANCEL
+                  </button>
+                </div>
               </div>
             )}
           </>

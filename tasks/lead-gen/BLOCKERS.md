@@ -76,7 +76,7 @@ Mailchimp env vars confirmed set (MAILCHIMP_API_KEY, MAILCHIMP_BORROWER_LIST_ID)
 ---
 
 ## BLOCKER-004 — Wrong LOANOS_URL in subscribe-lead.js (CRITICAL)
-**Status:** ACTIVE — All LoanOS contact creation failing
+**Status:** PARTIALLY RESOLVED — Netlify env var added 2026-03-31 by Adam. Builder code change still needed (subscribe-lead.js line 42: read from `process.env.LOANOS_URL` instead of hardcoded URL).
 **Detected:** 2026-03-30 AM post-deploy QA
 **Source:** Live form test returned `{"success":true,"mailchimp":"ok","loanos":"failed"}` for both funnels
 

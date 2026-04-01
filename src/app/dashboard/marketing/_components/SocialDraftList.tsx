@@ -17,6 +17,7 @@ export type SocialDraft = {
   scheduled_for: string | null
   agent_notes: string | null
   publer_post_id: string | null
+  rejection_reason?: string | null
   created_by: string | null
   created_at: string
   updated_at: string

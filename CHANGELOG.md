@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [5.0.9] — 2026-03-31 — Social Dashboard Bug Fixes + UX Improvements
+
+### Fixed
+- **PATCH body missing fields**: `SocialTab.handleUpdate` now sends `media_urls` and `rejection_reason` to the API — both were silently dropped on server round-trip
+- **Activity feed blank entries**: `SocialActivityFeed` was mapping `type`/`message` but DB uses `action`/`detail` — feed has been rendering blank entries since launch
+- **APPLY TO POST stale edit buffer**: Clicking EDIT after applying a Claude chat response now shows the applied content instead of stale original
+
+### Added
+- **DELETE draft**: Muted delete button with confirm dialog + new `DELETE` handler in `/api/social/drafts`
+- **APPROVE & PUBLISH**: One-click gold button that approves then immediately publishes to Publer — reduces draft→posted to a single action
+- **Platform badges**: IG/LI/FB/ALL badges next to status in draft list sidebar
+
 ## [5.0.8] — 2026-03-31 — Social Media Dashboard Fixes + Voice Feedback Loop
 
 ### Fixed

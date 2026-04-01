@@ -18,6 +18,22 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Social Dashboard Bug Fixes + UX Improvements — 2026-03-31 (session 8)
+
+**Fixed 3 bugs that have been silently broken since launch, added 3 UX improvements.**
+
+### Bugs Fixed:
+- **PATCH body missing fields**: `SocialTab.handleUpdate` was sending the update but omitting `media_urls` and `rejection_reason` from the request body — rejections with reasons and media edits were silently dropped on server round-trip even though the API accepted them
+- **Activity feed blank entries**: `SocialActivityFeed` mapped `type`/`message` but the DB table has `action`/`detail` — the feed has been rendering blank entries since it was built
+- **APPLY TO POST stale edit buffer**: After applying a Claude chat response to a draft, clicking EDIT showed the old content because `editContent` state wasn't synced when `draft.content` changed externally
+
+### UX Improvements:
+- **DELETE button**: Muted gray delete button (far right of action bar) with confirm dialog. New DELETE API handler in drafts route
+- **APPROVE & PUBLISH one-click**: Gold button that approves then immediately publishes to Publer in one action — the "press a button and it goes out" flow
+- **Platform badges**: IG/LI/FB/ALL badges next to status in the draft list sidebar
+
+### Deployed: 01559cc → dpl_BnxQYhSLsHQEg2MhSAZ8pxULanyj → BUILDING (checking)
+
 ## Social Media Dashboard Fixes — 2026-03-31 (session 7)
 
 **Audited and fixed the social media content pipeline — voice guide wasn't connected to scheduled agent, no feedback loop existed, media uploads were silently broken.**

@@ -229,6 +229,84 @@ export default function CarouselBuilder({ onDraftCreated, onClose }: Props) {
   // Keep the raw file for potential future use
   const bgFileRef = useRef<File | null>(null)
 
+  // AI generation state
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiSlideCount, setAiSlideCount] = useState(5)
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [generated, setGenerated] = useState(false)
+
+  /** AI-generate slide content from a prompt */
+  const handleAiGenerate = useCallback(async () => {
+    if (!aiPrompt.trim()) return
+    setAiGenerating(true)
+    setAiError(null)
+
+    try {
+      const res = await fetch('/api/chat/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `Create a ${aiSlideCount}-slide Instagram carousel about: ${aiPrompt}
+
+Return ONLY a JSON array of objects, each with a "text" field for the slide content. The first slide should be a strong hook, middle slides should be valuable points, and the last slide should be a call to action.
+
+Example format:
+[
+  {"text": "Hook text here"},
+  {"text": "Point 1"},
+  {"text": "Point 2"},
+  {"text": "Call to action"}
+]
+
+Rules:
+- Keep each slide to 1-3 short sentences max
+- Write in Adam's voice — punchy, direct, conversational
+- First slide = attention-grabbing hook (question or bold statement)
+- Last slide = clear CTA
+- No hashtags in slide text
+- Return ONLY the JSON array, nothing else`,
+            },
+          ],
+        }),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Generation failed' }))
+        setAiError(errData.error || `Failed (${res.status})`)
+        return
+      }
+
+      const data = await res.json()
+      const text = data.message?.content || ''
+
+      // Parse JSON array from Claude's response
+      const jsonMatch = text.match(/\[[\s\S]*\]/)
+      if (!jsonMatch) {
+        setAiError('AI response was not in expected format. Try again.')
+        return
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]) as Array<{ text: string }>
+      if (!Array.isArray(parsed) || parsed.length < 2) {
+        setAiError('Need at least 2 slides. Try again.')
+        return
+      }
+
+      // Populate slides
+      setSlides(parsed.map((s) => ({ text: s.text || '' })))
+      setSelectedSlide(0)
+      setGenerated(true)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Generation failed')
+    } finally {
+      setAiGenerating(false)
+    }
+  }, [aiPrompt, aiSlideCount])
+
   const updateSlide = useCallback((index: number, text: string) => {
     setSlides((prev) => prev.map((s, i) => (i === index ? { text } : s)))
   }, [])
@@ -425,6 +503,75 @@ export default function CarouselBuilder({ onDraftCreated, onClose }: Props) {
         <div className="flex h-full">
           {/* Left column: slide editor */}
           <div className="w-80 border-r border-zinc-800 p-4 space-y-4 overflow-y-auto">
+            {/* AI Generation */}
+            {!generated && (
+              <div className="rounded-md border border-zinc-700 p-3 space-y-2" style={{ background: '#0d0d18' }}>
+                <label
+                  className="block font-bold"
+                  style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
+                >
+                  ✨ GENERATE WITH AI
+                </label>
+                <textarea
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. 5 things first-time buyers don't know about closing costs..."
+                  className="w-full rounded-md border border-zinc-800 text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                  style={{ background: '#111118', fontFamily: 'inherit', lineHeight: 1.5 }}
+                />
+                <div className="flex items-center gap-2">
+                  <label className="text-zinc-500" style={{ fontSize: 10 }}>SLIDES:</label>
+                  <div className="flex gap-1">
+                    {[3, 4, 5, 6, 7, 8].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setAiSlideCount(n)}
+                        className="w-6 h-6 rounded text-xs font-bold transition-colors"
+                        style={{
+                          background: aiSlideCount === n ? GOLD : 'transparent',
+                          color: aiSlideCount === n ? '#09090b' : '#71717a',
+                          border: aiSlideCount === n ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                        }}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {aiError && (
+                  <p className="text-red-400" style={{ fontSize: 10 }}>{aiError}</p>
+                )}
+                <button
+                  onClick={handleAiGenerate}
+                  disabled={aiGenerating || !aiPrompt.trim()}
+                  className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80 disabled:opacity-40"
+                  style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+                >
+                  {aiGenerating ? 'GENERATING...' : 'GENERATE SLIDES'}
+                </button>
+                <div className="text-center" style={{ color: '#52525b', fontSize: 9 }}>
+                  Or skip and build manually below
+                </div>
+              </div>
+            )}
+
+            {/* Regenerate option after AI generation */}
+            {generated && (
+              <button
+                onClick={() => { setGenerated(false); setAiError(null) }}
+                className="w-full py-1.5 rounded-sm text-xs font-bold tracking-wider transition-opacity hover:opacity-80"
+                style={{
+                  background: 'transparent',
+                  color: GOLD,
+                  border: `1px dashed ${GOLD}`,
+                  fontFamily: 'inherit',
+                }}
+              >
+                ↻ REGENERATE WITH AI
+              </button>
+            )}
+
             {/* Caption */}
             <div>
               <label

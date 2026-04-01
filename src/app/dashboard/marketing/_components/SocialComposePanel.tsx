@@ -387,23 +387,27 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
         </div>
       </div>
 
-      {/* Carousel shortcut — when Carousel format is selected, offer the visual builder */}
+      {/* Carousel shortcut — auto-switch to carousel builder when selected */}
       {format === 'Carousel' && onBuildCarousel && (
-        <div className="pt-2">
-          <button
-            onClick={onBuildCarousel}
-            className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
-            style={{
-              background: 'transparent',
-              color: GOLD,
-              border: `1px solid ${GOLD}`,
-              fontFamily: 'inherit',
-            }}
+        <div className="pt-2 space-y-2">
+          <div
+            className="rounded-sm px-3 py-3 text-center"
+            style={{ background: '#0d0d18', border: `1px solid ${GOLD}30` }}
           >
-            BUILD CAROUSEL VISUALLY
-          </button>
-          <div className="text-center mt-1.5" style={{ color: '#52525b', fontSize: 10 }}>
-            Or describe your idea above and let Claude generate it
+            <p className="text-zinc-400 mb-2" style={{ fontSize: 11 }}>
+              Carousels use the visual builder with AI generation
+            </p>
+            <button
+              onClick={onBuildCarousel}
+              className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
+              style={{
+                background: GOLD,
+                color: '#09090b',
+                fontFamily: 'inherit',
+              }}
+            >
+              OPEN CAROUSEL BUILDER →
+            </button>
           </div>
         </div>
       )}

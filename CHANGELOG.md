@@ -1,5 +1,31 @@
 # LoanOS Changelog
 
+## [5.1.1] — 2026-04-01 — Marketing Dashboard Audit + Codex Review
+
+### Fixed
+- **`created_by` inconsistency**: SocialComposePanel, CarouselBuilder, and chat/social route used `'user'` — normalized to `'human'` to match draft list filter expectations
+- **Publish route action mislabel**: Activity logged `'scheduled'` when publishing — corrected to `'posted'`
+- **Missing activity logging**: Draft creation (POST), status changes (PATCH), publishing, and chat/social creation path now all log to `social_activity` — feed was mostly empty before
+- **Settings API error handling**: GET query errors, append mode errors, and upsert errors now properly captured and returned
+- **Fire-and-forget activity inserts**: All `social_activity` inserts now capture errors with `console.error`
+
+### Added
+- **Platform filters in draft list**: ALL / LI / IG / FB — platform="all" drafts appear under any specific filter
+- **Source filters in draft list**: ALL / AGENT / MANUAL — distinguishes agent vs manually created drafts
+- **Expanded status filters**: Added POSTED and REJECTED pills
+- **Draft count display**: `{filtered.length} of {drafts.length} posts` below filters
+- **Filter normalization helpers**: `normalizePlatform()` and `normalizeCreatedBy()` in SocialDraftList
+- **`updated_by` column** on `social_settings` table (uuid FK to auth.users)
+- **Builder subagent activity logging**: 03-builder.md now includes mandatory curl to log social_activity after each draft insert
+
+### Changed
+- **TopNav label**: "Voice Guide" → "Marketing" with 📣 icon (desktop + mobile)
+- **CALLS tab removed** from marketing page (kept SOCIAL, SEND, HISTORY, VOICE GUIDE)
+- **Drafts POST**: `pillar` and `created_by` added to allowedKeys
+
+### Removed
+- 2 junk draft records from database (malformed test data)
+
 ## [5.1.0] — 2026-03-31 — Carousel Builder + Voice Guide Everywhere
 
 ### Added

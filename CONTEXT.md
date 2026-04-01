@@ -18,6 +18,42 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Marketing Dashboard Audit + Codex Review — 2026-04-01 (session 10)
+
+**Comprehensive audit of the marketing dashboard and social media scheduled tasks. Two-pass review: initial audit fixes + Codex verification pass.**
+
+### Nav & Tab Cleanup:
+- **"Voice Guide" → "Marketing"**: Renamed in TopNav (desktop + mobile) with 📣 icon for discoverability
+- **CALLS tab removed**: Removed from marketing page tabs (SOCIAL, SEND, HISTORY, VOICE GUIDE remain)
+
+### Draft List Filters (SocialDraftList.tsx):
+- **Platform filters**: ALL / LI / IG / FB — drafts with `platform="all"` show under any specific filter
+- **Source filters**: ALL / AGENT / MANUAL — distinguishes agent-generated vs manually created drafts
+- **Expanded status filters**: Added POSTED and REJECTED to existing filter pills
+- **Count display**: Shows `{filtered.length} of {drafts.length} posts`
+- **Normalization helpers**: `normalizePlatform()` and `normalizeCreatedBy()` for case-insensitive matching
+
+### Activity Logging (was completely missing):
+- **Drafts POST**: Logs `"drafted"` action to `social_activity` on create
+- **Drafts PATCH**: Logs status changes (approved/rejected/scheduled/posted/updated)
+- **Publish route**: Fixed action label from `'scheduled'` → `'posted'`; added error capture
+- **Chat/social route**: Added activity logging on draft creation (was missing entirely)
+- **Builder subagent (03-builder.md)**: Added mandatory activity log curl after each draft insert
+
+### Data Consistency (Codex audit findings):
+- **`created_by` normalized**: `SocialComposePanel`, `CarouselBuilder`, `chat/social` route all changed from `'user'` → `'human'` to match filter expectations
+- **Error handling hardened**: All `social_activity` inserts now capture errors with `console.error` (were fire-and-forget)
+- **Settings API**: Added error handling on GET query and both upsert paths
+
+### DB Changes:
+- `ALTER TABLE social_settings ADD COLUMN updated_by uuid REFERENCES auth.users(id)`
+- Seeded `voice_feedback` key in `social_settings` with initialization message
+- Deleted 2 junk drafts (malformed test data)
+
+### Deployed:
+- Commit 1: `48a0fe2` → `dpl_NiYmaFhrrJY1NNUmbD8nmM1FSXpA` → READY ✅
+- Commit 2: `99e8ac7` → `dpl_5HGdnS1EEJFkoWnpryPJqbVLJHu8` → READY ✅
+
 ## Carousel Builder + Voice Guide Everywhere — 2026-03-31 (session 9)
 
 **Added visual carousel builder, wired voice guide into ALL content generation paths, regenerated all 22 existing drafts.**

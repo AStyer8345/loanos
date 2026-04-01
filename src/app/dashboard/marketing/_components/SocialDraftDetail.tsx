@@ -19,24 +19,29 @@ function renderMarkdown(text: string): string {
     .replace(/^- (.+)$/gm, '<span style="display:flex;gap:6px;margin-bottom:2px"><span style="color:#C9A84C;flex-shrink:0">•</span><span>$1</span></span>')
 }
 
-/** Parse "SLIDE N" blocks from post content for carousel preview */
+/** Parse "SLIDE N" blocks from post content for carousel preview.
+ *  Supports multiple formats:
+ *    SLIDE 1 — HOOK         (carousel builder)
+ *    **SLIDE 1 — HOOK**     (markdown bold)
+ *    [Slide 1 — Hook]       (scheduled agent)
+ *    [Slide 1: Hook]        (colon variant)
+ */
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
-  // Match patterns like "SLIDE 1:", "SLIDE 1 —", "SLIDE 1 — HOOK", etc.
-  const slideRegex = /(?:^|\n)\s*(?:\*\*)?SLIDE\s+(\d+)(?:\s*[—–:-]\s*([^\n*]*))?(?:\*\*)?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*)?SLIDE\s+\d)|$)/gi
+  const slideRegex = /(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
   const slides: { num: number; title: string; body: string }[] = []
   let match: RegExpExecArray | null
 
   while ((match = slideRegex.exec(content)) !== null) {
     const num = parseInt(match[1], 10)
-    const title = (match[2] || '').trim().replace(/\*\*/g, '')
+    const title = (match[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
     const body = (match[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Extract intro text (everything before first SLIDE reference)
-  const firstSlideIdx = content.search(/(?:^|\n)\s*(?:\*\*)?SLIDE\s+1\b/i)
+  // Extract intro text (everything before first SLIDE reference — either format)
+  const firstSlideIdx = content.search(/(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+1\b/i)
   const intro = firstSlideIdx > 0 ? content.substring(0, firstSlideIdx).trim() : ''
 
   return { intro, slides }

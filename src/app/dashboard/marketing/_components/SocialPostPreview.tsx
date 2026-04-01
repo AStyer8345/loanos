@@ -60,28 +60,32 @@ function parseContent(content: string | null): {
   const commentLines = commentIndex >= 0 ? lines.slice(commentIndex + 1) : []
   const firstComment = [inlineComment, ...commentLines].join('\n').trim() || null
 
-  // Parse carousel slides
-  const slideRegex = /(?:^|\n)\s*(?:\*\*)?SLIDE\s+(\d+)(?:\s*[—–:-]\s*([^\n*]*))?(?:\*\*)?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*)?SLIDE\s+\d)|$)/gi
+  // Parse carousel slides — supports multiple formats:
+  //   SLIDE 1 — HOOK         (carousel builder format)
+  //   **SLIDE 1 — HOOK**     (markdown bold variant)
+  //   [Slide 1 — Hook]       (scheduled agent format)
+  //   [Slide 1: Hook]        (colon variant)
+  const slideRegex = /(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n?([\s\S]*?)(?=(?:\n\s*(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
   const slides: ParsedSlide[] = []
   let slideMatch: RegExpExecArray | null
 
   while ((slideMatch = slideRegex.exec(bodyContent)) !== null) {
     const num = parseInt(slideMatch[1], 10)
-    const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '')
+    const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
     const body = (slideMatch[3] || '').trim().replace(/\*\*/g, '').replace(/^\n+|\n+$/g, '')
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Caption = everything before first SLIDE block
-  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:\*\*)?SLIDE\s+1\b/i)
+  // Caption = everything before first SLIDE block (either format)
+  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:\*\*|\[)?SLIDE\s+1\b/i)
   const caption = firstSlideIdx > 0 ? bodyContent.substring(0, firstSlideIdx).trim() : ''
 
   // For non-carousel: strip slide prefixes from body text
   const postText = slides.length >= 2
     ? caption
-    : bodyContent.replace(/^\s*slide\s+\d+\s*[—–:-]\s*/gim, '').trim()
+    : bodyContent.replace(/^\s*\[?\s*slide\s+\d+\s*[—–:\-]\s*[^\]]*\]?\s*/gim, '').trim()
 
   return { postText, firstComment, caption, slides }
 }

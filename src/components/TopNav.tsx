@@ -80,8 +80,8 @@ export default function TopNav() {
           />
 
           <NavItem
-            label="Voice Guide"
-            icon="🎙️"
+            label="Marketing"
+            icon="📣"
             isActive={currentSection === 'voice-guide'}
             onClick={() => navigate('/dashboard/marketing')}
           />
@@ -223,8 +223,8 @@ export default function TopNav() {
                   : 'text-zinc-400'
               }`}
             >
-              <span className="text-base">🎙️</span>
-              <span>Voice Guide</span>
+              <span className="text-base">📣</span>
+              <span>Marketing</span>
             </button>
 
             <button

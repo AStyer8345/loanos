@@ -30,13 +30,30 @@ type Props = {
   onCompose: () => void
 }
 
-type FilterStatus = 'ALL' | 'draft' | 'approved' | 'scheduled'
+type FilterStatus = 'ALL' | 'draft' | 'approved' | 'scheduled' | 'rejected' | 'posted'
+type FilterPlatform = 'ALL' | 'instagram' | 'linkedin' | 'facebook'
+type FilterSource = 'ALL' | 'agent' | 'human'
 
 const FILTERS: { key: FilterStatus; label: string }[] = [
   { key: 'ALL', label: 'ALL' },
   { key: 'draft', label: 'DRAFT' },
   { key: 'approved', label: 'APPROVED' },
   { key: 'scheduled', label: 'SCHEDULED' },
+  { key: 'posted', label: 'POSTED' },
+  { key: 'rejected', label: 'REJECTED' },
+]
+
+const PLATFORM_FILTERS: { key: FilterPlatform; label: string }[] = [
+  { key: 'ALL', label: 'ALL' },
+  { key: 'linkedin', label: 'LI' },
+  { key: 'instagram', label: 'IG' },
+  { key: 'facebook', label: 'FB' },
+]
+
+const SOURCE_FILTERS: { key: FilterSource; label: string }[] = [
+  { key: 'ALL', label: 'ALL' },
+  { key: 'agent', label: 'AGENT' },
+  { key: 'human', label: 'MANUAL' },
 ]
 
 const STATUS_COLORS: Record<string, string> = {
@@ -62,10 +79,43 @@ function formatDate(iso: string | null): string {
 
 export default function SocialDraftList({ drafts, selectedId, onSelect, onCompose }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('ALL')
+  const [platformFilter, setPlatformFilter] = useState<FilterPlatform>('ALL')
+  const [sourceFilter, setSourceFilter] = useState<FilterSource>('ALL')
 
-  const filtered = filter === 'ALL'
-    ? drafts
-    : drafts.filter((d) => d.status === filter)
+  const filtered = drafts.filter((d) => {
+    if (filter !== 'ALL' && d.status !== filter) return false
+    if (platformFilter !== 'ALL' && d.platform !== platformFilter && d.platform !== 'all') return false
+    if (sourceFilter === 'agent' && d.created_by !== 'agent') return false
+    if (sourceFilter === 'human' && d.created_by === 'agent') return false
+    return true
+  })
+
+  function renderFilterRow(
+    items: { key: string; label: string }[],
+    active: string,
+    onSet: (k: string) => void,
+  ) {
+    return (
+      <div className="flex gap-1 px-3 pb-1.5 flex-wrap">
+        {items.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => onSet(key)}
+            className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors"
+            style={{
+              background: active === key ? GOLD : 'transparent',
+              color: active === key ? '#09090b' : '#71717a',
+              border: active === key ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+              fontFamily: 'inherit',
+              fontSize: 10,
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -83,24 +133,20 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
         </button>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex gap-1 px-3 pb-2">
-        {FILTERS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors"
-            style={{
-              background: filter === key ? GOLD : 'transparent',
-              color: filter === key ? '#09090b' : '#71717a',
-              border: filter === key ? `1px solid ${GOLD}` : '1px solid #3f3f46',
-              fontFamily: 'inherit',
-              fontSize: 10,
-            }}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Filter pills — status */}
+      {renderFilterRow(FILTERS, filter, (k) => setFilter(k as FilterStatus))}
+
+      {/* Filter pills — platform */}
+      {renderFilterRow(PLATFORM_FILTERS, platformFilter, (k) => setPlatformFilter(k as FilterPlatform))}
+
+      {/* Filter pills — source */}
+      {renderFilterRow(SOURCE_FILTERS, sourceFilter, (k) => setSourceFilter(k as FilterSource))}
+
+      {/* Count */}
+      <div className="px-3 pb-2">
+        <span className="text-zinc-600" style={{ fontSize: 10 }}>
+          {filtered.length} of {drafts.length} posts
+        </span>
       </div>
 
       {/* Draft list */}

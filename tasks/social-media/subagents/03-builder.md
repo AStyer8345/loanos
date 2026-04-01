@@ -95,6 +95,24 @@ curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
 
 **IMPORTANT:** Adam reviews, edits, and approves all drafts in the LoanOS Marketing → Social tab. Do NOT push to Publer — that happens from the dashboard.
 
+### Log Activity After Each Draft Insert (MANDATORY)
+
+After EVERY successful draft insert above, immediately insert an activity log entry so the dashboard activity feed stays current:
+
+```bash
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_activity" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "action": "drafted",
+    "detail": "Agent created: \"<TITLE>\" (<PLATFORM>)"
+  }'
+```
+
+Replace `<TITLE>` and `<PLATFORM>` with the actual values from the draft you just inserted. This feeds the RECENT ACTIVITY strip in the Marketing dashboard.
+
 ### Execution Standards
 
 **Voice Standards — Adam Styer**

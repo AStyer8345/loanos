@@ -3,16 +3,15 @@
 import { useState } from 'react'
 import { useMCCState, mergedState } from './_components/useMCCState'
 import SendTab    from './_components/SendTab'
-import CallsTab   from './_components/CallsTab'
 import HistoryTab from './_components/HistoryTab'
 import SocialTab  from './_components/SocialTab'
 import VoiceGuideEditor from './_components/VoiceGuideEditor'
 
 const GOLD = '#C9A84C'
 
-type Tab = 'SEND' | 'CALLS' | 'HISTORY' | 'SOCIAL' | 'VOICE GUIDE'
+type Tab = 'SEND' | 'HISTORY' | 'SOCIAL' | 'VOICE GUIDE'
 
-const TABS: Tab[] = ['SOCIAL', 'SEND', 'CALLS', 'HISTORY', 'VOICE GUIDE']
+const TABS: Tab[] = ['SOCIAL', 'SEND', 'HISTORY', 'VOICE GUIDE']
 
 export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState<Tab>('SOCIAL')
@@ -84,9 +83,6 @@ export default function MarketingPage() {
       <div className="max-w-3xl">
         {activeTab === 'SEND' && (
           <SendTab mccState={mcc} onSave={saveState} />
-        )}
-        {activeTab === 'CALLS' && (
-          <CallsTab mccState={mcc} onSave={saveState} />
         )}
         {activeTab === 'HISTORY' && (
           <HistoryTab mccState={mcc} onSave={saveState} />

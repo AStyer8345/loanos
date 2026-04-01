@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient()
     const body = await req.json()
 
-    const allowedKeys = ['title', 'content', 'platform', 'format', 'hashtags', 'media_urls', 'status', 'scheduled_for', 'agent_notes']
+    const allowedKeys = ['title', 'content', 'platform', 'format', 'hashtags', 'media_urls', 'status', 'scheduled_for', 'agent_notes', 'pillar', 'created_by']
     const insert: Record<string, unknown> = { organization_id: organizationId }
     for (const key of allowedKeys) {
       if (key in body) insert[key] = body[key]
@@ -25,6 +25,16 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Log activity
+    await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .from('social_activity')
+      .insert({
+        organization_id: organizationId,
+        action: 'drafted',
+        detail: `New draft: "${data.title}" (${data.platform})`,
+      })
+
     return NextResponse.json({ draft: data })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -83,6 +93,25 @@ export async function PATCH(req: NextRequest) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Log status changes as activity
+    if ('status' in fields && data) {
+      const actionMap: Record<string, string> = {
+        approved: 'approved',
+        rejected: 'rejected',
+        scheduled: 'scheduled',
+        posted: 'posted',
+      }
+      const action = actionMap[data.status] || 'updated'
+      await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        .from('social_activity')
+        .insert({
+          organization_id: organizationId,
+          action,
+          detail: `${action.charAt(0).toUpperCase() + action.slice(1)}: "${data.title}" (${data.platform})`,
+        })
+    }
+
     return NextResponse.json({ draft: data })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

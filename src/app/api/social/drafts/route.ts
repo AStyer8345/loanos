@@ -59,3 +59,28 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }
+
+// DELETE — remove a social draft by id
+export async function DELETE(req: NextRequest) {
+  try {
+    const { organizationId } = await getOrganization()
+    const supabase = createServiceClient()
+    const body = await req.json()
+    const { id } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing draft id' }, { status: 400 })
+    }
+
+    const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .from('social_drafts')
+      .delete()
+      .eq('id', id)
+      .eq('organization_id', organizationId)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+}

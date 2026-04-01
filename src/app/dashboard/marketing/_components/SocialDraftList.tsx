@@ -47,6 +47,13 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: '#E05252',
 }
 
+const PLATFORM_LABELS: Record<string, string> = {
+  instagram: 'IG',
+  linkedin: 'LI',
+  facebook: 'FB',
+  all: 'ALL',
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -141,6 +148,19 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
                 >
                   {draft.status}
                 </span>
+                {draft.platform && PLATFORM_LABELS[draft.platform] && (
+                  <span
+                    className="inline-block px-1.5 py-0.5 rounded-sm font-bold uppercase"
+                    style={{
+                      fontSize: 9,
+                      background: '#18181b',
+                      color: '#71717a',
+                      border: '1px solid #27272a',
+                    }}
+                  >
+                    {PLATFORM_LABELS[draft.platform]}
+                  </span>
+                )}
               </div>
 
               {/* Subtitle */}

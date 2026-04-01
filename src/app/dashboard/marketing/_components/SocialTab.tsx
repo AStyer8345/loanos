@@ -71,6 +71,8 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
           platform: updated.platform,
           format: updated.format,
           scheduled_for: updated.scheduled_for,
+          media_urls: updated.media_urls,
+          rejection_reason: updated.rejection_reason,
         }),
       })
 
@@ -97,6 +99,27 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
     setDrafts((prev) => [draft, ...prev])
     setSelectedDraftId(draft.id)
     setMode('browse')
+  }, [])
+
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      const res = await fetch('/api/social/drafts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Delete failed' }))
+        throw new Error(data.error || 'Delete failed')
+      }
+    } catch (error) {
+      console.error('[social] delete failed', error)
+    } finally {
+      setDrafts((prev) => prev.filter((draft) => draft.id !== id))
+      setSelectedDraftId((prev) => (prev === id ? null : prev))
+      setMode('browse')
+    }
   }, [])
 
   const handleOpenVoiceGuide = useCallback(() => {
@@ -147,6 +170,7 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
             <SocialDraftDetail
               draft={selectedDraft}
               onUpdate={handleUpdate}
+              onDelete={handleDelete}
               onOpenVoiceGuide={handleOpenVoiceGuide}
             />
           ) : (

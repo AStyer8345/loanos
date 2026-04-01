@@ -34,6 +34,7 @@ function parseSlides(content: string): { intro: string; slides: { num: number; t
 type Props = {
   draft: SocialDraft
   onUpdate: (draft: SocialDraft) => void
+  onDelete: (id: string) => void
   onOpenVoiceGuide: () => void
 }
 
@@ -277,7 +278,7 @@ function SlidePreviewOrText({
   )
 }
 
-export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }: Props) {
+export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoiceGuide }: Props) {
   const [editing, setEditing] = useState(false)
   const [editContent, setEditContent] = useState(draft.content || '')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -336,10 +337,12 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
     return () => { cancelled = true }
   }, [draft.media_urls])
 
-  // Reset edit state when draft changes
+  // Reset edit state when draft changes (id or content)
   const [prevId, setPrevId] = useState(draft.id)
+  const [prevContent, setPrevContent] = useState(draft.content || '')
   if (draft.id !== prevId) {
     setPrevId(draft.id)
+    setPrevContent(draft.content || '')
     setEditing(false)
     setEditContent(draft.content || '')
     setMessages([])
@@ -347,6 +350,10 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
     setMediaIndex(0)
     setSlideIndex(0)
     setPublishError(null)
+  } else if (draft.content !== prevContent && !editing) {
+    // Content updated externally (e.g. APPLY TO POST) — sync edit buffer
+    setPrevContent(draft.content || '')
+    setEditContent(draft.content || '')
   }
 
   function handleEdit() {
@@ -371,6 +378,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
   }
 
   function handleApprove() {
+    setPublishError(null)
     onUpdate({ ...draft, status: 'approved' })
   }
 
@@ -413,6 +421,59 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
       setPublishError('Network error — could not reach publish API')
     } finally {
       setPublishing(false)
+    }
+  }
+
+  async function handleApproveAndPublish() {
+    setPublishing(true)
+    setPublishError(null)
+
+    try {
+      onUpdate({ ...draft, status: 'approved' })
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      const res = await fetch('/api/social/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draftId: draft.id }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Unknown error' }))
+        setPublishError(data.error || `Publish failed (${res.status})`)
+        return
+      }
+
+      onUpdate({ ...draft, status: 'posted' })
+    } catch {
+      setPublishError('Network error — could not reach publish API')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  async function handleDelete() {
+    const confirmed = window.confirm('Delete this draft?')
+    if (!confirmed) return
+
+    setPublishError(null)
+
+    try {
+      const res = await fetch('/api/social/drafts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: draft.id }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Delete failed' }))
+        setPublishError(data.error || `Delete failed (${res.status})`)
+        return
+      }
+
+      onDelete(draft.id)
+    } catch {
+      setPublishError('Network error — could not delete draft')
     }
   }
 
@@ -656,6 +717,20 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
               >
                 APPROVE
               </button>
+              {draft.status === 'draft' && (
+                <button
+                  onClick={handleApproveAndPublish}
+                  disabled={publishing}
+                  className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
+                  style={{
+                    background: GOLD,
+                    color: '#09090b',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {publishing ? 'PUBLISHING...' : 'APPROVE & PUBLISH'}
+                </button>
+              )}
               <button
                 onClick={handleEdit}
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
@@ -679,6 +754,18 @@ export default function SocialDraftDetail({ draft, onUpdate, onOpenVoiceGuide }:
                 }}
               >
                 REJECT
+              </button>
+              <button
+                onClick={handleDelete}
+                className="ml-auto px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
+                style={{
+                  background: 'transparent',
+                  color: '#71717a',
+                  border: '1px solid #3f3f46',
+                  fontFamily: 'inherit',
+                }}
+              >
+                DELETE
               </button>
               {draft.status === 'approved' && (
                 <button

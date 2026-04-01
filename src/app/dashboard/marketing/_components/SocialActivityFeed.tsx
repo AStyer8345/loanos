@@ -6,15 +6,18 @@ const GOLD = '#C9A84C'
 
 type ActivityEntry = {
   id: string
-  type: 'success' | 'warning' | 'error'
-  message: string
+  action: string
+  detail: string | null
   created_at: string
 }
 
-const DOT_COLORS: Record<string, string> = {
-  success: '#4CAF82',
-  warning: '#C9A84C',
-  error: '#E05252',
+const ACTION_COLORS: Record<string, string> = {
+  scheduled: '#3B82F6',
+  posted: '#4CAF82',
+  approved: '#4CAF82',
+  rejected: '#E05252',
+  drafted: '#C9A84C',
+  generated: '#C9A84C',
 }
 
 function relativeTime(iso: string): string {
@@ -81,14 +84,14 @@ export default function SocialActivityFeed() {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    background: DOT_COLORS[entry.type] || DOT_COLORS.success,
+                    background: ACTION_COLORS[entry.action] || '#71717a',
                     display: 'inline-block',
                     flexShrink: 0,
                   }}
                 />
                 <span className="text-zinc-500">{relativeTime(entry.created_at)}</span>
                 <span className="text-zinc-400">&mdash;</span>
-                <span className="text-zinc-300">{entry.message}</span>
+                <span className="text-zinc-300">{entry.detail || entry.action}</span>
               </div>
             ))}
           </div>

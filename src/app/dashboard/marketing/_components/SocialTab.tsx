@@ -5,9 +5,10 @@ import SocialActivityFeed from './SocialActivityFeed'
 import SocialDraftList, { type SocialDraft } from './SocialDraftList'
 import SocialDraftDetail from './SocialDraftDetail'
 import SocialComposePanel from './SocialComposePanel'
+import CarouselBuilder from './CarouselBuilder'
 import VoiceGuideDrawer from './VoiceGuideDrawer'
 
-type Mode = 'browse' | 'compose'
+type Mode = 'browse' | 'compose' | 'carousel'
 
 type Props = {
   onSwitchToVoiceGuide?: () => void
@@ -51,6 +52,11 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
 
   const handleCompose = useCallback(() => {
     setMode('compose')
+    setSelectedDraftId(null)
+  }, [])
+
+  const handleCarousel = useCallback(() => {
+    setMode('carousel')
     setSelectedDraftId(null)
   }, [])
 
@@ -161,10 +167,16 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
 
         {/* Right: Detail or Compose */}
         <div className="flex-1 overflow-hidden">
-          {mode === 'compose' ? (
+          {mode === 'carousel' ? (
+            <CarouselBuilder
+              onDraftCreated={handleDraftCreated}
+              onClose={() => setMode('browse')}
+            />
+          ) : mode === 'compose' ? (
             <SocialComposePanel
               onDraftCreated={handleDraftCreated}
               onClose={() => setMode('browse')}
+              onBuildCarousel={handleCarousel}
             />
           ) : selectedDraft ? (
             <SocialDraftDetail

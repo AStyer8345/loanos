@@ -20,6 +20,7 @@ type UploadedFile = {
 type Props = {
   onDraftCreated: (draft: SocialDraft) => void
   onClose: () => void
+  onBuildCarousel?: () => void
 }
 
 const PLATFORMS = ['Instagram', 'LinkedIn', 'Facebook', 'All'] as const
@@ -35,7 +36,7 @@ const FORMAT_TO_DB: Record<string, string> = {
   'Text Only': 'text_only',
 }
 
-export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
+export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCarousel }: Props) {
   const [prompt, setPrompt] = useState('')
   const [platform, setPlatform] = useState<string>('All')
   const [format, setFormat] = useState<string | null>(null) // null = let Claude decide
@@ -385,6 +386,27 @@ export default function SocialComposePanel({ onDraftCreated, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Carousel shortcut — when Carousel format is selected, offer the visual builder */}
+      {format === 'Carousel' && onBuildCarousel && (
+        <div className="pt-2">
+          <button
+            onClick={onBuildCarousel}
+            className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
+            style={{
+              background: 'transparent',
+              color: GOLD,
+              border: `1px solid ${GOLD}`,
+              fontFamily: 'inherit',
+            }}
+          >
+            BUILD CAROUSEL VISUALLY
+          </button>
+          <div className="text-center mt-1.5" style={{ color: '#52525b', fontSize: 10 }}>
+            Or describe your idea above and let Claude generate it
+          </div>
+        </div>
+      )}
 
       {/* Generate error */}
       {generateError && (

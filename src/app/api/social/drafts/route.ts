@@ -2,6 +2,35 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 
+// POST — create a new social draft
+export async function POST(req: NextRequest) {
+  try {
+    const { organizationId } = await getOrganization()
+    const supabase = createServiceClient()
+    const body = await req.json()
+
+    const allowedKeys = ['title', 'content', 'platform', 'format', 'hashtags', 'media_urls', 'status', 'scheduled_for', 'agent_notes']
+    const insert: Record<string, unknown> = { organization_id: organizationId }
+    for (const key of allowedKeys) {
+      if (key in body) insert[key] = body[key]
+    }
+    insert['created_at'] = new Date().toISOString()
+    insert['updated_at'] = new Date().toISOString()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from('social_drafts')
+      .insert(insert)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ draft: data })
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+}
+
 // GET — fetch all social drafts for the org
 export async function GET() {
   try {

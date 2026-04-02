@@ -21,8 +21,14 @@
 - Any forward pipeline movement exits all lead nurture campaigns immediately
 - High-stakes emails (rate drop alerts, co-marketing offers) require approval; all others auto-send
 
+### n8n Drip Scheduler Upgrade (same session)
+- **Workflow `LqBb3YDLjS2eUrDE`** rebuilt from 7 nodes → 16 nodes
+- **Trigger**: Hourly → Daily at 7am CT (cron `0 12 * * *` UTC)
+- **RPC**: `get_due_drip_emails` (old) → `get_due_drip_enrollments` (new, joins 5 tables)
+- **Migration 074**: `get_due_drip_enrollments` RPC function — returns enrollment + campaign + step + contact + loan data with `last_drip_send_at` subquery
+- **New capabilities**: Exit rule evaluation (unsubscribe, inactive, status_change), 14-day frequency guardrail, Claude-powered email generation from skeleton prompts with tone guides, approval queue branching (`requires_approval` → queued for dashboard review, else auto-send via Outlook), `drip_sends` record insert on both paths, enrollment step advancement with `next_send_at` calculation, activity logging
+
 ### Not Yet Wired (Future Work)
-- n8n daily scheduler upgrade (workflow `LqBb3YDLjS2eUrDE`)
 - Handwritten card API integration
 - Auto-enrollment triggers from pipeline events
 - Email open/click tracking

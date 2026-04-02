@@ -5,18 +5,18 @@
 @tailwind utilities;
 
 :root {
-  /* Canvas & surfaces — LoanOS dark (softened) */
+  /* Canvas & surfaces — LoanOS dark (comfortable) */
   --bg:       #0c0e14;
-  --surface:  #12151e;
-  --surface2: #1c1f2a;
+  --surface:  #171c28;
+  --surface2: #222838;
 
-  /* Borders — softer, less harsh */
-  --border:   #2a2d3a;
+  /* Borders — visible but not harsh */
+  --border:   #2f3546;
 
-  /* Text — softer than #e5e5e5 but still legible */
-  --text:     #dce1e8;
-  --muted:    #8d95a5;
-  --fg:       #dce1e8;
+  /* Text — bright enough to read without squinting */
+  --text:     #eaecf0;
+  --muted:    #9ba3b5;
+  --fg:       #eaecf0;
 
   /* Accents */
   --gold:     #C9A84C;
@@ -30,23 +30,23 @@
 
   /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
   --background: #0c0e14;
-  --foreground: #dce1e8;
-  --card: #161a26;
-  --card-foreground: #dce1e8;
-  --popover: #161a26;
-  --popover-foreground: #dce1e8;
+  --foreground: #eaecf0;
+  --card: #1c2235;
+  --card-foreground: #eaecf0;
+  --popover: #1c2235;
+  --popover-foreground: #eaecf0;
   --primary: #C9A84C;
   --primary-foreground: #0c0e14;
-  --secondary: #1c1f2a;
-  --secondary-foreground: #dce1e8;
-  --muted-bg: #1c1f2a;
-  --muted-foreground: #8d95a5;
-  --accent-bg: #1c1f2a;
-  --accent-foreground: #dce1e8;
+  --secondary: #222838;
+  --secondary-foreground: #eaecf0;
+  --muted-bg: #222838;
+  --muted-foreground: #9ba3b5;
+  --accent-bg: #222838;
+  --accent-foreground: #eaecf0;
   --destructive: #DC2626;
-  --destructive-foreground: #dce1e8;
+  --destructive-foreground: #eaecf0;
   --ring: #C9A84C;
-  --input: #252a38;
+  --input: #2f3546;
   --radius: 0.5rem;
 
   /* Scenario Builder palette — navy + blue accent */

@@ -3,6 +3,7 @@ import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
+import { getLoIdentity } from '@/lib/getLoIdentity'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 async function buildSystemPrompt(
@@ -99,8 +100,10 @@ export async function POST(req: NextRequest) {
 
     let systemPrompt = await buildSystemPrompt(organizationId, contactNames)
 
+    const identity = await getLoIdentity(organizationId)
+
     if (generateType === 'email') {
-      systemPrompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "Adam Styer | Mortgage Solutions LP | NMLS #513013"`
+      systemPrompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "${identity.loName} | ${identity.companyName}${identity.nmlsIndividual ? ` | NMLS #${identity.nmlsIndividual}` : ''}"`
     } else if (generateType === 'text') {
       systemPrompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
     }

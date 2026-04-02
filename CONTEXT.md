@@ -18,6 +18,53 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2.**
 
+## Multi-Tenant LO Onboarding — 2026-04-01 (session 12)
+
+**Full multi-tenancy implementation to support independent LOs joining LoanOS with separate organizations.**
+
+### Architecture Decision:
+- **Option B (separate orgs)** — each LO gets their own `organization_id`, not shared under Adam's org
+- All existing RLS policies already scope by `organization_id` — no schema changes needed for isolation
+- Backward compatible: all changes fall back to Adam's hardcoded values when `organization_id` is absent
+
+### New Files:
+- **`src/lib/getLoIdentity.ts`** — Central helper fetching LO identity (name, email, phone, NMLS, branding, links) from profiles + organizations + org_settings. Dual-mode: works in authenticated and webhook/service contexts.
+- **`src/lib/arive/processWebhook.ts`** — Shared Arive webhook processing logic extracted from original route (660+ lines). Used by both original and slug-based routes.
+- **`src/app/api/arive-webhook/[slug]/route.ts`** — Per-org Arive webhook routing via URL slug. Looks up org by slug, resolves owner profile, delegates to `processAriveWebhook()`.
+
+### Modified Files (dynamic identity):
+- **`src/app/api/outreach/route.ts`** — Dynamic LO signature instead of hardcoded Adam
+- **`src/app/api/chat/route.ts`** — Same pattern for email generation mode
+- **`src/app/api/chat/social/route.ts`** — Dynamic social media identity
+- **`src/app/api/scenarios/send-email/route.ts`** — Dynamic email header/footer/NMLS
+- **`src/app/api/agents/daily-briefing/route.ts`** — Dynamic briefing identity
+- **`src/lib/automations/prompts.ts`** — Dynamic application link in automation prompts
+- **`src/lib/defaultOutreachPrompt.ts`** — Added `buildOutreachPrompt(identity)` function
+
+### Database Changes:
+- **Migration 067**: `org_settings` — added `application_link` and `calendly_link` columns
+- **Migration 068**: `activity_log.organization_id` — hardened to `NOT NULL` (verified 830 rows, 0 nulls)
+- **`src/lib/database.types.ts`** — Updated org_settings types to include new columns
+
+### n8n Workflow Updates (3 workflows):
+- **LoanOS — Referral Intro Email** (`YbgDnTpPdefcazKy`) — `Build Referral Email` code node now fetches LO identity from Supabase when `organization_id` present in webhook body
+- **LoanOS — Pre-Approval Email** (`utMvZpkdRwIRZ51u`) — `Build PA Email` code node: dynamic header, signature, brand colors, Calendly link, initials
+- **LoanOS — Refi Intake Email** (`yCTydQ7RfZK4DyUg`) — `Build Refi Email` code node: dynamic subject, signature, phone, processor reference generalized
+
+### Pattern (all n8n code nodes):
+```
+1. Read organization_id from webhook body
+2. If present → parallel fetch: profiles (owner>admin>member), organizations, org_settings
+3. Use fetched values in email template (name, phone, email, NMLS, brand color, Calendly, app link)
+4. Fall back to Adam's hardcoded values if org_id missing or fetch fails
+```
+
+### Not Changed (still remaining):
+- Final CD Email workflow (`SkzrWeR0bHZs8kWX`) — same pattern needed
+- New Application Received workflow (`cWESnXXy9UOLB13q`) — same pattern needed
+- Contract Received workflow (`UfNcdpoVKQZqy0fj`) — same pattern needed
+- Admin UI for creating new organizations/users (future)
+
 ## Send Tab Audit + Fix — 2026-04-01 (session 11)
 
 **Full audit and fix of Marketing → Send tab (rate update + newsletter flows) plus social publish History logging.**

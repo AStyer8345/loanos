@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { logSecurityEvent } from '@/lib/audit'
+import { getLoIdentity } from '@/lib/getLoIdentity'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 
 export async function GET(request: NextRequest) {
@@ -76,8 +77,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Could not resolve organization' }, { status: 500 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const withOrg = (query: any) => query.eq('organization_id', organizationId)
+    const withOrg = (query: any) => query.eq('organization_id', organizationId) // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Pre-fetch org's arive_loan_ids — used to scope milestone queries that have no
     // organization_id column and must join through loans.organization_id instead.
@@ -174,9 +174,11 @@ export async function GET(request: NextRequest) {
       pendingDrafts,
     }, null, 2)
 
-    const systemPrompt = `You are the AI command center for Adam Styer, Senior Loan Officer at Adam Styer | Mortgage Solutions LP in Austin, TX. Every morning you review his pipeline data and produce a prioritized action list.
+    const identity = await getLoIdentity(organizationId)
 
-Adam's priorities in order:
+    const systemPrompt = `You are the AI command center for ${identity.loName} at ${identity.companyName}. Every morning you review the pipeline data and produce a prioritized action list.
+
+${identity.loFirstName}'s priorities in order:
 1. Closing-critical items (CTC, docs due, funding imminent)
 2. Stale leads that need a follow-up call or text
 3. Realtor relationships that need a touch
@@ -189,7 +191,7 @@ Return ONLY a valid JSON object with this exact structure:
     {
       "rank": 1,
       "contact": "Full name or loan identifier",
-      "action": "Specific action Adam should take (call, text, email, review doc, etc.)",
+      "action": "Specific action the LO should take (call, text, email, review doc, etc.)",
       "reason": "One sentence why this is urgent or important",
       "snippet": "Optional: 1-sentence suggested opening line if this involves outreach"
     }

@@ -28,6 +28,7 @@ export interface AutomationRecord {
   }
   orgName: string
   loName: string
+  applicationLink?: string | null
 }
 
 const VOICE_SYSTEM = `You are a mortgage loan officer writing a personal email.
@@ -77,7 +78,7 @@ const AUTOMATION_INSTRUCTIONS: Record<string, (r: AutomationRecord) => string> =
     `Write a warm welcome email to ${firstName(r.contact)} who was referred to us${r.referralContact ? ` by ${contactName(r.referralContact)}` : ''}. Introduce yourself briefly, mention you'd love to help with their home financing, and suggest a quick call. 4-5 sentences.`,
 
   'application-link': (r) =>
-    `Write a short email to ${firstName(r.contact)} with a link to start their loan application. The link is: https://mslp.my1003app.com/513013/register — make it feel casual, not pushy. 3-4 sentences. Mention you're here if they have questions while filling it out.`,
+    `Write a short email to ${firstName(r.contact)} with a link to start their loan application. The link is: ${r.applicationLink || 'your application link'} — make it feel casual, not pushy. 3-4 sentences. Mention you're here if they have questions while filling it out.`,
 
   'nurture-followup': (r) =>
     `Write a casual check-in email to ${firstName(r.contact)}. Don't be salesy — just checking in to see if they're still thinking about buying/refinancing and if there's anything you can help with. 3-4 sentences max. Light, conversational.`,

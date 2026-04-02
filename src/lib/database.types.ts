@@ -1939,7 +1939,9 @@ export type Database = {
       }
       org_settings: {
         Row: {
+          application_link: string | null
           arive_webhook_url: string | null
+          calendly_link: string | null
           created_at: string
           custom_email_reply_to: string | null
           id: string
@@ -1956,7 +1958,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          application_link?: string | null
           arive_webhook_url?: string | null
+          calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
           id?: string
@@ -1973,7 +1977,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          application_link?: string | null
           arive_webhook_url?: string | null
+          calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
           id?: string

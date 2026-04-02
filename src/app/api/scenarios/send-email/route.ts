@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
+import { getLoIdentity } from '@/lib/getLoIdentity'
 
 export async function POST(req: NextRequest) {
   let organizationId: string
@@ -43,13 +44,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Scenario has no share token' }, { status: 400 })
     }
 
+    const identity = await getLoIdentity(organizationId)
+
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loanos.vercel.app'
     const shareUrl = `${baseUrl}/share/${scenario.share_token}`
     const borrowerFirst = scenario.borrower_name
       ? scenario.borrower_name.split(/[\s,&]+/)[0]
       : 'there'
     const propLine = scenario.property_address ? ` for ${scenario.property_address}` : ''
-    const subject = `Your Loan Options${propLine} — from Adam Styer`
+    const subject = `Your Loan Options${propLine} — from ${identity.loName}`
 
     const body = `<!DOCTYPE html>
 <html>
@@ -60,8 +63,8 @@ export async function POST(req: NextRequest) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
         <!-- Header -->
         <tr><td style="padding-bottom:32px;">
-          <p style="margin:0;font-size:11px;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase;">Adam Styer | Mortgage Solutions LP</p>
-          <p style="margin:4px 0 0;font-size:10px;color:#555;">NMLS #513013</p>
+          <p style="margin:0;font-size:11px;color:${identity.brandColor};letter-spacing:0.08em;text-transform:uppercase;">${identity.companyName}</p>
+          <p style="margin:4px 0 0;font-size:10px;color:#555;">NMLS #${identity.nmlsIndividual}</p>
         </td></tr>
         <!-- Greeting -->
         <tr><td style="padding-bottom:24px;">
@@ -70,15 +73,15 @@ export async function POST(req: NextRequest) {
         </td></tr>
         <!-- CTA -->
         <tr><td style="padding-bottom:32px;">
-          <a href="${shareUrl}" style="display:inline-block;padding:14px 28px;background:#C9A84C;color:#0a0a0a;text-decoration:none;font-size:14px;font-weight:700;border-radius:10px;letter-spacing:0.02em;">View Your Loan Options →</a>
+          <a href="${shareUrl}" style="display:inline-block;padding:14px 28px;background:${identity.brandColor};color:#0a0a0a;text-decoration:none;font-size:14px;font-weight:700;border-radius:10px;letter-spacing:0.02em;">View Your Loan Options →</a>
         </td></tr>
         <!-- Link fallback -->
         <tr><td style="padding-bottom:32px;">
-          <p style="margin:0;font-size:11px;color:#555;">Or copy this link: <a href="${shareUrl}" style="color:#C9A84C;">${shareUrl}</a></p>
+          <p style="margin:0;font-size:11px;color:#555;">Or copy this link: <a href="${shareUrl}" style="color:${identity.brandColor};">${shareUrl}</a></p>
         </td></tr>
         <!-- Divider -->
         <tr><td style="border-top:1px solid #222;padding-top:24px;">
-          <p style="margin:0;font-size:11px;color:#555;line-height:1.6;">Questions? Reply to this email or call/text me directly.<br>Adam Styer | (512) 000-0000 | adam@thestyerteam.com</p>
+          <p style="margin:0;font-size:11px;color:#555;line-height:1.6;">Questions? Reply to this email or call/text me directly.<br>${identity.loName}${identity.loPhone ? ` | ${identity.loPhone}` : ''}${identity.loEmail ? ` | ${identity.loEmail}` : ''}</p>
           <p style="margin:12px 0 0;font-size:10px;color:#333;">This analysis is for informational purposes only and does not constitute a loan commitment or approval. Rates and fees are subject to change. Equal Housing Lender.</p>
         </td></tr>
       </table>

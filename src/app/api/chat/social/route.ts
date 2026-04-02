@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { getLoIdentity } from '@/lib/getLoIdentity'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages'
 
@@ -56,21 +57,22 @@ async function buildSocialSystemPrompt(
 The user wants to create a new post. Generate a complete social media post based on their prompt.`
   }
 
-  return `You are Adam Styer's social media content assistant. You write and edit social media posts using his voice, tone, and style.
+  const identity = await getLoIdentity(organizationId)
+
+  return `You are ${identity.loName}'s social media content assistant. You write and edit social media posts using the LO's voice, tone, and style.
 
 ## Voice & Workflow Guide
 ${voiceGuide}
 
-${voiceFeedback ? `## Feedback from Adam's Edits & Rejections\nLearn from these — do not repeat the same mistakes:\n${voiceFeedback}\n` : ''}
+${voiceFeedback ? `## Feedback from LO Edits & Rejections\nLearn from these — do not repeat the same mistakes:\n${voiceFeedback}\n` : ''}
 ${draftContext}
 
 ## Rules
-- Follow Adam's voice guide exactly
-- NMLS# 513013 required on any post mentioning rates, loan products, or mortgage services
+- Follow the LO's voice guide exactly${identity.nmlsIndividual ? `\n- NMLS# ${identity.nmlsIndividual} required on any post mentioning rates, loan products, or mortgage services` : ''}
 - No guaranteed approval language
 - No specific rate percentages without APR disclosure
-- Business name: Adam Styer | Mortgage Solutions LP (never "The Styer Team")
-- Keep posts short and punchy — Adam's voice, not corporate
+- Business name: ${identity.companyName}
+- Keep posts short and punchy — the LO's voice, not corporate
 - When editing, return ONLY the updated post content (no explanations unless asked)`
 }
 

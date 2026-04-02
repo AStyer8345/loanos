@@ -5,6 +5,7 @@ import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
 import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
+import { getLoIdentity } from '@/lib/getLoIdentity'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages'
 
@@ -250,7 +251,8 @@ Today's date: ${todayStr}`
 
   // Add generate type modifier
   if (generateType === 'email') {
-    prompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "Adam Styer | Mortgage Solutions LP | NMLS #513013"`
+    const identity = await getLoIdentity(organizationId)
+    prompt += `\n\nGenerate a professional email body. No subject line — just the body text. Keep it under 150 words. Include a signature line: "${identity.loName} | ${identity.companyName}${identity.nmlsIndividual ? ` | NMLS #${identity.nmlsIndividual}` : ''}"`
   } else if (generateType === 'text') {
     prompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
   }

@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [5.2.0] — 2026-04-01 — Multi-Tenant LO Onboarding
+
+### Added
+- **`getLoIdentity()` helper** (`src/lib/getLoIdentity.ts`): Central identity resolver for all LO-specific data (name, email, phone, NMLS, branding, links). Queries profiles → organizations → org_settings in parallel, with sensible fallbacks.
+- **Per-org Arive webhook route** (`src/app/api/arive-webhook/[slug]/route.ts`): Dynamic routing by org slug — each LO gets their own webhook URL.
+- **Shared `processAriveWebhook()`** (`src/lib/arive/processWebhook.ts`): Extracted 660+ lines of Arive webhook logic into reusable module.
+- **`org_settings` columns**: `application_link` and `calendly_link` (migration 067)
+- **`buildOutreachPrompt()`** in `defaultOutreachPrompt.ts` for dynamic outreach system prompts
+
+### Changed
+- **7 API routes updated to dynamic identity**: outreach, chat, chat/social, scenarios/send-email, agents/daily-briefing, automations/prompts — all now use `getLoIdentity()` instead of hardcoded Adam references
+- **3 n8n workflows updated for multi-tenancy**: Referral Intro, Pre-Approval, Refi Intake — code nodes fetch LO identity from Supabase when `organization_id` present, fall back to Adam's values otherwise
+- **`activity_log.organization_id`** hardened to NOT NULL (migration 068, verified 830 rows clean)
+- **`database.types.ts`** updated with new org_settings columns
+
+### Notes
+- Backward compatible: all changes fall back to Adam's current values when organization_id absent
+- Architecture: Option B (separate orgs per LO, not shared org)
+- Remaining workflows (Final CD, New App, Contract) need same pattern applied
+
 ## [5.1.2] — 2026-04-01 — Send Tab Audit + Fix
 
 ### Fixed

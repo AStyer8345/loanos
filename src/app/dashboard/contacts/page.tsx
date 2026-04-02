@@ -252,7 +252,7 @@ const REFERRAL_TYPE_LABELS: Record<string, string> = {
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
   { id: 'name',         label: 'Name',             minWidth: 200, render: c => (
-      <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none', fontWeight: 600 }}>
+      <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
         {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—'}
       </Link>
     ) },
@@ -265,7 +265,7 @@ const ALL_COLUMNS: ColumnDef[] = [
       ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 7px', borderRadius: 4, background: 'rgba(59,130,246,0.12)', color: '#60a5fa', whiteSpace: 'nowrap' }}>{REFERRAL_TYPE_LABELS[c.referral_type] ?? c.referral_type}</span>
       : <span style={{ color: 'var(--muted)' }}>—</span> },
   { id: 'referred_by',  label: 'Referred By',      minWidth: 160, render: c => c.referred_by
-      ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{c.referred_by}</Link>
+      ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{c.referred_by}</Link>
       : '—' },
   { id: 'company',      label: 'Company',          minWidth: 160, render: c => c.company_name ?? '—' },
   { id: 'birthday',     label: 'Birthday',         minWidth: 120, render: c => c.birthday ?? '—' },
@@ -283,7 +283,7 @@ const ALL_COLUMNS: ColumnDef[] = [
     } },
   { id: 'last_touch',      label: 'Last Touch',       minWidth: 180, render: c => <LastTouchCell date={c.last_touch_at ?? c.last_activity_date} /> },
   { id: 'production_tier', label: 'Tier',             minWidth: 80,  render: c => c.production_tier
-      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(201,168,76,0.12)', color: '#c9a84c', fontWeight: 600 }}>{c.production_tier}</span>
+      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'color-mix(in srgb, var(--primary) 12%, transparent)', color: 'var(--primary)', fontWeight: 600 }}>{c.production_tier}</span>
       : <span style={{ color: 'var(--muted)' }}>—</span> },
   { id: 'realtor_stage',   label: 'Realtor Stage',    minWidth: 140, render: c => c.realtor_stage ?? '—' },
   { id: 'referral_lifetime', label: 'Referrals',      minWidth: 90,  render: c => c.referral_lifetime_count ? String(c.referral_lifetime_count) : null },
@@ -301,8 +301,8 @@ const DRAGGABLE_COL_IDS = ALL_COLUMNS.filter(c => c.id !== 'name').map(c => c.id
 // ── Stage badge styles ────────────────────────────────────────────────────────
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   const map: Record<string, string> = {
-    'Lead':         'rgba(201,168,76,0.15)',
-    'Pre-App':      'rgba(201,168,76,0.20)',
+    'Lead':         'color-mix(in srgb, var(--primary) 15%, transparent)',
+    'Pre-App':      'color-mix(in srgb, var(--primary) 20%, transparent)',
     'Application':  'rgba(100,160,255,0.15)',
     'Pre-Approved': 'rgba(80,200,120,0.15)',
     'In Process':   'rgba(80,160,200,0.15)',
@@ -312,7 +312,7 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   return {
     display: 'inline-block', padding: '2px 8px', borderRadius: 3,
     fontFamily: 'var(--font-mono)', fontSize: 11,
-    background: stage ? (map[stage] ?? 'rgba(255,255,255,0.06)') : 'transparent',
+    background: stage ? (map[stage] ?? 'color-mix(in srgb, var(--primary) 6%, transparent)') : 'transparent',
     cursor: 'pointer', userSelect: 'none',
   }
 }
@@ -455,7 +455,7 @@ function ContactTypeahead({
               style={{
                 padding: '7px 10px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: i === highlighted ? 'rgba(201,168,76,0.12)' : 'transparent',
+                background: i === highlighted ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'transparent',
                 fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text)',
               }}
             >
@@ -501,7 +501,7 @@ function SortableColumnHeader({
     fontFamily: 'var(--font-mono)',
     fontSize: 10,
     letterSpacing: '0.1em',
-    color: sortKey === col.id ? '#c9a84c' : 'var(--muted)',
+    color: sortKey === col.id ? 'var(--primary)' : 'var(--muted)',
     whiteSpace: 'nowrap',
     userSelect: 'none',
     minWidth: col.minWidth,
@@ -1072,11 +1072,11 @@ export default function ContactsPage() {
                   onClick={() => { setActiveList(list.id); setSelectedContact(null); setSelectedIds(new Set()) }}
                   className="w-full text-left rounded flex items-center justify-between"
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    fontSize: 11,
                     padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
-                    background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
-                    color: isActive ? '#c9a84c' : 'var(--fg)',
-                    border: isActive ? '1px solid rgba(201,168,76,0.25)' : '1px solid transparent',
+                    background: isActive ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : 'var(--fg)',
+                    border: isActive ? '1px solid color-mix(in srgb, var(--primary) 25%, transparent)' : '1px solid transparent',
                     marginBottom: 2,
                   }}
                   title={sidebarCollapsed ? list.label : undefined}
@@ -1102,11 +1102,11 @@ export default function ContactsPage() {
                   onClick={() => { setActiveList(cl.id); setSelectedContact(null); setSelectedIds(new Set()) }}
                   className="w-full text-left rounded flex items-center justify-between flex-1 min-w-0"
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    fontSize: 11,
                     padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
-                    background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
-                    color: isActive ? '#c9a84c' : 'var(--fg)',
-                    border: isActive ? '1px solid rgba(201,168,76,0.25)' : '1px solid transparent',
+                    background: isActive ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : 'var(--fg)',
+                    border: isActive ? '1px solid color-mix(in srgb, var(--primary) 25%, transparent)' : '1px solid transparent',
                   }}
                   title={sidebarCollapsed ? cl.name : undefined}
                 >
@@ -1144,8 +1144,8 @@ export default function ContactsPage() {
             type="button"
             onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
             style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c9a84c', background: 'transparent',
-              border: '1px dashed rgba(201,168,76,0.5)', padding: '6px 8px', borderRadius: 4, cursor: 'pointer',
+              fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--primary)', background: 'transparent',
+              border: '1px dashed color-mix(in srgb, var(--primary) 50%, transparent)', padding: '6px 8px', borderRadius: 4, cursor: 'pointer',
               marginTop: 8, width: '100%',
             }}
           >
@@ -1169,7 +1169,7 @@ export default function ContactsPage() {
                 ? <>{total.toLocaleString()} of {counts[activeList].toLocaleString()} {counts[activeList] === 1 ? 'contact' : 'contacts'}</>
                 : <>{total.toLocaleString()} {total === 1 ? 'contact' : 'contacts'}</>
               }
-              {someSelected && <span style={{ marginLeft: 8, color: '#c9a84c' }}>· {selectedIds.size} selected</span>}
+              {someSelected && <span style={{ marginLeft: 8, color: 'var(--primary)' }}>· {selectedIds.size} selected</span>}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -1180,12 +1180,12 @@ export default function ContactsPage() {
             }}>FIND DUPES</button>
             <button onClick={() => setShowImport(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: 'transparent', color: '#c9a84c', padding: '8px 16px', borderRadius: 4,
-              border: '1px solid rgba(201,168,76,0.4)', cursor: 'pointer', fontWeight: 600,
+              background: 'transparent', color: 'var(--primary)', padding: '8px 16px', borderRadius: 4,
+              border: '1px solid color-mix(in srgb, var(--primary) 40%, transparent)', cursor: 'pointer', fontWeight: 600,
             }}>↑ IMPORT</button>
             <button onClick={() => setShowNewContact(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: '#c9a84c', color: '#000', padding: '8px 16px', borderRadius: 4,
+              background: 'var(--primary)', color: '#000', padding: '8px 16px', borderRadius: 4,
               border: 'none', cursor: 'pointer', fontWeight: 600,
             }}>+ NEW CONTACT</button>
           </div>
@@ -1200,7 +1200,7 @@ export default function ContactsPage() {
             onChange={e => { setActiveList(e.target.value); setSelectedContact(null); setSelectedIds(new Set()) }}
             style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em',
-              background: 'var(--bg)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.4)',
+              background: 'var(--bg)', color: 'var(--primary)', border: '1px solid color-mix(in srgb, var(--primary) 40%, transparent)',
               borderRadius: 4, padding: '6px 10px', cursor: 'pointer', outline: 'none', flexShrink: 0,
             }}
           >
@@ -1245,7 +1245,7 @@ export default function ContactsPage() {
                       disabled={col.id === 'name'}
                       onChange={() => col.id !== 'name' && toggleColumn(col.id)}
                       onClick={e => e.stopPropagation()}
-                      style={{ accentColor: '#c9a84c', cursor: col.id === 'name' ? 'default' : 'pointer' }}
+                      style={{ accentColor: 'var(--primary)', cursor: col.id === 'name' ? 'default' : 'pointer' }}
                     />
                     {col.label}{col.id === 'name' ? ' (pinned)' : ''}
                   </label>
@@ -1261,7 +1261,7 @@ export default function ContactsPage() {
               style={{
                 padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
                 cursor: 'pointer', border: 'none',
-                background: viewMode === 'table' ? '#c9a84c' : 'transparent',
+                background: viewMode === 'table' ? 'var(--primary)' : 'transparent',
                 color: viewMode === 'table' ? '#000' : 'var(--muted)', fontWeight: 600,
               }}>
               TABLE
@@ -1271,7 +1271,7 @@ export default function ContactsPage() {
               style={{
                 padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
                 cursor: 'pointer', border: 'none',
-                background: viewMode === 'kanban' ? '#c9a84c' : 'transparent',
+                background: viewMode === 'kanban' ? 'var(--primary)' : 'transparent',
                 color: viewMode === 'kanban' ? '#000' : 'var(--muted)', fontWeight: 600,
               }}>
               KANBAN
@@ -1300,7 +1300,7 @@ export default function ContactsPage() {
                       alignItems: 'center', flexShrink: 0,
                     }}>
                       <span>{stage.toUpperCase()}</span>
-                      <span style={{ color: '#c9a84c' }}>{(kanbanContacts[stage] ?? []).length}</span>
+                      <span style={{ color: 'var(--primary)' }}>{(kanbanContacts[stage] ?? []).length}</span>
                     </div>
                     {/* Droppable column */}
                     <Droppable droppableId={stage}>
@@ -1310,8 +1310,8 @@ export default function ContactsPage() {
                           {...provided.droppableProps}
                           style={{
                             flex: 1, overflowY: 'auto', borderRadius: 4, padding: 4, minHeight: 80,
-                            background: snapshot.isDraggingOver ? 'rgba(201,168,76,0.06)' : 'transparent',
-                            border: snapshot.isDraggingOver ? '1px dashed rgba(201,168,76,0.35)' : '1px solid transparent',
+                            background: snapshot.isDraggingOver ? 'color-mix(in srgb, var(--primary) 6%, transparent)' : 'transparent',
+                            border: snapshot.isDraggingOver ? '1px dashed color-mix(in srgb, var(--primary) 35%, transparent)' : '1px solid transparent',
                             transition: 'background 0.15s, border 0.15s',
                           }}
                         >
@@ -1326,8 +1326,8 @@ export default function ContactsPage() {
                                   style={{
                                     ...provided.draggableProps.style,
                                     padding: '9px 11px', marginBottom: 5, borderRadius: 4,
-                                    background: snapshot.isDragging ? 'rgba(201,168,76,0.12)' : 'var(--surface)',
-                                    border: snapshot.isDragging ? '1px solid rgba(201,168,76,0.6)' : '1px solid var(--border)',
+                                    background: snapshot.isDragging ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'var(--surface)',
+                                    border: snapshot.isDragging ? '1px solid color-mix(in srgb, var(--primary) 60%, transparent)' : '1px solid var(--border)',
                                     cursor: 'grab', fontFamily: 'var(--font-mono)',
                                     boxShadow: snapshot.isDragging ? '0 6px 20px rgba(0,0,0,0.5)' : 'none',
                                     transition: snapshot.isDragging ? 'none' : 'border 0.15s, background 0.15s',
@@ -1376,14 +1376,14 @@ export default function ContactsPage() {
               overflowY: 'auto',
               // Dark gold scrollbar
               scrollbarWidth: 'thin',
-              scrollbarColor: '#C9A84C44 transparent',
+              scrollbarColor: 'var(--primary) transparent',
             }}
           >
             <style>{`
               .contacts-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
               .contacts-scroll::-webkit-scrollbar-track { background: transparent; }
-              .contacts-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 3px; }
-              .contacts-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
+              .contacts-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--primary) 35%, transparent); border-radius: 3px; }
+              .contacts-scroll::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--primary) 60%, transparent); }
               th:hover .col-drag-handle { opacity: 1 !important; }
             `}</style>
             <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
@@ -1396,7 +1396,7 @@ export default function ContactsPage() {
               ) : contacts.length === 0 ? (
                 <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>NO CONTACTS FOUND</div>
               ) : (
-                <table style={{ minWidth: 'max-content', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                <table style={{ minWidth: 'max-content', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                       <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                         <tr style={{ borderBottom: '1px solid var(--border)' }}>
@@ -1409,7 +1409,7 @@ export default function ContactsPage() {
                             onClick={e => e.stopPropagation()}
                           >
                             <input type="checkbox" checked={allSelected} onChange={toggleSelectAll}
-                                   style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
+                                   style={{ accentColor: 'var(--primary)', cursor: 'pointer' }} />
                           </th>
                           {/* Name column — sticky after checkbox */}
                           <th
@@ -1417,7 +1417,7 @@ export default function ContactsPage() {
                             style={{
                               padding: '8px 16px', textAlign: 'left', cursor: 'pointer',
                               fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
-                              color: sort.key === 'first_name' ? '#c9a84c' : 'var(--muted)',
+                              color: sort.key === 'first_name' ? 'var(--primary)' : 'var(--muted)',
                               whiteSpace: 'nowrap', userSelect: 'none',
                               minWidth: nameColDef.minWidth,
                               position: 'sticky', left: 36, top: 0, zIndex: 30,
@@ -1445,16 +1445,16 @@ export default function ContactsPage() {
                       const isSelected = selectedIds.has(contact.id)
                       const isActive   = selectedContact?.id === contact.id
                       const rowBg      = isSelected
-                        ? 'rgba(201,168,76,0.06)'
+                        ? 'color-mix(in srgb, var(--primary) 6%, transparent)'
                         : isActive
-                          ? 'rgba(201,168,76,0.08)'
-                          : i % 2 === 0 ? 'var(--bg)' : 'rgba(255,255,255,0.02)'
+                          ? 'color-mix(in srgb, var(--primary) 8%, transparent)'
+                          : i % 2 === 0 ? 'var(--bg)' : 'var(--surface)'
                       // Pinned cells need explicit bg matching the row
                       const pinnedBg   = isSelected
-                        ? 'rgba(21,18,10,1)'
+                        ? 'color-mix(in srgb, var(--primary) 6%, var(--bg))'
                         : isActive
-                          ? 'rgba(22,19,11,1)'
-                          : i % 2 === 0 ? 'var(--bg)' : 'rgb(14,14,16)'
+                          ? 'color-mix(in srgb, var(--primary) 8%, var(--bg))'
+                          : i % 2 === 0 ? 'var(--bg)' : 'var(--surface)'
 
                       return (
                         <tr
@@ -1463,7 +1463,7 @@ export default function ContactsPage() {
                           style={{ borderBottom: '1px solid var(--border)', background: rowBg, cursor: 'pointer' }}
                           onMouseEnter={e => {
                             if (!isSelected && !isActive)
-                              (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.04)'
+                              (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--primary) 4%, transparent)'
                           }}
                           onMouseLeave={e => {
                             if (!isSelected && !isActive)
@@ -1476,7 +1476,7 @@ export default function ContactsPage() {
                             onClick={e => toggleSelect(contact.id, e)}
                           >
                             <input type="checkbox" checked={isSelected}
-                                   onChange={() => {}} style={{ accentColor: '#c9a84c', cursor: 'pointer' }} />
+                                   onChange={() => {}} style={{ accentColor: 'var(--primary)', cursor: 'pointer' }} />
                           </td>
 
                           {/* Name — sticky after checkbox */}
@@ -1559,7 +1559,7 @@ export default function ContactsPage() {
               {!editMode && (
                 <button onClick={() => { setEditMode(true); setEditData({ ...selectedContact }) }} style={{
                   fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em',
-                  background: 'transparent', color: '#c9a84c', border: '1px solid #c9a84c',
+                  background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)',
                   padding: '4px 10px', borderRadius: 4, cursor: 'pointer',
                 }}>EDIT</button>
               )}
@@ -1602,7 +1602,7 @@ export default function ContactsPage() {
                 ))}
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                   <button onClick={handleSaveEdit} disabled={saving} style={{
-                    flex: 1, background: '#c9a84c', color: '#000', border: 'none', borderRadius: 4,
+                    flex: 1, background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 4,
                     padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
                     cursor: saving ? 'default' : 'pointer', letterSpacing: '0.08em',
                   }}>{saving ? 'SAVING…' : 'SAVE CHANGES'}</button>
@@ -1631,7 +1631,7 @@ export default function ContactsPage() {
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
                     <div style={{ fontSize: 13, color: 'var(--fg)', wordBreak: 'break-word' }}>
                       {label === 'Referred By'
-                        ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(val)}`} onClick={e => e.stopPropagation()} style={{ color: '#c9a84c', textDecoration: 'none' }}>{val}</Link>
+                        ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(val)}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{val}</Link>
                         : isPhone && telHref(val)
                           ? <a href={telHref(val)!} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{val}</a>
                           : label === 'Email' && mailtoHref(val)
@@ -1650,7 +1650,7 @@ export default function ContactsPage() {
                       <div key={l.id} style={{ marginBottom: 10 }}>
                         <Link
                           href={`/dashboard/loans/${l.id}`}
-                          style={{ color: '#c9a84c', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                          style={{ color: 'var(--primary)', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
                         >
                           {[l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.borrower_name || l.loan_name || '(unnamed)'}
                         </Link>
@@ -1717,7 +1717,7 @@ export default function ContactsPage() {
                 }))
               openWithContacts(mapped)
             }}
-            style={{ background: 'var(--bg)', border: '1px solid #C9A84C', color: '#C9A84C',
+            style={{ background: 'var(--bg)', border: '1px solid var(--primary)', color: 'var(--primary)',
                      borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
             OUTREACH
           </button>
@@ -2078,7 +2078,7 @@ export default function ContactsPage() {
                   <input key={field} placeholder={placeholder}
                     value={newContact[field] ?? ''}
                     onChange={e => setNewContact(prev => ({ ...prev, [field]: e.target.value }))}
-                    style={{ width: '100%', background: 'var(--bg)', border: '1px solid rgba(201,168,76,0.3)',
+                    style={{ width: '100%', background: 'var(--bg)', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)',
                              color: 'var(--text)', borderRadius: 4, padding: '8px 10px', boxSizing: 'border-box',
                              fontFamily: 'var(--font-mono)', fontSize: 11, marginBottom: 8 }} />
                 ))}
@@ -2160,7 +2160,7 @@ export default function ContactsPage() {
             <button
               type="button"
               onClick={() => setNewListRules(prev => [...prev, { field: 'stage', operator: 'is', value: '' }])}
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#c9a84c', background: 'transparent', border: '1px dashed rgba(201,168,76,0.5)', padding: '6px 10px', borderRadius: 4, cursor: 'pointer', marginBottom: 16 }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--primary)', background: 'transparent', border: '1px dashed color-mix(in srgb, var(--primary) 50%, transparent)', padding: '6px 10px', borderRadius: 4, cursor: 'pointer', marginBottom: 16 }}
             >
               + Add Filter
             </button>
@@ -2170,7 +2170,7 @@ export default function ContactsPage() {
                 CANCEL
               </button>
               <button onClick={handleSaveNewList} disabled={!newListName.trim()}
-                style={{ background: '#c9a84c', border: 'none', color: '#000', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
+                style={{ background: 'var(--primary)', border: 'none', color: '#000', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
                 {editingListId ? 'Update List' : 'Save List'}
               </button>
             </div>

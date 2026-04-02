@@ -12,6 +12,36 @@ const PLATFORM_ACCOUNTS: Record<string, { id: string; network: string }> = {
   facebook:  { id: '69b05329de86f5e15b7c0722', network: 'facebook' },
 }
 
+/** Extract the main caption from structured draft content.
+ *  Looks for text between "## Caption" and the next "---" or "## LinkedIn".
+ *  Falls back to the full content (stripped of markdown headers/metadata) if no section found. */
+function extractCaption(content: string): string {
+  // Try to find ## Caption section
+  const captionMatch = content.match(/##\s*Caption\s*\n([\s\S]*?)(?=\n---|\n##\s*LinkedIn|$)/i)
+  if (captionMatch) return captionMatch[1].trim()
+
+  // Fallback: strip metadata block (everything before first "---") and markdown headers
+  const afterFirstRule = content.split(/\n---\n/)[1]
+  if (afterFirstRule) {
+    // Remove any remaining ## headers and return
+    return afterFirstRule.replace(/^##\s+.*$/gm, '').trim()
+  }
+
+  // Last resort: strip lines that look like metadata (# Title, **Key:** Value, ---)
+  return content
+    .replace(/^#\s+.*$/gm, '')
+    .replace(/^\*\*\w[^*]*:\*\*.*$/gm, '')
+    .replace(/^---$/gm, '')
+    .replace(/^##\s+.*$/gm, '')
+    .trim()
+}
+
+/** Extract the LinkedIn-specific version if present. Returns null if not found. */
+function extractLinkedInVersion(content: string): string | null {
+  const match = content.match(/##\s*LinkedIn\s*Version[^\n]*\n([\s\S]*?)(?=\n---|\n##\s|$)/i)
+  return match ? match[1].trim() : null
+}
+
 export async function POST(req: NextRequest) {
   let organizationId: string
   let userId: string
@@ -83,12 +113,18 @@ export async function POST(req: NextRequest) {
       if (signedUrls.length > 0) mediaEntries = signedUrls
     }
 
-    // Build networks object — same text for each platform
+    // Extract caption and LinkedIn version from the structured draft content.
+    // Claude generates: metadata headers → ## Caption → post text → ## LinkedIn Version → linkedin text
+    // Only the actual post text should be sent to each platform.
+    const captionText = extractCaption(draft.content)
+    const linkedinText = extractLinkedInVersion(draft.content) || captionText
+
+    // Build networks object — platform-specific text
     const networks: Record<string, { type: string; text: string; media?: { url: string }[] }> = {}
     for (const t of targets) {
       const networkEntry: { type: string; text: string; media?: { url: string }[] } = {
         type: mediaEntries ? 'photo' : 'status',
-        text: draft.content,
+        text: t.network === 'linkedin' ? linkedinText : captionText,
       }
       if (mediaEntries) {
         networkEntry.media = mediaEntries

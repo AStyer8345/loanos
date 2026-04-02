@@ -638,8 +638,8 @@ export default function LoanDetailPage() {
           </div>
 
           {/* Row 3: Vital Signs — compact, all items visible */}
-          <div className="rounded-lg border border-input/60 bg-card/50 px-4 py-2.5 mb-2">
-            <div className="flex items-center gap-7 flex-wrap text-sm font-mono">
+          <div className="rounded-lg border border-input bg-card px-5 py-3.5 mb-2 shadow-sm">
+            <div className="flex items-center gap-8 flex-wrap text-sm font-mono">
               {loan.loan_amount != null && (
                 <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
               )}
@@ -713,7 +713,7 @@ export default function LoanDetailPage() {
 
           {/* Row 4: Milestones (left) + Property address (bottom right) */}
           <div className="flex items-end gap-3 pt-2 pb-1">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 rounded-lg border border-input bg-card px-4 py-3 shadow-sm">
               <MilestoneTimeline loan={loan} activity={activity} />
             </div>
             {loan.property_address && (
@@ -723,12 +723,12 @@ export default function LoanDetailPage() {
                 )}_rb/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 flex flex-col items-start rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-indigo-950/60 hover:border-blue-400/50 hover:from-blue-900/60 hover:to-indigo-900/60 transition-colors px-3 py-1.5"
+                className="shrink-0 flex flex-col items-start rounded-lg border border-blue-400/30 bg-blue-50 dark:bg-gradient-to-br dark:from-blue-950/60 dark:to-indigo-950/60 hover:border-blue-400/50 hover:bg-blue-100 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60 transition-colors px-3 py-1.5 shadow-sm"
                 title="View on Zillow"
               >
-                <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
-                <span className="text-xs font-mono text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
-                <span className="text-[11px] font-mono text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
+                <span className="text-[9px] font-mono text-blue-500 dark:text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
+                <span className="text-xs font-mono text-blue-900 dark:text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
+                <span className="text-[11px] font-mono text-blue-700/70 dark:text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
                   {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
                 </span>
               </a>
@@ -924,7 +924,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   }, [loanId, onRefresh])
 
   return (
-    <div className="p-6 space-y-0">
+    <div className="p-6 space-y-6">
 
       {/* ── Section 1: Parties (Communication Hub) + Borrower/Documents ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
@@ -1263,67 +1263,67 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {parties.map(p => {
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
           const roleHex = ROLE_HEX[p.role] ?? '#6B7280'
           return (
-            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-input transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex, backgroundColor: `${roleHex}0A` }}>
+            <div key={p.role} className="group rounded-lg p-4 border border-input hover:border-input/80 transition-colors shadow-sm" style={{ borderLeftWidth: 3, borderLeftColor: roleHex, backgroundColor: `${roleHex}0A` }}>
               {/* Name + Role */}
-              <div className="mb-2">
-                <p className="text-[11px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
+              <div className="mb-3">
+                <p className="text-[11px] font-mono uppercase tracking-wide font-semibold leading-none" style={{ color: roleHex }}>{p.role}</p>
                 {p.contactId ? (
-                  <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-foreground hover:text-foreground/80 transition-colors truncate block mt-0.5">
+                  <Link href={`/dashboard/contacts/${p.contactId}`} className="text-base font-mono font-semibold text-foreground hover:text-foreground/80 transition-colors truncate block mt-1">
                     {p.name || '—'}
                   </Link>
                 ) : (
-                  <p className="text-sm font-mono font-medium text-foreground truncate mt-0.5">{p.name || '—'}</p>
+                  <p className="text-base font-mono font-semibold text-foreground truncate mt-1">{p.name || '—'}</p>
                 )}
               </div>
 
               {/* Action icons — colored on hover */}
-              <div className="flex items-center gap-1.5 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 {p.phone && (
                   <a
                     href={`tel:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
                     style={{ ['--hover-bg' as string]: roleHex }}
                     title={`Call ${fmtPhone(p.phone)}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
-                    <Phone size={11} />
+                    <Phone size={13} />
                   </a>
                 )}
                 {p.phone && (
                   <a
                     href={`sms:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
                     title={`Text ${fmtPhone(p.phone)}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
-                    <MessageSquare size={11} />
+                    <MessageSquare size={13} />
                   </a>
                 )}
                 {p.email && (
                   <a
                     href={`mailto:${p.email}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
                     title={`Email ${p.email}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
-                    <Mail size={11} />
+                    <Mail size={13} />
                   </a>
                 )}
               </div>
 
               {/* Last Contacted timestamp */}
               {lastContacted ? (
-                <p className="text-[9px] font-mono text-muted-foreground">Last contacted {fmtRelative(lastContacted)}</p>
+                <p className="text-[10px] font-mono text-muted-foreground">Last contacted {fmtRelative(lastContacted)}</p>
               ) : (
-                <p className="text-[9px] font-mono text-zinc-700">No contact logged</p>
+                <p className="text-[10px] font-mono text-muted-foreground/60">No contact logged</p>
               )}
             </div>
           )
@@ -1479,8 +1479,8 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
   }
 
   return (
-    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
-      <div className="px-4 py-2 bg-muted/80 border-b border-input flex items-center justify-between">
+    <div className="bg-card border border-input rounded-lg overflow-hidden shadow-sm">
+      <div className="px-5 py-3 bg-secondary border-b border-input flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
           <Clock size={11} className="text-[#C9A84C]" /> Key Dates
         </h2>
@@ -1798,8 +1798,8 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
   }
 
   return (
-    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 bg-muted/80 border-b border-input flex items-center justify-between">
+    <div className="bg-card border border-input rounded-lg overflow-hidden shadow-sm">
+      <div className="px-5 py-3 bg-secondary border-b border-input flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Documents</h2>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-muted-foreground font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>

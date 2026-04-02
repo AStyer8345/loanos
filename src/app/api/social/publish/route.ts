@@ -5,11 +5,11 @@ import { getOrganization } from '@/lib/getOrganization'
 const PUBLER_API_KEY = process.env.PUBLER_API_KEY || ''
 const PUBLER_WORKSPACE = process.env.PUBLER_WORKSPACE || ''
 
-const PLATFORM_ACCOUNTS: Record<string, string> = {
-  instagram: '69b0530110a77a0ed895847d',
-  linkedin: '69b0536404b824ffb2c05426',
-  facebook: '69b05329de86f5e15b7c0722',
-  all: '', // handled specially
+// Publer account IDs → keyed by platform name AND Publer network provider name
+const PLATFORM_ACCOUNTS: Record<string, { id: string; network: string }> = {
+  instagram: { id: '69b0530110a77a0ed895847d', network: 'instagram' },
+  linkedin:  { id: '69b0536404b824ffb2c05426', network: 'linkedin' },
+  facebook:  { id: '69b05329de86f5e15b7c0722', network: 'facebook' },
 }
 
 export async function POST(req: NextRequest) {
@@ -51,38 +51,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Draft must be approved before publishing' }, { status: 400 })
     }
 
-    // Determine which Publer profiles to post to
-    let profiles: string[] = []
-    if (draft.platform === 'all') {
-      profiles = [
-        PLATFORM_ACCOUNTS.instagram,
-        PLATFORM_ACCOUNTS.linkedin,
-        PLATFORM_ACCOUNTS.facebook,
-      ]
-    } else {
-      const accountId = PLATFORM_ACCOUNTS[draft.platform]
-      if (accountId) profiles = [accountId]
-    }
+    // Determine which Publer accounts to post to
+    const targets = draft.platform === 'all'
+      ? [PLATFORM_ACCOUNTS.instagram, PLATFORM_ACCOUNTS.linkedin, PLATFORM_ACCOUNTS.facebook]
+      : PLATFORM_ACCOUNTS[draft.platform] ? [PLATFORM_ACCOUNTS[draft.platform]] : []
 
-    if (profiles.length === 0) {
+    if (targets.length === 0) {
       return NextResponse.json({ error: 'No platform accounts configured' }, { status: 400 })
     }
 
-    // Build the Publer post body — matches working n8n workflow format
-    const publerBody: Record<string, unknown> = {
-      accounts: profiles,
-      text: draft.content,
-      is_draft: true, // Creates as draft in Publer for final review
+    // Publer v1 requires: bulk.posts[].networks + bulk.posts[].accounts
+    // Each network key = provider name (facebook, instagram, linkedin)
+    // Each account = { id, scheduled_at }
+    const scheduledAt = draft.scheduled_for || new Date(Date.now() + 2 * 60_000).toISOString() // default: 2 min from now
+
+    // Build networks object — same text for each platform
+    const networks: Record<string, { type: string; text: string; media?: { url: string }[] }> = {}
+    for (const t of targets) {
+      const networkEntry: { type: string; text: string; media?: { url: string }[] } = {
+        type: 'status',
+        text: draft.content,
+      }
+      if (draft.media_urls && draft.media_urls.length > 0) {
+        networkEntry.media = draft.media_urls.map((url: string) => ({ url }))
+      }
+      networks[t.network] = networkEntry
     }
 
-    // Add scheduled time if set
-    if (draft.scheduled_for) {
-      publerBody.scheduled_at = draft.scheduled_for
-    }
-
-    // Add media if present
-    if (draft.media_urls && draft.media_urls.length > 0) {
-      publerBody.media = draft.media_urls.map((url: string) => ({ path: url }))
+    const publerBody = {
+      bulk: {
+        state: 'draft', // Creates as draft in Publer for final review
+        posts: [
+          {
+            networks,
+            accounts: targets.map(t => ({
+              id: t.id,
+              scheduled_at: scheduledAt,
+            })),
+          },
+        ],
+      },
     }
 
     // Push to Publer
@@ -106,7 +114,7 @@ export async function POST(req: NextRequest) {
     }
 
     const publerData = await publerRes.json()
-    const publerPostId = publerData.id || publerData.post_id || null
+    const publerPostId = publerData.job_id || publerData.id || null
 
     // Only update draft status to 'posted' after Publer confirms
     const { error: updateError } = await supabase

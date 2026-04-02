@@ -133,30 +133,30 @@ export default function DashboardClient(props: DashboardClientProps) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Link href="/dashboard/loans?stage=funded&period=ytd">
               <Card className="border-l-4 border-l-[#10b981] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Commission Earned</div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Commission Earned</div>
                 <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
+                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
               </Card>
             </Link>
             <Link href="/dashboard/loans">
               <Card className="border-l-4 border-l-primary p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Commission</div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Commission</div>
                 <div className="text-2xl font-mono font-bold text-primary">{fmt(props.pipelineCommission ?? props.totalActiveCommission)}</div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
               </Card>
             </Link>
             <Link href="/dashboard/loans?stage=funded&period=mtd">
               <Card className="border-l-4 border-l-[#8b5cf6] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Closed This Month</div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Closed This Month</div>
                 <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
+                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
               </Card>
             </Link>
             <Link href="/dashboard/loans">
               <Card className="border-l-4 border-l-[#3b82f6] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Loans</div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Loans</div>
                 <div className="text-2xl font-mono font-bold text-foreground">{props.pipelineCount ?? props.totalActive}</div>
-                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
               </Card>
             </Link>
           </div>
@@ -168,9 +168,9 @@ export default function DashboardClient(props: DashboardClientProps) {
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={14} className="text-amber-400" />
                   <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Needs Attention</span>
-                  <span className="text-[10px] font-mono text-zinc-600">{needsAttentionCount} items</span>
+                  <span className="text-[11px] font-mono text-zinc-600">{needsAttentionCount} items</span>
                 </div>
-                <Link href="/dashboard/loans" className="flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
+                <Link href="/dashboard/loans" className="flex items-center gap-1 text-[11px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
                   View pipeline <ArrowRight size={9} />
                 </Link>
               </div>
@@ -202,7 +202,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                   )}
                   <div className="flex items-center gap-2 mb-2 px-2">
                     <Clock size={11} className="text-orange-400" />
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">No activity 7+ days</span>
+                    <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">No activity 7+ days</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     {props.staleLoans.slice(0, 12).map(l => (
@@ -218,7 +218,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                         </div>
                         <div className="flex items-center gap-3 ml-2 flex-shrink-0">
                           {l.estimated_closing_date && (
-                            <span className="text-zinc-600 text-[10px]">close {fmtDateShort(l.estimated_closing_date)}</span>
+                            <span className="text-zinc-600 text-[11px]">close {fmtDateShort(l.estimated_closing_date)}</span>
                           )}
                           <span className="text-orange-400">{l.daysSinceActivity}d idle</span>
                         </div>
@@ -257,9 +257,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               { label: 'Avg Per Loan', value: props.fundedYTD > 0 ? fmt(props.commissionYTD / props.fundedYTD) : '—', sub: props.fundedYTD > 0 ? `${fmtK(props.volumeYTD / props.fundedYTD)} avg loan` : '', border: '#8b5cf6' },
             ].map(k => (
               <Card key={k.label} className="p-3" style={{ borderLeftWidth: 4, borderLeftColor: k.border }}>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">{k.label}</div>
+                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">{k.label}</div>
                 <div className="text-xl font-mono font-bold text-foreground">{k.value}</div>
-                {k.sub && <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{k.sub}</div>}
+                {k.sub && <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{k.sub}</div>}
               </Card>
             ))}
           </div>
@@ -381,11 +381,11 @@ export default function DashboardClient(props: DashboardClientProps) {
 
 // ── Stage badge (uses global statusHex map) ─────────────────────────────
 function StageBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-zinc-600 text-[10px] font-mono">—</span>
+  if (!status) return <span className="text-zinc-600 text-[11px] font-mono">—</span>
   const hex = statusHex(status)
   return (
     <span
-      className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium border"
+      className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-mono font-medium border"
       style={{
         background: `${hex}22`,
         color: hex,

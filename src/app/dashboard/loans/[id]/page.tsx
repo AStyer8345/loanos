@@ -539,7 +539,7 @@ export default function LoanDetailPage() {
                 </button>
                 {actionsOpen && (
                   <div className="absolute right-0 top-full mt-1 w-56 bg-card border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
-                    <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
+                    <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
                     {[
                       { label: 'Send PA Email', automationId: 'pre-approval' },
                       { label: 'Send CD Email', automationId: 'final-cd' },
@@ -560,7 +560,7 @@ export default function LoanDetailPage() {
                       </button>
                     ))}
                     <div className="border-t border-input mt-1 pt-1">
-                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Tools</p>
+                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">Tools</p>
                       <Link
                         href={`/dashboard/scenarios/new?loan_id=${loanId}`}
                         onClick={() => setActionsOpen(false)}
@@ -571,7 +571,7 @@ export default function LoanDetailPage() {
                       </Link>
                     </div>
                     <div className="border-t border-input mt-1 pt-1">
-                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">View</p>
+                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">View</p>
                       {[
                         { label: 'Activity Log', tab: 'activity' as const },
                         { label: 'Email History', tab: 'emails' as const },
@@ -588,7 +588,7 @@ export default function LoanDetailPage() {
                       ))}
                     </div>
                     <div className="border-t border-input mt-1 pt-1">
-                      <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-red-600">Danger</p>
+                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-red-600">Danger</p>
                       <button
                         onClick={() => { setDeleteConfirmOpen(true); setActionsOpen(false) }}
                         className="w-full text-left px-3 py-2 text-xs font-mono text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors flex items-center gap-2"
@@ -677,7 +677,7 @@ export default function LoanDetailPage() {
               />
               {loan.referring_agent_name && (
                 <div className="shrink-0">
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
+                  <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
                   <Link
                     href={
                       loan.referral_contact_id
@@ -728,7 +728,7 @@ export default function LoanDetailPage() {
               >
                 <span className="text-[9px] font-mono text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
                 <span className="text-xs font-mono text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
-                <span className="text-[10px] font-mono text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
+                <span className="text-[11px] font-mono text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
                   {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
                 </span>
               </a>
@@ -824,7 +824,7 @@ export default function LoanDetailPage() {
 function VitalStat({ label, value, highlight, color }: { label: string; value: string; highlight?: boolean; color?: string }) {
   return (
     <div className="shrink-0">
-      <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <p
         className="text-sm font-mono font-semibold leading-none"
         style={color ? { color } : undefined}
@@ -852,7 +852,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
 }) {
   return (
     <div className="shrink-0">
-      <p className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <div className="flex items-center gap-1.5">
         {editingHeader === field ? (
           <input
@@ -1068,7 +1068,7 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 
   return (
     <div>
-      <h3 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Borrower</h3>
+      <h3 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Borrower</h3>
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
           <span className="text-sm font-mono font-bold text-zinc-300">{initials}</span>
@@ -1077,19 +1077,19 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
           <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
           <div className="flex items-center gap-3 mt-0.5">
             {email && (
-              <a href={`mailto:${email}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
+              <a href={`mailto:${email}`} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
                 {email}
               </a>
             )}
             {phone && (
-              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors shrink-0">
+              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors shrink-0">
                 {fmtPhone(phone)}
               </a>
             )}
           </div>
         </div>
         {loan.contact_id && contact && (
-          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors shrink-0">
+          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[11px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors shrink-0">
             View →
           </Link>
         )}
@@ -1114,7 +1114,7 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
       {loan.co_borrower_name && (
         <div className="pt-2 border-t border-input/40">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-zinc-600">Co-Borrower:</span>
+            <span className="text-[11px] font-mono text-zinc-600">Co-Borrower:</span>
             <span className="text-xs font-mono text-zinc-300">{loan.co_borrower_name}</span>
             {loan.co_borrower_phone && (
               <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-zinc-600 hover:text-zinc-400 transition-colors">
@@ -1249,7 +1249,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Parties</h2>
+        <h2 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Parties</h2>
         <div className="flex items-center gap-1.5">
           {groupButtons.map(btn => btn.href && (
             <a
@@ -1271,7 +1271,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
             <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-zinc-700 transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
               {/* Name + Role */}
               <div className="mb-2">
-                <p className="text-[10px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
+                <p className="text-[11px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
                 {p.contactId ? (
                   <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-zinc-100 hover:text-zinc-300 transition-colors truncate block mt-0.5">
                     {p.name || '—'}
@@ -1453,7 +1453,7 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
       <div key={d.key} className="flex items-center justify-between gap-2 py-1 group">
         <div className="flex items-center gap-1.5 min-w-0">
           <div className="w-1 h-1 rounded-full shrink-0" style={{ background: d.value ? d.hex : '#3f3f46' }} />
-          <span className="text-[10px] font-mono truncate" style={{ color: d.value ? d.hex : '#52525b' }}>{d.label}</span>
+          <span className="text-[11px] font-mono truncate" style={{ color: d.value ? d.hex : '#52525b' }}>{d.label}</span>
         </div>
         {editing === d.field ? (
           <input
@@ -1487,7 +1487,7 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
         {populatedSecondary.length > 0 && (
           <button
             onClick={() => setExpanded(e => !e)}
-            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
+            className="text-[11px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
           >
             {expanded ? 'Less' : `+${populatedSecondary.length} more`}
             <ChevronDown size={10} className={expanded ? 'rotate-180 transition-transform' : 'transition-transform'} />
@@ -1648,7 +1648,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
                   if (isActive) { setActiveType(null); setLogNotes('') }
                   else { setActiveType(type); setLogNotes('') }
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-[10px] font-mono font-semibold tracking-wide transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all"
                 style={{
                   background: isActive ? cfg.bg : 'transparent',
                   color: isActive ? cfg.color : '#71717a',
@@ -1676,13 +1676,13 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
               <button
                 onClick={handleLog}
                 disabled={saving}
-                className="px-3 py-1 rounded text-[10px] font-mono font-semibold bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
+                className="px-3 py-1 rounded text-[11px] font-mono font-semibold bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Saving…' : 'Save'}
               </button>
               <button
                 onClick={() => { setActiveType(null); setLogNotes('') }}
-                className="px-2.5 py-1 rounded text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="px-2.5 py-1 rounded text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
               >
                 Cancel
               </button>
@@ -1730,14 +1730,14 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                      <span className="text-[11px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[10px] font-mono text-zinc-600">{timeLabel}</span>
+                        <span className="text-[11px] font-mono text-zinc-600">{timeLabel}</span>
                         <ChevronDown size={10} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
                       </div>
                     </div>
                     {!isExpanded && preview && (
-                      <p className="text-[10px] font-mono text-zinc-600 mt-0.5 truncate">{preview}</p>
+                      <p className="text-[11px] font-mono text-zinc-600 mt-0.5 truncate">{preview}</p>
                     )}
                   </div>
                 </div>
@@ -1749,7 +1749,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
                     <button
                       onClick={() => handleDelete(item.id)}
                       disabled={isDeleting}
-                      className="inline-flex items-center gap-1 text-[10px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                      className="inline-flex items-center gap-1 text-[11px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                     >
                       <Trash2 size={10} /> {isDeleting ? 'Deleting…' : 'Delete'}
                     </button>
@@ -1802,12 +1802,12 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
+          <span className="text-[11px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1 text-[10px] font-mono text-[#C9A84C] hover:text-[#d4b860] disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-[#C9A84C] hover:text-[#d4b860] disabled:opacity-50 transition-colors"
           >
             <Upload size={10} /> {uploading ? 'Uploading…' : 'Upload'}
           </button>
@@ -1819,7 +1819,7 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono border border-zinc-700 text-zinc-400 hover:border-[#C9A84C] hover:text-[#C9A84C] rounded transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono border border-zinc-700 text-zinc-400 hover:border-[#C9A84C] hover:text-[#C9A84C] rounded transition-colors disabled:opacity-50"
           >
             <Upload size={10} /> Upload Document
           </button>
@@ -1841,7 +1841,7 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
                 className="text-zinc-500 hover:text-zinc-300 disabled:opacity-50 transition-colors ml-2 shrink-0"
                 title="Download"
               >
-                {signingId === doc.id ? <span className="text-[10px] font-mono">…</span> : <Download size={11} />}
+                {signingId === doc.id ? <span className="text-[11px] font-mono">…</span> : <Download size={11} />}
               </button>
             </div>
           ))}
@@ -1897,7 +1897,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
 
   return (
     <div>
-      <h2 className="text-[10px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Milestones</h2>
+      <h2 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Milestones</h2>
       <div className="flex flex-nowrap items-start gap-0 overflow-x-auto">
         {milestones.map((m, i) => {
           const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
@@ -1942,7 +1942,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
                 </div>
                 {/* Label — colored when complete/active */}
                 <p
-                  className={`text-[10px] font-mono font-medium text-center leading-tight line-clamp-2 ${
+                  className={`text-[11px] font-mono font-medium text-center leading-tight line-clamp-2 ${
                     isPending ? 'text-zinc-600' : ''
                   }`}
                   style={isComplete ? { color: m.hex } : isActive ? { color: m.hex } : undefined}
@@ -2137,7 +2137,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
                     <div className="text-xs font-mono text-zinc-100 font-medium">
                       {[c.first_name, c.last_name].filter(Boolean).join(' ')}
                     </div>
-                    {c.email && <div className="text-[10px] font-mono text-zinc-400 mt-0.5">{c.email}</div>}
+                    {c.email && <div className="text-[11px] font-mono text-zinc-400 mt-0.5">{c.email}</div>}
                     {c.contact_type && <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-wide">{c.contact_type}</span>}
                   </button>
                 ))}
@@ -2537,7 +2537,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
             <button onClick={() => { setLogModal(null); setLogNotes('') }} className="text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
           </div>
           <div className="mb-2">
-            <p className="text-[10px] font-mono text-zinc-500 mb-1">Date/Time: {new Date().toLocaleString()}</p>
+            <p className="text-[11px] font-mono text-zinc-500 mb-1">Date/Time: {new Date().toLocaleString()}</p>
           </div>
           <textarea
             value={logNotes}
@@ -2630,11 +2630,11 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 justify-between">
                       <div className="flex items-center gap-2 min-w-0">
-                        {typeLabel && <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400 shrink-0">{typeLabel}</span>}
+                        {typeLabel && <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400 shrink-0">{typeLabel}</span>}
                         <p className="text-sm font-mono text-zinc-200 truncate">{label}</p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[10px] font-mono text-zinc-600">{dateStr}</span>
+                        <span className="text-[11px] font-mono text-zinc-600">{dateStr}</span>
                         <ChevronDown size={11} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
                       </div>
                     </div>
@@ -2655,7 +2655,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
                       <button
                         onClick={() => handleDeleteActivity(item.id)}
                         disabled={isDeleting}
-                        className="inline-flex items-center gap-1 text-[10px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] font-mono text-red-500 border border-red-500/30 rounded px-2 py-0.5 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                       >
                         <Trash2 size={10} /> {isDeleting ? 'Deleting…' : 'Delete'}
                       </button>
@@ -2734,7 +2734,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
     <div className="space-y-6 max-w-2xl">
       {drafts.length > 0 && (
       <div className="space-y-3">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Draft Queue</p>
+        <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Draft Queue</p>
       {drafts.map(draft => {
         const colorClass = DRAFT_COLORS[draft.automation_name] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
         const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
@@ -2744,8 +2744,8 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
             <button onClick={() => setExpanded(isOpen ? null : draft.id)} className="w-full text-left p-4 focus:outline-none">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_CLASSES[draft.status] ?? STATUS_CLASSES.pending}`}>{draft.status}</span>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_CLASSES[draft.status] ?? STATUS_CLASSES.pending}`}>{draft.status}</span>
                   <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(draft.created_at)}</span>
                 </div>
                 {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
@@ -2792,7 +2792,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
       {/* Inbound emails from n8n / Outlook sync */}
       {inboundEmails.length > 0 && (
         <div className="space-y-3">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Inbound</p>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Inbound</p>
           {inboundEmails.map(email => {
             const fromName = (email.metadata?.from_name as string) || null
             const isOpen = expanded === email.id
@@ -2801,7 +2801,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                 <button onClick={() => setExpanded(isOpen ? null : email.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-amber-900/30 text-amber-400 border-amber-800">INBOUND</span>
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border bg-amber-900/30 text-amber-400 border-amber-800">INBOUND</span>
                       <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(email.occurred_at || email.created_at)}</span>
                     </div>
                     {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
@@ -2826,7 +2826,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
       {/* Permanent audit log from contact_emails */}
       {contactEmails.length > 0 && (
         <div className="space-y-3">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Email Log</p>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Email Log</p>
           {contactEmails.map(ce => {
             const src = ce.automation_source ?? 'unknown'
             const colorClass = DRAFT_COLORS[src] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
@@ -2837,7 +2837,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                 <button onClick={() => setExpanded(isOpen ? null : ce.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
                       <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(ce.sent_at)}</span>
                     </div>
                     {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}

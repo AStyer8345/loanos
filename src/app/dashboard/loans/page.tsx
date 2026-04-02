@@ -957,7 +957,7 @@ export default function LoansPage() {
                 ) : (
                   <span className="truncate">{list.label}</span>
                 )}
-                <span className={`text-[10px] rounded-full px-1 py-0 shrink-0 ml-1 ${
+                <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
                   activeList === list.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[#2A2A2A] text-[#666666]'
                 }`}>
                   {counts[list.id] ?? '…'}
@@ -986,7 +986,7 @@ export default function LoansPage() {
                   ) : (
                     <span className="truncate">{cl.name}</span>
                   )}
-                  <span className={`text-[10px] rounded-full px-1 py-0 shrink-0 ml-1 ${
+                  <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
                     activeList === cl.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[#2A2A2A] text-[#666666]'
                   }`}>
                     {counts[cl.id] ?? '…'}
@@ -1008,7 +1008,7 @@ export default function LoansPage() {
           <button
             type="button"
             onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
-            className="w-full mt-2 text-[10px] font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1.5 hover:bg-[#C9A84C]/10 transition-colors"
+            className="w-full mt-2 text-[11px] font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1.5 hover:bg-[#C9A84C]/10 transition-colors"
           >
             + New List
           </button>
@@ -1161,67 +1161,67 @@ export default function LoansPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               {/* Active filter chips */}
             {filterStatuses.length > 0 && filterStatuses.map(s => (
-              <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[10px] font-mono text-violet-400">
+              <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[11px] font-mono text-violet-400">
                 {s}
                 <button onClick={() => setFilterStatuses(prev => prev.filter(x => x !== s))} className="hover:text-white"><X size={10} /></button>
               </span>
             ))}
             {filterPurpose && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-900/30 border border-sky-700 text-[10px] font-mono text-sky-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-900/30 border border-sky-700 text-[11px] font-mono text-sky-400">
                 Purpose: {filterPurpose}
                 <button onClick={() => setFilterPurpose('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {filterProgram && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-900/30 border border-indigo-700 text-[10px] font-mono text-indigo-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-900/30 border border-indigo-700 text-[11px] font-mono text-indigo-400">
                 Program: {filterProgram}
                 <button onClick={() => setFilterProgram('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {filterLender && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/30 border border-amber-700 text-[10px] font-mono text-amber-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/30 border border-amber-700 text-[11px] font-mono text-amber-400">
                 Lender: {filterLender}
                 <button onClick={() => setFilterLender('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {filterState && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-900/30 border border-teal-700 text-[10px] font-mono text-teal-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-900/30 border border-teal-700 text-[11px] font-mono text-teal-400">
                 State: {filterState}
                 <button onClick={() => setFilterState('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {filterRateMin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[10px] font-mono text-orange-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[11px] font-mono text-orange-400">
                 Rate &gt; {filterRateMin}%
                 <button onClick={() => setFilterRateMin('')} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
             {(filterDateFrom || filterDateTo) && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-[10px] font-mono text-emerald-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-[11px] font-mono text-emerald-400">
                 Close: {filterDateFrom || '…'} → {filterDateTo || '…'}
                 <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-white"><X size={10} /></button>
               </span>
             )}
               {urlFilterActive?.stage && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[10px] font-mono text-[#C9A84C]">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[11px] font-mono text-[#C9A84C]">
                   Stage: {urlFilterActive.stage}
                   <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
                 </span>
               )}
               {urlFilterActive?.period && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/30 border border-blue-700 text-[10px] font-mono text-blue-400">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/30 border border-blue-700 text-[11px] font-mono text-blue-400">
                   Period: {urlFilterActive.period === 'mtd' ? 'This Month' : urlFilterActive.period === 'ytd' ? 'Year to Date' : urlFilterActive.period}
                   <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-white"><X size={10} /></button>
                 </span>
               )}
               {urlFilterActive?.filter && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[10px] font-mono text-orange-400">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[11px] font-mono text-orange-400">
                   {urlFilterActive.filter === 'no_activity_3days' ? 'No activity 3+ days' : urlFilterActive.filter}
                   <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
                 </span>
               )}
             {hasAdvancedFilters && (
-                <button onClick={clearAllFilters} className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
+                <button onClick={clearAllFilters} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
             )}
             </div>
           )}
@@ -1262,7 +1262,7 @@ export default function LoansPage() {
                           )}
                           className="accent-[#C9A84C] rounded"
                         />
-                        <span className="text-[10px] font-mono text-zinc-300 truncate">{s}</span>
+                        <span className="text-[11px] font-mono text-zinc-300 truncate">{s}</span>
                       </label>
                     ))}
                   </div>
@@ -1330,7 +1330,7 @@ export default function LoansPage() {
                   />
                 </div>
               </div>
-              <button onClick={clearAllFilters} className="mt-3 text-[10px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear All Filters</button>
+              <button onClick={clearAllFilters} className="mt-3 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear All Filters</button>
             </div>
           )}
         </div>
@@ -1436,7 +1436,7 @@ export default function LoansPage() {
                   >
                     <span className="text-xs font-mono font-semibold truncate" style={{ color: col.hex }}>{col.label}</span>
                     <span
-                      className="ml-auto shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+                      className="ml-auto shrink-0 text-[11px] font-mono px-1.5 py-0.5 rounded-full"
                       style={{ background: `${col.hex}22`, color: col.hex }}
                     >
                       {col.loans.length}
@@ -1461,16 +1461,16 @@ export default function LoansPage() {
                               : {}}
                         >
                           <p className="text-sm font-mono font-medium text-[#F0F0F0] truncate">{borrowerDisplayName(loan)}</p>
-                          {loan.loan_name && <p className="text-[10px] font-mono text-[#C9A84C]/60 truncate mt-0.5">{loan.loan_name}</p>}
+                          {loan.loan_name && <p className="text-[11px] font-mono text-[#C9A84C]/60 truncate mt-0.5">{loan.loan_name}</p>}
                           <div className="mt-2 flex items-center justify-between gap-2">
                             <span className="text-xs font-mono text-blue-400 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</span>
                             {ecd && (
-                              <span className={`text-[10px] font-mono whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-[#555555]'}`}>
+                              <span className={`text-[11px] font-mono whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-[#555555]'}`}>
                                 {fmtDate(ecd)}{days !== null && days <= 14 ? ` · ${days}d` : ''}
                               </span>
                             )}
                           </div>
-                          {loan.lender && <p className="text-[10px] font-mono text-[#444444] mt-1.5 truncate">{loan.lender}</p>}
+                          {loan.lender && <p className="text-[11px] font-mono text-[#444444] mt-1.5 truncate">{loan.lender}</p>}
                         </div>
                       )
                     })}
@@ -1644,7 +1644,7 @@ export default function LoansPage() {
                             {fmtDate(ecd)}
                           </span>
                           {days !== null && days <= 14 && (
-                            <span className={`ml-2 text-[10px] ${days <= 7 ? 'text-red-400' : 'text-amber-400'}`}>
+                            <span className={`ml-2 text-[11px] ${days <= 7 ? 'text-red-400' : 'text-amber-400'}`}>
                               {days <= 0 ? 'TODAY' : `${days}d`}
                             </span>
                           )}
@@ -1661,8 +1661,8 @@ export default function LoansPage() {
                             <span className={lockExpired ? 'text-red-400' : lockWarn ? 'text-amber-400' : 'text-[#999999]'}>
                               {fmtDate(loan.rate_lock_expiration)}
                             </span>
-                            {lockExpired && <span className="ml-1.5 text-[10px] text-red-400">EXPIRED</span>}
-                            {lockWarn && <span className="ml-1.5 text-[10px] text-amber-400">{lockDays}d</span>}
+                            {lockExpired && <span className="ml-1.5 text-[11px] text-red-400">EXPIRED</span>}
+                            {lockWarn && <span className="ml-1.5 text-[11px] text-amber-400">{lockDays}d</span>}
                           </td>
                         )
                       }
@@ -1764,7 +1764,7 @@ export default function LoansPage() {
                                 </a>
                               )}
                               {!tel && !smsHref && !mailto && (
-                                <span className="text-[10px] font-mono text-zinc-600">No contact</span>
+                                <span className="text-[11px] font-mono text-zinc-600">No contact</span>
                               )}
                             </div>
                           </td>
@@ -1805,7 +1805,7 @@ export default function LoansPage() {
               onChange={e => setNewListName(e.target.value)}
               className="w-full border border-[#2A2A2A] rounded px-3 py-2 text-sm font-mono bg-[#0A0A0A] text-[#F0F0F0] placeholder:text-[#666666] mb-4 focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
             />
-            <div className="text-[10px] font-mono text-[#666666] uppercase tracking-wider mb-2">Filter rules (AND)</div>
+            <div className="text-[11px] font-mono text-[#666666] uppercase tracking-wider mb-2">Filter rules (AND)</div>
             {newListRules.map((rule, idx) => (
               <div key={idx} className="flex gap-2 mb-2 flex-wrap items-center">
                 <select

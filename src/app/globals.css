@@ -13,10 +13,10 @@
   /* Borders — softer, less harsh */
   --border:   #2a2d3a;
 
-  /* Text — reduced contrast for all-day comfort */
-  --text:     #c8cdd5;
-  --muted:    #7a8291;
-  --fg:       #c8cdd5;
+  /* Text — softer than #e5e5e5 but still legible */
+  --text:     #dce1e8;
+  --muted:    #8d95a5;
+  --fg:       #dce1e8;
 
   /* Accents */
   --gold:     #C9A84C;
@@ -30,21 +30,21 @@
 
   /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
   --background: #0c0e14;
-  --foreground: #c8cdd5;
+  --foreground: #dce1e8;
   --card: #161a26;
-  --card-foreground: #c8cdd5;
+  --card-foreground: #dce1e8;
   --popover: #161a26;
-  --popover-foreground: #c8cdd5;
+  --popover-foreground: #dce1e8;
   --primary: #C9A84C;
   --primary-foreground: #0c0e14;
   --secondary: #1c1f2a;
-  --secondary-foreground: #c8cdd5;
+  --secondary-foreground: #dce1e8;
   --muted-bg: #1c1f2a;
-  --muted-foreground: #7a8291;
+  --muted-foreground: #8d95a5;
   --accent-bg: #1c1f2a;
-  --accent-foreground: #c8cdd5;
+  --accent-foreground: #dce1e8;
   --destructive: #DC2626;
-  --destructive-foreground: #c8cdd5;
+  --destructive-foreground: #dce1e8;
   --ring: #C9A84C;
   --input: #252a38;
   --radius: 0.5rem;
@@ -90,7 +90,7 @@ body {
 }
 .lo-table thead th {
   padding: 0.625rem 1rem;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

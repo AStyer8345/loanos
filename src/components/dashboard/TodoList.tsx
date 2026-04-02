@@ -152,7 +152,7 @@ export default function TodoList() {
           <>
             <div className="flex items-center gap-1.5 pt-1 pb-0.5">
               <Bot className="w-3 h-3 text-[#C9A84C]" />
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Agent Actions</span>
+              <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Agent Actions</span>
             </div>
             {agentItems.map(todo => {
               const parsed = parseAgentItem(todo.text)!
@@ -164,7 +164,7 @@ export default function TodoList() {
                   </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded border ${colorClass}`}>
+                      <span className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border ${colorClass}`}>
                         {parsed.domain}
                       </span>
                     </div>
@@ -182,7 +182,7 @@ export default function TodoList() {
         {/* Manual todos — urgent first */}
         {(urgent.length > 0 || manualItems.length > 0) && agentItems.length > 0 && (
           <div className="flex items-center gap-1.5 pt-2 pb-0.5">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">My Tasks</span>
+            <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">My Tasks</span>
           </div>
         )}
         {urgent.map(todo => (

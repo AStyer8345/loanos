@@ -9,7 +9,7 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, FileText, Zap, Activity, Download, Upload,
   ChevronRight, AlertCircle, Check, Clock, Inbox, X, ChevronDown,
-  Mail, Phone, MessageSquare, StickyNote, Trash2, Briefcase,
+  Mail, Phone, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
@@ -377,7 +377,6 @@ export default function LoanDetailPage() {
   const params = useParams()
   const router = useRouter()
   const loanId = params.id as string
-  const { organizationId } = useOrg()
 
   const [loan, setLoan] = useState<Loan | null>(null)
   const [contact, setContact] = useState<ContactRow | null>(null)
@@ -454,7 +453,7 @@ export default function LoanDetailPage() {
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
-  }, [loanId, supabase, organizationId])
+  }, [loanId, supabase])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 

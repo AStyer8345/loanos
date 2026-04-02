@@ -10,7 +10,8 @@ import Papa from 'papaparse'
 import { normalizeContactStage } from '@/lib/constants/loan-stages'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import { fmtCurrency, fmtDate, fmtDateOnly } from '@/lib/formatters'
-import { Trash2, Pencil, GripVertical } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import ContactsSidebar from '@/components/ui/contacts-sidebar'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import DuplicateMergeModal from './DuplicateMergeModal'
 import {
@@ -43,10 +44,10 @@ type Contact = {
   referral_type: string | null
   company_name: string | null
   notes: string | null
-  birthday: string | null
-  coborrower_first_name: string | null
-  coborrower_last_name: string | null
-  coborrower_birthday: string | null
+  birthdate: string | null
+  co_borrower_first: string | null
+  co_borrower_last: string | null
+  co_borrower_birthdate: string | null
   last_touch: string | null
   last_touch_at: string | null
   last_activity_date: string | null
@@ -268,9 +269,9 @@ const ALL_COLUMNS: ColumnDef[] = [
       ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{c.referred_by}</Link>
       : '—' },
   { id: 'company',      label: 'Company',          minWidth: 160, render: c => c.company_name ?? '—' },
-  { id: 'birthday',     label: 'Birthday',         minWidth: 120, render: c => c.birthday ?? '—' },
-  { id: 'co_name',      label: 'Co-Borrower Name', minWidth: 180, render: c => c.coborrower_first_name ? `${c.coborrower_first_name} ${c.coborrower_last_name ?? ''}`.trim() : '—' },
-  { id: 'co_bday',      label: 'Co-Bday',          minWidth: 120, render: c => c.coborrower_birthday ?? '—' },
+  { id: 'birthday',     label: 'Birthday',         minWidth: 120, render: c => c.birthdate ?? '—' },
+  { id: 'co_name',      label: 'Co-Borrower Name', minWidth: 180, render: c => c.co_borrower_first ? `${c.co_borrower_first} ${c.co_borrower_last ?? ''}`.trim() : '—' },
+  { id: 'co_bday',      label: 'Co-Bday',          minWidth: 120, render: c => c.co_borrower_birthdate ?? '—' },
   { id: 'notes',        label: 'Notes',            minWidth: 200, render: c => {
       const v = c.notes
       if (!v) return '—'
@@ -1028,131 +1029,19 @@ export default function ContactsPage() {
   return (
     <div className="flex h-full" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
 
-      {/* ── Sidebar (collapses to icon rail under 1280px or via toggle) ───── */}
-      <aside
-        className="flex-shrink-0 border-r overflow-y-auto flex flex-col"
-        style={{
-          width: sidebarCollapsed ? 52 : 200,
-          borderColor: 'var(--border)',
-          background: 'var(--surface)',
-          transition: 'width 0.2s ease',
-        }}
-      >
-        <div className="px-2 py-3 flex items-center justify-between" style={{ minHeight: 40 }}>
-          {!sidebarCollapsed && (
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.12em' }}>
-              SMART LISTS
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-            style={{
-              padding: 4, background: 'transparent', border: 'none', cursor: 'pointer',
-              color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 10,
-            }}
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {sidebarCollapsed ? '›' : '‹'}
-          </button>
-        </div>
-        <div className="px-2 pb-4">
-          {SMART_LISTS.map(list => {
-            const isActive = activeList === list.id
-            const initial = list.label.charAt(0)
-            return (
-              <div key={list.id}>
-                {list.section && !sidebarCollapsed && (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--muted)', letterSpacing: '0.15em', marginTop: 10, marginBottom: 4, paddingLeft: 6, opacity: 0.6 }}>
-                    {list.section}
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => { setActiveList(list.id); setSelectedContact(null); setSelectedIds(new Set()) }}
-                  className="w-full text-left rounded flex items-center justify-between"
-                  style={{
-                    fontSize: 11,
-                    padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
-                    background: isActive ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'transparent',
-                    color: isActive ? 'var(--primary)' : 'var(--fg)',
-                    border: isActive ? '1px solid color-mix(in srgb, var(--primary) 25%, transparent)' : '1px solid transparent',
-                    marginBottom: 2,
-                  }}
-                  title={sidebarCollapsed ? list.label : undefined}
-                >
-                  {sidebarCollapsed ? (
-                    <span style={{ fontWeight: 600, fontSize: 12 }}>{initial}</span>
-                  ) : (
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{list.label}</span>
-                  )}
-                  <span style={{ opacity: 0.7, fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{counts[list.id] ?? 0}</span>
-                </button>
-              </div>
-            )
-          })}
-          {/* Custom lists */}
-          {customLists.map(cl => {
-            const isActive = activeList === cl.id
-            const initial = cl.name.charAt(0)
-            return (
-              <div key={cl.id} className="flex items-center gap-1" style={{ marginBottom: 2 }}>
-                <button
-                  type="button"
-                  onClick={() => { setActiveList(cl.id); setSelectedContact(null); setSelectedIds(new Set()) }}
-                  className="w-full text-left rounded flex items-center justify-between flex-1 min-w-0"
-                  style={{
-                    fontSize: 11,
-                    padding: sidebarCollapsed ? '6px 8px' : '5px 8px',
-                    background: isActive ? 'color-mix(in srgb, var(--primary) 12%, transparent)' : 'transparent',
-                    color: isActive ? 'var(--primary)' : 'var(--fg)',
-                    border: isActive ? '1px solid color-mix(in srgb, var(--primary) 25%, transparent)' : '1px solid transparent',
-                  }}
-                  title={sidebarCollapsed ? cl.name : undefined}
-                >
-                  {sidebarCollapsed ? (
-                    <span style={{ fontWeight: 600, fontSize: 12 }}>{initial}</span>
-                  ) : (
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cl.name}</span>
-                  )}
-                  <span style={{ opacity: 0.7, fontSize: 10, flexShrink: 0, marginLeft: 4 }}>{counts[cl.id] ?? 0}</span>
-                </button>
-                {!sidebarCollapsed && (
-                  <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-                    <button
-                      type="button"
-                      onClick={e => { e.stopPropagation(); openEditModal(cl) }}
-                      style={{ padding: '3px 4px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      title="Edit list"
-                    >
-                      <Pencil size={11} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
-                      style={{ padding: '3px 4px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      title="Delete list"
-                    >
-                      <Trash2 size={11} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-          <button
-            type="button"
-            onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
-            style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--primary)', background: 'transparent',
-              border: '1px dashed color-mix(in srgb, var(--primary) 50%, transparent)', padding: '6px 8px', borderRadius: 4, cursor: 'pointer',
-              marginTop: 8, width: '100%',
-            }}
-          >
-            + New List
-          </button>
-        </div>
-      </aside>
+      {/* ── Sidebar ───── */}
+      <ContactsSidebar
+        smartLists={SMART_LISTS}
+        customLists={customLists}
+        activeList={activeList}
+        counts={counts}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
+        onSelectList={(id) => { setActiveList(id); setSelectedContact(null); setSelectedIds(new Set()) }}
+        onNewList={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
+        onEditList={(list) => openEditModal(customLists.find(cl => cl.id === list.id)!)}
+        onDeleteList={(id) => setDeleteListId(id)}
+      />
 
       {/* ── Main ────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -1619,12 +1508,12 @@ export default function ContactsPage() {
                   ['Phone', selectedContact.phone, true],
                   ['Stage', selectedContact.stage],
                   ['Lead Source', selectedContact.lead_source], ['Referred By', selectedContact.referred_by],
-                  ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthday],
+                  ['Company', selectedContact.company_name], ['Birthday', selectedContact.birthdate],
                   ['Last Touch', selectedContact.last_activity_date
                     ? new Date(selectedContact.last_activity_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                     : selectedContact.last_touch], ['Notes', selectedContact.notes],
-                  ['Co-Borrower', selectedContact.coborrower_first_name
-                    ? `${selectedContact.coborrower_first_name} ${selectedContact.coborrower_last_name ?? ''}`.trim()
+                  ['Co-Borrower', selectedContact.co_borrower_first
+                    ? `${selectedContact.co_borrower_first} ${selectedContact.co_borrower_last ?? ''}`.trim()
                     : null],
                 ] as [string, string | null, boolean?][]).map(([label, val, isPhone]) => val ? (
                   <div key={label}>

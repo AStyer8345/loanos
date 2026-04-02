@@ -148,7 +148,7 @@ async function upsertPartyContact(
   if (n(party.postalCode)) contactData.mailing_zip = n(party.postalCode)
 
   try {
-    const contact = await sbUpsert('contacts', 'email', contactData) as { id: string } | null
+    const contact = await sbUpsert('contacts', 'email,organization_id', contactData) as { id: string } | null
     return contact?.id ?? null
   } catch (err) {
     console.warn(`[arive-webhook] Failed to upsert ${contactType} contact:`, err)
@@ -178,8 +178,8 @@ export async function processAriveWebhook(
   const now = new Date().toISOString()
 
   try {
-    // ── 1. Upsert contact on email ────────────────────────────────────────────
-    const contact = await sbUpsert('contacts', 'email', {
+    // ── 1. Upsert contact on email+org (multi-tenant safe) ─────────────────────
+    const contact = await sbUpsert('contacts', 'email,organization_id', {
       email: (email as string).toLowerCase().trim(),
       first_name: (n(body.borrowerFirstName) as string) || '',
       last_name: (n(body.borrowerLastName) as string) || '',
@@ -195,8 +195,8 @@ export async function processAriveWebhook(
 
     if (!contact?.id) throw new Error('Contact upsert returned no record')
 
-    // ── 2. Determine upsert conflict column ───────────────────────────────────
-    const conflictCol = ariveLoanId ? 'arive_loan_id' : 'loan_number'
+    // ── 2. Determine upsert conflict column (composite with org for multi-tenant safety)
+    const conflictCol = ariveLoanId ? 'arive_loan_id,organization_id' : 'loan_number'
 
     // ── 3. Build loan record ──────────────────────────────────────────────────
     const createdAtDate = nDate(body.createdAt)
@@ -458,7 +458,7 @@ export async function processAriveWebhook(
     let coBorrowerContactId: string | null = null
     if (coBorrowerEmail) {
       try {
-        const coBorrowerContact = await sbUpsert('contacts', 'email', {
+        const coBorrowerContact = await sbUpsert('contacts', 'email,organization_id', {
           email: (coBorrowerEmail as string).toLowerCase().trim(),
           first_name: coBorrowerFirst ?? '',
           last_name: coBorrowerLast ?? '',

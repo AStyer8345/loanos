@@ -40,6 +40,7 @@ async function buildSocialSystemPrompt(
       .from('social_drafts')
       .select('title, platform, format, pillar, content, hashtags, agent_notes')
       .eq('id', draftId)
+      .eq('organization_id', organizationId)
       .maybeSingle()
 
     if (draft) {
@@ -183,6 +184,7 @@ export async function POST(req: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq('id', draftId)
+        .eq('organization_id', organizationId)
 
       return NextResponse.json({
         message: assistantMessage,

@@ -180,6 +180,7 @@ Today's date: ${todayStr}`
         group_tag
       `)
       .eq('id', recordId)
+      .eq('organization_id', organizationId)
       .maybeSingle()
 
     if (data) {
@@ -187,6 +188,7 @@ Today's date: ${todayStr}`
         .from('loans')
         .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name')
         .eq('contact_id', recordId)
+        .eq('organization_id', organizationId)
         .limit(1)
 
       const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ')
@@ -217,6 +219,7 @@ Today's date: ${todayStr}`
         borrower_name, borrower_first_name, borrower_last_name
       `)
       .eq('id', recordId)
+      .eq('organization_id', organizationId)
       .maybeSingle()
 
     if (data) {
@@ -226,6 +229,7 @@ Today's date: ${todayStr}`
           .from('contacts')
           .select('first_name, last_name, email, phone')
           .eq('id', data.contact_id)
+          .eq('organization_id', organizationId)
           .maybeSingle()
         contact = contactRow ?? null
       }
@@ -367,6 +371,7 @@ export async function POST(req: NextRequest) {
           .from('chat_sessions')
           .update({ messages: updatedMessages })
           .eq('id', sessionId)
+          .eq('organization_id', organizationId)
       } else {
         const { data } = await supabase
           .from('chat_sessions')
@@ -392,8 +397,10 @@ export async function POST(req: NextRequest) {
 
 // GET /api/chat?recordId=&recordType= — load most recent session for a record
 export async function GET(req: NextRequest) {
+  let organizationId: string
   try {
-    await getOrganization()
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -413,6 +420,7 @@ export async function GET(req: NextRequest) {
       .select('id, messages, updated_at')
       .eq('record_id', recordId)
       .eq('record_type', recordType)
+      .eq('organization_id', organizationId)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()

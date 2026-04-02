@@ -130,32 +130,38 @@ export async function POST(req: NextRequest) {
     const linkedinText = extractLinkedInVersion(draft.content) || captionText
 
     // Build networks object — platform-specific text
-    const networks: Record<string, { type: string; text: string; media?: { url: string }[] }> = {}
+    const networks: Record<string, { type: string; text: string }> = {}
     for (const t of targets) {
-      const networkEntry: { type: string; text: string; media?: { url: string }[] } = {
+      networks[t.network] = {
         type: mediaEntries ? 'photo' : 'status',
         text: t.network === 'linkedin' ? linkedinText : captionText,
       }
-      if (mediaEntries) {
-        networkEntry.media = mediaEntries
-      }
-      networks[t.network] = networkEntry
+    }
+
+    // Publer expects media at the post level, not inside each network entry
+    const postEntry: Record<string, unknown> = {
+      networks,
+      accounts: targets.map(t => ({
+        id: t.id,
+        scheduled_at: scheduledAt,
+      })),
+    }
+    if (mediaEntries) {
+      postEntry.media = mediaEntries
     }
 
     const publerBody = {
       bulk: {
-        state: 'scheduled', // Publish at the scheduled time
-        posts: [
-          {
-            networks,
-            accounts: targets.map(t => ({
-              id: t.id,
-              scheduled_at: scheduledAt,
-            })),
-          },
-        ],
+        state: 'scheduled',
+        posts: [postEntry],
       },
     }
+
+    // Debug: log the full payload and extracted text
+    console.log('[social/publish] Caption text:', captionText.substring(0, 200))
+    console.log('[social/publish] Scheduled at:', scheduledAt)
+    console.log('[social/publish] Media entries:', mediaEntries?.length ?? 0)
+    console.log('[social/publish] Publer payload:', JSON.stringify(publerBody).substring(0, 500))
 
     // Push to Publer
     const publerRes = await fetch('https://app.publer.com/api/v1/posts/schedule', {
@@ -178,7 +184,9 @@ export async function POST(req: NextRequest) {
     }
 
     const publerData = await publerRes.json()
+    console.log('[social/publish] Publer response:', JSON.stringify(publerData).substring(0, 500))
     const publerPostId = publerData.job_id || publerData.id || null
+    console.log('[social/publish] Publer post ID:', publerPostId)
 
     // Only update draft status to 'posted' after Publer confirms
     const { error: updateError } = await supabase

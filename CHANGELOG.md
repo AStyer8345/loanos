@@ -1,5 +1,33 @@
 # LoanOS Changelog
 
+## [5.5.0] — 2026-04-02 — Drip Campaigns v1
+
+### Added
+- **Drip campaign system**: 4 new Supabase tables (`drip_campaigns`, `drip_steps`, `drip_enrollments`, `drip_sends`) with 8 enums, 7 indexes, RLS policies, and `updated_at` triggers
+- **TypeScript types** (`src/lib/drip/types.ts`): 8 union types, 4 row interfaces, 3 joined types for UI
+- **Query helpers** (`src/lib/drip/queries.ts`): 12 exported functions covering all CRUD operations
+- **API routes** (7 routes under `/api/drip/`): campaigns CRUD, steps CRUD, enrollments with pagination/search, approval queue with approve/edit/skip/cancel
+- **Dashboard UI** (`/dashboard/drip-campaigns`): 3-level depth — campaign overview with stats tiles, campaign detail with 4 tabs (Steps & Skeletons, Enrolled Contacts, Send History, Exit Rules), approval queue page
+- **7 React components**: CampaignCard, StepCard, StepEditor (inline edit), EnrollmentTable (paginated + searchable), SendHistoryTable, ExitRulesPanel, ApprovalCard (with inline email editing)
+- **Navigation**: "Drip" link added to TopNav with Mail icon
+- **Seed data**: 6 campaigns with 23 total steps — Past Client Retention (6), Ghost Referral (4), Incomplete App (3), Went Quiet (4), Realtor Relationships (4), Long-Term Nurture (2)
+- **Design spec**: `docs/superpowers/specs/2026-04-02-drip-campaigns-design.md`
+- **Implementation plan**: `docs/superpowers/plans/2026-04-02-drip-campaigns.md`
+
+### Design Decisions
+- Hybrid approach: skeleton prompts + Claude polish for personalized emails
+- Three tone types: `knowledgeable_friend` (past clients), `straight_shooter` (leads), `quiet_confidence` (realtors)
+- 14-day frequency guardrail prevents email pile-ups across campaigns
+- Any forward pipeline movement exits all lead nurture campaigns immediately
+- High-stakes emails (rate drop alerts, co-marketing offers) require approval; all others auto-send
+
+### Not Yet Wired (Future Work)
+- n8n daily scheduler upgrade (workflow `LqBb3YDLjS2eUrDE`)
+- Handwritten card API integration
+- Auto-enrollment triggers from pipeline events
+- Email open/click tracking
+- Unsubscribe management page
+
 ## [5.4.2] — 2026-04-02 — Marketing Dashboard Light Mode
 
 ### Changed

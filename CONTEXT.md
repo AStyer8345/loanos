@@ -16,7 +16,7 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01.**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01. Light Mode Polish: Pipeline + Contacts + Loan Detail per-page fixes — semantic tokens, font-sans data cells, layout restructure on loan detail 2026-04-02.**
 
 ## UI Renovation — 2026-04-01
 
@@ -87,10 +87,41 @@ Dark theme was causing eye strain during all-day use. Multiple attempts to softe
 - `src/app/admin/layout.tsx` had same issue — fixed
 
 ### Known Remaining:
-- Some stray `hover:text-white` in loan detail (lines ~1289, 1301, 1312)
-- Contacts DnD table has extensive inline styles that may need light mode adjustment
 - Some less-visited pages (share/[token], onboarding) may have inline dark styles
 - SmartActionQueue may have hardcoded dark values
+
+## Light Mode Polish — 2026-04-02
+
+**Per-page light mode fixes across Pipeline, Contacts, and Loan Detail.**
+
+### Pipeline page (`src/app/dashboard/loans/page.tsx`):
+- Replaced all hardcoded hex colors with semantic tokens: `text-[#CCCCCC]` → `text-foreground/70`, `text-[#999999]` → `text-muted-foreground`, `text-[#555555]` → `text-muted-foreground/60`, `#C9A84C` → `text-primary`/`bg-primary`/`border-primary`
+- Filter badges: Added `dark:` variants (violet, sky, indigo, amber, teal, orange, emerald, blue)
+- Data cells: `font-mono` → `font-sans` (17 occurrences)
+- Sidebar: removed `font-mono`, semantic hover states
+- Scrollbar: `rgba(201,168,76,0.35)` → `color-mix(in srgb, var(--primary) 35%, transparent)`
+- Committed as `21dac13`
+
+### Contacts page (`src/app/dashboard/contacts/page.tsx`):
+- Row backgrounds: hardcoded `rgb(14,14,16)` dark stripes → `var(--surface)` + `color-mix` for selected/active
+- All `#c9a84c`/`#C9A84C` inline styles → `var(--primary)`
+- All `rgba(201,168,76,...)` → `color-mix(in srgb, var(--primary) X%, transparent)`
+- Table: removed `fontFamily: 'var(--font-mono)'`, fontSize 12 → 13
+- Sidebar nav: removed `fontFamily: 'var(--font-mono)'`
+- Committed as `21fc2cd`
+
+### Loan detail page (`src/app/dashboard/loans/[id]/page.tsx`):
+- Property badge: `items-end` → `items-stretch` to match milestone box height
+- Removed BorrowerProfileCard entirely (info already on party cards)
+- Layout restructure: Key Dates directly below parties, Documents + Activity side-by-side, detail sections single column with `max-w-3xl`
+- Group action buttons (Email All, Text Borrowers, etc.) moved left next to PARTIES header
+- Cleaned up unused `organizationId` + `Briefcase` imports
+- Committed as `47b7338`
+
+### Pattern established:
+- `color-mix(in srgb, var(--primary) X%, transparent)` for theme-aware opacity in inline styles
+- `var(--primary)` / `var(--surface)` / `var(--bg)` in inline `style={{}}` objects
+- `font-sans` override on data cells to counteract parent `font-mono` classes
 
 ## Multi-Tenant LO Onboarding — 2026-04-01 (session 12)
 

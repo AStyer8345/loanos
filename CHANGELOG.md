@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## [5.4.1] — 2026-04-02 — Light Mode Per-Page Polish
+
+### Changed
+- **Pipeline page** (`loans/page.tsx`): All remaining hardcoded hex colors replaced with semantic tokens, filter badges get `dark:` variants, `font-mono` → `font-sans` on 17 data cells, sidebar cleaned up
+- **Contacts page** (`contacts/page.tsx`): Dark row stripes (`rgb(14,14,16)`) → `var(--surface)`, all `#c9a84c` inline → `var(--primary)`, `rgba(201,168,76,...)` → `color-mix()`, font-mono removed from table + sidebar
+- **Loan detail page** (`loans/[id]/page.tsx`): Property badge matches milestone height (`items-stretch`), BorrowerProfileCard removed, layout restructured (Key Dates below parties, Documents + Activity side-by-side, single-column detail sections), group action buttons moved left next to PARTIES header
+
+### Pattern Established
+- `color-mix(in srgb, var(--primary) X%, transparent)` for theme-aware opacity in inline styles
+- `var(--primary)` / `var(--surface)` / `var(--bg)` in inline `style={{}}` objects
+
+### Commits
+- `21dac13` — style: pipeline page semantic tokens + light mode fix
+- `21fc2cd` — style: contacts page dark stripes + semantic tokens
+- `47b7338` — Restructure loan detail page layout for light mode
+
 ## [5.4.0] — 2026-04-01 — Light/Dark Mode Toggle
 
 ### Added

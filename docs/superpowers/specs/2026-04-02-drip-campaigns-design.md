@@ -188,7 +188,7 @@ Four new Supabase tables. All tables include `org_id` for multi-tenancy with RLS
 
 | Rule | Campaigns Affected | Logic |
 |------|-------------------|-------|
-| Contact status → `under_contract` or `active_loan` | All lead nurture | Remove immediately, reason: "entered pipeline" |
+| Any forward pipeline movement (application received, in process, submitted to UW, under contract, etc.) | All lead nurture | Remove immediately, reason: "entered pipeline" — the moment someone applies, nurture stops |
 | Contact status → `closed` | Lead nurture → enroll in Past Client | Transition, not just removal |
 | Contact unsubscribed | All | Remove from all, never re-enroll automatically |
 | Email bounced 2+ times | All | Remove, flag contact |

@@ -29,6 +29,37 @@ function renderMarkdown(text: string): string {
 /** Lines that are Canva design instructions, not displayable content */
 const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
 
+/** Strip metadata, headers, contact blocks, hashtags, and image notes from draft content
+ *  so the detail panel only shows the actual post caption. */
+function cleanContentForDisplay(content: string): string {
+  let text = content.replace(/\r\n/g, '\n')
+
+  // Remove everything from ## Hashtags onward
+  text = text.replace(/\n##\s*Hashtags?\b[\s\S]*/i, '')
+  // Remove everything from ## Image Notes onward
+  text = text.replace(/\n##\s*Image\s+Notes?\b[\s\S]*/i, '')
+  // Remove ## LinkedIn Version section
+  text = text.replace(/\n##\s*LinkedIn\s*Version[^\n]*\n[\s\S]*?(?=\n##\s|$)/i, '')
+  // Remove ## Caption header line (keep the text under it)
+  text = text.replace(/^##\s*Caption\s*\n/im, '')
+
+  // Remove title header (# Post — ... or # Title)
+  text = text.replace(/^#\s+.*$/gm, '')
+  // Remove **NMLS Disclosure:** lines
+  text = text.replace(/^\*\*NMLS\s+Disclosure:\*\*.*$/gm, '')
+  // Remove contact block: **Name | Company**, NMLS#, email, phone lines
+  text = text.replace(/^\*\*Adam Styer[^*]*\*\*\s*$/gm, '')
+  text = text.replace(/^NMLS#\s*\d+\s*$/gm, '')
+  text = text.replace(/^[📧📱🏢]\s*.*$/gm, '')
+  // Remove --- dividers
+  text = text.replace(/^---\s*$/gm, '')
+
+  // Collapse excess blank lines
+  text = text.replace(/\n{3,}/g, '\n\n').trim()
+
+  return text
+}
+
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
   // Strip UI artifacts that got saved into content
   let cleaned = content.replace(/^(?:CLAUDE|APPLY TO POST|YOU|SEND)\s*\n/gim, '')
@@ -189,12 +220,13 @@ function SlidePreviewOrText({
   const hasSlides = slides.length >= 2
 
   if (!hasSlides) {
-    // No slides detected — render with lightweight markdown (bold, italic, hr, bullets)
+    // No slides detected — strip metadata and render clean caption only
+    const displayText = cleanContentForDisplay(draft.content || '')
     return (
       <div
         className="rounded-md border border-input px-3 py-2.5 text-foreground/80 whitespace-pre-wrap"
         style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
-        dangerouslySetInnerHTML={{ __html: renderMarkdown(draft.content || '(empty)') }}
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(displayText || '(empty)') }}
       />
     )
   }

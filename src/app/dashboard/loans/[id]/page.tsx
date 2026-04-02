@@ -711,8 +711,8 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Row 4: Milestones (left) + Property address (bottom right) */}
-          <div className="flex items-end gap-3 pt-2 pb-1">
+          {/* Row 4: Milestones (left) + Property address (right, same height) */}
+          <div className="flex items-stretch gap-3 pt-2 pb-1">
             <div className="flex-1 min-w-0 rounded-lg border border-input bg-card px-4 py-3 shadow-sm">
               <MilestoneTimeline loan={loan} activity={activity} />
             </div>
@@ -723,12 +723,12 @@ export default function LoanDetailPage() {
                 )}_rb/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 flex flex-col items-start rounded-lg border border-blue-400/30 bg-blue-50 dark:bg-gradient-to-br dark:from-blue-950/60 dark:to-indigo-950/60 hover:border-blue-400/50 hover:bg-blue-100 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60 transition-colors px-3 py-1.5 shadow-sm"
+                className="shrink-0 flex flex-col justify-center items-start rounded-lg border border-blue-400/30 bg-blue-50 dark:bg-gradient-to-br dark:from-blue-950/60 dark:to-indigo-950/60 hover:border-blue-400/50 hover:bg-blue-100 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60 transition-colors px-5 py-3 shadow-sm"
                 title="View on Zillow"
               >
-                <span className="text-[9px] font-mono text-blue-500 dark:text-blue-400/80 uppercase tracking-wider leading-none mb-0.5">Property</span>
-                <span className="text-xs font-mono text-blue-900 dark:text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
-                <span className="text-[11px] font-mono text-blue-700/70 dark:text-blue-300/70 leading-tight mt-0.5 whitespace-nowrap">
+                <span className="text-[9px] font-mono text-blue-500 dark:text-blue-400/80 uppercase tracking-wider leading-none mb-1">Property</span>
+                <span className="text-sm font-mono text-blue-900 dark:text-blue-100 leading-tight font-medium whitespace-nowrap">{loan.property_address}</span>
+                <span className="text-xs font-mono text-blue-700/70 dark:text-blue-300/70 leading-tight mt-1 whitespace-nowrap">
                   {[loan.property_city, loan.property_state].filter(Boolean).join(', ')}{loan.property_zip ? ` ${loan.property_zip}` : ''}
                 </span>
               </a>
@@ -926,22 +926,23 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   return (
     <div className="p-6 space-y-6">
 
-      {/* ── Section 1: Parties (Communication Hub) + Borrower/Documents ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-        <CommunicationHub loan={loan} activity={activity} contact={contact} />
-        <div className="space-y-6">
-          <BorrowerProfileCard loan={loan} contact={contact} />
-          <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
-        </div>
+      {/* ── Section 1: Parties (full width) ── */}
+      <CommunicationHub loan={loan} activity={activity} contact={contact} />
+
+      {/* ── Section 2: Key Dates — directly below parties ── */}
+      <KeyDatesGrid loan={loan} onSave={handleSaveField} />
+
+      {/* ── Section 3: Documents + Activity side-by-side ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
+        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+        <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
       </div>
 
       <div className="border-t border-input/40 my-6" />
 
-      {/* ── Section 3: Two-column — Details + Sidebar ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
-        <div className="space-y-6">
-          {/* Key Dates — compact grid from raw_payload + loan columns */}
-          <KeyDatesGrid loan={loan} onSave={handleSaveField} />
+      {/* ── Section 4: Loan Details ── */}
+      <div>
+        <div className="space-y-6 max-w-3xl">
 
           {/* Borrower + Co-Borrower — side-by-side columns */}
           <div className={`grid gap-6 ${loan.co_borrower_name ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
@@ -1044,91 +1045,8 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
           {/* Linked Contact */}
           <LinkedContactCard loan={loan} contact={contact} onReassignContact={handleReassignContact} />
         </div>
-
-        <div className="space-y-6">
-          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
-        </div>
       </div>
 
-    </div>
-  )
-}
-
-// ── BorrowerProfileCard ───────────────────────────────────────────────────────
-
-
-function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRow | null }) {
-  // Fall back to linked contact when loan borrower fields are empty (pre-import loans)
-  const firstName = loan.borrower_first_name ?? contact?.first_name ?? ''
-  const lastName = loan.borrower_last_name ?? contact?.last_name ?? ''
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || loan.borrower_name || '—'
-  const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?'
-  const email = loan.borrower_email ?? contact?.email ?? null
-  const phone = loan.borrower_phone ?? contact?.phone ?? null
-
-  return (
-    <div>
-      <h3 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-3">Borrower</h3>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-muted border border-input flex items-center justify-center shrink-0">
-          <span className="text-sm font-mono font-bold text-foreground/80">{initials}</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-mono font-semibold text-foreground truncate">{fullName}</p>
-          <div className="flex items-center gap-3 mt-0.5">
-            {email && (
-              <a href={`mailto:${email}`} className="text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors truncate">
-                {email}
-              </a>
-            )}
-            {phone && (
-              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors shrink-0">
-                {fmtPhone(phone)}
-              </a>
-            )}
-          </div>
-        </div>
-        {loan.contact_id && contact && (
-          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[11px] font-mono text-muted-foreground hover:text-muted-foreground transition-colors shrink-0">
-            View →
-          </Link>
-        )}
-      </div>
-
-      {/* Employment — only if exists */}
-      {(loan.employer_name || loan.position_description) && (
-        <div className="pt-2 border-t border-input/40">
-          <div className="flex items-center gap-2">
-            <Briefcase size={10} className="text-muted-foreground shrink-0" />
-            <span className="text-xs font-mono text-foreground/80 truncate">
-              {[loan.position_description, loan.employer_name].filter(Boolean).join(' at ')}
-            </span>
-            {loan.self_employed && (
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">SE</span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Co-borrower — only if exists */}
-      {loan.co_borrower_name && (
-        <div className="pt-2 border-t border-input/40">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-muted-foreground">Co-Borrower:</span>
-            <span className="text-xs font-mono text-foreground/80">{loan.co_borrower_name}</span>
-            {loan.co_borrower_phone && (
-              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-muted-foreground hover:text-muted-foreground transition-colors">
-                <Phone size={10} />
-              </a>
-            )}
-            {loan.co_borrower_email && (
-              <a href={`mailto:${loan.co_borrower_email}`} className="text-muted-foreground hover:text-muted-foreground transition-colors">
-                <Mail size={10} />
-              </a>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -32,7 +32,7 @@ export default async function RootLayout({
           <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         )}
       </head>
-      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} ${ibmPlexMono.className} bg-gray-950 antialiased`}>
+      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} ${ibmPlexSans.className} bg-gray-950 antialiased`}>
         <OutreachChatProvider>
           {children}
           <LoanOSChat />

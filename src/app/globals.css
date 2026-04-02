@@ -69,8 +69,8 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
 

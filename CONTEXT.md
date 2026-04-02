@@ -16,7 +16,7 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01.**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01.**
 
 ## UI Renovation — 2026-04-01
 
@@ -46,9 +46,51 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 - `src/app/dashboard/loans/page.tsx` — border-input/bg-card tokens
 
 ### Design Decisions:
-- Pipeline sidebar uses #0A0A0A/#1A1A1A/#2A2A2A palette — intentionally NOT converted to card tokens
 - Contacts table uses inline styles (DnD, sticky columns) — modified hover color only, structure unchanged
 - LoanOS color mapping: `#060b18` (nav bg), `#0f172a` → `bg-card`, `#1e293b` → `border-input`, `#C9A84C` → `primary`
+
+## Light/Dark Mode — 2026-04-01
+
+**Full theme toggle implementation. Light mode is now the default.**
+
+### Problem:
+Dark theme was causing eye strain during all-day use. Multiple attempts to soften the dark palette (lift surfaces, reduce contrast, brighten text, lift cards) failed to satisfy — user requested full light mode with dark mode toggle.
+
+### Implementation:
+- **next-themes**: Installed and configured with `attribute="class"`, `defaultTheme="light"`, `enableSystem={false}`
+- **Tailwind**: `darkMode: 'class'` in `tailwind.config.ts`
+- **ThemeProvider** (`src/components/ThemeProvider.tsx`): Wraps app in `layout.tsx`
+- **ThemeToggle** (`src/components/ThemeToggle.tsx`): Sun/Moon icon button in TopNav
+- **`suppressHydrationWarning`** on `<html>` element in root layout (required by next-themes)
+
+### CSS Variable Palettes (globals.css):
+- **Light**: bg #f5f6f8, card #ffffff, text #1a1d26, muted #5f6678, gold #a68a2e, border #d8dce5
+- **Dark**: bg #0c0e14, card #1c2235, text #eaecf0, muted #9ba3b5, gold #C9A84C, border #2f3546
+- Card glow has light-mode-specific softer shadow
+- Table `.lo-table` header bg uses `var(--surface2)`, row borders use `var(--border)`
+
+### Batch Replacements (~300+ across 60+ files):
+- text-zinc-100/200 → text-foreground
+- text-zinc-300 → text-foreground/80
+- text-zinc-400/500/600 → text-muted-foreground
+- bg-zinc-700 → bg-input, bg-zinc-800 → bg-muted
+- bg-zinc-900 → bg-card, bg-zinc-950/bg-gray-950 → bg-background
+- border-zinc-600/700/800 → border-input
+- hover:bg-zinc-800 → hover:bg-secondary
+- #09090b → var(--bg), #111118 → var(--surface)
+- Pipeline: 87+ hex values (#0A0A0A/#1A1A1A/#2A2A2A) → semantic tokens
+- Loan detail: inline style grays (#3f3f46/#52525b/#71717a/#27272a) → CSS vars
+- Chat components: `const BG = '#0f0f0f'` → `const BG = 'var(--bg)'`
+
+### Root Cause Fix:
+- `src/app/dashboard/layout.tsx` had `bg-zinc-950` wrapping ALL dashboard pages — changed to `bg-background`
+- `src/app/admin/layout.tsx` had same issue — fixed
+
+### Known Remaining:
+- Some stray `hover:text-white` in loan detail (lines ~1289, 1301, 1312)
+- Contacts DnD table has extensive inline styles that may need light mode adjustment
+- Some less-visited pages (share/[token], onboarding) may have inline dark styles
+- SmartActionQueue may have hardcoded dark values
 
 ## Multi-Tenant LO Onboarding — 2026-04-01 (session 12)
 

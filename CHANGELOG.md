@@ -1,5 +1,35 @@
 # LoanOS Changelog
 
+## [5.4.0] — 2026-04-01 — Light/Dark Mode Toggle
+
+### Added
+- **Light/dark mode toggle**: Full theme switching via `next-themes` library with sun/moon icon in TopNav
+- **ThemeProvider** (`src/components/ThemeProvider.tsx`): Wraps app with `attribute="class"`, `defaultTheme="light"`
+- **ThemeToggle** (`src/components/ThemeToggle.tsx`): Mounted toggle button with hydration guard
+- **Light palette**: bg #f5f6f8, card #ffffff, text #1a1d26, muted #5f6678, gold #a68a2e, border #d8dce5
+- **Dark palette** (refined): bg #0c0e14, card #1c2235, text #eaecf0, muted #9ba3b5, gold #C9A84C, border #2f3546
+
+### Changed
+- **`tailwind.config.ts`**: Added `darkMode: 'class'`
+- **`src/app/layout.tsx`**: ThemeProvider wrapping, `suppressHydrationWarning` on `<html>`, body uses `var(--bg)`/`var(--text)` inline styles
+- **`src/app/dashboard/layout.tsx`**: `bg-zinc-950` → `bg-background` (root cause of dark-only dashboard)
+- **`src/app/admin/layout.tsx`**: Same fix — `bg-zinc-950` → `bg-background`
+- **`src/components/TopNav.tsx`**: ThemeToggle added, `bg-[#060b18]` → `bg-[var(--bg)]`
+- **`src/app/globals.css`**: Dual `:root/.light` + `.dark` CSS variable blocks, light-specific card shadow, table header/border vars
+- **Pipeline page** (`loans/page.tsx`): 87+ hardcoded hex values replaced with semantic tokens
+- **Loan detail** (`loans/[id]/page.tsx`): Inline style dark grays replaced with CSS variables
+- **Chat components**: `LoanOSChat.tsx` + `OutreachChat.tsx` BG constant → `var(--bg)`
+- **60+ files**: Batch-replaced ~300+ hardcoded zinc-*/gray-* classes and hex values with semantic tokens
+- **Font sizes**: text-[10px] → text-[11px], text-[9px] → text-[10px] across key pages
+
+### Commits
+- `7dd578d` — style: soften dark palette
+- `883f3c1` — style: brighten text + bump font sizes
+- `b9819e6` — style: lift cards + brighten text
+- `4991144` — feat: add light/dark mode toggle
+- `5d94a26` — style: convert Pipeline/Chat to semantic tokens
+- `d6c7afc` — fix: dashboard layout bg-zinc-950 overriding light mode
+
 ## [5.3.0] — 2026-04-01 — UI Renovation (shadcn/ui + Visual Polish)
 
 ### Added

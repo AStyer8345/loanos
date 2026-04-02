@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <OrgProvider>
       <div className="min-h-screen bg-zinc-950">
         <TopNav />
-        <main className="pt-16">
+        <main className="pt-14">
           {children}
         </main>
       </div>

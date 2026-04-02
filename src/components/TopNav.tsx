@@ -1,14 +1,40 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Settings } from 'lucide-react'
-import { NavItem } from './NavItem'
+import {
+  LayoutDashboard,
+  Workflow,
+  Users,
+  Calculator,
+  Megaphone,
+  Shield,
+  Settings,
+  Search,
+  Menu,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'voice-guide' | 'admin' | 'settings'
+type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'marketing' | 'admin' | 'settings'
+
+const NAV_ITEMS: { label: string; section: Section; href: string; icon: React.ReactNode }[] = [
+  { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
+  { label: 'Pipeline',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
+  { label: 'Contacts',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
+  { label: 'Scenarios', section: 'scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" /> },
+  { label: 'Marketing', section: 'marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
+  { label: 'Admin',     section: 'admin',     href: '/dashboard/automations', icon: <Shield className="size-4" /> },
+]
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
@@ -16,7 +42,7 @@ function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/loans')) return 'pipeline'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
   if (pathname.startsWith('/dashboard/scenarios')) return 'scenarios'
-  if (pathname.startsWith('/dashboard/marketing')) return 'voice-guide'
+  if (pathname.startsWith('/dashboard/marketing')) return 'marketing'
   if (pathname.startsWith('/dashboard/automations')) return 'admin'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null
@@ -25,234 +51,184 @@ function sectionFromPath(pathname: string): Section | null {
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
-
   const currentSection = sectionFromPath(pathname || '')
-
-  const navigate = (href: string) => {
-    router.push(href)
-    setMobileOpen(false)
-  }
 
   return (
     <>
       <GlobalSearch />
-      <nav className="fixed inset-x-0 top-0 z-30 h-16 bg-[#060b18] border-b border-[#1e293b] text-white shadow-lg shadow-black/40 flex items-center px-3 md:px-6">
-        {/* Logo → Pipeline Dashboard */}
-        <button
-          type="button"
-          onClick={() => navigate('/dashboard')}
-          className="flex items-baseline gap-2 mr-4"
-        >
-          <span className="text-lg font-bold tracking-tight leading-none font-mono">
-            Loan<span className="text-[#C9A84C]">OS</span>
-          </span>
-        </button>
+      <header className="fixed inset-x-0 top-0 z-30 h-14 border-b border-input bg-[#060b18] shadow-lg shadow-black/40">
+        <div className="flex h-full items-center justify-between px-4 md:px-6">
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-2">
-          <NavItem
-            label="Dashboard"
-            icon="📊"
-            isActive={currentSection === 'dashboard'}
-            onClick={() => navigate('/dashboard')}
-          />
+          {/* ── Left: Logo + Nav ── */}
+          <div className="flex items-center gap-6">
+            {/* Logo */}
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="flex items-baseline gap-1.5"
+            >
+              <span className="text-lg font-bold tracking-tight font-mono text-foreground">
+                Loan<span className="text-primary">OS</span>
+              </span>
+            </button>
 
-          <NavItem
-            label="Pipeline"
-            icon="📋"
-            isActive={currentSection === 'pipeline'}
-            onClick={() => navigate('/dashboard/loans')}
-          />
-
-          <NavItem
-            label="Contacts"
-            icon="👥"
-            isActive={currentSection === 'contacts'}
-            onClick={() => navigate('/dashboard/contacts')}
-          />
-
-          <NavItem
-            label="Scenarios"
-            icon="📐"
-            isActive={currentSection === 'scenarios'}
-            onClick={() => navigate('/dashboard/scenarios')}
-          />
-
-          <NavItem
-            label="Marketing"
-            icon="📣"
-            isActive={currentSection === 'voice-guide'}
-            onClick={() => navigate('/dashboard/marketing')}
-          />
-
-          <NavItem
-            label="Admin"
-            icon="⚙️"
-            isActive={currentSection === 'admin'}
-            onClick={() => navigate('/dashboard/automations')}
-          />
-        </div>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* ⌘K search hint */}
-        <button
-          type="button"
-          onClick={() => {
-            const evt = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
-            document.dispatchEvent(evt)
-          }}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-zinc-700 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500 transition-colors mr-2"
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.05em' }}
-        >
-          <span>⌘K</span>
-          <span className="text-zinc-600">search</span>
-        </button>
-
-        <ActivityFeed />
-
-        {/* Right side: settings icon + profile + sign out */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard/settings')}
-            className={`hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-              currentSection === 'settings'
-                ? 'bg-amber-500/20 text-amber-200'
-                : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
-            }`}
-            title="Settings"
-          >
-            <Settings size={15} />
-          </button>
-
-          <div className="hidden sm:flex flex-col items-end mr-1">
-            <span className="text-xs font-semibold tracking-widest text-zinc-200">
-              ADAM STYER
-            </span>
-            <span className="text-[10px] text-zinc-500 font-mono tracking-[0.18em] uppercase">
-              Mortgage Solutions LP
-            </span>
+            {/* Desktop nav links */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive = currentSection === item.section
+                return (
+                  <button
+                    key={item.section}
+                    type="button"
+                    onClick={() => router.push(item.href)}
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                )
+              })}
+            </nav>
           </div>
-          <div className="hidden sm:inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 text-sm font-semibold text-[#C9A84C]">
-            AS
-          </div>
-          <div className="ml-1">
-            <SignOutButton />
-          </div>
-          {/* Mobile hamburger */}
-          <button
-            type="button"
-            className="md:hidden ml-1 inline-flex items-center justify-center w-9 h-9 rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
-            onClick={() => setMobileOpen((prev) => !prev)}
-          >
-            <span className="sr-only">Toggle navigation</span>
-            <span className="flex flex-col gap-1.5">
-              <span className="block w-4 h-0.5 bg-current rounded-full" />
-              <span className="block w-4 h-0.5 bg-current rounded-full" />
-              <span className="block w-4 h-0.5 bg-current rounded-full" />
-            </span>
-          </button>
-        </div>
-      </nav>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="fixed inset-x-0 top-16 z-20 bg-zinc-950/95 text-zinc-200 border-t border-zinc-800 md:hidden">
-          <div className="flex flex-col gap-1 px-3 py-3">
+          {/* ── Right: Search + Activity + Settings + Profile + Mobile toggle ── */}
+          <div className="flex items-center gap-2">
+            {/* ⌘K search hint */}
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'dashboard'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
+              onClick={() => {
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-input px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors"
+              style={{ fontSize: 11, letterSpacing: '0.05em' }}
             >
-              <span className="text-base">📊</span>
-              <span>Dashboard</span>
+              <Search className="size-3" />
+              <span className="font-mono">⌘K</span>
             </button>
 
+            <ActivityFeed />
+
+            {/* Settings */}
             <button
               type="button"
-              onClick={() => navigate('/dashboard/loans')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'pipeline'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
+              onClick={() => router.push('/dashboard/settings')}
+              className={cn(
+                'hidden sm:inline-flex items-center justify-center size-8 rounded-md transition-colors',
+                currentSection === 'settings'
+                  ? 'bg-primary/15 text-primary'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              )}
+              title="Settings"
             >
-              <span className="text-base">📋</span>
-              <span>Pipeline</span>
+              <Settings className="size-4" />
             </button>
 
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard/contacts')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'contacts'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
-            >
-              <span className="text-base">👥</span>
-              <span>Contacts</span>
-            </button>
+            {/* User profile */}
+            <div className="hidden sm:flex items-center gap-2 ml-1">
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-semibold tracking-widest text-foreground">
+                  ADAM STYER
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono tracking-[0.18em] uppercase">
+                  Mortgage Solutions LP
+                </span>
+              </div>
+              <div className="flex items-center justify-center size-8 rounded-full bg-primary/20 border border-primary/50 text-sm font-semibold text-primary">
+                AS
+              </div>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard/scenarios')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'scenarios'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
-            >
-              <span className="text-base">📐</span>
-              <span>Scenarios</span>
-            </button>
+            {/* Sign out */}
+            <div className="hidden sm:block ml-1">
+              <SignOutButton />
+            </div>
 
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard/marketing')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'voice-guide'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
-            >
-              <span className="text-base">📣</span>
-              <span>Marketing</span>
-            </button>
+            {/* ── Mobile menu ── */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="size-9 border-input text-muted-foreground">
+                    <Menu className="size-4" />
+                    <span className="sr-only">Toggle navigation</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72 bg-[#060b18] border-input">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <span className="text-lg font-bold tracking-tight font-mono text-foreground">
+                        Loan<span className="text-primary">OS</span>
+                      </span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 flex flex-col gap-1">
+                    {NAV_ITEMS.map((item) => {
+                      const isActive = currentSection === item.section
+                      return (
+                        <button
+                          key={item.section}
+                          type="button"
+                          onClick={() => router.push(item.href)}
+                          className={cn(
+                            'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors w-full text-left',
+                            isActive
+                              ? 'bg-primary/15 text-primary'
+                              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                          )}
+                        >
+                          {item.icon}
+                          {item.label}
+                        </button>
+                      )
+                    })}
 
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard/automations')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                currentSection === 'admin'
-                  ? 'bg-amber-500/20 text-amber-200'
-                  : 'text-zinc-400'
-              }`}
-            >
-              <span className="text-base">⚙️</span>
-              <span>Admin</span>
-            </button>
+                    <div className="my-3 border-t border-input" />
 
-            <div className="mt-2 border-t border-zinc-800 pt-2">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/settings')}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200 w-full text-left"
-              >
-                <span>⚙️</span>
-                <span>Settings</span>
-              </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push('/dashboard/settings')}
+                      className={cn(
+                        'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors w-full text-left',
+                        currentSection === 'settings'
+                          ? 'bg-primary/15 text-primary'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <Settings className="size-4" />
+                      Settings
+                    </button>
+
+                    <div className="my-3 border-t border-input" />
+
+                    {/* Mobile user info */}
+                    <div className="flex items-center gap-3 px-3 py-2">
+                      <div className="flex items-center justify-center size-8 rounded-full bg-primary/20 border border-primary/50 text-sm font-semibold text-primary">
+                        AS
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold tracking-wider text-foreground">
+                          ADAM STYER
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono tracking-wider uppercase">
+                          Mortgage Solutions LP
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="px-3 mt-2">
+                      <SignOutButton />
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
-      )}
+      </header>
     </>
   )
 }

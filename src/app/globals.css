@@ -28,6 +28,27 @@
   --accent-light:  hsla(210, 70%, 60%, 0.12);
   --accent-border: hsla(210, 70%, 60%, 0.5);
 
+  /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
+  --background: #050505;
+  --foreground: #e5e5e5;
+  --card: #0a0a0a;
+  --card-foreground: #e5e5e5;
+  --popover: #0a0a0a;
+  --popover-foreground: #e5e5e5;
+  --primary: #C9A84C;
+  --primary-foreground: #050505;
+  --secondary: #171717;
+  --secondary-foreground: #e5e5e5;
+  --muted-bg: #171717;
+  --muted-foreground: #737373;
+  --accent-bg: #171717;
+  --accent-foreground: #e5e5e5;
+  --destructive: #DC2626;
+  --destructive-foreground: #e5e5e5;
+  --ring: #C9A84C;
+  --input: #262626;
+  --radius: 0.5rem;
+
   /* Scenario Builder palette — navy + blue accent */
   --sc-bg:       #0c1220;
   --sc-card:     #111a2e;

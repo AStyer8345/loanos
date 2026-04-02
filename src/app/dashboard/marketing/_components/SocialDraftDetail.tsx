@@ -26,16 +26,28 @@ function renderMarkdown(text: string): string {
  *    [Slide 1 — Hook]         (bracket format)
  *    ## Slide 1 — Hook        (markdown header - agent format)
  */
+/** Lines that are Canva design instructions, not displayable content */
+const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
+
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
+  // Strip UI artifacts that got saved into content
+  let cleaned = content.replace(/^(?:CLAUDE|APPLY TO POST|YOU|SEND)\s*\n/gim, '')
+
   // Cut off content at design brief section (agent sometimes appends Canva specs)
-  let cleaned = content
   const briefIdx = cleaned.search(/\n---\s*\n+\s*(?:#{1,3}\s+)?(?:CANVA|DESIGN)\s+(?:DESIGN\s+)?BRIEF/i)
   if (briefIdx > 0) cleaned = cleaned.substring(0, briefIdx)
-  // Cut off at hashtag section divider
+  // Cut off at hashtag section, FULL CAPTION, or Agent Notes
   const hashIdx = cleaned.search(/\n---\s*\n+\s*\*\*Hashtags?\*\*\s*:/i)
   if (hashIdx > 0) cleaned = cleaned.substring(0, hashIdx)
-  // Remove horizontal rules
-  cleaned = cleaned.replace(/^---\s*$/gm, '').replace(/\n{3,}/g, '\n\n')
+  const captionIdx = cleaned.search(/\n\s*(?:#{1,3}\s+)?(?:\*\*)?FULL CAPTION(?:\*\*)?:?\s*\n/i)
+  if (captionIdx > 0) cleaned = cleaned.substring(0, captionIdx)
+  const agentIdx = cleaned.search(/\n---\s*\n+\s*(?:\*\*)?Agent\s+Notes?\s*(?:\*\*)?:?/i)
+  if (agentIdx > 0) cleaned = cleaned.substring(0, agentIdx)
+
+  // Remove horizontal rules and metadata lines
+  cleaned = cleaned
+    .replace(/^---\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
 
   const slideRegex = /(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+(\d+)(?:\s*[—–:\-]\s*([^\n\]*]*))?(?:\*\*|\])?\s*\n([\s\S]*?)(?=(?:\n\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+\d)|$)/gi
   const slides: { num: number; title: string; body: string }[] = []
@@ -43,17 +55,32 @@ function parseSlides(content: string): { intro: string; slides: { num: number; t
 
   while ((match = slideRegex.exec(cleaned)) !== null) {
     const num = parseInt(match[1], 10)
-    const title = (match[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
+    const title = (match[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '').replace(/\(.*?\)\s*$/, '').trim()
     let body = (match[3] || '').trim().replace(/^\n+|\n+$/g, '')
     body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Strip design instructions from slide bodies
+    body = body
+      .split('\n')
+      .filter((l) => !designInstructionPattern.test(l))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Extract intro text (everything before first SLIDE reference)
+  // Extract intro text (everything before first SLIDE reference), stripping metadata + design instructions
   const firstSlideIdx = cleaned.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
-  const intro = firstSlideIdx > 0 ? cleaned.substring(0, firstSlideIdx).trim() : ''
+  const metaPattern = /^\s*(?:#{1,3}\s+)?(?:\*\*)?(?:TITLE|PLATFORM|FORMAT|PILLAR|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)(?:\*\*)?\s*:?/i
+  const postTitlePattern = /^\s*#{1,3}\s+Post\s+\d+\s*[—–:-].*/i
+  const introRaw = firstSlideIdx > 0 ? cleaned.substring(0, firstSlideIdx) : ''
+  const intro = introRaw
+    .split('\n')
+    .filter((l) => !metaPattern.test(l) && !postTitlePattern.test(l) && !designInstructionPattern.test(l))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 
   return { intro, slides }
 }

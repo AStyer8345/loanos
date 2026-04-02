@@ -60,17 +60,25 @@ function parseContent(content: string | null): {
 
   let rawContent = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines).join('\n')
 
+  // Strip UI artifacts that got saved into content (e.g. "CLAUDE\nAPPLY TO POST")
+  rawContent = rawContent.replace(/^(?:CLAUDE|APPLY TO POST|YOU|SEND)\s*\n/gim, '')
+
   // Remove design brief and everything after it
   const briefIdx = rawContent.search(designBriefPattern)
   if (briefIdx > 0) rawContent = rawContent.substring(0, briefIdx)
 
-  // Remove hashtag section divider
+  // Remove hashtag section divider and Agent Notes
   const hashIdx = rawContent.search(hashtagSectionPattern)
   if (hashIdx > 0) rawContent = rawContent.substring(0, hashIdx)
+  const agentNotesIdx = rawContent.search(/\n---\s*\n+\s*(?:\*\*)?Agent\s+Notes?\s*(?:\*\*)?:?/i)
+  if (agentNotesIdx > 0) rawContent = rawContent.substring(0, agentNotesIdx)
+
+  // Design instruction patterns inside slide bodies
+  const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
 
   const bodyContent = rawContent
     .split('\n')
-    .filter((line) => !metadataPattern.test(line) && !postTitlePattern.test(line))
+    .filter((line) => !metadataPattern.test(line) && !postTitlePattern.test(line) && !designInstructionPattern.test(line))
     .join('\n')
     .replace(/^---\s*$/gm, '') // remove horizontal rules
     .replace(/\n{3,}/g, '\n\n') // collapse excess blank lines
@@ -91,18 +99,40 @@ function parseContent(content: string | null): {
 
   while ((slideMatch = slideRegex.exec(bodyContent)) !== null) {
     const num = parseInt(slideMatch[1], 10)
-    const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '')
+    const title = (slideMatch[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '').replace(/\(.*?\)\s*$/, '').trim()
     let body = (slideMatch[3] || '').trim().replace(/^\n+|\n+$/g, '')
-    // Clean markdown bold from body content for display
+    // Clean markdown bold from body content
     body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Strip design instructions from slide bodies
+    body = body
+      .split('\n')
+      .filter((l) => !designInstructionPattern.test(l))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
     if (body || title) {
       slides.push({ num, title, body })
     }
   }
 
-  // Caption = everything before first SLIDE block
-  const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
-  const caption = firstSlideIdx > 0 ? bodyContent.substring(0, firstSlideIdx).trim() : ''
+  // Look for FULL CAPTION section — this is the real post copy
+  const fullCaptionMatch = rawContent.match(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*)?FULL CAPTION(?:\*\*)?:?\s*\n([\s\S]*?)(?=\n---|\n\s*(?:\*\*)?(?:Hashtags?|Agent Notes?)|\n\s*#{1,3}\s+(?:Hashtag|Agent)|$)/i)
+  let caption = ''
+
+  if (fullCaptionMatch) {
+    // Use the FULL CAPTION section as the display caption (strip design instructions)
+    caption = fullCaptionMatch[1]
+      .split('\n')
+      .filter((l) => !designInstructionPattern.test(l) && !metadataPattern.test(l))
+      .join('\n')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  } else {
+    // Fallback: everything before first SLIDE block
+    const firstSlideIdx = bodyContent.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
+    caption = firstSlideIdx > 0 ? bodyContent.substring(0, firstSlideIdx).trim() : ''
+  }
 
   // For non-carousel: strip slide prefixes from body text
   const postText = slides.length >= 2

@@ -1463,7 +1463,7 @@ export default function ContactsPage() {
                           style={{ borderBottom: '1px solid var(--border)', background: rowBg, cursor: 'pointer' }}
                           onMouseEnter={e => {
                             if (!isSelected && !isActive)
-                              (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'
+                              (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.04)'
                           }}
                           onMouseLeave={e => {
                             if (!isSelected && !isActive)

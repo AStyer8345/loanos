@@ -74,6 +74,44 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Card glow on hover */
+.card-glow {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-glow:hover {
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.06), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Table styling */
+.lo-table {
+  width: 100%;
+  font-size: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.lo-table thead th {
+  padding: 0.625rem 1rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.lo-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+.lo-table tbody tr:hover {
+  background: rgba(201, 168, 76, 0.04);
+}
+.lo-table tbody td {
+  padding: 0.625rem 1rem;
+}
+
 /* Command center / tactical action button */
 .action-btn:hover {
   background: var(--gold);

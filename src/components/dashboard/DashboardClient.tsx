@@ -19,6 +19,7 @@ import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -323,36 +324,34 @@ export default function DashboardClient(props: DashboardClientProps) {
           {props.chartData.length > 0 && (
             <Card className="overflow-hidden">
               <div className="px-4 py-3 border-b border-input text-xs font-mono text-muted-foreground uppercase tracking-wider">Monthly Breakdown</div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs font-mono">
-                  <thead>
-                    <tr className="border-b border-input">
-                      <th className="text-left px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Month</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Loans</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Volume</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Commission</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {props.chartData.map((d, i) => (
-                      <tr key={d.month} className={i % 2 ? 'bg-black/20' : ''}>
-                        <td className="px-3 py-2.5 text-zinc-100 font-medium">{d.month}</td>
-                        <td className="px-3 py-2.5 text-right text-zinc-400">{d.loans}</td>
-                        <td className="px-3 py-2.5 text-right text-blue-400">{fmtK(d.volume)}</td>
-                        <td className="px-3 py-2.5 text-right text-[#C9A84C]">{fmt(d.commission)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-input bg-secondary/50">
-                      <td className="px-3 py-2.5 text-zinc-100 font-semibold">YTD</td>
-                      <td className="px-3 py-2.5 text-right text-zinc-100 font-semibold">{props.fundedYTD}</td>
-                      <td className="px-3 py-2.5 text-right text-blue-400 font-semibold">{fmtK(props.volumeYTD)}</td>
-                      <td className="px-3 py-2.5 text-right text-[#C9A84C] font-semibold">{fmt(props.commissionYTD)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+              <Table className="font-mono">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">Month</TableHead>
+                    <TableHead className="text-right">Loans</TableHead>
+                    <TableHead className="text-right">Volume</TableHead>
+                    <TableHead className="text-right">Commission</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {props.chartData.map((d) => (
+                    <TableRow key={d.month}>
+                      <TableCell className="text-zinc-100 font-medium">{d.month}</TableCell>
+                      <TableCell className="text-right text-zinc-400">{d.loans}</TableCell>
+                      <TableCell className="text-right text-blue-400">{fmtK(d.volume)}</TableCell>
+                      <TableCell className="text-right text-primary">{fmt(d.commission)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow className="border-t-2 border-input">
+                    <TableCell className="text-zinc-100 font-semibold">YTD</TableCell>
+                    <TableCell className="text-right text-zinc-100 font-semibold">{props.fundedYTD}</TableCell>
+                    <TableCell className="text-right text-blue-400 font-semibold">{fmtK(props.volumeYTD)}</TableCell>
+                    <TableCell className="text-right text-primary font-semibold">{fmt(props.commissionYTD)}</TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
             </Card>
           )}
         </div>

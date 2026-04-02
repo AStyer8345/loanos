@@ -3,6 +3,8 @@ import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { fmtCurrency, fmtK, fmtDate } from '@/lib/formatters'
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
+import { Card } from '@/components/ui/card'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,41 +44,41 @@ export default async function VolumeReportPage() {
       <h1 className="text-xl font-mono font-bold text-zinc-100 mb-1">Volume Report</h1>
       <p className="text-xs font-mono text-zinc-500 mb-6">{thisYear} YTD &middot; {funded.length} loans &middot; {fmtK(totalVolume)} total volume</p>
 
-      <div className="bg-card border border-input rounded-lg overflow-hidden">
-        <table className="w-full text-xs font-mono">
-          <thead>
-            <tr className="border-b border-input">
-              <th className="text-left px-4 py-3 text-[10px] text-zinc-500 uppercase tracking-wider">Borrower</th>
-              <th className="text-right px-4 py-3 text-[10px] text-zinc-500 uppercase tracking-wider">Loan Amount</th>
-              <th className="text-left px-4 py-3 text-[10px] text-zinc-500 uppercase tracking-wider">Status</th>
-              <th className="text-right px-4 py-3 text-[10px] text-zinc-500 uppercase tracking-wider">Close Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {funded.map((loan, i) => {
+      <Card className="overflow-hidden">
+        <Table className="font-mono">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left">Borrower</TableHead>
+              <TableHead className="text-right">Loan Amount</TableHead>
+              <TableHead className="text-left">Status</TableHead>
+              <TableHead className="text-right">Close Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {funded.map((loan) => {
               const name = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
               const cd = loan.closing_date || loan.funding_date
               return (
-                <tr key={loan.id} className={`hover:bg-input/30 ${i > 0 ? 'border-t border-input' : ''}`}>
-                  <td className="px-4 py-2.5">
-                    <Link href={`/dashboard/loans/${loan.id}`} className="text-zinc-200 hover:text-[#C9A84C]">{name}</Link>
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</td>
-                  <td className="px-4 py-2.5 text-emerald-400">{loan.status}</td>
-                  <td className="px-4 py-2.5 text-right text-zinc-500">{fmtDate(cd)}</td>
-                </tr>
+                <TableRow key={loan.id}>
+                  <TableCell>
+                    <Link href={`/dashboard/loans/${loan.id}`} className="text-zinc-200 hover:text-primary">{name}</Link>
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</TableCell>
+                  <TableCell className="text-emerald-400">{loan.status}</TableCell>
+                  <TableCell className="text-right text-zinc-500">{fmtDate(cd)}</TableCell>
+                </TableRow>
               )
             })}
-          </tbody>
-          <tfoot>
-            <tr className="border-t-2 border-[#334155] bg-[#1e293b]/50">
-              <td className="px-4 py-3 text-zinc-100 font-semibold">Total ({funded.length} loans)</td>
-              <td className="px-4 py-3 text-right text-blue-400 font-semibold">{fmt(totalVolume)}</td>
-              <td colSpan={2} />
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+          </TableBody>
+          <TableFooter>
+            <TableRow className="border-t-2 border-input">
+              <TableCell className="text-zinc-100 font-semibold">Total ({funded.length} loans)</TableCell>
+              <TableCell className="text-right text-blue-400 font-semibold">{fmt(totalVolume)}</TableCell>
+              <TableCell colSpan={2} />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </Card>
     </div>
   )
 }

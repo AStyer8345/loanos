@@ -20,20 +20,30 @@ function extractCaption(content: string): string {
   const captionMatch = content.match(/##\s*Caption\s*\n([\s\S]*?)(?=\n---|\n##\s*LinkedIn|$)/i)
   if (captionMatch) return captionMatch[1].trim()
 
-  // Fallback: strip metadata block (everything before first "---") and markdown headers
-  const afterFirstRule = content.split(/\n---\n/)[1]
-  if (afterFirstRule) {
-    // Remove any remaining ## headers and return
-    return afterFirstRule.replace(/^##\s+.*$/gm, '').trim()
-  }
+  // General approach: strip all metadata, trailing sections, and signature blocks
+  let text = content
 
-  // Last resort: strip lines that look like metadata (# Title, **Key:** Value, ---)
-  return content
-    .replace(/^#\s+.*$/gm, '')
-    .replace(/^\*\*\w[^*]*:\*\*.*$/gm, '')
-    .replace(/^---$/gm, '')
-    .replace(/^##\s+.*$/gm, '')
-    .trim()
+  // Cut trailing sections (## Hashtags, ## Notes, ## Image Notes, ## LinkedIn Version, etc.)
+  text = text.replace(/\n##\s*(?:Hashtags?|Notes?|Image\s+Notes?|LinkedIn\s*Version|Design\s+Brief|Canva|Agent\s+Notes?)\b[\s\S]*/i, '')
+
+  // Remove ## Caption / ## Post header lines (keep content under them)
+  text = text.replace(/^##\s*(?:Caption|Post)\s*\n/gim, '')
+
+  // Remove # Title headers
+  text = text.replace(/^#\s+.*$/gm, '')
+  // Remove **Key:** metadata lines (Tone, Platform, Format, NMLS Disclosure, etc.)
+  text = text.replace(/^\*\*[A-Za-z][^*]*:\*\*.*$/gm, '')
+  // Remove bold signature lines (**NMLS# 513013 | Adam Styer...**)
+  text = text.replace(/^\*\*NMLS#[^*]*\*\*\s*$/gm, '')
+  // Remove plain NMLS, email, phone lines
+  text = text.replace(/^NMLS#?\s*\d+.*$/gm, '')
+  text = text.replace(/^[📧📱🏢]\s*.*$/gm, '')
+  text = text.replace(/^adam@\S+.*$/gim, '')
+  text = text.replace(/^\d{3}[-.]\d{3}[-.]\d{4}\s*$/gm, '')
+  // Remove --- dividers
+  text = text.replace(/^---\s*$/gm, '')
+
+  return text.replace(/\n{3,}/g, '\n\n').trim()
 }
 
 /** Extract the LinkedIn-specific version if present. Returns null if not found. */

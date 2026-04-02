@@ -30,31 +30,42 @@ function renderMarkdown(text: string): string {
 const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
 
 /** Strip metadata, headers, contact blocks, hashtags, and image notes from draft content
- *  so the detail panel only shows the actual post caption. */
+ *  so the detail panel only shows the actual post caption.
+ *
+ *  Claude generates drafts with varying structures — metadata keys change per post.
+ *  Strategy: cut trailing sections first, then strip known metadata line patterns. */
 function cleanContentForDisplay(content: string): string {
   let text = content.replace(/\r\n/g, '\n')
 
-  // Remove everything from ## Hashtags onward
-  text = text.replace(/\n##\s*Hashtags?\b[\s\S]*/i, '')
-  // Remove everything from ## Image Notes onward
-  text = text.replace(/\n##\s*Image\s+Notes?\b[\s\S]*/i, '')
-  // Remove ## LinkedIn Version section
-  text = text.replace(/\n##\s*LinkedIn\s*Version[^\n]*\n[\s\S]*?(?=\n##\s|$)/i, '')
-  // Remove ## Caption header line (keep the text under it)
-  text = text.replace(/^##\s*Caption\s*\n/im, '')
+  // ── 1. Cut trailing sections (## Hashtags, ## Notes, ## Image Notes, ## LinkedIn Version, etc.) ──
+  // Anything starting with ## followed by a known non-caption keyword → remove to end
+  text = text.replace(/\n##\s*(?:Hashtags?|Notes?|Image\s+Notes?|LinkedIn\s*Version|Design\s+Brief|Canva|Agent\s+Notes?)\b[\s\S]*/i, '')
 
-  // Remove title header (# Post — ... or # Title)
+  // ── 2. Remove ## Caption / ## Post header lines (keep content under them) ──
+  text = text.replace(/^##\s*(?:Caption|Post)\s*\n/gim, '')
+
+  // ── 3. Remove # Title headers (e.g. "# Post — Chey and Tay Closing") ──
   text = text.replace(/^#\s+.*$/gm, '')
-  // Remove **NMLS Disclosure:** lines
-  text = text.replace(/^\*\*NMLS\s+Disclosure:\*\*.*$/gm, '')
-  // Remove contact block: **Name | Company**, NMLS#, email, phone lines
-  text = text.replace(/^\*\*Adam Styer[^*]*\*\*\s*$/gm, '')
-  text = text.replace(/^NMLS#\s*\d+\s*$/gm, '')
+
+  // ── 4. Remove **Key:** metadata lines — catches Tone, Platform, Format, NMLS Disclosure, Pillar, etc. ──
+  text = text.replace(/^\*\*[A-Za-z][^*]*:\*\*.*$/gm, '')
+
+  // ── 5. Remove signature/contact blocks ──
+  // Bold signature lines: **NMLS# 513013 | Adam Styer | Mortgage Solutions LP**
+  text = text.replace(/^\*\*NMLS#[^*]*\*\*\s*$/gm, '')
+  // Plain NMLS lines
+  text = text.replace(/^NMLS#?\s*\d+.*$/gm, '')
+  // Email/phone emoji lines
   text = text.replace(/^[📧📱🏢]\s*.*$/gm, '')
-  // Remove --- dividers
+  // Plain email lines (adam@...)
+  text = text.replace(/^adam@\S+.*$/gim, '')
+  // Phone number lines
+  text = text.replace(/^\d{3}[-.]\d{3}[-.]\d{4}\s*$/gm, '')
+
+  // ── 6. Remove --- dividers ──
   text = text.replace(/^---\s*$/gm, '')
 
-  // Collapse excess blank lines
+  // ── 7. Collapse excess blank lines ──
   text = text.replace(/\n{3,}/g, '\n\n').trim()
 
   return text

@@ -84,7 +84,8 @@ export async function getLoIdentity(organizationId: string): Promise<LoIdentity>
     null
 
   const loName = profile?.full_name || FALLBACKS.loName
-  const loFirstName = loName.split(' ')[0] || FALLBACKS.loFirstName
+  // If loName is the fallback "Your Loan Officer", splitting gives "Your" — use the dedicated fallback instead
+  const loFirstName = profile?.full_name ? loName.split(' ')[0] || FALLBACKS.loFirstName : FALLBACKS.loFirstName
 
   return {
     loName,

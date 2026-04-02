@@ -69,13 +69,18 @@ export async function POST(
   //   .single()
 
   // ── 3. Find the owner profile for this org to get user_id ───────────────────
-  const { data: ownerProfile } = await serviceClient
+  // Prefer owner role, then admin, then any member (alpha sort: admin < member < owner)
+  const { data: orgProfiles } = await serviceClient
     .from('profiles')
-    .select('id')
+    .select('id, role')
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: true })
-    .limit(1)
-    .single()
+    .limit(10)
+  const ownerProfile =
+    orgProfiles?.find((p) => p.role === 'owner') ??
+    orgProfiles?.find((p) => p.role === 'admin') ??
+    orgProfiles?.[0] ??
+    null
 
   const resolvedUserId = ownerProfile?.id ?? null
 

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, AlertCircle, Trash2, X, Phone, Mail, MessageSquare, GripVertical } from 'lucide-react'
+import PipelineSidebar from '@/components/ui/pipeline-sidebar'
 import {
   DndContext,
   closestCenter,
@@ -919,101 +920,17 @@ export default function LoansPage() {
   return (
     <div className="flex min-h-screen bg-[var(--bg)]">
       {/* Sidebar */}
-      <aside
-        className="shrink-0 border-r border-[var(--input)] bg-[var(--bg)] flex flex-col transition-[width] duration-200"
-        style={{ width: sidebarCollapsed ? 52 : 200 }}
-      >
-        <div className="flex items-center justify-between px-2 py-3 min-h-[40px]">
-          {!sidebarCollapsed && (
-            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Views</p>
-          )}
-          <button
-            type="button"
-            onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-            className="text-muted-foreground text-xs p-1 hover:text-foreground transition-colors"
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {sidebarCollapsed ? '›' : '‹'}
-          </button>
-        </div>
-        <div className="px-2 pb-4">
-          {SMART_LISTS.map(list => {
-            const initial = list.label.charAt(0)
-            return (
-              <button
-                key={list.id}
-                onClick={() => handleListChange(list.id)}
-                className={`w-full flex items-center justify-between rounded text-left transition-colors ${
-                  sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                } text-[11px] ${
-                  activeList === list.id
-                    ? 'text-primary font-semibold bg-primary/10 border-r-2 border-primary'
-                    : 'text-muted-foreground hover:bg-card hover:text-foreground'
-                }`}
-                title={sidebarCollapsed ? list.label : undefined}
-              >
-                {sidebarCollapsed ? (
-                  <span className="font-semibold text-xs">{initial}</span>
-                ) : (
-                  <span className="truncate">{list.label}</span>
-                )}
-                <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                  activeList === list.id ? 'bg-primary/20 text-primary' : 'bg-[var(--input)] text-muted-foreground'
-                }`}>
-                  {counts[list.id] ?? '…'}
-                </span>
-              </button>
-            )
-          })}
-          {customLists.map(cl => {
-            const initial = cl.name.charAt(0)
-            return (
-              <div key={cl.id} className="flex items-center gap-1">
-                <button
-                  key={cl.id}
-                  onClick={() => handleListChange(cl.id)}
-                  className={`w-full flex items-center justify-between rounded text-left transition-colors ${
-                    sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                  } text-[11px] flex-1 min-w-0 ${
-                    activeList === cl.id
-                      ? 'text-primary font-semibold bg-primary/10 border-r-2 border-primary'
-                      : 'text-muted-foreground hover:bg-card hover:text-foreground'
-                  }`}
-                  title={sidebarCollapsed ? cl.name : undefined}
-                >
-                  {sidebarCollapsed ? (
-                    <span className="font-semibold text-xs">{initial}</span>
-                  ) : (
-                    <span className="truncate">{cl.name}</span>
-                  )}
-                  <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                    activeList === cl.id ? 'bg-primary/20 text-primary' : 'bg-[var(--input)] text-muted-foreground'
-                  }`}>
-                    {counts[cl.id] ?? '…'}
-                  </span>
-                </button>
-                {!sidebarCollapsed && (
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
-                    className="text-muted-foreground hover:text-foreground p-0.5 text-xs transition-colors"
-                    title="Delete list"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            )
-          })}
-          <button
-            type="button"
-            onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
-            className="w-full mt-2 text-[11px] text-primary border border-dashed border-primary/40 rounded px-2 py-1.5 hover:bg-primary/10 transition-colors"
-          >
-            + New List
-          </button>
-        </div>
-      </aside>
+      <PipelineSidebar
+        smartLists={SMART_LISTS}
+        customLists={customLists}
+        activeList={activeList}
+        counts={counts}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
+        onSelectList={handleListChange}
+        onNewList={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
+        onDeleteList={(id) => setDeleteListId(id)}
+      />
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">

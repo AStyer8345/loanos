@@ -10,17 +10,17 @@
 
 /* ── Light mode (default) ───────────────────────────────── */
 :root, .light {
-  --bg:       #f5f6f8;
-  --surface:  #ffffff;
-  --surface2: #eef0f4;
+  --bg:       #e8eaef;
+  --surface:  #f0f1f5;
+  --surface2: #e4e6ec;
 
-  --border:   #d8dce5;
+  --border:   #c8ccd6;
 
-  --text:     #1a1d26;
-  --muted:    #5f6678;
-  --fg:       #1a1d26;
+  --text:     #05060b;
+  --muted:    #010309;
+  --fg:       #05060b;
 
-  --gold:     #a68a2e;
+  --gold:     #a4851e;
   --green:    #16a34a;
   --red:      #dc2626;
 
@@ -28,29 +28,29 @@
   --accent-light:  hsla(210, 70%, 50%, 0.08);
   --accent-border: hsla(210, 70%, 50%, 0.3);
 
-  --background: #f5f6f8;
-  --foreground: #1a1d26;
-  --card: #ffffff;
-  --card-foreground: #1a1d26;
-  --popover: #ffffff;
-  --popover-foreground: #1a1d26;
-  --primary: #a68a2e;
+  --background: #e8eaef;
+  --foreground: #05060b;
+  --card: #f0f1f5;
+  --card-foreground: #05060b;
+  --popover: #f0f1f5;
+  --popover-foreground: #05060b;
+  --primary: #a4851e;
   --primary-foreground: #ffffff;
-  --secondary: #eef0f4;
-  --secondary-foreground: #1a1d26;
-  --muted-bg: #eef0f4;
-  --muted-foreground: #5f6678;
-  --accent-bg: #eef0f4;
-  --accent-foreground: #1a1d26;
+  --secondary: #e4e6ec;
+  --secondary-foreground: #05060b;
+  --muted-bg: #e4e6ec;
+  --muted-foreground: #010309;
+  --accent-bg: #e4e6ec;
+  --accent-foreground: #05060b;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --ring: #a68a2e;
-  --input: #d8dce5;
+  --ring: #a4851e;
+  --input: #c8ccd6;
 
-  --sc-bg:       #f5f6f8;
-  --sc-card:     #ffffff;
-  --sc-card-alt: #f0f2f7;
-  --sc-border:   #d8dce5;
+  --sc-bg:       #e8eaef;
+  --sc-card:     #f0f1f5;
+  --sc-card-alt: #e8eaef;
+  --sc-border:   #c8ccd6;
   --sc-accent:   #3b6fcc;
   --sc-accent-dim: rgba(59, 111, 204, 0.08);
   --sc-gold:     #3b6fcc;
@@ -59,8 +59,8 @@
   --sc-blue-dim: rgba(59, 111, 204, 0.08);
   --sc-green:    #16a34a;
   --sc-red:      #dc2626;
-  --sc-text:     #1a1d26;
-  --sc-muted:    rgba(26, 29, 38, 0.45);
+  --sc-text:     #05060b;
+  --sc-muted:    rgba(5, 6, 11, 0.45);
 }
 
 /* ── Dark mode ──────────────────────────────────────────── */
@@ -134,7 +134,7 @@ body {
   box-shadow: 0 0 20px rgba(201, 168, 76, 0.06), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 :root .card-glow:hover, .light .card-glow:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(166, 138, 46, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(164, 133, 30, 0.2), 0 0 16px rgba(164, 133, 30, 0.08);
 }
 
 /* Table styling */

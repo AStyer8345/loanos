@@ -1268,7 +1268,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
           const roleHex = ROLE_HEX[p.role] ?? '#6B7280'
           return (
-            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-input transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
+            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-input transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex, backgroundColor: `${roleHex}0A` }}>
               {/* Name + Role */}
               <div className="mb-2">
                 <p className="text-[11px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>

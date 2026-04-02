@@ -29,8 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'name and audience are required' }, { status: 400 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('drip_campaigns')
       .insert({

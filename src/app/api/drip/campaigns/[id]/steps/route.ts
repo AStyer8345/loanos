@@ -44,8 +44,7 @@ export async function POST(
     if (!body.name || !body.trigger_type || !body.skeleton) {
       return NextResponse.json({ error: 'name, trigger_type, and skeleton are required' }, { status: 400 })
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
     const { data, error } = await supabase
       .from('drip_steps')
       .insert({

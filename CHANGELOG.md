@@ -1,5 +1,18 @@
 # LoanOS Changelog
 
+## [5.4.2] — 2026-04-02 — Marketing Dashboard Light Mode
+
+### Changed
+- **Marketing dashboard** (16 component files): Replaced 40+ hardcoded dark-mode hex values with CSS variables across SocialTab, SocialDraftList, SocialDraftDetail, SocialComposePanel, SocialPostPreview, SocialActivityFeed, CarouselBuilder, SendTab, CallsTab, MediaManager, RateUpdateForm, NewsletterForm, ContactCard, VoiceGuideEditor, VoiceGuideDrawer, shared.tsx, page.tsx
+- All `GOLD = '#C9A84C'` constants → `var(--primary)`
+- Dark backgrounds → `var(--surface)`, borders → `var(--border)`, text → `var(--foreground)`/`var(--muted-foreground)`
+- Chat bubbles use `color-mix(in srgb, var(--primary) 8%, var(--surface))`
+- Error states use `color-mix(in srgb, #E05252 6%, var(--bg))`
+- Preserved: canvas fillStyle, platform preview mock-up colors (FB blue, IG gradient, LI blue)
+
+### Commits
+- `7182275` — style: marketing dashboard light mode — 16 files themed
+
 ## [5.4.1] — 2026-04-02 — Light Mode Per-Page Polish
 
 ### Changed

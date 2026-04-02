@@ -23,7 +23,7 @@ type Props = {
   onBuildCarousel?: () => void
 }
 
-const PLATFORMS = ['Instagram', 'LinkedIn', 'Facebook', 'All'] as const
+const PLATFORMS = ['Instagram', 'LinkedIn', 'Facebook', 'Google', 'All'] as const
 const FORMATS = ['Single Image', 'Carousel', 'Video', 'Reel Script', 'Text Only'] as const
 const CLAUDE_FORMAT = '\u2728 Let Claude Decide' as const
 

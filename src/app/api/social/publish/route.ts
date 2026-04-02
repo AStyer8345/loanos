@@ -10,6 +10,7 @@ const PLATFORM_ACCOUNTS: Record<string, { id: string; network: string }> = {
   instagram: { id: '69b0530110a77a0ed895847d', network: 'instagram' },
   linkedin:  { id: '69b0536404b824ffb2c05426', network: 'linkedin' },
   facebook:  { id: '69b05329de86f5e15b7c0722', network: 'facebook' },
+  google:    { id: '69c3e3f548d8e4e643d45438', network: 'google' },
 }
 
 /** Extract the main caption from structured draft content.
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     // Determine which Publer accounts to post to
     const targets = draft.platform === 'all'
-      ? [PLATFORM_ACCOUNTS.instagram, PLATFORM_ACCOUNTS.linkedin, PLATFORM_ACCOUNTS.facebook]
+      ? [PLATFORM_ACCOUNTS.instagram, PLATFORM_ACCOUNTS.linkedin, PLATFORM_ACCOUNTS.facebook, PLATFORM_ACCOUNTS.google]
       : PLATFORM_ACCOUNTS[draft.platform] ? [PLATFORM_ACCOUNTS[draft.platform]] : []
 
     if (targets.length === 0) {
@@ -345,6 +346,7 @@ export async function POST(req: NextRequest) {
         linkedin: 'LinkedIn',
         facebook: 'Facebook',
         instagram: 'Facebook', // History tab groups Instagram under Facebook
+        google: 'Google',
         all: 'Facebook',       // Multi-platform defaults to Facebook channel
       }
 

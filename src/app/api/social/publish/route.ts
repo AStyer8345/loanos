@@ -130,6 +130,8 @@ export async function POST(req: NextRequest) {
 
         // Step 2: Upload to Publer via from-url
         const fileName = storagePath.split('/').pop() || 'image.jpg'
+        const ext = fileName.split('.').pop()?.toLowerCase() || ''
+        const isVideo = ['mp4', 'mov', 'webm', 'avi', 'mkv', 'm4v'].includes(ext)
         const uploadRes = await fetch('https://app.publer.com/api/v1/media/from-url', {
           method: 'POST',
           headers: publerHeaders,
@@ -156,9 +158,10 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        // Step 3: Poll for media upload completion (max 30s)
+        // Step 3: Poll for media upload completion (photos ~10s, videos up to ~60s)
+        const maxAttempts = isVideo ? 30 : 15
         let mediaId: string | null = null
-        for (let attempt = 0; attempt < 15; attempt++) {
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
           await new Promise(r => setTimeout(r, 2000))
           const statusRes = await fetch(`https://app.publer.com/api/v1/job_status/${mediaJobId}`, {
             headers: publerHeaders,
@@ -189,7 +192,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (mediaId) {
-          uploadedMedia.push({ id: mediaId, type: 'photo' })
+          uploadedMedia.push({ id: mediaId, type: isVideo ? 'video' : 'photo' })
           console.log('[social/publish] Media uploaded, ID:', mediaId)
         } else {
           console.error('[social/publish] Timed out or failed to get media ID for:', storagePath)
@@ -205,10 +208,15 @@ export async function POST(req: NextRequest) {
     const linkedinText = extractLinkedInVersion(draft.content) || captionText
 
     // Build networks object — platform-specific text + media IDs inside each network
+    // Determine post type from media: video > photo > status
+    const postType = mediaIds
+      ? (mediaIds.some(m => m.type === 'video') ? 'video' : 'photo')
+      : 'status'
+
     const networks: Record<string, { type: string; text: string; media?: { id: string; type: string }[] }> = {}
     for (const t of targets) {
       const networkEntry: { type: string; text: string; media?: { id: string; type: string }[] } = {
-        type: mediaIds ? 'photo' : 'status',
+        type: postType,
         text: t.network === 'linkedin' ? linkedinText : captionText,
       }
       if (mediaIds) {

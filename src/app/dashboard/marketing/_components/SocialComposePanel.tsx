@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const ACCEPTED_TYPES = 'image/*,video/*'
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
@@ -250,7 +250,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
             className={`rounded-md border border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
               dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-input'
             }`}
-            style={{ background: dragOver ? undefined : '#0a0a14' }}
+            style={{ background: dragOver ? undefined : 'var(--surface)' }}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
             onDragLeave={() => setDragOver(false)}
@@ -336,8 +336,8 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                 style={{
                   background: platform === p ? GOLD : 'transparent',
-                  color: platform === p ? 'var(--bg)' : '#71717a',
-                  border: platform === p ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                  color: platform === p ? 'var(--bg)' : 'var(--muted-foreground)',
+                  border: platform === p ? `1px solid ${GOLD}` : '1px solid var(--border)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -363,8 +363,8 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                 style={{
                   background: format === f ? GOLD : 'transparent',
-                  color: format === f ? 'var(--bg)' : '#71717a',
-                  border: format === f ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                  color: format === f ? 'var(--bg)' : 'var(--muted-foreground)',
+                  border: format === f ? `1px solid ${GOLD}` : '1px solid var(--border)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -376,8 +376,8 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
               className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
               style={{
                 background: format === null ? GOLD : 'transparent',
-                color: format === null ? 'var(--bg)' : '#71717a',
-                border: format === null ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                color: format === null ? 'var(--bg)' : 'var(--muted-foreground)',
+                border: format === null ? `1px solid ${GOLD}` : '1px solid var(--border)',
                 fontFamily: 'inherit',
               }}
             >
@@ -392,7 +392,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
         <div className="pt-2 space-y-2">
           <div
             className="rounded-sm px-3 py-3 text-center"
-            style={{ background: '#0d0d18', border: `1px solid ${GOLD}30` }}
+            style={{ background: 'var(--surface)', border: `1px solid ${GOLD}30` }}
           >
             <p className="text-muted-foreground mb-2" style={{ fontSize: 11 }}>
               Carousels use the visual builder with AI generation
@@ -416,7 +416,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
       {generateError && (
         <div
           className="rounded-sm px-3 py-2 text-xs font-bold"
-          style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
+          style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', color: '#E05252', border: '1px solid #E05252' }}
         >
           {generateError}
         </div>

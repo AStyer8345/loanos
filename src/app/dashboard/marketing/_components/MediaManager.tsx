@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const ACCEPTED_TYPES = 'image/*,video/*'
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
@@ -118,7 +118,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
               style={{
                 width: 80,
                 height: 80,
-                borderColor: dropTarget === i && dragIndex !== null ? GOLD : '#3f3f46',
+                borderColor: dropTarget === i && dragIndex !== null ? GOLD : 'var(--border)',
                 opacity: dragIndex === i ? 0.4 : 1,
               }}
             >
@@ -155,7 +155,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
               {/* Drag hint */}
               <div
                 className="absolute bottom-0 inset-x-0 bg-black/60 text-center py-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ fontSize: 8, color: '#a1a1aa' }}
+                style={{ fontSize: 8, color: 'var(--muted-foreground)' }}
               >
                 drag to reorder
               </div>
@@ -169,7 +169,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
         className={`rounded-md border border-dashed px-4 py-4 text-center cursor-pointer transition-colors ${
           dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-input'
         }`}
-        style={{ background: dragOver ? undefined : '#0a0a14' }}
+        style={{ background: dragOver ? undefined : 'var(--surface)' }}
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type Props = {
   open: boolean

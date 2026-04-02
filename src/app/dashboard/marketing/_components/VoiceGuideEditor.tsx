@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 const SEED_CONTENT = `# Voice & Workflow Guide
 

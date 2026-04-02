@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 export type SocialDraft = {
   id: string
@@ -124,8 +124,8 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
             className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors"
             style={{
               background: active === key ? GOLD : 'transparent',
-              color: active === key ? 'var(--bg)' : '#71717a',
-              border: active === key ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+              color: active === key ? 'var(--bg)' : 'var(--muted-foreground)',
+              border: active === key ? `1px solid ${GOLD}` : '1px solid var(--border)',
               fontFamily: 'inherit',
               fontSize: 10,
             }}
@@ -178,7 +178,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
         )}
         {filtered.map((draft) => {
           const isSelected = draft.id === selectedId
-          const statusColor = STATUS_COLORS[draft.status] || '#71717a'
+          const statusColor = STATUS_COLORS[draft.status] || 'var(--muted-foreground)'
           return (
             <button
               key={draft.id}
@@ -195,7 +195,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
                 className="truncate font-bold"
                 style={{
                   fontSize: 11,
-                  color: isSelected ? '#fff' : '#a1a1aa',
+                  color: isSelected ? 'var(--foreground)' : 'var(--muted-foreground)',
                 }}
               >
                 {draft.title || 'Untitled'}
@@ -219,9 +219,9 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
                     className="inline-block px-1.5 py-0.5 rounded-sm font-bold uppercase"
                     style={{
                       fontSize: 9,
-                      background: '#18181b',
-                      color: '#71717a',
-                      border: '1px solid #27272a',
+                      background: 'var(--surface)',
+                      color: 'var(--muted-foreground)',
+                      border: '1px solid var(--border)',
                     }}
                   >
                     {PLATFORM_LABELS[draft.platform]}

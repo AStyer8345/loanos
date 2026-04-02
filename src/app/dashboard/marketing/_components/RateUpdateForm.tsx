@@ -7,7 +7,7 @@ import { DEFAULT_RATE_ROWS, type RateRow, type MCCState, type LogEntry } from '@
 import { TRACKERS } from '@/lib/marketing/schedule'
 
 const NETLIFY_URL = 'https://styermortgage.com/.netlify/functions/generate-rate-update'
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type RatePreview = {
   pageTitle:         string
@@ -212,8 +212,8 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
                   onClick={() => toggleAudience(a)}
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-all"
                   style={{
-                    border: `1px solid ${audiences.includes(a) ? GOLD : '#3f3f46'}`,
-                    color: audiences.includes(a) ? GOLD : '#71717a',
+                    border: `1px solid ${audiences.includes(a) ? GOLD : 'var(--border)'}`,
+                    color: audiences.includes(a) ? GOLD : 'var(--muted-foreground)',
                     background: audiences.includes(a) ? `${GOLD}15` : 'transparent',
                   }}
                 >

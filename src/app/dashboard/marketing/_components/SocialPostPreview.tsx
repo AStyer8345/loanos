@@ -12,7 +12,7 @@ type Props = {
 
 type Platform = 'facebook' | 'instagram' | 'linkedin'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const OVERLAY_BG = 'rgba(10, 10, 10, 0.8)'
 const OUTER_FONT = "'IBM Plex Mono', 'Courier New', monospace"
 const PREVIEW_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
@@ -186,7 +186,7 @@ function PlatformTab({
         appearance: 'none',
         border: 'none',
         background: active ? '#ffffff' : 'transparent',
-        color: active ? 'var(--surface)' : '#a1a1aa',
+        color: active ? 'var(--surface)' : 'var(--muted-foreground)',
         borderRadius: 999,
         padding: '8px 12px',
         fontSize: 11,
@@ -412,7 +412,7 @@ function CarouselSlidePreview({
       >
         {/* Top: slide number */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ color: '#52525b', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em' }}>
+          <span style={{ color: 'var(--muted-foreground)', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em' }}>
             SLIDE {slide.num} OF {total}
           </span>
           {slide.title && !isFirst && (
@@ -430,7 +430,7 @@ function CarouselSlidePreview({
                 {bodyLines[0] || ''}
               </div>
               {bodyLines.length > 1 && (
-                <div style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.6 }}>
+                <div style={{ color: 'var(--foreground)', fontSize: 13, lineHeight: 1.6 }}>
                   {bodyLines.slice(1).join('\n')}
                 </div>
               )}
@@ -441,7 +441,7 @@ function CarouselSlidePreview({
                 <div
                   key={i}
                   style={{
-                    color: i === 0 ? GOLD : '#a1a1aa',
+                    color: i === 0 ? GOLD : 'var(--muted-foreground)',
                     fontSize: i === 0 ? 16 : 12,
                     fontWeight: i === 0 ? 700 : 400,
                     lineHeight: 1.5,
@@ -453,7 +453,7 @@ function CarouselSlidePreview({
               ))}
             </div>
           ) : (
-            <div style={{ color: '#e4e4e7', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            <div style={{ color: 'var(--foreground)', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
               {slide.body}
             </div>
           )}
@@ -461,7 +461,7 @@ function CarouselSlidePreview({
 
         {/* Bottom: branding */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--card)' }}>
-          <span style={{ color: '#52525b', fontSize: 9, letterSpacing: '0.05em' }}>
+          <span style={{ color: 'var(--muted-foreground)', fontSize: 9, letterSpacing: '0.05em' }}>
             Adam Styer | Mortgage Solutions LP
           </span>
           {isCTA && (
@@ -480,9 +480,9 @@ function CarouselSlidePreview({
             width: 32,
             height: 32,
             borderRadius: '50%',
-            background: '#18181b',
-            color: '#fff',
-            border: '1px solid #3f3f46',
+            background: 'var(--surface)',
+            color: 'var(--foreground)',
+            border: '1px solid var(--border)',
             cursor: slideIndex === 0 ? 'default' : 'pointer',
             opacity: slideIndex === 0 ? 0.2 : 1,
             fontSize: 14,
@@ -501,7 +501,7 @@ function CarouselSlidePreview({
                 width: i === slideIndex ? 16 : 6,
                 height: 6,
                 borderRadius: 3,
-                background: i === slideIndex ? GOLD : '#3f3f46',
+                background: i === slideIndex ? GOLD : 'var(--border)',
                 transition: 'all 0.2s',
                 display: 'block',
               }}
@@ -517,9 +517,9 @@ function CarouselSlidePreview({
             width: 32,
             height: 32,
             borderRadius: '50%',
-            background: '#18181b',
-            color: '#fff',
-            border: '1px solid #3f3f46',
+            background: 'var(--surface)',
+            color: 'var(--foreground)',
+            border: '1px solid var(--border)',
             cursor: slideIndex === total - 1 ? 'default' : 'pointer',
             opacity: slideIndex === total - 1 ? 0.2 : 1,
             fontSize: 14,
@@ -610,7 +610,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
           }}
         >
           <div>
-            <div style={{ fontSize: 11, letterSpacing: '0.14em', color: '#a1a1aa' }}>POST PREVIEW</div>
+            <div style={{ fontSize: 11, letterSpacing: '0.14em', color: 'var(--muted-foreground)' }}>POST PREVIEW</div>
             <div style={{ fontSize: 14, color: '#ffffff', marginTop: 4 }}>
               {platform.charAt(0).toUpperCase() + platform.slice(1)}
             </div>
@@ -621,7 +621,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
             style={{
               appearance: 'none',
               border: '1px solid rgba(255, 255, 255, 0.12)',
-              background: '#18181b',
+              background: 'var(--surface)',
               color: '#ffffff',
               width: 34,
               height: 34,

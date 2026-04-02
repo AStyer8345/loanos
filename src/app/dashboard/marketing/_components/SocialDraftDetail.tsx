@@ -6,8 +6,8 @@ import type { SocialDraft } from './SocialDraftList'
 import MediaManager from './MediaManager'
 import SocialPostPreview from './SocialPostPreview'
 
-const GOLD = '#C9A84C'
-const BRAND_GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
+const BRAND_GOLD = 'var(--primary)'
 
 /** Lightweight inline markdown → HTML for social post preview.
  *  Handles: **bold**, *italic*, --- hr, and lines starting with - as bullets. */
@@ -15,7 +15,7 @@ function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
-    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #27272a;margin:8px 0" />')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0" />')
     .replace(/^- (.+)$/gm, '<span style="display:flex;gap:6px;margin-bottom:2px"><span style="color:#C9A84C;flex-shrink:0">•</span><span>$1</span></span>')
 }
 
@@ -156,7 +156,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
       className="rounded-md overflow-hidden"
       style={{
         background: 'var(--surface)',
-        border: `1px solid ${isCTA ? BRAND_GOLD : '#27272a'}`,
+        border: `1px solid ${isCTA ? BRAND_GOLD : 'var(--border)'}`,
         padding: '16px 18px',
       }}
     >
@@ -168,7 +168,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
             color: BRAND_GOLD,
             fontSize: 10,
             letterSpacing: '0.1em',
-            background: '#1a1a2e',
+            background: 'color-mix(in srgb, var(--primary) 8%, var(--surface))',
             padding: '2px 8px',
             borderRadius: 3,
             whiteSpace: 'nowrap',
@@ -179,7 +179,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
         {slide.title && (
           <span
             className="font-bold truncate"
-            style={{ color: '#a1a1aa', fontSize: 10, letterSpacing: '0.05em' }}
+            style={{ color: 'var(--muted-foreground)', fontSize: 10, letterSpacing: '0.05em' }}
           >
             {slide.title.toUpperCase()}
           </span>
@@ -196,7 +196,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
             {slide.body.split('\n')[0]}
           </div>
           {slide.body.split('\n').slice(1).join('\n').trim() && (
-            <div style={{ color: '#d4d4d8', fontSize: 12, lineHeight: 1.6 }}>
+            <div style={{ color: 'var(--foreground)', fontSize: 12, lineHeight: 1.6 }}>
               {slide.body.split('\n').slice(1).join('\n').trim()}
             </div>
           )}
@@ -205,7 +205,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
         <div
           className="whitespace-pre-wrap"
           style={{
-            color: isCTA ? BRAND_GOLD : '#d4d4d8',
+            color: isCTA ? BRAND_GOLD : 'var(--foreground)',
             fontSize: 12,
             lineHeight: 1.6,
             fontWeight: isCTA ? 600 : 400,
@@ -265,7 +265,7 @@ function SlidePreviewOrText({
           onClick={() => setSlideIndex(Math.max(0, safeIndex - 1))}
           disabled={safeIndex === 0}
           className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-          style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+          style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
         >
           &#8592;
         </button>
@@ -279,7 +279,7 @@ function SlidePreviewOrText({
               style={{
                 width: i === safeIndex ? 16 : 6,
                 height: 6,
-                background: i === safeIndex ? BRAND_GOLD : '#3f3f46',
+                background: i === safeIndex ? BRAND_GOLD : 'var(--border)',
               }}
             />
           ))}
@@ -289,7 +289,7 @@ function SlidePreviewOrText({
           onClick={() => setSlideIndex(Math.min(slides.length - 1, safeIndex + 1))}
           disabled={safeIndex === slides.length - 1}
           className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-          style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+          style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
         >
           &#8594;
         </button>
@@ -329,7 +329,7 @@ function FormatSwitcher({ current, onChange }: { current: string | null; onChang
       {open && (
         <div
           className="absolute top-full left-0 mt-1 rounded-sm border border-input py-1 z-50"
-          style={{ background: '#18181b', minWidth: 140 }}
+          style={{ background: 'var(--surface)', minWidth: 140 }}
         >
           {FORMAT_OPTIONS.map((f) => (
             <button
@@ -337,7 +337,7 @@ function FormatSwitcher({ current, onChange }: { current: string | null; onChang
               onClick={() => { onChange(f.value); setOpen(false) }}
               className="block w-full text-left px-3 py-1.5 text-xs font-bold transition-colors hover:bg-muted"
               style={{
-                color: f.value === current ? GOLD : '#a1a1aa',
+                color: f.value === current ? GOLD : 'var(--muted-foreground)',
                 fontFamily: 'inherit',
                 fontSize: 10,
                 letterSpacing: '0.05em',
@@ -607,7 +607,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
       {/* 1. Header bar */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-input">
         <div>
-          <div className="text-white font-bold" style={{ fontSize: 15 }}>
+          <div className="text-foreground font-bold" style={{ fontSize: 15 }}>
             {draft.title || 'Untitled'}
           </div>
           <div className="text-muted-foreground flex items-center gap-2" style={{ fontSize: 11 }}>
@@ -660,7 +660,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 <button
                   onClick={() => setEditing(false)}
                   className="px-3 py-1 rounded-sm text-xs font-bold text-muted-foreground transition-opacity hover:opacity-80"
-                  style={{ border: '1px solid #3f3f46', fontFamily: 'inherit' }}
+                  style={{ border: '1px solid var(--border)', fontFamily: 'inherit' }}
                 >
                   CANCEL
                 </button>
@@ -749,8 +749,8 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 className="ml-auto px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
                 style={{
                   background: 'transparent',
-                  color: '#71717a',
-                  border: '1px solid #3f3f46',
+                  color: 'var(--muted-foreground)',
+                  border: '1px solid var(--border)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -774,7 +774,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             {publishError && (
               <div
                 className="rounded-sm px-3 py-2 text-xs font-bold"
-                style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
+                style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', color: '#E05252', border: '1px solid #E05252' }}
               >
                 {publishError}
               </div>
@@ -782,12 +782,12 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             {showRejectModal && (
               <div
                 className="rounded-sm p-3 space-y-2"
-                style={{ background: '#1a0a0a', border: '1px solid #E05252' }}
+                style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', border: '1px solid #E05252' }}
               >
                 <div className="text-xs font-bold" style={{ color: '#E05252', letterSpacing: '0.1em' }}>
                   WHY ARE YOU REJECTING THIS?
                 </div>
-                <div className="text-xs" style={{ color: '#a1a1aa' }}>
+                <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                   This helps the AI learn your voice. Be specific — e.g. &quot;I never debate lock vs float&quot; or &quot;too corporate sounding&quot;
                 </div>
                 <textarea
@@ -797,7 +797,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   className="w-full rounded-sm p-2 text-sm resize-none"
                   style={{
                     background: 'var(--bg)',
-                    color: '#fafafa',
+                    color: 'var(--foreground)',
                     border: '1px solid #27272a',
                     fontFamily: 'inherit',
                     minHeight: 60,
@@ -816,7 +816,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   <button
                     onClick={() => setShowRejectModal(false)}
                     className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                    style={{ background: 'transparent', color: '#71717a', border: '1px solid #27272a', fontFamily: 'inherit' }}
+                    style={{ background: 'transparent', color: 'var(--muted-foreground)', border: '1px solid #27272a', fontFamily: 'inherit' }}
                   >
                     CANCEL
                   </button>
@@ -862,13 +862,13 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 key={i}
                 className="text-xs rounded-sm px-2 py-1.5"
                 style={{
-                  background: msg.role === 'user' ? '#1a1a2e' : 'var(--surface)',
-                  color: msg.role === 'user' ? '#e4e4e7' : '#a1a1aa',
-                  borderLeft: msg.role === 'assistant' ? `2px solid ${GOLD}` : '2px solid #3f3f46',
+                  background: msg.role === 'user' ? 'color-mix(in srgb, var(--primary) 8%, var(--surface))' : 'var(--surface)',
+                  color: msg.role === 'user' ? 'var(--foreground)' : 'var(--muted-foreground)',
+                  borderLeft: msg.role === 'assistant' ? `2px solid ${GOLD}` : '2px solid var(--border)',
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold" style={{ fontSize: 9, color: msg.role === 'user' ? '#71717a' : GOLD }}>
+                  <span className="font-bold" style={{ fontSize: 9, color: msg.role === 'user' ? 'var(--muted-foreground)' : GOLD }}>
                     {msg.role === 'user' ? 'YOU' : 'CLAUDE'}
                   </span>
                   {msg.role === 'assistant' && (

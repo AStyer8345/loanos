@@ -3,7 +3,7 @@
 import { type ReactNode, type ButtonHTMLAttributes, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cadenceColor, formatDaysAgo } from '@/lib/marketing/utils'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const GREEN = '#4CAF82'
 const RED = '#E05252'
 
@@ -90,7 +90,7 @@ export function Btn({
   const variantStyle: React.CSSProperties =
     variant === 'primary'   ? { background: GOLD, color: 'var(--bg)', fontWeight: 700, border: `1px solid ${GOLD}` } :
     variant === 'secondary' ? { background: 'transparent', color: GOLD, border: `1px solid ${GOLD}`, fontWeight: 700 } :
-    variant === 'ghost'     ? { background: 'transparent', color: '#a1a1aa', border: '1px solid #3f3f46', fontWeight: 600 } :
+    variant === 'ghost'     ? { background: 'transparent', color: 'var(--muted-foreground)', border: '1px solid var(--border)', fontWeight: 600 } :
                               { background: 'transparent', color: RED, border: `1px solid ${RED}`, fontWeight: 700 }
   return (
     <button

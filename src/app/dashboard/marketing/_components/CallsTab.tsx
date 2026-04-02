@@ -165,9 +165,9 @@ export default function CallsTab({ mccState, onSave }: Props) {
               onClick={() => { setActiveList(key); setSearch(''); setShowAdd(false) }}
               className="px-3 py-1.5 rounded-sm text-xs font-bold transition-all border"
               style={{
-                borderColor: active ? '#C9A84C' : '#3f3f46',
-                color:       active ? 'var(--bg)' : '#71717a',
-                background:  active ? '#C9A84C' : 'transparent',
+                borderColor: active ? 'var(--primary)' : 'var(--border)',
+                color:       active ? 'var(--bg)' : 'var(--muted-foreground)',
+                background:  active ? 'var(--primary)' : 'transparent',
               }}
             >
               {label} ({count})

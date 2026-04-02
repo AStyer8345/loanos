@@ -7,7 +7,7 @@ import HistoryTab from './_components/HistoryTab'
 import SocialTab  from './_components/SocialTab'
 import VoiceGuideEditor from './_components/VoiceGuideEditor'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type Tab = 'SEND' | 'HISTORY' | 'SOCIAL' | 'VOICE GUIDE'
 
@@ -58,7 +58,7 @@ export default function MarketingPage() {
             onClick={() => setActiveTab(tab)}
             className="px-4 py-2 text-xs font-bold tracking-widest transition-colors relative"
             style={{
-              color: activeTab === tab ? GOLD : '#52525b',
+              color: activeTab === tab ? GOLD : 'var(--muted-foreground)',
               fontFamily: 'inherit',
             }}
           >

@@ -5,7 +5,7 @@ import { type MCCState } from '@/lib/marketing/types'
 import RateUpdateForm from './RateUpdateForm'
 import NewsletterForm from './NewsletterForm'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type Props = {
   mccState: MCCState
@@ -31,7 +31,7 @@ export default function SendTab({ mccState, onSave }: Props) {
             className="px-4 py-2 text-xs font-bold transition-colors"
             style={{
               background: sendMode === key ? GOLD : 'transparent',
-              color: sendMode === key ? 'var(--bg)' : '#71717a',
+              color: sendMode === key ? 'var(--bg)' : 'var(--muted-foreground)',
               fontFamily: 'inherit',
             }}
           >

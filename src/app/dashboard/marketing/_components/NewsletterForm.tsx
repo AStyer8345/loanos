@@ -6,7 +6,7 @@ import { type MCCState, type LogEntry } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
 
 const NETLIFY_URL = 'https://styermortgage.com/.netlify/functions/generate-newsletter'
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type NLPreview = {
   pageTitle:         string
@@ -178,8 +178,8 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
                   onClick={() => toggleAudience(key)}
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-all"
                   style={{
-                    border: `1px solid ${audiences.includes(key) ? GOLD : '#3f3f46'}`,
-                    color: audiences.includes(key) ? GOLD : '#71717a',
+                    border: `1px solid ${audiences.includes(key) ? GOLD : 'var(--border)'}`,
+                    color: audiences.includes(key) ? GOLD : 'var(--muted-foreground)',
                     background: audiences.includes(key) ? `${GOLD}15` : 'transparent',
                   }}
                 >
@@ -200,7 +200,7 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
                   className="px-3 py-1 text-xs font-bold transition-colors"
                   style={{
                     background: mode === m ? GOLD : 'transparent',
-                    color: mode === m ? 'var(--bg)' : '#71717a',
+                    color: mode === m ? 'var(--bg)' : 'var(--muted-foreground)',
                   }}
                 >
                   {m === 'structured' ? 'STRUCTURED FIELDS' : 'CUSTOM PROMPT'}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 
 type ActivityEntry = {
   id: string
@@ -57,7 +57,7 @@ export default function SocialActivityFeed() {
   return (
     <div
       className="border-b border-input px-4 py-2"
-      style={{ background: '#0a0a1a', fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
+      style={{ background: 'var(--surface)', fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       <div className="flex items-center gap-4">
         <span
@@ -84,7 +84,7 @@ export default function SocialActivityFeed() {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    background: ACTION_COLORS[entry.action] || '#71717a',
+                    background: ACTION_COLORS[entry.action] || 'var(--muted-foreground)',
                     display: 'inline-block',
                     flexShrink: 0,
                   }}

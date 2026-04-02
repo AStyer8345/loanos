@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const SLIDE_SIZE = 1080
 const PREVIEW_SIZE = 340
 
@@ -172,7 +172,7 @@ function SlidePreview({
       {/* Content (above overlay) */}
       <div className="relative z-10 flex flex-col justify-between h-full">
         {/* Slide counter */}
-        <div style={{ color: '#52525b', fontSize: 22 * scale, fontWeight: 400 }}>
+        <div style={{ color: 'var(--muted-foreground)', fontSize: 22 * scale, fontWeight: 400 }}>
           {index + 1} / {total}
         </div>
 
@@ -180,7 +180,7 @@ function SlidePreview({
         <div
           className="flex-1 flex items-center justify-center text-center"
           style={{
-            color: isFirst || isLast ? GOLD : '#e4e4e7',
+            color: isFirst || isLast ? GOLD : 'var(--foreground)',
             fontSize: (isFirst ? 62 : 50) * scale,
             fontWeight: 700,
             lineHeight: 1.35,
@@ -198,7 +198,7 @@ function SlidePreview({
             paddingTop: 12 * scale,
           }}
         >
-          <span style={{ color: '#52525b', fontSize: 17 * scale }}>
+          <span style={{ color: 'var(--muted-foreground)', fontSize: 17 * scale }}>
             Adam Styer | Mortgage Solutions LP
           </span>
           {isLast && (
@@ -505,7 +505,7 @@ Rules:
           <div className="w-80 border-r border-input p-4 space-y-4 overflow-y-auto">
             {/* AI Generation */}
             {!generated && (
-              <div className="rounded-md border border-input p-3 space-y-2" style={{ background: '#0d0d18' }}>
+              <div className="rounded-md border border-input p-3 space-y-2" style={{ background: 'var(--surface)' }}>
                 <label
                   className="block font-bold"
                   style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
@@ -530,8 +530,8 @@ Rules:
                         className="w-6 h-6 rounded text-xs font-bold transition-colors"
                         style={{
                           background: aiSlideCount === n ? GOLD : 'transparent',
-                          color: aiSlideCount === n ? 'var(--bg)' : '#71717a',
-                          border: aiSlideCount === n ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                          color: aiSlideCount === n ? 'var(--bg)' : 'var(--muted-foreground)',
+                          border: aiSlideCount === n ? `1px solid ${GOLD}` : '1px solid var(--border)',
                         }}
                       >
                         {n}
@@ -550,7 +550,7 @@ Rules:
                 >
                   {aiGenerating ? 'GENERATING...' : 'GENERATE SLIDES'}
                 </button>
-                <div className="text-center" style={{ color: '#52525b', fontSize: 9 }}>
+                <div className="text-center" style={{ color: 'var(--muted-foreground)', fontSize: 9 }}>
                   Or skip and build manually below
                 </div>
               </div>
@@ -604,8 +604,8 @@ Rules:
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                   style={{
                     background: bgMode === 'black' ? GOLD : 'transparent',
-                    color: bgMode === 'black' ? 'var(--bg)' : '#71717a',
-                    border: bgMode === 'black' ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                    color: bgMode === 'black' ? 'var(--bg)' : 'var(--muted-foreground)',
+                    border: bgMode === 'black' ? `1px solid ${GOLD}` : '1px solid var(--border)',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -619,8 +619,8 @@ Rules:
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                   style={{
                     background: bgMode === 'image' ? GOLD : 'transparent',
-                    color: bgMode === 'image' ? 'var(--bg)' : '#71717a',
-                    border: bgMode === 'image' ? `1px solid ${GOLD}` : '1px solid #3f3f46',
+                    color: bgMode === 'image' ? 'var(--bg)' : 'var(--muted-foreground)',
+                    border: bgMode === 'image' ? `1px solid ${GOLD}` : '1px solid var(--border)',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -668,7 +668,7 @@ Rules:
                       key={i}
                       className="rounded-md border p-2"
                       style={{
-                        borderColor: i === safeIndex ? GOLD : '#27272a',
+                        borderColor: i === safeIndex ? GOLD : 'var(--border)',
                         background: i === safeIndex ? `${GOLD}08` : 'var(--surface)',
                         cursor: 'pointer',
                       }}
@@ -679,7 +679,7 @@ Rules:
                           className="font-bold"
                           style={{
                             fontSize: 9,
-                            color: isFirst || isLastSlide ? GOLD : '#71717a',
+                            color: isFirst || isLastSlide ? GOLD : 'var(--muted-foreground)',
                             letterSpacing: '0.1em',
                           }}
                         >
@@ -690,7 +690,7 @@ Rules:
                             onClick={(e) => { e.stopPropagation(); moveSlide(i, i - 1) }}
                             disabled={i === 0}
                             className="w-5 h-5 flex items-center justify-center rounded text-xs disabled:opacity-20 hover:opacity-80"
-                            style={{ color: '#71717a' }}
+                            style={{ color: 'var(--muted-foreground)' }}
                           >
                             ▲
                           </button>
@@ -698,7 +698,7 @@ Rules:
                             onClick={(e) => { e.stopPropagation(); moveSlide(i, i + 1) }}
                             disabled={isLastSlide}
                             className="w-5 h-5 flex items-center justify-center rounded text-xs disabled:opacity-20 hover:opacity-80"
-                            style={{ color: '#71717a' }}
+                            style={{ color: 'var(--muted-foreground)' }}
                           >
                             ▼
                           </button>
@@ -743,8 +743,8 @@ Rules:
                   className="w-full mt-2 py-1.5 rounded-sm text-xs font-bold tracking-wider transition-opacity hover:opacity-80"
                   style={{
                     background: 'transparent',
-                    color: '#71717a',
-                    border: '1px dashed #3f3f46',
+                    color: 'var(--muted-foreground)',
+                    border: '1px dashed var(--border)',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -772,7 +772,7 @@ Rules:
                 onClick={() => setSelectedSlide(Math.max(0, safeIndex - 1))}
                 disabled={safeIndex === 0}
                 className="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-                style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+                style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
               >
                 ←
               </button>
@@ -785,7 +785,7 @@ Rules:
                     style={{
                       width: i === safeIndex ? 16 : 6,
                       height: 6,
-                      background: i === safeIndex ? GOLD : '#3f3f46',
+                      background: i === safeIndex ? GOLD : 'var(--border)',
                     }}
                   />
                 ))}
@@ -794,7 +794,7 @@ Rules:
                 onClick={() => setSelectedSlide(Math.min(slides.length - 1, safeIndex + 1))}
                 disabled={safeIndex === slides.length - 1}
                 className="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-                style={{ background: '#18181b', color: '#fff', border: '1px solid #3f3f46' }}
+                style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
               >
                 →
               </button>
@@ -808,7 +808,7 @@ Rules:
                   onClick={() => setSelectedSlide(i)}
                   className="flex-shrink-0 rounded overflow-hidden transition-all"
                   style={{
-                    border: i === safeIndex ? `2px solid ${GOLD}` : '2px solid #27272a',
+                    border: i === safeIndex ? `2px solid ${GOLD}` : '2px solid var(--border)',
                     opacity: i === safeIndex ? 1 : 0.6,
                   }}
                 >
@@ -832,7 +832,7 @@ Rules:
         {error && (
           <div
             className="rounded-sm px-3 py-2 text-xs font-bold"
-            style={{ background: '#1a0505', color: '#E05252', border: '1px solid #E05252' }}
+            style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', color: '#E05252', border: '1px solid #E05252' }}
           >
             {error}
           </div>

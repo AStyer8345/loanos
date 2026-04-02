@@ -5,7 +5,7 @@ import { type MCCContact, type MCCState, type LogEntry } from '@/lib/marketing/t
 import { Btn, Input } from './shared'
 import { todayString } from '@/lib/marketing/utils'
 
-const GOLD = '#C9A84C'
+const GOLD = 'var(--primary)'
 const GREEN = '#4CAF82'
 const RED = '#E05252'
 

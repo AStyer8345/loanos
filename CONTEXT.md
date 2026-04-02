@@ -16,7 +16,39 @@ Deploy: Vercel
 
 ## Current Status
 
-Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02.**
+Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01.**
+
+## UI Renovation — 2026-04-01
+
+**5-step layered redesign using shadcn/ui + 21st.dev components.**
+
+### Steps Completed:
+1. **Foundation**: Installed shadcn/ui, CSS variable theme tokens mapped to LoanOS dark palette, cn() utility
+2. **Shell swap**: Replaced TopNav with 21st.dev Navbar1 component
+3. **Shared primitives**: Created Card, Badge, Input, Textarea, Dialog components
+4. **Page imports**: Swapped hardcoded colors to primitives across Dashboard, Pipeline, Contact Record, Loan Record, Contacts, Scenarios, Marketing, Admin, Reports, Automations
+5. **Visual polish**: Card glow effect (gold box-shadow on hover), Badge depth (colored borders + inset shadow), Table primitive (7 sub-components), gold-tinted row hover on tables and contacts
+
+### Key Files Created/Modified:
+- `src/components/ui/card.tsx` — Card with `.card-glow` hover effect
+- `src/components/ui/badge.tsx` — 7 variants with colored borders + inset shadow
+- `src/components/ui/table.tsx` — Table/TableHeader/TableBody/TableFooter/TableHead/TableRow/TableCell/TableCaption
+- `src/app/globals.css` — `.card-glow` and `.lo-table` CSS classes
+- `src/components/dashboard/DashboardClient.tsx` — Card/Badge/Table imports, monthly breakdown uses Table primitive
+- `src/components/dashboard/HotLeadsWidget.tsx` — Card primitive swap
+- `src/components/dashboard/DailyScheduleWidget.tsx` — Card + border-input tokens
+- `src/components/dashboard/DailyBriefingPanel.tsx` — Card + bg-card/bg-input tokens
+- `src/components/automations/AutomationCard.tsx` — bg-card/border-input tokens
+- `src/components/automations/InlineDraftEditor.tsx` — bg-card/border-input tokens
+- `src/app/dashboard/reports/volume/page.tsx` — Card + Table primitives
+- `src/app/dashboard/reports/commission/page.tsx` — Card + Table primitives
+- `src/app/dashboard/contacts/page.tsx` — Gold hover tint
+- `src/app/dashboard/loans/page.tsx` — border-input/bg-card tokens
+
+### Design Decisions:
+- Pipeline sidebar uses #0A0A0A/#1A1A1A/#2A2A2A palette — intentionally NOT converted to card tokens
+- Contacts table uses inline styles (DnD, sticky columns) — modified hover color only, structure unchanged
+- LoanOS color mapping: `#060b18` (nav bg), `#0f172a` → `bg-card`, `#1e293b` → `border-input`, `#C9A84C` → `primary`
 
 ## Multi-Tenant LO Onboarding — 2026-04-01 (session 12)
 

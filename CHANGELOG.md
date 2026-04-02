@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [5.3.0] — 2026-04-01 — UI Renovation (shadcn/ui + Visual Polish)
+
+### Added
+- **shadcn/ui foundation**: CSS variable theme tokens, cn() utility, Radix UI primitives
+- **21st.dev Navbar1**: Replaced TopNav with polished navigation component
+- **Card primitive** (`src/components/ui/card.tsx`): Hover glow effect (gold box-shadow + border highlight)
+- **Badge primitive** (`src/components/ui/badge.tsx`): 7 variants with colored borders + inset shadow (default, secondary, destructive, outline, success, warning, info)
+- **Table primitive** (`src/components/ui/table.tsx`): 7 sub-components with gold-tinted row hover, sticky headers, subtle borders
+- **Input, Textarea, Dialog** primitives for future use
+- **CSS classes**: `.card-glow` (gold hover shadow), `.lo-table` (table styling) in globals.css
+
+### Changed
+- **Dashboard**: DashboardClient, HotLeadsWidget, DailyScheduleWidget, DailyBriefingPanel — swapped hardcoded `#0f172a`/`#1e293b` to Card + semantic tokens (`bg-card`, `border-input`, `bg-input`)
+- **Dashboard monthly breakdown**: Replaced `<table>` with Table primitive components
+- **Reports** (volume + commission): Wrapped in Card, replaced tables with Table primitives, `text-[#C9A84C]` → `text-primary`
+- **Automations**: AutomationCard + InlineDraftEditor — `bg-card`/`border-input` tokens
+- **Contacts**: Gold-tinted row hover (`rgba(201,168,76,0.04)`)
+- **Pipeline control bar**: `border-input`/`bg-card` tokens (sidebar palette intentionally untouched)
+
 ## [5.2.1] — 2026-04-02 — Shared-Email Co-Borrower Fix
 
 ### Fixed

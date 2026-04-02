@@ -65,6 +65,24 @@ export async function POST(req: NextRequest) {
     // Each account = { id, scheduled_at }
     const scheduledAt = draft.scheduled_for || new Date(Date.now() + 2 * 60_000).toISOString() // default: 2 min from now
 
+    // Convert Supabase storage paths to signed URLs so Publer can fetch them
+    let mediaEntries: { url: string }[] | undefined
+    if (draft.media_urls && draft.media_urls.length > 0) {
+      const signedUrls: { url: string }[] = []
+      for (const storagePath of draft.media_urls as string[]) {
+        const { data: signedData, error: signError } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(storagePath, 7200) // 2 hour expiry — enough for Publer to fetch
+
+        if (signError || !signedData?.signedUrl) {
+          console.error('[social/publish] Failed to sign media URL:', storagePath, signError)
+          continue
+        }
+        signedUrls.push({ url: signedData.signedUrl })
+      }
+      if (signedUrls.length > 0) mediaEntries = signedUrls
+    }
+
     // Build networks object — same text for each platform
     const networks: Record<string, { type: string; text: string; media?: { url: string }[] }> = {}
     for (const t of targets) {
@@ -72,15 +90,15 @@ export async function POST(req: NextRequest) {
         type: 'status',
         text: draft.content,
       }
-      if (draft.media_urls && draft.media_urls.length > 0) {
-        networkEntry.media = draft.media_urls.map((url: string) => ({ url }))
+      if (mediaEntries) {
+        networkEntry.media = mediaEntries
       }
       networks[t.network] = networkEntry
     }
 
     const publerBody = {
       bulk: {
-        state: 'draft', // Creates as draft in Publer for final review
+        state: 'scheduled', // Publish at the scheduled time
         posts: [
           {
             networks,

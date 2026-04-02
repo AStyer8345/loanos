@@ -300,8 +300,8 @@ function SortableLoanColumnHeader({
       style={style}
       onClick={onSort}
       className={`text-left px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wide select-none bg-[var(--surface2)] ${
-        col.key === sortKey ? 'text-[#C9A84C]' : 'text-[var(--muted)]'
-      } ${col.key ? 'hover:text-[var(--fg)]' : ''}`}
+        col.key === sortKey ? 'text-primary' : 'text-muted-foreground'
+      } ${col.key ? 'hover:text-foreground' : ''}`}
     >
       <div className="flex items-center gap-1">
         <span
@@ -925,12 +925,12 @@ export default function LoansPage() {
       >
         <div className="flex items-center justify-between px-2 py-3 min-h-[40px]">
           {!sidebarCollapsed && (
-            <p className="text-[9px] font-mono font-semibold text-[var(--muted)] uppercase tracking-wider">Views</p>
+            <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Views</p>
           )}
           <button
             type="button"
             onClick={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-            className="text-[var(--muted)] text-xs p-1 hover:text-[var(--fg)] transition-colors"
+            className="text-muted-foreground text-xs p-1 hover:text-foreground transition-colors"
             title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {sidebarCollapsed ? '›' : '‹'}
@@ -945,10 +945,10 @@ export default function LoansPage() {
                 onClick={() => handleListChange(list.id)}
                 className={`w-full flex items-center justify-between rounded text-left transition-colors ${
                   sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                } text-[11px] font-mono ${
+                } text-[11px] ${
                   activeList === list.id
-                    ? 'text-[#C9A84C] font-semibold bg-[#C9A84C]/10 border-r-2 border-[#C9A84C]'
-                    : 'text-[#999999] hover:bg-[var(--card)] hover:text-[var(--fg)]'
+                    ? 'text-primary font-semibold bg-primary/10 border-r-2 border-primary'
+                    : 'text-muted-foreground hover:bg-card hover:text-foreground'
                 }`}
                 title={sidebarCollapsed ? list.label : undefined}
               >
@@ -958,7 +958,7 @@ export default function LoansPage() {
                   <span className="truncate">{list.label}</span>
                 )}
                 <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                  activeList === list.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[var(--input)] text-[var(--muted)]'
+                  activeList === list.id ? 'bg-primary/20 text-primary' : 'bg-[var(--input)] text-muted-foreground'
                 }`}>
                   {counts[list.id] ?? '…'}
                 </span>
@@ -974,10 +974,10 @@ export default function LoansPage() {
                   onClick={() => handleListChange(cl.id)}
                   className={`w-full flex items-center justify-between rounded text-left transition-colors ${
                     sidebarCollapsed ? 'px-2 py-1.5' : 'px-2 py-1'
-                  } text-[11px] font-mono flex-1 min-w-0 ${
+                  } text-[11px] flex-1 min-w-0 ${
                     activeList === cl.id
-                      ? 'text-[#C9A84C] font-semibold bg-[#C9A84C]/10 border-r-2 border-[#C9A84C]'
-                      : 'text-[#999999] hover:bg-[var(--card)] hover:text-[var(--fg)]'
+                      ? 'text-primary font-semibold bg-primary/10 border-r-2 border-primary'
+                      : 'text-muted-foreground hover:bg-card hover:text-foreground'
                   }`}
                   title={sidebarCollapsed ? cl.name : undefined}
                 >
@@ -987,7 +987,7 @@ export default function LoansPage() {
                     <span className="truncate">{cl.name}</span>
                   )}
                   <span className={`text-[11px] rounded-full px-1 py-0 shrink-0 ml-1 ${
-                    activeList === cl.id ? 'bg-[#C9A84C]/20 text-[#C9A84C]' : 'bg-[var(--input)] text-[var(--muted)]'
+                    activeList === cl.id ? 'bg-primary/20 text-primary' : 'bg-[var(--input)] text-muted-foreground'
                   }`}>
                     {counts[cl.id] ?? '…'}
                   </span>
@@ -996,7 +996,7 @@ export default function LoansPage() {
                   <button
                     type="button"
                     onClick={e => { e.stopPropagation(); setDeleteListId(cl.id) }}
-                    className="text-[var(--muted)] hover:text-[var(--fg)] p-0.5 text-xs transition-colors"
+                    className="text-muted-foreground hover:text-foreground p-0.5 text-xs transition-colors"
                     title="Delete list"
                   >
                     ×
@@ -1008,7 +1008,7 @@ export default function LoansPage() {
           <button
             type="button"
             onClick={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
-            className="w-full mt-2 text-[11px] font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1.5 hover:bg-[#C9A84C]/10 transition-colors"
+            className="w-full mt-2 text-[11px] text-primary border border-dashed border-primary/40 rounded px-2 py-1.5 hover:bg-primary/10 transition-colors"
           >
             + New List
           </button>
@@ -1020,23 +1020,23 @@ export default function LoansPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--input)]">
           <div>
-            <h1 className="text-lg font-mono font-semibold text-[var(--fg)]">
+            <h1 className="text-lg font-mono font-semibold text-foreground">
               {activeListLabel}
             </h1>
-            <p className="text-xs font-mono text-[var(--muted)] mt-0.5">
+            <p className="text-xs font-mono text-muted-foreground mt-0.5">
               {filtered.length} {filtered.length === 1 ? 'loan' : 'loans'}
               {search && ` matching "${search}"`}
             </p>
           </div>
           {/* Search */}
           <div className="relative w-64">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search loans…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[var(--input)] rounded-lg bg-[var(--card)] text-[var(--fg)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent"
+              className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[var(--input)] rounded-lg bg-[var(--card)] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -1048,7 +1048,7 @@ export default function LoansPage() {
               <select
                 value={LOAN_QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
                 onChange={e => handleListChange(e.target.value)}
-                className="text-xs font-mono px-2.5 py-1.5 border border-[#C9A84C]/40 rounded bg-[var(--secondary)] text-[#C9A84C] cursor-pointer outline-none"
+                className="text-xs font-mono px-2.5 py-1.5 border border-primary/40 rounded bg-[var(--secondary)] text-primary cursor-pointer outline-none"
               >
                 {LOAN_QUICK_FILTERS.map(f => (
                   <option key={f.id} value={f.id}>{f.label}</option>
@@ -1059,8 +1059,8 @@ export default function LoansPage() {
                 onClick={() => setShowFilters(p => !p)}
                 className={`text-xs font-mono px-2.5 py-1.5 border rounded transition-colors ${
                   showFilters || hasAdvancedFilters
-                    ? 'border-[#C9A84C]/40 text-[#C9A84C] bg-[#C9A84C]/10'
-                    : 'border-[var(--input)] text-[var(--muted)] hover:text-[var(--fg)] hover:bg-[var(--secondary)]'
+                    ? 'border-primary/40 text-primary bg-primary/10'
+                    : 'border-[var(--input)] text-muted-foreground hover:text-foreground hover:bg-[var(--secondary)]'
                 }`}
               >
                 Filters {hasAdvancedFilters ? '●' : '▾'}
@@ -1077,13 +1077,13 @@ export default function LoansPage() {
                 }).length
                 return (
                   <div className="flex items-center gap-3 text-xs font-mono whitespace-nowrap">
-                    <span className="text-[var(--muted)]">Total Loans <span className="text-[#F3F4F6] font-semibold">{filtered.length}</span></span>
-                    <span className="text-[#374151]">|</span>
-                    <span className="text-[var(--muted)]">Total Volume <span className="text-blue-400 font-semibold">{fmtCurrency(totalVolume)}</span></span>
-                    <span className="text-[#374151]">|</span>
-                    <span className="text-[var(--muted)]">Gross Commission <span className="text-[#C9A84C] font-semibold">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</span></span>
-                    <span className="text-[#374151]">|</span>
-                    <span className="text-[var(--muted)]">Closing This Week <span className={`font-semibold ${closingThisWeek > 0 ? 'text-amber-400' : 'text-[#F3F4F6]'}`}>{closingThisWeek}</span></span>
+                    <span className="text-muted-foreground">Total Loans <span className="text-foreground font-semibold">{filtered.length}</span></span>
+                    <span className="text-muted-foreground/30">|</span>
+                    <span className="text-muted-foreground">Total Volume <span className="text-blue-400 font-semibold">{fmtCurrency(totalVolume)}</span></span>
+                    <span className="text-muted-foreground/30">|</span>
+                    <span className="text-muted-foreground">Gross Commission <span className="text-primary font-semibold">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</span></span>
+                    <span className="text-muted-foreground/30">|</span>
+                    <span className="text-muted-foreground">Closing This Week <span className={`font-semibold ${closingThisWeek > 0 ? 'text-amber-400' : 'text-foreground'}`}>{closingThisWeek}</span></span>
                   </div>
                 )
               })()}
@@ -1095,7 +1095,7 @@ export default function LoansPage() {
                 type="button"
                 onClick={() => toggleViewMode('table')}
                 title="Table view"
-                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'table' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-[var(--muted)] hover:text-[var(--fg)] hover:bg-[var(--secondary)]'}`}
+                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'table' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-[var(--secondary)]'}`}
               >
                 ≡ List
               </button>
@@ -1104,7 +1104,7 @@ export default function LoansPage() {
                 type="button"
                 onClick={() => toggleViewMode('kanban')}
                 title="Kanban view"
-                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'kanban' ? 'bg-[#C9A84C]/15 text-[#C9A84C]' : 'text-[var(--muted)] hover:text-[var(--fg)] hover:bg-[var(--secondary)]'}`}
+                className={`px-2.5 py-1.5 text-xs font-mono transition-colors ${viewMode === 'kanban' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-[var(--secondary)]'}`}
               >
                 ⊞ Board
               </button>
@@ -1114,7 +1114,7 @@ export default function LoansPage() {
               <button
                 type="button"
                 onClick={() => setShowColPicker(p => !p)}
-                className="text-xs font-mono font-medium text-[var(--muted)] px-2.5 py-1.5 border border-[var(--input)] rounded hover:bg-[var(--secondary)] hover:text-[var(--fg)] transition-colors"
+                className="text-xs font-mono font-medium text-muted-foreground px-2.5 py-1.5 border border-[var(--input)] rounded hover:bg-[var(--secondary)] hover:text-foreground transition-colors"
               >
                 COLUMNS ▾
               </button>
@@ -1131,7 +1131,7 @@ export default function LoansPage() {
                       placeholder="Search fields…"
                       value={colSearch}
                       onChange={e => setColSearch(e.target.value)}
-                      className="w-full px-2 py-1 text-xs font-mono bg-[var(--bg)] border border-[var(--input)] rounded text-[var(--fg)] placeholder:text-[#555] outline-none focus:ring-1 focus:ring-[#C9A84C]"
+                      className="w-full px-2 py-1 text-xs font-mono bg-[var(--bg)] border border-[var(--input)] rounded text-foreground placeholder:text-muted-foreground/60 outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div className="max-h-[280px] overflow-y-auto py-1">
@@ -1140,13 +1140,13 @@ export default function LoansPage() {
                     ).map(col => (
                       <label
                         key={col.id}
-                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-[var(--fg)] cursor-pointer hover:bg-[var(--input)]"
+                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-foreground cursor-pointer hover:bg-[var(--input)]"
                       >
                         <input
                           type="checkbox"
                           checked={visibleColumns.includes(col.id)}
                           onChange={() => toggleColumn(col.id)}
-                          className="rounded cursor-pointer accent-[#C9A84C]"
+                          className="rounded cursor-pointer accent-[var(--primary)]"
                         />
                         {col.label}
                       </label>
@@ -1161,63 +1161,63 @@ export default function LoansPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               {/* Active filter chips */}
             {filterStatuses.length > 0 && filterStatuses.map(s => (
-              <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-900/30 border border-violet-700 text-[11px] font-mono text-violet-400">
+              <span key={s} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 border border-violet-300 dark:border-violet-700 text-[11px] font-mono text-violet-700 dark:text-violet-400">
                 {s}
-                <button onClick={() => setFilterStatuses(prev => prev.filter(x => x !== s))} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterStatuses(prev => prev.filter(x => x !== s))} className="hover:text-foreground"><X size={10} /></button>
               </span>
             ))}
             {filterPurpose && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-900/30 border border-sky-700 text-[11px] font-mono text-sky-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/30 border border-sky-300 dark:border-sky-700 text-[11px] font-mono text-sky-700 dark:text-sky-400">
                 Purpose: {filterPurpose}
-                <button onClick={() => setFilterPurpose('')} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterPurpose('')} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
             {filterProgram && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-900/30 border border-indigo-700 text-[11px] font-mono text-indigo-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700 text-[11px] font-mono text-indigo-700 dark:text-indigo-400">
                 Program: {filterProgram}
-                <button onClick={() => setFilterProgram('')} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterProgram('')} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
             {filterLender && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/30 border border-amber-700 text-[11px] font-mono text-amber-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 text-[11px] font-mono text-amber-700 dark:text-amber-400">
                 Lender: {filterLender}
-                <button onClick={() => setFilterLender('')} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterLender('')} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
             {filterState && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-900/30 border border-teal-700 text-[11px] font-mono text-teal-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/30 border border-teal-300 dark:border-teal-700 text-[11px] font-mono text-teal-700 dark:text-teal-400">
                 State: {filterState}
-                <button onClick={() => setFilterState('')} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterState('')} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
             {filterRateMin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[11px] font-mono text-orange-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 text-[11px] font-mono text-orange-700 dark:text-orange-400">
                 Rate &gt; {filterRateMin}%
-                <button onClick={() => setFilterRateMin('')} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => setFilterRateMin('')} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
             {(filterDateFrom || filterDateTo) && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 border border-emerald-700 text-[11px] font-mono text-emerald-400">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-300 dark:border-emerald-700 text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
                 Close: {filterDateFrom || '…'} → {filterDateTo || '…'}
-                <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-white"><X size={10} /></button>
+                <button onClick={() => { setFilterDateFrom(''); setFilterDateTo('') }} className="hover:text-foreground"><X size={10} /></button>
               </span>
             )}
               {urlFilterActive?.stage && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[11px] font-mono text-[#C9A84C]">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[11px] font-mono text-primary">
                   Stage: {urlFilterActive.stage}
-                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
+                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-foreground"><X size={10} /></button>
                 </span>
               )}
               {urlFilterActive?.period && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/30 border border-blue-700 text-[11px] font-mono text-blue-400">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 text-[11px] font-mono text-blue-700 dark:text-blue-400">
                   Period: {urlFilterActive.period === 'mtd' ? 'This Month' : urlFilterActive.period === 'ytd' ? 'Year to Date' : urlFilterActive.period}
-                  <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-white"><X size={10} /></button>
+                  <button onClick={() => { setUrlFilterActive(prev => prev ? { ...prev, period: undefined } : null); router.replace('/dashboard/loans') }} className="hover:text-foreground"><X size={10} /></button>
                 </span>
               )}
               {urlFilterActive?.filter && (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-900/30 border border-orange-700 text-[11px] font-mono text-orange-400">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 text-[11px] font-mono text-orange-700 dark:text-orange-400">
                   {urlFilterActive.filter === 'no_activity_3days' ? 'No activity 3+ days' : urlFilterActive.filter}
-                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-white"><X size={10} /></button>
+                  <button onClick={() => { setUrlFilterActive(null); router.replace('/dashboard/loans'); fetchLoans(activeList) }} className="hover:text-foreground"><X size={10} /></button>
                 </span>
               )}
             {hasAdvancedFilters && (
@@ -1234,7 +1234,7 @@ export default function LoansPage() {
                 <select
                   value={filterPreset}
                   onChange={e => applyPreset(e.target.value)}
-                  className="text-[11px] font-mono px-2 py-1.5 border border-[var(--input)] rounded bg-[var(--card)] text-[#999999] outline-none min-w-[220px]"
+                  className="text-[11px] font-mono px-2 py-1.5 border border-[var(--input)] rounded bg-[var(--card)] text-muted-foreground outline-none min-w-[220px]"
                 >
                   <option value="">Presets…</option>
                   <option value="inprocess">Loans in Process</option>
@@ -1260,7 +1260,7 @@ export default function LoansPage() {
                           onChange={() => setFilterStatuses(prev =>
                             prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
                           )}
-                          className="accent-[#C9A84C] rounded"
+                          className="accent-[var(--primary)] rounded"
                         />
                         <span className="text-[11px] font-mono text-foreground/80 truncate">{s}</span>
                       </label>
@@ -1271,7 +1271,7 @@ export default function LoansPage() {
                 <div>
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Purpose</label>
                   <select value={filterPurpose} onChange={e => setFilterPurpose(e.target.value)}
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none min-w-[120px]">
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none min-w-[120px]">
                     <option value="">All</option>
                     <option value="Purchase">Purchase</option>
                     <option value="Refinance">Refinance</option>
@@ -1282,7 +1282,7 @@ export default function LoansPage() {
                 <div>
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Program</label>
                   <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)}
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none min-w-[120px]">
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none min-w-[120px]">
                     <option value="">All</option>
                     <option value="Conventional">Conventional</option>
                     <option value="FHA">FHA</option>
@@ -1295,7 +1295,7 @@ export default function LoansPage() {
                 <div>
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Lender</label>
                   <select value={filterLender} onChange={e => setFilterLender(e.target.value)}
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none min-w-[140px]">
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none min-w-[140px]">
                     <option value="">All</option>
                     {distinctLenders.map(l => <option key={l} value={l}>{l}</option>)}
                   </select>
@@ -1305,7 +1305,7 @@ export default function LoansPage() {
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">State</label>
                   <input type="text" value={filterState} onChange={e => setFilterState(e.target.value)}
                     placeholder="e.g. TX"
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none w-20 placeholder:text-muted-foreground"
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none w-20 placeholder:text-muted-foreground"
                   />
                 </div>
                 {/* Rate > */}
@@ -1313,20 +1313,20 @@ export default function LoansPage() {
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Rate &gt;</label>
                   <input type="number" step="0.125" value={filterRateMin} onChange={e => setFilterRateMin(e.target.value)}
                     placeholder="6.5"
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none w-20 placeholder:text-muted-foreground"
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none w-20 placeholder:text-muted-foreground"
                   />
                 </div>
                 {/* Closing date range */}
                 <div>
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Close From</label>
                   <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none"
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Close To</label>
                   <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)}
-                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-[var(--fg)] outline-none"
+                    className="text-[11px] font-mono px-2 py-1 border border-[var(--input)] rounded bg-[var(--card)] text-foreground outline-none"
                   />
                 </div>
               </div>
@@ -1337,27 +1337,27 @@ export default function LoansPage() {
 
         {/* Bulk actions bar */}
         {selected.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded-lg mx-4 mb-2 mt-2">
-            <span className="text-sm font-mono font-medium text-[#C9A84C]">{selected.size} selected</span>
+          <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg mx-4 mb-2 mt-2">
+            <span className="text-sm font-mono font-medium text-primary">{selected.size} selected</span>
             <div className="flex items-center gap-2 ml-auto">
               <select
                 value={bulkStatus}
                 onChange={e => { setBulkStatus(e.target.value); if (e.target.value) handleBulkStatusUpdate(e.target.value) }}
-                className="text-xs font-mono border border-[var(--input)] rounded px-2 py-1.5 bg-[var(--card)] text-[var(--fg)]"
+                className="text-xs font-mono border border-[var(--input)] rounded px-2 py-1.5 bg-[var(--card)] text-foreground"
               >
                 <option value="">Update Status…</option>
                 {LOAN_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <button
                 onClick={handleBulkDelete}
-                className="flex items-center gap-1 text-xs font-mono px-3 py-1.5 rounded bg-red-900/30 text-red-400 border border-red-800 hover:bg-red-900/50 transition-colors"
+                className="flex items-center gap-1 text-xs font-mono px-3 py-1.5 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
               >
                 <Trash2 size={12} />
                 Delete
               </button>
               <button
                 onClick={() => setSelected(new Set())}
-                className="text-xs font-mono text-[var(--muted)] hover:text-[var(--fg)] px-2 py-1.5 transition-colors"
+                className="text-xs font-mono text-muted-foreground hover:text-foreground px-2 py-1.5 transition-colors"
               >
                 Cancel
               </button>
@@ -1382,11 +1382,11 @@ export default function LoansPage() {
                     className="flex-1 rounded-md px-3 py-2 border"
                     style={{ borderColor: `${stage.hex}40`, background: `${stage.hex}12` }}
                   >
-                    <p className="text-[9px] font-mono font-semibold uppercase tracking-wider" style={{ color: stage.hex }}>
+                    <p className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: stage.hex }}>
                       {stage.short}
                     </p>
-                    <p className="text-lg font-mono font-bold text-[var(--fg)] leading-tight">{stage.count}</p>
-                    <p className="text-[9px] font-mono text-[#555555] mt-0.5 truncate">{stage.label}</p>
+                    <p className="text-lg font-bold text-foreground leading-tight">{stage.count}</p>
+                    <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">{stage.label}</p>
                   </div>
                 ))}
               </div>
@@ -1410,19 +1410,19 @@ export default function LoansPage() {
         <style>{`
           .loans-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
           .loans-scroll::-webkit-scrollbar-track { background: transparent; }
-          .loans-scroll::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.35); border-radius: 3px; }
-          .loans-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
+          .loans-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--primary) 35%, transparent); border-radius: 3px; }
+          .loans-scroll::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--primary) 60%, transparent); }
         `}</style>
         {/* ── Kanban board ───────────────────────────────────────────────── */}
         {viewMode === 'kanban' && (
           <div
             className="loans-scroll flex-1 overflow-x-auto"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent', display: 'flex', minHeight: 0 }}
+            style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--primary) transparent', display: 'flex', minHeight: 0 }}
           >
             {loading ? (
-              <div className="flex items-center justify-center w-full text-[var(--muted)] text-sm font-mono">Loading…</div>
+              <div className="flex items-center justify-center w-full text-muted-foreground text-sm font-mono">Loading…</div>
             ) : kanbanColumns.filter(c => c.loans.length > 0).length === 0 ? (
-              <div className="flex flex-col items-center justify-center w-full gap-2 text-[var(--muted)]">
+              <div className="flex flex-col items-center justify-center w-full gap-2 text-muted-foreground">
                 <AlertCircle size={20} />
                 <p className="text-sm font-mono">No loans found</p>
               </div>
@@ -1453,24 +1453,24 @@ export default function LoansPage() {
                         <div
                           key={loan.id}
                           onClick={() => router.push(`/dashboard/loans/${loan.id}`)}
-                          className="bg-[var(--card)] border border-[var(--input)] rounded-lg p-3 cursor-pointer hover:border-[#C9A84C]/40 hover:bg-secondary transition-colors"
+                          className="bg-[var(--card)] border border-[var(--input)] rounded-lg p-3 cursor-pointer hover:border-primary/40 hover:bg-secondary transition-colors"
                           style={urgentClose
                             ? { borderLeftColor: 'rgba(239,68,68,0.5)', borderLeftWidth: 3 }
                             : warnClose
                               ? { borderLeftColor: 'rgba(245,158,11,0.5)', borderLeftWidth: 3 }
                               : {}}
                         >
-                          <p className="text-sm font-mono font-medium text-[var(--fg)] truncate">{borrowerDisplayName(loan)}</p>
-                          {loan.loan_name && <p className="text-[11px] font-mono text-[#C9A84C]/60 truncate mt-0.5">{loan.loan_name}</p>}
+                          <p className="text-sm font-sans font-medium text-foreground truncate">{borrowerDisplayName(loan)}</p>
+                          {loan.loan_name && <p className="text-[11px] font-sans text-primary/60 truncate mt-0.5">{loan.loan_name}</p>}
                           <div className="mt-2 flex items-center justify-between gap-2">
-                            <span className="text-xs font-mono text-blue-400 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</span>
+                            <span className="text-xs font-sans text-foreground/70 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</span>
                             {ecd && (
-                              <span className={`text-[11px] font-mono whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-[#555555]'}`}>
+                              <span className={`text-[11px] font-sans whitespace-nowrap ${urgentClose ? 'text-red-400' : warnClose ? 'text-amber-400' : 'text-muted-foreground/60'}`}>
                                 {fmtDate(ecd)}{days !== null && days <= 14 ? ` · ${days}d` : ''}
                               </span>
                             )}
                           </div>
-                          {loan.lender && <p className="text-[11px] font-mono text-[#444444] mt-1.5 truncate">{loan.lender}</p>}
+                          {loan.lender && <p className="text-[11px] font-sans text-muted-foreground/60 mt-1.5 truncate">{loan.lender}</p>}
                         </div>
                       )
                     })}
@@ -1486,12 +1486,12 @@ export default function LoansPage() {
         <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
         <div
           className={`loans-scroll flex-1 w-0 min-w-full overflow-auto${viewMode === 'kanban' ? ' hidden' : ''}`}
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#C9A84C44 transparent' }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--primary) transparent' }}
         >
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-[var(--muted)] text-sm font-mono">Loading…</div>
+            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm font-mono">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 gap-2 text-[var(--muted)]">
+            <div className="flex flex-col items-center justify-center h-48 gap-2 text-muted-foreground">
               <AlertCircle size={20} />
               <p className="text-sm font-mono">No loans found</p>
             </div>
@@ -1505,7 +1505,7 @@ export default function LoansPage() {
                       type="checkbox"
                       checked={filtered.length > 0 && selected.size === filtered.length}
                       onChange={toggleSelectAll}
-                      className="rounded border-[var(--input)] accent-[#C9A84C] focus:ring-[#C9A84C]"
+                      className="rounded border-[var(--input)] accent-[var(--primary)] focus:ring-primary"
                     />
                   </th>
                   {/* Borrower column — pinned, not draggable */}
@@ -1513,7 +1513,7 @@ export default function LoansPage() {
                     <th
                       onClick={() => handleSort('borrower_name')}
                       className={`text-left px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wide select-none cursor-pointer bg-[var(--surface2)] sticky top-0 z-10 ${
-                        sortKey === 'borrower_name' ? 'text-[#C9A84C]' : 'text-[var(--muted)] hover:text-[var(--fg)]'
+                        sortKey === 'borrower_name' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <span className="flex items-center gap-0.5">
@@ -1542,7 +1542,7 @@ export default function LoansPage() {
                   const days = activeList === 'inprocess' ? daysUntilClose(ecd) : null
                   return (
                   <tr key={loan.id}
-                    className={`group/row border-b border-[var(--input)]/50 hover:bg-[var(--card)] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-[#C9A84C]/5' : ''}`}
+                    className={`group/row border-b border-[var(--input)]/50 hover:bg-[var(--card)] transition-colors cursor-pointer ${selected.has(loan.id) ? 'bg-primary/5' : ''}`}
                     style={urgencyStyle}
                     onClick={() => router.push(`/dashboard/loans/${loan.id}`)}>
                     <td className="w-8 px-2 py-3" onClick={e => e.stopPropagation()}>
@@ -1550,7 +1550,7 @@ export default function LoansPage() {
                         type="checkbox"
                         checked={selected.has(loan.id)}
                         onChange={() => toggleSelect(loan.id)}
-                        className="rounded border-[var(--input)] accent-[#C9A84C] focus:ring-[#C9A84C]"
+                        className="rounded border-[var(--input)] accent-[var(--primary)] focus:ring-primary"
                       />
                     </td>
                     {colDefs.map(col => {
@@ -1562,15 +1562,15 @@ export default function LoansPage() {
                               {loan.contact_id ? (
                                 <Link
                                   href={`/dashboard/contacts/${loan.contact_id}`}
-                                  className="text-[var(--fg)] hover:text-[#C9A84C] font-mono text-sm"
+                                  className="text-foreground hover:text-primary font-sans text-sm"
                                   style={{ textDecoration: 'none' }}
-                                  onMouseEnter={e => (e.currentTarget.style.textDecorationColor = '#C9A84C', e.currentTarget.style.textDecoration = 'underline')}
+                                  onMouseEnter={e => (e.currentTarget.style.textDecorationColor = 'var(--primary)', e.currentTarget.style.textDecoration = 'underline')}
                                   onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
                                 >
                                   {borrowerDisplayName(loan)}
                                 </Link>
                               ) : (
-                                <span className="text-[var(--fg)] font-mono text-sm">{borrowerDisplayName(loan)}</span>
+                                <span className="text-foreground font-sans text-sm">{borrowerDisplayName(loan)}</span>
                               )}
                               {/* Delete button */}
                               <button
@@ -1585,9 +1585,9 @@ export default function LoansPage() {
                             {loan.loan_name && (
                               <Link
                                 href={`/dashboard/loans/${loan.id}`}
-                                className="block text-xs font-mono text-[#C9A84C]/70 mt-0.5 hover:text-[#C9A84C]"
+                                className="block text-xs font-sans text-primary/70 mt-0.5 hover:text-primary"
                                 style={{ textDecoration: 'none' }}
-                                onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = '#C9A84C')}
+                                onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = 'var(--primary)')}
                                 onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
                                 onClick={e => e.stopPropagation()}
                               >
@@ -1602,9 +1602,9 @@ export default function LoansPage() {
                           <td key={col.id} className="px-4 py-3" onClick={e => e.stopPropagation()}>
                             <Link
                               href={`/dashboard/loans/${loan.id}`}
-                              className="text-[#C9A84C]/80 hover:text-[#C9A84C] font-mono text-sm"
+                              className="text-primary/80 hover:text-primary font-sans text-sm"
                               style={{ textDecoration: 'none' }}
-                              onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = '#C9A84C')}
+                              onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline', e.currentTarget.style.textDecorationColor = 'var(--primary)')}
                               onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
                             >
                               {loan.loan_name || '—'}
@@ -1612,8 +1612,8 @@ export default function LoansPage() {
                           </td>
                         )
                       }
-                      if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 font-mono text-[#CCCCCC] whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
-                      if (col.id === 'purchase_price') return <td key={col.id} className="px-4 py-3 font-mono text-[#CCCCCC] whitespace-nowrap">{fmtCurrency(loan.purchase_price ?? null)}</td>
+                      if (col.id === 'loan_amount') return <td key={col.id} className="px-4 py-3 font-sans text-foreground/70 whitespace-nowrap">{fmtCurrency(loan.loan_amount)}</td>
+                      if (col.id === 'purchase_price') return <td key={col.id} className="px-4 py-3 font-sans text-foreground/70 whitespace-nowrap">{fmtCurrency(loan.purchase_price ?? null)}</td>
                       if (col.id === 'status') {
                         return (
                           <td key={col.id} className="px-4 py-3" onClick={e => e.stopPropagation()}>
@@ -1623,7 +1623,7 @@ export default function LoansPage() {
                                 value={loan.status ?? ''}
                                 onChange={e => handleStatusChange(loan.id, e.target.value)}
                                 onBlur={() => setEditingStatusId(null)}
-                                className="text-xs font-mono border border-[var(--input)] rounded px-2 py-1 bg-[var(--card)] text-[var(--fg)]"
+                                className="text-xs font-mono border border-[var(--input)] rounded px-2 py-1 bg-[var(--card)] text-foreground"
                               >
                                 {LOAN_STATUS_OPTIONS.map(s => (
                                   <option key={s} value={s}>{s}</option>
@@ -1637,10 +1637,10 @@ export default function LoansPage() {
                           </td>
                         )
                       }
-                      if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_purpose || '—'}</td>
+                      if (col.id === 'loan_purpose') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.loan_purpose || '—'}</td>
                       if (col.id === 'closing_date') return (
-                        <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
-                          <span className={days !== null && days <= 7 ? 'text-red-400' : days !== null && days <= 14 ? 'text-amber-400' : 'text-[#999999]'}>
+                        <td key={col.id} className="px-4 py-3 font-sans whitespace-nowrap">
+                          <span className={days !== null && days <= 7 ? 'text-red-400' : days !== null && days <= 14 ? 'text-amber-400' : 'text-muted-foreground'}>
                             {fmtDate(ecd)}
                           </span>
                           {days !== null && days <= 14 && (
@@ -1650,15 +1650,15 @@ export default function LoansPage() {
                           )}
                         </td>
                       )
-                      if (col.id === 'interest_rate') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999] whitespace-nowrap">{loan.interest_rate != null ? `${loan.interest_rate}%` : '—'}</td>
-                      if (col.id === 'lender') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.lender || '—'}</td>
+                      if (col.id === 'interest_rate') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground whitespace-nowrap">{loan.interest_rate != null ? `${loan.interest_rate}%` : '—'}</td>
+                      if (col.id === 'lender') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.lender || '—'}</td>
                       if (col.id === 'rate_lock_expiration') {
                         const lockDays = daysUntilClose(loan.rate_lock_expiration)
                         const lockExpired = lockDays !== null && lockDays < 0
                         const lockWarn = lockDays !== null && lockDays >= 0 && lockDays <= 7
                         return (
-                          <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
-                            <span className={lockExpired ? 'text-red-400' : lockWarn ? 'text-amber-400' : 'text-[#999999]'}>
+                          <td key={col.id} className="px-4 py-3 font-sans whitespace-nowrap">
+                            <span className={lockExpired ? 'text-red-400' : lockWarn ? 'text-amber-400' : 'text-muted-foreground'}>
                               {fmtDate(loan.rate_lock_expiration)}
                             </span>
                             {lockExpired && <span className="ml-1.5 text-[11px] text-red-400">EXPIRED</span>}
@@ -1666,17 +1666,17 @@ export default function LoansPage() {
                           </td>
                         )
                       }
-                      if (col.id === 'loan_number') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_number || '—'}</td>
-                      if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loanLocation(loan)}</td>
-                      if (col.id === 'property_state') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.property_state || '—'}</td>
-                      if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.loan_program || '—'}</td>
-                      if (col.id === 'borrower_email') return <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">{loan.borrower_email || '—'}</td>
+                      if (col.id === 'loan_number') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.loan_number || '—'}</td>
+                      if (col.id === 'location') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loanLocation(loan)}</td>
+                      if (col.id === 'property_state') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.property_state || '—'}</td>
+                      if (col.id === 'loan_program') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.loan_program || '—'}</td>
+                      if (col.id === 'borrower_email') return <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">{loan.borrower_email || '—'}</td>
                       if (col.id === 'borrower_phone') {
                         const href = telHref(loan.borrower_phone)
                         const val = fmtPhone(loan.borrower_phone)
                         return (
-                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
-                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
+                          <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-primary hover:underline">{val}</a> : val}
                           </td>
                         )
                       }
@@ -1685,7 +1685,7 @@ export default function LoansPage() {
                         return (
                           <td
                             key={col.id}
-                            className="px-4 py-3 font-mono text-[#C9A84C]"
+                            className="px-4 py-3 font-sans text-primary"
                             onClick={e => { e.stopPropagation(); if (!isEditing) { setEditingCommissionId(loan.id); setEditingCommissionValue((loan.commission_amount ?? 0).toString()); } }}
                           >
                             {isEditing ? (
@@ -1700,7 +1700,7 @@ export default function LoansPage() {
                                   if (e.key === 'Enter') handleCommissionChange(loan.id, editingCommissionValue)
                                   if (e.key === 'Escape') { setEditingCommissionId(null); setEditingCommissionValue('') }
                                 }}
-                                className="w-24 bg-[var(--bg)] border border-[var(--input)] rounded px-2 py-1 text-xs text-[var(--fg)] outline-none focus:ring-1 focus:ring-[#C9A84C]"
+                                className="w-24 bg-[var(--bg)] border border-[var(--input)] rounded px-2 py-1 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
                               />
                             ) : (
                               <span className="cursor-text underline-offset-2 hover:underline decoration-dotted">
@@ -1714,8 +1714,8 @@ export default function LoansPage() {
                         const href = mailtoHref(loan.contact_email)
                         const val = loan.contact_email ?? '—'
                         return (
-                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
-                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
+                          <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-primary hover:underline">{val}</a> : val}
                           </td>
                         )
                       }
@@ -1723,8 +1723,8 @@ export default function LoansPage() {
                         const href = telHref(loan.contact_phone)
                         const val = fmtPhone(loan.contact_phone)
                         return (
-                          <td key={col.id} className="px-4 py-3 font-mono text-[#999999]">
-                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-[#C9A84C] hover:underline">{val}</a> : val}
+                          <td key={col.id} className="px-4 py-3 font-sans text-muted-foreground">
+                            {href ? <a href={href} onClick={e => e.stopPropagation()} className="hover:text-primary hover:underline">{val}</a> : val}
                           </td>
                         )
                       }
@@ -1732,8 +1732,8 @@ export default function LoansPage() {
                         const ms = loan.last_milestone_at
                         const msAgeDays = ms ? Math.floor((Date.now() - new Date(ms).getTime()) / (1000 * 60 * 60 * 24)) : null
                         return (
-                          <td key={col.id} className="px-4 py-3 font-mono whitespace-nowrap">
-                            <span className={msAgeDays !== null && msAgeDays > 30 ? 'text-amber-400' : 'text-[#999999]'}>
+                          <td key={col.id} className="px-4 py-3 font-sans whitespace-nowrap">
+                            <span className={msAgeDays !== null && msAgeDays > 30 ? 'text-amber-400' : 'text-muted-foreground'}>
                               {fmtRelativeDate(ms)}
                             </span>
                           </td>
@@ -1759,7 +1759,7 @@ export default function LoansPage() {
                                 </a>
                               )}
                               {mailto && (
-                                <a href={mailto} title={`Email ${email}`} className="p-1.5 rounded hover:bg-amber-500/20 text-muted-foreground hover:text-[#C9A84C] transition-colors">
+                                <a href={mailto} title={`Email ${email}`} className="p-1.5 rounded hover:bg-amber-500/20 text-muted-foreground hover:text-primary transition-colors">
                                   <Mail size={14} />
                                 </a>
                               )}
@@ -1784,7 +1784,7 @@ export default function LoansPage() {
               <button
                 onClick={loadMoreLoans}
                 disabled={loadingMore}
-                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-[var(--input)] rounded text-[#999999] hover:bg-[var(--card)] hover:text-[var(--fg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-[var(--input)] rounded text-muted-foreground hover:bg-[var(--card)] hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loadingMore ? 'Loading…' : `Load more (showing ${loans.length})`}
               </button>
@@ -1798,27 +1798,27 @@ export default function LoansPage() {
       {showNewListModal && (
         <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setShowNewListModal(false)}>
           <div className="bg-[var(--card)] border border-[var(--input)] rounded-lg p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="text-xs font-mono font-semibold text-[var(--muted)] uppercase tracking-wider mb-3">New Smart List</div>
+            <div className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">New Smart List</div>
             <input
               placeholder="List name"
               value={newListName}
               onChange={e => setNewListName(e.target.value)}
-              className="w-full border border-[var(--input)] rounded px-3 py-2 text-sm font-mono bg-[var(--bg)] text-[var(--fg)] placeholder:text-[var(--muted)] mb-4 focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
+              className="w-full border border-[var(--input)] rounded px-3 py-2 text-sm font-mono bg-[var(--bg)] text-foreground placeholder:text-muted-foreground mb-4 focus:outline-none focus:ring-1 focus:ring-primary"
             />
-            <div className="text-[11px] font-mono text-[var(--muted)] uppercase tracking-wider mb-2">Filter rules (AND)</div>
+            <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Filter rules (AND)</div>
             {newListRules.map((rule, idx) => (
               <div key={idx} className="flex gap-2 mb-2 flex-wrap items-center">
                 <select
                   value={rule.field}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, field: e.target.value } : r))}
-                  className="min-w-[100px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-[var(--fg)]"
+                  className="min-w-[100px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground"
                 >
                   {LOAN_FILTER_FIELDS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
                 </select>
                 <select
                   value={rule.operator}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, operator: e.target.value } : r))}
-                  className="min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-[var(--fg)]"
+                  className="min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground"
                 >
                   {FILTER_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
                 </select>
@@ -1826,25 +1826,25 @@ export default function LoansPage() {
                   placeholder="Value"
                   value={rule.value}
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
-                  className="flex-1 min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-[var(--fg)] placeholder:text-[var(--muted)]"
+                  className="flex-1 min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground placeholder:text-muted-foreground"
                 />
                 {newListRules.length > 1 && (
-                  <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} className="text-[var(--muted)] hover:text-[var(--fg)] p-1 transition-colors">×</button>
+                  <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-foreground p-1 transition-colors">×</button>
                 )}
               </div>
             ))}
             <button
               type="button"
               onClick={() => setNewListRules(prev => [...prev, { field: 'status', operator: 'is', value: '' }])}
-              className="text-xs font-mono text-[#C9A84C] border border-dashed border-[#C9A84C]/40 rounded px-2 py-1 mb-4 hover:bg-[#C9A84C]/10 transition-colors"
+              className="text-xs font-mono text-primary border border-dashed border-primary/40 rounded px-2 py-1 mb-4 hover:bg-primary/10 transition-colors"
             >
               + Add Filter
             </button>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowNewListModal(false)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-[var(--muted)] hover:bg-[var(--input)] transition-colors">
+              <button onClick={() => setShowNewListModal(false)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-muted-foreground hover:bg-[var(--input)] transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSaveNewList} disabled={!newListName.trim()} className="px-3 py-1.5 text-xs font-mono bg-[#C9A84C] text-[var(--bg)] rounded font-semibold disabled:opacity-50 hover:bg-[#D4B05C] transition-colors">
+              <button onClick={handleSaveNewList} disabled={!newListName.trim()} className="px-3 py-1.5 text-xs font-mono bg-primary text-[var(--bg)] rounded font-semibold disabled:opacity-50 hover:brightness-110 transition-colors">
                 Save List
               </button>
             </div>
@@ -1856,10 +1856,10 @@ export default function LoansPage() {
       {deleteListId && (
         <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setDeleteListId(null)}>
           <div className="bg-[var(--card)] border border-[var(--input)] rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="text-sm font-mono text-[var(--fg)] mb-2">Delete this list?</div>
-            <div className="text-xs font-mono text-[var(--muted)] mb-4">This cannot be undone.</div>
+            <div className="text-sm font-mono text-foreground mb-2">Delete this list?</div>
+            <div className="text-xs font-mono text-muted-foreground mb-4">This cannot be undone.</div>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeleteListId(null)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-[var(--muted)] hover:bg-[var(--input)] transition-colors">Cancel</button>
+              <button onClick={() => setDeleteListId(null)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-muted-foreground hover:bg-[var(--input)] transition-colors">Cancel</button>
               <button onClick={handleDeleteList} className="px-3 py-1.5 text-xs font-mono bg-red-700 text-white rounded hover:bg-red-600 transition-colors">Delete</button>
             </div>
           </div>
@@ -1879,12 +1879,12 @@ export default function LoansPage() {
       {deletingLoanId && (
         <div className="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center" onClick={() => setDeletingLoanId(null)}>
           <div className="bg-[var(--card)] border border-[var(--input)] rounded-lg p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="text-sm font-mono text-[var(--fg)] mb-1">Delete this loan?</div>
-            <div className="text-xs font-mono text-[var(--muted)] mb-4">
+            <div className="text-sm font-mono text-foreground mb-1">Delete this loan?</div>
+            <div className="text-xs font-mono text-muted-foreground mb-4">
               {(() => { const l = loans.find(l => l.id === deletingLoanId); return l ? (l.loan_name || borrowerDisplayName(l)) : 'This loan' })()} will be permanently removed. This cannot be undone.
             </div>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeletingLoanId(null)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-[var(--muted)] hover:bg-[var(--input)] transition-colors">Cancel</button>
+              <button onClick={() => setDeletingLoanId(null)} className="px-3 py-1.5 text-xs font-mono border border-[var(--input)] rounded text-muted-foreground hover:bg-[var(--input)] transition-colors">Cancel</button>
               <button onClick={() => handleDeleteLoan(deletingLoanId)} className="px-3 py-1.5 text-xs font-mono bg-red-700 text-white rounded hover:bg-red-600 transition-colors flex items-center gap-1.5">
                 <Trash2 size={11} /> Delete
               </button>
@@ -1897,7 +1897,7 @@ export default function LoansPage() {
 }
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-[var(--muted)] font-mono text-xs">—</span>
+  if (!status) return <span className="text-muted-foreground font-mono text-xs">—</span>
   const hex = statusHex(status)
   return (
     <span

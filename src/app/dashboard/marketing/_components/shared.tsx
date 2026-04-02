@@ -53,7 +53,7 @@ export function Input({
   return (
     <input
       {...props}
-      className={`w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 ${className}`}
+      className={`w-full bg-background border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 ${className}`}
       style={{ fontFamily: 'inherit', ...props.style }}
     />
   )
@@ -68,7 +68,7 @@ export function Textarea({
   return (
     <textarea
       {...props}
-      className={`w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none ${className}`}
+      className={`w-full bg-background border border-input text-foreground text-xs rounded-sm px-2 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none ${className}`}
       style={{ fontFamily: 'inherit', lineHeight: 1.6, ...props.style }}
     />
   )

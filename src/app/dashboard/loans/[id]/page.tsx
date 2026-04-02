@@ -1452,8 +1452,8 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
     return (
       <div key={d.key} className="flex items-center justify-between gap-2 py-1 group">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="w-1 h-1 rounded-full shrink-0" style={{ background: d.value ? d.hex : '#3f3f46' }} />
-          <span className="text-[11px] font-mono truncate" style={{ color: d.value ? d.hex : '#52525b' }}>{d.label}</span>
+          <div className="w-1 h-1 rounded-full shrink-0" style={{ background: d.value ? d.hex : 'var(--input)' }} />
+          <span className="text-[11px] font-mono truncate" style={{ color: d.value ? d.hex : 'var(--muted)' }}>{d.label}</span>
         </div>
         {editing === d.field ? (
           <input
@@ -1468,7 +1468,7 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
         ) : (
           <span
             className={`text-[11px] font-mono text-right shrink-0 ${canEdit ? 'cursor-pointer hover:text-foreground' : ''} transition-colors`}
-            style={{ color: d.value ? '#d4d4d8' : '#3f3f46' }}
+            style={{ color: d.value ? 'var(--fg)' : 'var(--input)' }}
             onClick={canEdit ? () => { setEditValue(d.value ?? ''); setEditing(d.field!) } : undefined}
           >
             {fmtDate(d.value)}
@@ -1651,7 +1651,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all"
                 style={{
                   background: isActive ? cfg.bg : 'transparent',
-                  color: isActive ? cfg.color : '#71717a',
+                  color: isActive ? cfg.color : 'var(--muted)',
                   border: isActive ? `1px solid ${cfg.color}` : '1px solid #3f3f46',
                 }}
               >
@@ -1969,7 +1969,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
               {i < milestones.length - 1 && (
                 <div
                   className="shrink-0 self-start mt-[9px] h-px w-2 sm:w-3"
-                  style={{ background: isComplete ? `${m.hex}66` : '#27272a' }}
+                  style={{ background: isComplete ? `${m.hex}66` : 'var(--input)' }}
                 />
               )}
             </div>

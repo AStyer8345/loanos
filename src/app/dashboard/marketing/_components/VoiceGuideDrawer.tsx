@@ -45,7 +45,7 @@ export default function VoiceGuideDrawer({ open, onClose, onEditFullTab }: Props
 
       {/* Drawer panel */}
       <div
-        className="fixed top-0 right-0 h-full w-[480px] max-w-[90vw] bg-zinc-950 border-l border-input z-50 flex flex-col transition-transform duration-300 ease-in-out"
+        className="fixed top-0 right-0 h-full w-[480px] max-w-[90vw] bg-background border-l border-input z-50 flex flex-col transition-transform duration-300 ease-in-out"
         style={{
           transform: open ? 'translateX(0)' : 'translateX(100%)',
           fontFamily: "'IBM Plex Mono', 'Courier New', monospace",

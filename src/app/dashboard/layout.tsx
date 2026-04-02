@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <OrgProvider>
-      <div className="min-h-screen bg-zinc-950">
+      <div className="min-h-screen bg-background">
         <TopNav />
         <main className="pt-14">
           {children}

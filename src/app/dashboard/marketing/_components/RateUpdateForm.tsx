@@ -230,7 +230,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
               id="direction"
               value={direction}
               onChange={e => setDirection(e.target.value)}
-              className="w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
+              className="w-full bg-background border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
               style={{ fontFamily: 'inherit' }}
             >
               <option value="">Select direction...</option>
@@ -248,7 +248,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
               id="depth"
               value={depth}
               onChange={e => setDepth(e.target.value)}
-              className="w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
+              className="w-full bg-background border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
               style={{ fontFamily: 'inherit' }}
             >
               <option value="short">Short & Sweet</option>

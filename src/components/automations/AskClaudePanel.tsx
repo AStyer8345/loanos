@@ -86,7 +86,7 @@ export default function AskClaudePanel({
           rows={4}
           disabled={state === 'loading' || state === 'preview'}
           onChange={(e) => setInstruction(e.target.value)}
-          className="w-full px-2 py-2 text-xs text-foreground bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-2 py-2 text-xs text-foreground bg-background border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ fontFamily: MONO }}
         />
       </div>

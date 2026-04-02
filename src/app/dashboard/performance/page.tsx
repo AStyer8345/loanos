@@ -203,10 +203,10 @@ export default function PerformancePage() {
   const fAmt = Number(form.amount)||0; const fGross = Number(form.gross)||0; const fCr = Number(form.compRate)||1
   const preview = fAmt && fGross ? { margin:fmtPct(fGross/fAmt), comp:fmt(fAmt*fCr/100), pl:fGross-fAmt*fCr/100 } : null
 
-  if (!loaded) return <div className="min-h-screen bg-zinc-950" />
+  if (!loaded) return <div className="min-h-screen bg-background" />
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-4 lg:p-6">
+    <div className="min-h-screen bg-background p-4 lg:p-6">
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -317,7 +317,7 @@ export default function PerformancePage() {
                 </thead>
                 <tbody>
                   {activeMonthly.map((m,i) => (
-                    <tr key={m.full} className={i%2 ? 'bg-zinc-950/50' : ''}>
+                    <tr key={m.full} className={i%2 ? 'bg-background/50' : ''}>
                       <td className="px-3 py-2.5 text-foreground font-medium">{m.full}</td>
                       <td className="px-3 py-2.5 text-muted-foreground text-right">{m.loans}</td>
                       <td className="px-3 py-2.5 text-blue-400 text-right">{fmtK(m.volume)}</td>
@@ -422,7 +422,7 @@ export default function PerformancePage() {
                 </thead>
                 <tbody>
                   {[...loans].sort((a,b) => MONTHS.indexOf(a.month)-MONTHS.indexOf(b.month) || a.name.localeCompare(b.name)).map((l,i) => (
-                    <tr key={l.id} className={i%2 ? 'bg-zinc-950/50' : ''}>
+                    <tr key={l.id} className={i%2 ? 'bg-background/50' : ''}>
                       <td className="px-3 py-2.5 text-muted-foreground">{SHORT[l.month]}</td>
                       <td className="px-3 py-2.5 text-foreground font-medium">{l.name}</td>
                       <td className="px-3 py-2.5 text-blue-400 text-right">{fmt(l.amount)}</td>
@@ -493,7 +493,7 @@ export default function PerformancePage() {
                 </thead>
                 <tbody>
                   {monthly.map((m,i) => (
-                    <tr key={m.full} className={i%2 ? 'bg-zinc-950/50' : ''}>
+                    <tr key={m.full} className={i%2 ? 'bg-background/50' : ''}>
                       <td className="px-3 py-2.5 text-foreground font-medium">{m.full}</td>
                       <td className="px-3 py-2 text-right">
                         <input

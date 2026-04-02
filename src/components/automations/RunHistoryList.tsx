@@ -166,7 +166,7 @@ export default function RunHistoryList({ automationId }: RunHistoryListProps) {
             {isExpanded && run.full_log && (
               <div className="px-4 pb-3 pt-1">
                 <pre
-                  className="text-muted-foreground whitespace-pre-wrap break-words rounded p-3 bg-zinc-950 border border-input"
+                  className="text-muted-foreground whitespace-pre-wrap break-words rounded p-3 bg-background border border-input"
                   style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.6 }}
                 >
                   {run.full_log}

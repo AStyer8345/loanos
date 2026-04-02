@@ -298,7 +298,7 @@ export default function AutomationCard({
           }}
           placeholder="Refine this draft..."
           disabled={state === 'refining'}
-          className="flex-1 bg-zinc-950 border border-input text-foreground text-xs rounded px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
+          className="flex-1 bg-background border border-input text-foreground text-xs rounded px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
           style={{ fontFamily: 'inherit' }}
         />
         <button

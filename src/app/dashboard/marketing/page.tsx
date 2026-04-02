@@ -21,7 +21,7 @@ export default function MarketingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-foreground flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center font-mono">
         <span className="text-muted-foreground text-sm tracking-widest">LOADING...</span>
       </div>
     )
@@ -29,7 +29,7 @@ export default function MarketingPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-foreground flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center font-mono">
         <div className="text-center">
           <p className="text-red-400 text-sm">Error loading marketing data.</p>
           <p className="text-muted-foreground text-xs mt-1">{error}</p>
@@ -40,7 +40,7 @@ export default function MarketingPage() {
 
   return (
     <div
-      className="min-h-screen bg-zinc-950 text-foreground p-6"
+      className="min-h-screen bg-background text-foreground p-6"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {/* Header */}

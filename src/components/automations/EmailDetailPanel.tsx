@@ -321,7 +321,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
           <div>
             {automation.prompt_snapshot ? (
               <pre
-                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
+                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-background"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {automation.prompt_snapshot}

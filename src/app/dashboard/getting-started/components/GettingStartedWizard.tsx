@@ -117,7 +117,7 @@ export default function GettingStartedWizard({
   ]
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start py-12 px-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-start py-12 px-4">
       {/* Step progress bar */}
       <div className="w-full max-w-2xl mb-8">
         <div className="flex items-center gap-0">

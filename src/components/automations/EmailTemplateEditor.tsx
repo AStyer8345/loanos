@@ -77,7 +77,7 @@ export default function EmailTemplateEditor({
           value={template}
           onChange={e => onTemplateChange(e.target.value)}
           rows={10}
-          className="w-full px-3 py-2 text-xs text-foreground bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
+          className="w-full px-3 py-2 text-xs text-foreground bg-background border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
           style={{ fontFamily: MONO, lineHeight: 1.7 }}
           placeholder="Write your email template here. Use {{variable_name}} for dynamic values."
         />
@@ -86,7 +86,7 @@ export default function EmailTemplateEditor({
       {/* Preview — variables rendered as gold pills */}
       {showPreview && (
         <div
-          className="min-h-[160px] px-3 py-2 border border-input rounded bg-zinc-950"
+          className="min-h-[160px] px-3 py-2 border border-input rounded bg-background"
           style={{ lineHeight: 1.9, fontSize: 12 }}
         >
           {segments.length === 0 ? (

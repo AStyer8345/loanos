@@ -864,7 +864,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             }}
             placeholder="Tell Claude how to edit this post..."
             disabled={chatLoading}
-            className="flex-1 bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
+            className="flex-1 bg-background border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
             style={{ fontFamily: 'inherit' }}
           />
           <button

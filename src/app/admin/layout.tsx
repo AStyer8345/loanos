@@ -9,8 +9,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isAdmin) redirect('/dashboard')
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-input bg-zinc-950/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-background">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-input bg-background/90 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="font-mono text-sm font-semibold text-amber-500 tracking-wide">

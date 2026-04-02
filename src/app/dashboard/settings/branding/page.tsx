@@ -169,7 +169,7 @@ export default function BrandingSettingsPage() {
             <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wider">
               Preview
             </label>
-            <div className="bg-zinc-950 border border-input rounded-lg overflow-hidden">
+            <div className="bg-background border border-input rounded-lg overflow-hidden">
               {/* Mock nav bar */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-input">
                 <div className="flex items-center gap-2">

@@ -162,7 +162,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
 
             {!promptLoading && !promptError && systemPrompt && (
               <pre
-                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
+                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-background"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {systemPrompt}

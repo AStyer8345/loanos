@@ -456,10 +456,36 @@ export async function processAriveWebhook(
     const coBorrowerLast = n(body['loanBorrower2_lastName']) as string | null
 
     let coBorrowerContactId: string | null = null
-    if (coBorrowerEmail) {
+    const borrowerEmailNorm = (email as string).toLowerCase().trim()
+    const coBorrowerEmailNorm = coBorrowerEmail ? (coBorrowerEmail as string).toLowerCase().trim() : null
+
+    if (coBorrowerEmailNorm && coBorrowerEmailNorm === borrowerEmailNorm) {
+      // Shared email (e.g. married couple) — don't create a separate contact.
+      // Instead, populate co_borrower_* fields on the existing borrower contact.
+      coBorrowerContactId = contact.id
+      try {
+        const coBorrowerFields: Record<string, unknown> = {
+          co_borrower_first: coBorrowerFirst ?? '',
+          co_borrower_last: coBorrowerLast ?? '',
+          co_borrower_email: coBorrowerEmailNorm,
+          co_borrower_mobile: n(body['loanBorrower2_mobilePhone10digit']),
+          updated_at: now,
+        }
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/contacts?id=eq.${contact.id}`,
+          {
+            method: 'PATCH',
+            headers: { ...sbHeaders(), Prefer: 'return=minimal' },
+            body: JSON.stringify(coBorrowerFields),
+          }
+        )
+      } catch (err) {
+        console.warn('[arive-webhook] Failed to patch co-borrower fields on shared-email contact:', err)
+      }
+    } else if (coBorrowerEmailNorm) {
       try {
         const coBorrowerContact = await sbUpsert('contacts', 'email,organization_id', {
-          email: (coBorrowerEmail as string).toLowerCase().trim(),
+          email: coBorrowerEmailNorm,
           first_name: coBorrowerFirst ?? '',
           last_name: coBorrowerLast ?? '',
           phone: n(body['loanBorrower2_mobilePhone10digit']),

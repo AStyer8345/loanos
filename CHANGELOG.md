@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [5.2.1] — 2026-04-02 — Shared-Email Co-Borrower Fix
+
+### Fixed
+- **Shared-email co-borrower bug** (`processWebhook.ts`): When borrower and co-borrower share the same email (married couples), the co-borrower upsert was overwriting the borrower's name on the contact record. Now detects shared email and populates `co_borrower_*` fields on the existing borrower contact instead of creating/overwriting a separate record.
+
+### Data Fixes (manual, Szpitalak loan)
+- Restored contact `7257de4c` to Vijayta Szpitalak (primary borrower) with Anton as co-borrower fields
+- Created Scot Peterson (`scot@dutkoragen.com`) as buyer agent contact, linked to loan
+- Set `buyer_agent_contact_id` and `co_borrower_contact_id` on loan record
+- Fixed contact stage from "Pre-Approved" back to "Lead"
+
+### Known Issue
+- **n8n "Arive New Loan → Supabase" workflow bypasses `processWebhook.ts`** — does direct Supabase inserts, so party contacts (buyer agent, co-borrower, listing agent, TC, title, escrow) are never auto-created. Workflow needs to be updated to call `/api/arive-webhook/[slug]` instead.
+
 ## [5.2.0] — 2026-04-01 — Multi-Tenant LO Onboarding
 
 ### Added

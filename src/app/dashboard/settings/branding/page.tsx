@@ -61,7 +61,7 @@ export default function BrandingSettingsPage() {
     return (
       <div className="max-w-2xl mx-auto py-10 px-4">
         <div className="flex items-center justify-center py-20">
-          <Loader2 size={20} className="animate-spin text-zinc-500" />
+          <Loader2 size={20} className="animate-spin text-muted-foreground" />
         </div>
       </div>
     )
@@ -73,14 +73,14 @@ export default function BrandingSettingsPage() {
       <div>
         <Link
           href="/dashboard/settings"
-          className="inline-flex items-center gap-1 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors mb-4"
+          className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground/80 transition-colors mb-4"
         >
           <ArrowLeft size={12} /> Back to Settings
         </Link>
-        <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider mb-1">
+        <h1 className="text-lg font-mono font-bold text-foreground uppercase tracking-wider mb-1">
           Branding
         </h1>
-        <p className="text-sm font-mono text-zinc-500">
+        <p className="text-sm font-mono text-muted-foreground">
           Customize your organization&apos;s brand color. Changes apply across the entire dashboard.
         </p>
       </div>
@@ -107,11 +107,11 @@ export default function BrandingSettingsPage() {
               <Palette size={17} className="text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-mono font-semibold text-zinc-100">Upgrade to Professional</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">Custom branding is available on the Professional plan ($99/mo)</p>
+              <h2 className="text-sm font-mono font-semibold text-foreground">Upgrade to Professional</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Custom branding is available on the Professional plan ($99/mo)</p>
             </div>
           </div>
-          <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+          <p className="text-xs font-mono text-muted-foreground leading-relaxed">
             Professional plan includes custom brand colors, logo uploads, custom subdomains,
             and branded email reply-to addresses. Your dashboard will reflect your brand identity.
           </p>
@@ -119,15 +119,15 @@ export default function BrandingSettingsPage() {
       )}
 
       {/* Branding editor */}
-      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
               <Palette size={17} className="text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-mono font-semibold text-zinc-100">Brand Color</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <h2 className="text-sm font-mono font-semibold text-foreground">Brand Color</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {hasAccess ? 'Set your primary accent color' : 'Preview — upgrade to edit'}
               </p>
             </div>
@@ -143,11 +143,11 @@ export default function BrandingSettingsPage() {
                 value={color}
                 onChange={e => setColor(e.target.value)}
                 disabled={!hasAccess}
-                className="w-12 h-12 rounded-md border border-zinc-600 cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-12 h-12 rounded-md border border-input cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">
                 Hex Color
               </label>
               <input
@@ -159,17 +159,17 @@ export default function BrandingSettingsPage() {
                 }}
                 disabled={!hasAccess}
                 placeholder="#C9A84C"
-                className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
           {/* Live preview */}
           <div>
-            <label className="block text-xs font-mono text-zinc-500 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-mono text-muted-foreground mb-2 uppercase tracking-wider">
               Preview
             </label>
-            <div className="bg-zinc-950 border border-zinc-700 rounded-lg overflow-hidden">
+            <div className="bg-zinc-950 border border-input rounded-lg overflow-hidden">
               {/* Mock nav bar */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-input">
                 <div className="flex items-center gap-2">
@@ -177,14 +177,14 @@ export default function BrandingSettingsPage() {
                     className="w-6 h-6 rounded"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="text-sm font-mono font-semibold text-zinc-100">
+                  <span className="text-sm font-mono font-semibold text-foreground">
                     {branding?.orgName || 'LoanOS'}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono text-zinc-500">Dashboard</span>
-                  <span className="text-xs font-mono text-zinc-500">Contacts</span>
-                  <span className="text-xs font-mono text-zinc-500">Loans</span>
+                  <span className="text-xs font-mono text-muted-foreground">Dashboard</span>
+                  <span className="text-xs font-mono text-muted-foreground">Contacts</span>
+                  <span className="text-xs font-mono text-muted-foreground">Loans</span>
                 </div>
               </div>
               {/* Mock content */}
@@ -194,7 +194,7 @@ export default function BrandingSettingsPage() {
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="text-xs font-mono text-zinc-400">Accent elements use your brand color</span>
+                  <span className="text-xs font-mono text-muted-foreground">Accent elements use your brand color</span>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -237,23 +237,23 @@ export default function BrandingSettingsPage() {
       {/* Current branding info */}
       {branding && (
         <div className="bg-card/50 border border-input rounded-lg p-4">
-          <h3 className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">Current Branding</h3>
+          <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3">Current Branding</h3>
           <div className="grid grid-cols-2 gap-3 text-xs font-mono">
             <div>
-              <span className="text-zinc-500">Organization:</span>
-              <span className="text-zinc-300 ml-2">{branding.orgName}</span>
+              <span className="text-muted-foreground">Organization:</span>
+              <span className="text-foreground/80 ml-2">{branding.orgName}</span>
             </div>
             <div>
-              <span className="text-zinc-500">Plan:</span>
-              <span className="text-zinc-300 ml-2 capitalize">{branding.plan}</span>
+              <span className="text-muted-foreground">Plan:</span>
+              <span className="text-foreground/80 ml-2 capitalize">{branding.plan}</span>
             </div>
             <div>
-              <span className="text-zinc-500">Slug:</span>
-              <span className="text-zinc-300 ml-2">{branding.slug || '—'}</span>
+              <span className="text-muted-foreground">Slug:</span>
+              <span className="text-foreground/80 ml-2">{branding.slug || '—'}</span>
             </div>
             <div>
-              <span className="text-zinc-500">Color:</span>
-              <span className="text-zinc-300 ml-2">{branding.brandColor || 'Default (#C9A84C)'}</span>
+              <span className="text-muted-foreground">Color:</span>
+              <span className="text-foreground/80 ml-2">{branding.brandColor || 'Default (#C9A84C)'}</span>
             </div>
           </div>
         </div>

@@ -78,7 +78,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
       {/* Week navigation */}
       <div className="flex items-center gap-3">
         <Btn variant="ghost" size="xs" onClick={() => setWeekOffset(w => w - 1)}>← PREV</Btn>
-        <span className="text-zinc-300 text-xs font-bold">
+        <span className="text-foreground/80 text-xs font-bold">
           {weekLabel}{isCurrentWeek ? ' · This Week' : ''}
         </span>
         <Btn variant="ghost" size="xs" onClick={() => setWeekOffset(w => w + 1)} disabled={isCurrentWeek}>
@@ -109,7 +109,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
 
       {/* Manual log form */}
       {showLogForm && (
-        <div className="bg-card border border-zinc-700 rounded-sm p-4 space-y-3">
+        <div className="bg-card border border-input rounded-sm p-4 space-y-3">
           <div>
             <FieldLabel>ACTIVITY *</FieldLabel>
             <Input
@@ -125,7 +125,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
               <select
                 value={logForm.channel}
                 onChange={e => setLogForm(p => ({ ...p, channel: e.target.value as LogChannel }))}
-                className="w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-1.5 focus:outline-none"
+                className="w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
                 style={{ fontFamily: 'inherit' }}
               >
                 {LOG_CHANNELS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -161,14 +161,14 @@ export default function HistoryTab({ mccState, onSave }: Props) {
 
       {/* Log table */}
       {weekEntries.length === 0 ? (
-        <div className="text-center py-12 text-zinc-600">
+        <div className="text-center py-12 text-muted-foreground">
           <p className="text-sm">Nothing logged this week.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs font-mono border-collapse">
             <thead>
-              <tr className="border-b border-input text-zinc-500" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
+              <tr className="border-b border-input text-muted-foreground" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
                 <th className="text-left pb-2 pr-4 font-bold">DATE</th>
                 <th className="text-left pb-2 pr-4 font-bold">ACTIVITY</th>
                 <th className="text-left pb-2 pr-4 font-bold">TYPE</th>
@@ -178,19 +178,19 @@ export default function HistoryTab({ mccState, onSave }: Props) {
             <tbody>
               {weekEntries.map(entry => (
                 <tr key={entry.id} className="border-b border-zinc-900 hover:bg-card transition-colors">
-                  <td className="py-2 pr-4 text-zinc-500 whitespace-nowrap">
+                  <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">
                     {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </td>
-                  <td className="py-2 pr-4 text-zinc-200">
+                  <td className="py-2 pr-4 text-foreground">
                     {entry.activity}
                     {entry.notes && (
-                      <span className="text-zinc-600 ml-2" style={{ fontSize: 10 }}>· {entry.notes}</span>
+                      <span className="text-muted-foreground ml-2" style={{ fontSize: 10 }}>· {entry.notes}</span>
                     )}
                   </td>
                   <td className="py-2 pr-4">
                     <TypeBadge type={channelToType(entry.channel)} />
                   </td>
-                  <td className="py-2 text-zinc-400">{entry.channel}</td>
+                  <td className="py-2 text-muted-foreground">{entry.channel}</td>
                 </tr>
               ))}
             </tbody>

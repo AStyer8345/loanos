@@ -44,7 +44,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
       <div className="px-4 py-3 border-b border-input flex items-center gap-2">
         <span className="text-sm">🔥</span>
         <span className="text-xs font-mono font-semibold text-[#C9A84C] uppercase tracking-widest">Hot Leads</span>
-        <span className="text-[10px] font-mono text-zinc-600">last 14 days</span>
+        <span className="text-[10px] font-mono text-muted-foreground">last 14 days</span>
       </div>
 
       <div className="divide-y divide-input">
@@ -60,14 +60,14 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <Link
                     href={`/dashboard/contacts/${lead.id}`}
-                    className="text-xs font-mono font-medium text-zinc-200 hover:text-[#C9A84C] transition-colors truncate"
+                    className="text-xs font-mono font-medium text-foreground hover:text-[#C9A84C] transition-colors truncate"
                   >
                     {name}
                   </Link>
                   {lead.referred_by && (
-                    <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">via {lead.referred_by}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">via {lead.referred_by}</span>
                   )}
-                  <span className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{daysLabel}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">{daysLabel}</span>
                 </div>
 
                 {/* Action icons */}
@@ -77,7 +77,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                       <a
                         href={`tel:${lead.phone}`}
                         title={`Call ${lead.phone}`}
-                        className="p-1.5 rounded hover:bg-emerald-900/40 text-zinc-600 hover:text-emerald-400 transition-colors"
+                        className="p-1.5 rounded hover:bg-emerald-900/40 text-muted-foreground hover:text-emerald-400 transition-colors"
                         onClick={e => e.stopPropagation()}
                       >
                         <Phone className="w-3.5 h-3.5" />
@@ -85,7 +85,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                       <a
                         href={`sms:${lead.phone}`}
                         title={`Text ${lead.phone}`}
-                        className="p-1.5 rounded hover:bg-blue-900/40 text-zinc-600 hover:text-blue-400 transition-colors"
+                        className="p-1.5 rounded hover:bg-blue-900/40 text-muted-foreground hover:text-blue-400 transition-colors"
                         onClick={e => e.stopPropagation()}
                       >
                         <MessageSquare className="w-3.5 h-3.5" />
@@ -96,7 +96,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                     <a
                       href={`mailto:${lead.email}`}
                       title={`Email ${lead.email}`}
-                      className="p-1.5 rounded hover:bg-violet-900/40 text-zinc-600 hover:text-violet-400 transition-colors"
+                      className="p-1.5 rounded hover:bg-violet-900/40 text-muted-foreground hover:text-violet-400 transition-colors"
                       onClick={e => e.stopPropagation()}
                     >
                       <Mail className="w-3.5 h-3.5" />
@@ -105,7 +105,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
                   <button
                     onClick={() => handleDismiss(lead.id)}
                     title="Dismiss"
-                    className="p-1.5 rounded text-zinc-700 hover:text-zinc-400 hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1.5 rounded text-zinc-700 hover:text-muted-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
                   >
                     ×
                   </button>
@@ -114,7 +114,7 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
 
               {/* Notes */}
               {noteSnippet && (
-                <p className="text-[11px] font-mono text-zinc-500 mt-1 pl-0 leading-relaxed italic">{noteSnippet}</p>
+                <p className="text-[11px] font-mono text-muted-foreground mt-1 pl-0 leading-relaxed italic">{noteSnippet}</p>
               )}
             </div>
           )

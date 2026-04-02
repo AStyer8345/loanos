@@ -32,7 +32,7 @@ const LENGTH_OPTIONS: Array<NonNullable<EmailConfig['length']>> = ['short', 'med
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="text-zinc-500 mb-1"
+      className="text-muted-foreground mb-1"
       style={{ fontSize: 9, letterSpacing: '0.15em', fontFamily: MONO }}
     >
       {children}
@@ -101,7 +101,7 @@ function EditableChipList({
             {chip}
             <button
               onClick={() => onChange(chips.filter(c => c !== chip))}
-              className="ml-0.5 text-zinc-500 hover:text-zinc-300 leading-none"
+              className="ml-0.5 text-muted-foreground hover:text-foreground/80 leading-none"
               style={{ fontSize: 10 }}
               aria-label={`Remove ${chip}`}
             >
@@ -122,12 +122,12 @@ function EditableChipList({
               addChip()
             }
           }}
-          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="flex-1 px-2 py-1 text-xs text-foreground bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
           style={{ fontFamily: MONO, fontSize: 10 }}
         />
         <button
           onClick={addChip}
-          className="px-2 py-1 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
+          className="px-2 py-1 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
           style={{ fontFamily: MONO, fontSize: 10 }}
         >
           Add
@@ -275,13 +275,13 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
                     onChange={e => setClaudeInstruction(e.target.value)}
                     rows={3}
                     placeholder="e.g. make this more urgent, add a P.S., mention the rate lock deadline..."
-                    className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+                    className="w-full mt-1 px-2 py-1.5 text-xs text-foreground bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
                     style={{ fontFamily: MONO }}
                   />
                   <button
                     onClick={() => setClaudeInstruction('')}
                     disabled={!claudeInstruction.trim()}
-                    className="mt-1.5 px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="mt-1.5 px-3 py-1.5 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{ fontFamily: MONO }}
                   >
                     Update Prompt
@@ -295,7 +295,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
               <button
                 onClick={handleSendTest}
                 disabled={sendingTest}
-                className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
+                className="px-3 py-1.5 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
                 style={{ fontFamily: MONO }}
               >
                 {sendingTest ? 'Sending...' : 'Send Test Email'}
@@ -321,14 +321,14 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
           <div>
             {automation.prompt_snapshot ? (
               <pre
-                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
+                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {automation.prompt_snapshot}
               </pre>
             ) : (
               <div className="py-8 text-center">
-                <span className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+                <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
                   no prompt snapshot available
                 </span>
               </div>
@@ -377,7 +377,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             <div>
               <SectionLabel>TRIGGER</SectionLabel>
               <div
-                className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-400 text-xs"
+                className="mt-1 px-2 py-1.5 border border-input rounded text-muted-foreground text-xs"
                 style={{ fontFamily: MONO, background: 'var(--bg)' }}
               >
                 {automation.trigger_type}
@@ -389,7 +389,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             <div>
               <SectionLabel>N8N WORKFLOW ID</SectionLabel>
               <div
-                className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-500 text-xs"
+                className="mt-1 px-2 py-1.5 border border-input rounded text-muted-foreground text-xs"
                 style={{ fontFamily: MONO, background: 'var(--bg)' }}
               >
                 {automation.source_id || '—'}
@@ -401,7 +401,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
               <button
                 onClick={handleRunNow}
                 disabled={runningNow}
-                className="px-4 py-2 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
+                className="px-4 py-2 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
                 style={{ fontFamily: MONO }}
               >
                 {runningNow ? 'Running...' : 'Run Now'}

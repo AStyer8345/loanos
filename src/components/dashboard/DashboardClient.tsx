@@ -49,10 +49,10 @@ interface TTProps { active?: boolean; payload?: Array<{ value: number; name: str
 const ChartTooltip = ({ active, payload, label }: TTProps) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-xs font-mono space-y-0.5">
-      <div className="text-zinc-300 mb-1">{label}</div>
+    <div className="bg-muted border border-input rounded px-3 py-2 text-xs font-mono space-y-0.5">
+      <div className="text-foreground/80 mb-1">{label}</div>
       {payload.map(p => (
-        <div key={p.name} className="text-zinc-400">{p.name}: <span className="text-zinc-100">{fmt(p.value)}</span></div>
+        <div key={p.name} className="text-muted-foreground">{p.name}: <span className="text-foreground">{fmt(p.value)}</span></div>
       ))}
     </div>
   )
@@ -95,8 +95,8 @@ export default function DashboardClient(props: DashboardClientProps) {
       {/* ── Header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-mono font-bold text-zinc-100">Dashboard</h1>
-          <p className="text-xs font-mono text-zinc-500 mt-0.5">{dateStr}</p>
+          <h1 className="text-xl font-mono font-bold text-foreground">Dashboard</h1>
+          <p className="text-xs font-mono text-muted-foreground mt-0.5">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
           {needsAttentionCount > 0 && (
@@ -108,19 +108,19 @@ export default function DashboardClient(props: DashboardClientProps) {
           <div className="flex bg-card border border-input rounded-lg p-1 gap-0.5">
             <button
               onClick={() => setTab('pipeline')}
-              className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'pipeline' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+              className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'pipeline' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             >Pipeline</button>
             <button
               onClick={() => setTab('performance')}
-              className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'performance' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+              className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'performance' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             >Performance</button>
             <button
               onClick={() => setTab('briefing')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'briefing' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'briefing' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             ><Brain size={11} />Briefing</button>
             <button
               onClick={() => setTab('queue')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'queue' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'queue' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             ><ListChecks size={11} />Queue</button>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={14} className="text-amber-400" />
                   <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Needs Attention</span>
-                  <span className="text-[11px] font-mono text-zinc-600">{needsAttentionCount} items</span>
+                  <span className="text-[11px] font-mono text-muted-foreground">{needsAttentionCount} items</span>
                 </div>
                 <Link href="/dashboard/loans" className="flex items-center gap-1 text-[11px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
                   View pipeline <ArrowRight size={9} />
@@ -186,7 +186,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                     >
                       <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                        <span className="text-zinc-200">{f.name}</span>
+                        <span className="text-foreground">{f.name}</span>
                       </div>
                       <span className="text-amber-400">{f.flag} — {fmtDateShort(f.date)}</span>
                     </Link>
@@ -202,7 +202,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                   )}
                   <div className="flex items-center gap-2 mb-2 px-2">
                     <Clock size={11} className="text-orange-400" />
-                    <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">No activity 7+ days</span>
+                    <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">No activity 7+ days</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     {props.staleLoans.slice(0, 12).map(l => (
@@ -213,12 +213,12 @@ export default function DashboardClient(props: DashboardClientProps) {
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                          <span className="text-zinc-300 truncate">{l.name}</span>
+                          <span className="text-foreground/80 truncate">{l.name}</span>
                           {l.status && <StageBadge status={l.status} />}
                         </div>
                         <div className="flex items-center gap-3 ml-2 flex-shrink-0">
                           {l.estimated_closing_date && (
-                            <span className="text-zinc-600 text-[11px]">close {fmtDateShort(l.estimated_closing_date)}</span>
+                            <span className="text-muted-foreground text-[11px]">close {fmtDateShort(l.estimated_closing_date)}</span>
                           )}
                           <span className="text-orange-400">{l.daysSinceActivity}d idle</span>
                         </div>
@@ -278,7 +278,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[220px] flex items-center justify-center text-zinc-600 font-mono text-sm">No funded loans this year</div>
+                <div className="h-[220px] flex items-center justify-center text-muted-foreground font-mono text-sm">No funded loans this year</div>
               )}
             </Card>
 
@@ -298,7 +298,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[220px] flex items-center justify-center text-zinc-600 font-mono text-sm">No data yet</div>
+                <div className="h-[220px] flex items-center justify-center text-muted-foreground font-mono text-sm">No data yet</div>
               )}
             </Card>
           </div>
@@ -336,8 +336,8 @@ export default function DashboardClient(props: DashboardClientProps) {
                 <TableBody>
                   {props.chartData.map((d) => (
                     <TableRow key={d.month}>
-                      <TableCell className="text-zinc-100 font-medium">{d.month}</TableCell>
-                      <TableCell className="text-right text-zinc-400">{d.loans}</TableCell>
+                      <TableCell className="text-foreground font-medium">{d.month}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{d.loans}</TableCell>
                       <TableCell className="text-right text-blue-400">{fmtK(d.volume)}</TableCell>
                       <TableCell className="text-right text-primary">{fmt(d.commission)}</TableCell>
                     </TableRow>
@@ -345,8 +345,8 @@ export default function DashboardClient(props: DashboardClientProps) {
                 </TableBody>
                 <TableFooter>
                   <TableRow className="border-t-2 border-input">
-                    <TableCell className="text-zinc-100 font-semibold">YTD</TableCell>
-                    <TableCell className="text-right text-zinc-100 font-semibold">{props.fundedYTD}</TableCell>
+                    <TableCell className="text-foreground font-semibold">YTD</TableCell>
+                    <TableCell className="text-right text-foreground font-semibold">{props.fundedYTD}</TableCell>
                     <TableCell className="text-right text-blue-400 font-semibold">{fmtK(props.volumeYTD)}</TableCell>
                     <TableCell className="text-right text-primary font-semibold">{fmt(props.commissionYTD)}</TableCell>
                   </TableRow>
@@ -381,7 +381,7 @@ export default function DashboardClient(props: DashboardClientProps) {
 
 // ── Stage badge (uses global statusHex map) ─────────────────────────────
 function StageBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-zinc-600 text-[11px] font-mono">—</span>
+  if (!status) return <span className="text-muted-foreground text-[11px] font-mono">—</span>
   const hex = statusHex(status)
   return (
     <span

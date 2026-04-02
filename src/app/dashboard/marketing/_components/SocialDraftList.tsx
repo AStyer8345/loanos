@@ -164,7 +164,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
 
       {/* Count */}
       <div className="px-3 pb-2">
-        <span className="text-zinc-600" style={{ fontSize: 10 }}>
+        <span className="text-muted-foreground" style={{ fontSize: 10 }}>
           {filtered.length} of {drafts.length} posts
         </span>
       </div>
@@ -173,7 +173,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
       <div className="flex-1 overflow-y-auto">
         {filtered.length === 0 && (
           <div className="px-3 py-6 text-center">
-            <span className="text-zinc-600" style={{ fontSize: 11 }}>No drafts found</span>
+            <span className="text-muted-foreground" style={{ fontSize: 11 }}>No drafts found</span>
           </div>
         )}
         {filtered.map((draft) => {
@@ -230,7 +230,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
               </div>
 
               {/* Subtitle */}
-              <div className="mt-1 text-zinc-600 truncate" style={{ fontSize: 10 }}>
+              <div className="mt-1 text-muted-foreground truncate" style={{ fontSize: 10 }}>
                 {[
                   draft.platform,
                   draft.pillar,

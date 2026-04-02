@@ -124,7 +124,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <span className="text-zinc-500 text-xs" style={{ fontFamily: MONO }}>
+        <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
           loading...
         </span>
       </div>
@@ -142,7 +142,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
   if (entries.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
-        <span className="text-zinc-500 text-xs" style={{ fontFamily: MONO }}>
+        <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
           no sends yet
         </span>
       </div>
@@ -166,7 +166,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
               style={{ fontFamily: MONO }}
             >
               {/* Date/time */}
-              <span className="text-xs text-zinc-300 flex-shrink-0" style={{ minWidth: 140 }}>
+              <span className="text-xs text-foreground/80 flex-shrink-0" style={{ minWidth: 140 }}>
                 {formatDateTime(entry.created_at)}
               </span>
 
@@ -178,12 +178,12 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
               </span>
 
               {/* Subject */}
-              <span className="flex-1 text-xs text-zinc-400 truncate min-w-0">
+              <span className="flex-1 text-xs text-muted-foreground truncate min-w-0">
                 {subject}
               </span>
 
               {/* Relative time */}
-              <span className="text-zinc-600 flex-shrink-0 hidden sm:block" style={{ fontSize: 10 }}>
+              <span className="text-muted-foreground flex-shrink-0 hidden sm:block" style={{ fontSize: 10 }}>
                 {relativeTime(entry.created_at)}
               </span>
 
@@ -197,7 +197,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
             {isExpanded && body && (
               <div className="px-4 pb-3 pt-1">
                 <pre
-                  className="text-zinc-400 whitespace-pre-wrap break-words rounded p-3 bg-zinc-950 border border-input"
+                  className="text-muted-foreground whitespace-pre-wrap break-words rounded p-3 bg-zinc-950 border border-input"
                   style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.6 }}
                 >
                   {body}
@@ -206,7 +206,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
             )}
             {isExpanded && !body && (
               <div className="px-4 pb-3 pt-1">
-                <span className="text-xs text-zinc-600" style={{ fontFamily: MONO }}>
+                <span className="text-xs text-muted-foreground" style={{ fontFamily: MONO }}>
                   no email body available
                 </span>
               </div>
@@ -221,7 +221,7 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="px-4 py-1.5 rounded border border-zinc-700 text-xs text-zinc-300 transition-colors hover:border-[#C9A84C] hover:text-[#C9A84C] disabled:opacity-30"
+            className="px-4 py-1.5 rounded border border-input text-xs text-foreground/80 transition-colors hover:border-[#C9A84C] hover:text-[#C9A84C] disabled:opacity-30"
             style={{ fontFamily: MONO }}
           >
             {loadingMore ? 'loading...' : 'load more'}

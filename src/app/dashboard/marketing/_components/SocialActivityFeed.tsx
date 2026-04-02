@@ -68,9 +68,9 @@ export default function SocialActivityFeed() {
         </span>
 
         {!loaded ? (
-          <span className="text-zinc-600" style={{ fontSize: 11 }}>Loading...</span>
+          <span className="text-muted-foreground" style={{ fontSize: 11 }}>Loading...</span>
         ) : entries.length === 0 ? (
-          <span className="text-zinc-600" style={{ fontSize: 11 }}>No activity yet</span>
+          <span className="text-muted-foreground" style={{ fontSize: 11 }}>No activity yet</span>
         ) : (
           <div className="flex items-center gap-4 overflow-x-auto">
             {entries.map((entry) => (
@@ -89,9 +89,9 @@ export default function SocialActivityFeed() {
                     flexShrink: 0,
                   }}
                 />
-                <span className="text-zinc-500">{relativeTime(entry.created_at)}</span>
-                <span className="text-zinc-400">&mdash;</span>
-                <span className="text-zinc-300">{entry.detail || entry.action}</span>
+                <span className="text-muted-foreground">{relativeTime(entry.created_at)}</span>
+                <span className="text-muted-foreground">&mdash;</span>
+                <span className="text-foreground/80">{entry.detail || entry.action}</span>
               </div>
             ))}
           </div>

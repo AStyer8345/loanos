@@ -212,7 +212,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
         </div>
         <button
           onClick={onClose}
-          className="text-zinc-500 text-xs font-bold tracking-wider hover:text-zinc-300 transition-colors"
+          className="text-muted-foreground text-xs font-bold tracking-wider hover:text-foreground/80 transition-colors"
           style={{ fontFamily: 'inherit' }}
         >
           X CLOSE
@@ -233,7 +233,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
             onChange={(e) => setPrompt(e.target.value)}
             rows={4}
             placeholder="e.g. Post about how first-time buyers can use down payment assistance programs in Texas..."
-            className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+            className="w-full rounded-md border border-input text-foreground text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
             style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.6 }}
           />
         </div>
@@ -248,7 +248,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
           </label>
           <div
             className={`rounded-md border border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
-              dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-zinc-700'
+              dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-input'
             }`}
             style={{ background: dragOver ? undefined : '#0a0a14' }}
             onClick={() => fileInputRef.current?.click()}
@@ -268,11 +268,11 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
               }}
             />
             {uploading ? (
-              <span className="text-zinc-400" style={{ fontSize: 11 }}>
+              <span className="text-muted-foreground" style={{ fontSize: 11 }}>
                 Uploading...
               </span>
             ) : (
-              <span className="text-zinc-500" style={{ fontSize: 11 }}>
+              <span className="text-muted-foreground" style={{ fontSize: 11 }}>
                 📎 Drag photos or video here, or click to browse
               </span>
             )}
@@ -287,12 +287,12 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
               {files.map((f, i) => (
                 <div
                   key={f.path}
-                  className="relative group rounded-md border border-zinc-700 overflow-hidden"
+                  className="relative group rounded-md border border-input overflow-hidden"
                   style={{ width: 72, height: 72 }}
                 >
                   {f.type.startsWith('video/') ? (
                     <div className="w-full h-full bg-card flex items-center justify-center">
-                      <span className="text-zinc-500 text-lg">🎬</span>
+                      <span className="text-muted-foreground text-lg">🎬</span>
                     </div>
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -304,7 +304,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                   )}
                   <button
                     onClick={(e) => { e.stopPropagation(); removeFile(i) }}
-                    className="absolute top-0 right-0 bg-black/70 text-zinc-300 hover:text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-0 right-0 bg-black/70 text-foreground/80 hover:text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     &times;
                   </button>
@@ -312,7 +312,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                     className="absolute bottom-0 inset-x-0 bg-black/70 px-1 py-0.5 truncate"
                     style={{ fontSize: 8 }}
                   >
-                    <span className="text-zinc-400">{f.name}</span>
+                    <span className="text-muted-foreground">{f.name}</span>
                   </div>
                 </div>
               ))}
@@ -394,7 +394,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
             className="rounded-sm px-3 py-3 text-center"
             style={{ background: '#0d0d18', border: `1px solid ${GOLD}30` }}
           >
-            <p className="text-zinc-400 mb-2" style={{ fontSize: 11 }}>
+            <p className="text-muted-foreground mb-2" style={{ fontSize: 11 }}>
               Carousels use the visual builder with AI generation
             </p>
             <button

@@ -117,7 +117,7 @@ export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => router.push(`/dashboard/scenarios/${s.id}`)}
-                        className="p-1.5 rounded hover:bg-zinc-800/60 transition-colors"
+                        className="p-1.5 rounded hover:bg-muted/60 transition-colors"
                         title="View/Edit"
                         style={{ color: 'var(--sc-muted)' }}
                       >
@@ -125,7 +125,7 @@ export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }
                       </button>
                       <button
                         onClick={() => handleDuplicate(s.id)}
-                        className="p-1.5 rounded hover:bg-zinc-800/60 transition-colors"
+                        className="p-1.5 rounded hover:bg-muted/60 transition-colors"
                         title="Duplicate"
                         style={{ color: 'var(--sc-muted)' }}
                       >
@@ -134,7 +134,7 @@ export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }
                       <button
                         onClick={() => handleDelete(s.id)}
                         disabled={deleting === s.id}
-                        className="p-1.5 rounded hover:bg-zinc-800/60 transition-colors"
+                        className="p-1.5 rounded hover:bg-muted/60 transition-colors"
                         title="Delete"
                         style={{ color: 'var(--sc-red)' }}
                       >

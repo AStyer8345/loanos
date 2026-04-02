@@ -58,7 +58,7 @@ export default function VoiceGuideDrawer({ open, onClose, onEditFullTab }: Props
           </h3>
           <button
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-300 transition-colors text-sm leading-none p-1"
+            className="text-muted-foreground hover:text-foreground/80 transition-colors text-sm leading-none p-1"
           >
             &times;
           </button>
@@ -68,18 +68,18 @@ export default function VoiceGuideDrawer({ open, onClose, onEditFullTab }: Props
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <span className="text-zinc-600 text-xs tracking-widest">LOADING...</span>
+              <span className="text-muted-foreground text-xs tracking-widest">LOADING...</span>
             </div>
           ) : content ? (
             <pre
-              className="text-zinc-300 whitespace-pre-wrap break-words"
+              className="text-foreground/80 whitespace-pre-wrap break-words"
               style={{ fontSize: '12px', lineHeight: '1.7' }}
             >
               {content}
             </pre>
           ) : (
             <div className="flex items-center justify-center py-12">
-              <p className="text-zinc-600 text-xs">No voice guide configured.</p>
+              <p className="text-muted-foreground text-xs">No voice guide configured.</p>
             </div>
           )}
         </div>
@@ -88,7 +88,7 @@ export default function VoiceGuideDrawer({ open, onClose, onEditFullTab }: Props
         <div className="px-5 py-4 border-t border-input">
           <button
             onClick={onEditFullTab}
-            className="w-full px-4 py-2 text-xs font-bold tracking-widest rounded-sm transition-colors border border-zinc-700 text-zinc-300 hover:text-zinc-100 hover:border-zinc-500"
+            className="w-full px-4 py-2 text-xs font-bold tracking-widest rounded-sm transition-colors border border-input text-foreground/80 hover:text-foreground hover:border-zinc-500"
           >
             EDIT IN FULL TAB
           </button>

@@ -65,13 +65,13 @@ function StatusCount({ dot, count, label }: { dot: string; count: number; label:
         style={{ background: dot }}
       />
       <span
-        className="text-zinc-100 text-xs tabular-nums"
+        className="text-foreground text-xs tabular-nums"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         {count}
       </span>
       <span
-        className="text-zinc-500 text-xs"
+        className="text-muted-foreground text-xs"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         {label}
@@ -93,7 +93,7 @@ function BulkButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+      className="px-3 py-1.5 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {label}

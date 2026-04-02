@@ -46,10 +46,10 @@ export default function AutomationGroup({
           {label}
         </span>
         <div className="flex items-center gap-3">
-          <span className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+          <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
             {automations.length}
           </span>
-          <span className="text-zinc-500 text-xs" style={{ color: GOLD }}>
+          <span className="text-muted-foreground text-xs" style={{ color: GOLD }}>
             {groupOpen ? '▾' : '▸'}
           </span>
         </div>

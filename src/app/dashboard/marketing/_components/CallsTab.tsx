@@ -198,7 +198,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
 
       {/* Add form */}
       {showAdd && (
-        <div className="bg-card border border-zinc-700 rounded-sm p-4 space-y-3">
+        <div className="bg-card border border-input rounded-sm p-4 space-y-3">
           <SectionLabel>ADD CONTACT</SectionLabel>
           {addError && <p className="text-red-400 text-xs">{addError}</p>}
           <div className="grid grid-cols-2 gap-3">
@@ -238,7 +238,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
 
       {/* Contact grid — empty state */}
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-zinc-600">
+        <div className="text-center py-12 text-muted-foreground">
           <p className="text-sm">
             {search
               ? `No contacts match "${search}"`

@@ -14,9 +14,9 @@ const MONO = "'IBM Plex Mono', 'Courier New', monospace"
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-3 px-4 py-3 border-t border-input/50 animate-pulse">
-      <div className="w-2 h-2 rounded-full bg-zinc-800" />
-      <div className="h-3 w-48 bg-zinc-800 rounded" />
-      <div className="ml-auto h-3 w-16 bg-zinc-800 rounded" />
+      <div className="w-2 h-2 rounded-full bg-muted" />
+      <div className="h-3 w-48 bg-muted rounded" />
+      <div className="ml-auto h-3 w-16 bg-muted rounded" />
     </div>
   )
 }
@@ -25,8 +25,8 @@ function SkeletonGroup() {
   return (
     <div className="border border-input" style={{ borderLeft: `3px solid ${GOLD}` }}>
       <div className="px-4 py-2.5 flex items-center justify-between animate-pulse">
-        <div className="h-3 w-32 bg-zinc-800 rounded" />
-        <div className="h-3 w-4 bg-zinc-800 rounded" />
+        <div className="h-3 w-32 bg-muted rounded" />
+        <div className="h-3 w-4 bg-muted rounded" />
       </div>
       <SkeletonRow />
       <SkeletonRow />
@@ -149,7 +149,7 @@ export default function AutomationsPage() {
           >
             AUTOMATION COMMAND CENTER
           </h1>
-          <p className="text-zinc-600 text-xs mt-1" style={{ fontFamily: MONO }}>
+          <p className="text-muted-foreground text-xs mt-1" style={{ fontFamily: MONO }}>
             {automations.length > 0
               ? `${automations.length} automations across ${grouped.length} groups`
               : loading
@@ -180,7 +180,7 @@ export default function AutomationsPage() {
             </p>
             <button
               onClick={() => void fetchAutomations()}
-              className="px-4 py-1.5 text-xs border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+              className="px-4 py-1.5 text-xs border border-input text-muted-foreground hover:text-foreground hover:border-zinc-500 transition-colors"
               style={{ fontFamily: MONO }}
             >
               Retry
@@ -193,7 +193,7 @@ export default function AutomationsPage() {
           <div className="flex flex-col gap-3">
             {grouped.length === 0 ? (
               <div className="border border-input px-4 py-8 text-center">
-                <p className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+                <p className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
                   no automations registered
                 </p>
               </div>

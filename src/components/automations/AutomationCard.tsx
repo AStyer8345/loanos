@@ -145,12 +145,12 @@ export default function AutomationCard({
             <span className="text-emerald-400 text-xs font-bold tracking-wider uppercase">
               Sent
             </span>
-            <span className="text-zinc-600 text-xs">
+            <span className="text-muted-foreground text-xs">
               {automation.name}
             </span>
           </div>
           {sentTimestamp && (
-            <span className="text-zinc-600" style={{ fontSize: 10 }}>
+            <span className="text-muted-foreground" style={{ fontSize: 10 }}>
               {new Date(sentTimestamp).toLocaleDateString('en-US', {
                 month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
               })}
@@ -170,8 +170,8 @@ export default function AutomationCard({
       >
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0 mr-3">
-            <div className="text-zinc-100 text-xs font-bold">{automation.name}</div>
-            <div className="text-zinc-500 mt-0.5" style={{ fontSize: 11 }}>
+            <div className="text-foreground text-xs font-bold">{automation.name}</div>
+            <div className="text-muted-foreground mt-0.5" style={{ fontSize: 11 }}>
               {automation.description}
             </div>
           </div>
@@ -205,8 +205,8 @@ export default function AutomationCard({
       >
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-zinc-100 text-xs font-bold">{automation.name}</div>
-            <div className="text-zinc-500 mt-0.5" style={{ fontSize: 11 }}>
+            <div className="text-foreground text-xs font-bold">{automation.name}</div>
+            <div className="text-muted-foreground mt-0.5" style={{ fontSize: 11 }}>
               {automation.description}
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function AutomationCard({
             DRAFTING...
           </div>
         </div>
-        <div className="mt-2 text-zinc-500" style={{ fontSize: 11 }}>
+        <div className="mt-2 text-muted-foreground" style={{ fontSize: 11 }}>
           Generating draft...
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function AutomationCard({
           type="text"
           value={subject}
           onChange={e => setSubject(e.target.value)}
-          className="w-full bg-[var(--surface)] border border-input text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500"
+          className="w-full bg-[var(--surface)] border border-input text-foreground text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500"
           style={{ fontFamily: 'inherit' }}
         />
       </div>
@@ -279,7 +279,7 @@ export default function AutomationCard({
           value={body}
           onChange={e => setBody(e.target.value)}
           rows={6}
-          className="w-full bg-[var(--surface)] border border-input text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 resize-none"
+          className="w-full bg-[var(--surface)] border border-input text-foreground text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 resize-none"
           style={{ fontFamily: 'inherit', lineHeight: 1.6, minHeight: 140 }}
         />
       </div>
@@ -298,7 +298,7 @@ export default function AutomationCard({
           }}
           placeholder="Refine this draft..."
           disabled={state === 'refining'}
-          className="flex-1 bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs rounded px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
+          className="flex-1 bg-zinc-950 border border-input text-foreground text-xs rounded px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
           style={{ fontFamily: 'inherit' }}
         />
         <button
@@ -323,7 +323,7 @@ export default function AutomationCard({
         <button
           onClick={handleDiscard}
           disabled={state === 'sending'}
-          className="px-3 py-1.5 rounded text-xs font-bold text-zinc-500 transition-opacity hover:opacity-80 disabled:opacity-40"
+          className="px-3 py-1.5 rounded text-xs font-bold text-muted-foreground transition-opacity hover:opacity-80 disabled:opacity-40"
           style={{ border: '1px solid #3f3f46', fontFamily: 'inherit' }}
         >
           DISCARD

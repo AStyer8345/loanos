@@ -331,7 +331,7 @@ export default function ScenarioCard({
           {index > 0 && onCopyFrom && (
             <button
               onClick={onCopyFrom}
-              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-zinc-800/60"
+              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-muted/60"
               style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-accent)' }}
               title="Copy all fields from Option A"
             >
@@ -341,7 +341,7 @@ export default function ScenarioCard({
           {canRemove && (
             <button
               onClick={onRemove}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-zinc-800/60"
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-muted/60"
               style={{ color: 'var(--sc-muted)' }}
             >
               <X size={14} />
@@ -480,7 +480,7 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
           {index > 0 && onCopyFrom && (
             <button
               onClick={onCopyFrom}
-              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-zinc-800/60"
+              className="text-[10px] font-medium px-2.5 py-1 rounded-md transition-colors hover:bg-muted/60"
               style={{ color: 'var(--sc-accent)', border: '1px solid var(--sc-accent)' }}
               title="Copy all fields from Option 1"
             >
@@ -488,7 +488,7 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
             </button>
           )}
           {canRemove && (
-            <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-zinc-800/60" style={{ color: 'var(--sc-muted)' }}>
+            <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-muted/60" style={{ color: 'var(--sc-muted)' }}>
               <X size={14} />
             </button>
           )}

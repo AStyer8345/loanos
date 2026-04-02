@@ -114,14 +114,14 @@ export default function AgentDetailPanel({ automation, onSave, saving }: DetailP
           <div>
             {automation.prompt_snapshot ? (
               <pre
-                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
+                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {automation.prompt_snapshot}
               </pre>
             ) : (
               <div className="py-8 text-center">
-                <span className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+                <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
                   no prompt snapshot available
                 </span>
               </div>

@@ -1221,7 +1221,7 @@ export default function LoansPage() {
                 </span>
               )}
             {hasAdvancedFilters && (
-                <button onClick={clearAllFilters} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear all</button>
+                <button onClick={clearAllFilters} className="text-[11px] font-mono text-muted-foreground hover:text-foreground/80 underline">Clear all</button>
             )}
             </div>
           )}
@@ -1230,7 +1230,7 @@ export default function LoansPage() {
           {showFilters && (
             <div className="mt-3 p-3 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg">
               <div className="mb-3">
-                <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Presets</label>
+                <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Presets</label>
                 <select
                   value={filterPreset}
                   onChange={e => applyPreset(e.target.value)}
@@ -1250,7 +1250,7 @@ export default function LoansPage() {
               <div className="flex items-start gap-4 flex-wrap">
                 {/* Status multi-select */}
                 <div className="min-w-[180px]">
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Status</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Status</label>
                   <div className="max-h-[140px] overflow-y-auto border border-[#2A2A2A] rounded bg-[#1A1A1A] py-1">
                     {distinctStatuses.map(s => (
                       <label key={s} className="flex items-center gap-2 px-2 py-0.5 hover:bg-[#2A2A2A] cursor-pointer">
@@ -1262,14 +1262,14 @@ export default function LoansPage() {
                           )}
                           className="accent-[#C9A84C] rounded"
                         />
-                        <span className="text-[11px] font-mono text-zinc-300 truncate">{s}</span>
+                        <span className="text-[11px] font-mono text-foreground/80 truncate">{s}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 {/* Purpose */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Purpose</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Purpose</label>
                   <select value={filterPurpose} onChange={e => setFilterPurpose(e.target.value)}
                     className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[120px]">
                     <option value="">All</option>
@@ -1280,7 +1280,7 @@ export default function LoansPage() {
                 </div>
                 {/* Program */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Program</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Program</label>
                   <select value={filterProgram} onChange={e => setFilterProgram(e.target.value)}
                     className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[120px]">
                     <option value="">All</option>
@@ -1293,7 +1293,7 @@ export default function LoansPage() {
                 </div>
                 {/* Lender */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Lender</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Lender</label>
                   <select value={filterLender} onChange={e => setFilterLender(e.target.value)}
                     className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none min-w-[140px]">
                     <option value="">All</option>
@@ -1302,35 +1302,35 @@ export default function LoansPage() {
                 </div>
                 {/* State */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">State</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">State</label>
                   <input type="text" value={filterState} onChange={e => setFilterState(e.target.value)}
                     placeholder="e.g. TX"
-                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-zinc-600"
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-muted-foreground"
                   />
                 </div>
                 {/* Rate > */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Rate &gt;</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Rate &gt;</label>
                   <input type="number" step="0.125" value={filterRateMin} onChange={e => setFilterRateMin(e.target.value)}
                     placeholder="6.5"
-                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-zinc-600"
+                    className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none w-20 placeholder:text-muted-foreground"
                   />
                 </div>
                 {/* Closing date range */}
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Close From</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Close From</label>
                   <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
                     className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Close To</label>
+                  <label className="block text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Close To</label>
                   <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)}
                     className="text-[11px] font-mono px-2 py-1 border border-[#2A2A2A] rounded bg-[#1A1A1A] text-[#F0F0F0] outline-none"
                   />
                 </div>
               </div>
-              <button onClick={clearAllFilters} className="mt-3 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 underline">Clear All Filters</button>
+              <button onClick={clearAllFilters} className="mt-3 text-[11px] font-mono text-muted-foreground hover:text-foreground/80 underline">Clear All Filters</button>
             </div>
           )}
         </div>
@@ -1575,7 +1575,7 @@ export default function LoansPage() {
                               {/* Delete button */}
                               <button
                                 onClick={e => { e.stopPropagation(); setDeletingLoanId(loan.id) }}
-                                className="opacity-0 group-hover/row:opacity-100 text-zinc-600 hover:text-red-400 transition-all ml-auto"
+                                className="opacity-0 group-hover/row:opacity-100 text-muted-foreground hover:text-red-400 transition-all ml-auto"
                                 title="Delete loan"
                               >
                                 <Trash2 size={12} />
@@ -1749,22 +1749,22 @@ export default function LoansPage() {
                           <td key={col.id} className="px-2 py-3" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center gap-1 opacity-40 group-hover/row:opacity-100 transition-opacity">
                               {tel && (
-                                <a href={tel} title={`Call ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-green-500/20 text-zinc-400 hover:text-green-400 transition-colors">
+                                <a href={tel} title={`Call ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-green-500/20 text-muted-foreground hover:text-green-400 transition-colors">
                                   <Phone size={14} />
                                 </a>
                               )}
                               {smsHref && (
-                                <a href={smsHref} title={`Text ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-blue-500/20 text-zinc-400 hover:text-blue-400 transition-colors">
+                                <a href={smsHref} title={`Text ${fmtPhone(phone)}`} className="p-1.5 rounded hover:bg-blue-500/20 text-muted-foreground hover:text-blue-400 transition-colors">
                                   <MessageSquare size={14} />
                                 </a>
                               )}
                               {mailto && (
-                                <a href={mailto} title={`Email ${email}`} className="p-1.5 rounded hover:bg-amber-500/20 text-zinc-400 hover:text-[#C9A84C] transition-colors">
+                                <a href={mailto} title={`Email ${email}`} className="p-1.5 rounded hover:bg-amber-500/20 text-muted-foreground hover:text-[#C9A84C] transition-colors">
                                   <Mail size={14} />
                                 </a>
                               )}
                               {!tel && !smsHref && !mailto && (
-                                <span className="text-[11px] font-mono text-zinc-600">No contact</span>
+                                <span className="text-[11px] font-mono text-muted-foreground">No contact</span>
                               )}
                             </div>
                           </td>

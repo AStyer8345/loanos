@@ -173,14 +173,14 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
         <SectionLabel>CURRENT RATES</SectionLabel>
         <div className="space-y-2">
           {/* Header */}
-          <div className="grid grid-cols-3 gap-2 text-zinc-500 pb-1 border-b border-input" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
+          <div className="grid grid-cols-3 gap-2 text-muted-foreground pb-1 border-b border-input" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
             <span>PRODUCT</span>
             <span>RATE</span>
-            <span>APR <span className="text-zinc-600">(auto)</span></span>
+            <span>APR <span className="text-muted-foreground">(auto)</span></span>
           </div>
           {rows.map((row, i) => (
             <div key={row.product} className="grid grid-cols-3 gap-2 items-center">
-              <span className="text-zinc-400" style={{ fontSize: 11 }}>{row.product}</span>
+              <span className="text-muted-foreground" style={{ fontSize: 11 }}>{row.product}</span>
               <Input
                 placeholder="6.875"
                 value={row.rate}
@@ -230,7 +230,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
               id="direction"
               value={direction}
               onChange={e => setDirection(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-1.5 focus:outline-none"
+              className="w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
               style={{ fontFamily: 'inherit' }}
             >
               <option value="">Select direction...</option>
@@ -248,7 +248,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
               id="depth"
               value={depth}
               onChange={e => setDepth(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-1.5 focus:outline-none"
+              className="w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 focus:outline-none"
               style={{ fontFamily: 'inherit' }}
             >
               <option value="short">Short & Sweet</option>
@@ -307,23 +307,23 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
       {/* Confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowConfirm(false)}>
-          <div className="bg-card border border-zinc-700 rounded-lg p-6 max-w-sm w-full mx-4 space-y-4" onClick={e => e.stopPropagation()}>
-            <h3 className="text-zinc-100 font-bold text-sm">Confirm Send</h3>
-            <p className="text-zinc-400 text-xs leading-relaxed">
+          <div className="bg-card border border-input rounded-lg p-6 max-w-sm w-full mx-4 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-foreground font-bold text-sm">Confirm Send</h3>
+            <p className="text-muted-foreground text-xs leading-relaxed">
               This will publish a rate update page and send Mailchimp campaigns to:
             </p>
             <ul className="text-xs space-y-1">
               {audiences.includes('borrower') && (
-                <li className="text-zinc-200">• <strong>Borrowers / Past Clients</strong> list</li>
+                <li className="text-foreground">• <strong>Borrowers / Past Clients</strong> list</li>
               )}
               {audiences.includes('realtor') && (
-                <li className="text-zinc-200">• <strong>Realtors / Partners</strong> list</li>
+                <li className="text-foreground">• <strong>Realtors / Partners</strong> list</li>
               )}
               {audiences.length === 0 && (
-                <li className="text-zinc-500">No audiences selected — page only, no emails.</li>
+                <li className="text-muted-foreground">No audiences selected — page only, no emails.</li>
               )}
             </ul>
-            <p className="text-zinc-500 text-xs">This cannot be undone.</p>
+            <p className="text-muted-foreground text-xs">This cannot be undone.</p>
             <div className="flex gap-2 justify-end pt-2">
               <Btn variant="ghost" onClick={() => setShowConfirm(false)}>Cancel</Btn>
               <Btn variant="secondary" onClick={() => { setShowConfirm(false); handlePublish() }}>
@@ -350,7 +350,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
             </div>
             <Btn onClick={handleSchedule} disabled={isLoading}>Confirm</Btn>
           </div>
-          <p className="text-zinc-500 mt-2" style={{ fontSize: 9 }}>
+          <p className="text-muted-foreground mt-2" style={{ fontSize: 9 }}>
             Must be at least 15 minutes in the future. Page publishes immediately; email sends at scheduled time.
           </p>
         </Card>
@@ -365,16 +365,16 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
           <SectionLabel>PREVIEW</SectionLabel>
           <div className="space-y-2 text-xs">
             <div>
-              <span className="text-zinc-500">URL: </span>
+              <span className="text-muted-foreground">URL: </span>
               <a href={preview.pageUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD }}>
                 {preview.pageUrl}
               </a>
             </div>
             {preview.borrowerSubject && (
-              <div><span className="text-zinc-500">Borrower subject: </span><span className="text-zinc-200">{preview.borrowerSubject}</span></div>
+              <div><span className="text-muted-foreground">Borrower subject: </span><span className="text-foreground">{preview.borrowerSubject}</span></div>
             )}
             {preview.realtorSubject && (
-              <div><span className="text-zinc-500">Realtor subject: </span><span className="text-zinc-200">{preview.realtorSubject}</span></div>
+              <div><span className="text-muted-foreground">Realtor subject: </span><span className="text-foreground">{preview.realtorSubject}</span></div>
             )}
           </div>
         </Card>

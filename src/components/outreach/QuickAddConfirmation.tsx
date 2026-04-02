@@ -23,8 +23,8 @@ const FIELD_LABELS: [keyof ExtractedContact, string][] = [
 
 export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, onCancel }: Props) {
   return (
-    <div className="rounded-lg border border-zinc-700 bg-card p-3 text-xs font-mono">
-      <div className="mb-2 font-semibold text-zinc-100">Confirm New Contact</div>
+    <div className="rounded-lg border border-input bg-card p-3 text-xs font-mono">
+      <div className="mb-2 font-semibold text-foreground">Confirm New Contact</div>
 
       {duplicate && (
         <div className="mb-2 rounded bg-amber-500/10 border border-amber-500/40 p-2 text-amber-400">
@@ -41,8 +41,8 @@ export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, 
           if (!val) return null
           return (
             <div key={key} className="flex gap-2">
-              <span className="text-zinc-500 w-20 shrink-0">{label}:</span>
-              <span className="text-zinc-200 font-medium">{val}</span>
+              <span className="text-muted-foreground w-20 shrink-0">{label}:</span>
+              <span className="text-foreground font-medium">{val}</span>
             </div>
           )
         })}
@@ -57,7 +57,7 @@ export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, 
         </button>
         <button
           onClick={onCancel}
-          className="rounded border border-zinc-600 px-3 py-1.5 text-zinc-400 hover:bg-zinc-800 transition-colors font-mono"
+          className="rounded border border-input px-3 py-1.5 text-muted-foreground hover:bg-muted transition-colors font-mono"
         >
           Cancel
         </button>

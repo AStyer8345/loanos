@@ -4,6 +4,7 @@ import './globals.css'
 import { OutreachChatProvider } from '@/components/outreach/OutreachChatContext'
 import LoanOSChat from '@/components/crm/LoanOSChat'
 import { getBranding } from '@/lib/branding/getBranding'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
 const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-mono' })
 const ibmPlexSans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans' })
@@ -26,17 +27,19 @@ export default async function RootLayout({
     : ''
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {cssVars && (
           <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         )}
       </head>
-      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} ${ibmPlexSans.className} bg-gray-950 antialiased`}>
-        <OutreachChatProvider>
-          {children}
-          <LoanOSChat />
-        </OutreachChatProvider>
+      <body className={`${ibmPlexMono.variable} ${ibmPlexSans.variable} ${ibmPlexSans.className} antialiased`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+        <ThemeProvider>
+          <OutreachChatProvider>
+            {children}
+            <LoanOSChat />
+          </OutreachChatProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

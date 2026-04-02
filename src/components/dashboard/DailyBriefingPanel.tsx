@@ -56,9 +56,9 @@ export default function DailyBriefingPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Brain className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Daily Briefing</span>
+          <span className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-widest">Daily Briefing</span>
           {data && (
-            <span className="text-xs font-mono text-zinc-600">
+            <span className="text-xs font-mono text-muted-foreground">
               — generated {new Date(data.generatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
             </span>
           )}
@@ -66,7 +66,7 @@ export default function DailyBriefingPanel() {
         <button
           onClick={runBriefing}
           disabled={loading}
-          className="flex items-center gap-1.5 text-xs font-mono bg-card border border-input hover:border-amber-600/50 text-zinc-400 hover:text-amber-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs font-mono bg-card border border-input hover:border-amber-600/50 text-muted-foreground hover:text-amber-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Generating…' : data ? 'Refresh' : 'Run Briefing'}
@@ -98,8 +98,8 @@ export default function DailyBriefingPanel() {
               { label: 'Pending Drafts', count: data.pendingDrafts.length },
             ].map(s => (
               <Card key={s.label} className="border-l-[3px] border-l-amber-600/50 p-3">
-                <div className="text-xl font-mono font-bold text-zinc-100">{s.count}</div>
-                <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mt-0.5">{s.label}</div>
+                <div className="text-xl font-mono font-bold text-foreground">{s.count}</div>
+                <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mt-0.5">{s.label}</div>
               </Card>
             ))}
           </div>
@@ -107,7 +107,7 @@ export default function DailyBriefingPanel() {
           {/* AI Summary */}
           {data.summary && (
             <Card className="border-l-[3px] border-l-amber-600 px-4 py-3">
-              <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
+              <p className="text-sm font-mono text-foreground/80 leading-relaxed">{data.summary}</p>
             </Card>
           )}
 
@@ -115,8 +115,8 @@ export default function DailyBriefingPanel() {
           {totalItems > 0 && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s Actions</span>
-                <span className="text-xs font-mono text-zinc-500">{checkedCount}/{totalItems} done</span>
+                <span className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-widest">Today&apos;s Actions</span>
+                <span className="text-xs font-mono text-muted-foreground">{checkedCount}/{totalItems} done</span>
               </div>
               <div className="h-1 bg-input rounded-full overflow-hidden mb-3">
                 <div
@@ -145,18 +145,18 @@ export default function DailyBriefingPanel() {
                     <div className="flex-shrink-0 mt-0.5">
                       {done
                         ? <CheckCircle2 size={16} className="text-emerald-500" />
-                        : <Circle size={16} className="text-zinc-600" />
+                        : <Circle size={16} className="text-muted-foreground" />
                       }
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wide">#{item.rank}</span>
-                        <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wide">#{item.rank}</span>
+                        <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                           {item.contact}
                         </span>
                       </div>
-                      <p className={`text-xs font-mono ${done ? 'text-zinc-600' : 'text-zinc-400'}`}>{item.action}</p>
-                      {item.reason && <p className="text-[10px] font-mono text-zinc-600 mt-0.5">{item.reason}</p>}
+                      <p className={`text-xs font-mono ${done ? 'text-muted-foreground' : 'text-muted-foreground'}`}>{item.action}</p>
+                      {item.reason && <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{item.reason}</p>}
                       {item.snippet && !done && (
                         <p className="text-[10px] font-mono text-amber-500/80 mt-1 italic">&ldquo;{item.snippet}&rdquo;</p>
                       )}
@@ -168,7 +168,7 @@ export default function DailyBriefingPanel() {
           </div>
 
           {checkedCount === totalItems && totalItems > 0 && (
-            <div className="flex flex-col items-center py-6 text-zinc-600">
+            <div className="flex flex-col items-center py-6 text-muted-foreground">
               <CheckCircle2 size={28} className="text-emerald-500 mb-2" />
               <p className="text-sm font-mono">All done for today.</p>
             </div>

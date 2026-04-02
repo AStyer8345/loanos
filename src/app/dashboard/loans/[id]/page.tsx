@@ -343,13 +343,13 @@ function fmtPhone(val: string | null | undefined): string | null {
 
 function PhoneLink({ phone }: { phone: string | null | undefined }) {
   const fmt = fmtPhone(phone)
-  if (!fmt) return <span className="text-zinc-600">—</span>
+  if (!fmt) return <span className="text-muted-foreground">—</span>
   const digits = (phone ?? '').replace(/\D/g, '')
   return <a href={`tel:${digits}`} className="hover:underline">{fmt}</a>
 }
 
 function EmailLink({ email }: { email: string | null | undefined }) {
-  if (!email) return <span className="text-zinc-600">—</span>
+  if (!email) return <span className="text-muted-foreground">—</span>
   return <a href={`mailto:${email}`} className="hover:underline">{email}</a>
 }
 
@@ -471,10 +471,10 @@ export default function LoanDetailPage() {
   }, [loanId, displayName, setActiveRecord])
 
   if (loading) return (
-    <div className="flex items-center justify-center h-96 text-zinc-500 text-sm font-mono">Loading…</div>
+    <div className="flex items-center justify-center h-96 text-muted-foreground text-sm font-mono">Loading…</div>
   )
   if (!loan) return (
-    <div className="flex flex-col items-center justify-center h-96 gap-3 text-zinc-500 font-mono">
+    <div className="flex flex-col items-center justify-center h-96 gap-3 text-muted-foreground font-mono">
       <AlertCircle size={24} />
       <p>Loan not found</p>
       <Link href="/dashboard/loans" className="text-amber-400 hover:underline text-sm">← Back to loans</Link>
@@ -521,7 +521,7 @@ export default function LoanDetailPage() {
         <div className="px-6 pt-3 pb-0">
           {/* Row 1: Breadcrumb + Actions */}
           <div className="flex items-center justify-between mb-2">
-            <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 font-mono transition-colors">
+            <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground/80 font-mono transition-colors">
               <ArrowLeft size={11} /> Loans
             </Link>
             <div className="flex items-center gap-2">
@@ -533,13 +533,13 @@ export default function LoanDetailPage() {
               <div className="relative" ref={actionsRef}>
                 <button
                   onClick={() => setActionsOpen(prev => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded border border-zinc-700 transition-colors font-mono"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium bg-muted hover:bg-input text-foreground rounded border border-input transition-colors font-mono"
                 >
                   Actions <ChevronDown size={10} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                 </button>
                 {actionsOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-card border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
-                    <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-card border border-input rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
+                    <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Automations</p>
                     {[
                       { label: 'Send PA Email', automationId: 'pre-approval' },
                       { label: 'Send CD Email', automationId: 'final-cd' },
@@ -553,25 +553,25 @@ export default function LoanDetailPage() {
                       <button
                         key={label}
                         onClick={() => { setActiveTab('automations'); setSelectedAutomationId(automationId); setActionsOpen(false) }}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-foreground/80 hover:bg-muted hover:text-foreground transition-colors flex items-center gap-2"
                       >
-                        <Zap size={12} className="text-zinc-500 shrink-0" />
+                        <Zap size={12} className="text-muted-foreground shrink-0" />
                         {label}
                       </button>
                     ))}
                     <div className="border-t border-input mt-1 pt-1">
-                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">Tools</p>
+                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Tools</p>
                       <Link
                         href={`/dashboard/scenarios/new?loan_id=${loanId}`}
                         onClick={() => setActionsOpen(false)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-foreground/80 hover:bg-muted hover:text-foreground transition-colors flex items-center gap-2"
                       >
                         <span className="shrink-0">📐</span>
                         Create Scenario
                       </Link>
                     </div>
                     <div className="border-t border-input mt-1 pt-1">
-                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">View</p>
+                      <p className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">View</p>
                       {[
                         { label: 'Activity Log', tab: 'activity' as const },
                         { label: 'Email History', tab: 'emails' as const },
@@ -580,9 +580,9 @@ export default function LoanDetailPage() {
                         <button
                           key={label}
                           onClick={() => { setActiveTab(tab); setActionsOpen(false) }}
-                          className="w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors flex items-center gap-2"
+                          className="w-full text-left px-3 py-2 text-xs font-mono text-foreground/80 hover:bg-muted hover:text-foreground transition-colors flex items-center gap-2"
                         >
-                          <ChevronRight size={12} className="text-zinc-500 shrink-0" />
+                          <ChevronRight size={12} className="text-muted-foreground shrink-0" />
                           {label}
                         </button>
                       ))}
@@ -606,17 +606,17 @@ export default function LoanDetailPage() {
           {/* Row 2: Name + Days to Close */}
           <div className="flex items-baseline justify-between gap-4 mb-3">
             <div className="min-w-0">
-              <h1 className="font-mono font-bold text-zinc-100 text-lg leading-tight truncate">
+              <h1 className="font-mono font-bold text-foreground text-lg leading-tight truncate">
                 {loan.loan_name || displayName}
               </h1>
-              <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+              <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
                 {loan.contact_id ? (
-                  <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-zinc-300 transition-colors">
+                  <Link href={`/dashboard/contacts/${loan.contact_id}`} className="hover:text-foreground/80 transition-colors">
                     {displayName}
                   </Link>
                 ) : displayName}
-                {(loan.loan_number || loan.arive_loan_id) ? <span className="text-zinc-600"> · #{loan.loan_number || loan.arive_loan_id}</span> : ''}
-                {productLabel ? <span className="text-zinc-600"> · {productLabel}</span> : ''}
+                {(loan.loan_number || loan.arive_loan_id) ? <span className="text-muted-foreground"> · #{loan.loan_number || loan.arive_loan_id}</span> : ''}
+                {productLabel ? <span className="text-muted-foreground"> · {productLabel}</span> : ''}
               </p>
             </div>
             {(() => {
@@ -626,10 +626,10 @@ export default function LoanDetailPage() {
               if (dtc == null) return null
               return (
                 <div className="shrink-0 text-right">
-                  <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-zinc-100'}`}>
+                  <span className={`text-2xl font-mono font-bold leading-none ${isUrgent ? 'text-amber-400' : 'text-foreground'}`}>
                     {Math.abs(dtc)}
                   </span>
-                  <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-zinc-500'}`}>
+                  <p className={`text-[9px] font-mono font-medium mt-0.5 ${isUrgent ? 'text-amber-400/80' : 'text-muted-foreground'}`}>
                     {dtc < 0 ? 'DAYS PAST CLOSE' : dtc === 0 ? 'CLOSES TODAY' : 'DAYS TO CLOSE'}
                   </p>
                 </div>
@@ -677,14 +677,14 @@ export default function LoanDetailPage() {
               />
               {loan.referring_agent_name && (
                 <div className="shrink-0">
-                  <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">Realtor</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Realtor</p>
                   <Link
                     href={
                       loan.referral_contact_id
                         ? `/dashboard/contacts/${loan.referral_contact_id}`
                         : `/dashboard/contacts/by-name/${encodeURIComponent(loan.referring_agent_name.trim())}`
                     }
-                    className="text-sm font-mono text-zinc-100 hover:text-zinc-300 transition-colors truncate block max-w-[9rem]"
+                    className="text-sm font-mono text-foreground hover:text-foreground/80 transition-colors truncate block max-w-[9rem]"
                   >
                     {loan.referring_agent_name}
                   </Link>
@@ -751,8 +751,8 @@ export default function LoanDetailPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 text-[11px] font-mono font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'text-zinc-100'
-                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                    ? 'text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground/80'
                 }`}
                 style={activeTab === tab.id ? { borderBottomColor: tabHex } : undefined}
               >
@@ -784,22 +784,22 @@ export default function LoanDetailPage() {
     {/* Delete confirmation modal */}
     {deleteConfirmOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div className="bg-card border border-zinc-700 rounded-xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="bg-card border border-input rounded-xl p-6 w-full max-w-sm shadow-2xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-red-950/50 rounded-lg">
               <Trash2 size={18} className="text-red-400" />
             </div>
-            <h2 className="text-sm font-mono font-semibold text-zinc-100">Delete Loan Record</h2>
+            <h2 className="text-sm font-mono font-semibold text-foreground">Delete Loan Record</h2>
           </div>
-          <p className="text-xs font-mono text-zinc-400 mb-2">
-            This will permanently delete <span className="text-zinc-200 font-semibold">{loan.loan_name ?? loan.borrower_name ?? 'this loan'}</span> and all associated data.
+          <p className="text-xs font-mono text-muted-foreground mb-2">
+            This will permanently delete <span className="text-foreground font-semibold">{loan.loan_name ?? loan.borrower_name ?? 'this loan'}</span> and all associated data.
           </p>
           <p className="text-xs font-mono text-red-400 mb-6">This action cannot be undone.</p>
           <div className="flex gap-3 justify-end">
             <button
               onClick={() => setDeleteConfirmOpen(false)}
               disabled={deleting}
-              className="px-4 py-1.5 text-xs font-mono text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors disabled:opacity-50"
+              className="px-4 py-1.5 text-xs font-mono text-foreground/80 bg-muted hover:bg-input rounded transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
@@ -824,12 +824,12 @@ export default function LoanDetailPage() {
 function VitalStat({ label, value, highlight, color }: { label: string; value: string; highlight?: boolean; color?: string }) {
   return (
     <div className="shrink-0">
-      <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <p
         className="text-sm font-mono font-semibold leading-none"
         style={color ? { color } : undefined}
       >
-        {!color && <span className={highlight ? 'text-zinc-100' : 'text-zinc-300'}>{value}</span>}
+        {!color && <span className={highlight ? 'text-foreground' : 'text-foreground/80'}>{value}</span>}
         {color && value}
       </p>
     </div>
@@ -852,7 +852,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
 }) {
   return (
     <div className="shrink-0">
-      <p className="text-[11px] text-zinc-500 uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <div className="flex items-center gap-1.5">
         {editingHeader === field ? (
           <input
@@ -863,11 +863,11 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
             onChange={e => setHeaderInput(e.target.value)}
             onBlur={() => saveHeaderField(field, inputType === 'number' ? (headerInput ? parseFloat(headerInput) : null) : (headerInput || null))}
             onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingHeader(null) }}
-            className="w-32 text-sm font-mono font-semibold text-zinc-100 bg-transparent border-b border-zinc-500 outline-none"
+            className="w-32 text-sm font-mono font-semibold text-foreground bg-transparent border-b border-zinc-500 outline-none"
           />
         ) : (
           <p
-            className="text-sm font-mono font-semibold cursor-pointer hover:text-zinc-100 transition-colors leading-none"
+            className="text-sm font-mono font-semibold cursor-pointer hover:text-foreground transition-colors leading-none"
             style={color ? { color } : undefined}
             onClick={() => { setHeaderInput(rawValue != null ? String(rawValue) : ''); setEditingHeader(field) }}
           >
@@ -1068,28 +1068,28 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 
   return (
     <div>
-      <h3 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Borrower</h3>
+      <h3 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-3">Borrower</h3>
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-          <span className="text-sm font-mono font-bold text-zinc-300">{initials}</span>
+        <div className="w-10 h-10 rounded-full bg-muted border border-input flex items-center justify-center shrink-0">
+          <span className="text-sm font-mono font-bold text-foreground/80">{initials}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-mono font-semibold text-zinc-100 truncate">{fullName}</p>
+          <p className="text-sm font-mono font-semibold text-foreground truncate">{fullName}</p>
           <div className="flex items-center gap-3 mt-0.5">
             {email && (
-              <a href={`mailto:${email}`} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors truncate">
+              <a href={`mailto:${email}`} className="text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors truncate">
                 {email}
               </a>
             )}
             {phone && (
-              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors shrink-0">
+              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors shrink-0">
                 {fmtPhone(phone)}
               </a>
             )}
           </div>
         </div>
         {loan.contact_id && contact && (
-          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[11px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors shrink-0">
+          <Link href={`/dashboard/contacts/${loan.contact_id}`} className="text-[11px] font-mono text-muted-foreground hover:text-muted-foreground transition-colors shrink-0">
             View →
           </Link>
         )}
@@ -1099,8 +1099,8 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
       {(loan.employer_name || loan.position_description) && (
         <div className="pt-2 border-t border-input/40">
           <div className="flex items-center gap-2">
-            <Briefcase size={10} className="text-zinc-600 shrink-0" />
-            <span className="text-xs font-mono text-zinc-300 truncate">
+            <Briefcase size={10} className="text-muted-foreground shrink-0" />
+            <span className="text-xs font-mono text-foreground/80 truncate">
               {[loan.position_description, loan.employer_name].filter(Boolean).join(' at ')}
             </span>
             {loan.self_employed && (
@@ -1114,15 +1114,15 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
       {loan.co_borrower_name && (
         <div className="pt-2 border-t border-input/40">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-zinc-600">Co-Borrower:</span>
-            <span className="text-xs font-mono text-zinc-300">{loan.co_borrower_name}</span>
+            <span className="text-[11px] font-mono text-muted-foreground">Co-Borrower:</span>
+            <span className="text-xs font-mono text-foreground/80">{loan.co_borrower_name}</span>
             {loan.co_borrower_phone && (
-              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-zinc-600 hover:text-zinc-400 transition-colors">
+              <a href={`tel:${loan.co_borrower_phone.replace(/\D/g, '')}`} className="text-muted-foreground hover:text-muted-foreground transition-colors">
                 <Phone size={10} />
               </a>
             )}
             {loan.co_borrower_email && (
-              <a href={`mailto:${loan.co_borrower_email}`} className="text-zinc-600 hover:text-zinc-400 transition-colors">
+              <a href={`mailto:${loan.co_borrower_email}`} className="text-muted-foreground hover:text-muted-foreground transition-colors">
                 <Mail size={10} />
               </a>
             )}
@@ -1249,14 +1249,14 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest">Parties</h2>
+        <h2 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Parties</h2>
         <div className="flex items-center gap-1.5">
           {groupButtons.map(btn => btn.href && (
             <a
               key={btn.label}
               href={btn.href}
               title={btn.title}
-              className="text-[9px] font-mono px-2 py-0.5 rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors whitespace-nowrap"
+              className="text-[9px] font-mono px-2 py-0.5 rounded border border-input text-muted-foreground hover:text-foreground hover:border-zinc-500 transition-colors whitespace-nowrap"
             >
               {btn.label}
             </a>
@@ -1268,16 +1268,16 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
           const roleHex = ROLE_HEX[p.role] ?? '#6B7280'
           return (
-            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-zinc-700 transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
+            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-input transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
               {/* Name + Role */}
               <div className="mb-2">
                 <p className="text-[11px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
                 {p.contactId ? (
-                  <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-zinc-100 hover:text-zinc-300 transition-colors truncate block mt-0.5">
+                  <Link href={`/dashboard/contacts/${p.contactId}`} className="text-sm font-mono font-medium text-foreground hover:text-foreground/80 transition-colors truncate block mt-0.5">
                     {p.name || '—'}
                   </Link>
                 ) : (
-                  <p className="text-sm font-mono font-medium text-zinc-100 truncate mt-0.5">{p.name || '—'}</p>
+                  <p className="text-sm font-mono font-medium text-foreground truncate mt-0.5">{p.name || '—'}</p>
                 )}
               </div>
 
@@ -1286,7 +1286,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
                 {p.phone && (
                   <a
                     href={`tel:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
                     style={{ ['--hover-bg' as string]: roleHex }}
                     title={`Call ${fmtPhone(p.phone)}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
@@ -1298,7 +1298,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
                 {p.phone && (
                   <a
                     href={`sms:${p.phone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
                     title={`Text ${fmtPhone(p.phone)}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -1309,7 +1309,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
                 {p.email && (
                   <a
                     href={`mailto:${p.email}`}
-                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-zinc-800/80 text-zinc-500 hover:text-white transition-colors"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted/80 text-muted-foreground hover:text-white transition-colors"
                     title={`Email ${p.email}`}
                     onMouseEnter={e => (e.currentTarget.style.background = `${roleHex}33`)}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -1321,7 +1321,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
 
               {/* Last Contacted timestamp */}
               {lastContacted ? (
-                <p className="text-[9px] font-mono text-zinc-600">Last contacted {fmtRelative(lastContacted)}</p>
+                <p className="text-[9px] font-mono text-muted-foreground">Last contacted {fmtRelative(lastContacted)}</p>
               ) : (
                 <p className="text-[9px] font-mono text-zinc-700">No contact logged</p>
               )}
@@ -1463,11 +1463,11 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
             onChange={e => setEditValue(e.target.value)}
             onBlur={() => handleSave(d.field!)}
             onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(null) }}
-            className="w-28 text-[11px] font-mono text-zinc-200 bg-transparent border-b border-zinc-500 outline-none text-right"
+            className="w-28 text-[11px] font-mono text-foreground bg-transparent border-b border-zinc-500 outline-none text-right"
           />
         ) : (
           <span
-            className={`text-[11px] font-mono text-right shrink-0 ${canEdit ? 'cursor-pointer hover:text-zinc-100' : ''} transition-colors`}
+            className={`text-[11px] font-mono text-right shrink-0 ${canEdit ? 'cursor-pointer hover:text-foreground' : ''} transition-colors`}
             style={{ color: d.value ? '#d4d4d8' : '#3f3f46' }}
             onClick={canEdit ? () => { setEditValue(d.value ?? ''); setEditing(d.field!) } : undefined}
           >
@@ -1479,15 +1479,15 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
   }
 
   return (
-    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-4 py-2 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
+      <div className="px-4 py-2 bg-muted/80 border-b border-input flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
           <Clock size={11} className="text-[#C9A84C]" /> Key Dates
         </h2>
         {populatedSecondary.length > 0 && (
           <button
             onClick={() => setExpanded(e => !e)}
-            className="text-[11px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors flex items-center gap-1"
+            className="text-[11px] font-mono text-muted-foreground hover:text-muted-foreground transition-colors flex items-center gap-1"
           >
             {expanded ? 'Less' : `+${populatedSecondary.length} more`}
             <ChevronDown size={10} className={expanded ? 'rotate-180 transition-transform' : 'transition-transform'} />
@@ -1623,19 +1623,19 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
-    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
+    <div className="bg-card/80 border border-input rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
       {/* Header */}
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between shrink-0">
+      <div className="px-4 py-2.5 bg-muted/80 border-b border-input flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <Activity size={11} className="text-[#C9A84C]" />
-          <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
             Activity {feedItems.length > 0 && `(${feedItems.length})`}
           </h2>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div className="px-3 py-2.5 border-b border-zinc-700/60 shrink-0">
+      <div className="px-3 py-2.5 border-b border-input/60 shrink-0">
         <div className="flex gap-1.5">
           {(['call', 'text', 'email', 'note'] as const).map(type => {
             const cfg = LOAN_ACTIVITY_CONFIG[type]
@@ -1670,7 +1670,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
               onChange={e => setLogNotes(e.target.value)}
               placeholder={`Notes about this ${activeType}…`}
               rows={2}
-              className="w-full bg-card border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
+              className="w-full bg-card border border-input rounded px-3 py-2 text-xs font-mono text-foreground placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
             />
             <div className="flex gap-2 mt-1.5">
               <button
@@ -1682,7 +1682,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
               </button>
               <button
                 onClick={() => { setActiveType(null); setLogNotes('') }}
-                className="px-2.5 py-1 rounded text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="px-2.5 py-1 rounded text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors"
               >
                 Cancel
               </button>
@@ -1695,7 +1695,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       <div className="flex-1 overflow-y-auto">
         {feedItems.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-xs text-zinc-600 font-mono">No activity yet — log a call, text, or note above.</p>
+            <p className="text-xs text-muted-foreground font-mono">No activity yet — log a call, text, or note above.</p>
           </div>
         ) : (
           feedItems.map(item => {
@@ -1719,7 +1719,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
             return (
               <div key={item.id} className="border-b border-input/50">
                 <div
-                  className="flex gap-2.5 px-4 py-2.5 items-center cursor-pointer hover:bg-zinc-800/30 transition-colors"
+                  className="flex gap-2.5 px-4 py-2.5 items-center cursor-pointer hover:bg-muted/30 transition-colors"
                   onClick={() => toggleExpanded(item.id)}
                 >
                   <div
@@ -1732,19 +1732,19 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[11px] font-mono font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[11px] font-mono text-zinc-600">{timeLabel}</span>
-                        <ChevronDown size={10} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                        <span className="text-[11px] font-mono text-muted-foreground">{timeLabel}</span>
+                        <ChevronDown size={10} className="text-muted-foreground transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
                       </div>
                     </div>
                     {!isExpanded && preview && (
-                      <p className="text-[11px] font-mono text-zinc-600 mt-0.5 truncate">{preview}</p>
+                      <p className="text-[11px] font-mono text-muted-foreground mt-0.5 truncate">{preview}</p>
                     )}
                   </div>
                 </div>
                 {isExpanded && (
                   <div className="px-4 pb-3 pl-12">
                     {item.summary && (
-                      <p className="text-[11px] font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap mb-2">{item.summary}</p>
+                      <p className="text-[11px] font-mono text-foreground/80 leading-relaxed whitespace-pre-wrap mb-2">{item.summary}</p>
                     )}
                     <button
                       onClick={() => handleDelete(item.id)}
@@ -1798,11 +1798,11 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
   }
 
   return (
-    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
+    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 bg-muted/80 border-b border-input flex items-center justify-between">
+        <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Documents</h2>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-zinc-500 font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
+          <span className="text-[11px] text-muted-foreground font-mono">{docs.length} file{docs.length !== 1 ? 's' : ''}</span>
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -1815,11 +1815,11 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
       </div>
       {docs.length === 0 ? (
         <div className="py-8 text-center space-y-3">
-          <p className="text-xs text-zinc-500 font-mono">No documents uploaded</p>
+          <p className="text-xs text-muted-foreground font-mono">No documents uploaded</p>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono border border-zinc-700 text-zinc-400 hover:border-[#C9A84C] hover:text-[#C9A84C] rounded transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono border border-input text-muted-foreground hover:border-[#C9A84C] hover:text-[#C9A84C] rounded transition-colors disabled:opacity-50"
           >
             <Upload size={10} /> Upload Document
           </button>
@@ -1829,16 +1829,16 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
           {docs.map((doc, i) => (
             <div
               key={doc.id}
-              className={`flex items-center justify-between px-3 py-2 hover:bg-zinc-800/40 transition-colors ${i > 0 ? 'border-t border-zinc-700/50' : ''}`}
+              className={`flex items-center justify-between px-3 py-2 hover:bg-muted/40 transition-colors ${i > 0 ? 'border-t border-input/50' : ''}`}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <FileText size={11} className="text-zinc-500 shrink-0" />
-                <span className="text-xs font-mono text-zinc-200 truncate">{doc.file_name}</span>
+                <FileText size={11} className="text-muted-foreground shrink-0" />
+                <span className="text-xs font-mono text-foreground truncate">{doc.file_name}</span>
               </div>
               <button
                 onClick={() => handleDownload(doc)}
                 disabled={signingId === doc.id}
-                className="text-zinc-500 hover:text-zinc-300 disabled:opacity-50 transition-colors ml-2 shrink-0"
+                className="text-muted-foreground hover:text-foreground/80 disabled:opacity-50 transition-colors ml-2 shrink-0"
                 title="Download"
               >
                 {signingId === doc.id ? <span className="text-[11px] font-mono">…</span> : <Download size={11} />}
@@ -1897,7 +1897,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
 
   return (
     <div>
-      <h2 className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-3">Milestones</h2>
+      <h2 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-3">Milestones</h2>
       <div className="flex flex-nowrap items-start gap-0 overflow-x-auto">
         {milestones.map((m, i) => {
           const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
@@ -1937,13 +1937,13 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
                       <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: m.hex }} />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
+                    <div className="w-5 h-5 rounded-full border border-input shrink-0" />
                   )}
                 </div>
                 {/* Label — colored when complete/active */}
                 <p
                   className={`text-[11px] font-mono font-medium text-center leading-tight line-clamp-2 ${
-                    isPending ? 'text-zinc-600' : ''
+                    isPending ? 'text-muted-foreground' : ''
                   }`}
                   style={isComplete ? { color: m.hex } : isActive ? { color: m.hex } : undefined}
                 >
@@ -1952,7 +1952,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
                 {/* Sub-line: date or status */}
                 {sub && (
                   <p className={`text-[9px] font-mono text-center leading-tight mt-0.5 ${
-                    isActive ? 'text-zinc-400' : 'text-zinc-600'
+                    isActive ? 'text-muted-foreground' : 'text-muted-foreground'
                   }`}>
                     {sub}
                   </p>
@@ -2099,8 +2099,8 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   }, [draft, searchContacts, editing])
 
   return (
-    <div className={`flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-zinc-700/60' : ''}`}>
-      <span className={`w-40 shrink-0 text-xs font-mono leading-5 mt-0.5 ${labelColor ?? 'text-zinc-500'}`}>{label}</span>
+    <div className={`flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-input/60' : ''}`}>
+      <span className={`w-40 shrink-0 text-xs font-mono leading-5 mt-0.5 ${labelColor ?? 'text-muted-foreground'}`}>{label}</span>
       <div className="flex-1 min-w-0">
         {editing && searchContacts ? (
           <>
@@ -2118,27 +2118,27 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               onBlur={commit}
               onKeyDown={onKeyDown}
               placeholder="Type to search contacts…"
-              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full placeholder-zinc-600"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-muted text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full placeholder-zinc-600"
             />
             {(loadingSuggestions || suggestions.length > 0) && dropdownRect && typeof document !== 'undefined' && createPortal(
               <div
                 style={{ position: 'fixed', top: dropdownRect.top, left: dropdownRect.left, width: Math.max(dropdownRect.width, 256), zIndex: 9999 }}
-                className="bg-zinc-800 border border-zinc-600 rounded shadow-xl max-h-52 overflow-y-auto"
+                className="bg-muted border border-input rounded shadow-xl max-h-52 overflow-y-auto"
               >
                 {loadingSuggestions && suggestions.length === 0 && (
-                  <div className="px-3 py-2 text-xs font-mono text-zinc-500">Searching…</div>
+                  <div className="px-3 py-2 text-xs font-mono text-muted-foreground">Searching…</div>
                 )}
                 {suggestions.map(c => (
                   <button
                     key={c.id}
                     onMouseDown={e => { e.preventDefault(); selectContact(c) }}
-                    className="w-full text-left px-3 py-2 hover:bg-zinc-700 transition-colors border-b border-zinc-700/50 last:border-0"
+                    className="w-full text-left px-3 py-2 hover:bg-input transition-colors border-b border-input/50 last:border-0"
                   >
-                    <div className="text-xs font-mono text-zinc-100 font-medium">
+                    <div className="text-xs font-mono text-foreground font-medium">
                       {[c.first_name, c.last_name].filter(Boolean).join(' ')}
                     </div>
-                    {c.email && <div className="text-[11px] font-mono text-zinc-400 mt-0.5">{c.email}</div>}
-                    {c.contact_type && <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-wide">{c.contact_type}</span>}
+                    {c.email && <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{c.email}</div>}
+                    {c.contact_type && <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wide">{c.contact_type}</span>}
                   </button>
                 ))}
               </div>,
@@ -2152,7 +2152,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
-              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-muted text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
             >
               <option value="">—</option>
               {(options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
@@ -2166,22 +2166,22 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
               onChange={e => setDraft(e.target.value)}
               onBlur={commit}
               onKeyDown={onKeyDown}
-              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-zinc-800 text-zinc-100 focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
+              className="text-xs font-mono border border-amber-500/50 rounded px-2 py-0.5 bg-muted text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
             />
           )
         ) : (
           <span
             onClick={canEdit ? startEdit : undefined}
-            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-400 transition-colors' : ''} ${saved ? 'text-[#4ADE80]' : 'text-zinc-200'}`}
+            className={`font-mono text-sm ${canEdit ? 'cursor-text hover:text-amber-400 transition-colors' : ''} ${saved ? 'text-[#4ADE80]' : 'text-foreground'}`}
           >
-            {saved ? '✓ Saved' : (displayValue ?? <span className="text-zinc-600">—</span>)}
+            {saved ? '✓ Saved' : (displayValue ?? <span className="text-muted-foreground">—</span>)}
           </span>
         )}
       </div>
       {canEdit && !editing && !saved && (
         <button
           onClick={startEdit}
-          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-zinc-500 hover:text-amber-400 transition-all shrink-0"
+          className="opacity-0 group-hover:opacity-50 hover:!opacity-100 ml-2 mt-0.5 text-muted-foreground hover:text-amber-400 transition-all shrink-0"
           title="Edit"
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -2211,9 +2211,9 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
 }) {
   return (
-    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
-        <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">{title}</h2>
+    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 bg-muted/80 border-b border-input">
+        <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">{title}</h2>
       </div>
       {fields.map((f, i) => (
         <EditableRow
@@ -2258,7 +2258,7 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
 
   return (
     <div>
-      <p className="text-sm text-zinc-500 font-mono mb-4">
+      <p className="text-sm text-muted-foreground font-mono mb-4">
         Run automations pre-filled with this loan&apos;s details. Output will be an Outlook draft.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2267,14 +2267,14 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
             key={wf.id}
             ref={wf.id === highlightId ? highlightRef : undefined}
             className={`bg-card/80 border rounded-lg shadow-lg shadow-black/50 p-4 transition-colors ${
-              wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-zinc-700 hover:border-zinc-600'
+              wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-input hover:border-input'
             }`}
           >
             <div className="flex items-start gap-3">
               <span className="text-2xl">{wf.icon}</span>
               <div className="flex-1">
-                <p className="font-mono font-medium text-zinc-100 text-sm">{wf.name}</p>
-                <p className="text-xs text-zinc-500 font-mono mt-0.5">{wf.description}</p>
+                <p className="font-mono font-medium text-foreground text-sm">{wf.name}</p>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">{wf.description}</p>
               </div>
             </div>
             <button
@@ -2366,24 +2366,24 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-zinc-700 rounded-lg shadow-xl shadow-black/60 w-full max-w-md">
-        <div className="px-5 py-4 border-b border-zinc-700 flex items-center justify-between">
+      <div className="bg-card border border-input rounded-lg shadow-xl shadow-black/60 w-full max-w-md">
+        <div className="px-5 py-4 border-b border-input flex items-center justify-between">
           <div>
-            <p className="font-mono font-semibold text-zinc-100">{workflow.icon} {workflow.name}</p>
-            <p className="text-xs text-zinc-500 font-mono mt-0.5">For: {loan.borrower_name || loan.loan_name}</p>
+            <p className="font-mono font-semibold text-foreground">{workflow.icon} {workflow.name}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">For: {loan.borrower_name || loan.loan_name}</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 text-lg leading-none">×</button>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground/80 text-lg leading-none">×</button>
         </div>
         <div className="p-5">
           {done ? (
             <div className="flex flex-col items-center py-4 gap-2 text-[#4ADE80]">
               <Check size={28} />
               <p className="font-medium">Sent to n8n</p>
-              <p className="text-xs text-zinc-500 font-mono">Check Outlook for draft</p>
+              <p className="text-xs text-muted-foreground font-mono">Check Outlook for draft</p>
             </div>
           ) : (
             <>
-              <div className="bg-zinc-800 rounded-lg p-3 mb-4 text-xs text-zinc-400 font-mono space-y-1 border border-zinc-700">
+              <div className="bg-muted rounded-lg p-3 mb-4 text-xs text-muted-foreground font-mono space-y-1 border border-input">
                 <p><span className="font-medium">Borrower:</span> {loan.borrower_name || '—'}</p>
                 <p><span className="font-medium">Amount:</span> {fmtCurrency(loan.loan_amount)}</p>
                 {loan.closing_date && <p><span className="font-medium">Closing:</span> {fmtDate(loan.closing_date)}</p>}
@@ -2392,28 +2392,28 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
               {workflow.triggerType === 'pdf' ? (
                 <div>
-                  <label className="block text-xs font-mono text-zinc-400 mb-1">{workflow.triggerLabel}</label>
+                  <label className="block text-xs font-mono text-muted-foreground mb-1">{workflow.triggerLabel}</label>
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-zinc-600 rounded-lg p-6 text-center cursor-pointer hover:border-amber-500/50 transition-colors bg-zinc-800/50"
+                    className="border-2 border-dashed border-input rounded-lg p-6 text-center cursor-pointer hover:border-amber-500/50 transition-colors bg-muted/50"
                   >
                     {file ? (
                       <p className="text-sm text-[#4ADE80] font-medium">{file.name}</p>
                     ) : (
-                      <p className="text-sm text-zinc-500 font-mono">Drop PDF here or click to browse</p>
+                      <p className="text-sm text-muted-foreground font-mono">Drop PDF here or click to browse</p>
                     )}
                   </div>
                   <input ref={fileRef} type="file" accept=".pdf" hidden onChange={e => setFile(e.target.files?.[0] || null)} />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-mono text-zinc-400 mb-1">Referral Details</label>
+                  <label className="block text-xs font-mono text-muted-foreground mb-1">Referral Details</label>
                   <textarea
                     rows={5}
                     value={referralText}
                     onChange={e => setReferralText(e.target.value)}
                     placeholder="Name, contact info, what they're looking for…"
-                    className="w-full text-sm font-mono bg-zinc-800 border border-zinc-600 text-zinc-200 rounded-lg p-2.5 focus:outline-none focus:border-amber-500 resize-none"
+                    className="w-full text-sm font-mono bg-muted border border-input text-foreground rounded-lg p-2.5 focus:outline-none focus:border-amber-500 resize-none"
                   />
                 </div>
               )}
@@ -2518,7 +2518,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     <div className="max-w-2xl">
       {/* Log activity buttons */}
       <div className="flex gap-2 mb-4">
-        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-zinc-800 text-zinc-300 border border-zinc-600 hover:border-amber-500/50 hover:text-amber-400 transition-colors">
+        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-muted text-foreground/80 border border-input hover:border-amber-500/50 hover:text-amber-400 transition-colors">
           <span className="text-sm">📞</span> Log Call
         </button>
         <button onClick={() => setLogModal('email')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-blue-900/30 text-blue-400 border border-blue-800 hover:bg-blue-900/50 transition-colors">
@@ -2531,20 +2531,20 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
 
       {/* Log modal */}
       {logModal && (
-        <div className="mb-4 bg-zinc-800/80 border border-zinc-700 rounded-lg p-4">
+        <div className="mb-4 bg-muted/80 border border-input rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-mono font-semibold text-zinc-100">Log {logModal}</h3>
-            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="text-zinc-500 hover:text-zinc-300"><X size={16} /></button>
+            <h3 className="text-sm font-mono font-semibold text-foreground">Log {logModal}</h3>
+            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="text-muted-foreground hover:text-foreground/80"><X size={16} /></button>
           </div>
           <div className="mb-2">
-            <p className="text-[11px] font-mono text-zinc-500 mb-1">Date/Time: {new Date().toLocaleString()}</p>
+            <p className="text-[11px] font-mono text-muted-foreground mb-1">Date/Time: {new Date().toLocaleString()}</p>
           </div>
           <textarea
             value={logNotes}
             onChange={e => setLogNotes(e.target.value)}
             placeholder={`Notes about this ${logModal}...`}
             rows={3}
-            className="w-full bg-card border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
+            className="w-full bg-card border border-input rounded px-3 py-2 text-xs font-mono text-foreground placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
           />
           <div className="flex gap-2 mt-2">
             <button
@@ -2554,7 +2554,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
             >
               {logSaving ? 'Saving...' : 'Save'}
             </button>
-            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="px-3 py-1.5 rounded text-xs font-mono text-zinc-400 hover:text-zinc-200">
+            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="px-3 py-1.5 rounded text-xs font-mono text-muted-foreground hover:text-foreground">
               Cancel
             </button>
           </div>
@@ -2562,7 +2562,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
       )}
 
       {activity.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
+        <div className="flex flex-col items-center justify-center h-48 gap-2 text-muted-foreground font-mono">
           <Activity size={24} />
           <p className="text-sm">No activity yet</p>
         </div>
@@ -2582,7 +2582,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
               className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 filter === f
                   ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 border border-zinc-600'
+                  : 'bg-muted text-muted-foreground hover:bg-input border border-input'
               }`}
             >
               {label}
@@ -2592,7 +2592,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
       </div>
 
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-32 gap-2 text-zinc-500 font-mono">
+        <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted-foreground font-mono">
           <p className="text-sm">No {filter} activity</p>
         </div>
       ) : (
@@ -2617,7 +2617,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
             return (
               <div key={item.id} className="border-b border-input last:border-b-0">
                 <div
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/40 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/40 transition-colors"
                   onClick={() => toggleExpanded(item.id)}
                 >
                   <div className="shrink-0">
@@ -2630,26 +2630,26 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 justify-between">
                       <div className="flex items-center gap-2 min-w-0">
-                        {typeLabel && <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400 shrink-0">{typeLabel}</span>}
-                        <p className="text-sm font-mono text-zinc-200 truncate">{label}</p>
+                        {typeLabel && <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground shrink-0">{typeLabel}</span>}
+                        <p className="text-sm font-mono text-foreground truncate">{label}</p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[11px] font-mono text-zinc-600">{dateStr}</span>
-                        <ChevronDown size={11} className="text-zinc-600 transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
+                        <span className="text-[11px] font-mono text-muted-foreground">{dateStr}</span>
+                        <ChevronDown size={11} className="text-muted-foreground transition-transform" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />
                       </div>
                     </div>
                     {!isExpanded && previewText && (
-                      <p className="text-xs font-mono text-zinc-500 mt-0.5 truncate">{previewText}</p>
+                      <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate">{previewText}</p>
                     )}
                   </div>
                 </div>
                 {isExpanded && (
                   <div className="px-4 pb-3 pl-11">
                     {summaryText && (
-                      <p className="text-xs font-mono text-zinc-300 leading-relaxed whitespace-pre-wrap mb-2">{summaryText}</p>
+                      <p className="text-xs font-mono text-foreground/80 leading-relaxed whitespace-pre-wrap mb-2">{summaryText}</p>
                     )}
                     {detail && !summaryText && (
-                      <p className="text-xs font-mono text-zinc-400 mb-2">{detail}</p>
+                      <p className="text-xs font-mono text-muted-foreground mb-2">{detail}</p>
                     )}
                     {isManual && (
                       <button
@@ -2681,7 +2681,7 @@ const DRAFT_COLORS: Record<string, string> = {
   final_cd:          'bg-amber-900/40 text-amber-400 border-amber-800',
   review_request:    'bg-purple-900/40 text-purple-400 border-purple-800',
   referral_intro:    'bg-orange-900/40 text-orange-400 border-orange-800',
-  milestone:         'bg-zinc-800/60 text-zinc-300 border-zinc-700',
+  milestone:         'bg-muted/60 text-foreground/80 border-input',
 }
 
 const DRAFT_LABELS: Record<string, string> = {
@@ -2692,7 +2692,7 @@ const DRAFT_LABELS: Record<string, string> = {
 const STATUS_CLASSES: Record<string, string> = {
   pending:   'bg-amber-900/40 text-amber-400 border-amber-800',
   sent:      'bg-green-900/40 text-[#4ADE80] border-green-800',
-  discarded: 'bg-zinc-800 text-zinc-500 border-zinc-700',
+  discarded: 'bg-muted text-muted-foreground border-input',
 }
 
 function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { drafts: EmailDraftRow[]; contactEmails: ContactEmailRow[]; inboundEmails: InboundEmailRow[]; onRefresh: () => void }) {
@@ -2723,7 +2723,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
 
   if (drafts.length === 0 && contactEmails.length === 0 && inboundEmails.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 text-zinc-500 font-mono">
+      <div className="flex flex-col items-center justify-center h-48 gap-2 text-muted-foreground font-mono">
         <Inbox size={24} />
         <p className="text-sm">No emails logged yet</p>
       </div>
@@ -2734,29 +2734,29 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
     <div className="space-y-6 max-w-2xl">
       {drafts.length > 0 && (
       <div className="space-y-3">
-        <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Draft Queue</p>
+        <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Draft Queue</p>
       {drafts.map(draft => {
-        const colorClass = DRAFT_COLORS[draft.automation_name] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
+        const colorClass = DRAFT_COLORS[draft.automation_name] || 'bg-input text-foreground/80 border-input'
         const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
         const isOpen = expanded === draft.id
         return (
-          <div key={draft.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
+          <div key={draft.id} className="border border-input rounded-lg bg-card hover:border-input transition-colors">
             <button onClick={() => setExpanded(isOpen ? null : draft.id)} className="w-full text-left p-4 focus:outline-none">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_CLASSES[draft.status] ?? STATUS_CLASSES.pending}`}>{draft.status}</span>
-                  <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(draft.created_at)}</span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(draft.created_at)}</span>
                 </div>
-                {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                {isOpen ? <ChevronRight className="w-4 h-4 text-muted-foreground rotate-90" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
               </div>
-              <div className="text-sm font-mono font-medium text-zinc-100 mb-1 truncate">{draft.subject}</div>
-              <div className="text-xs font-mono text-zinc-400 truncate">To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}</div>
-              {!isOpen && draft.body_preview && <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{draft.body_preview}</div>}
+              <div className="text-sm font-mono font-medium text-foreground mb-1 truncate">{draft.subject}</div>
+              <div className="text-xs font-mono text-muted-foreground truncate">To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}</div>
+              {!isOpen && draft.body_preview && <div className="text-xs text-muted-foreground mt-2 line-clamp-2">{draft.body_preview}</div>}
             </button>
             {isOpen && (
               <div className="border-t border-input">
-                <div className="bg-zinc-800 rounded-b-lg">
+                <div className="bg-muted rounded-b-lg">
                   <iframe
                     ref={el => { iframeRefs.current[draft.id] = el }}
                     className="w-full border-0 rounded-b-lg"
@@ -2792,28 +2792,28 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
       {/* Inbound emails from n8n / Outlook sync */}
       {inboundEmails.length > 0 && (
         <div className="space-y-3">
-          <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Inbound</p>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Inbound</p>
           {inboundEmails.map(email => {
             const fromName = (email.metadata?.from_name as string) || null
             const isOpen = expanded === email.id
             return (
-              <div key={email.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
+              <div key={email.id} className="border border-input rounded-lg bg-card hover:border-input transition-colors">
                 <button onClick={() => setExpanded(isOpen ? null : email.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border bg-amber-900/30 text-amber-400 border-amber-800">INBOUND</span>
-                      <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(email.occurred_at || email.created_at)}</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(email.occurred_at || email.created_at)}</span>
                     </div>
-                    {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                    {isOpen ? <ChevronRight className="w-4 h-4 text-muted-foreground rotate-90" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                   </div>
-                  <div className="text-sm font-mono font-medium text-zinc-100 truncate mb-1">{email.subject || '(no subject)'}</div>
-                  <div className="text-xs font-mono text-zinc-400 truncate">From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '—')}</div>
+                  <div className="text-sm font-mono font-medium text-foreground truncate mb-1">{email.subject || '(no subject)'}</div>
+                  <div className="text-xs font-mono text-muted-foreground truncate">From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '—')}</div>
                   {!isOpen && email.body_snippet && (
-                    <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{email.body_snippet}</div>
+                    <div className="text-xs text-muted-foreground mt-2 line-clamp-2">{email.body_snippet}</div>
                   )}
                 </button>
                 {isOpen && email.body_snippet && (
-                  <div className="border-t border-input p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                  <div className="border-t border-input p-4 text-xs text-foreground/80 font-mono whitespace-pre-wrap bg-muted/50 rounded-b-lg max-h-64 overflow-y-auto">
                     {email.body_snippet}
                   </div>
                 )}
@@ -2826,26 +2826,26 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
       {/* Permanent audit log from contact_emails */}
       {contactEmails.length > 0 && (
         <div className="space-y-3">
-          <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Email Log</p>
+          <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Email Log</p>
           {contactEmails.map(ce => {
             const src = ce.automation_source ?? 'unknown'
-            const colorClass = DRAFT_COLORS[src] || 'bg-zinc-700 text-zinc-300 border-zinc-600'
+            const colorClass = DRAFT_COLORS[src] || 'bg-input text-foreground/80 border-input'
             const label = DRAFT_LABELS[src] || src.replace(/_/g, ' ')
             const isOpen = expanded === ce.id
             return (
-              <div key={ce.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
+              <div key={ce.id} className="border border-input rounded-lg bg-card hover:border-input transition-colors">
                 <button onClick={() => setExpanded(isOpen ? null : ce.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${colorClass}`}>{label}</span>
-                      <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(ce.sent_at)}</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{fmtRelative(ce.sent_at)}</span>
                     </div>
-                    {isOpen ? <ChevronRight className="w-4 h-4 text-zinc-500 rotate-90" /> : <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                    {isOpen ? <ChevronRight className="w-4 h-4 text-muted-foreground rotate-90" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                   </div>
-                  <div className="text-sm font-mono font-medium text-zinc-100 truncate">{ce.subject}</div>
+                  <div className="text-sm font-mono font-medium text-foreground truncate">{ce.subject}</div>
                 </button>
                 {isOpen && (ce.body_html || ce.body_text) && (
-                  <div className="border-t border-input p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                  <div className="border-t border-input p-4 text-xs text-foreground/80 font-mono whitespace-pre-wrap bg-muted/50 rounded-b-lg max-h-64 overflow-y-auto">
                     {ce.body_html
                       ? <div dangerouslySetInnerHTML={{ __html: ce.body_html }} />
                       : ce.body_text}
@@ -2882,7 +2882,7 @@ const STATUS_HEX_DETAIL: Record<string, string> = {
 }
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span className="text-zinc-500 text-xs font-mono">—</span>
+  if (!status) return <span className="text-muted-foreground text-xs font-mono">—</span>
   const hex = STATUS_HEX_DETAIL[status] ?? STATUS_HEX_DETAIL[status.toLowerCase()] ?? '#52525B'
   return (
     <span
@@ -2921,7 +2921,7 @@ function InlineStatusSelect({ status, loanId, onUpdate }: {
         defaultValue={status ?? ''}
         onChange={handleChange}
         onBlur={() => setOpen(false)}
-        className="text-xs font-mono bg-zinc-800 border border-[#C9A84C]/60 rounded px-2 py-1 text-zinc-100 focus:outline-none focus:border-[#C9A84C]"
+        className="text-xs font-mono bg-muted border border-[#C9A84C]/60 rounded px-2 py-1 text-foreground focus:outline-none focus:border-[#C9A84C]"
       >
         <option value="">— Select Status —</option>
         {LOAN_STATUS_OPTS.map(opt => (
@@ -2938,7 +2938,7 @@ function InlineStatusSelect({ status, loanId, onUpdate }: {
       className="flex items-center gap-1 hover:opacity-80 transition-opacity"
     >
       <StatusBadge status={saving ? '...' : status} />
-      <ChevronDown size={10} className="text-zinc-500" />
+      <ChevronDown size={10} className="text-muted-foreground" />
     </button>
   )
 }

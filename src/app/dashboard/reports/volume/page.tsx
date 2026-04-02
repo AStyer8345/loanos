@@ -40,9 +40,9 @@ export default async function VolumeReportPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-6">
-      <Link href="/dashboard" className="text-xs font-mono text-zinc-500 hover:text-zinc-300 mb-4 inline-block">&larr; Dashboard</Link>
-      <h1 className="text-xl font-mono font-bold text-zinc-100 mb-1">Volume Report</h1>
-      <p className="text-xs font-mono text-zinc-500 mb-6">{thisYear} YTD &middot; {funded.length} loans &middot; {fmtK(totalVolume)} total volume</p>
+      <Link href="/dashboard" className="text-xs font-mono text-muted-foreground hover:text-foreground/80 mb-4 inline-block">&larr; Dashboard</Link>
+      <h1 className="text-xl font-mono font-bold text-foreground mb-1">Volume Report</h1>
+      <p className="text-xs font-mono text-muted-foreground mb-6">{thisYear} YTD &middot; {funded.length} loans &middot; {fmtK(totalVolume)} total volume</p>
 
       <Card className="overflow-hidden">
         <Table className="font-mono">
@@ -61,18 +61,18 @@ export default async function VolumeReportPage() {
               return (
                 <TableRow key={loan.id}>
                   <TableCell>
-                    <Link href={`/dashboard/loans/${loan.id}`} className="text-zinc-200 hover:text-primary">{name}</Link>
+                    <Link href={`/dashboard/loans/${loan.id}`} className="text-foreground hover:text-primary">{name}</Link>
                   </TableCell>
-                  <TableCell className="text-right text-zinc-200">{fmt(loan.loan_amount ?? 0)}</TableCell>
+                  <TableCell className="text-right text-foreground">{fmt(loan.loan_amount ?? 0)}</TableCell>
                   <TableCell className="text-emerald-400">{loan.status}</TableCell>
-                  <TableCell className="text-right text-zinc-500">{fmtDate(cd)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">{fmtDate(cd)}</TableCell>
                 </TableRow>
               )
             })}
           </TableBody>
           <TableFooter>
             <TableRow className="border-t-2 border-input">
-              <TableCell className="text-zinc-100 font-semibold">Total ({funded.length} loans)</TableCell>
+              <TableCell className="text-foreground font-semibold">Total ({funded.length} loans)</TableCell>
               <TableCell className="text-right text-blue-400 font-semibold">{fmt(totalVolume)}</TableCell>
               <TableCell colSpan={2} />
             </TableRow>

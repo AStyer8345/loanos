@@ -40,8 +40,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-100">Tenant Dashboard</h1>
-        <p className="text-sm text-zinc-500 mt-1">Manage all LoanOS tenants</p>
+        <h1 className="text-2xl font-semibold text-foreground">Tenant Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage all LoanOS tenants</p>
       </div>
 
       {/* Stats */}
@@ -59,49 +59,49 @@ export default function AdminDashboard() {
           placeholder="Search tenants..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-sm rounded-md border border-input bg-card px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+          className="w-full max-w-sm rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
 
         {loading ? (
-          <div className="text-sm text-zinc-500">Loading tenants...</div>
+          <div className="text-sm text-muted-foreground">Loading tenants...</div>
         ) : (
           <div className="overflow-hidden rounded-lg border border-input">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-input bg-card/50">
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">Name</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">Plan</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">Members</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">NMLS</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">Last Active</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-400">Created</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Plan</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Members</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">NMLS</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Last Active</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(t => (
                   <tr key={t.id} className="border-b border-input/50 hover:bg-card/30 transition-colors">
                     <td className="px-4 py-3">
-                      <Link href={`/admin/tenants/${t.id}`} className="text-zinc-100 hover:text-amber-400 transition-colors font-medium">
+                      <Link href={`/admin/tenants/${t.id}`} className="text-foreground hover:text-amber-400 transition-colors font-medium">
                         {t.name}
                       </Link>
-                      {t.slug && <span className="ml-2 text-xs text-zinc-600">{t.slug}</span>}
+                      {t.slug && <span className="ml-2 text-xs text-muted-foreground">{t.slug}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <PlanBadge plan={t.plan} />
                     </td>
-                    <td className="px-4 py-3 text-zinc-300 font-mono">{t.member_count}</td>
-                    <td className="px-4 py-3 text-zinc-500 font-mono text-xs">{t.nmls || '—'}</td>
-                    <td className="px-4 py-3 text-zinc-500 text-xs">
+                    <td className="px-4 py-3 text-foreground/80 font-mono">{t.member_count}</td>
+                    <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{t.nmls || '—'}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
                       {t.last_active ? formatRelative(t.last_active) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-zinc-500 text-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
                       {new Date(t.created_at).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-zinc-600">
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                       {search ? 'No tenants match your search' : 'No tenants found'}
                     </td>
                   </tr>
@@ -118,8 +118,8 @@ export default function AdminDashboard() {
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-lg border border-input bg-card/50 p-4">
-      <div className="text-2xl font-semibold text-zinc-100 font-mono">{value}</div>
-      <div className="text-xs text-zinc-500 mt-1">{label}</div>
+      <div className="text-2xl font-semibold text-foreground font-mono">{value}</div>
+      <div className="text-xs text-muted-foreground mt-1">{label}</div>
     </div>
   )
 }
@@ -130,7 +130,7 @@ function PlanBadge({ plan }: { plan: string }) {
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
       isPro
         ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-        : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+        : 'bg-muted text-muted-foreground border border-input'
     }`}>
       {isPro ? 'Pro' : 'Starter'}
     </span>

@@ -5,30 +5,84 @@
 @tailwind utilities;
 
 :root {
-  /* Canvas & surfaces — LoanOS dark (comfortable) */
+  --radius: 0.5rem;
+}
+
+/* ── Light mode (default) ───────────────────────────────── */
+:root, .light {
+  --bg:       #f5f6f8;
+  --surface:  #ffffff;
+  --surface2: #eef0f4;
+
+  --border:   #d8dce5;
+
+  --text:     #1a1d26;
+  --muted:    #5f6678;
+  --fg:       #1a1d26;
+
+  --gold:     #a68a2e;
+  --green:    #16a34a;
+  --red:      #dc2626;
+
+  --accent:        var(--gold);
+  --accent-light:  hsla(210, 70%, 50%, 0.08);
+  --accent-border: hsla(210, 70%, 50%, 0.3);
+
+  --background: #f5f6f8;
+  --foreground: #1a1d26;
+  --card: #ffffff;
+  --card-foreground: #1a1d26;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d26;
+  --primary: #a68a2e;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f4;
+  --secondary-foreground: #1a1d26;
+  --muted-bg: #eef0f4;
+  --muted-foreground: #5f6678;
+  --accent-bg: #eef0f4;
+  --accent-foreground: #1a1d26;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --ring: #a68a2e;
+  --input: #d8dce5;
+
+  --sc-bg:       #f5f6f8;
+  --sc-card:     #ffffff;
+  --sc-card-alt: #f0f2f7;
+  --sc-border:   #d8dce5;
+  --sc-accent:   #3b6fcc;
+  --sc-accent-dim: rgba(59, 111, 204, 0.08);
+  --sc-gold:     #3b6fcc;
+  --sc-gold-dim: rgba(59, 111, 204, 0.08);
+  --sc-blue:     #3b6fcc;
+  --sc-blue-dim: rgba(59, 111, 204, 0.08);
+  --sc-green:    #16a34a;
+  --sc-red:      #dc2626;
+  --sc-text:     #1a1d26;
+  --sc-muted:    rgba(26, 29, 38, 0.45);
+}
+
+/* ── Dark mode ──────────────────────────────────────────── */
+.dark {
   --bg:       #0c0e14;
   --surface:  #171c28;
   --surface2: #222838;
 
-  /* Borders — visible but not harsh */
   --border:   #2f3546;
 
-  /* Text — bright enough to read without squinting */
   --text:     #eaecf0;
   --muted:    #9ba3b5;
   --fg:       #eaecf0;
 
-  /* Accents */
   --gold:     #C9A84C;
   --green:    #4ADE80;
   --red:      #DC2626;
 
-  /* Legacy aliases */
   --accent:        var(--gold);
   --accent-light:  hsla(210, 70%, 60%, 0.12);
   --accent-border: hsla(210, 70%, 60%, 0.5);
 
-  /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
   --background: #0c0e14;
   --foreground: #eaecf0;
   --card: #1c2235;
@@ -47,9 +101,7 @@
   --destructive-foreground: #eaecf0;
   --ring: #C9A84C;
   --input: #2f3546;
-  --radius: 0.5rem;
 
-  /* Scenario Builder palette — navy + blue accent */
   --sc-bg:       #0c1220;
   --sc-card:     #111a2e;
   --sc-card-alt: #162035;
@@ -81,6 +133,9 @@ body {
 .card-glow:hover {
   box-shadow: 0 0 20px rgba(201, 168, 76, 0.06), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+:root .card-glow:hover, .light .card-glow:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(166, 138, 46, 0.15);
+}
 
 /* Table styling */
 .lo-table {
@@ -96,13 +151,13 @@ body {
   letter-spacing: 0.05em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface2);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 .lo-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border);
   transition: background 0.15s ease;
 }
 .lo-table tbody tr:hover {

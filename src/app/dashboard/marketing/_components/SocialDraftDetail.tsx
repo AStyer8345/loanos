@@ -192,7 +192,7 @@ function SlidePreviewOrText({
     // No slides detected — render with lightweight markdown (bold, italic, hr, bullets)
     return (
       <div
-        className="rounded-md border border-input px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
+        className="rounded-md border border-input px-3 py-2.5 text-foreground/80 whitespace-pre-wrap"
         style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
         dangerouslySetInnerHTML={{ __html: renderMarkdown(draft.content || '(empty)') }}
       />
@@ -207,7 +207,7 @@ function SlidePreviewOrText({
       {/* Caption / intro text */}
       {intro && (
         <div
-          className="rounded-md border border-input px-3 py-2 text-zinc-300 whitespace-pre-wrap"
+          className="rounded-md border border-input px-3 py-2 text-foreground/80 whitespace-pre-wrap"
           style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
           dangerouslySetInnerHTML={{ __html: renderMarkdown(intro) }}
         />
@@ -285,14 +285,14 @@ function FormatSwitcher({ current, onChange }: { current: string | null; onChang
       </button>
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 rounded-sm border border-zinc-700 py-1 z-50"
+          className="absolute top-full left-0 mt-1 rounded-sm border border-input py-1 z-50"
           style={{ background: '#18181b', minWidth: 140 }}
         >
           {FORMAT_OPTIONS.map((f) => (
             <button
               key={f.value}
               onClick={() => { onChange(f.value); setOpen(false) }}
-              className="block w-full text-left px-3 py-1.5 text-xs font-bold transition-colors hover:bg-zinc-800"
+              className="block w-full text-left px-3 py-1.5 text-xs font-bold transition-colors hover:bg-muted"
               style={{
                 color: f.value === current ? GOLD : '#a1a1aa',
                 fontFamily: 'inherit',
@@ -567,7 +567,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           <div className="text-white font-bold" style={{ fontSize: 15 }}>
             {draft.title || 'Untitled'}
           </div>
-          <div className="text-zinc-500 flex items-center gap-2" style={{ fontSize: 11 }}>
+          <div className="text-muted-foreground flex items-center gap-2" style={{ fontSize: 11 }}>
             <span>{subtitle}</span>
             <FormatSwitcher current={draft.format} onChange={handleFormatChange} />
           </div>
@@ -603,7 +603,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={8}
-                className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                className="w-full rounded-md border border-input text-foreground text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
                 style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.6 }}
               />
               <div className="flex gap-2">
@@ -616,7 +616,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="px-3 py-1 rounded-sm text-xs font-bold text-zinc-500 transition-opacity hover:opacity-80"
+                  className="px-3 py-1 rounded-sm text-xs font-bold text-muted-foreground transition-opacity hover:opacity-80"
                   style={{ border: '1px solid #3f3f46', fontFamily: 'inherit' }}
                 >
                   CANCEL
@@ -793,7 +793,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
               AGENT NOTES
             </div>
             <div
-              className="rounded-md border border-input px-3 py-2.5 text-zinc-500 whitespace-pre-wrap"
+              className="rounded-md border border-input px-3 py-2.5 text-muted-foreground whitespace-pre-wrap"
               style={{ background: 'var(--surface)', fontSize: 11, lineHeight: 1.5 }}
             >
               {draft.agent_notes}
@@ -864,7 +864,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             }}
             placeholder="Tell Claude how to edit this post..."
             disabled={chatLoading}
-            className="flex-1 bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
+            className="flex-1 bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
             style={{ fontFamily: 'inherit' }}
           />
           <button
@@ -877,7 +877,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           </button>
         </div>
 
-        <div className="text-zinc-600" style={{ fontSize: 10 }}>
+        <div className="text-muted-foreground" style={{ fontSize: 10 }}>
           Claude sees this post + your voice guide automatically
         </div>
       </div>

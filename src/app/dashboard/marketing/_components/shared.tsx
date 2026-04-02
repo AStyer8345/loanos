@@ -11,7 +11,7 @@ const RED = '#E05252'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-card border border-zinc-700 rounded-sm p-4 ${className}`}>
+    <div className={`bg-card border border-input rounded-sm p-4 ${className}`}>
       {children}
     </div>
   )
@@ -36,7 +36,7 @@ export function FieldLabel({ children, htmlFor }: { children: ReactNode; htmlFor
   return (
     <label
       htmlFor={htmlFor}
-      className="block text-zinc-100 mb-1"
+      className="block text-foreground mb-1"
       style={{ fontSize: 11, fontWeight: 700 }}
     >
       {children}
@@ -53,7 +53,7 @@ export function Input({
   return (
     <input
       {...props}
-      className={`w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 ${className}`}
+      className={`w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 ${className}`}
       style={{ fontFamily: 'inherit', ...props.style }}
     />
   )
@@ -68,7 +68,7 @@ export function Textarea({
   return (
     <textarea
       {...props}
-      className={`w-full bg-zinc-950 border border-zinc-600 text-zinc-100 text-xs rounded-sm px-2 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none ${className}`}
+      className={`w-full bg-zinc-950 border border-input text-foreground text-xs rounded-sm px-2 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none ${className}`}
       style={{ fontFamily: 'inherit', lineHeight: 1.6, ...props.style }}
     />
   )
@@ -122,7 +122,7 @@ export function CadenceBadge({ label, lastTimestamp, freqDays, showDaysAgo = fal
       style={{ borderColor: dotColor, fontSize: 10 }}
     >
       <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
-      <span className="text-zinc-300 font-bold tracking-wide">{label}</span>
+      <span className="text-foreground/80 font-bold tracking-wide">{label}</span>
       {showDaysAgo && (
         <span style={{ color: dotColor }}>{daysLabel}</span>
       )}
@@ -149,7 +149,7 @@ export function Banner({ type, children }: { type: 'success' | 'error'; children
 export function Spinner() {
   return (
     <span
-      className="inline-block border-2 border-zinc-700 rounded-full animate-spin"
+      className="inline-block border-2 border-input rounded-full animate-spin"
       style={{ width: 14, height: 14, borderTopColor: GOLD }}
     />
   )

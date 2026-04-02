@@ -65,19 +65,19 @@ function SecretField({
   const [visible, setVisible] = useState(false)
   return (
     <div>
-      <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">{label}</label>
       <div className="relative">
         <input
           type={visible ? 'text' : 'password'}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder ?? '••••••••••••'}
-          className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 pr-9 focus:outline-none focus:border-amber-500 transition-colors font-mono placeholder-zinc-500"
+          className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground pr-9 focus:outline-none focus:border-amber-500 transition-colors font-mono placeholder-muted-foreground"
         />
         <button
           type="button"
           onClick={() => setVisible(v => !v)}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/80 transition-colors"
         >
           {visible ? <EyeOff size={14} /> : <Eye size={14} />}
         </button>
@@ -96,13 +96,13 @@ function TextField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">{label}</label>
+      <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500 transition-colors"
+        className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:border-amber-500 transition-colors"
       />
     </div>
   )
@@ -122,19 +122,19 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+    <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
       <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
             <Icon size={17} className="text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-mono font-semibold text-zinc-100">{title}</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>
+            <h2 className="text-sm font-mono font-semibold text-foreground">{title}</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
           </div>
         </div>
         {updatedAt && (
-          <span className="text-xs text-zinc-500 font-mono mt-0.5">
+          <span className="text-xs text-muted-foreground font-mono mt-0.5">
             Saved {fmtTime(updatedAt)}
           </span>
         )}
@@ -407,8 +407,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4 space-y-6">
       <div>
-        <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider mb-1">Settings</h1>
-        <p className="text-sm font-mono text-zinc-500">Manage integrations, credentials, and account preferences.</p>
+        <h1 className="text-lg font-mono font-bold text-foreground uppercase tracking-wider mb-1">Settings</h1>
+        <p className="text-sm font-mono text-muted-foreground">Manage integrations, credentials, and account preferences.</p>
       </div>
 
       {/* Flash message */}
@@ -514,13 +514,13 @@ export default function SettingsPage() {
       >
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-zinc-500">
+            <span className="text-xs font-mono text-muted-foreground">
               {aiIsCustom ? 'Custom prompt active' : 'Using default prompt'}
             </span>
             {aiIsCustom && (
               <button
                 onClick={resetAiPrompt}
-                className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors"
               >
                 <RotateCcw size={11} /> Reset to default
               </button>
@@ -530,11 +530,11 @@ export default function SettingsPage() {
             value={aiPrompt}
             onChange={e => setAiPrompt(e.target.value)}
             rows={16}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2.5 text-xs font-mono text-zinc-200 resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
+            className="w-full bg-muted border border-input rounded px-3 py-2.5 text-xs font-mono text-foreground resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
             placeholder="You are LoanOS AI…"
             spellCheck={false}
           />
-          <p className="mt-2 text-[11px] font-mono text-zinc-600">
+          <p className="mt-2 text-[11px] font-mono text-muted-foreground">
             The loan or contact record data is always appended automatically — you don&apos;t need to include it here.
           </p>
         </div>
@@ -551,13 +551,13 @@ export default function SettingsPage() {
       >
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-zinc-500">
+            <span className="text-xs font-mono text-muted-foreground">
               {outreachIsCustom ? 'Custom prompt active' : 'Using default prompt'}
             </span>
             {outreachIsCustom && (
               <button
                 onClick={resetOutreachPrompt}
-                className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors"
               >
                 <RotateCcw size={11} /> Reset to default
               </button>
@@ -567,47 +567,47 @@ export default function SettingsPage() {
             value={outreachPrompt}
             onChange={e => setOutreachPrompt(e.target.value)}
             rows={12}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2.5 text-xs font-mono text-zinc-200 resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
+            className="w-full bg-muted border border-input rounded px-3 py-2.5 text-xs font-mono text-foreground resize-y focus:outline-none focus:border-amber-500 transition-colors leading-relaxed"
             placeholder="You are Adam Styer&apos;s outreach assistant…"
             spellCheck={false}
           />
-          <p className="mt-2 text-[11px] font-mono text-zinc-600">
+          <p className="mt-2 text-[11px] font-mono text-muted-foreground">
             Pipeline data (active loans, contact counts, selected contacts) is always appended automatically.
           </p>
         </div>
       </SectionCard>
 
       {/* ── ORGANIZATION MEMBERS ── */}
-      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-center gap-3 mb-5">
-          <h2 className="text-sm font-mono font-semibold text-zinc-100 uppercase tracking-wider">Organization Members</h2>
-          <span className="text-xs text-zinc-500 font-mono lowercase">{myRole}</span>
+          <h2 className="text-sm font-mono font-semibold text-foreground uppercase tracking-wider">Organization Members</h2>
+          <span className="text-xs text-muted-foreground font-mono lowercase">{myRole}</span>
         </div>
 
         {/* Members list */}
         <div className="mb-6 flex flex-col gap-2">
           {members.map(m => (
-            <div key={m.id} className="flex items-center justify-between px-3 py-2 bg-zinc-800 border border-zinc-700 rounded">
+            <div key={m.id} className="flex items-center justify-between px-3 py-2 bg-muted border border-input rounded">
               <div>
-                <span className="text-sm text-zinc-200 font-mono">{m.full_name || m.email}</span>
-                {m.full_name && <span className="text-xs text-zinc-500 font-mono ml-2">{m.email}</span>}
+                <span className="text-sm text-foreground font-mono">{m.full_name || m.email}</span>
+                {m.full_name && <span className="text-xs text-muted-foreground font-mono ml-2">{m.email}</span>}
               </div>
               {canManageMembers && m.role !== 'owner' ? (
                 <select
                   value={m.role}
                   onChange={e => handleRoleChange(m.id, e.target.value)}
-                  className="bg-card border border-zinc-600 text-zinc-300 px-2 py-1 rounded text-xs font-mono focus:outline-none focus:border-amber-500"
+                  className="bg-card border border-input text-foreground/80 px-2 py-1 rounded text-xs font-mono focus:outline-none focus:border-amber-500"
                 >
                   <option value="admin">admin</option>
                   <option value="member">member</option>
                 </select>
               ) : (
-                <span className={`text-xs font-mono px-2 py-1 border rounded ${m.role === 'owner' ? 'text-amber-400 border-amber-500/40' : 'text-zinc-500 border-zinc-700'}`}>{m.role}</span>
+                <span className={`text-xs font-mono px-2 py-1 border rounded ${m.role === 'owner' ? 'text-amber-400 border-amber-500/40' : 'text-muted-foreground border-input'}`}>{m.role}</span>
               )}
             </div>
           ))}
           {members.length === 0 && (
-            <p className="text-xs text-zinc-500 font-mono">No members loaded.</p>
+            <p className="text-xs text-muted-foreground font-mono">No members loaded.</p>
           )}
         </div>
 
@@ -615,22 +615,22 @@ export default function SettingsPage() {
         {canManageMembers && (
           <form onSubmit={handleInvite} className="flex gap-2 items-end">
             <div className="flex-1">
-              <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">Invite by Email</label>
+              <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">Invite by Email</label>
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
                 placeholder="janie@example.com"
                 required
-                className="w-full bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-sm text-zinc-200 font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:border-amber-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-mono text-zinc-500 mb-1.5 uppercase tracking-wider">Role</label>
+              <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">Role</label>
               <select
                 value={inviteRole}
                 onChange={e => setInviteRole(e.target.value)}
-                className="bg-zinc-800 border border-zinc-600 text-zinc-200 px-3 py-2 rounded text-sm font-mono focus:outline-none focus:border-amber-500"
+                className="bg-muted border border-input text-foreground px-3 py-2 rounded text-sm font-mono focus:outline-none focus:border-amber-500"
               >
                 <option value="member">member</option>
                 <option value="admin">admin</option>
@@ -651,21 +651,21 @@ export default function SettingsPage() {
       </div>
 
       {/* ── EMAIL SYNC ── */}
-      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
             <Mail size={17} className="text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-mono font-semibold text-zinc-100">Email Sync</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">Inbound emails are automatically logged to contact activity timelines.</p>
+            <h2 className="text-sm font-mono font-semibold text-foreground">Email Sync</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Inbound emails are automatically logged to contact activity timelines.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] border border-[#4ADE80]/40">
             <CheckCircle size={11} /> Active
           </span>
-          <span className="text-xs text-zinc-500 font-mono">Managed by n8n — polls Outlook every 5 minutes</span>
+          <span className="text-xs text-muted-foreground font-mono">Managed by n8n — polls Outlook every 5 minutes</span>
         </div>
       </div>
     </div>

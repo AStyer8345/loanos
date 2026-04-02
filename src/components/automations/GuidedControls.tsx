@@ -49,7 +49,7 @@ export default function GuidedControls({
         <div>
           <SectionLabel>SCHEDULE</SectionLabel>
           <div
-            className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-500 text-xs"
+            className="mt-1 px-2 py-1.5 border border-input rounded text-muted-foreground text-xs"
             style={{ fontFamily: MONO, background: 'var(--bg)' }}
           >
             {schedule}
@@ -275,7 +275,7 @@ function AssistantControls({
           placeholder="Key instructions for this assistant..."
           rows={3}
           onChange={(e) => onChange({ key_instructions: e.target.value })}
-          className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="w-full mt-1 px-2 py-1.5 text-xs text-foreground bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
           style={{ fontFamily: MONO }}
         />
       </div>
@@ -288,7 +288,7 @@ function AssistantControls({
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="text-zinc-500 mb-1"
+      className="text-muted-foreground mb-1"
       style={{ fontSize: 9, letterSpacing: '0.15em', fontFamily: MONO }}
     >
       {children}
@@ -333,7 +333,7 @@ function ChipList({
 }) {
   if (chips.length === 0) {
     return (
-      <div className="mt-1 text-zinc-600" style={{ fontSize: 10, fontFamily: MONO }}>
+      <div className="mt-1 text-muted-foreground" style={{ fontSize: 10, fontFamily: MONO }}>
         No focus areas defined
       </div>
     )
@@ -392,7 +392,7 @@ function EditableChipList({
             {chip}
             <button
               onClick={() => removeChip(chip)}
-              className="ml-0.5 text-zinc-500 hover:text-zinc-300 leading-none"
+              className="ml-0.5 text-muted-foreground hover:text-foreground/80 leading-none"
               style={{ fontSize: 10 }}
               aria-label={`Remove ${chip}`}
             >
@@ -413,12 +413,12 @@ function EditableChipList({
               addChip()
             }
           }}
-          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="flex-1 px-2 py-1 text-xs text-foreground bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
           style={{ fontFamily: MONO, fontSize: 10 }}
         />
         <button
           onClick={addChip}
-          className="px-2 py-1 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
+          className="px-2 py-1 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
           style={{ fontFamily: MONO, fontSize: 10 }}
         >
           Add
@@ -443,7 +443,7 @@ function TextInput({
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+      className="w-full mt-1 px-2 py-1.5 text-xs text-foreground bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
       style={{ fontFamily: MONO }}
     />
   )

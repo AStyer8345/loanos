@@ -16,11 +16,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin" className="font-mono text-sm font-semibold text-amber-500 tracking-wide">
               LOANOS ADMIN
             </Link>
-            <Link href="/dashboard" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+            <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground/80 transition-colors">
               ← Back to Dashboard
             </Link>
           </div>
-          <span className="text-xs text-zinc-600 font-mono">SUPER ADMIN</span>
+          <span className="text-xs text-muted-foreground font-mono">SUPER ADMIN</span>
         </div>
       </nav>
       <main className="pt-14">

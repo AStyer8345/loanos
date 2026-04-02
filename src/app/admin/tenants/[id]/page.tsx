@@ -57,13 +57,13 @@ export default function TenantDetailPage() {
   }
 
   if (loading) {
-    return <div className="text-sm text-zinc-500">Loading tenant...</div>
+    return <div className="text-sm text-muted-foreground">Loading tenant...</div>
   }
 
   if (!tenant) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-500">Tenant not found</p>
+        <p className="text-muted-foreground">Tenant not found</p>
         <Link href="/admin" className="text-amber-400 text-sm hover:underline mt-2 inline-block">
           ← Back to Admin
         </Link>
@@ -76,11 +76,11 @@ export default function TenantDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link href="/admin" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+          <Link href="/admin" className="text-xs text-muted-foreground hover:text-foreground/80 transition-colors">
             ← Back to Admin
           </Link>
-          <h1 className="text-2xl font-semibold text-zinc-100 mt-1">{tenant.name}</h1>
-          {tenant.slug && <p className="text-sm text-zinc-500 font-mono">{tenant.slug}</p>}
+          <h1 className="text-2xl font-semibold text-foreground mt-1">{tenant.name}</h1>
+          {tenant.slug && <p className="text-sm text-muted-foreground font-mono">{tenant.slug}</p>}
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export default function TenantDetailPage() {
       <div className="grid grid-cols-2 gap-6">
         {/* Organization Info */}
         <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
-          <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Organization</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Organization</h2>
           <div className="space-y-2">
             <InfoRow label="Name" value={tenant.name} />
             <InfoRow label="Slug" value={tenant.slug || '—'} mono />
@@ -98,9 +98,9 @@ export default function TenantDetailPage() {
             <InfoRow label="Contacts" value={String(tenant.contact_count)} mono />
             {tenant.brand_color && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-500">Brand Color</span>
-                <div className="w-4 h-4 rounded border border-zinc-700" style={{ backgroundColor: tenant.brand_color }} />
-                <span className="text-xs text-zinc-400 font-mono">{tenant.brand_color}</span>
+                <span className="text-xs text-muted-foreground">Brand Color</span>
+                <div className="w-4 h-4 rounded border border-input" style={{ backgroundColor: tenant.brand_color }} />
+                <span className="text-xs text-muted-foreground font-mono">{tenant.brand_color}</span>
               </div>
             )}
           </div>
@@ -108,18 +108,18 @@ export default function TenantDetailPage() {
 
         {/* Billing Info */}
         <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
-          <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Billing</h2>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Billing</h2>
           <div className="space-y-2">
             <InfoRow label="Plan" value={tenant.plan === 'professional' ? 'Professional' : 'Starter'} />
             <InfoRow label="MRR" value={tenant.plan === 'professional' ? '$99' : '$0'} mono />
           </div>
           <div className="pt-3 border-t border-input">
-            <p className="text-xs text-zinc-600 mb-2">Manual Plan Override</p>
+            <p className="text-xs text-muted-foreground mb-2">Manual Plan Override</p>
             <div className="flex gap-2">
               <button
                 onClick={() => handlePlanOverride('starter')}
                 disabled={overriding || tenant.plan === 'starter'}
-                className="rounded px-3 py-1.5 text-xs font-medium border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="rounded px-3 py-1.5 text-xs font-medium border border-input text-foreground/80 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 Set Starter
               </button>
@@ -138,47 +138,47 @@ export default function TenantDetailPage() {
 
       {/* Members */}
       <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
-        <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           Members ({tenant.members.length})
         </h2>
         <div className="space-y-2">
           {tenant.members.map(m => (
             <div key={m.id} className="flex items-center justify-between py-1.5">
               <div>
-                <span className="text-sm text-zinc-200">{m.full_name || 'Unnamed'}</span>
-                <span className="ml-2 text-xs text-zinc-500">{m.email}</span>
+                <span className="text-sm text-foreground">{m.full_name || 'Unnamed'}</span>
+                <span className="ml-2 text-xs text-muted-foreground">{m.email}</span>
               </div>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                 m.role === 'owner'
                   ? 'bg-amber-500/10 text-amber-400'
                   : m.role === 'admin'
                   ? 'bg-blue-500/10 text-blue-400'
-                  : 'bg-zinc-800 text-zinc-400'
+                  : 'bg-muted text-muted-foreground'
               }`}>
                 {m.role}
               </span>
             </div>
           ))}
           {tenant.members.length === 0 && (
-            <p className="text-xs text-zinc-600">No members</p>
+            <p className="text-xs text-muted-foreground">No members</p>
           )}
         </div>
       </div>
 
       {/* Recent Activity */}
       <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
-        <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           Recent Activity (last 20)
         </h2>
         <div className="space-y-1">
           {tenant.recent_activity.map(a => (
             <div key={a.id} className="flex items-center justify-between py-1.5 border-b border-input/30 last:border-0">
               <div className="flex items-center gap-3">
-                <span className="text-xs text-zinc-600 font-mono w-32 shrink-0">
+                <span className="text-xs text-muted-foreground font-mono w-32 shrink-0">
                   {new Date(a.created_at).toLocaleString()}
                 </span>
-                <span className="text-xs text-zinc-500">{a.action}</span>
-                {a.summary && <span className="text-xs text-zinc-400">— {a.summary}</span>}
+                <span className="text-xs text-muted-foreground">{a.action}</span>
+                {a.summary && <span className="text-xs text-muted-foreground">— {a.summary}</span>}
               </div>
               {a.entity_type && (
                 <span className="text-xs text-zinc-700 font-mono">{a.entity_type}</span>
@@ -186,7 +186,7 @@ export default function TenantDetailPage() {
             </div>
           ))}
           {tenant.recent_activity.length === 0 && (
-            <p className="text-xs text-zinc-600">No activity recorded</p>
+            <p className="text-xs text-muted-foreground">No activity recorded</p>
           )}
         </div>
       </div>
@@ -197,8 +197,8 @@ export default function TenantDetailPage() {
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs text-zinc-500">{label}</span>
-      <span className={`text-sm text-zinc-200 ${mono ? 'font-mono' : ''}`}>{value}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className={`text-sm text-foreground ${mono ? 'font-mono' : ''}`}>{value}</span>
     </div>
   )
 }

@@ -31,13 +31,13 @@ function StatCard({ label, count, icon: Icon, color }: {
   color: string
 }) {
   return (
-    <div className="bg-card/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 flex items-center gap-3">
+    <div className="bg-card/80 border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-4 flex items-center gap-3">
       <div className={`p-2 rounded-md ${color}`}>
         <Icon size={16} className="text-white" />
       </div>
       <div>
-        <div className="text-2xl font-mono font-bold text-zinc-100">{count}</div>
-        <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">{label}</div>
+        <div className="text-2xl font-mono font-bold text-foreground">{count}</div>
+        <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{label}</div>
       </div>
     </div>
   )
@@ -94,9 +94,9 @@ export default function DailyBriefingPage() {
               <Brain size={20} className="text-amber-400" />
             </div>
             <div>
-              <h1 className="text-lg font-mono font-bold text-zinc-100 uppercase tracking-wider">Daily Briefing</h1>
+              <h1 className="text-lg font-mono font-bold text-foreground uppercase tracking-wider">Daily Briefing</h1>
               {data && (
-                <p className="text-xs font-mono text-zinc-500">
+                <p className="text-xs font-mono text-muted-foreground">
                   Generated {new Date(data.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               )}
@@ -105,7 +105,7 @@ export default function DailyBriefingPage() {
           <button
             onClick={fetchBriefing}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-amber-500/50 text-amber-400 rounded font-mono text-sm hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-muted border border-amber-500/50 text-amber-400 rounded font-mono text-sm hover:bg-input disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             {loading ? 'Generating…' : data ? 'Refresh' : 'Run Briefing'}
@@ -122,9 +122,9 @@ export default function DailyBriefingPage() {
 
         {/* Empty state */}
         {!data && !loading && !error && (
-          <div className="flex flex-col items-center justify-center py-24 text-zinc-500">
-            <Brain size={40} strokeWidth={1.2} className="mb-3 text-zinc-600" />
-            <p className="text-sm font-mono">Click <strong className="text-zinc-400">Run Briefing</strong> to generate your morning action list.</p>
+          <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+            <Brain size={40} strokeWidth={1.2} className="mb-3 text-muted-foreground" />
+            <p className="text-sm font-mono">Click <strong className="text-muted-foreground">Run Briefing</strong> to generate your morning action list.</p>
           </div>
         )}
 
@@ -132,12 +132,12 @@ export default function DailyBriefingPage() {
         {loading && (
           <div className="space-y-3">
             {[...Array(7)].map((_, i) => (
-              <div key={i} className="bg-card border border-zinc-700 rounded-r-lg border-l-[3px] border-l-amber-500 p-4 animate-pulse">
+              <div key={i} className="bg-card border border-input rounded-r-lg border-l-[3px] border-l-amber-500 p-4 animate-pulse">
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-zinc-700 mt-0.5 flex-shrink-0" />
+                  <div className="w-5 h-5 rounded-full bg-input mt-0.5 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-zinc-700 rounded w-3/4" />
-                    <div className="h-3 bg-zinc-800 rounded w-1/2" />
+                    <div className="h-4 bg-input rounded w-3/4" />
+                    <div className="h-3 bg-muted rounded w-1/2" />
                   </div>
                 </div>
               </div>
@@ -158,19 +158,19 @@ export default function DailyBriefingPage() {
 
             {/* AI Summary */}
             {data.summary && (
-              <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 mb-6">
-                <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
+              <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-4 mb-6">
+                <p className="text-sm font-mono text-foreground/80 leading-relaxed">{data.summary}</p>
               </div>
             )}
 
             {/* Progress */}
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Today&apos;s Actions</h2>
-              <span className="text-xs font-mono text-zinc-500">{checkedCount}/{totalItems} done</span>
+              <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Today&apos;s Actions</h2>
+              <span className="text-xs font-mono text-muted-foreground">{checkedCount}/{totalItems} done</span>
             </div>
 
             {/* Progress bar */}
-            <div className="h-1.5 bg-zinc-800 rounded-full mb-4 overflow-hidden border border-zinc-700">
+            <div className="h-1.5 bg-muted rounded-full mb-4 overflow-hidden border border-input">
               <div
                 className="h-full bg-[#4ADE80] rounded-full transition-all duration-300"
                 style={{ width: totalItems > 0 ? `${(checkedCount / totalItems) * 100}%` : '0%' }}
@@ -188,8 +188,8 @@ export default function DailyBriefingPage() {
                     className={`
                       bg-card border rounded-r-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all
                       ${done
-                        ? 'border-zinc-700 border-l-zinc-600 opacity-60'
-                        : 'border-zinc-700 border-l-amber-500 hover:border-amber-500/70'
+                        ? 'border-input border-l-zinc-600 opacity-60'
+                        : 'border-input border-l-amber-500 hover:border-amber-500/70'
                       }
                     `}
                   >
@@ -198,23 +198,23 @@ export default function DailyBriefingPage() {
                       <div className="flex-shrink-0 mt-0.5">
                         {done
                           ? <CheckCircle2 size={18} className="text-[#4ADE80]" />
-                          : <Circle size={18} className="text-zinc-500" />
+                          : <Circle size={18} className="text-muted-foreground" />
                         }
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-wide">
+                          <span className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wide">
                             #{item.rank}
                           </span>
-                          <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
+                          <span className={`text-sm font-mono font-semibold ${done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                             {item.contact}
                           </span>
                         </div>
-                        <p className={`text-sm font-mono ${done ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                        <p className={`text-sm font-mono ${done ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
                           {item.action}
                         </p>
-                        <p className="text-xs font-mono text-zinc-500 mt-1">{item.reason}</p>
+                        <p className="text-xs font-mono text-muted-foreground mt-1">{item.reason}</p>
                         {item.snippet && !done && (
                           <p className="text-xs text-amber-400 font-mono mt-1.5 italic">
                             &quot;{item.snippet}&quot;
@@ -229,7 +229,7 @@ export default function DailyBriefingPage() {
 
             {/* All done */}
             {checkedCount === totalItems && totalItems > 0 && (
-              <div className="mt-6 flex flex-col items-center py-8 text-zinc-500">
+              <div className="mt-6 flex flex-col items-center py-8 text-muted-foreground">
                 <CheckCircle2 size={36} className="text-[#4ADE80] mb-2" />
                 <p className="text-sm font-mono">All done for today.</p>
               </div>

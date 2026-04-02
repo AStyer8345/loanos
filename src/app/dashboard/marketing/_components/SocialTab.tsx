@@ -138,7 +138,7 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
         className="flex items-center justify-center py-20"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
-        <span className="text-zinc-600 text-sm tracking-widest">LOADING SOCIAL...</span>
+        <span className="text-muted-foreground text-sm tracking-widest">LOADING SOCIAL...</span>
       </div>
     )
   }
@@ -187,7 +187,7 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
             />
           ) : (
             <div className="flex items-center justify-center h-full">
-              <span className="text-zinc-600" style={{ fontSize: 12 }}>
+              <span className="text-muted-foreground" style={{ fontSize: 12 }}>
                 Select a draft to preview
               </span>
             </div>

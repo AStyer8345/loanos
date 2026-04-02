@@ -492,7 +492,7 @@ Rules:
         </div>
         <button
           onClick={onClose}
-          className="text-zinc-500 text-xs font-bold tracking-wider hover:text-zinc-300 transition-colors"
+          className="text-muted-foreground text-xs font-bold tracking-wider hover:text-foreground/80 transition-colors"
           style={{ fontFamily: 'inherit' }}
         >
           X CLOSE
@@ -505,7 +505,7 @@ Rules:
           <div className="w-80 border-r border-input p-4 space-y-4 overflow-y-auto">
             {/* AI Generation */}
             {!generated && (
-              <div className="rounded-md border border-zinc-700 p-3 space-y-2" style={{ background: '#0d0d18' }}>
+              <div className="rounded-md border border-input p-3 space-y-2" style={{ background: '#0d0d18' }}>
                 <label
                   className="block font-bold"
                   style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
@@ -517,11 +517,11 @@ Rules:
                   onChange={(e) => setAiPrompt(e.target.value)}
                   rows={3}
                   placeholder="e.g. 5 things first-time buyers don't know about closing costs..."
-                  className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                  className="w-full rounded-md border border-input text-foreground text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
                   style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.5 }}
                 />
                 <div className="flex items-center gap-2">
-                  <label className="text-zinc-500" style={{ fontSize: 10 }}>SLIDES:</label>
+                  <label className="text-muted-foreground" style={{ fontSize: 10 }}>SLIDES:</label>
                   <div className="flex gap-1">
                     {[3, 4, 5, 6, 7, 8].map((n) => (
                       <button
@@ -585,7 +585,7 @@ Rules:
                 onChange={(e) => setCaption(e.target.value)}
                 rows={2}
                 placeholder="Caption for the post..."
-                className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                className="w-full rounded-md border border-input text-foreground text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
                 style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.5 }}
               />
             </div>
@@ -636,7 +636,7 @@ Rules:
               </div>
               {bgMode === 'image' && bgFileName && (
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-zinc-500 truncate" style={{ fontSize: 10 }}>
+                  <span className="text-muted-foreground truncate" style={{ fontSize: 10 }}>
                     {bgFileName}
                   </span>
                   <button
@@ -724,7 +724,7 @@ Rules:
                             ? 'Call to action...'
                             : 'Slide content...'
                         }
-                        className="w-full rounded border border-input text-zinc-100 text-xs px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                        className="w-full rounded border border-input text-foreground text-xs px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
                         style={{
                           background: 'transparent',
                           fontFamily: 'inherit',

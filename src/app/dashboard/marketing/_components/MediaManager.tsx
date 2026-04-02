@@ -87,7 +87,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
         style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
       >
         <span>MEDIA</span>
-        <span className="text-zinc-500" style={{ fontSize: 10, letterSpacing: 'normal' }}>
+        <span className="text-muted-foreground" style={{ fontSize: 10, letterSpacing: 'normal' }}>
           {mediaPaths.length} / {MAX_FILES}
         </span>
       </div>
@@ -124,7 +124,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
             >
               {isVideo(url) ? (
                 <div className="w-full h-full bg-card flex items-center justify-center">
-                  <span className="text-zinc-400 text-xs font-bold">VIDEO</span>
+                  <span className="text-muted-foreground text-xs font-bold">VIDEO</span>
                 </div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -167,7 +167,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
       {/* Upload zone */}
       <div
         className={`rounded-md border border-dashed px-4 py-4 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-zinc-700'
+          dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-input'
         }`}
         style={{ background: dragOver ? undefined : '#0a0a14' }}
         onClick={() => fileInputRef.current?.click()}
@@ -196,11 +196,11 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
           }}
         />
         {uploading ? (
-          <span className="text-zinc-400" style={{ fontSize: 11 }}>
+          <span className="text-muted-foreground" style={{ fontSize: 11 }}>
             Uploading...
           </span>
         ) : (
-          <span className="text-zinc-500" style={{ fontSize: 11 }}>
+          <span className="text-muted-foreground" style={{ fontSize: 11 }}>
             + Add photos or video (drag &amp; drop or click)
           </span>
         )}

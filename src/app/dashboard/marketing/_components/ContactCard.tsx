@@ -91,7 +91,7 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
 
   return (
     <div
-      className="bg-card border border-zinc-700 rounded-sm p-3 relative transition-opacity"
+      className="bg-card border border-input rounded-sm p-3 relative transition-opacity"
       style={{ opacity: calledToday ? 0.55 : 1 }}
     >
       {/* Called today badge */}
@@ -105,7 +105,7 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
       {!calledToday && (
         <button
           onClick={onDelete}
-          className="absolute top-2 right-2 text-zinc-600 hover:text-red-400 text-xs leading-none"
+          className="absolute top-2 right-2 text-muted-foreground hover:text-red-400 text-xs leading-none"
           title="Delete contact"
         >
           ✕
@@ -113,20 +113,20 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
       )}
 
       {/* Name + company */}
-      <div className="font-bold text-zinc-100 pr-6" style={{ fontSize: 13 }}>
+      <div className="font-bold text-foreground pr-6" style={{ fontSize: 13 }}>
         {contact.first} {contact.last}
       </div>
       {contact.company && (
-        <div className="text-zinc-400 text-xs mt-0.5">{contact.company}</div>
+        <div className="text-muted-foreground text-xs mt-0.5">{contact.company}</div>
       )}
 
       {/* Contact links */}
       <div className="flex gap-3 mt-2 text-xs">
         {contact.phone && (
-          <a href={`tel:${contact.phone}`} className="text-zinc-400 hover:text-zinc-100">{contact.phone}</a>
+          <a href={`tel:${contact.phone}`} className="text-muted-foreground hover:text-foreground">{contact.phone}</a>
         )}
         {contact.email && (
-          <a href={`mailto:${contact.email}`} className="text-zinc-400 hover:text-zinc-100">{contact.email}</a>
+          <a href={`mailto:${contact.email}`} className="text-muted-foreground hover:text-foreground">{contact.email}</a>
         )}
       </div>
 
@@ -139,7 +139,7 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
 
       {/* Call history (last 2) */}
       {contact.callHistory?.slice(0, 2).map((h) => (
-        <div key={h.date} className="text-xs text-zinc-600 mt-0.5">
+        <div key={h.date} className="text-xs text-muted-foreground mt-0.5">
           {h.date}: {h.note || 'No note'}
         </div>
       ))}

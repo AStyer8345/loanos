@@ -20,7 +20,7 @@ export default function SendTab({ mccState, onSave }: Props) {
   return (
     <div className="space-y-4">
       {/* Inner toggle */}
-      <div className="flex border border-zinc-700 rounded-sm overflow-hidden w-fit">
+      <div className="flex border border-input rounded-sm overflow-hidden w-fit">
         {([
           { key: 'rate-update' as SendMode, label: '📈 RATE UPDATE' },
           { key: 'newsletter'  as SendMode, label: '✉ NEWSLETTER' },

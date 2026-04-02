@@ -146,7 +146,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
           <div>
             {promptLoading && (
               <div className="flex items-center justify-center py-8">
-                <span className="text-zinc-500 text-xs" style={{ fontFamily: MONO }}>
+                <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
                   loading...
                 </span>
               </div>
@@ -162,7 +162,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
 
             {!promptLoading && !promptError && systemPrompt && (
               <pre
-                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
+                className="text-foreground/80 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {systemPrompt}
@@ -171,7 +171,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
 
             {!promptLoading && !promptError && systemPrompt === null && (
               <div className="py-8 text-center">
-                <span className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+                <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
                   no prompt available
                 </span>
               </div>

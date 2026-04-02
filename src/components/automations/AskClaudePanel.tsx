@@ -86,7 +86,7 @@ export default function AskClaudePanel({
           rows={4}
           disabled={state === 'loading' || state === 'preview'}
           onChange={(e) => setInstruction(e.target.value)}
-          className="w-full px-2 py-2 text-xs text-zinc-100 bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-2 py-2 text-xs text-foreground bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ fontFamily: MONO }}
         />
       </div>
@@ -96,7 +96,7 @@ export default function AskClaudePanel({
         <button
           onClick={handleUpdateAgent}
           disabled={state === 'loading' || !instruction.trim()}
-          className="px-3 py-2 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ fontFamily: MONO }}
         >
           {state === 'loading' ? 'Thinking...' : 'Update Agent'}
@@ -142,7 +142,7 @@ function PreviewChanges({ oldConfig, newConfig, onApply, onCancel }: PreviewChan
     <div className="flex flex-col gap-3">
       {/* Section label */}
       <div
-        className="text-zinc-500"
+        className="text-muted-foreground"
         style={{ fontSize: 9, letterSpacing: '0.15em' }}
       >
         PREVIEW CHANGES
@@ -154,7 +154,7 @@ function PreviewChanges({ oldConfig, newConfig, onApply, onCancel }: PreviewChan
         style={{ background: 'var(--bg)', maxHeight: 240 }}
       >
         {diff.length === 0 ? (
-          <div className="px-3 py-2 text-zinc-600 text-xs">No changes detected</div>
+          <div className="px-3 py-2 text-muted-foreground text-xs">No changes detected</div>
         ) : (
           diff.map((line, i) => (
             <DiffLine key={i} line={line} />
@@ -178,7 +178,7 @@ function PreviewChanges({ oldConfig, newConfig, onApply, onCancel }: PreviewChan
         </button>
         <button
           onClick={onCancel}
-          className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-zinc-200 hover:border-zinc-500"
+          className="px-3 py-1.5 text-xs border border-input bg-card text-muted-foreground rounded transition-colors hover:text-foreground hover:border-zinc-500"
           style={{ fontFamily: MONO }}
         >
           Cancel

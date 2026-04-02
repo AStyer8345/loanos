@@ -13,6 +13,7 @@ import {
   Menu,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -127,6 +128,9 @@ export default function TopNav() {
             >
               <Settings className="size-4" />
             </button>
+
+            {/* Theme toggle */}
+            <ThemeToggle />
 
             {/* User profile */}
             <div className="hidden sm:flex items-center gap-2 ml-1">

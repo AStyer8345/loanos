@@ -57,14 +57,14 @@ export default function EmailTemplateEditor({
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div
-          className="text-zinc-500"
+          className="text-muted-foreground"
           style={{ fontSize: 9, letterSpacing: '0.15em', fontFamily: MONO }}
         >
           EMAIL TEMPLATE
         </div>
         <button
           onClick={() => setShowPreview(v => !v)}
-          className="text-xs px-2 py-0.5 rounded border border-zinc-700 text-zinc-400 transition-colors hover:border-[#C9A84C] hover:text-[#C9A84C]"
+          className="text-xs px-2 py-0.5 rounded border border-input text-muted-foreground transition-colors hover:border-[#C9A84C] hover:text-[#C9A84C]"
           style={{ fontFamily: MONO, fontSize: 10 }}
         >
           {showPreview ? 'Edit' : 'Preview'}
@@ -77,7 +77,7 @@ export default function EmailTemplateEditor({
           value={template}
           onChange={e => onTemplateChange(e.target.value)}
           rows={10}
-          className="w-full px-3 py-2 text-xs text-zinc-200 bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="w-full px-3 py-2 text-xs text-foreground bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-muted-foreground"
           style={{ fontFamily: MONO, lineHeight: 1.7 }}
           placeholder="Write your email template here. Use {{variable_name}} for dynamic values."
         />
@@ -90,7 +90,7 @@ export default function EmailTemplateEditor({
           style={{ lineHeight: 1.9, fontSize: 12 }}
         >
           {segments.length === 0 ? (
-            <span className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
+            <span className="text-muted-foreground text-xs" style={{ fontFamily: MONO }}>
               (empty template)
             </span>
           ) : (
@@ -113,7 +113,7 @@ export default function EmailTemplateEditor({
               ) : (
                 <span
                   key={i}
-                  className="text-zinc-300 whitespace-pre-wrap"
+                  className="text-foreground/80 whitespace-pre-wrap"
                   style={{ fontFamily: MONO, fontSize: 12 }}
                 >
                   {seg.value}
@@ -127,7 +127,7 @@ export default function EmailTemplateEditor({
       {/* Mode toggle */}
       <div className="flex items-center gap-1 pt-1">
         <span
-          className="text-zinc-500 mr-2"
+          className="text-muted-foreground mr-2"
           style={{ fontSize: 9, letterSpacing: '0.12em', fontFamily: MONO }}
         >
           MODE

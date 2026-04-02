@@ -76,7 +76,7 @@ export default function AutomationRow({ automation, isExpanded, onToggle }: Auto
       />
 
       {/* Name */}
-      <span className="flex-1 text-xs font-bold text-zinc-100 truncate min-w-0">
+      <span className="flex-1 text-xs font-bold text-foreground truncate min-w-0">
         {automation.name}
       </span>
 
@@ -88,7 +88,7 @@ export default function AutomationRow({ automation, isExpanded, onToggle }: Auto
 
       {/* Last run */}
       <span
-        className="text-zinc-500 flex-shrink-0 hidden sm:block"
+        className="text-muted-foreground flex-shrink-0 hidden sm:block"
         style={{ fontSize: 10, minWidth: 56, textAlign: 'right' }}
       >
         {lastRun}

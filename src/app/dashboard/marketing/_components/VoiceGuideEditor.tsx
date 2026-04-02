@@ -116,7 +116,7 @@ export default function VoiceGuideEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <span className="text-zinc-600 text-sm tracking-widest">LOADING...</span>
+        <span className="text-muted-foreground text-sm tracking-widest">LOADING...</span>
       </div>
     )
   }
@@ -124,7 +124,7 @@ export default function VoiceGuideEditor() {
   if (isEmpty && !content) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
-        <p className="text-zinc-500 text-sm">No voice guide found.</p>
+        <p className="text-muted-foreground text-sm">No voice guide found.</p>
         <button
           onClick={handleSeed}
           className="px-4 py-2 text-xs font-bold tracking-widest rounded-sm transition-colors"
@@ -155,7 +155,7 @@ export default function VoiceGuideEditor() {
             VOICE & WORKFLOW GUIDE
           </h2>
           {formattedDate && (
-            <p className="text-zinc-600 text-xs mt-1">
+            <p className="text-muted-foreground text-xs mt-1">
               Last updated: {formattedDate}
             </p>
           )}
@@ -186,7 +186,7 @@ export default function VoiceGuideEditor() {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="w-full rounded-sm border border-input bg-[var(--surface)] text-zinc-200 p-4 focus:outline-none focus:border-zinc-600 resize-y"
+        className="w-full rounded-sm border border-input bg-[var(--surface)] text-foreground p-4 focus:outline-none focus:border-input resize-y"
         style={{
           fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
           fontSize: '13px',

@@ -14,7 +14,7 @@ export default function ScenarioError({
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--sc-bg, #0a0a0a)', color: 'var(--sc-text, #e5e5e5)' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--sc-bg, var(--bg))', color: 'var(--sc-text, #e5e5e5)' }}>
       <div className="max-w-md text-center space-y-4">
         <h2 className="text-xl font-semibold">Something went wrong</h2>
         <p className="text-sm" style={{ color: 'var(--sc-muted, #888)' }}>

@@ -1345,7 +1345,7 @@ function LinkedContactCard({ loan, contact, onReassignContact }: {
   const name = contact ? `${contact.first_name ?? ''} ${contact.last_name ?? ''}`.trim() : 'Unknown'
   return (
     <div style={{
-      background: 'var(--surface, #1a1a1a)', border: '1px solid var(--border, #2a2a2a)',
+      background: 'var(--surface, var(--card))', border: '1px solid var(--border, var(--input))',
       borderRadius: 6, padding: '16px 20px',
     }}>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted, #888)', letterSpacing: '0.1em', marginBottom: 8 }}>
@@ -2878,7 +2878,7 @@ const STATUS_HEX_DETAIL: Record<string, string> = {
   'Application': '#6366F1', 'application_intake': '#6366F1', 'New Application': '#60A5FA',
   'under_contract': '#34D399', 'Lead': '#6B7280', 'lead': '#6B7280',
   'On Hold': '#F59E0B', 'Suspended': '#F59E0B',
-  'Cancelled': '#71717A', 'Dead': '#52525B', 'Denied': '#EF4444', 'Withdrawn': '#9CA3AF',
+  'Cancelled': '#71717A', 'Dead': '#52525B', 'Denied': '#EF4444', 'Withdrawn': 'var(--muted)',
 }
 
 function StatusBadge({ status }: { status: string | null }) {

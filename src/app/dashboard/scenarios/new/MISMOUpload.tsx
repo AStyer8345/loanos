@@ -123,7 +123,7 @@ export default function MISMOUpload({ onImport }: MISMOUploadProps) {
                   <button
                     onClick={useData}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium flex-1"
-                    style={{ background: 'var(--sc-gold)', color: '#0a0a0a' }}
+                    style={{ background: 'var(--sc-gold)', color: 'var(--bg)' }}
                   >
                     <Check size={14} />
                     Use This Data

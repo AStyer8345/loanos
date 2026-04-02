@@ -381,9 +381,9 @@ function CarouselSlidePreview({
       {/* The slide card */}
       <div
         style={{
-          background: '#0a0a0a',
+          background: 'var(--bg)',
           borderRadius: 16,
-          border: isCTA ? `1px solid ${GOLD}` : '1px solid #1a1a1a',
+          border: isCTA ? `1px solid ${GOLD}` : '1px solid var(--card)',
           aspectRatio: '1 / 1',
           padding: isFirst ? '32px 28px' : '24px 24px',
           display: 'flex',
@@ -442,7 +442,7 @@ function CarouselSlidePreview({
         </div>
 
         {/* Bottom: branding */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid #1a1a1a' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--card)' }}>
           <span style={{ color: '#52525b', fontSize: 9, letterSpacing: '0.05em' }}>
             Adam Styer | Mortgage Solutions LP
           </span>

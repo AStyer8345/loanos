@@ -30,7 +30,7 @@ interface SharedScenario {
 
 // CSS variable values for the dark share-page theme
 const DARK_THEME = {
-  '--sc-bg': '#0a0a0a',
+  '--sc-bg': 'var(--bg)',
   '--sc-card': '#141414',
   '--sc-card-alt': '#111111',
   '--sc-border': '#262626',
@@ -44,7 +44,7 @@ const TEXT = '#F0EDE8'
 const MUTED = '#888888'
 const CARD_BG = '#141414'
 const BORDER = '#262626'
-const BG = '#0a0a0a'
+const BG = 'var(--bg)'
 
 function buildDisplayData(data: SharedScenario): DisplayData {
   const propertyValue = data.property_value || 0
@@ -398,7 +398,7 @@ export default function SharePage({ params }: { params: { token: string } }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 rounded-[10px] text-sm font-semibold"
-                style={{ background: GOLD, color: '#0a0a0a', fontFamily: "'IBM Plex Mono', monospace" }}
+                style={{ background: GOLD, color: 'var(--bg)', fontFamily: "'IBM Plex Mono', monospace" }}
               >
                 Schedule a Call
               </a>

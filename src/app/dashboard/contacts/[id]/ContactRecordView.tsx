@@ -674,7 +674,7 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
           ))}
         </div>
         {loan.co_borrower_contact_id && loan.co_borrower_name && (
-          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-subtle, #2a2a2a)' }}>
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-subtle, var(--input))' }}>
             <Link
               href={`/dashboard/contacts/${loan.co_borrower_contact_id}`}
               onClick={e => e.stopPropagation()}
@@ -1370,7 +1370,7 @@ export function ContactRecordView(props: Props) {
                                 || loan.borrower_name || loan.loan_name || '—'
                               const closeDate = (loan as { estimated_closing_date?: string | null }).estimated_closing_date || loan.closing_date
                               return (
-                                <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, #2a2a2a)' }}>
+                                <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, var(--input))' }}>
                                   <td style={{ padding: '8px 8px 8px 0' }}>
                                     <Link href={`/dashboard/loans/${loan.id}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
                                       {borrowerName}

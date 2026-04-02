@@ -9,9 +9,9 @@ import BulkActionPreview from './BulkActionPreview'
 
 // ── Theme (matches LoanOSChat) ─────────────────────────────────────────────
 const ACCENT = '#C9A84C'
-const BG = '#0f0f0f'
-const SURFACE = '#1a1a1a'
-const BORDER = '#2a2a2a'
+const BG = 'var(--bg)'
+const SURFACE = 'var(--card)'
+const BORDER = 'var(--input)'
 const FONT = '"IBM Plex Mono", "Courier New", monospace'
 
 type Message = {

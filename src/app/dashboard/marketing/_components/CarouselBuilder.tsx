@@ -71,7 +71,7 @@ function renderSlideToCtx(
     ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
     ctx.fillRect(0, 0, size, size)
   } else {
-    ctx.fillStyle = '#0a0a0a'
+    ctx.fillStyle = 'var(--bg)'
     ctx.fillRect(0, 0, size, size)
   }
 
@@ -107,7 +107,7 @@ function renderSlideToCtx(
 
   // Branding bar — bottom
   const barY = size - pad * 1.4
-  ctx.strokeStyle = '#1a1a1a'
+  ctx.strokeStyle = 'var(--card)'
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(pad, barY)
@@ -155,7 +155,7 @@ function SlidePreview({
       style={{
         width: size,
         height: size,
-        background: bgMode === 'image' && bgDataUrl ? `url(${bgDataUrl}) center/cover` : '#0a0a0a',
+        background: bgMode === 'image' && bgDataUrl ? `url(${bgDataUrl}) center/cover` : 'var(--bg)',
         fontFamily: "system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif",
         padding: 60 * scale,
         borderRadius: 8 * scale,
@@ -194,7 +194,7 @@ function SlidePreview({
         <div
           className="flex items-center justify-between"
           style={{
-            borderTop: '1px solid #1a1a1a',
+            borderTop: '1px solid var(--card)',
             paddingTop: 12 * scale,
           }}
         >

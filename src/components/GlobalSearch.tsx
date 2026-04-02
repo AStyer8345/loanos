@@ -128,11 +128,11 @@ export default function GlobalSearch() {
       <div style={{
         position: 'fixed', top: '15vh', left: '50%', transform: 'translateX(-50%)',
         zIndex: 1000, width: '100%', maxWidth: 580,
-        background: '#1a1a1a', border: '1px solid #2a2a2a',
+        background: 'var(--card)', border: '1px solid var(--input)',
         borderRadius: 8, boxShadow: '0 24px 64px rgba(0,0,0,0.7)', overflow: 'hidden',
       }}>
         {/* Input row */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid #2a2a2a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid var(--input)' }}>
           <span style={{ color: '#666', marginRight: 10, fontSize: 16, lineHeight: 1 }}>⌕</span>
           <input
             ref={inputRef}
@@ -185,7 +185,7 @@ export default function GlobalSearch() {
                         background: i === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
                         borderLeft: i === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
                       {/* Type pill */}
-                      <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: '#2a2a2a', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: 'var(--input)', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
                         {c.contact_type ?? 'contact'}
                       </span>
                       {/* Name */}
@@ -220,7 +220,7 @@ export default function GlobalSearch() {
                           background: flatIdx === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
                           borderLeft: flatIdx === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
                         {/* Type pill */}
-                        <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: '#2a2a2a', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                        <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: 'var(--input)', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
                           loan
                         </span>
                         {/* Borrower name */}
@@ -247,10 +247,10 @@ export default function GlobalSearch() {
         </div>
 
         {/* Footer hint bar */}
-        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid #2a2a2a', background: 'rgba(0,0,0,0.3)' }}>
+        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid var(--input)', background: 'rgba(0,0,0,0.3)' }}>
           {([['↵', 'select'], ['↑↓', 'navigate'], ['esc', 'close']] as const).map(([key, label]) => (
             <span key={key} style={{ fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <kbd style={{ background: '#2a2a2a', borderRadius: 3, padding: '1px 5px', fontSize: 9, color: '#888' }}>{key}</kbd>
+              <kbd style={{ background: 'var(--input)', borderRadius: 3, padding: '1px 5px', fontSize: 9, color: '#888' }}>{key}</kbd>
               {label}
             </span>
           ))}

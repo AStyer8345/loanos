@@ -165,7 +165,7 @@ export default function StatementUpload({ onImport }: StatementUploadProps) {
                   <button
                     onClick={applyImport}
                     className="flex-1 px-4 py-2 rounded-md text-xs font-semibold transition-colors"
-                    style={{ background: 'var(--sc-gold)', color: '#0a0a0a' }}
+                    style={{ background: 'var(--sc-gold)', color: 'var(--bg)' }}
                   >
                     Apply to Current Loan
                   </button>

@@ -8,9 +8,9 @@ import QuickAddConfirmation from '@/components/outreach/QuickAddConfirmation'
 import BulkActionPreview from '@/components/outreach/BulkActionPreview'
 
 const ACCENT = '#C9A84C'
-const BG = '#0f0f0f'
-const SURFACE = '#1a1a1a'
-const BORDER = '#2a2a2a'
+const BG = 'var(--bg)'
+const SURFACE = 'var(--card)'
+const BORDER = 'var(--input)'
 const FONT = '"IBM Plex Mono", "Courier New", monospace'
 
 type Message = {
@@ -692,7 +692,7 @@ export default function LoanOSChat() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: '#0a0a0a',
+              background: 'var(--bg)',
             }}
           >
             <div>
@@ -1024,7 +1024,7 @@ export default function LoanOSChat() {
                 type="submit"
                 disabled={(!input.trim() && attachments.length === 0) || isLoading}
                 style={{
-                  background: (input.trim() || attachments.length > 0) && !isLoading ? ACCENT : '#2a2a2a',
+                  background: (input.trim() || attachments.length > 0) && !isLoading ? ACCENT : 'var(--input)',
                   border: 'none',
                   borderRadius: 8,
                   color: (input.trim() || attachments.length > 0) && !isLoading ? '#000' : '#444',

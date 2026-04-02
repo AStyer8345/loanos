@@ -71,7 +71,7 @@ export default function DashboardClient(props: DashboardClientProps) {
   const needsAttentionCount = props.urgentFlags.length + props.staleLoans.length
 
   return (
-    <div className="min-h-screen bg-[#060b18] p-4 lg:p-6 space-y-4">
+    <div className="min-h-screen bg-[var(--bg)] p-4 lg:p-6 space-y-4">
 
       {/* ── Setup Banner ── */}
       {props.showSetupBanner && (

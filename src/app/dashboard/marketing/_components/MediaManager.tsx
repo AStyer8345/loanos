@@ -123,7 +123,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
               }}
             >
               {isVideo(url) ? (
-                <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+                <div className="w-full h-full bg-card flex items-center justify-center">
                   <span className="text-zinc-400 text-xs font-bold">VIDEO</span>
                 </div>
               ) : (
@@ -138,7 +138,7 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
               {/* Order badge */}
               <div
                 className="absolute top-0.5 left-0.5 w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold"
-                style={{ background: '#09090bCC', color: GOLD, fontSize: 9 }}
+                style={{ background: 'var(--bg)CC', color: GOLD, fontSize: 9 }}
               >
                 {i + 1}
               </div>

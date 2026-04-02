@@ -31,7 +31,7 @@ export default function SendTab({ mccState, onSave }: Props) {
             className="px-4 py-2 text-xs font-bold transition-colors"
             style={{
               background: sendMode === key ? GOLD : 'transparent',
-              color: sendMode === key ? '#09090b' : '#71717a',
+              color: sendMode === key ? 'var(--bg)' : '#71717a',
               fontFamily: 'inherit',
             }}
           >

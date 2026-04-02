@@ -45,7 +45,7 @@ export function NavDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-52 rounded-md bg-zinc-900 border border-zinc-700 py-1 z-40">
+        <div className="absolute left-0 mt-2 w-52 rounded-md bg-card border border-zinc-700 py-1 z-40">
           {items.map((item) => (
             <button
               key={item.label}

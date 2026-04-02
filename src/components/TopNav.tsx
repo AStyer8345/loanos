@@ -56,7 +56,7 @@ export default function TopNav() {
   return (
     <>
       <GlobalSearch />
-      <header className="fixed inset-x-0 top-0 z-30 h-14 border-b border-input bg-[#060b18] shadow-lg shadow-black/40">
+      <header className="fixed inset-x-0 top-0 z-30 h-14 border-b border-input bg-[var(--bg)] shadow-lg shadow-black/40">
         <div className="flex h-full items-center justify-between px-4 md:px-6">
 
           {/* ── Left: Logo + Nav ── */}
@@ -157,7 +157,7 @@ export default function TopNav() {
                     <span className="sr-only">Toggle navigation</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-72 bg-[#060b18] border-input">
+                <SheetContent side="right" className="w-72 bg-[var(--bg)] border-input">
                   <SheetHeader>
                     <SheetTitle>
                       <span className="text-lg font-bold tracking-tight font-mono text-foreground">

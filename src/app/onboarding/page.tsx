@@ -95,7 +95,7 @@ export default function OnboardingPage() {
   const ready = !loading && orgName.trim().length > 0 && fullName.trim().length > 0
 
   return (
-    <main style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: '#060b18', fontFamily: "'IBM Plex Mono', monospace", padding: '2rem 1rem' }}>
+    <main style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: "'IBM Plex Mono', monospace", padding: '2rem 1rem' }}>
       <div style={{ width: '100%', maxWidth: '480px' }}>
         {/* Header */}
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
@@ -249,7 +249,7 @@ export default function OnboardingPage() {
             disabled={!ready}
             style={{
               background: ready ? '#C9A84C' : '#1e293b',
-              color: ready ? '#050505' : '#475569',
+              color: ready ? 'var(--bg)' : '#475569',
               padding: '0.625rem',
               borderRadius: '4px',
               border: 'none',

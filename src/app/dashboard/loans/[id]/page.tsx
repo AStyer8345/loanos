@@ -517,7 +517,7 @@ export default function LoanDetailPage() {
     <>
     <div className="flex flex-col h-full">
       {/* ── Header — slim, consolidated ── */}
-      <div className="border-b border-zinc-800/60 shrink-0 bg-[#0a0a0c]">
+      <div className="border-b border-input/60 shrink-0 bg-[var(--bg)]">
         <div className="px-6 pt-3 pb-0">
           {/* Row 1: Breadcrumb + Actions */}
           <div className="flex items-center justify-between mb-2">
@@ -538,7 +538,7 @@ export default function LoanDetailPage() {
                   Actions <ChevronDown size={10} className={actionsOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
                 </button>
                 {actionsOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-card border border-zinc-700 rounded-lg shadow-xl z-20 py-1 overflow-hidden max-h-[70vh] overflow-y-auto">
                     <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Automations</p>
                     {[
                       { label: 'Send PA Email', automationId: 'pre-approval' },
@@ -559,7 +559,7 @@ export default function LoanDetailPage() {
                         {label}
                       </button>
                     ))}
-                    <div className="border-t border-zinc-800 mt-1 pt-1">
+                    <div className="border-t border-input mt-1 pt-1">
                       <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">Tools</p>
                       <Link
                         href={`/dashboard/scenarios/new?loan_id=${loanId}`}
@@ -570,7 +570,7 @@ export default function LoanDetailPage() {
                         Create Scenario
                       </Link>
                     </div>
-                    <div className="border-t border-zinc-800 mt-1 pt-1">
+                    <div className="border-t border-input mt-1 pt-1">
                       <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">View</p>
                       {[
                         { label: 'Activity Log', tab: 'activity' as const },
@@ -587,7 +587,7 @@ export default function LoanDetailPage() {
                         </button>
                       ))}
                     </div>
-                    <div className="border-t border-zinc-800 mt-1 pt-1">
+                    <div className="border-t border-input mt-1 pt-1">
                       <p className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-red-600">Danger</p>
                       <button
                         onClick={() => { setDeleteConfirmOpen(true); setActionsOpen(false) }}
@@ -638,7 +638,7 @@ export default function LoanDetailPage() {
           </div>
 
           {/* Row 3: Vital Signs — compact, all items visible */}
-          <div className="rounded-lg border border-zinc-800/60 bg-zinc-900/50 px-4 py-2.5 mb-2">
+          <div className="rounded-lg border border-input/60 bg-card/50 px-4 py-2.5 mb-2">
             <div className="flex items-center gap-7 flex-wrap text-sm font-mono">
               {loan.loan_amount != null && (
                 <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
@@ -737,7 +737,7 @@ export default function LoanDetailPage() {
         </div>
 
         {/* Tab bar — active tab uses loan status color */}
-        <div className="px-6 flex gap-0 border-t border-zinc-800/40">
+        <div className="px-6 flex gap-0 border-t border-input/40">
           {([
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
@@ -784,7 +784,7 @@ export default function LoanDetailPage() {
     {/* Delete confirmation modal */}
     {deleteConfirmOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="bg-card border border-zinc-700 rounded-xl p-6 w-full max-w-sm shadow-2xl">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-red-950/50 rounded-lg">
               <Trash2 size={18} className="text-red-400" />
@@ -935,7 +935,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
         </div>
       </div>
 
-      <div className="border-t border-zinc-800/40 my-6" />
+      <div className="border-t border-input/40 my-6" />
 
       {/* ── Section 3: Two-column — Details + Sidebar ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
@@ -1097,7 +1097,7 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 
       {/* Employment — only if exists */}
       {(loan.employer_name || loan.position_description) && (
-        <div className="pt-2 border-t border-zinc-800/40">
+        <div className="pt-2 border-t border-input/40">
           <div className="flex items-center gap-2">
             <Briefcase size={10} className="text-zinc-600 shrink-0" />
             <span className="text-xs font-mono text-zinc-300 truncate">
@@ -1112,7 +1112,7 @@ function BorrowerProfileCard({ loan, contact }: { loan: Loan; contact: ContactRo
 
       {/* Co-borrower — only if exists */}
       {loan.co_borrower_name && (
-        <div className="pt-2 border-t border-zinc-800/40">
+        <div className="pt-2 border-t border-input/40">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-zinc-600">Co-Borrower:</span>
             <span className="text-xs font-mono text-zinc-300">{loan.co_borrower_name}</span>
@@ -1268,7 +1268,7 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
           const lastContacted = p.email ? lastContactedMap.get(p.email.toLowerCase()) : undefined
           const roleHex = ROLE_HEX[p.role] ?? '#6B7280'
           return (
-            <div key={p.role} className="group rounded-lg p-2.5 border border-zinc-800/60 hover:border-zinc-700 transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
+            <div key={p.role} className="group rounded-lg p-2.5 border border-input/60 hover:border-zinc-700 transition-colors" style={{ borderLeftWidth: 3, borderLeftColor: roleHex }}>
               {/* Name + Role */}
               <div className="mb-2">
                 <p className="text-[10px] font-mono uppercase tracking-wide leading-none" style={{ color: roleHex }}>{p.role}</p>
@@ -1479,7 +1479,7 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
   }
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
           <Clock size={11} className="text-[#C9A84C]" /> Key Dates
@@ -1499,7 +1499,7 @@ function KeyDatesGrid({ loan, onSave }: { loan: Loan; onSave: (field: string, va
         <div>{primaryDates.slice(5).map(renderDate)}</div>
       </div>
       {expanded && populatedSecondary.length > 0 && (
-        <div className="px-4 pb-2 pt-1 border-t border-zinc-800/40 grid grid-cols-2 gap-x-6">
+        <div className="px-4 pb-2 pt-1 border-t border-input/40 grid grid-cols-2 gap-x-6">
           <div>{populatedSecondary.slice(0, Math.ceil(populatedSecondary.length / 2)).map(renderDate)}</div>
           <div>{populatedSecondary.slice(Math.ceil(populatedSecondary.length / 2)).map(renderDate)}</div>
         </div>
@@ -1623,7 +1623,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
+    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
       {/* Header */}
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
@@ -1670,7 +1670,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
               onChange={e => setLogNotes(e.target.value)}
               placeholder={`Notes about this ${activeType}…`}
               rows={2}
-              className="w-full bg-zinc-900 border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
+              className="w-full bg-card border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
             />
             <div className="flex gap-2 mt-1.5">
               <button
@@ -1717,7 +1717,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
               : null
 
             return (
-              <div key={item.id} className="border-b border-zinc-800/50">
+              <div key={item.id} className="border-b border-input/50">
                 <div
                   className="flex gap-2.5 px-4 py-2.5 items-center cursor-pointer hover:bg-zinc-800/30 transition-colors"
                   onClick={() => toggleExpanded(item.id)}
@@ -1798,7 +1798,7 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
   }
 
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700 flex items-center justify-between">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Documents</h2>
         <div className="flex items-center gap-3">
@@ -2211,7 +2211,7 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
 }) {
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 rounded-lg overflow-hidden">
+    <div className="bg-card/80 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 bg-zinc-800/80 border-b border-zinc-700">
         <h2 className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">{title}</h2>
       </div>
@@ -2266,7 +2266,7 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
           <div
             key={wf.id}
             ref={wf.id === highlightId ? highlightRef : undefined}
-            className={`bg-zinc-900/80 border rounded-lg shadow-lg shadow-black/50 p-4 transition-colors ${
+            className={`bg-card/80 border rounded-lg shadow-lg shadow-black/50 p-4 transition-colors ${
               wf.id === highlightId ? 'border-[#C9A84C] ring-1 ring-[#C9A84C]/30' : 'border-zinc-700 hover:border-zinc-600'
             }`}
           >
@@ -2366,7 +2366,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl shadow-black/60 w-full max-w-md">
+      <div className="bg-card border border-zinc-700 rounded-lg shadow-xl shadow-black/60 w-full max-w-md">
         <div className="px-5 py-4 border-b border-zinc-700 flex items-center justify-between">
           <div>
             <p className="font-mono font-semibold text-zinc-100">{workflow.icon} {workflow.name}</p>
@@ -2544,7 +2544,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
             onChange={e => setLogNotes(e.target.value)}
             placeholder={`Notes about this ${logModal}...`}
             rows={3}
-            className="w-full bg-zinc-900 border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
+            className="w-full bg-card border border-zinc-600 rounded px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
           />
           <div className="flex gap-2 mt-2">
             <button
@@ -2596,7 +2596,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
           <p className="text-sm">No {filter} activity</p>
         </div>
       ) : (
-        <div className="space-y-0 border border-zinc-800 rounded-lg overflow-hidden">
+        <div className="space-y-0 border border-input rounded-lg overflow-hidden">
           {visible.map((item) => {
             const typeIcon = item.type === 'call' ? '📞' : item.type === 'email' ? '📧' : item.type === 'text' ? '💬' : item.type === 'note' ? '📝' : null
             const typeLabel = item.type === 'call' ? 'Call' : item.type === 'email' ? 'Email' : item.type === 'text' ? 'Text' : item.type === 'note' ? 'Note' : null
@@ -2615,7 +2615,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
               + new Date(item.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
             return (
-              <div key={item.id} className="border-b border-zinc-800 last:border-b-0">
+              <div key={item.id} className="border-b border-input last:border-b-0">
                 <div
                   className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-800/40 transition-colors"
                   onClick={() => toggleExpanded(item.id)}
@@ -2740,7 +2740,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
         const label = DRAFT_LABELS[draft.automation_name] || draft.automation_name
         const isOpen = expanded === draft.id
         return (
-          <div key={draft.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+          <div key={draft.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
             <button onClick={() => setExpanded(isOpen ? null : draft.id)} className="w-full text-left p-4 focus:outline-none">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -2755,7 +2755,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
               {!isOpen && draft.body_preview && <div className="text-xs text-zinc-500 mt-2 line-clamp-2">{draft.body_preview}</div>}
             </button>
             {isOpen && (
-              <div className="border-t border-zinc-800">
+              <div className="border-t border-input">
                 <div className="bg-zinc-800 rounded-b-lg">
                   <iframe
                     ref={el => { iframeRefs.current[draft.id] = el }}
@@ -2766,7 +2766,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                   />
                 </div>
                 {draft.status === 'pending' && (
-                  <div className="flex gap-2 p-3 border-t border-zinc-800">
+                  <div className="flex gap-2 p-3 border-t border-input">
                     <button
                       onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'sent') }}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-400 bg-amber-900/20 hover:bg-amber-900/30 border border-amber-800 rounded-md transition-colors"
@@ -2797,7 +2797,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
             const fromName = (email.metadata?.from_name as string) || null
             const isOpen = expanded === email.id
             return (
-              <div key={email.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+              <div key={email.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
                 <button onClick={() => setExpanded(isOpen ? null : email.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -2813,7 +2813,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                   )}
                 </button>
                 {isOpen && email.body_snippet && (
-                  <div className="border-t border-zinc-800 p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                  <div className="border-t border-input p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
                     {email.body_snippet}
                   </div>
                 )}
@@ -2833,7 +2833,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
             const label = DRAFT_LABELS[src] || src.replace(/_/g, ' ')
             const isOpen = expanded === ce.id
             return (
-              <div key={ce.id} className="border border-zinc-800 rounded-lg bg-zinc-900 hover:border-zinc-700 transition-colors">
+              <div key={ce.id} className="border border-input rounded-lg bg-card hover:border-zinc-700 transition-colors">
                 <button onClick={() => setExpanded(isOpen ? null : ce.id)} className="w-full text-left p-4 focus:outline-none">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -2845,7 +2845,7 @@ function EmailHistoryTab({ drafts, contactEmails, inboundEmails, onRefresh }: { 
                   <div className="text-sm font-mono font-medium text-zinc-100 truncate">{ce.subject}</div>
                 </button>
                 {isOpen && (ce.body_html || ce.body_text) && (
-                  <div className="border-t border-zinc-800 p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
+                  <div className="border-t border-input p-4 text-xs text-zinc-300 font-mono whitespace-pre-wrap bg-zinc-800/50 rounded-b-lg max-h-64 overflow-y-auto">
                     {ce.body_html
                       ? <div dangerouslySetInnerHTML={{ __html: ce.body_html }} />
                       : ce.body_text}

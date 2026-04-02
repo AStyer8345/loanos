@@ -23,7 +23,7 @@ const FIELD_LABELS: [keyof ExtractedContact, string][] = [
 
 export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, onCancel }: Props) {
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-xs font-mono">
+    <div className="rounded-lg border border-zinc-700 bg-card p-3 text-xs font-mono">
       <div className="mb-2 font-semibold text-zinc-100">Confirm New Contact</div>
 
       {duplicate && (

@@ -50,6 +50,12 @@ Read:
 
 ### Step 3 — Rewrite anything below 7
 
+**CRITICAL: During rewrites, NEVER:**
+- Remove `~[LIVE DATA NEEDED]` placeholders from TIMELY posts
+- Replace placeholders with fabricated data to make the post "sound better"
+- Add specific economic events, CPI results, Fed decisions, or rate movements that haven't been verified
+- The Quality pass improves voice and engagement — it does NOT fill in data
+
 **Rewrite principles:**
 
 1. **Start with something specific, not a category**

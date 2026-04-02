@@ -31,7 +31,7 @@ function StatCard({ label, count, icon: Icon, color }: {
   color: string
 }) {
   return (
-    <div className="bg-zinc-900/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 flex items-center gap-3">
+    <div className="bg-card/80 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 flex items-center gap-3">
       <div className={`p-2 rounded-md ${color}`}>
         <Icon size={16} className="text-white" />
       </div>
@@ -84,7 +84,7 @@ export default function DailyBriefingPage() {
   const totalItems   = data?.top7.length ?? 0
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-[var(--bg)]">
       <div className="max-w-4xl mx-auto px-6 py-8">
 
         {/* Header */}
@@ -132,7 +132,7 @@ export default function DailyBriefingPage() {
         {loading && (
           <div className="space-y-3">
             {[...Array(7)].map((_, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-700 rounded-r-lg border-l-[3px] border-l-amber-500 p-4 animate-pulse">
+              <div key={i} className="bg-card border border-zinc-700 rounded-r-lg border-l-[3px] border-l-amber-500 p-4 animate-pulse">
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-zinc-700 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
@@ -158,7 +158,7 @@ export default function DailyBriefingPage() {
 
             {/* AI Summary */}
             {data.summary && (
-              <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 mb-6">
+              <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-4 mb-6">
                 <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
               </div>
             )}
@@ -186,7 +186,7 @@ export default function DailyBriefingPage() {
                     key={item.rank}
                     onClick={() => toggleCheck(item.rank)}
                     className={`
-                      bg-zinc-900 border rounded-r-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all
+                      bg-card border rounded-r-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all
                       ${done
                         ? 'border-zinc-700 border-l-zinc-600 opacity-60'
                         : 'border-zinc-700 border-l-amber-500 hover:border-amber-500/70'

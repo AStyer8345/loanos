@@ -28,6 +28,7 @@ Read in order:
 2. `tasks/social-media/research/[most recent]`
 3. `tasks/social-media/domain-queue.md`
 4. `tasks/social-media/notebooklm-pull-[TODAY].md`
+5. `tasks/social-media/content-repost-queue.md` — **NEW**: website content queued for platform-native reposts (rate updates, blog posts, newsletters). Include these in the content calendar as Tier 2 posts. Schedule 2-3 days after original publish date. After including in the calendar, move entries from "Pending" to "Completed" section.
 
 ---
 
@@ -41,9 +42,32 @@ Read in order:
 
 ### 2. Content Calendar Design
 
+**CRITICAL: Classify every post as EVERGREEN or TIMELY before writing the spec.**
+
+#### Content Classification
+
+**EVERGREEN** — Can be batch-written weeks ahead. No dependency on real-time data.
+- Program education (FHA vs Conventional, down payment myths, PMI breakdowns)
+- Personal brand (Adam's story, philosophy, behind-the-scenes)
+- Realtor resources (tips, tools, partnership value)
+- Client win stories (anonymized)
+- General homebuying education (DTI, pre-approval process, closing costs)
+- Payment math with illustrative examples (clearly labeled as illustrative)
+
+**TIMELY** — Depends on real-world data that doesn't exist yet. CANNOT be fully written ahead of time.
+- "What moved rates this week" / rate recaps
+- CPI, jobs report, Fed decision reactions
+- "Lock or float" recommendations
+- Austin market data posts (median price, inventory, days on market)
+- Any post framed as "this week," "just dropped," "came in," "right now"
+- Any post that references specific economic events or data releases
+
+**TIMELY posts get TEMPLATES only.** The Builder writes the structure, voice, and framework — but all data-dependent content is marked with `~[LIVE DATA NEEDED]` placeholders. The Refresh subagent (07-refresh) fills these in on publish day with real data.
+
 For each planned post, specify:
 ```
 Post #: [number]
+Classification: [EVERGREEN / TIMELY]
 Platform: [LinkedIn / Instagram / Facebook]
 Format: [Text-only / Carousel / Static Image / Reels / Story]
 Content Pillar: [Rate Education / Market Update / Client Win / Personal Brand / Realtor Resource]
@@ -53,7 +77,13 @@ CTA: [specific — e.g. "DM me 'RATES' for a free rate comparison"]
 Compliance flag: [NMLS# required? Equal Housing? APR disclosure?]
 Canva image needed: [YES/NO — if YES, include brief]
 Scheduled date/time: [YYYY-MM-DD HH:MM CST]
+Data sources needed (TIMELY only): [e.g. "Freddie Mac PMMS", "BLS CPI release", "Unlock MLS"]
 ```
+
+#### Weekly Calendar Balance
+- Aim for 3-4 EVERGREEN posts and 1-2 TIMELY posts per week
+- TIMELY posts should be scheduled for Tuesday-Thursday (gives Monday AM for data refresh)
+- Never schedule a TIMELY post for Monday — not enough time for weekend data to land
 
 ### 3. Voice Framework (design in Week 2, reference after)
 
@@ -101,9 +131,12 @@ Voice standards (always enforce):
 ### 5. Risk Assessment
 
 For each planned content type:
-- LOW risk: educational content with no rates mentioned
-- MEDIUM risk: market updates with data references (verify accuracy before publishing)
-- HIGH risk: any post with specific rates, APRs, or approval language (Reviewer must check NMLS# and APR disclosure)
+- LOW risk: EVERGREEN educational content with no rates mentioned
+- MEDIUM risk: EVERGREEN content with illustrative rate math (verify disclaimers)
+- HIGH risk: TIMELY posts — any post with specific rates, APRs, economic data, or market statistics
+- CRITICAL risk: Any post that presents future economic events as if they already happened — this is FABRICATION and must NEVER happen
+
+**Data Integrity Rule:** If the data doesn't exist yet, the post cannot state it as fact. Period. No exceptions. No "educated guesses." No "likely scenarios." Either it's real, verified data or it's a `~[LIVE DATA NEEDED]` placeholder.
 
 ---
 

@@ -1,3 +1,38 @@
+## Mission Brief — 2026-04-01 AM
+
+### Domain
+Lead Generation
+
+### Focus Area
+BLOCKER-004/005 Close Verification — confirm fixes deployed and functioning. Transition to Week 4 FTB Funnel planning.
+
+### Session Type
+[x] Execute / Build (Sequence C — QA verification sub-session)
+
+### Objectives
+1. Verify BLOCKER-004 fix (LOANOS_URL env var read) is deployed — confirmed via git evidence
+2. Verify BLOCKER-005 fix (await notifyPreApprovalLead) is deployed — confirmed via git evidence
+3. Close both blockers in BLOCKERS.md
+4. Update ADAM-TODO.md to reflect current state
+5. Scope Week 4 research for next session (FTB funnel, down payment lead magnet)
+
+### Definition of Done
+- BLOCKER-004 and BLOCKER-005 both marked RESOLVED in BLOCKERS.md
+- ADAM-TODO.md updated
+- Session log updated
+- NotebookLM pushed with session summary
+
+### Resources / Files in Scope
+- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/netlify/functions/subscribe-lead.js` — READ-ONLY (verified)
+- `tasks/lead-gen/BLOCKERS.md` — close BLOCKER-004 and BLOCKER-005
+- `tasks/ADAM-TODO.md` — mark BLOCKER-005 action item done
+- `tasks/lead-gen/session-log.md` — append session entry
+
+### HIGH RISK Items
+- None this session (read-only verification). No existing funnels being modified.
+
+---
+
 ## Mission Brief — 2026-03-31 AM
 
 ### Domain

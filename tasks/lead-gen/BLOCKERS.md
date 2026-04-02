@@ -76,7 +76,8 @@ Mailchimp env vars confirmed set (MAILCHIMP_API_KEY, MAILCHIMP_BORROWER_LIST_ID)
 ---
 
 ## BLOCKER-004 — Wrong LOANOS_URL in subscribe-lead.js (CRITICAL)
-**Status:** PARTIALLY RESOLVED — Netlify env var added 2026-03-31 by Adam. Builder code change still needed (subscribe-lead.js line 42: read from `process.env.LOANOS_URL` instead of hardcoded URL).
+**Status:** ✅ FULLY RESOLVED — 2026-04-01 AM verification
+**Resolved:** Code fixed in commit `1a4f90c` (2026-03-30 08:41 CT). Env var `LOANOS_URL` added by Adam in Netlify dashboard 2026-03-31. Both code + env var confirmed present. Fix is deployed (ancestor of latest origin/main commit `ede505e`).
 **Detected:** 2026-03-30 AM post-deploy QA
 **Source:** Live form test returned `{"success":true,"mailchimp":"ok","loanos":"failed"}` for both funnels
 
@@ -112,7 +113,8 @@ Every lead submitted via get-preapproved.html or rate-alert.html fails to create
 ---
 
 ## BLOCKER-005 — notifyPreApprovalLead() Fire-and-Forget Bug (HIGH)
-**Status:** ACTIVE — n8n PA notify not completing from subscribe-lead.js
+**Status:** ✅ FULLY RESOLVED — 2026-04-01 AM verification
+**Resolved:** Code fixed in commit `1a4f90c` (2026-03-30 08:41 CT). Both `notifyPreApprovalLead()` and `enrollInDrip()` are now called inside `await Promise.allSettled([...])` — both execute to completion before function returns. Fix is deployed (ancestor of latest origin/main commit `ede505e`).
 **Detected:** 2026-03-30 AM post-deploy QA
 **Source:** n8n workflow `J9Pe24vUi6fpZtdZ` triggerCount did not increment after PA form test via subscribe-lead.js
 

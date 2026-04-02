@@ -139,7 +139,7 @@ export default function InlineDraftEditor({
           value={subject}
           onChange={e => setSubject(e.target.value)}
           disabled={isBusy}
-          className="w-full bg-[#111118] border border-zinc-800 text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
+          className="w-full bg-[var(--surface)] border border-input text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
           style={{ fontFamily: 'inherit' }}
         />
       </div>
@@ -157,7 +157,7 @@ export default function InlineDraftEditor({
           onChange={e => setBody(e.target.value)}
           disabled={isBusy}
           rows={6}
-          className="w-full bg-[#111118] border border-zinc-800 text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 resize-none disabled:opacity-50"
+          className="w-full bg-[var(--surface)] border border-input text-zinc-100 text-xs rounded px-3 py-2 focus:outline-none focus:border-yellow-500 resize-none disabled:opacity-50"
           style={{ fontFamily: 'inherit', lineHeight: 1.6, minHeight: 140 }}
         />
       </div>
@@ -183,7 +183,7 @@ export default function InlineDraftEditor({
           onClick={handleRefine}
           disabled={isBusy || !refineInput.trim()}
           className="px-3 py-1.5 rounded text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-40"
-          style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
         >
           {state === 'refining' ? '...' : 'REFINE'}
         </button>
@@ -210,7 +210,7 @@ export default function InlineDraftEditor({
           onClick={handleSend}
           disabled={isBusy}
           className="px-4 py-1.5 rounded text-xs font-bold tracking-wider transition-opacity hover:opacity-80 disabled:opacity-60"
-          style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
         >
           {state === 'sending' ? 'SENDING...' : 'SEND'}
         </button>

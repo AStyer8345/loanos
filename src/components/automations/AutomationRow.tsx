@@ -66,7 +66,7 @@ export default function AutomationRow({ automation, isExpanded, onToggle }: Auto
   return (
     <button
       onClick={onToggle}
-      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-zinc-900/50 border-b border-zinc-800/50"
+      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-card/50 border-b border-input/50"
       style={{ fontFamily: MONO }}
     >
       {/* Status dot */}

@@ -124,7 +124,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
             className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors"
             style={{
               background: active === key ? GOLD : 'transparent',
-              color: active === key ? '#09090b' : '#71717a',
+              color: active === key ? 'var(--bg)' : '#71717a',
               border: active === key ? `1px solid ${GOLD}` : '1px solid #3f3f46',
               fontFamily: 'inherit',
               fontSize: 10,
@@ -139,7 +139,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
 
   return (
     <div
-      className="w-72 border-r border-zinc-800 flex flex-col h-full"
+      className="w-72 border-r border-input flex flex-col h-full"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {/* New Post button */}
@@ -147,7 +147,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
         <button
           onClick={onCompose}
           className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
         >
           + NEW POST
         </button>
@@ -183,7 +183,7 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
             <button
               key={draft.id}
               onClick={() => onSelect(draft.id)}
-              className="w-full text-left px-3 py-2.5 border-b border-zinc-800/50 transition-colors hover:bg-zinc-900/50"
+              className="w-full text-left px-3 py-2.5 border-b border-input/50 transition-colors hover:bg-card/50"
               style={{
                 borderLeft: isSelected ? `2px solid ${GOLD}` : '2px solid transparent',
                 background: isSelected ? `${GOLD}08` : 'transparent',

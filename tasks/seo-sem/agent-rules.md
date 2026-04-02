@@ -36,6 +36,15 @@
 - **When the context file says something is done, verify against the actual file before skipping it.** The context file claimed H1 was updated but the actual index.html had the old title. Always trust the source file, not the context doc.
 - **38 files in one commit is fine.** Don't batch into multiple commits just for aesthetics — one commit per logical session is cleaner for git history.
 
+## BLOG INDEX SYNC RULE (added 2026-04-01)
+
+When any new blog post is created or added to manifest.json:
+1. Add a `<li><a href="...">Title</a></li>` entry to the `<noscript>` block in blog.html (static crawler links)
+2. Add a `ListItem` entry to the CollectionPage JSON-LD schema in blog.html (increment position number)
+3. Both must stay in sync with manifest.json — if manifest has it, blog.html noscript + schema must too
+
+This was the root cause of blog posts not appearing in Google `site:` searches — the blog index only showed 3 static links to crawlers.
+
 ## SELF-IMPROVEMENT LOG
 
 | Date | Session | Rule Added/Changed | Reason |
@@ -54,3 +63,5 @@
 | 2026-03-30 | AM | Canonical convention: all site pages use .html extension | austin-mortgage-rates.html and rate-alert.html both had canonicals without .html extension. Site convention is .html on all pages except homepage. Catch this on any new page creation. |
 | 2026-03-31 | AM | Check for new untracked blog files each session | March 30 session created 2 new blog files that weren't in prior session's QA — check `ls blog/` at start of every AM session for untracked files not yet in sitemap/manifest |
 | 2026-03-31 | AM | temp-placeholder filename = real post pattern repeating | Third instance of a real post at a temp-placeholder URL (2026-03-06, 2026-03-10, and now 2026-03-30). Always noindex the temp URL + update its canonical. The proper-slug version becomes the canonical source. |
+| 2026-04-01 | AM | Suburb pages have 3+ different form HTML variants | Not all suburb pages use the hero-quick-form-actions pattern — some use an older "form-group/btn-full" structure. When batch-editing forms, check indentation and structure on skipped files rather than assuming one pattern covers all 24. |
+| 2026-04-01 | AM | BOFU blog posts get broker-vs-bank table | High-intent "how to choose a lender" type posts benefit from a side-by-side comparison table as a mid-post anchor — good for dwell time and featured snippet eligibility. |

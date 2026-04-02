@@ -168,7 +168,7 @@ function PlatformTab({
         appearance: 'none',
         border: 'none',
         background: active ? '#ffffff' : 'transparent',
-        color: active ? '#111118' : '#a1a1aa',
+        color: active ? 'var(--surface)' : '#a1a1aa',
         borderRadius: 999,
         padding: '8px 12px',
         fontSize: 11,
@@ -216,7 +216,7 @@ function ProfileBlock() {
           height: 42,
           borderRadius: '50%',
           background: GOLD,
-          color: '#111118',
+          color: 'var(--surface)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -228,7 +228,7 @@ function ProfileBlock() {
         AS
       </div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#111118' }}>Adam Styer</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--surface)' }}>Adam Styer</div>
         <div style={{ fontSize: 13, color: '#6b7280' }}>Mortgage Solutions LP</div>
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>Just now</div>
       </div>
@@ -245,7 +245,7 @@ function EngagementBar({ platform }: { platform: Platform }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            color: '#111118',
+            color: 'var(--surface)',
             fontSize: 14,
             lineHeight: 1,
             fontWeight: 600,
@@ -258,7 +258,7 @@ function EngagementBar({ platform }: { platform: Platform }) {
           </div>
           <span>save</span>
         </div>
-        <div style={{ marginTop: 10, color: '#111118', fontSize: 13, fontWeight: 600 }}>0 likes</div>
+        <div style={{ marginTop: 10, color: 'var(--surface)', fontSize: 13, fontWeight: 600 }}>0 likes</div>
       </div>
     )
   }
@@ -576,7 +576,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
           maxHeight: '92vh',
           overflow: 'auto',
           borderRadius: 28,
-          background: '#111118',
+          background: 'var(--surface)',
           color: '#ffffff',
           boxShadow: '0 24px 80px rgba(0, 0, 0, 0.45)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -648,7 +648,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
 
               {/* Caption / post text */}
               {displayText && (
-                <div style={{ marginTop: 16, color: '#111118', fontSize: 15, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                <div style={{ marginTop: 16, color: 'var(--surface)', fontSize: 15, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                   <div style={getLineClamp(expanded)}>
                     {displayText}
                   </div>
@@ -726,7 +726,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
                     height: 34,
                     borderRadius: '50%',
                     background: GOLD,
-                    color: '#111118',
+                    color: 'var(--surface)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -738,7 +738,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
                   AS
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#111118' }}>Adam Styer</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--surface)' }}>Adam Styer</div>
                   <div
                     style={{
                       marginTop: 6,

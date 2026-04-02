@@ -115,11 +115,11 @@ export default function RunHistoryList({ automationId }: RunHistoryListProps) {
         const statusColor = runStatusColor(run.status)
 
         return (
-          <div key={run.id} className="border-b border-zinc-800/50">
+          <div key={run.id} className="border-b border-input/50">
             {/* Row */}
             <button
               onClick={() => toggleExpand(run.id)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-zinc-900/50"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-card/50"
               style={{ fontFamily: MONO }}
             >
               {/* Status dot */}
@@ -166,7 +166,7 @@ export default function RunHistoryList({ automationId }: RunHistoryListProps) {
             {isExpanded && run.full_log && (
               <div className="px-4 pb-3 pt-1">
                 <pre
-                  className="text-zinc-400 whitespace-pre-wrap break-words rounded p-3 bg-zinc-950 border border-zinc-800"
+                  className="text-zinc-400 whitespace-pre-wrap break-words rounded p-3 bg-zinc-950 border border-input"
                   style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.6 }}
                 >
                   {run.full_log}

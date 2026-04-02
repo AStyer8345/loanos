@@ -438,3 +438,40 @@ Priority 3: Suburb page keyword density improvements — local H2/H3 copy
 
 Advance queue: YES — DSCR post complete
 ---
+---
+## Session: 2026-04-01 AM — SEO + SEM
+Focus: "How to Choose a Mortgage Lender" blog post + TCPA compliance on suburb forms
+Type: Execution
+
+### Completed
+
+**Blog post: "How to Choose a Mortgage Lender in Austin TX" (MEDIUM_RISK):**
+- File: blog/2026-04-01-how-to-choose-a-mortgage-lender-austin-tx.html
+- Title: "How to Choose a Lender Austin TX | Adam Styer | NMLS #513013" (60 chars ✓)
+- Meta: "Five questions every Austin buyer should ask before choosing a mortgage lender — and why the answer matters more than the rate. NMLS #513013." (143 chars ✓)
+- H1: "How to Choose a Mortgage Lender in Austin TX"
+- Content: Broker vs bank explanation, 5 questions to ask framework, rate math table ($450K at 7.00% vs 7.25%), red flags list, broker vs bank comparison table, honest "right move" close
+- Schema: Article + FAQPage (6 questions: broker vs bank, questions to ask, realtor referrals, is lowest rate best, how to compare, red flags)
+- Internal links: /get-preapproved, /mortgage-broker-vs-bank.html, /products.html, Calendly
+- Added to sitemap.xml (lastmod 2026-04-01) and blog/manifest.json (first position)
+
+**TCPA consent checkbox — all 24 suburb hero forms (LOW_RISK):**
+- Pages updated: all 24 suburb pages
+- 3 form HTML variants found and handled (22-space hero-quick-form-actions, 16-space variant, 18-space variant, and old btn-full form structure)
+- New rule added to agent-rules.md: suburb pages have 3+ form variants — check structure before batch editing
+- Resolves open issue from styermortgage-context.md (TCPA gap on suburb hero forms, discovered 2026-03-31)
+
+**Git commit: 29c9f16 — 27 files changed, pushed to GitHub, Netlify auto-deploying**
+
+### Deferred
+- GSC monitoring: April 5 window not yet reached — check in next session
+- SMS opt-in checkbox on suburb forms: separate LOW_RISK item, added to backlog
+- Blog CTA audit: verify all 12 posts link to /get-preapproved (not raw loan app URL)
+
+### Next Session Instructions
+Priority 1: Check GSC impressions on new blog posts (April 5+ window) — VA, FHA vs conventional, pre-approval, FTB, DSCR
+Priority 2: Write "How to Qualify for a Mortgage When Self-Employed in Austin TX" — large underserved keyword cluster
+Priority 3: Blog CTA audit — 12 posts, verify all CTAs route to /get-preapproved
+
+Advance queue: YES
+---

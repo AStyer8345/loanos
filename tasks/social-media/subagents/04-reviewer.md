@@ -29,7 +29,25 @@ Every post must pass ALL of these:
 - [ ] Sounds like Adam, not like a marketing agency
 - [ ] Word count within spec (LinkedIn ≤150, Instagram ≤150, Facebook ≤120)
 
-### 3. Compliance Review
+### 3. Data Integrity Review (NEW — HIGHEST PRIORITY)
+
+**Auto-REJECT if ANY of these are found:**
+
+- [ ] Post presents economic events as having occurred when they haven't (CPI results, Fed decisions, jobs reports, bond market movements) — REJECT
+- [ ] Post uses "this week," "just dropped," "came in" language about data that cannot be verified as of today's date — REJECT
+- [ ] Post states specific rate movements (e.g., "rates jumped 0.25%") without a verified data source — REJECT
+- [ ] Post states Austin market statistics (median price, inventory, DOM) without a verified source — REJECT
+- [ ] TIMELY post is missing `~[LIVE DATA NEEDED]` placeholders where real-time data should go — REJECT
+- [ ] Post makes forward-looking economic predictions stated as fact (e.g., "rates will drop by Q3") — REJECT
+
+**Acceptable:**
+- Illustrative payment math clearly labeled as examples (e.g., "$400K at 6.5% vs 7.0%")
+- FHA/VA/Conventional program parameters that are factual (e.g., "3.5% minimum down for FHA")
+- Educational framework posts (e.g., "When CPI runs hot, rates tend to stay elevated" — conditional, not claiming a specific CPI result)
+- Directional language with qualifiers (e.g., "roughly," "approximately," "in the range of")
+- `~[LIVE DATA NEEDED]` placeholders in TIMELY post templates
+
+### 4. Compliance Review
 
 NMLS# and Rate Posts:
 - [ ] Any post mentioning a specific rate → NMLS# 513013 present → if missing: REJECT
@@ -50,14 +68,14 @@ Testimonials:
 - [ ] Any post featuring a client quote or story → check Build Report for FTC disclosure note
 - [ ] If testimonial was incentivized (gift card, referral fee, etc.) → FTC "#ad" or "paid review" disclosure required → flag if unclear
 
-### 4. Brand Review
+### 5. Brand Review
 - [ ] Business name: "Adam Styer | Mortgage Solutions LP" — never "The Styer Team" → REJECT if wrong name appears
 - [ ] Loan application link (if present): https://mslp.my1003app.com/513013/register → verify correct
 - [ ] Calendly link (if present): https://calendly.com/adamstyer/15minutes → verify correct
 - [ ] No competitor brand names or negative comparisons (legal risk)
 - [ ] No claims about being the #1 or top mortgage broker without supporting data
 
-### 5. Platform Spec Review
+### 6. Platform Spec Review
 LinkedIn:
 - [ ] ≤150 words
 - [ ] ≤5 hashtags
@@ -92,12 +110,13 @@ Date: [DATE]
 
 ## Spec Compliance: [PASS/FAIL]
 ## Voice: [PASS/FAIL]
+## Data Integrity: [PASS/FAIL]
 ## Compliance: [PASS/FAIL]
 ## Brand: [PASS/FAIL]
 ## Platform Specs: [PASS/FAIL]
 
 ## Post-by-Post Results
-| Post # | Platform | Voice | Compliance | Brand | Platform Spec | Verdict |
+| Post # | Platform | Classification | Voice | Data Integrity | Compliance | Brand | Platform Spec | Verdict |
 |--------|----------|-------|------------|-------|---------------|---------|
 | 1 | LinkedIn | PASS | PASS | PASS | PASS | APPROVED |
 | 2 | Instagram | FAIL | PASS | PASS | PASS | REJECTED |

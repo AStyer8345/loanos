@@ -59,6 +59,31 @@ curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts?organiza
 
 ---
 
+## ABSOLUTE RULE — NO FABRICATED DATA
+
+**NEVER write content that presents economic events, market data, or rate movements as if they have already occurred when they have not.**
+
+This includes but is not limited to:
+- "CPI came in hotter/cooler than expected" — unless you have the actual CPI release data
+- "The Fed hinted at..." or "Markets sold off" — unless reporting a real, verified event
+- "Rates moved this week" — unless you have actual rate data from this week
+- "The 10-year moved" — unless you have the actual Treasury yield movement
+- Median home prices, inventory counts, days on market — unless pulled from a verified source TODAY
+- Any statement framed as "this week," "just dropped," "came in" about data that doesn't exist yet
+
+**What to do instead for TIMELY posts:**
+Write the post structure, voice, framework, and educational framing — but replace ALL data-dependent statements with `~[LIVE DATA NEEDED: description of what goes here]` placeholders.
+
+Example:
+- BAD: "CPI came in hotter than expected. Rates jumped."
+- GOOD: "~[LIVE DATA NEEDED: CPI result and direction]. ~[LIVE DATA NEEDED: rate reaction to CPI]."
+
+The Refresh subagent (07-refresh) fills these placeholders with real data on publish day.
+
+**EVERGREEN posts** can include illustrative math (e.g., "a $400K loan at 6.5% vs 7.0%") as long as it's clearly labeled as illustrative, not presented as today's actual rates.
+
+---
+
 ## EXECUTION PROTOCOL
 
 ### Pre-Execution Checklist
@@ -66,6 +91,7 @@ curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts?organiza
 - [ ] Voice feedback fetched and patterns noted
 - [ ] Rejected drafts reviewed for anti-patterns
 - [ ] Full spec read
+- [ ] **Each post's classification (EVERGREEN vs TIMELY) confirmed from the spec**
 - [ ] Platform word limits understood (LinkedIn ≤150 words, Instagram ≤150 words, Facebook ≤120 words)
 - [ ] Compliance flags identified for each post
 - [ ] Definition of done understood
@@ -89,7 +115,8 @@ curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
     "hashtags": "<comma-separated hashtags>",
     "status": "draft",
     "created_by": "agent",
-    "agent_notes": "<compliance flags, format recommendations, reasoning>"
+    "classification": "<evergreen|timely>",
+    "agent_notes": "<compliance flags, format recommendations, reasoning. For TIMELY posts: list all ~[LIVE DATA NEEDED] placeholders that must be filled before publish>"
   }'
 ```
 

@@ -109,7 +109,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
 
       {/* Manual log form */}
       {showLogForm && (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-sm p-4 space-y-3">
+        <div className="bg-card border border-zinc-700 rounded-sm p-4 space-y-3">
           <div>
             <FieldLabel>ACTIVITY *</FieldLabel>
             <Input
@@ -168,7 +168,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-xs font-mono border-collapse">
             <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
+              <tr className="border-b border-input text-zinc-500" style={{ fontSize: 9, letterSpacing: '0.12em' }}>
                 <th className="text-left pb-2 pr-4 font-bold">DATE</th>
                 <th className="text-left pb-2 pr-4 font-bold">ACTIVITY</th>
                 <th className="text-left pb-2 pr-4 font-bold">TYPE</th>
@@ -177,7 +177,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
             </thead>
             <tbody>
               {weekEntries.map(entry => (
-                <tr key={entry.id} className="border-b border-zinc-900 hover:bg-zinc-900 transition-colors">
+                <tr key={entry.id} className="border-b border-zinc-900 hover:bg-card transition-colors">
                   <td className="py-2 pr-4 text-zinc-500 whitespace-nowrap">
                     {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </td>

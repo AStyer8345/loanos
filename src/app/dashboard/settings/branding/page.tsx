@@ -101,7 +101,7 @@ export default function BrandingSettingsPage() {
 
       {/* Upgrade prompt for Starter plan */}
       {!hasAccess && (
-        <div className="bg-zinc-900 border border-amber-500/40 rounded-lg p-6">
+        <div className="bg-card border border-amber-500/40 rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 rounded-md bg-amber-500/10 border border-amber-500/40 flex items-center justify-center">
               <Palette size={17} className="text-amber-400" />
@@ -119,7 +119,7 @@ export default function BrandingSettingsPage() {
       )}
 
       {/* Branding editor */}
-      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
@@ -171,7 +171,7 @@ export default function BrandingSettingsPage() {
             </label>
             <div className="bg-zinc-950 border border-zinc-700 rounded-lg overflow-hidden">
               {/* Mock nav bar */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-input">
                 <div className="flex items-center gap-2">
                   <div
                     className="w-6 h-6 rounded"
@@ -236,7 +236,7 @@ export default function BrandingSettingsPage() {
 
       {/* Current branding info */}
       {branding && (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+        <div className="bg-card/50 border border-input rounded-lg p-4">
           <h3 className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">Current Branding</h3>
           <div className="grid grid-cols-2 gap-3 text-xs font-mono">
             <div>

@@ -221,7 +221,7 @@ export default function PerformancePage() {
           >
             Reset Data
           </button>
-          <div className="flex bg-zinc-900 border border-zinc-700 rounded-lg p-1 gap-0.5">
+          <div className="flex bg-card border border-zinc-700 rounded-lg p-1 gap-0.5">
             {(['dashboard','loans','expenses'] as Tab[]).map(t => (
               <button
                 key={t}
@@ -255,7 +255,7 @@ export default function PerformancePage() {
               { label:'Total Comp',    value:fmt(ytd.comp),     sub:ytd.gross ? `${fmtPct(ytd.comp/ytd.gross)} of gross` : '',      border:'border-l-amber-500' },
               { label:'Other Income',  value:fmt(ytd.otherInc), sub:`Expenses: ${fmt(ytd.expenses)}`,                               border:'border-l-rose-500'  },
             ].map(k => (
-              <div key={k.label} className={`bg-zinc-900 border border-zinc-800 border-l-4 ${k.border} rounded-lg p-3`}>
+              <div key={k.label} className={`bg-card border border-input border-l-4 ${k.border} rounded-lg p-3`}>
                 <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">{k.label}</div>
                 <div className="text-xl font-mono font-bold text-zinc-100">{k.value}</div>
                 {k.sub && <div className="text-[10px] font-mono text-zinc-500 mt-0.5 leading-tight">{k.sub}</div>}
@@ -265,7 +265,7 @@ export default function PerformancePage() {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+            <div className="bg-card border border-zinc-700 rounded-lg p-4">
               <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Monthly Performance</h3>
               {activeMonthly.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -286,7 +286,7 @@ export default function PerformancePage() {
               )}
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+            <div className="bg-card border border-zinc-700 rounded-lg p-4">
               <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Cumulative Net P&L</h3>
               {cumData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -304,12 +304,12 @@ export default function PerformancePage() {
           </div>
 
           {/* Monthly Breakdown Table */}
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
+          <div className="bg-card border border-zinc-700 rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-zinc-700 text-xs font-mono text-zinc-400 uppercase tracking-wider">Monthly Breakdown</div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-input">
                     {['Month','Loans','Volume','Gross','Comp','P&L','Other Inc','Expenses','Net P&L'].map(h => (
                       <th key={h} className={`px-3 py-2.5 text-zinc-500 font-medium uppercase tracking-wider text-[10px] ${h==='Month'?'text-left':'text-right'}`}>{h}</th>
                     ))}
@@ -363,7 +363,7 @@ export default function PerformancePage() {
 
           {/* Add / Edit Form */}
           {showForm && (
-            <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+            <div className="bg-card border border-zinc-700 rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-mono font-semibold text-zinc-100">{editingId ? 'Edit Loan' : 'Add New Loan'}</h3>
                 <button onClick={closeForm} className="text-zinc-500 hover:text-zinc-100"><X size={18} /></button>
@@ -410,11 +410,11 @@ export default function PerformancePage() {
           )}
 
           {/* Loans Table */}
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
+          <div className="bg-card border border-zinc-700 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-input">
                     {['Mo','Borrower','Loan Amt','Gross','Margin','Comp','P&L','Date',''].map(h => (
                       <th key={h} className={`px-3 py-2.5 text-zinc-500 font-medium uppercase tracking-wider text-[10px] ${h==='Mo'||h===''?'text-left':'text-right'}`}>{h}</th>
                     ))}
@@ -481,11 +481,11 @@ export default function PerformancePage() {
         <div className="space-y-4">
           <p className="text-xs font-mono text-zinc-500">Edit monthly other income and business expenses. These flow into your Net P&L and Trust Balance.</p>
 
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
+          <div className="bg-card border border-zinc-700 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-input">
                     {['Month','Other Income','Expenses','Loan P&L','Net P&L'].map(h => (
                       <th key={h} className={`px-3 py-2.5 text-zinc-500 font-medium uppercase tracking-wider text-[10px] ${h==='Month'?'text-left':'text-right'}`}>{h}</th>
                     ))}
@@ -532,7 +532,7 @@ export default function PerformancePage() {
           </div>
 
           {/* Trust Account */}
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+          <div className="bg-card border border-zinc-700 rounded-lg p-4">
             <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Trust Account</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[

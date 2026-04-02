@@ -91,7 +91,7 @@ export default function ContactCard({ contact, listKey, mccState, onSave, onDele
 
   return (
     <div
-      className="bg-zinc-900 border border-zinc-700 rounded-sm p-3 relative transition-opacity"
+      className="bg-card border border-zinc-700 rounded-sm p-3 relative transition-opacity"
       style={{ opacity: calledToday ? 0.55 : 1 }}
     >
       {/* Called today badge */}

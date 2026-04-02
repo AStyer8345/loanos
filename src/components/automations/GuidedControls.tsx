@@ -49,8 +49,8 @@ export default function GuidedControls({
         <div>
           <SectionLabel>SCHEDULE</SectionLabel>
           <div
-            className="mt-1 px-2 py-1.5 border border-zinc-800 rounded text-zinc-500 text-xs"
-            style={{ fontFamily: MONO, background: '#09090b' }}
+            className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-500 text-xs"
+            style={{ fontFamily: MONO, background: 'var(--bg)' }}
           >
             {schedule}
           </div>
@@ -275,7 +275,7 @@ function AssistantControls({
           placeholder="Key instructions for this assistant..."
           rows={3}
           onChange={(e) => onChange({ key_instructions: e.target.value })}
-          className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[#09090b] border border-zinc-800 rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
           style={{ fontFamily: MONO }}
         />
       </div>
@@ -413,12 +413,12 @@ function EditableChipList({
               addChip()
             }
           }}
-          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[#09090b] border border-zinc-800 rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
           style={{ fontFamily: MONO, fontSize: 10 }}
         />
         <button
           onClick={addChip}
-          className="px-2 py-1 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
+          className="px-2 py-1 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
           style={{ fontFamily: MONO, fontSize: 10 }}
         >
           Add
@@ -443,7 +443,7 @@ function TextInput({
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[#09090b] border border-zinc-800 rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+      className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
       style={{ fontFamily: MONO }}
     />
   )

@@ -233,8 +233,8 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
             onChange={(e) => setPrompt(e.target.value)}
             rows={4}
             placeholder="e.g. Post about how first-time buyers can use down payment assistance programs in Texas..."
-            className="w-full rounded-md border border-zinc-800 text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
-            style={{ background: '#111118', fontFamily: 'inherit', lineHeight: 1.6 }}
+            className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+            style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.6 }}
           />
         </div>
 
@@ -291,7 +291,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                   style={{ width: 72, height: 72 }}
                 >
                   {f.type.startsWith('video/') ? (
-                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+                    <div className="w-full h-full bg-card flex items-center justify-center">
                       <span className="text-zinc-500 text-lg">🎬</span>
                     </div>
                   ) : (
@@ -336,7 +336,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                 style={{
                   background: platform === p ? GOLD : 'transparent',
-                  color: platform === p ? '#09090b' : '#71717a',
+                  color: platform === p ? 'var(--bg)' : '#71717a',
                   border: platform === p ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                   fontFamily: 'inherit',
                 }}
@@ -363,7 +363,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
                 className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                 style={{
                   background: format === f ? GOLD : 'transparent',
-                  color: format === f ? '#09090b' : '#71717a',
+                  color: format === f ? 'var(--bg)' : '#71717a',
                   border: format === f ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                   fontFamily: 'inherit',
                 }}
@@ -376,7 +376,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
               className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
               style={{
                 background: format === null ? GOLD : 'transparent',
-                color: format === null ? '#09090b' : '#71717a',
+                color: format === null ? 'var(--bg)' : '#71717a',
                 border: format === null ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                 fontFamily: 'inherit',
               }}
@@ -402,7 +402,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
               className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
               style={{
                 background: GOLD,
-                color: '#09090b',
+                color: 'var(--bg)',
                 fontFamily: 'inherit',
               }}
             >
@@ -428,7 +428,7 @@ export default function SocialComposePanel({ onDraftCreated, onClose, onBuildCar
           onClick={handleGenerate}
           disabled={loading || !prompt.trim()}
           className="w-full py-2.5 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80 disabled:opacity-40"
-          style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
         >
           {loading ? 'GENERATING...' : 'GENERATE POST'}
         </button>

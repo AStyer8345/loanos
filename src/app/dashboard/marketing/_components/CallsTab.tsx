@@ -166,7 +166,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
               className="px-3 py-1.5 rounded-sm text-xs font-bold transition-all border"
               style={{
                 borderColor: active ? '#C9A84C' : '#3f3f46',
-                color:       active ? '#09090b' : '#71717a',
+                color:       active ? 'var(--bg)' : '#71717a',
                 background:  active ? '#C9A84C' : 'transparent',
               }}
             >
@@ -198,7 +198,7 @@ export default function CallsTab({ mccState, onSave }: Props) {
 
       {/* Add form */}
       {showAdd && (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-sm p-4 space-y-3">
+        <div className="bg-card border border-zinc-700 rounded-sm p-4 space-y-3">
           <SectionLabel>ADD CONTACT</SectionLabel>
           {addError && <p className="text-red-400 text-xs">{addError}</p>}
           <div className="grid grid-cols-2 gap-3">

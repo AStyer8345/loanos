@@ -59,16 +59,16 @@ export default function AdminDashboard() {
           placeholder="Search tenants..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-sm rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+          className="w-full max-w-sm rounded-md border border-input bg-card px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
 
         {loading ? (
           <div className="text-sm text-zinc-500">Loading tenants...</div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-zinc-800">
+          <div className="overflow-hidden rounded-lg border border-input">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                <tr className="border-b border-input bg-card/50">
                   <th className="px-4 py-3 text-left font-medium text-zinc-400">Name</th>
                   <th className="px-4 py-3 text-left font-medium text-zinc-400">Plan</th>
                   <th className="px-4 py-3 text-left font-medium text-zinc-400">Members</th>
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {filtered.map(t => (
-                  <tr key={t.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
+                  <tr key={t.id} className="border-b border-input/50 hover:bg-card/30 transition-colors">
                     <td className="px-4 py-3">
                       <Link href={`/admin/tenants/${t.id}`} className="text-zinc-100 hover:text-amber-400 transition-colors font-medium">
                         {t.name}
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+    <div className="rounded-lg border border-input bg-card/50 p-4">
       <div className="text-2xl font-semibold text-zinc-100 font-mono">{value}</div>
       <div className="text-xs text-zinc-500 mt-1">{label}</div>
     </div>

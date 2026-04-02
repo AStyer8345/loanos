@@ -128,7 +128,7 @@ export default function VoiceGuideEditor() {
         <button
           onClick={handleSeed}
           className="px-4 py-2 text-xs font-bold tracking-widest rounded-sm transition-colors"
-          style={{ background: GOLD, color: '#09090b' }}
+          style={{ background: GOLD, color: 'var(--bg)' }}
         >
           SEED FROM TEMPLATE
         </button>
@@ -175,7 +175,7 @@ export default function VoiceGuideEditor() {
             onClick={handleSave}
             disabled={saving}
             className="px-4 py-2 text-xs font-bold tracking-widest rounded-sm transition-colors disabled:opacity-50"
-            style={{ background: GOLD, color: '#09090b' }}
+            style={{ background: GOLD, color: 'var(--bg)' }}
           >
             {saving ? 'SAVING...' : 'SAVE'}
           </button>
@@ -186,7 +186,7 @@ export default function VoiceGuideEditor() {
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="w-full rounded-sm border border-zinc-800 bg-[#111118] text-zinc-200 p-4 focus:outline-none focus:border-zinc-600 resize-y"
+        className="w-full rounded-sm border border-input bg-[var(--surface)] text-zinc-200 p-4 focus:outline-none focus:border-zinc-600 resize-y"
         style={{
           fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
           fontSize: '13px',

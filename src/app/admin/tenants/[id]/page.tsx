@@ -87,7 +87,7 @@ export default function TenantDetailPage() {
       {/* Info Cards */}
       <div className="grid grid-cols-2 gap-6">
         {/* Organization Info */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-5 space-y-3">
+        <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
           <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Organization</h2>
           <div className="space-y-2">
             <InfoRow label="Name" value={tenant.name} />
@@ -107,13 +107,13 @@ export default function TenantDetailPage() {
         </div>
 
         {/* Billing Info */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-5 space-y-3">
+        <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
           <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Billing</h2>
           <div className="space-y-2">
             <InfoRow label="Plan" value={tenant.plan === 'professional' ? 'Professional' : 'Starter'} />
             <InfoRow label="MRR" value={tenant.plan === 'professional' ? '$99' : '$0'} mono />
           </div>
-          <div className="pt-3 border-t border-zinc-800">
+          <div className="pt-3 border-t border-input">
             <p className="text-xs text-zinc-600 mb-2">Manual Plan Override</p>
             <div className="flex gap-2">
               <button
@@ -137,7 +137,7 @@ export default function TenantDetailPage() {
       </div>
 
       {/* Members */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-5 space-y-3">
+      <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
         <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
           Members ({tenant.members.length})
         </h2>
@@ -166,13 +166,13 @@ export default function TenantDetailPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-5 space-y-3">
+      <div className="rounded-lg border border-input bg-card/50 p-5 space-y-3">
         <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
           Recent Activity (last 20)
         </h2>
         <div className="space-y-1">
           {tenant.recent_activity.map(a => (
-            <div key={a.id} className="flex items-center justify-between py-1.5 border-b border-zinc-800/30 last:border-0">
+            <div key={a.id} className="flex items-center justify-between py-1.5 border-b border-input/30 last:border-0">
               <div className="flex items-center gap-3">
                 <span className="text-xs text-zinc-600 font-mono w-32 shrink-0">
                   {new Date(a.created_at).toLocaleString()}

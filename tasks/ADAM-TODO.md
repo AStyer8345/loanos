@@ -8,6 +8,17 @@
 ## PENDING
 
 <!-- Agents append new items below this line -->
+- [ ] [SOCIAL] 2026-04-01 🚨 INVESTIGATE — Week 1–3 posts (21 posts) do NOT exist in social_drafts Supabase table despite session logs claiming they were written. Prior agent builds used curl to Supabase REST API which has a DNS resolution failure from the agent environment. These posts may never have been saved. Decide: (1) rebuild Weeks 1–3 using the MCP-based insert method now confirmed working, or (2) confirm posts exist elsewhere. Build reports for Weeks 1–3 also do not exist on disk.
+- [ ] [SOCIAL] 2026-04-01 — Week 4 Posts 22–28 are now in social_drafts (confirmed). Schedule EVERGREEN posts (22, 23, 26, 27, 28) in LoanOS Marketing → Social tab. DO NOT schedule Posts 24–25 (FOMC TIMELY) until April 29 after 2 PM ET.
+- [ ] [SOCIAL] 2026-04-01 — Create Canva assets for Week 4: Post 22 (10-slide LinkedIn carousel, VA myths) + Post 27 (4-slide Instagram carousel, 2-1 buydown) — design briefs in tasks/social-media/build-reports/2026-04-01-week4-build.md
+- [ ] [SOCIAL] 2026-04-01 — Film vertical Reel for Post 23 (30–45 sec, VA loan myths buyer-facing) — script in social_drafts (Post 23 ID: 35b84305). Phone-shot vertical, hook: "Most veterans in Austin are leaving money on the table."
+- [ ] [SOCIAL] 2026-04-29 — After FOMC decision (2 PM ET): Refresh agent will auto-fill Posts 24–25. Review and approve fills in LoanOS Marketing → Social tab before posting. Target publish: 3–4 PM CDT same day.
+- [ ] [SOCIAL] 2026-04-01 ⚠️ URGENT — Run 7 Publer curl commands for Week 1 posts (April 7 publish is in 6 days!) — commands in tasks/social-media/qa-reports/2026-03-28-week1-qa.md (use corrected commands for Posts 2, 4, 5). DO THIS NOW or Week 1 misses its window.
+- [ ] [SOCIAL] 2026-04-01 ⚠️ URGENT — Complete NMLS# 513013 profile audit on all 4 social platforms (LinkedIn, Instagram, Facebook, Google Business Profile) before April 7 publish date. No post can go live without this.
+- [ ] [SOCIAL] 2026-04-01 — Run 1 Publer curl command for Week 3 Post 17 (LinkedIn long-form, April 23) — command in tasks/social-media/qa-reports/2026-04-01-week3-qa.md (run from local terminal)
+- [ ] [SOCIAL] 2026-04-01 — Create Canva assets for Week 3 carousel posts: Post 15 (12 slides, LinkedIn), Post 19 (10 slides, LinkedIn), Post 20 (3-4 slides, Instagram) — design briefs in tasks/social-media/build-reports/2026-04-01-week3-build.md
+- [ ] [SOCIAL] 2026-04-01 — Film vertical videos for Week 3: Post 16 (30-sec Reel, 20% down myth) + Post 18 (30-45 sec Reel, pre-approval in 24 hours) — scripts in social_drafts content field for those posts
+- [ ] [SOCIAL] 2026-04-01 — Replace placeholder inventory data in Week 3 Posts 19, 20, 21 on/after April 23 — pull from unlockmls.com/housing-stats; replace all ~[~PLACEHOLDER] values in Supabase social_drafts and Publer draft before April 24 publish
 - [ ] [SOCIAL] 2026-03-31 — Run 3 Publer curl commands for Week 2 text posts (Posts 9, 11, 14) — commands in tasks/social-media/qa-reports/2026-03-31-week2-qa.md (run from local terminal, API unreachable from agent)
 - [ ] [SOCIAL] 2026-03-31 — Create Canva assets for Week 2 carousel posts: Post 8 (12 slides), Post 10 (8 slides), Post 12 (10 slides), Post 13 (6 slides) — design briefs in tasks/social-media/build-reports/2026-03-28-week2-build.md
 - [ ] [SOCIAL] 2026-03-31 — Film vertical videos for Week 2: Post 9 (30-sec Reel, rate lock questions) + Post 11 (30-45 sec, why I became a broker) — scripts with timecodes in tasks/social-media/build-reports/2026-03-28-week2-build.md
@@ -28,5 +39,5 @@
 - [ ] [LEAD-GEN] 2026-03-28 — Create recurring weekly Friday 9:00 AM CT Mailchimp campaign to send rate update to all `rate-alert` tagged subscribers — use template in spec
 - [x] [LEAD-GEN] 2026-03-29 — DEPLOY: `git push` from `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site` — COMPLETE (commit 1b3f0be, 2026-03-29 10:00 AM CT). Both funnels live.
 - [x] [LEAD-GEN] 2026-03-30 — BLOCKER-004: Add Netlify env var `LOANOS_URL = https://loanos-astyer8345s-projects.vercel.app` in Netlify dashboard — DONE 2026-03-31 by Adam
-- [ ] [LEAD-GEN] 2026-03-30 — BLOCKER-005: After Builder fixes subscribe-lead.js, run `git push` from `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site` to deploy the fix. This fixes PA speed-to-lead notification (n8n PA notify was not firing due to missing `await`).
+- [x] [LEAD-GEN] 2026-03-30 — BLOCKER-005: After Builder fixes subscribe-lead.js, run `git push` from `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site` to deploy the fix. This fixes PA speed-to-lead notification (n8n PA notify was not firing due to missing `await`). — RESOLVED: Code fixed commit `1a4f90c` 2026-03-30, deployed via subsequent commits through 2026-03-31.
 - [x] [LEAD-GEN] 2026-03-30 — Confirm `LOANOS_SYSTEM_USER_ID` is set in Vercel — CONFIRMED 2026-03-31 by Adam

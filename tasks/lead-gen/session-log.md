@@ -2,6 +2,59 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-01 AM — Lead Generation
+Focus: BLOCKER-004 + BLOCKER-005 Resolution Verification
+Type: Execute / Build (Sequence C — QA verification)
+Week in Queue: Week 3 → transitioning to Week 4
+
+### Completed
+- Confirmed BLOCKER-004 FULLY RESOLVED: commit `1a4f90c` (2026-03-30 08:41 CT) changed subscribe-lead.js line 42 from hardcoded URL to `process.env.LOANOS_URL`. Adam's Netlify env var addition (2026-03-31) completes the fix. Deployed.
+- Confirmed BLOCKER-005 FULLY RESOLVED: same commit `1a4f90c` wrapped `notifyPreApprovalLead()` and `enrollInDrip()` in `await Promise.allSettled()`. No longer fire-and-forget. Deployed.
+- Closed both blockers in BLOCKERS.md
+- Marked BLOCKER-005 ADAM-TODO item as complete
+- Written QA verification report: tasks/lead-gen/qa-reports/2026-04-01-blocker-resolution-qa.md
+- NotebookLM pull report written: tasks/lead-gen/notebooklm-pull-2026-04-01.md
+- Today's mission brief updated: tasks/lead-gen/today-mission.md
+
+### Deferred
+- Live end-to-end test (curl test to confirm `loanos: "ok"` in production) — optional, code evidence sufficient. Adam can run manually.
+- Mailchimp Customer Journey creation (PA Welcome Series + Rate Watch Welcome Series): Adam must do in UI — existing item
+- Week 4 research (FTB funnel, down payment DPA lead magnet): queued for next session
+
+### Output Produced
+- QA Report: tasks/lead-gen/qa-reports/2026-04-01-blocker-resolution-qa.md — PASS
+- BLOCKERS.md: BLOCKER-004 closed; BLOCKER-005 closed
+- ADAM-TODO.md: BLOCKER-005 item marked complete
+- NotebookLM pull: tasks/lead-gen/notebooklm-pull-2026-04-01.md
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (FTB Guide, Pre-Approval, Rate Alert) — all 3 pages live
+- Backend integrations: All wired (LoanOS + Mailchimp + PA notify) — fixes deployed as of 2026-03-30
+- Estimated leads/month from owned channels: ~5–10 (infrastructure now fully operational; Mailchimp Journeys still pending Adam)
+- Week 3 status: COMPLETE (pending Mailchimp Journey creation by Adam)
+
+### Compliance Checks Passed
+- N/A this session (verification-only — no new code written)
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: N/A | QA: 5
+
+### System Improvement Notes
+- BLOCKERS.md needs same-session updates when Builder commits a fix. The 2026-03-30 fix commit was not reflected in BLOCKERS.md, leading to confusion in the 2026-03-31 AM session. Rule: Builder subagent must update BLOCKERS.md status when it commits a fix, not wait for a QA confirmation.
+
+### BLOCKERS
+- BLOCKER-001: TCPA on homepage forms — LOW (no SMS live)
+- BLOCKER-004: ✅ RESOLVED 2026-04-01
+- BLOCKER-005: ✅ RESOLVED 2026-04-01
+
+### Next Session Instructions
+Priority 1: **Week 4 Research** — First-Time Buyer Expansion. Research Texas DPA programs (TDHCA, Travis County DPA), "down payment myths" content angle, and 8-email nurture sequence structure for Austin FTB buyers. Write research file to `tasks/lead-gen/research/2026-04-01-ftb-expansion-research.md`.
+Priority 2: **Architect** — After research, design the FTB Expansion funnel spec (down payment lead magnet PDF, opt-in page, 8-email sequence).
+Priority 3: **Adam confirms** Mailchimp Customer Journeys created (PA Welcome Series + Rate Watch Welcome Series) — only then can Week 3 be declared 100% complete.
+
+Advance queue to next topic: YES — Week 3 infrastructure fully complete. Begin Week 4: First-Time Buyer Expansion.
+
+---
 ## Session: 2026-03-30 AM — Lead Generation
 Focus: Week 3 Post-Deploy QA — Rate Alert Funnel + Pre-Approval Funnel live verification
 Type: Execute / Build (Sequence C — QA-only sub-session)

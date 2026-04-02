@@ -60,10 +60,10 @@ export default async function WaitlistPage() {
           No signups yet. Share the marketing site to start building the list.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-zinc-800">
+        <div className="overflow-x-auto rounded-lg border border-input">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-zinc-900 text-zinc-400 text-xs uppercase tracking-widest">
+              <tr className="bg-card text-zinc-400 text-xs uppercase tracking-widest">
                 <th className="px-4 py-3 text-left font-medium">Name</th>
                 <th className="px-4 py-3 text-left font-medium">Email</th>
                 <th className="px-4 py-3 text-left font-medium">Company</th>
@@ -74,7 +74,7 @@ export default async function WaitlistPage() {
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-zinc-900/50 transition-colors">
+                <tr key={row.id} className="hover:bg-card/50 transition-colors">
                   <td className="px-4 py-3 font-medium text-zinc-100">{row.name}</td>
                   <td className="px-4 py-3 text-zinc-300 font-mono text-xs">{row.email}</td>
                   <td className="px-4 py-3 text-zinc-400">{row.company ?? '—'}</td>

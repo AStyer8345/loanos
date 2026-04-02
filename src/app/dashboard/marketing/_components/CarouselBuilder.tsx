@@ -483,7 +483,7 @@ Rules:
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-input">
         <div
           className="font-bold"
           style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
@@ -502,7 +502,7 @@ Rules:
       <div className="flex-1 overflow-y-auto">
         <div className="flex h-full">
           {/* Left column: slide editor */}
-          <div className="w-80 border-r border-zinc-800 p-4 space-y-4 overflow-y-auto">
+          <div className="w-80 border-r border-input p-4 space-y-4 overflow-y-auto">
             {/* AI Generation */}
             {!generated && (
               <div className="rounded-md border border-zinc-700 p-3 space-y-2" style={{ background: '#0d0d18' }}>
@@ -517,8 +517,8 @@ Rules:
                   onChange={(e) => setAiPrompt(e.target.value)}
                   rows={3}
                   placeholder="e.g. 5 things first-time buyers don't know about closing costs..."
-                  className="w-full rounded-md border border-zinc-800 text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
-                  style={{ background: '#111118', fontFamily: 'inherit', lineHeight: 1.5 }}
+                  className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                  style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.5 }}
                 />
                 <div className="flex items-center gap-2">
                   <label className="text-zinc-500" style={{ fontSize: 10 }}>SLIDES:</label>
@@ -530,7 +530,7 @@ Rules:
                         className="w-6 h-6 rounded text-xs font-bold transition-colors"
                         style={{
                           background: aiSlideCount === n ? GOLD : 'transparent',
-                          color: aiSlideCount === n ? '#09090b' : '#71717a',
+                          color: aiSlideCount === n ? 'var(--bg)' : '#71717a',
                           border: aiSlideCount === n ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                         }}
                       >
@@ -546,7 +546,7 @@ Rules:
                   onClick={handleAiGenerate}
                   disabled={aiGenerating || !aiPrompt.trim()}
                   className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80 disabled:opacity-40"
-                  style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+                  style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
                 >
                   {aiGenerating ? 'GENERATING...' : 'GENERATE SLIDES'}
                 </button>
@@ -585,8 +585,8 @@ Rules:
                 onChange={(e) => setCaption(e.target.value)}
                 rows={2}
                 placeholder="Caption for the post..."
-                className="w-full rounded-md border border-zinc-800 text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
-                style={{ background: '#111118', fontFamily: 'inherit', lineHeight: 1.5 }}
+                className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.5 }}
               />
             </div>
 
@@ -604,7 +604,7 @@ Rules:
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                   style={{
                     background: bgMode === 'black' ? GOLD : 'transparent',
-                    color: bgMode === 'black' ? '#09090b' : '#71717a',
+                    color: bgMode === 'black' ? 'var(--bg)' : '#71717a',
                     border: bgMode === 'black' ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                     fontFamily: 'inherit',
                   }}
@@ -619,7 +619,7 @@ Rules:
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-colors"
                   style={{
                     background: bgMode === 'image' ? GOLD : 'transparent',
-                    color: bgMode === 'image' ? '#09090b' : '#71717a',
+                    color: bgMode === 'image' ? 'var(--bg)' : '#71717a',
                     border: bgMode === 'image' ? `1px solid ${GOLD}` : '1px solid #3f3f46',
                     fontFamily: 'inherit',
                   }}
@@ -669,7 +669,7 @@ Rules:
                       className="rounded-md border p-2"
                       style={{
                         borderColor: i === safeIndex ? GOLD : '#27272a',
-                        background: i === safeIndex ? `${GOLD}08` : '#111118',
+                        background: i === safeIndex ? `${GOLD}08` : 'var(--surface)',
                         cursor: 'pointer',
                       }}
                       onClick={() => setSelectedSlide(i)}
@@ -724,7 +724,7 @@ Rules:
                             ? 'Call to action...'
                             : 'Slide content...'
                         }
-                        className="w-full rounded border border-zinc-800 text-zinc-100 text-xs px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                        className="w-full rounded border border-input text-zinc-100 text-xs px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
                         style={{
                           background: 'transparent',
                           fontFamily: 'inherit',
@@ -828,7 +828,7 @@ Rules:
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-zinc-800 p-4 space-y-2">
+      <div className="border-t border-input p-4 space-y-2">
         {error && (
           <div
             className="rounded-sm px-3 py-2 text-xs font-bold"
@@ -841,7 +841,7 @@ Rules:
           onClick={handleCreate}
           disabled={creating || slides.filter((s) => s.text.trim()).length < 2}
           className="w-full py-2.5 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80 disabled:opacity-40"
-          style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
         >
           {creating ? 'GENERATING SLIDES...' : 'CREATE CAROUSEL DRAFT'}
         </button>

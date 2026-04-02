@@ -168,7 +168,7 @@ export default function ReferralPage() {
   }
 
   return (
-    <div style={{ background: '#09090b', minHeight: '100%', padding: '28px 32px', fontFamily: "'IBM Plex Mono', monospace" }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', padding: '28px 32px', fontFamily: "'IBM Plex Mono', monospace" }}>
 
       {/* Back nav */}
       <Link

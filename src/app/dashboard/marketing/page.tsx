@@ -51,7 +51,7 @@ export default function MarketingPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex border-b border-zinc-800 mb-6">
+      <div className="flex border-b border-input mb-6">
         {TABS.map(tab => (
           <button
             key={tab}

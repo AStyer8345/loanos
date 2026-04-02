@@ -113,7 +113,7 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
     <div
       className="rounded-md overflow-hidden"
       style={{
-        background: '#111118',
+        background: 'var(--surface)',
         border: `1px solid ${isCTA ? BRAND_GOLD : '#27272a'}`,
         padding: '16px 18px',
       }}
@@ -192,8 +192,8 @@ function SlidePreviewOrText({
     // No slides detected — render with lightweight markdown (bold, italic, hr, bullets)
     return (
       <div
-        className="rounded-md border border-zinc-800 px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
-        style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
+        className="rounded-md border border-input px-3 py-2.5 text-zinc-300 whitespace-pre-wrap"
+        style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
         dangerouslySetInnerHTML={{ __html: renderMarkdown(draft.content || '(empty)') }}
       />
     )
@@ -207,8 +207,8 @@ function SlidePreviewOrText({
       {/* Caption / intro text */}
       {intro && (
         <div
-          className="rounded-md border border-zinc-800 px-3 py-2 text-zinc-300 whitespace-pre-wrap"
-          style={{ background: '#111118', fontSize: 12, lineHeight: 1.6 }}
+          className="rounded-md border border-input px-3 py-2 text-zinc-300 whitespace-pre-wrap"
+          style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
           dangerouslySetInnerHTML={{ __html: renderMarkdown(intro) }}
         />
       )}
@@ -562,7 +562,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {/* 1. Header bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-input">
         <div>
           <div className="text-white font-bold" style={{ fontSize: 15 }}>
             {draft.title || 'Untitled'}
@@ -603,14 +603,14 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={8}
-                className="w-full rounded-md border border-zinc-800 text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
-                style={{ background: '#111118', fontFamily: 'inherit', lineHeight: 1.6 }}
+                className="w-full rounded-md border border-input text-zinc-100 text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
+                style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.6 }}
               />
               <div className="flex gap-2">
                 <button
                   onClick={handleSave}
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                  style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+                  style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
                 >
                   SAVE
                 </button>
@@ -670,7 +670,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
                   style={{
                     background: GOLD,
-                    color: '#09090b',
+                    color: 'var(--bg)',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -720,7 +720,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
                   style={{
                     background: GOLD,
-                    color: '#09090b',
+                    color: 'var(--bg)',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -753,7 +753,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   placeholder="What's wrong with this post..."
                   className="w-full rounded-sm p-2 text-sm resize-none"
                   style={{
-                    background: '#09090b',
+                    background: 'var(--bg)',
                     color: '#fafafa',
                     border: '1px solid #27272a',
                     fontFamily: 'inherit',
@@ -793,8 +793,8 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
               AGENT NOTES
             </div>
             <div
-              className="rounded-md border border-zinc-800 px-3 py-2.5 text-zinc-500 whitespace-pre-wrap"
-              style={{ background: '#111118', fontSize: 11, lineHeight: 1.5 }}
+              className="rounded-md border border-input px-3 py-2.5 text-zinc-500 whitespace-pre-wrap"
+              style={{ background: 'var(--surface)', fontSize: 11, lineHeight: 1.5 }}
             >
               {draft.agent_notes}
             </div>
@@ -803,7 +803,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
       </div>
 
       {/* 3. Chat panel */}
-      <div className="border-t border-zinc-800 p-3 space-y-2">
+      <div className="border-t border-input p-3 space-y-2">
         <div
           className="font-bold"
           style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
@@ -819,7 +819,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 key={i}
                 className="text-xs rounded-sm px-2 py-1.5"
                 style={{
-                  background: msg.role === 'user' ? '#1a1a2e' : '#111118',
+                  background: msg.role === 'user' ? '#1a1a2e' : 'var(--surface)',
                   color: msg.role === 'user' ? '#e4e4e7' : '#a1a1aa',
                   borderLeft: msg.role === 'assistant' ? `2px solid ${GOLD}` : '2px solid #3f3f46',
                 }}
@@ -836,7 +836,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                         fontSize: 9,
                         letterSpacing: '0.1em',
                         background: GOLD,
-                        color: '#09090b',
+                        color: 'var(--bg)',
                         fontFamily: 'inherit',
                       }}
                     >
@@ -871,7 +871,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             onClick={handleChatSend}
             disabled={chatLoading || !chatInput.trim()}
             className="px-3 py-1.5 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-40"
-            style={{ background: GOLD, color: '#09090b', fontFamily: 'inherit' }}
+            style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
           >
             {chatLoading ? '...' : 'SEND'}
           </button>

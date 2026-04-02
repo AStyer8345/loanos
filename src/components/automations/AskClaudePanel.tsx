@@ -67,7 +67,7 @@ export default function AskClaudePanel({
 
   return (
     <div
-      className="flex flex-col gap-4 p-4 bg-[#09090b] border border-zinc-800 rounded"
+      className="flex flex-col gap-4 p-4 bg-[var(--bg)] border border-input rounded"
       style={{ fontFamily: MONO }}
     >
       {/* Header */}
@@ -86,7 +86,7 @@ export default function AskClaudePanel({
           rows={4}
           disabled={state === 'loading' || state === 'preview'}
           onChange={(e) => setInstruction(e.target.value)}
-          className="w-full px-2 py-2 text-xs text-zinc-100 bg-zinc-950 border border-zinc-800 rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-2 py-2 text-xs text-zinc-100 bg-zinc-950 border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ fontFamily: MONO }}
         />
       </div>
@@ -96,7 +96,7 @@ export default function AskClaudePanel({
         <button
           onClick={handleUpdateAgent}
           disabled={state === 'loading' || !instruction.trim()}
-          className="px-3 py-2 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ fontFamily: MONO }}
         >
           {state === 'loading' ? 'Thinking...' : 'Update Agent'}
@@ -150,8 +150,8 @@ function PreviewChanges({ oldConfig, newConfig, onApply, onCancel }: PreviewChan
 
       {/* Diff lines */}
       <div
-        className="rounded border border-zinc-800 overflow-auto"
-        style={{ background: '#0a0a0c', maxHeight: 240 }}
+        className="rounded border border-input overflow-auto"
+        style={{ background: 'var(--bg)', maxHeight: 240 }}
       >
         {diff.length === 0 ? (
           <div className="px-3 py-2 text-zinc-600 text-xs">No changes detected</div>
@@ -178,7 +178,7 @@ function PreviewChanges({ oldConfig, newConfig, onApply, onCancel }: PreviewChan
         </button>
         <button
           onClick={onCancel}
-          className="px-3 py-1.5 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-zinc-200 hover:border-zinc-500"
+          className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-zinc-200 hover:border-zinc-500"
           style={{ fontFamily: MONO }}
         >
           Cancel

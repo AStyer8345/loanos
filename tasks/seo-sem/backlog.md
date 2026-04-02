@@ -69,5 +69,34 @@
 - ~~[ZERO_RISK] Add 2026-03-30-why-rates-jumped to sitemap + manifest~~ ✅ DONE 2026-03-31 — commit 46cfddb
 - ~~[ZERO_RISK] Add 2026-03-30-temp-placeholder to robots.txt Disallow~~ ✅ DONE 2026-03-31 — commit 46cfddb
 - ~~Blog post: "DSCR Loans Austin TX 2026 — The Complete Investor's Guide"~~ ✅ DONE 2026-03-31 — commit 46cfddb, FAQPage 6 questions, comparison table, Austin submarket analysis
-- [MEDIUM_RISK] Blog post: "How to Choose a Mortgage Lender in Austin TX" — high-intent bottom-of-funnel query (next AM session)
+- ~~[MEDIUM_RISK] Blog post: "How to Choose a Mortgage Lender in Austin TX"~~ ✅ DONE 2026-04-01 — commit 29c9f16, FAQPage 6 questions, broker vs bank table, 60-char title, 143-char meta
+- ~~[LOW_RISK] Add TCPA consent checkbox to 24 suburb hero forms~~ ✅ DONE 2026-04-01 — commit 29c9f16, all 24 suburb pages updated (3 form variants handled)
 - [P4 — GSC BLOCKED] Check impressions on 5 new blog posts (VA, FHA vs conventional, pre-approval, FTB, DSCR) — after April 5
+- [P4 — GSC BLOCKED] Check impressions on 6th blog post (How to Choose a Lender) — after April 10
+
+## ADDED 2026-04-01 AM
+- [MEDIUM_RISK] Blog post: "How to Qualify for a Mortgage When Self-Employed in Austin TX" — large underserved keyword cluster, natural follow-on to the lender selection post
+- [LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms (after TCPA required — SMS opt-in is optional/separate per 2026 FCC rules, same pattern as /get-preapproved)
+- [LOW_RISK] Blog post CTA audit: verify all 12 blog posts link CTAs to /get-preapproved (not raw loan app URL)
+
+## ADDED 2026-04-01 — SEO AUDIT FINDINGS (source: April 2026 full-site audit)
+
+### P1 — HIGH PRIORITY CONTENT GAPS
+- [MEDIUM_RISK] New page: Austin Condo Mortgage Guide — competitor Leaman Team owns this niche with 20+ named condo projects, zero condo content on our site. Dedicated landing page + building list.
+- [MEDIUM_RISK] New page: "How to Buy a House in Austin TX" — top-of-funnel pillar page (3,000+ words), step-by-step homebuying process. High informational demand keyword.
+- [MEDIUM_RISK] Monthly Austin Housing Market Report — recurring blog series with median prices, inventory, rate trends, Adam's market take. Fresh content signal + realtor sharing.
+- [LOW_RISK] Expand Non-QM page to cover bank statement loans, asset depletion (currently only DSCR). Keyword: "non-QM loan Texas"
+- [LOW_RISK] Add veteran-specific FAQ + eligibility detail to VA loan page. Keyword: "VA loan Austin Texas"
+
+### P2 — MEDIUM PRIORITY CONTENT GAPS
+- [LOW_RISK] Mortgage glossary / terms resource page — internal linking opportunity for every loan page
+- [LOW_RISK] Investment property ROI examples + calculator tie-in on DSCR page. Keyword: "investment property loan Austin"
+- [LOW_RISK] Mortgage document checklist blog post + downloadable PDF. High-intent keyword, easy to rank.
+- [LOW_RISK] Add construction loan builder partner content + process walkthrough. Keyword: "construction loan Austin TX"
+
+### P3 — ONGOING MAINTENANCE (from audit)
+- [LOW_RISK] blog.html noscript links — keep in sync when new posts are added (new agent rule needed)
+- [LOW_RISK] blog.html CollectionPage schema — keep in sync when new posts are added (new agent rule needed)
+- [LOW_RISK] City pages: add unique local data per city (median prices, school districts, commute times) to reduce duplicate content risk — do 2-3 cities per session
+- [P4 — GSC BLOCKED] Validate suburb page impressions — which are getting traffic vs. dead weight
+- [P4 — GSC BLOCKED] Keyword gap analysis — competitor keywords we're not targeting

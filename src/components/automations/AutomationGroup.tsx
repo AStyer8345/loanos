@@ -32,11 +32,11 @@ export default function AutomationGroup({
   const label = getGroupLabel(groupName)
 
   return (
-    <div className="border border-zinc-800" style={{ borderLeft: `3px solid ${GOLD}` }}>
+    <div className="border border-input" style={{ borderLeft: `3px solid ${GOLD}` }}>
       {/* Group header */}
       <button
         onClick={() => setGroupOpen(prev => !prev)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-zinc-900/40 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-card/40 transition-colors"
         style={{ fontFamily: MONO }}
       >
         <span
@@ -66,7 +66,7 @@ export default function AutomationGroup({
                 onToggle={() => onToggle(automation.id)}
               />
               {expandedId === automation.id && (
-                <div className="border-t border-zinc-800/50">
+                <div className="border-t border-input/50">
                   {automation.source === 'claude_code' && (
                     <AgentDetailPanel
                       automation={automation}

@@ -30,6 +30,7 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 
 ## CRITICAL RULES — SOCIAL MEDIA DOMAIN
 
+- **NEVER FABRICATE DATA.** Do not write economic events (CPI, Fed decisions, jobs reports, rate movements, market stats) as if they have occurred when they have not. This is the #1 rule. Posts are classified as EVERGREEN (can be pre-written) or TIMELY (need real data). TIMELY posts use `~[LIVE DATA NEEDED]` placeholders until the Refresh subagent fills them with verified data on publish day.
 - NEVER publish a post live. All post content goes into the social_drafts Supabase table. Adam reviews and publishes from the LoanOS Marketing → Social tab.
 - NEVER publish rate-related content without NMLS# 513013 present.
 - NEVER post guaranteed approval language — blocked by RESPA/Reg Z.
@@ -37,7 +38,6 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 - If a post mentions a specific rate → APR disclosure required.
 - If a visual post is created → Equal Housing Lender required on the image or caption.
 - If Reviewer rejects a post → it does NOT get scheduled. Full stop.
-- Week 1 Rule: Sequence A (Research Only) until audit + baseline are complete.
 
 ---
 
@@ -45,11 +45,14 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 
 ```
 00-notebooklm.md  (PULL mode)   ← pulls prior context
+07-refresh.md     (AM only)      ← fills TIMELY post templates with real data for upcoming publish dates
 01-research.md                   ← social media research
-02-architect.md                  ← content plan / strategy
+02-architect.md                  ← content plan / strategy (classifies posts as EVERGREEN vs TIMELY)
 03-builder.md                    ← write posts to social_drafts table, generate Canva prompts
+                                    EVERGREEN posts: full copy ready to publish
+                                    TIMELY posts: templates with ~[LIVE DATA NEEDED] placeholders
 03b-quality.md                   ← brand & quality polish (score/rewrite until ≥7/10)
-04-reviewer.md                   ← compliance + spec review (gets polished copy only)
+04-reviewer.md                   ← compliance + DATA INTEGRITY + spec review
 05-qa.md                         ← verify posts appear in social_drafts table
 06-reporter.md                   ← session log
 00-notebooklm.md  (PUSH mode)   ← pushes knowledge to NotebookLM
@@ -68,6 +71,90 @@ Read in order:
 6. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
+
+---
+
+## STEP 1B — GBP CONTENT DISTRIBUTION (AM session only — run BEFORE regular subagent sequence)
+
+**Purpose:** Detect new website content (rate updates, blog posts, newsletter landing pages) published since last check, and automatically post each one to GBP + all social platforms via the existing n8n webhook.
+
+### 1. Read the tracker
+Read `tasks/social-media/gbp-content-tracker.md` — this lists content already posted to GBP.
+
+### 2. Scan for new content in the site directory
+
+Check these three directories in `~/Documents/Claude/styerteam-mortgage-site/` for files NOT yet in the tracker:
+
+```bash
+# Rate updates — check for new rate pages
+ls -1t ~/Documents/Claude/styerteam-mortgage-site/rates/*.html 2>/dev/null | head -5
+
+# Blog posts — check for new posts (exclude temp-placeholder files)
+ls -1t ~/Documents/Claude/styerteam-mortgage-site/blog/2026-*.html 2>/dev/null | grep -v temp-placeholder | head -10
+
+# Newsletter landing pages — check realtor-updates directory
+ls -1t ~/Documents/Claude/styerteam-mortgage-site/realtor-updates/*.html 2>/dev/null | head -5
+```
+
+Compare against the tracker. Any file not in the "Posted to GBP" section is NEW.
+
+### 3. For each new content piece, fire the GBP webhook
+
+Read the HTML file to extract the `<title>` and first paragraph of body content, then craft a GBP-appropriate summary.
+
+**GBP post rules:**
+- Rate updates: Include rate direction (up/down/flat), 1-2 key rate points, link to full rate page. MUST include NMLS #513013.
+- Blog posts: 2-3 sentence teaser of the article, link to the blog post URL. Educational tone.
+- Newsletter content: Key takeaway + link. Realtor version gets peer-to-peer tone; borrower version gets educational tone.
+- ALL posts must include: "Adam Styer | Mortgage Solutions LP | NMLS #513013" at the end.
+- Keep GBP posts under 300 words. Google truncates longer posts.
+
+**Fire the webhook:**
+```bash
+curl -s -X POST "https://styer.app.n8n.cloud/webhook/gbp-social-post" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "theme": "[TOPIC — e.g., rate update, first-time buyers, VA loans]",
+    "gbp_post": "[YOUR GBP POST TEXT HERE]"
+  }'
+```
+
+The webhook handles everything downstream — Gemini adapts for Facebook/Instagram/LinkedIn, Imagen generates an image, Publer posts to all 4 platforms (GBP account `69c3e3f548d8e4e643d45438`, FB `69b05329de86f5e15b7c0722`, IG `69b0530110a77a0ed895847d`, LI `69b0536404b824ffb2c05426`).
+
+### 4. Update the tracker
+
+After each successful webhook call, append to `tasks/social-media/gbp-content-tracker.md`:
+```
+YYYY-MM-DD | [rate/blog/newsletter] | [filename] | posted
+```
+
+### 5. Log it
+
+Include in the session log under a "GBP Distribution" heading:
+- How many new content pieces detected
+- Which ones were posted
+- Any failures (webhook returned non-200)
+
+### 6. Queue platform-native posts for the Builder
+
+The webhook gives you instant distribution — but it's the same content on all platforms. For higher-quality, platform-native posts, also queue new content for the Builder subagent to create deeper versions:
+
+For each new content piece detected, add an entry to `tasks/social-media/content-repost-queue.md`:
+```
+YYYY-MM-DD | [rate/blog/newsletter] | [filename] | [suggested angle for native posts]
+```
+
+**Suggested native post formats by content type:**
+
+| Content Type | LinkedIn | Instagram | Facebook |
+|---|---|---|---|
+| Rate update | Text post: rate direction + what it means + "DM me RATES" CTA | Static image: rate snapshot card (Canva brief) | Short text: 2-sentence hook + link to rate page |
+| Blog post | Carousel: 4-5 slides summarizing key points | Carousel or Reel: educational breakdown | Text post: teaser + link |
+| Newsletter | Text post: key takeaway reframed for professionals | Story: 3-slide summary of top insights | Text post: conversational version + link |
+
+The Architect picks these up during the next planning session and weaves them into the content calendar alongside original content. **This is not urgent** — the webhook already handled immediate distribution. These native versions can publish 2-3 days after the original to extend content lifespan.
+
+**If no new content is found → skip this step entirely and proceed to Step 2.**
 
 ---
 
@@ -152,23 +239,25 @@ Check `tasks/social-media/subagent-status.md` for completion signal after each s
 
 ### Sequence A — Research Only
 ```
-00 (PULL) → 01 Research → 06 Reporter → 00 (PUSH)
+00 (PULL) → 07 Refresh (AM only) → 01 Research → 06 Reporter → 00 (PUSH)
 ```
 
 ### Sequence B — Strategy
 ```
-00 (PULL) → 01 Research → 02 Architect → 06 Reporter → 00 (PUSH)
+00 (PULL) → 07 Refresh (AM only) → 01 Research → 02 Architect → 06 Reporter → 00 (PUSH)
 ```
 
 ### Sequence C — Execute
 ```
-00 (PULL) → 02 Architect (confirm plan) → 03 Builder → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
+00 (PULL) → 07 Refresh (AM only) → 02 Architect (confirm plan) → 03 Builder → 03b Quality → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
 ```
 
 ### Sequence D — Full Cycle
 ```
-00 (PULL) → 01 Research → 02 Architect → 03 Builder → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
+00 (PULL) → 07 Refresh (AM only) → 01 Research → 02 Architect → 03 Builder → 03b Quality → 04 Reviewer → 05 QA → 06 Reporter → 00 (PUSH)
 ```
+
+**Note:** The Refresh subagent (07) runs in ALL sequences during AM sessions. It checks for TIMELY drafts due within 48 hours and fills them with real data. If no TIMELY drafts are due, it completes instantly. PM sessions skip 07.
 
 **Social Media Rule:** Week 1 only runs Sequence A. No content is written or scheduled until research and
 baseline audit are complete.

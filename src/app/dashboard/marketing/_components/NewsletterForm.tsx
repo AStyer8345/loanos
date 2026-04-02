@@ -46,6 +46,7 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
   const [errorMsg, setErrorMsg]       = useState('')
   const [showSchedule, setShowSchedule] = useState(false)
   const [scheduleTime, setScheduleTime] = useState('')
+  const [showConfirm, setShowConfirm]   = useState(false)
 
   const realtorTracker  = TRACKERS.find(t => t.key === 'realtor-nl')!
   const borrowerTracker = TRACKERS.find(t => t.key === 'borrower-nl')!
@@ -199,7 +200,7 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
                   className="px-3 py-1 text-xs font-bold transition-colors"
                   style={{
                     background: mode === m ? GOLD : 'transparent',
-                    color: mode === m ? '#09090b' : '#71717a',
+                    color: mode === m ? 'var(--bg)' : '#71717a',
                   }}
                 >
                   {m === 'structured' ? 'STRUCTURED FIELDS' : 'CUSTOM PROMPT'}
@@ -256,13 +257,43 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
         <Btn onClick={handlePreview} disabled={isLoading}>
           {isLoading ? <><Spinner /> Loading...</> : '👁 Preview'}
         </Btn>
-        <Btn variant="secondary" onClick={() => handlePublish()} disabled={isLoading}>
+        <Btn variant="secondary" onClick={() => setShowConfirm(true)} disabled={isLoading}>
           ▶ Publish + Send Emails
         </Btn>
         <Btn variant="ghost" onClick={() => setShowSchedule(!showSchedule)} disabled={!preview || isLoading}>
           📅 Schedule
         </Btn>
       </div>
+
+      {/* Confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowConfirm(false)}>
+          <div className="bg-card border border-zinc-700 rounded-lg p-6 max-w-sm w-full mx-4 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-zinc-100 font-bold text-sm">Confirm Send</h3>
+            <p className="text-zinc-400 text-xs leading-relaxed">
+              This will publish a newsletter and send Mailchimp campaigns to:
+            </p>
+            <ul className="text-xs space-y-1">
+              {audiences.includes('borrower') && (
+                <li className="text-zinc-200">• <strong>Borrowers / Past Clients</strong> list</li>
+              )}
+              {audiences.includes('realtor') && (
+                <li className="text-zinc-200">• <strong>Realtors / Partners</strong> list</li>
+              )}
+              {audiences.length === 0 && (
+                <li className="text-zinc-500">No audiences selected — page only, no emails.</li>
+              )}
+            </ul>
+            <p className="text-zinc-500 text-xs">This cannot be undone.</p>
+            <div className="flex gap-2 justify-end pt-2">
+              <Btn variant="ghost" onClick={() => setShowConfirm(false)}>Cancel</Btn>
+              <Btn variant="secondary" onClick={() => { setShowConfirm(false); handlePublish() }}>
+                Yes, Send Now
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Schedule picker */}
       {showSchedule && (

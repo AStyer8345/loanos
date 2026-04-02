@@ -30,7 +30,7 @@ export default function BulkActionPreview({
   const remaining = count - nameList.length
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-xs font-mono">
+    <div className="rounded-lg border border-zinc-700 bg-card p-3 text-xs font-mono">
       <div className="mb-2 font-semibold text-zinc-100">
         {actionType === 'email' && `Email ${count} contact${count !== 1 ? 's' : ''}`}
         {actionType === 'text' && `Text ${count} contact${count !== 1 ? 's' : ''}`}

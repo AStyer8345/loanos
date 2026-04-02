@@ -13,7 +13,7 @@ const MONO = "'IBM Plex Mono', 'Courier New', monospace"
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-t border-zinc-800/50 animate-pulse">
+    <div className="flex items-center gap-3 px-4 py-3 border-t border-input/50 animate-pulse">
       <div className="w-2 h-2 rounded-full bg-zinc-800" />
       <div className="h-3 w-48 bg-zinc-800 rounded" />
       <div className="ml-auto h-3 w-16 bg-zinc-800 rounded" />
@@ -23,7 +23,7 @@ function SkeletonRow() {
 
 function SkeletonGroup() {
   return (
-    <div className="border border-zinc-800" style={{ borderLeft: `3px solid ${GOLD}` }}>
+    <div className="border border-input" style={{ borderLeft: `3px solid ${GOLD}` }}>
       <div className="px-4 py-2.5 flex items-center justify-between animate-pulse">
         <div className="h-3 w-32 bg-zinc-800 rounded" />
         <div className="h-3 w-4 bg-zinc-800 rounded" />
@@ -139,7 +139,7 @@ export default function AutomationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505]" style={{ fontFamily: MONO }}>
+    <div className="min-h-screen bg-[var(--bg)]" style={{ fontFamily: MONO }}>
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Page header */}
         <div className="mb-6">
@@ -174,7 +174,7 @@ export default function AutomationsPage() {
 
         {/* Error state */}
         {!loading && error && (
-          <div className="border border-zinc-800 px-4 py-6 text-center">
+          <div className="border border-input px-4 py-6 text-center">
             <p className="text-red-400 text-xs mb-3" style={{ fontFamily: MONO }}>
               {error}
             </p>
@@ -192,7 +192,7 @@ export default function AutomationsPage() {
         {!loading && !error && (
           <div className="flex flex-col gap-3">
             {grouped.length === 0 ? (
-              <div className="border border-zinc-800 px-4 py-8 text-center">
+              <div className="border border-input px-4 py-8 text-center">
                 <p className="text-zinc-600 text-xs" style={{ fontFamily: MONO }}>
                   no automations registered
                 </p>

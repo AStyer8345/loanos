@@ -18,7 +18,7 @@ export default function StatusBar({ automations, onBulkAction, loading }: Status
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-3 bg-[#09090b] border border-zinc-800"
+      className="flex items-center justify-between px-4 py-3 bg-[var(--bg)] border border-input"
       style={{ borderLeft: `3px solid ${GOLD}`, fontFamily: MONO }}
     >
       {/* Left: status counts */}
@@ -93,7 +93,7 @@ function BulkButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="px-3 py-1.5 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+      className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {label}

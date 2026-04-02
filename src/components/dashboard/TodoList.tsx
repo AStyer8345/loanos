@@ -91,7 +91,7 @@ export default function TodoList() {
   const manualItems = todos.filter(t => !parseAgentItem(t.text))
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4 flex flex-col h-full">
+    <div className="bg-card border border-zinc-700 rounded-lg p-4 flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">To-Do</span>
@@ -158,7 +158,7 @@ export default function TodoList() {
               const parsed = parseAgentItem(todo.text)!
               const colorClass = DOMAIN_COLORS[parsed.domain] ?? 'bg-zinc-800/60 text-zinc-400 border-zinc-600/50'
               return (
-                <div key={todo.id} className="flex items-start gap-2 group rounded px-2 py-2 hover:bg-zinc-800/50 transition-colors border border-zinc-800 rounded-md">
+                <div key={todo.id} className="flex items-start gap-2 group rounded px-2 py-2 hover:bg-zinc-800/50 transition-colors border border-input rounded-md">
                   <button onClick={() => toggleComplete(todo)} className="text-zinc-500 hover:text-emerald-500 flex-shrink-0 transition-colors mt-0.5">
                     <Circle className="w-3.5 h-3.5" />
                   </button>

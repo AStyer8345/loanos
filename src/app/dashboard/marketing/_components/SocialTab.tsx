@@ -145,7 +145,7 @@ export default function SocialTab({ onSwitchToVoiceGuide }: Props) {
 
   return (
     <div
-      className="flex flex-col border border-zinc-800 rounded-sm overflow-hidden"
+      className="flex flex-col border border-input rounded-sm overflow-hidden"
       style={{
         fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
         height: 'calc(100vh - 180px)',

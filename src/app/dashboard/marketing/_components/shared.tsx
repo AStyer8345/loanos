@@ -11,7 +11,7 @@ const RED = '#E05252'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-zinc-900 border border-zinc-700 rounded-sm p-4 ${className}`}>
+    <div className={`bg-card border border-zinc-700 rounded-sm p-4 ${className}`}>
       {children}
     </div>
   )
@@ -88,7 +88,7 @@ export function Btn({
 }) {
   const sizeClass = { xs: 'px-2 py-0.5 text-xs', sm: 'px-3 py-1 text-xs', md: 'px-4 py-2 text-sm' }[size]
   const variantStyle: React.CSSProperties =
-    variant === 'primary'   ? { background: GOLD, color: '#09090b', fontWeight: 700, border: `1px solid ${GOLD}` } :
+    variant === 'primary'   ? { background: GOLD, color: 'var(--bg)', fontWeight: 700, border: `1px solid ${GOLD}` } :
     variant === 'secondary' ? { background: 'transparent', color: GOLD, border: `1px solid ${GOLD}`, fontWeight: 700 } :
     variant === 'ghost'     ? { background: 'transparent', color: '#a1a1aa', border: '1px solid #3f3f46', fontWeight: 600 } :
                               { background: 'transparent', color: RED, border: `1px solid ${RED}`, fontWeight: 700 }

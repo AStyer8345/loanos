@@ -122,7 +122,7 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+    <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
       <div className="flex items-start justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
@@ -578,7 +578,7 @@ export default function SettingsPage() {
       </SectionCard>
 
       {/* ── ORGANIZATION MEMBERS ── */}
-      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-center gap-3 mb-5">
           <h2 className="text-sm font-mono font-semibold text-zinc-100 uppercase tracking-wider">Organization Members</h2>
           <span className="text-xs text-zinc-500 font-mono lowercase">{myRole}</span>
@@ -596,7 +596,7 @@ export default function SettingsPage() {
                 <select
                   value={m.role}
                   onChange={e => handleRoleChange(m.id, e.target.value)}
-                  className="bg-zinc-900 border border-zinc-600 text-zinc-300 px-2 py-1 rounded text-xs font-mono focus:outline-none focus:border-amber-500"
+                  className="bg-card border border-zinc-600 text-zinc-300 px-2 py-1 rounded text-xs font-mono focus:outline-none focus:border-amber-500"
                 >
                   <option value="admin">admin</option>
                   <option value="member">member</option>
@@ -651,7 +651,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ── EMAIL SYNC ── */}
-      <div className="bg-zinc-900 border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+      <div className="bg-card border border-zinc-700 border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-600 flex items-center justify-center">
             <Mail size={17} className="text-amber-400" />

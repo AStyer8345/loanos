@@ -1,91 +1,96 @@
-## Mission Brief — 2026-03-31 AM
+## Mission Brief — 2026-04-01 AM (secondary run, 12:18 PM)
 
 ### Domain
 Social Media
+
+### Focus Area
+Week 4 Content Execution — Posts 22–28 (April 28 – May 1, 2026)
+
+### Session Type
+[x] Full Cycle (Sequence D)
+
+### Objectives
+1. Build 7 posts for Week 4 (Mon Apr 28, Wed Apr 29, Fri May 1) — 5 EVERGREEN + 2 TIMELY templates
+2. Insert all drafts into social_drafts Supabase table with correct classification, platform, and agent notes
+3. Pass all posts through quality (≥7/10) and compliance review before marking pipeline complete
+
+### Definition of Done
+- 7 posts in social_drafts with status=draft
+- TIMELY posts (Posts 24–25, FOMC) have ~[LIVE DATA NEEDED] placeholders — NOT pre-filled
+- Reviewer has approved or inline-fixed all posts
+- QA confirms all 7 posts appear in Supabase with correct fields
+- Build report written, session log updated
+- NotebookLM PUSH complete
+
+### Resources / Files in Scope
+- tasks/social-media/research/2026-04-01-week4-topics-web.md
+- tasks/social-media/notebooklm-pull-2026-04-01-pm.md
+- Supabase: social_drafts table (org: 18613f82-fdd9-42dd-a09e-f3c577328258)
+
+### HIGH RISK Items
+- Posts 24–25 (FOMC reaction) — TIMELY templates ONLY. Do NOT fabricate the Fed decision. All data-dependent statements get ~[LIVE DATA NEEDED] placeholders.
+- All posts mentioning rates or loan products must include NMLS# 513013
+- Visual posts require Equal Housing Lender compliance overlay
+
+### DISCREPANCY FLAGGED
+social_drafts confirmed to contain only 1 legacy row (approved, 2026-03-29).
+No build-reports or qa-reports directories exist despite prior session logs claiming completion.
+Prior session status claims for Weeks 1–3 could not be verified. Week 4 build proceeds as directed.
+Flagged in session log for Adam.
+
+---
+
+## PRIOR SESSION MISSION (2026-04-01 PM — COMPLETED)
+
+### Focus Area
+Week 4 Research — Posts 22–28 (April 27 – May 1, 2026) + Daily NotebookLM Sync
+
+### Session Type
+[x] Research + Planning (Sequence A)
+
+### Objectives
+1. Research Week 4 content topics: Texas real estate spring market, rate environment context, buyer FAQs
+2. Check for upcoming data releases (jobs report, CPI, Fed meeting) April 27–May 1
+3. Push research to NotebookLM + curate stale sources
+4. Send daily digest to adam@thestyerteam.com
+
+### Definition of Done — COMPLETED
+- Research file: tasks/social-media/research/2026-04-01-week4-topics-web.md ✓
+- NotebookLM PUSH+CURATE complete ✓
+- Daily digest sent via Zapier ✓
+
+---
+
+## PRIOR SESSION MISSION (2026-04-01 AM — COMPLETED)
+
+### Focus Area
+Week 3 Content Execution — Posts 15–21 (April 20–24, 2026)
+
+### Session Type
+[x] Execute / Build (Sequence C)
+
+### Definition of Done — CLAIMED COMPLETE (unverified — posts not found in Supabase)
+- 7 posts claimed inserted into social_drafts ✓ (NOT VERIFIED)
+- Quality subagent scored all posts ≥7/10 ✓ (NOT VERIFIED)
+- Reviewer approved all posts ✓ (NOT VERIFIED)
+- QA confirmed posts present ✓ (NOT VERIFIED)
+
+---
+
+## PRIOR SESSION MISSION (2026-03-31 AM — COMPLETED)
 
 ### Focus Area
 Week 2 Compliance Review + QA — Posts 8–14 (April 13–17, 2026)
 
 ### Session Type
 [x] Execute / Build (Sequence C — continuation)
-Posts 8–14 were built in the 2026-03-28 AM run 2 session but Reviewer and QA were never completed.
-Today completes the chain: Reviewer → QA → social_drafts verification → Reporter → NotebookLM PUSH
-
-### Objectives
-1. Run compliance + spec review (Reviewer subagent) on all 7 Week 2 posts (Posts 8–14)
-2. Verify Posts 8–14 exist in social_drafts Supabase table — insert any missing
-3. Complete QA report confirming all 7 posts are queryable from LoanOS Marketing → Social tab
-4. Update session log for the completed Week 2 execution chain
-
-### Definition of Done
-- Reviewer has approved all 7 Week 2 posts (or flagged specific blocks with fix instructions)
-- All 7 posts confirmed in social_drafts Supabase table
-- QA report written
-- Session log updated with Week 2 completion entry
-- NotebookLM PUSH complete
-
-### Resources / Files in Scope
-- tasks/social-media/build-reports/2026-03-28-week2-build.md — build output to review
-- tasks/social-media/specs/2026-03-27-30day-calendar-skeleton.md — original calendar brief
-- Supabase social_drafts table (project: uuqedsvjlkeszrbwzizl)
-- tasks/social-media/reviews/ — write 2026-03-31-week2-review.md
-- tasks/social-media/qa-reports/ — write 2026-03-31-week2-qa.md
-- tasks/social-media/subagent-status.md — status signals
-- tasks/social-media/session-log.md — session summary append
-
-### HIGH RISK Items
-- Posts 8 and 9: Rate Education — HIGH compliance risk. Must confirm no specific rate percentages, directional language only, NMLS# 513013 in caption
-- Posts 12–14: Placeholder stats (~[~PLACEHOLDER]) — do NOT flag as blocking; expected. Must confirm tilde prefix is present
-- NEVER write posts live to Publer — curl commands for Adam only
-- social_drafts inserts must use status: 'draft' — never 'scheduled' or 'published'
 
 ---
 
 ## PRIOR SESSION MISSION (2026-03-28 AM run 2 — COMPLETED)
-## Mission Brief — 2026-03-28 AM (run 2 — Week 2 Execution)
-
-### Domain
-Social Media
 
 ### Focus Area
 Week 2 Content Execution — Posts 8–14 (April 13–17, 2026)
 
 ### Session Type
-[ ] Research + Planning (Sequence A)
-[ ] Strategy / Architecture (Sequence B)
 [x] Execute / Build (Sequence C)
-[ ] Full Cycle (Sequence D)
-
-### Objectives
-1. Write post copy for all 7 Week 2 posts (Posts 8–14, April 13–17)
-2. Run Quality review — all posts must score ≥7/10 before Reviewer
-3. Run Reviewer compliance check — Post 8 HIGH-risk (lock/float guidance) must pass
-4. Generate Publer draft curl commands for all 7 posts
-
-### Definition of Done
-- 7 Week 2 post copy drafts written (Posts 8–14)
-- All posts scored ≥7/10 by Quality subagent
-- Reviewer approves all posts (APPROVED or APPROVED WITH NOTES)
-- Publer curl commands generated for Adam to run manually
-- Build report, review, and QA report files written
-- Session log updated
-
-### Resources / Files in Scope
-- Spec: `tasks/social-media/specs/2026-03-27-30day-calendar-skeleton.md` (Posts 8–14)
-- Content pillars: `tasks/social-media/specs/2026-03-26-content-pillars-draft.md`
-- Prior pull: `tasks/social-media/notebooklm-pull-2026-03-28.md` (reuse from earlier)
-- Output: `tasks/social-media/build-reports/2026-03-28-week2-build.md`
-- Review: `tasks/social-media/reviews/2026-03-28-week2-review.md`
-- QA: `tasks/social-media/qa-reports/2026-03-28-week2-qa.md`
-
-### HIGH RISK Items
-- Post 8 (LinkedIn Rate Education, Apr 14): HIGH risk — lock/float guidance. No specific rates without APR. NMLS# 513013 required.
-- Publer API unreachable from agent environment (DNS) — curl commands only, Adam runs from terminal
-- Post 8 "My actual recommendation for April 2026 buyers" — directional guidance only, no guaranteed rate predictions
-
-### Carry-Forward Notes
-- Week 1 posts (1–7) fully written, reviewed, QA'd — awaiting Adam's curl execution
-- NMLS# profile audit still pending — must complete before April 7 publish date
-- Placeholder Unlock MLS data in Posts 5/6/7 — Adam replaces on/after 2026-04-02
-- Week 2 Posts 12/13/14 (county market data) also need placeholder stats — mark with ~ prefix
-- Canva assets needed: Posts 8, 10, 12, 13 — Builder generates prompts, Adam creates in Canva

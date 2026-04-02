@@ -56,7 +56,7 @@ export default function SocialActivityFeed() {
 
   return (
     <div
-      className="border-b border-zinc-800 px-4 py-2"
+      className="border-b border-input px-4 py-2"
       style={{ background: '#0a0a1a', fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       <div className="flex items-center gap-4">

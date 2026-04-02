@@ -122,12 +122,12 @@ function EditableChipList({
               addChip()
             }
           }}
-          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[#09090b] border border-zinc-800 rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+          className="flex-1 px-2 py-1 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
           style={{ fontFamily: MONO, fontSize: 10 }}
         />
         <button
           onClick={addChip}
-          className="px-2 py-1 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
+          className="px-2 py-1 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C]"
           style={{ fontFamily: MONO, fontSize: 10 }}
         >
           Add
@@ -181,9 +181,9 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
   }
 
   return (
-    <div className="flex flex-col bg-[#09090b]" style={{ fontFamily: MONO }}>
+    <div className="flex flex-col bg-[var(--bg)]" style={{ fontFamily: MONO }}>
       {/* Tab bar */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b border-input">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -275,13 +275,13 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
                     onChange={e => setClaudeInstruction(e.target.value)}
                     rows={3}
                     placeholder="e.g. make this more urgent, add a P.S., mention the rate lock deadline..."
-                    className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[#09090b] border border-zinc-800 rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
+                    className="w-full mt-1 px-2 py-1.5 text-xs text-zinc-100 bg-[var(--bg)] border border-input rounded resize-none focus:outline-none focus:border-[#C9A84C] placeholder:text-zinc-600"
                     style={{ fontFamily: MONO }}
                   />
                   <button
                     onClick={() => setClaudeInstruction('')}
                     disabled={!claudeInstruction.trim()}
-                    className="mt-1.5 px-3 py-1.5 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="mt-1.5 px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30 disabled:cursor-not-allowed"
                     style={{ fontFamily: MONO }}
                   >
                     Update Prompt
@@ -291,11 +291,11 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             </div>
 
             {/* Bottom bar */}
-            <div className="flex items-center justify-between border-t border-zinc-800 pt-4">
+            <div className="flex items-center justify-between border-t border-input pt-4">
               <button
                 onClick={handleSendTest}
                 disabled={sendingTest}
-                className="px-3 py-1.5 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
+                className="px-3 py-1.5 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
                 style={{ fontFamily: MONO }}
               >
                 {sendingTest ? 'Sending...' : 'Send Test Email'}
@@ -307,7 +307,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
                 style={{
                   fontFamily: MONO,
                   background: GOLD,
-                  color: '#09090b',
+                  color: 'var(--bg)',
                 }}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
@@ -321,7 +321,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
           <div>
             {automation.prompt_snapshot ? (
               <pre
-                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-zinc-800 bg-zinc-950"
+                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {automation.prompt_snapshot}
@@ -377,8 +377,8 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             <div>
               <SectionLabel>TRIGGER</SectionLabel>
               <div
-                className="mt-1 px-2 py-1.5 border border-zinc-800 rounded text-zinc-400 text-xs"
-                style={{ fontFamily: MONO, background: '#09090b' }}
+                className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-400 text-xs"
+                style={{ fontFamily: MONO, background: 'var(--bg)' }}
               >
                 {automation.trigger_type}
                 {automation.schedule ? ` — ${automation.schedule}` : ''}
@@ -389,8 +389,8 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             <div>
               <SectionLabel>N8N WORKFLOW ID</SectionLabel>
               <div
-                className="mt-1 px-2 py-1.5 border border-zinc-800 rounded text-zinc-500 text-xs"
-                style={{ fontFamily: MONO, background: '#09090b' }}
+                className="mt-1 px-2 py-1.5 border border-input rounded text-zinc-500 text-xs"
+                style={{ fontFamily: MONO, background: 'var(--bg)' }}
               >
                 {automation.source_id || '—'}
               </div>
@@ -401,7 +401,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
               <button
                 onClick={handleRunNow}
                 disabled={runningNow}
-                className="px-4 py-2 text-xs border border-zinc-700 bg-zinc-900 text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
+                className="px-4 py-2 text-xs border border-zinc-700 bg-card text-zinc-400 rounded transition-colors hover:text-[#C9A84C] hover:border-[#C9A84C] disabled:opacity-30"
                 style={{ fontFamily: MONO }}
               >
                 {runningNow ? 'Running...' : 'Run Now'}
@@ -409,7 +409,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
             </div>
 
             {/* Save */}
-            <div className="flex justify-end border-t border-zinc-800 pt-4">
+            <div className="flex justify-end border-t border-input pt-4">
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -417,7 +417,7 @@ export default function EmailDetailPanel({ automation, onSave, saving }: DetailP
                 style={{
                   fontFamily: MONO,
                   background: GOLD,
-                  color: '#09090b',
+                  color: 'var(--bg)',
                 }}
               >
                 {saving ? 'Saving...' : 'Save Changes'}

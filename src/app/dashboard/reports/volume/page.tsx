@@ -39,7 +39,7 @@ export default async function VolumeReportPage() {
   const totalVolume = funded.reduce((sum, l) => sum + (l.loan_amount ?? 0), 0)
 
   return (
-    <div className="min-h-screen bg-[#060b18] p-6">
+    <div className="min-h-screen bg-[var(--bg)] p-6">
       <Link href="/dashboard" className="text-xs font-mono text-zinc-500 hover:text-zinc-300 mb-4 inline-block">&larr; Dashboard</Link>
       <h1 className="text-xl font-mono font-bold text-zinc-100 mb-1">Volume Report</h1>
       <p className="text-xs font-mono text-zinc-500 mb-6">{thisYear} YTD &middot; {funded.length} loans &middot; {fmtK(totalVolume)} total volume</p>

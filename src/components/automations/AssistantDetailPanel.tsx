@@ -76,9 +76,9 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
   }
 
   return (
-    <div className="flex flex-col bg-[#09090b]" style={{ fontFamily: MONO }}>
+    <div className="flex flex-col bg-[var(--bg)]" style={{ fontFamily: MONO }}>
       {/* Tab bar */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b border-input">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -124,7 +124,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
             </div>
 
             {/* Bottom bar */}
-            <div className="mt-6 flex justify-end border-t border-zinc-800 pt-4">
+            <div className="mt-6 flex justify-end border-t border-input pt-4">
               <button
                 onClick={handleSave}
                 disabled={saving}
@@ -132,7 +132,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
                 style={{
                   fontFamily: MONO,
                   background: GOLD,
-                  color: '#09090b',
+                  color: 'var(--bg)',
                 }}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
@@ -162,7 +162,7 @@ export default function AssistantDetailPanel({ automation, onSave, saving }: Det
 
             {!promptLoading && !promptError && systemPrompt && (
               <pre
-                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-zinc-800 bg-zinc-950"
+                className="text-zinc-300 whitespace-pre-wrap break-words rounded p-4 border border-input bg-zinc-950"
                 style={{ fontFamily: MONO, fontSize: 11, lineHeight: 1.7 }}
               >
                 {systemPrompt}

@@ -111,7 +111,7 @@ export default function LoginPage() {
             className="w-full font-mono font-semibold py-2 px-4 rounded text-sm tracking-wider transition-colors"
             style={{
               background: ready ? 'var(--gold)' : 'var(--surface2)',
-              color: ready ? '#050505' : 'var(--muted)',
+              color: ready ? 'var(--bg)' : 'var(--muted)',
               border: '1px solid var(--border)',
               cursor: ready ? 'pointer' : 'not-allowed',
               opacity: ready ? 1 : 0.5,

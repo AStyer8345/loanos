@@ -5,18 +5,18 @@
 @tailwind utilities;
 
 :root {
-  /* Canvas & surfaces — LoanOS dark tactical */
-  --bg:       #050505;
-  --surface:  #0a0a0a;
-  --surface2: #171717;
+  /* Canvas & surfaces — LoanOS dark (softened) */
+  --bg:       #0c0e14;
+  --surface:  #12151e;
+  --surface2: #1c1f2a;
 
-  /* Borders — hard 1px */
-  --border:   #262626;
+  /* Borders — softer, less harsh */
+  --border:   #2a2d3a;
 
-  /* Text */
-  --text:     #e5e5e5;
-  --muted:    #737373;
-  --fg:       #e5e5e5;
+  /* Text — reduced contrast for all-day comfort */
+  --text:     #c8cdd5;
+  --muted:    #7a8291;
+  --fg:       #c8cdd5;
 
   /* Accents */
   --gold:     #C9A84C;
@@ -29,24 +29,24 @@
   --accent-border: hsla(210, 70%, 60%, 0.5);
 
   /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
-  --background: #050505;
-  --foreground: #e5e5e5;
-  --card: #0f172a;
-  --card-foreground: #e5e5e5;
-  --popover: #0f172a;
-  --popover-foreground: #e5e5e5;
+  --background: #0c0e14;
+  --foreground: #c8cdd5;
+  --card: #161a26;
+  --card-foreground: #c8cdd5;
+  --popover: #161a26;
+  --popover-foreground: #c8cdd5;
   --primary: #C9A84C;
-  --primary-foreground: #050505;
-  --secondary: #171717;
-  --secondary-foreground: #e5e5e5;
-  --muted-bg: #171717;
-  --muted-foreground: #737373;
-  --accent-bg: #171717;
-  --accent-foreground: #e5e5e5;
+  --primary-foreground: #0c0e14;
+  --secondary: #1c1f2a;
+  --secondary-foreground: #c8cdd5;
+  --muted-bg: #1c1f2a;
+  --muted-foreground: #7a8291;
+  --accent-bg: #1c1f2a;
+  --accent-foreground: #c8cdd5;
   --destructive: #DC2626;
-  --destructive-foreground: #e5e5e5;
+  --destructive-foreground: #c8cdd5;
   --ring: #C9A84C;
-  --input: #1e293b;
+  --input: #252a38;
   --radius: 0.5rem;
 
   /* Scenario Builder palette — navy + blue accent */
@@ -115,5 +115,5 @@ body {
 /* Command center / tactical action button */
 .action-btn:hover {
   background: var(--gold);
-  color: #050505;
+  color: #0c0e14;
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Phone, Mail, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Card } from '@/components/ui/card'
 
 export type HotLead = {
   id: string
@@ -39,14 +40,14 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
   if (visible.length === 0) return null
 
   return (
-    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#1e293b] flex items-center gap-2">
+    <Card className="overflow-hidden">
+      <div className="px-4 py-3 border-b border-input flex items-center gap-2">
         <span className="text-sm">🔥</span>
         <span className="text-xs font-mono font-semibold text-[#C9A84C] uppercase tracking-widest">Hot Leads</span>
         <span className="text-[10px] font-mono text-zinc-600">last 14 days</span>
       </div>
 
-      <div className="divide-y divide-[#1e293b]">
+      <div className="divide-y divide-input">
         {visible.map(lead => {
           const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ')
           const daysLabel = lead.daysAgo === 0 ? 'today' : lead.daysAgo === 1 ? '1d ago' : `${lead.daysAgo}d ago`
@@ -119,6 +120,6 @@ export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Card } from '@/components/ui/card'
 
 // ── Types (inlined from schedule.ts) ───────────────────────────────────────────
 
@@ -160,9 +161,9 @@ export default function DailyScheduleWidget() {
   if (isWeekend) return null // clean dashboard on weekends
 
   return (
-    <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg overflow-hidden">
+    <Card className="overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e293b]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-input">
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">
             Today&apos;s Schedule
@@ -179,7 +180,7 @@ export default function DailyScheduleWidget() {
             <span className="text-xs font-mono" style={{ color: allDone ? '#4CAF82' : '#C9A84C' }}>
               {done}/{day.tasks.length}
             </span>
-            <div className="w-20 h-1 rounded-full overflow-hidden bg-[#1e293b]">
+            <div className="w-20 h-1 rounded-full overflow-hidden bg-input">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{ width: `${pct}%`, background: allDone ? '#4CAF82' : '#C9A84C' }}
@@ -196,7 +197,7 @@ export default function DailyScheduleWidget() {
       </div>
 
       {/* Task list */}
-      <div className="divide-y divide-[#1e293b]">
+      <div className="divide-y divide-input">
         {day.tasks.map(task => {
           const checked = !!todayTasks[task.id]
           return (
@@ -240,6 +241,6 @@ export default function DailyScheduleWidget() {
           )
         })}
       </div>
-    </div>
+    </Card>
   )
 }

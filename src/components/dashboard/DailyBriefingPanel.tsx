@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Brain, CheckCircle2, Circle, RefreshCw } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 
 interface ActionItem {
   rank: number
@@ -65,7 +66,7 @@ export default function DailyBriefingPanel() {
         <button
           onClick={runBriefing}
           disabled={loading}
-          className="flex items-center gap-1.5 text-xs font-mono bg-[#0f172a] border border-zinc-700 hover:border-amber-600/50 text-zinc-400 hover:text-amber-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs font-mono bg-card border border-input hover:border-amber-600/50 text-zinc-400 hover:text-amber-400 px-3 py-1.5 rounded transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Generating…' : data ? 'Refresh' : 'Run Briefing'}
@@ -81,7 +82,7 @@ export default function DailyBriefingPanel() {
       {loading && (
         <div className="space-y-2">
           {[1, 2, 3, 4, 5, 6, 7].map(i => (
-            <div key={i} className="h-14 bg-[#0f172a] border border-[#1e293b] rounded-lg border-l-[3px] border-l-amber-800/40 animate-pulse" />
+            <div key={i} className="h-14 bg-card border border-input rounded-lg border-l-[3px] border-l-amber-800/40 animate-pulse" />
           ))}
         </div>
       )}
@@ -96,18 +97,18 @@ export default function DailyBriefingPanel() {
               { label: 'Realtor Touches', count: data.realtorTouches?.length ?? 0 },
               { label: 'Pending Drafts', count: data.pendingDrafts.length },
             ].map(s => (
-              <div key={s.label} className="bg-[#0f172a] border border-[#1e293b] border-l-[3px] border-l-amber-600/50 rounded-lg p-3">
+              <Card key={s.label} className="border-l-[3px] border-l-amber-600/50 p-3">
                 <div className="text-xl font-mono font-bold text-zinc-100">{s.count}</div>
                 <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mt-0.5">{s.label}</div>
-              </div>
+              </Card>
             ))}
           </div>
 
           {/* AI Summary */}
           {data.summary && (
-            <div className="bg-[#0f172a] border border-[#1e293b] border-l-[3px] border-l-amber-600 rounded-lg px-4 py-3">
+            <Card className="border-l-[3px] border-l-amber-600 px-4 py-3">
               <p className="text-sm font-mono text-zinc-300 leading-relaxed">{data.summary}</p>
-            </div>
+            </Card>
           )}
 
           {/* Progress */}
@@ -117,7 +118,7 @@ export default function DailyBriefingPanel() {
                 <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s Actions</span>
                 <span className="text-xs font-mono text-zinc-500">{checkedCount}/{totalItems} done</span>
               </div>
-              <div className="h-1 bg-[#1e293b] rounded-full overflow-hidden mb-3">
+              <div className="h-1 bg-input rounded-full overflow-hidden mb-3">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                   style={{ width: `${(checkedCount / totalItems) * 100}%` }}
@@ -134,10 +135,10 @@ export default function DailyBriefingPanel() {
                 <div
                   key={item.rank}
                   onClick={() => setChecked(c => c.includes(item.rank) ? c.filter(x => x !== item.rank) : [...c, item.rank])}
-                  className={`bg-[#0f172a] border rounded-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all ${
+                  className={`bg-card border border-input rounded-lg border-l-[3px] px-4 py-3 cursor-pointer transition-all ${
                     done
-                      ? 'border-[#1e293b] border-l-zinc-700 opacity-60'
-                      : 'border-[#1e293b] border-l-amber-600/70 hover:border-amber-600/40'
+                      ? 'border-l-zinc-700 opacity-60'
+                      : 'border-l-amber-600/70 hover:border-amber-600/40'
                   }`}
                 >
                   <div className="flex items-start gap-3">

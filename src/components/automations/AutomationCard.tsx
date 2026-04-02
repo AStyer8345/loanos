@@ -136,7 +136,7 @@ export default function AutomationCard({
   if (state === 'sent') {
     return (
       <div
-        className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
+        className="bg-card border border-input rounded-lg p-4"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         <div className="flex items-center justify-between">
@@ -165,7 +165,7 @@ export default function AutomationCard({
   if (state === 'idle') {
     return (
       <div
-        className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
+        className="bg-card border border-input rounded-lg p-4"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         <div className="flex items-center justify-between">
@@ -200,7 +200,7 @@ export default function AutomationCard({
   if (state === 'generating') {
     return (
       <div
-        className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4"
+        className="bg-card border border-input rounded-lg p-4"
         style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
       >
         <div className="flex items-center justify-between">
@@ -231,7 +231,7 @@ export default function AutomationCard({
   // ── Draft / Refining / Sending state ───────────────────────────────────────
   return (
     <div
-      className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4 space-y-3"
+      className="bg-card border border-input rounded-lg p-4 space-y-3"
       style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       {/* Header */}

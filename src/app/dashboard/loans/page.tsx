@@ -1042,7 +1042,7 @@ export default function LoansPage() {
         </div>
 
         {/* Unified control + stats bar */}
-        <div className="px-4 py-2 border-b border-[#1e293b] bg-[#0a0f1a]">
+        <div className="px-4 py-2 border-b border-input bg-card">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <select

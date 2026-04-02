@@ -31,9 +31,9 @@
   /* shadcn/ui semantic tokens — mapped to LoanOS dark palette */
   --background: #050505;
   --foreground: #e5e5e5;
-  --card: #0a0a0a;
+  --card: #0f172a;
   --card-foreground: #e5e5e5;
-  --popover: #0a0a0a;
+  --popover: #0f172a;
   --popover-foreground: #e5e5e5;
   --primary: #C9A84C;
   --primary-foreground: #050505;
@@ -46,7 +46,7 @@
   --destructive: #DC2626;
   --destructive-foreground: #e5e5e5;
   --ring: #C9A84C;
-  --input: #262626;
+  --input: #1e293b;
   --radius: 0.5rem;
 
   /* Scenario Builder palette — navy + blue accent */

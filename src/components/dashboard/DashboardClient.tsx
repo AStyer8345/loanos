@@ -17,6 +17,8 @@ import TodoList from './TodoList'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -97,12 +99,12 @@ export default function DashboardClient(props: DashboardClientProps) {
         </div>
         <div className="flex items-center gap-3">
           {needsAttentionCount > 0 && (
-            <div className="flex items-center gap-1.5 bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-xs font-mono text-amber-400">{needsAttentionCount} need attention</span>
-            </div>
+            <Badge variant="warning" className="gap-1.5 px-3 py-1.5 rounded-lg">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span className="font-mono">{needsAttentionCount} need attention</span>
+            </Badge>
           )}
-          <div className="flex bg-[#0f172a] border border-[#1e293b] rounded-lg p-1 gap-0.5">
+          <div className="flex bg-card border border-input rounded-lg p-1 gap-0.5">
             <button
               onClick={() => setTab('pipeline')}
               className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'pipeline' ? 'bg-[#C9A84C] text-black' : 'text-zinc-400 hover:text-zinc-100'}`}
@@ -128,25 +130,33 @@ export default function DashboardClient(props: DashboardClientProps) {
         <div className="space-y-4">
           {/* ── KPI Cards ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Link href="/dashboard/loans?stage=funded&period=ytd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#10b981] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Commission Earned</div>
-              <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
+            <Link href="/dashboard/loans?stage=funded&period=ytd">
+              <Card className="border-l-4 border-l-[#10b981] p-3 hover:bg-secondary/50 transition-colors">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Commission Earned</div>
+                <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
+                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
+              </Card>
             </Link>
-            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#C9A84C] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Commission</div>
-              <div className="text-2xl font-mono font-bold text-[#C9A84C]">{fmt(props.pipelineCommission ?? props.totalActiveCommission)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+            <Link href="/dashboard/loans">
+              <Card className="border-l-4 border-l-primary p-3 hover:bg-secondary/50 transition-colors">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Commission</div>
+                <div className="text-2xl font-mono font-bold text-primary">{fmt(props.pipelineCommission ?? props.totalActiveCommission)}</div>
+                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+              </Card>
             </Link>
-            <Link href="/dashboard/loans?stage=funded&period=mtd" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#8b5cf6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Closed This Month</div>
-              <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
+            <Link href="/dashboard/loans?stage=funded&period=mtd">
+              <Card className="border-l-4 border-l-[#8b5cf6] p-3 hover:bg-secondary/50 transition-colors">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Closed This Month</div>
+                <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
+                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
+              </Card>
             </Link>
-            <Link href="/dashboard/loans" className="block bg-[#0f172a] border border-[#1e293b] border-l-4 border-l-[#3b82f6] rounded-lg p-3 hover:bg-[#1e293b]/50 transition-colors">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Pipeline Loans</div>
-              <div className="text-2xl font-mono font-bold text-zinc-100">{props.pipelineCount ?? props.totalActive}</div>
-              <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+            <Link href="/dashboard/loans">
+              <Card className="border-l-4 border-l-[#3b82f6] p-3 hover:bg-secondary/50 transition-colors">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Loans</div>
+                <div className="text-2xl font-mono font-bold text-foreground">{props.pipelineCount ?? props.totalActive}</div>
+                <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
+              </Card>
             </Link>
           </div>
 
@@ -245,18 +255,18 @@ export default function DashboardClient(props: DashboardClientProps) {
               { label: 'Projected', value: fmt(props.commissionYTD + props.projectedCommission), sub: `${fmt(props.projectedCommission)} in pipeline`, border: '#10b981' },
               { label: 'Avg Per Loan', value: props.fundedYTD > 0 ? fmt(props.commissionYTD / props.fundedYTD) : '—', sub: props.fundedYTD > 0 ? `${fmtK(props.volumeYTD / props.fundedYTD)} avg loan` : '', border: '#8b5cf6' },
             ].map(k => (
-              <div key={k.label} className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-3" style={{ borderLeftWidth: 4, borderLeftColor: k.border }}>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">{k.label}</div>
-                <div className="text-xl font-mono font-bold text-zinc-100">{k.value}</div>
-                {k.sub && <div className="text-[10px] font-mono text-zinc-500 mt-0.5">{k.sub}</div>}
-              </div>
+              <Card key={k.label} className="p-3" style={{ borderLeftWidth: 4, borderLeftColor: k.border }}>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">{k.label}</div>
+                <div className="text-xl font-mono font-bold text-foreground">{k.value}</div>
+                {k.sub && <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{k.sub}</div>}
+              </Card>
             ))}
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-              <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Volume by Month</h3>
+            <Card className="p-4">
+              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">Volume by Month</h3>
               {props.chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={props.chartData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
@@ -269,10 +279,10 @@ export default function DashboardClient(props: DashboardClientProps) {
               ) : (
                 <div className="h-[220px] flex items-center justify-center text-zinc-600 font-mono text-sm">No funded loans this year</div>
               )}
-            </div>
+            </Card>
 
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-              <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Commission Trend</h3>
+            <Card className="p-4">
+              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">Commission Trend</h3>
               {props.chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={props.chartData.reduce<Array<{ month: string; cumCommission: number }>>((acc, d) => {
@@ -289,12 +299,12 @@ export default function DashboardClient(props: DashboardClientProps) {
               ) : (
                 <div className="h-[220px] flex items-center justify-center text-zinc-600 font-mono text-sm">No data yet</div>
               )}
-            </div>
+            </Card>
           </div>
 
           {/* Loans by stage chart */}
-          <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg p-4">
-            <h3 className="text-xs font-mono text-zinc-400 uppercase tracking-wider mb-4">Active Pipeline by Stage</h3>
+          <Card className="p-4">
+            <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">Active Pipeline by Stage</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={props.stageData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                 <XAxis dataKey="stage" tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} axisLine={{ stroke: '#1e293b' }} tickLine={false} />
@@ -307,16 +317,16 @@ export default function DashboardClient(props: DashboardClientProps) {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </Card>
 
           {/* Monthly breakdown table */}
           {props.chartData.length > 0 && (
-            <div className="bg-[#0f172a] border border-[#1e293b] rounded-lg overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#1e293b] text-xs font-mono text-zinc-400 uppercase tracking-wider">Monthly Breakdown</div>
+            <Card className="overflow-hidden">
+              <div className="px-4 py-3 border-b border-input text-xs font-mono text-muted-foreground uppercase tracking-wider">Monthly Breakdown</div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs font-mono">
                   <thead>
-                    <tr className="border-b border-[#1e293b]">
+                    <tr className="border-b border-input">
                       <th className="text-left px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Month</th>
                       <th className="text-right px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Loans</th>
                       <th className="text-right px-3 py-2.5 text-[10px] text-zinc-500 uppercase tracking-wider">Volume</th>
@@ -334,7 +344,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-[#334155] bg-[#1e293b]/50">
+                    <tr className="border-t-2 border-input bg-secondary/50">
                       <td className="px-3 py-2.5 text-zinc-100 font-semibold">YTD</td>
                       <td className="px-3 py-2.5 text-right text-zinc-100 font-semibold">{props.fundedYTD}</td>
                       <td className="px-3 py-2.5 text-right text-blue-400 font-semibold">{fmtK(props.volumeYTD)}</td>
@@ -343,7 +353,7 @@ export default function DashboardClient(props: DashboardClientProps) {
                   </tfoot>
                 </table>
               </div>
-            </div>
+            </Card>
           )}
         </div>
       )}

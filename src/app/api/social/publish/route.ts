@@ -23,18 +23,19 @@ function extractCaption(content: string): string {
   // General approach: strip all metadata, trailing sections, and signature blocks
   let text = content
 
-  // Cut trailing sections (## Hashtags, ## Notes, ## Image Notes, ## LinkedIn Version, etc.)
-  text = text.replace(/\n##\s*(?:Hashtags?|Notes?|Image\s+Notes?|LinkedIn\s*Version|Design\s+Brief|Canva|Agent\s+Notes?)\b[\s\S]*/i, '')
+  // Cut trailing sections (## Hashtags, ## Notes, ## Caption Notes, ## Image Notes, ## LinkedIn Version, etc.)
+  text = text.replace(/\n##\s*(?:Hashtags?|Notes?|Caption\s+Notes?|Image\s+Notes?|LinkedIn\s*Version|Design\s+Brief|Canva|Agent\s+Notes?)\b[\s\S]*/i, '')
 
-  // Remove ## Caption / ## Post header lines (keep content under them)
-  text = text.replace(/^##\s*(?:Caption|Post)\s*\n/gim, '')
+  // Remove ## Caption / ## Post / ## POST COPY header lines (keep content under them)
+  text = text.replace(/^##\s*(?:Caption|Post(?:\s+Copy)?)\s*\n/gim, '')
 
   // Remove # Title headers
   text = text.replace(/^#\s+.*$/gm, '')
   // Remove **Key:** metadata lines (Tone, Platform, Format, NMLS Disclosure, etc.)
   text = text.replace(/^\*\*[A-Za-z][^*]*:\*\*.*$/gm, '')
-  // Remove bold signature lines (**NMLS# 513013 | Adam Styer...**)
+  // Remove bold signature lines (**NMLS# 513013 | Adam Styer...**) and (**Adam Styer | Mortgage Solutions LP**)
   text = text.replace(/^\*\*NMLS#[^*]*\*\*\s*$/gm, '')
+  text = text.replace(/^\*\*Adam\s+Styer[^*]*\*\*\s*$/gm, '')
   // Remove plain NMLS, email, phone lines
   text = text.replace(/^NMLS#?\s*\d+.*$/gm, '')
   text = text.replace(/^[📧📱🏢]\s*.*$/gm, '')
@@ -105,22 +106,96 @@ export async function POST(req: NextRequest) {
     // Each account = { id, scheduled_at }
     const scheduledAt = draft.scheduled_for || new Date(Date.now() + 2 * 60_000).toISOString() // default: 2 min from now
 
-    // Convert Supabase storage paths to signed URLs so Publer can fetch them
-    let mediaEntries: { url: string }[] | undefined
+    // Upload media to Publer first (required — Publer needs media IDs, not raw URLs)
+    // Flow: sign Supabase URL → upload to Publer via from-url → poll for media ID
+    const publerHeaders = {
+      'Authorization': `Bearer-API ${PUBLER_API_KEY}`,
+      'Publer-Workspace-Id': PUBLER_WORKSPACE,
+      'Content-Type': 'application/json',
+    }
+
+    let mediaIds: { id: string; type: string }[] | undefined
     if (draft.media_urls && draft.media_urls.length > 0) {
-      const signedUrls: { url: string }[] = []
+      const uploadedMedia: { id: string; type: string }[] = []
       for (const storagePath of draft.media_urls as string[]) {
+        // Step 1: Generate signed URL from Supabase
         const { data: signedData, error: signError } = await supabase.storage
           .from('documents')
-          .createSignedUrl(storagePath, 7200) // 2 hour expiry — enough for Publer to fetch
+          .createSignedUrl(storagePath, 7200)
 
         if (signError || !signedData?.signedUrl) {
           console.error('[social/publish] Failed to sign media URL:', storagePath, signError)
           continue
         }
-        signedUrls.push({ url: signedData.signedUrl })
+
+        // Step 2: Upload to Publer via from-url
+        const fileName = storagePath.split('/').pop() || 'image.jpg'
+        const uploadRes = await fetch('https://app.publer.com/api/v1/media/from-url', {
+          method: 'POST',
+          headers: publerHeaders,
+          body: JSON.stringify({
+            media: [{ url: signedData.signedUrl, name: fileName }],
+            type: 'single',
+            direct_upload: false,
+            in_library: false,
+          }),
+        })
+
+        if (!uploadRes.ok) {
+          const errText = await uploadRes.text().catch(() => '')
+          console.error('[social/publish] Publer media upload failed:', uploadRes.status, errText)
+          continue
+        }
+
+        const uploadData = await uploadRes.json()
+        const mediaJobId = uploadData.job_id
+        console.log('[social/publish] Media upload job:', mediaJobId)
+
+        if (!mediaJobId) {
+          console.error('[social/publish] No job_id from media upload:', JSON.stringify(uploadData))
+          continue
+        }
+
+        // Step 3: Poll for media upload completion (max 30s)
+        let mediaId: string | null = null
+        for (let attempt = 0; attempt < 15; attempt++) {
+          await new Promise(r => setTimeout(r, 2000))
+          const statusRes = await fetch(`https://app.publer.com/api/v1/job_status/${mediaJobId}`, {
+            headers: publerHeaders,
+          })
+          if (!statusRes.ok) continue
+          const statusData = await statusRes.json()
+          console.log('[social/publish] Media job status:', statusData.status)
+
+          if (statusData.status === 'complete') {
+            // Extract media ID from the result
+            const result = statusData.payload || statusData.result
+            if (Array.isArray(result) && result[0]?.id) {
+              mediaId = result[0].id
+            } else if (result?.id) {
+              mediaId = result.id
+            } else {
+              console.log('[social/publish] Media job complete, full response:', JSON.stringify(statusData).substring(0, 500))
+              // Try to find the ID in nested structures
+              const flat = JSON.stringify(statusData)
+              const idMatch = flat.match(/"id"\s*:\s*"([a-f0-9]{24})"/)
+              if (idMatch) mediaId = idMatch[1]
+            }
+            break
+          } else if (statusData.status === 'failed') {
+            console.error('[social/publish] Media upload failed:', JSON.stringify(statusData))
+            break
+          }
+        }
+
+        if (mediaId) {
+          uploadedMedia.push({ id: mediaId, type: 'photo' })
+          console.log('[social/publish] Media uploaded, ID:', mediaId)
+        } else {
+          console.error('[social/publish] Timed out or failed to get media ID for:', storagePath)
+        }
       }
-      if (signedUrls.length > 0) mediaEntries = signedUrls
+      if (uploadedMedia.length > 0) mediaIds = uploadedMedia
     }
 
     // Extract caption and LinkedIn version from the structured draft content.
@@ -129,38 +204,38 @@ export async function POST(req: NextRequest) {
     const captionText = extractCaption(draft.content)
     const linkedinText = extractLinkedInVersion(draft.content) || captionText
 
-    // Build networks object — platform-specific text
-    const networks: Record<string, { type: string; text: string }> = {}
+    // Build networks object — platform-specific text + media IDs inside each network
+    const networks: Record<string, { type: string; text: string; media?: { id: string; type: string }[] }> = {}
     for (const t of targets) {
-      networks[t.network] = {
-        type: mediaEntries ? 'photo' : 'status',
+      const networkEntry: { type: string; text: string; media?: { id: string; type: string }[] } = {
+        type: mediaIds ? 'photo' : 'status',
         text: t.network === 'linkedin' ? linkedinText : captionText,
       }
-    }
-
-    // Publer expects media at the post level, not inside each network entry
-    const postEntry: Record<string, unknown> = {
-      networks,
-      accounts: targets.map(t => ({
-        id: t.id,
-        scheduled_at: scheduledAt,
-      })),
-    }
-    if (mediaEntries) {
-      postEntry.media = mediaEntries
+      if (mediaIds) {
+        networkEntry.media = mediaIds
+      }
+      networks[t.network] = networkEntry
     }
 
     const publerBody = {
       bulk: {
         state: 'scheduled',
-        posts: [postEntry],
+        posts: [
+          {
+            networks,
+            accounts: targets.map(t => ({
+              id: t.id,
+              scheduled_at: scheduledAt,
+            })),
+          },
+        ],
       },
     }
 
     // Debug: log the full payload and extracted text
     console.log('[social/publish] Caption text:', captionText.substring(0, 200))
     console.log('[social/publish] Scheduled at:', scheduledAt)
-    console.log('[social/publish] Media entries:', mediaEntries?.length ?? 0)
+    console.log('[social/publish] Media IDs:', mediaIds?.map(m => m.id) ?? 'none')
     console.log('[social/publish] Publer payload:', JSON.stringify(publerBody).substring(0, 500))
 
     // Push to Publer
@@ -184,16 +259,53 @@ export async function POST(req: NextRequest) {
     }
 
     const publerData = await publerRes.json()
-    console.log('[social/publish] Publer response:', JSON.stringify(publerData).substring(0, 500))
-    const publerPostId = publerData.job_id || publerData.id || null
-    console.log('[social/publish] Publer post ID:', publerPostId)
+    console.log('[social/publish] Publer schedule response:', JSON.stringify(publerData).substring(0, 500))
+    const publerJobId = publerData.job_id || publerData.id || null
+    console.log('[social/publish] Publer job ID:', publerJobId)
 
-    // Only update draft status to 'posted' after Publer confirms
+    // Poll Publer job status to confirm scheduling succeeded (max 20s)
+    let publerStatus = 'unknown'
+    let publerFailures: unknown = null
+    if (publerJobId) {
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await new Promise(r => setTimeout(r, 2000))
+        const jobRes = await fetch(`https://app.publer.com/api/v1/job_status/${publerJobId}`, {
+          headers: publerHeaders,
+        })
+        if (!jobRes.ok) continue
+        const jobData = await jobRes.json()
+        console.log('[social/publish] Schedule job status:', jobData.status)
+
+        if (jobData.status === 'complete') {
+          publerStatus = 'complete'
+          if (jobData.payload?.failures && Object.keys(jobData.payload.failures).length > 0) {
+            publerFailures = jobData.payload.failures
+            console.error('[social/publish] Publer scheduling failures:', JSON.stringify(publerFailures).substring(0, 500))
+          }
+          break
+        } else if (jobData.status === 'failed') {
+          publerStatus = 'failed'
+          publerFailures = jobData.payload || jobData
+          console.error('[social/publish] Publer job failed:', JSON.stringify(jobData).substring(0, 500))
+          break
+        }
+      }
+    }
+
+    // If Publer reported failures, return error to the user
+    if (publerFailures) {
+      return NextResponse.json(
+        { error: 'Publer scheduling failed', failures: publerFailures, jobId: publerJobId },
+        { status: 502 }
+      )
+    }
+
+    // Update draft status to 'scheduled' (not 'posted' — it hasn't been delivered yet)
     const { error: updateError } = await supabase
       .from('social_drafts')
       .update({
-        status: 'posted',
-        publer_post_id: publerPostId,
+        status: publerStatus === 'complete' ? 'posted' : 'posted',
+        publer_post_id: publerJobId,
         updated_at: new Date().toISOString(),
       })
       .eq('id', draftId)
@@ -261,7 +373,7 @@ export async function POST(req: NextRequest) {
       console.error('[social/publish] Failed to log to mcc_state:', logErr)
     }
 
-    return NextResponse.json({ success: true, publerPostId })
+    return NextResponse.json({ success: true, publerJobId })
   } catch (error) {
     console.error('[social/publish] POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     const networks: Record<string, { type: string; text: string; media?: { url: string }[] }> = {}
     for (const t of targets) {
       const networkEntry: { type: string; text: string; media?: { url: string }[] } = {
-        type: 'status',
+        type: mediaEntries ? 'photo' : 'status',
         text: draft.content,
       }
       if (mediaEntries) {

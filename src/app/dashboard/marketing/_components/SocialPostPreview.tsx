@@ -51,12 +51,16 @@ function parseContent(content: string | null): {
   }
 
   // Strip metadata lines and design briefs
-  const metadataPattern = /^\s*(?:#{1,3}\s+)?(?:\*\*)?(?:TITLE|PLATFORM|FORMAT|PILLAR|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)(?:\*\*)?\s*:?/i
-  // Cut off content at design brief / hashtags section
+  // Matches any **Key:** Value line (Tone, Platform, Format, NMLS Disclosure, etc.)
+  const metadataPattern = /^\s*\*\*[A-Za-z][^*]*:\*\*.*/i
+  // Cut off content at design brief / hashtags / notes sections
   const designBriefPattern = /\n---\s*\n+\s*(?:#{1,3}\s+)?(?:CANVA|DESIGN)\s+(?:DESIGN\s+)?BRIEF/i
-  const hashtagSectionPattern = /\n---\s*\n+\s*\*\*Hashtags?\*\*\s*:/i
-  // Also strip post title headers like "# Post 22 — VA Loan Myths"
-  const postTitlePattern = /^\s*#{1,3}\s+Post\s+\d+\s*[—–:-].*/i
+  const hashtagSectionPattern = /\n(?:---\s*\n+\s*\*\*Hashtags?\*\*\s*:|##\s*Hashtags?\b)/i
+  const notesSectionPattern = /\n##\s*(?:Notes?|Image\s+Notes?)\b/i
+  // Strip post title headers like "# Post — Chey and Tay Closing" or "# Post 22 — VA Loan Myths"
+  const postTitlePattern = /^\s*#{1,3}\s+(?:Post\b).*/i
+  // Bold signature lines: **NMLS# 513013 | Adam Styer | Mortgage Solutions LP**
+  const signaturePattern = /^\s*\*\*NMLS#[^*]*\*\*\s*$/i
 
   let rawContent = (commentIndex >= 0 ? lines.slice(0, commentIndex) : lines).join('\n')
 
@@ -70,15 +74,29 @@ function parseContent(content: string | null): {
   // Remove hashtag section divider and Agent Notes
   const hashIdx = rawContent.search(hashtagSectionPattern)
   if (hashIdx > 0) rawContent = rawContent.substring(0, hashIdx)
-  const agentNotesIdx = rawContent.search(/\n---\s*\n+\s*(?:\*\*)?Agent\s+Notes?\s*(?:\*\*)?:?/i)
+  const notesIdx = rawContent.search(notesSectionPattern)
+  if (notesIdx > 0) rawContent = rawContent.substring(0, notesIdx)
+  const agentNotesIdx = rawContent.search(/\n(?:---\s*\n+\s*)?(?:\*\*)?Agent\s+Notes?\s*(?:\*\*)?:?/i)
   if (agentNotesIdx > 0) rawContent = rawContent.substring(0, agentNotesIdx)
+  // Remove ## LinkedIn Version section
+  rawContent = rawContent.replace(/\n##\s*LinkedIn\s*Version[^\n]*\n[\s\S]*?(?=\n##\s|$)/i, '')
 
   // Design instruction patterns inside slide bodies
   const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
 
   const bodyContent = rawContent
     .split('\n')
-    .filter((line) => !metadataPattern.test(line) && !postTitlePattern.test(line) && !designInstructionPattern.test(line))
+    .filter((line) =>
+      !metadataPattern.test(line) &&
+      !postTitlePattern.test(line) &&
+      !designInstructionPattern.test(line) &&
+      !signaturePattern.test(line) &&
+      !/^\s*NMLS#?\s*\d+/.test(line) &&
+      !/^\s*[📧📱🏢]\s*/.test(line) &&
+      !/^\s*adam@\S+/i.test(line) &&
+      !/^\s*\d{3}[-.]\d{3}[-.]\d{4}\s*$/.test(line) &&
+      !/^\s*##\s*(?:Caption|Post)\s*$/i.test(line)
+    )
     .join('\n')
     .replace(/^---\s*$/gm, '') // remove horizontal rules
     .replace(/\n{3,}/g, '\n\n') // collapse excess blank lines

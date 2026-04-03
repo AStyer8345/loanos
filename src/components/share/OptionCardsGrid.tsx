@@ -38,9 +38,9 @@ function computeDeltas(
     const interestDiff = rowInterest5yr - baseInterest5yr
     if (Math.abs(interestDiff) >= 1000) {
       if (interestDiff > 0) {
-        deltas.push({ value: interestDiff, label: 'more interest (5 yr)', type: 'cost' })
+        deltas.push({ value: interestDiff, label: 'more interest + MI (5 yr)', type: 'cost' })
       } else {
-        deltas.push({ value: Math.abs(interestDiff), label: 'less interest (5 yr)', type: 'savings' })
+        deltas.push({ value: Math.abs(interestDiff), label: 'less interest + MI (5 yr)', type: 'savings' })
       }
     }
   }

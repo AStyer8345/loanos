@@ -21,6 +21,7 @@ import BuydownSection from './BuydownSection'
 import DownPaymentSection from './DownPaymentSection'
 import RentVsOwnSection from './RentVsOwnSection'
 import ArmVsFixedSection from './ArmVsFixedSection'
+import WaitingCostSection from './WaitingCostSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
@@ -544,6 +545,11 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                       {/* ── ARM vs. Fixed Comparison (purchase only) ── */}
                       {displayData.mode === 'purchase' && (
                         <ArmVsFixedSection purchaseScenarios={purchaseScenarios} />
+                      )}
+
+                      {/* ── Cost of Waiting 6 Months (purchase only) ── */}
+                      {displayData.mode === 'purchase' && (
+                        <WaitingCostSection purchaseScenarios={purchaseScenarios} />
                       )}
 
                       {/* ── Row 3: Total Interest Paid ──────────────────────── */}

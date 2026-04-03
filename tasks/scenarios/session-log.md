@@ -288,3 +288,35 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Tier 3 item 2 (ARM vs Fixed) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-03 (scenarios-am)
+
+**What was built:**
+- Cost of Waiting 6 Months (`src/app/dashboard/scenarios/new/WaitingCostSection.tsx`)
+  - Two user inputs: "Rate in 6 months" (default = current rate + 0.25%) and "Annual appreciation %" (default = 3.0%)
+  - 3 stat cards: Monthly Payment Delta (red/green), Home Price Increase (amber), Total Cost to Wait (red/green)
+  - Comparison table (Today vs. In 6 Months): purchase price, loan amount, interest rate, monthly P&I, extra lifetime interest
+  - Context box: plain-English explanation of trade-off — includes note that rates could decrease (balanced compliance language)
+  - Math: newPrice = purchasePrice × (1 + apprecRate/2), newLoanAmount = newPrice - downPayment, extraLifetimeInterest = monthlyDelta × termMonths - priceIncrease
+  - Renders in purchase mode after ArmVsFixedSection, conditional on loanAmount > 0 and rate > 0
+  - Compliance footer: illustrative only, rates/prices unpredictable, not a product recommendation
+
+**MC gap closed:** Borrowers asking "should we wait?" now get a real number instead of Adam saying "rates might go up." The delta is interactive — change the rate assumption, the table updates instantly. Before: Adam had to manually build 2 scenarios with different rates + guesstimate appreciation. After: type a projected rate → see the monthly, price, and lifetime cost of waiting side by side.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** (TBD) — pushed to main
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/WaitingCostSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Engagement tracking — view_count display in ActionsBar after save. `view_count` column already exists in schema — just needs display. Shows Adam when borrower viewed the link (follow-up trigger).
+2. Share page: equity build curve chart — overlaid loan balance vs equity line over 30 years. Single most emotionally compelling visual per NotebookLM research.
+3. Total cost of waiting for REFI mode — "Is now the right time to refi?" parallel version (rates need to drop X bps for refi to make sense in Y months)
+
+**Domain queue updates:**
+- Tier 3 item 3 (Total cost of waiting) — ✅ COMPLETE this session

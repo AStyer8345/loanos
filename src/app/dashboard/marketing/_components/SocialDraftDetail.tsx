@@ -5,12 +5,16 @@ import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 import MediaManager from './MediaManager'
 import SocialPostPreview from './SocialPostPreview'
+import { parseContentToSlides, regenerateCarouselImages } from './carouselRenderer'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
 
-const GOLD = 'var(--primary)'
 const BRAND_GOLD = 'var(--primary)'
 
-/** Lightweight inline markdown → HTML for social post preview.
- *  Handles: **bold**, *italic*, --- hr, and lines starting with - as bullets. */
+/** Lightweight inline markdown → HTML for social post preview. */
 function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -19,66 +23,30 @@ function renderMarkdown(text: string): string {
     .replace(/^- (.+)$/gm, '<span style="display:flex;gap:6px;margin-bottom:2px"><span style="color:#C9A84C;flex-shrink:0">•</span><span>$1</span></span>')
 }
 
-/** Parse "SLIDE N" blocks from post content for carousel preview.
- *  Supports ALL agent formats:
- *    SLIDE 1 — HOOK           (carousel builder)
- *    **SLIDE 1 — HOOK**       (bold markdown)
- *    [Slide 1 — Hook]         (bracket format)
- *    ## Slide 1 — Hook        (markdown header - agent format)
- */
 /** Lines that are Canva design instructions, not displayable content */
 const designInstructionPattern = /^\s*(?:\*\*)?(?:Visual|Text on image|Caption starter)(?:\*\*)?:.*$/i
 
-/** Strip metadata, headers, contact blocks, hashtags, and image notes from draft content
- *  so the detail panel only shows the actual post caption.
- *
- *  Claude generates drafts with varying structures — metadata keys change per post.
- *  Strategy: cut trailing sections first, then strip known metadata line patterns. */
+/** Strip metadata, headers, contact blocks, hashtags, and image notes from draft content */
 function cleanContentForDisplay(content: string): string {
   let text = content.replace(/\r\n/g, '\n')
-
-  // ── 1. Cut trailing sections (## Hashtags, ## Notes, ## Image Notes, ## LinkedIn Version, etc.) ──
-  // Anything starting with ## followed by a known non-caption keyword → remove to end
   text = text.replace(/\n##\s*(?:Hashtags?|Notes?|Image\s+Notes?|LinkedIn\s*Version|Design\s+Brief|Canva|Agent\s+Notes?)\b[\s\S]*/i, '')
-
-  // ── 2. Remove ## Caption / ## Post header lines (keep content under them) ──
   text = text.replace(/^##\s*(?:Caption|Post)\s*\n/gim, '')
-
-  // ── 3. Remove # Title headers (e.g. "# Post — Chey and Tay Closing") ──
   text = text.replace(/^#\s+.*$/gm, '')
-
-  // ── 4. Remove **Key:** metadata lines — catches Tone, Platform, Format, NMLS Disclosure, Pillar, etc. ──
   text = text.replace(/^\*\*[A-Za-z][^*]*:\*\*.*$/gm, '')
-
-  // ── 5. Remove signature/contact blocks ──
-  // Bold signature lines: **NMLS# 513013 | Adam Styer | Mortgage Solutions LP**
   text = text.replace(/^\*\*NMLS#[^*]*\*\*\s*$/gm, '')
-  // Plain NMLS lines
   text = text.replace(/^NMLS#?\s*\d+.*$/gm, '')
-  // Email/phone emoji lines
   text = text.replace(/^[📧📱🏢]\s*.*$/gm, '')
-  // Plain email lines (adam@...)
   text = text.replace(/^adam@\S+.*$/gim, '')
-  // Phone number lines
   text = text.replace(/^\d{3}[-.]\d{3}[-.]\d{4}\s*$/gm, '')
-
-  // ── 6. Remove --- dividers ──
   text = text.replace(/^---\s*$/gm, '')
-
-  // ── 7. Collapse excess blank lines ──
   text = text.replace(/\n{3,}/g, '\n\n').trim()
-
   return text
 }
 
 function parseSlides(content: string): { intro: string; slides: { num: number; title: string; body: string }[] } {
-  // Strip UI artifacts that got saved into content
   let cleaned = content.replace(/^(?:CLAUDE|APPLY TO POST|YOU|SEND)\s*\n/gim, '')
-
-  // Cut off content at design brief section (agent sometimes appends Canva specs)
   const briefIdx = cleaned.search(/\n---\s*\n+\s*(?:#{1,3}\s+)?(?:CANVA|DESIGN)\s+(?:DESIGN\s+)?BRIEF/i)
   if (briefIdx > 0) cleaned = cleaned.substring(0, briefIdx)
-  // Cut off at hashtag section, FULL CAPTION, or Agent Notes
   const hashIdx = cleaned.search(/\n---\s*\n+\s*\*\*Hashtags?\*\*\s*:/i)
   if (hashIdx > 0) cleaned = cleaned.substring(0, hashIdx)
   const captionIdx = cleaned.search(/\n\s*(?:#{1,3}\s+)?(?:\*\*)?FULL CAPTION(?:\*\*)?:?\s*\n/i)
@@ -86,7 +54,6 @@ function parseSlides(content: string): { intro: string; slides: { num: number; t
   const agentIdx = cleaned.search(/\n---\s*\n+\s*(?:\*\*)?Agent\s+Notes?\s*(?:\*\*)?:?/i)
   if (agentIdx > 0) cleaned = cleaned.substring(0, agentIdx)
 
-  // Remove horizontal rules and metadata lines
   cleaned = cleaned
     .replace(/^---\s*$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
@@ -100,7 +67,6 @@ function parseSlides(content: string): { intro: string; slides: { num: number; t
     const title = (match[2] || '').trim().replace(/\*\*/g, '').replace(/\]$/, '').replace(/\(.*?\)\s*$/, '').trim()
     let body = (match[3] || '').trim().replace(/^\n+|\n+$/g, '')
     body = body.replace(/\*\*([^*]+)\*\*/g, '$1')
-    // Strip design instructions from slide bodies
     body = body
       .split('\n')
       .filter((l) => !designInstructionPattern.test(l))
@@ -112,7 +78,6 @@ function parseSlides(content: string): { intro: string; slides: { num: number; t
     }
   }
 
-  // Extract intro text (everything before first SLIDE reference), stripping metadata + design instructions
   const firstSlideIdx = cleaned.search(/(?:^|\n)\s*(?:#{1,3}\s+)?(?:\*\*|\[)?SLIDE\s+1\b/i)
   const metaPattern = /^\s*(?:#{1,3}\s+)?(?:\*\*)?(?:TITLE|PLATFORM|FORMAT|PILLAR|CURRENT CONTENT|CAPTION(\s*\(.*?\))?)(?:\*\*)?\s*:?/i
   const postTitlePattern = /^\s*#{1,3}\s+Post\s+\d+\s*[—–:-].*/i
@@ -145,7 +110,7 @@ function formatDate(iso: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-/** Branded slide card — renders one carousel slide as a compact preview that fits the detail panel */
+/** Branded slide card */
 function SlideCard({ slide, total }: { slide: { num: number; title: string; body: string }; total: number }) {
   const isFirst = slide.num === 1
   const isLast = slide.num === total
@@ -153,63 +118,39 @@ function SlideCard({ slide, total }: { slide: { num: number; title: string; body
 
   return (
     <div
-      className="rounded-md overflow-hidden"
-      style={{
-        background: 'var(--surface)',
-        border: `1px solid ${isCTA ? BRAND_GOLD : 'var(--border)'}`,
-        padding: '16px 18px',
-      }}
+      className={cn(
+        'rounded-lg overflow-hidden p-4',
+        isCTA ? 'border-primary/40 border bg-primary/5' : 'border border-input bg-card',
+      )}
     >
-      {/* Slide badge row */}
       <div className="flex items-center gap-2 mb-2">
-        <span
-          className="font-bold"
-          style={{
-            color: BRAND_GOLD,
-            fontSize: 10,
-            letterSpacing: '0.1em',
-            background: 'color-mix(in srgb, var(--primary) 8%, var(--surface))',
-            padding: '2px 8px',
-            borderRadius: 3,
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <Badge variant="default" className="text-[10px] px-2 py-0 h-5 font-mono">
           {slide.num} / {total}
-        </span>
+        </Badge>
         {slide.title && (
-          <span
-            className="font-bold truncate"
-            style={{ color: 'var(--muted-foreground)', fontSize: 10, letterSpacing: '0.05em' }}
-          >
-            {slide.title.toUpperCase()}
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
+            {slide.title}
           </span>
         )}
       </div>
 
-      {/* Slide content */}
       {isFirst ? (
         <>
-          <div
-            className="font-bold mb-1"
-            style={{ color: BRAND_GOLD, fontSize: 15, lineHeight: 1.3 }}
-          >
+          <div className="font-semibold text-primary text-[15px] leading-snug mb-1">
             {slide.body.split('\n')[0]}
           </div>
           {slide.body.split('\n').slice(1).join('\n').trim() && (
-            <div style={{ color: 'var(--foreground)', fontSize: 12, lineHeight: 1.6 }}>
+            <div className="text-foreground text-xs leading-relaxed">
               {slide.body.split('\n').slice(1).join('\n').trim()}
             </div>
           )}
         </>
       ) : (
         <div
-          className="whitespace-pre-wrap"
-          style={{
-            color: isCTA ? BRAND_GOLD : 'var(--foreground)',
-            fontSize: 12,
-            lineHeight: 1.6,
-            fontWeight: isCTA ? 600 : 400,
-          }}
+          className={cn(
+            'whitespace-pre-wrap text-xs leading-relaxed',
+            isCTA ? 'text-primary font-semibold' : 'text-foreground',
+          )}
           dangerouslySetInnerHTML={{ __html: renderMarkdown(slide.body) }}
         />
       )}
@@ -231,12 +172,10 @@ function SlidePreviewOrText({
   const hasSlides = slides.length >= 2
 
   if (!hasSlides) {
-    // No slides detected — strip metadata and render clean caption only
     const displayText = cleanContentForDisplay(draft.content || '')
     return (
       <div
-        className="rounded-md border border-input px-3 py-2.5 text-foreground/80 whitespace-pre-wrap"
-        style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
+        className="rounded-lg border border-input bg-card px-4 py-3 text-foreground/90 whitespace-pre-wrap text-sm leading-relaxed font-sans"
         dangerouslySetInnerHTML={{ __html: renderMarkdown(displayText || '(empty)') }}
       />
     )
@@ -247,29 +186,24 @@ function SlidePreviewOrText({
 
   return (
     <div className="space-y-3">
-      {/* Caption / intro text */}
       {intro && (
         <div
-          className="rounded-md border border-input px-3 py-2 text-foreground/80 whitespace-pre-wrap"
-          style={{ background: 'var(--surface)', fontSize: 12, lineHeight: 1.6 }}
+          className="rounded-lg border border-input bg-card px-4 py-3 text-foreground/90 whitespace-pre-wrap text-sm leading-relaxed font-sans"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(intro) }}
         />
       )}
 
-      {/* Slide card */}
       <SlideCard slide={currentSlide} total={slides.length} />
 
-      {/* Navigation */}
+      {/* Navigation dots */}
       <div className="flex items-center justify-center gap-3">
         <button
           onClick={() => setSlideIndex(Math.max(0, safeIndex - 1))}
           disabled={safeIndex === 0}
-          className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-          style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
+          className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80 border border-input bg-card"
         >
           &#8592;
         </button>
-
         <div className="flex gap-1.5">
           {slides.map((_, i) => (
             <button
@@ -284,12 +218,10 @@ function SlidePreviewOrText({
             />
           ))}
         </div>
-
         <button
           onClick={() => setSlideIndex(Math.min(slides.length - 1, safeIndex + 1))}
           disabled={safeIndex === slides.length - 1}
-          className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80"
-          style={{ background: 'var(--surface)', color: 'var(--foreground)', border: '1px solid var(--border)' }}
+          className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold disabled:opacity-20 transition-opacity hover:opacity-80 border border-input bg-card"
         >
           &#8594;
         </button>
@@ -312,36 +244,23 @@ function FormatSwitcher({ current, onChange }: { current: string | null; onChang
 
   return (
     <div className="relative inline-block">
-      <button
+      <Badge
+        variant="outline"
+        className="cursor-pointer hover:bg-accent text-[10px] tracking-wider"
         onClick={() => setOpen(!open)}
-        className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors hover:opacity-80"
-        style={{
-          background: 'transparent',
-          color: GOLD,
-          border: `1px solid ${GOLD}`,
-          fontFamily: 'inherit',
-          fontSize: 10,
-          letterSpacing: '0.05em',
-        }}
       >
         {label.toUpperCase()} ▾
-      </button>
+      </Badge>
       {open && (
-        <div
-          className="absolute top-full left-0 mt-1 rounded-sm border border-input py-1 z-50"
-          style={{ background: 'var(--surface)', minWidth: 140 }}
-        >
+        <div className="absolute top-full left-0 mt-1 rounded-lg border border-input bg-card shadow-lg py-1 z-50 min-w-[140px]">
           {FORMAT_OPTIONS.map((f) => (
             <button
               key={f.value}
               onClick={() => { onChange(f.value); setOpen(false) }}
-              className="block w-full text-left px-3 py-1.5 text-xs font-bold transition-colors hover:bg-muted"
-              style={{
-                color: f.value === current ? GOLD : 'var(--muted-foreground)',
-                fontFamily: 'inherit',
-                fontSize: 10,
-                letterSpacing: '0.05em',
-              }}
+              className={cn(
+                'block w-full text-left px-3 py-1.5 text-[10px] font-semibold tracking-wider transition-colors hover:bg-accent',
+                f.value === current ? 'text-primary' : 'text-muted-foreground',
+              )}
             >
               {f.label.toUpperCase()}
             </button>
@@ -365,7 +284,12 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
   const [slideIndex, setSlideIndex] = useState(0)
   const [showPreview, setShowPreview] = useState(false)
 
-  // Signed URLs for media (bucket is authenticated, raw URLs don't work)
+  // Carousel edit state
+  const [editCaption, setEditCaption] = useState('')
+  const [editSlides, setEditSlides] = useState<{ text: string }[]>([])
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenError, setRegenError] = useState<string | null>(null)
+
   const [signedMediaUrls, setSignedMediaUrls] = useState<string[]>([])
 
   useEffect(() => {
@@ -380,18 +304,14 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
       const supabase = createClient()
       const resolved: string[] = []
       for (const urlOrPath of urls!) {
-        // If it's already a signed URL or external URL, use as-is
         if (urlOrPath.includes('token=') || !urlOrPath.includes('supabase') && urlOrPath.startsWith('http') && !urlOrPath.includes('/storage/v1/')) {
           resolved.push(urlOrPath)
           continue
         }
-        // Extract the storage path from a full Supabase URL or use as bare path
         let storagePath = urlOrPath
         const storageIdx = urlOrPath.indexOf('/storage/v1/object/')
         if (storageIdx !== -1) {
-          // Format: .../storage/v1/object/public/documents/path or .../authenticated/documents/path
           const afterStorage = urlOrPath.substring(storageIdx + '/storage/v1/object/'.length)
-          // Remove "public/documents/" or "authenticated/documents/" prefix
           storagePath = afterStorage.replace(/^(public|authenticated)\/documents\//, '')
         }
         const { data, error } = await supabase.storage
@@ -400,7 +320,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
         if (!error && data?.signedUrl) {
           resolved.push(data.signedUrl)
         } else {
-          // Fallback — use original URL (may still be broken but better than nothing)
           resolved.push(urlOrPath)
         }
       }
@@ -410,7 +329,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     return () => { cancelled = true }
   }, [draft.media_urls])
 
-  /** When media paths change via MediaManager, update the draft and re-resolve signed URLs */
   const handleMediaChange = useCallback((newPaths: string[]) => {
     onUpdate({ ...draft, media_urls: newPaths.length > 0 ? newPaths : null })
   }, [draft, onUpdate])
@@ -419,7 +337,7 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     onUpdate({ ...draft, format: fmt })
   }, [draft, onUpdate])
 
-  // Reset edit state when draft changes (id or content)
+  // Reset edit state when draft changes
   const [prevId, setPrevId] = useState(draft.id)
   const [prevContent, setPrevContent] = useState(draft.content || '')
   if (draft.id !== prevId) {
@@ -432,22 +350,28 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     setSlideIndex(0)
     setPublishError(null)
   } else if (draft.content !== prevContent && !editing) {
-    // Content updated externally (e.g. APPLY TO POST) — sync edit buffer
     setPrevContent(draft.content || '')
     setEditContent(draft.content || '')
   }
 
+  const isCarousel = draft.format === 'carousel'
+
   function handleEdit() {
     setEditing(true)
     setEditContent(draft.content || '')
+    setRegenError(null)
+    if (isCarousel) {
+      const parsed = parseContentToSlides(draft.content || '')
+      setEditCaption(parsed.caption)
+      setEditSlides(parsed.slides.length >= 2 ? parsed.slides : [{ text: '' }, { text: '' }])
+    }
   }
 
-  function handleSave() {
+  function handleSaveText() {
     setEditing(false)
     const oldContent = draft.content || ''
     const newContent = editContent
     onUpdate({ ...draft, content: editContent })
-    // If content actually changed, log the edit as feedback for the agent
     if (oldContent !== newContent) {
       const summary = `[${new Date().toISOString().slice(0, 10)}] EDITED "${draft.title}": Adam manually edited this post. Original started with: "${oldContent.slice(0, 80)}..." — Changed to start with: "${newContent.slice(0, 80)}..."`
       fetch('/api/social/settings', {
@@ -455,6 +379,68 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'voice_feedback', appendEntry: summary }),
       }).catch(() => { /* non-blocking */ })
+    }
+  }
+
+  async function handleSaveCarousel() {
+    const nonEmpty = editSlides.filter((s) => s.text.trim())
+    if (nonEmpty.length < 2) {
+      setRegenError('Need at least 2 slides with text')
+      return
+    }
+
+    setRegenerating(true)
+    setRegenError(null)
+
+    try {
+      // Regenerate slide images
+      const newMediaPaths = await regenerateCarouselImages(nonEmpty)
+
+      // Rebuild structured content
+      const contentLines: string[] = []
+      if (editCaption.trim()) {
+        contentLines.push('## Caption')
+        contentLines.push(editCaption.trim())
+        contentLines.push('')
+        contentLines.push('---')
+        contentLines.push('')
+      }
+      nonEmpty.forEach((s, i) => {
+        const label = i === 0 ? 'HOOK' : i === nonEmpty.length - 1 ? 'CTA' : `POINT ${i}`
+        contentLines.push(`SLIDE ${i + 1} — ${label}`)
+        contentLines.push(s.text)
+        contentLines.push('')
+      })
+
+      const newContent = contentLines.join('\n').trim()
+
+      setEditing(false)
+      onUpdate({
+        ...draft,
+        content: newContent,
+        media_urls: newMediaPaths,
+        title: nonEmpty[0].text.slice(0, 60) || draft.title,
+      })
+
+      // Log the edit for voice learning
+      const summary = `[${new Date().toISOString().slice(0, 10)}] EDITED CAROUSEL "${draft.title}": Adam edited slides and regenerated images.`
+      fetch('/api/social/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'voice_feedback', appendEntry: summary }),
+      }).catch(() => { /* non-blocking */ })
+    } catch (err) {
+      setRegenError(err instanceof Error ? err.message : 'Failed to regenerate slides')
+    } finally {
+      setRegenerating(false)
+    }
+  }
+
+  function handleSave() {
+    if (isCarousel) {
+      handleSaveCarousel()
+    } else {
+      handleSaveText()
     }
   }
 
@@ -472,7 +458,6 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     if (!rejectReason.trim()) return
     setShowRejectModal(false)
     onUpdate({ ...draft, status: 'rejected', rejection_reason: rejectReason.trim() } as SocialDraft)
-    // Store feedback for the agent to learn from
     try {
       const res = await fetch('/api/social/settings', {
         method: 'POST',
@@ -508,23 +493,19 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
   async function handleApproveAndPublish() {
     setPublishing(true)
     setPublishError(null)
-
     try {
       onUpdate({ ...draft, status: 'approved' })
       await new Promise((resolve) => setTimeout(resolve, 500))
-
       const res = await fetch('/api/social/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ draftId: draft.id }),
       })
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }))
         setPublishError(data.error || `Publish failed (${res.status})`)
         return
       }
-
       onUpdate({ ...draft, status: 'posted' })
     } catch {
       setPublishError('Network error — could not reach publish API')
@@ -536,22 +517,18 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
   async function handleDelete() {
     const confirmed = window.confirm('Delete this draft?')
     if (!confirmed) return
-
     setPublishError(null)
-
     try {
       const res = await fetch('/api/social/drafts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: draft.id }),
       })
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Delete failed' }))
         setPublishError(data.error || `Delete failed (${res.status})`)
         return
       }
-
       onDelete(draft.id)
     } catch {
       setPublishError('Network error — could not delete draft')
@@ -562,25 +539,18 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     const text = chatInput.trim()
     if (!text) return
     setChatInput('')
-
     const userMsg: ChatMessage = { role: 'user', content: text }
     const nextMessages = [...messages, userMsg]
     setMessages(nextMessages)
     setChatLoading(true)
-
     try {
       const res = await fetch('/api/chat/social', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: nextMessages,
-          draftId: draft.id,
-        }),
+        body: JSON.stringify({ messages: nextMessages, draftId: draft.id }),
       })
-
       if (!res.ok) throw new Error('Chat request failed')
       const data = await res.json()
-
       if (data.message) {
         const assistantMsg: ChatMessage = { role: 'assistant', content: data.message.content }
         setMessages([...nextMessages, assistantMsg])
@@ -597,303 +567,280 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
 
   const subtitle = [draft.platform, draft.pillar, formatDate(draft.scheduled_for)]
     .filter(Boolean)
-    .join(' \u00B7 ')
+    .join(' · ')
 
   return (
-    <div
-      className="flex flex-col h-full"
-      style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
-    >
-      {/* 1. Header bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-input">
-        <div>
-          <div className="text-foreground font-bold" style={{ fontSize: 15 }}>
+    <div className="flex flex-col h-full">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-input bg-card/50">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-foreground font-semibold text-[15px] truncate">
             {draft.title || 'Untitled'}
-          </div>
-          <div className="text-muted-foreground flex items-center gap-2" style={{ fontSize: 11 }}>
-            <span>{subtitle}</span>
+          </h2>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-muted-foreground text-[11px]">{subtitle}</span>
             <FormatSwitcher current={draft.format} onChange={handleFormatChange} />
           </div>
         </div>
-        <button
-          onClick={onOpenVoiceGuide}
-          className="px-3 py-1 rounded-sm text-xs font-bold tracking-wider transition-opacity hover:opacity-80"
-          style={{
-            background: 'transparent',
-            color: GOLD,
-            border: `1px solid ${GOLD}`,
-            fontFamily: 'inherit',
-          }}
-        >
-          VOICE GUIDE
-        </button>
+        <Button variant="outline" size="sm" onClick={onOpenVoiceGuide} className="text-xs tracking-wider shrink-0">
+          Voice Guide
+        </Button>
       </div>
 
-      {/* 2. Content area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Post content */}
-        <div>
-          <div
-            className="font-bold mb-2"
-            style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-          >
-            POST CONTENT
-          </div>
+      {/* ── Scrollable content area ── */}
+      <ScrollArea className="flex-1">
+        <div className="p-5 space-y-5">
 
-          {editing ? (
-            <div className="space-y-2">
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                rows={8}
-                className="w-full rounded-md border border-input text-foreground text-xs px-3 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 resize-none"
-                style={{ background: 'var(--surface)', fontFamily: 'inherit', lineHeight: 1.6 }}
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                  style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
-                >
-                  SAVE
-                </button>
-                <button
-                  onClick={() => setEditing(false)}
-                  className="px-3 py-1 rounded-sm text-xs font-bold text-muted-foreground transition-opacity hover:opacity-80"
-                  style={{ border: '1px solid var(--border)', fontFamily: 'inherit' }}
-                >
-                  CANCEL
-                </button>
-              </div>
-            </div>
-          ) : (
-            <SlidePreviewOrText draft={draft} slideIndex={slideIndex} setSlideIndex={setSlideIndex} />
-          )}
-        </div>
-
-        {/* Media manager — add, remove, reorder */}
-        <MediaManager
-          mediaPaths={draft.media_urls || []}
-          signedUrls={signedMediaUrls}
-          onChange={handleMediaChange}
-        />
-
-        {/* Action buttons */}
-        {!editing && (
-          <>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => setShowPreview(true)}
-                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  color: '#8B5CF6',
-                  border: '1px solid #8B5CF6',
-                  fontFamily: 'inherit',
-                }}
-              >
-                PREVIEW
-              </button>
-              <button
-                onClick={handleApprove}
-                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  color: '#4CAF82',
-                  border: '1px solid #4CAF82',
-                  fontFamily: 'inherit',
-                }}
-              >
-                APPROVE
-              </button>
-              {draft.status === 'draft' && (
-                <button
-                  onClick={handleApproveAndPublish}
-                  disabled={publishing}
-                  className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
-                  style={{
-                    background: GOLD,
-                    color: 'var(--bg)',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {publishing ? 'PUBLISHING...' : 'APPROVE & PUBLISH'}
-                </button>
-              )}
-              <button
-                onClick={handleEdit}
-                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  color: '#3B82F6',
-                  border: '1px solid #3B82F6',
-                  fontFamily: 'inherit',
-                }}
-              >
-                EDIT
-              </button>
-              <button
-                onClick={handleReject}
-                className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  color: '#E05252',
-                  border: '1px solid #E05252',
-                  fontFamily: 'inherit',
-                }}
-              >
-                REJECT
-              </button>
-              <button
-                onClick={handleDelete}
-                className="ml-auto px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  color: 'var(--muted-foreground)',
-                  border: '1px solid var(--border)',
-                  fontFamily: 'inherit',
-                }}
-              >
-                DELETE
-              </button>
-              {draft.status === 'approved' && (
-                <button
-                  onClick={handlePublish}
-                  disabled={publishing}
-                  className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-60"
-                  style={{
-                    background: GOLD,
-                    color: 'var(--bg)',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {publishing ? 'PUBLISHING...' : 'PUBLISH TO PUBLER'}
-                </button>
-              )}
-            </div>
-            {publishError && (
-              <div
-                className="rounded-sm px-3 py-2 text-xs font-bold"
-                style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', color: '#E05252', border: '1px solid #E05252' }}
-              >
-                {publishError}
-              </div>
-            )}
-            {showRejectModal && (
-              <div
-                className="rounded-sm p-3 space-y-2"
-                style={{ background: 'color-mix(in srgb, #E05252 6%, var(--bg))', border: '1px solid #E05252' }}
-              >
-                <div className="text-xs font-bold" style={{ color: '#E05252', letterSpacing: '0.1em' }}>
-                  WHY ARE YOU REJECTING THIS?
-                </div>
-                <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  This helps the AI learn your voice. Be specific — e.g. &quot;I never debate lock vs float&quot; or &quot;too corporate sounding&quot;
-                </div>
-                <textarea
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="What's wrong with this post..."
-                  className="w-full rounded-sm p-2 text-sm resize-none"
-                  style={{
-                    background: 'var(--bg)',
-                    color: 'var(--foreground)',
-                    border: '1px solid #27272a',
-                    fontFamily: 'inherit',
-                    minHeight: 60,
-                  }}
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleRejectSubmit}
-                    disabled={!rejectReason.trim()}
-                    className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-40"
-                    style={{ background: '#E05252', color: '#fff', fontFamily: 'inherit' }}
-                  >
-                    REJECT
-                  </button>
-                  <button
-                    onClick={() => setShowRejectModal(false)}
-                    className="px-3 py-1 rounded-sm text-xs font-bold transition-opacity hover:opacity-80"
-                    style={{ background: 'transparent', color: 'var(--muted-foreground)', border: '1px solid #27272a', fontFamily: 'inherit' }}
-                  >
-                    CANCEL
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Agent notes */}
-        {draft.agent_notes && (
-          <div>
-            <div
-              className="font-bold mb-2"
-              style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-            >
-              AGENT NOTES
-            </div>
-            <div
-              className="rounded-md border border-input px-3 py-2.5 text-muted-foreground whitespace-pre-wrap"
-              style={{ background: 'var(--surface)', fontSize: 11, lineHeight: 1.5 }}
-            >
-              {draft.agent_notes}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 3. Chat panel */}
-      <div className="border-t border-input p-3 space-y-2">
-        <div
-          className="font-bold"
-          style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-        >
-          CHAT &mdash; EDITING &lsquo;{draft.title || 'Untitled'}&rsquo;
-        </div>
-
-        {/* Message list */}
-        {messages.length > 0 && (
-          <div className="max-h-40 overflow-y-auto space-y-1.5">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className="text-xs rounded-sm px-2 py-1.5"
-                style={{
-                  background: msg.role === 'user' ? 'color-mix(in srgb, var(--primary) 8%, var(--surface))' : 'var(--surface)',
-                  color: msg.role === 'user' ? 'var(--foreground)' : 'var(--muted-foreground)',
-                  borderLeft: msg.role === 'assistant' ? `2px solid ${GOLD}` : '2px solid var(--border)',
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold" style={{ fontSize: 9, color: msg.role === 'user' ? 'var(--muted-foreground)' : GOLD }}>
-                    {msg.role === 'user' ? 'YOU' : 'CLAUDE'}
-                  </span>
-                  {msg.role === 'assistant' && (
-                    <button
-                      onClick={() => onUpdate({ ...draft, content: msg.content })}
-                      className="px-2 py-0.5 rounded-sm font-bold transition-opacity hover:opacity-80"
-                      style={{
-                        fontSize: 9,
-                        letterSpacing: '0.1em',
-                        background: GOLD,
-                        color: 'var(--bg)',
-                        fontFamily: 'inherit',
-                      }}
-                    >
-                      APPLY TO POST
-                    </button>
+          {/* Post Content Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[11px] font-semibold tracking-widest text-primary uppercase">
+                Post Content
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {editing ? (
+                <div className="space-y-3">
+                  {isCarousel ? (
+                    /* ── Carousel editor: caption + individual slides ── */
+                    <>
+                      <div>
+                        <label className="block text-[10px] font-semibold tracking-widest text-primary uppercase mb-1">
+                          Caption
+                        </label>
+                        <textarea
+                          value={editCaption}
+                          onChange={(e) => setEditCaption(e.target.value)}
+                          rows={3}
+                          placeholder="Caption for the post (shows on Instagram, Facebook, etc.)..."
+                          className="w-full rounded-lg border border-input bg-background text-foreground text-sm px-4 py-3 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-none leading-relaxed font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold tracking-widest text-primary uppercase mb-1">
+                          Slides ({editSlides.length})
+                        </label>
+                        <div className="space-y-2">
+                          {editSlides.map((slide, i) => {
+                            const label = i === 0 ? 'HOOK' : i === editSlides.length - 1 ? 'CTA' : `SLIDE ${i + 1}`
+                            return (
+                              <div key={i} className="flex gap-2 items-start">
+                                <span className="text-[9px] font-bold tracking-wider text-muted-foreground pt-3 w-12 shrink-0">
+                                  {label}
+                                </span>
+                                <textarea
+                                  value={slide.text}
+                                  onChange={(e) => {
+                                    const next = [...editSlides]
+                                    next[i] = { text: e.target.value }
+                                    setEditSlides(next)
+                                  }}
+                                  rows={2}
+                                  className="flex-1 rounded-lg border border-input bg-background text-foreground text-sm px-3 py-2 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-none leading-relaxed font-sans"
+                                />
+                                {editSlides.length > 2 && (
+                                  <button
+                                    onClick={() => setEditSlides(editSlides.filter((_, j) => j !== i))}
+                                    className="text-xs text-red-400 hover:text-red-300 pt-2.5 shrink-0"
+                                  >
+                                    ✕
+                                  </button>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                        {editSlides.length < 10 && (
+                          <button
+                            onClick={() => setEditSlides([...editSlides, { text: '' }])}
+                            className="mt-2 text-[10px] font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            + ADD SLIDE
+                          </button>
+                        )}
+                      </div>
+                      {regenError && (
+                        <div className="rounded-lg px-3 py-2 text-xs font-semibold bg-destructive/10 text-destructive border border-destructive/25">
+                          {regenError}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSave} disabled={regenerating}>
+                          {regenerating ? 'Regenerating...' : 'Save & Regenerate'}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={regenerating}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    /* ── Standard text editor ── */
+                    <>
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        rows={8}
+                        className="w-full rounded-lg border border-input bg-background text-foreground text-sm px-4 py-3 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-none leading-relaxed font-sans"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSave}>Save</Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+                      </div>
+                    </>
                   )}
                 </div>
-                <div className="mt-0.5 whitespace-pre-wrap">{msg.content}</div>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <SlidePreviewOrText draft={draft} slideIndex={slideIndex} setSlideIndex={setSlideIndex} />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Media Card */}
+          <Card>
+            <CardContent className="pt-4">
+              <MediaManager
+                mediaPaths={draft.media_urls || []}
+                signedUrls={signedMediaUrls}
+                onChange={handleMediaChange}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Action Bar */}
+          {!editing && (
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Primary actions — left */}
+                  <Button size="sm" variant="outline" onClick={() => setShowPreview(true)} className="text-violet-400 border-violet-400/40 hover:bg-violet-400/10">
+                    Preview
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleApprove} className="text-emerald-400 border-emerald-400/40 hover:bg-emerald-400/10">
+                    Approve
+                  </Button>
+                  {draft.status === 'draft' && (
+                    <Button size="sm" onClick={handleApproveAndPublish} disabled={publishing}>
+                      {publishing ? 'Publishing...' : 'Approve & Publish'}
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" onClick={handleEdit} className="text-blue-400 border-blue-400/40 hover:bg-blue-400/10">
+                    Edit
+                  </Button>
+
+                  {/* Spacer */}
+                  <div className="flex-1" />
+
+                  {/* Destructive actions — right */}
+                  <Button size="sm" variant="outline" onClick={handleReject} className="text-red-400 border-red-400/40 hover:bg-red-400/10">
+                    Reject
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={handleDelete} className="text-muted-foreground hover:text-red-400">
+                    Delete
+                  </Button>
+
+                  {draft.status === 'approved' && (
+                    <Button size="sm" onClick={handlePublish} disabled={publishing}>
+                      {publishing ? 'Publishing...' : 'Publish to Publer'}
+                    </Button>
+                  )}
+                </div>
+
+                {publishError && (
+                  <div className="mt-3 rounded-lg px-3 py-2 text-xs font-semibold bg-destructive/10 text-destructive border border-destructive/25">
+                    {publishError}
+                  </div>
+                )}
+
+                {showRejectModal && (
+                  <div className="mt-3 rounded-lg p-4 space-y-3 bg-destructive/5 border border-destructive/25">
+                    <div className="text-xs font-semibold text-destructive tracking-wider uppercase">
+                      Why are you rejecting this?
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      This helps the AI learn your voice. Be specific — e.g. &quot;I never debate lock vs float&quot; or &quot;too corporate sounding&quot;
+                    </p>
+                    <textarea
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="What's wrong with this post..."
+                      className="w-full rounded-lg p-3 text-sm resize-none bg-background text-foreground border border-input min-h-[60px] focus:outline-none focus:ring-1 focus:ring-destructive"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="destructive" onClick={handleRejectSubmit} disabled={!rejectReason.trim()}>
+                        Reject
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setShowRejectModal(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Agent Notes */}
+          {draft.agent_notes && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[11px] font-semibold tracking-widest text-primary uppercase">
+                  Agent Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-muted-foreground text-[11px] leading-relaxed whitespace-pre-wrap">
+                  {draft.agent_notes}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* ── Chat Panel (pinned to bottom) ── */}
+      <div className="border-t border-input bg-card/50 p-4 space-y-2.5">
+        <div className="text-[10px] font-semibold tracking-widest text-primary uppercase">
+          Chat — Editing &lsquo;{draft.title || 'Untitled'}&rsquo;
+        </div>
+
+        {messages.length > 0 && (
+          <ScrollArea className="max-h-40">
+            <div className="space-y-1.5">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    'text-xs rounded-lg px-3 py-2',
+                    msg.role === 'user'
+                      ? 'bg-primary/5 border-l-2 border-l-input'
+                      : 'bg-card border-l-2 border-l-primary',
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      'font-semibold text-[9px] tracking-wider uppercase',
+                      msg.role === 'user' ? 'text-muted-foreground' : 'text-primary',
+                    )}>
+                      {msg.role === 'user' ? 'You' : 'Claude'}
+                    </span>
+                    {msg.role === 'assistant' && (
+                      <Button
+                        size="sm"
+                        className="h-5 px-2 text-[9px] tracking-wider"
+                        onClick={() => onUpdate({ ...draft, content: msg.content })}
+                      >
+                        Apply to Post
+                      </Button>
+                    )}
+                  </div>
+                  <div className="mt-1 whitespace-pre-wrap text-foreground/80">{msg.content}</div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         )}
 
-        {/* Input */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -907,22 +854,20 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
             }}
             placeholder="Tell Claude how to edit this post..."
             disabled={chatLoading}
-            className="flex-1 bg-background border border-input text-foreground text-xs rounded-sm px-2 py-1.5 placeholder-zinc-600 focus:outline-none focus:border-yellow-500 disabled:opacity-50"
-            style={{ fontFamily: 'inherit' }}
+            className="flex-1 bg-background border border-input text-foreground text-xs rounded-lg px-3 py-2 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
           />
-          <button
+          <Button
+            size="sm"
             onClick={handleChatSend}
             disabled={chatLoading || !chatInput.trim()}
-            className="px-3 py-1.5 rounded-sm text-xs font-bold transition-opacity hover:opacity-80 disabled:opacity-40"
-            style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
           >
-            {chatLoading ? '...' : 'SEND'}
-          </button>
+            {chatLoading ? '...' : 'Send'}
+          </Button>
         </div>
 
-        <div className="text-muted-foreground" style={{ fontSize: 10 }}>
+        <p className="text-muted-foreground text-[10px]">
           Claude sees this post + your voice guide automatically
-        </div>
+        </p>
       </div>
 
       {/* Platform preview modal */}

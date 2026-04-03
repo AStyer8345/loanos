@@ -3,130 +3,16 @@
 import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
+import { renderSlideToCtx, SLIDE_SIZE, type Slide } from './carouselRenderer'
 
 const GOLD = 'var(--primary)'
-const SLIDE_SIZE = 1080
 const PREVIEW_SIZE = 340
 
-type Slide = { text: string }
 type BgMode = 'black' | 'image'
 
 type Props = {
   onDraftCreated: (draft: SocialDraft) => void
   onClose: () => void
-}
-
-/** Word-wrap text for Canvas rendering */
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const lines: string[] = []
-  // Split on explicit newlines first
-  for (const paragraph of text.split('\n')) {
-    if (!paragraph.trim()) {
-      lines.push('')
-      continue
-    }
-    const words = paragraph.split(' ')
-    let current = ''
-    for (const word of words) {
-      const test = current ? current + ' ' + word : word
-      if (ctx.measureText(test).width > maxWidth) {
-        if (current) lines.push(current)
-        current = word
-      } else {
-        current = test
-      }
-    }
-    if (current) lines.push(current)
-  }
-  return lines
-}
-
-/** Render a single carousel slide to a canvas context */
-function renderSlideToCtx(
-  ctx: CanvasRenderingContext2D,
-  size: number,
-  slide: Slide,
-  index: number,
-  total: number,
-  bgImage: HTMLImageElement | null,
-) {
-  // Background
-  if (bgImage) {
-    // Cover-fit the image
-    const imgRatio = bgImage.width / bgImage.height
-    let sx = 0, sy = 0, sw = bgImage.width, sh = bgImage.height
-    if (imgRatio > 1) {
-      sw = bgImage.height
-      sx = (bgImage.width - sw) / 2
-    } else {
-      sh = bgImage.width
-      sy = (bgImage.height - sh) / 2
-    }
-    ctx.drawImage(bgImage, sx, sy, sw, sh, 0, 0, size, size)
-    // Dark overlay for text readability
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
-    ctx.fillRect(0, 0, size, size)
-  } else {
-    ctx.fillStyle = 'var(--bg)'
-    ctx.fillRect(0, 0, size, size)
-  }
-
-  const scale = size / SLIDE_SIZE
-  const pad = 60 * scale
-  const isFirst = index === 0
-  const isLast = index === total - 1
-
-  // Slide counter — top left
-  ctx.fillStyle = '#52525b'
-  ctx.font = `${Math.round(22 * scale)}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'top'
-  ctx.fillText(`${index + 1} / ${total}`, pad, pad * 0.7)
-
-  // Main text — centered
-  const fontSize = Math.round((isFirst ? 62 : 50) * scale)
-  ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`
-  ctx.fillStyle = isFirst || isLast ? GOLD : '#e4e4e7'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-
-  const maxWidth = size - pad * 2
-  const lines = wrapText(ctx, slide.text, maxWidth)
-  const lineHeight = fontSize * 1.35
-  const totalTextHeight = lines.length * lineHeight
-  const startY = (size - totalTextHeight) / 2 + lineHeight / 2
-
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i] === '') continue
-    ctx.fillText(lines[i], size / 2, startY + i * lineHeight, maxWidth)
-  }
-
-  // Branding bar — bottom
-  const barY = size - pad * 1.4
-  ctx.strokeStyle = 'var(--card)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(pad, barY)
-  ctx.lineTo(size - pad, barY)
-  ctx.stroke()
-
-  const brandSize = Math.round(17 * scale)
-  ctx.font = `${brandSize}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`
-  ctx.fillStyle = '#52525b'
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'top'
-  ctx.fillText('Adam Styer | Mortgage Solutions LP', pad, barY + 12 * scale)
-
-  if (isLast) {
-    ctx.fillStyle = GOLD
-    ctx.textAlign = 'right'
-    ctx.font = `bold ${brandSize}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`
-    ctx.fillText('NMLS# 513013', size - pad, barY + 12 * scale)
-  }
 }
 
 /** CSS-based slide preview (matches Canvas output visually) */
@@ -252,15 +138,20 @@ export default function CarouselBuilder({ onDraftCreated, onClose }: Props) {
               role: 'user',
               content: `Create a ${aiSlideCount}-slide Instagram carousel about: ${aiPrompt}
 
-Return ONLY a JSON array of objects, each with a "text" field for the slide content. The first slide should be a strong hook, middle slides should be valuable points, and the last slide should be a call to action.
+Return ONLY a JSON object with two fields:
+1. "slides" — an array of objects, each with a "text" field for the slide content
+2. "caption" — the Instagram/social media caption to accompany the carousel (include relevant hashtags at the end of the caption)
 
 Example format:
-[
-  {"text": "Hook text here"},
-  {"text": "Point 1"},
-  {"text": "Point 2"},
-  {"text": "Call to action"}
-]
+{
+  "slides": [
+    {"text": "Hook text here"},
+    {"text": "Point 1"},
+    {"text": "Point 2"},
+    {"text": "Call to action"}
+  ],
+  "caption": "Your engaging caption here...\\n\\n#hashtag1 #hashtag2"
+}
 
 Rules:
 - Keep each slide to 1-3 short sentences max
@@ -268,7 +159,9 @@ Rules:
 - First slide = attention-grabbing hook (question or bold statement)
 - Last slide = clear CTA
 - No hashtags in slide text
-- Return ONLY the JSON array, nothing else`,
+- Caption should be engaging, 2-4 sentences, with a call to action and relevant hashtags
+- Caption should NOT repeat the slide text verbatim — it should complement it
+- Return ONLY the JSON object, nothing else`,
             },
           ],
         }),
@@ -283,21 +176,47 @@ Rules:
       const data = await res.json()
       const text = data.message?.content || ''
 
-      // Parse JSON array from Claude's response
-      const jsonMatch = text.match(/\[[\s\S]*\]/)
-      if (!jsonMatch) {
+      // Parse JSON from Claude's response — supports both {slides, caption} object and bare array
+      const objMatch = text.match(/\{[\s\S]*\}/)
+      const arrMatch = text.match(/\[[\s\S]*\]/)
+      let slidesData: Array<{ text: string }>
+      let generatedCaption = ''
+
+      if (objMatch) {
+        try {
+          const obj = JSON.parse(objMatch[0]) as { slides?: Array<{ text: string }>; caption?: string }
+          if (obj.slides && Array.isArray(obj.slides)) {
+            slidesData = obj.slides
+            generatedCaption = obj.caption || ''
+          } else if (arrMatch) {
+            slidesData = JSON.parse(arrMatch[0])
+          } else {
+            setAiError('AI response was not in expected format. Try again.')
+            return
+          }
+        } catch {
+          if (arrMatch) {
+            slidesData = JSON.parse(arrMatch[0])
+          } else {
+            setAiError('AI response was not in expected format. Try again.')
+            return
+          }
+        }
+      } else if (arrMatch) {
+        slidesData = JSON.parse(arrMatch[0])
+      } else {
         setAiError('AI response was not in expected format. Try again.')
         return
       }
 
-      const parsed = JSON.parse(jsonMatch[0]) as Array<{ text: string }>
-      if (!Array.isArray(parsed) || parsed.length < 2) {
+      if (!Array.isArray(slidesData) || slidesData.length < 2) {
         setAiError('Need at least 2 slides. Try again.')
         return
       }
 
-      // Populate slides
-      setSlides(parsed.map((s) => ({ text: s.text || '' })))
+      // Populate slides and caption
+      setSlides(slidesData.map((s) => ({ text: s.text || '' })))
+      if (generatedCaption) setCaption(generatedCaption)
       setSelectedSlide(0)
       setGenerated(true)
     } catch (err) {
@@ -412,10 +331,13 @@ Rules:
         mediaPaths.push(storagePath)
       }
 
-      // Build the structured content text (so it also works with the existing slide preview)
+      // Build structured content — ## Caption header ensures extractCaption() in publish route finds it
       const contentLines: string[] = []
       if (caption.trim()) {
+        contentLines.push('## Caption')
         contentLines.push(caption.trim())
+        contentLines.push('')
+        contentLines.push('---')
         contentLines.push('')
       }
       slides.forEach((s, i) => {

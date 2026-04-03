@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-
-const GOLD = 'var(--primary)'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 export type SocialDraft = {
   id: string
@@ -35,33 +38,33 @@ type FilterPlatform = 'ALL' | 'instagram' | 'linkedin' | 'facebook'
 type FilterSource = 'ALL' | 'agent' | 'human'
 
 const FILTERS: { key: FilterStatus; label: string }[] = [
-  { key: 'ALL', label: 'ALL' },
-  { key: 'draft', label: 'DRAFT' },
-  { key: 'approved', label: 'APPROVED' },
-  { key: 'scheduled', label: 'SCHEDULED' },
-  { key: 'posted', label: 'POSTED' },
-  { key: 'rejected', label: 'REJECTED' },
+  { key: 'ALL', label: 'All' },
+  { key: 'draft', label: 'Draft' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'scheduled', label: 'Scheduled' },
+  { key: 'posted', label: 'Posted' },
+  { key: 'rejected', label: 'Rejected' },
 ]
 
 const PLATFORM_FILTERS: { key: FilterPlatform; label: string }[] = [
-  { key: 'ALL', label: 'ALL' },
+  { key: 'ALL', label: 'All' },
   { key: 'linkedin', label: 'LI' },
   { key: 'instagram', label: 'IG' },
   { key: 'facebook', label: 'FB' },
 ]
 
 const SOURCE_FILTERS: { key: FilterSource; label: string }[] = [
-  { key: 'ALL', label: 'ALL' },
-  { key: 'agent', label: 'AGENT' },
-  { key: 'human', label: 'MANUAL' },
+  { key: 'ALL', label: 'All' },
+  { key: 'agent', label: 'Agent' },
+  { key: 'human', label: 'Manual' },
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: '#D97706',
-  approved: '#4CAF82',
-  scheduled: '#3B82F6',
-  posted: '#9B72CF',
-  rejected: '#E05252',
+const STATUS_VARIANT: Record<string, 'default' | 'success' | 'info' | 'destructive' | 'warning' | 'secondary'> = {
+  draft: 'warning',
+  approved: 'success',
+  scheduled: 'info',
+  posted: 'default',
+  rejected: 'destructive',
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -91,6 +94,35 @@ function formatDate(iso: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+function FilterPills({
+  items,
+  active,
+  onSet,
+}: {
+  items: { key: string; label: string }[]
+  active: string
+  onSet: (k: string) => void
+}) {
+  return (
+    <div className="flex gap-1 flex-wrap">
+      {items.map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => onSet(key)}
+          className={cn(
+            'px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide transition-all',
+            active === key
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-transparent text-muted-foreground border border-input hover:bg-accent hover:text-accent-foreground',
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function SocialDraftList({ drafts, selectedId, onSelect, onCompose }: Props) {
   const [filter, setFilter] = useState<FilterStatus>('ALL')
   const [platformFilter, setPlatformFilter] = useState<FilterPlatform>('ALL')
@@ -110,139 +142,94 @@ export default function SocialDraftList({ drafts, selectedId, onSelect, onCompos
     return true
   })
 
-  function renderFilterRow(
-    items: { key: string; label: string }[],
-    active: string,
-    onSet: (k: string) => void,
-  ) {
-    return (
-      <div className="flex gap-1 px-3 pb-1.5 flex-wrap">
-        {items.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => onSet(key)}
-            className="px-2 py-0.5 rounded-sm text-xs font-bold transition-colors"
-            style={{
-              background: active === key ? GOLD : 'transparent',
-              color: active === key ? 'var(--bg)' : 'var(--muted-foreground)',
-              border: active === key ? `1px solid ${GOLD}` : '1px solid var(--border)',
-              fontFamily: 'inherit',
-              fontSize: 10,
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-    )
-  }
-
   return (
-    <div
-      className="w-72 border-r border-input flex flex-col h-full"
-      style={{ fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
-    >
+    <div className="w-72 border-r border-input flex flex-col h-full bg-card/30">
       {/* New Post button */}
       <div className="p-3">
-        <button
+        <Button
           onClick={onCompose}
-          className="w-full py-2 rounded-sm text-xs font-bold tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: GOLD, color: 'var(--bg)', fontFamily: 'inherit' }}
+          className="w-full font-semibold tracking-wider text-xs"
+          size="sm"
         >
-          + NEW POST
-        </button>
+          + New Post
+        </Button>
       </div>
 
-      {/* Filter pills — status */}
-      {renderFilterRow(FILTERS, filter, (k) => setFilter(k as FilterStatus))}
+      {/* Filters */}
+      <div className="px-3 space-y-2 pb-3">
+        <FilterPills items={FILTERS} active={filter} onSet={(k) => setFilter(k as FilterStatus)} />
+        <FilterPills items={PLATFORM_FILTERS} active={platformFilter} onSet={(k) => setPlatformFilter(k as FilterPlatform)} />
+        <FilterPills items={SOURCE_FILTERS} active={sourceFilter} onSet={(k) => setSourceFilter(k as FilterSource)} />
+      </div>
 
-      {/* Filter pills — platform */}
-      {renderFilterRow(PLATFORM_FILTERS, platformFilter, (k) => setPlatformFilter(k as FilterPlatform))}
-
-      {/* Filter pills — source */}
-      {renderFilterRow(SOURCE_FILTERS, sourceFilter, (k) => setSourceFilter(k as FilterSource))}
+      <Separator />
 
       {/* Count */}
-      <div className="px-3 pb-2">
-        <span className="text-muted-foreground" style={{ fontSize: 10 }}>
+      <div className="px-3 py-2">
+        <span className="text-muted-foreground text-[10px] font-medium">
           {filtered.length} of {drafts.length} posts
         </span>
       </div>
 
       {/* Draft list */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         {filtered.length === 0 && (
-          <div className="px-3 py-6 text-center">
-            <span className="text-muted-foreground" style={{ fontSize: 11 }}>No drafts found</span>
+          <div className="px-3 py-8 text-center">
+            <span className="text-muted-foreground text-xs">No drafts found</span>
           </div>
         )}
         {filtered.map((draft) => {
           const isSelected = draft.id === selectedId
-          const statusColor = STATUS_COLORS[draft.status] || 'var(--muted-foreground)'
           return (
             <button
               key={draft.id}
               onClick={() => onSelect(draft.id)}
-              className="w-full text-left px-3 py-2.5 border-b border-input/50 transition-colors hover:bg-card/50"
-              style={{
-                borderLeft: isSelected ? `2px solid ${GOLD}` : '2px solid transparent',
-                background: isSelected ? `${GOLD}08` : 'transparent',
-                fontFamily: 'inherit',
-              }}
+              className={cn(
+                'w-full text-left px-3 py-3 border-b border-input/30 transition-all group',
+                isSelected
+                  ? 'bg-primary/5 border-l-2 border-l-primary'
+                  : 'border-l-2 border-l-transparent hover:bg-card/60',
+              )}
             >
               {/* Title */}
               <div
-                className="truncate font-bold"
-                style={{
-                  fontSize: 11,
-                  color: isSelected ? 'var(--foreground)' : 'var(--muted-foreground)',
-                }}
+                className={cn(
+                  'truncate text-[11px] font-semibold leading-tight',
+                  isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground',
+                )}
               >
                 {draft.title || 'Untitled'}
               </div>
 
-              {/* Status badge */}
-              <div className="mt-1 flex items-center gap-2">
-                <span
-                  className="inline-block px-1.5 py-0.5 rounded-sm font-bold uppercase"
-                  style={{
-                    fontSize: 9,
-                    background: `${statusColor}20`,
-                    color: statusColor,
-                    border: `1px solid ${statusColor}40`,
-                  }}
+              {/* Status + platform badges */}
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <Badge
+                  variant={STATUS_VARIANT[draft.status] || 'outline'}
+                  className="text-[9px] px-1.5 py-0 h-4 uppercase"
                 >
                   {draft.status}
-                </span>
+                </Badge>
                 {draft.platform && PLATFORM_LABELS[draft.platform] && (
-                  <span
-                    className="inline-block px-1.5 py-0.5 rounded-sm font-bold uppercase"
-                    style={{
-                      fontSize: 9,
-                      background: 'var(--surface)',
-                      color: 'var(--muted-foreground)',
-                      border: '1px solid var(--border)',
-                    }}
-                  >
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">
                     {PLATFORM_LABELS[draft.platform]}
-                  </span>
+                  </Badge>
                 )}
               </div>
 
               {/* Subtitle */}
-              <div className="mt-1 text-muted-foreground truncate" style={{ fontSize: 10 }}>
+              <div className="mt-1 text-muted-foreground truncate text-[10px]">
                 {[
                   draft.platform,
                   draft.pillar,
                   formatDate(draft.scheduled_for || draft.created_at),
                 ]
                   .filter(Boolean)
-                  .join(' \u00B7 ')}
+                  .join(' · ')}
               </div>
             </button>
           )
         })}
-      </div>
+      </ScrollArea>
     </div>
   )
 }

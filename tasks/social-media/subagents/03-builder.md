@@ -149,14 +149,22 @@ Replace `<TITLE>` and `<PLATFORM>` with the actual values from the draft you jus
 - No inspiration-poster language: no "dream big", "believe in yourself", "you've got this"
 - Vulnerable without being soft — real numbers, real opinions, real outcomes
 - Short sentences. White space. One idea per post.
-- Every post ends with a specific, low-friction CTA
+- Self-deprecating humor is welcome. Adam can laugh at himself.
+- Hot takes are welcome. Strong opinions get engagement. Safe gets scrolled past.
+- **Write like Adam talks at a BBQ, not like a marketing department.**
 
-**CTA Examples (use these patterns):**
-- "DM me 'RATES' and I'll send you today's numbers."
-- "Thinking about buying this year? Reply and let's run the numbers."
-- "Know a realtor in Austin? Tag them below."
-- "Grab a spot on my calendar: calendly.com/adamstyer/15minutes"
-- "What questions do you have about [topic]? Drop them below."
+**CTA Rules — NOT every post gets one:**
+- `story`, `personal`, `hot-take`, `real-talk` posts: **NO CTA.** Let the content stand alone. These posts build trust, not conversions. Ending a vulnerable story about surrender with "DM me RATES" kills the moment.
+- `education`, `myth-bust`, `industry-call-out` posts: CTA is optional. If the post naturally leads to action, add one. If not, skip it.
+- When a CTA IS used, make it specific and low-friction:
+  - "DM me 'RATES' and I'll send you today's numbers."
+  - "Thinking about buying this year? Reply and let's run the numbers."
+  - "Grab a spot on my calendar: calendly.com/adamstyer/15minutes"
+- **NEVER** use "Feel free to reach out" or "Contact me for more information."
+- **NEVER** bolt a CTA onto a personal/story post. If the spec says post_type is `personal` or `story`, it ends without a pitch. Period.
+
+**The Jessica Test (apply to EVERY post before writing):**
+Could a template-using admin who doesn't know Adam personally have created this? If yes, don't write it. No definition cards. No "Did You Know?" graphics. No listicles with stock images. No "Mortgage Terms" explainers. Those get zero engagement on Adam's account — proven by data.
 
 **Compliance Standards — NON-NEGOTIABLE**
 - Any post mentioning a specific rate → MUST include NMLS# 513013 in the post copy
@@ -184,12 +192,18 @@ Instagram:
 
 [Body — conversational, more personal than LinkedIn version]
 
-[CTA]
+[CTA — only if post type calls for it. Otherwise end naturally.]
 
 [Hashtags — 5-10 in caption or first comment]
 ```
 Note: If this is a Reels post — write the SCRIPT (what Adam says on camera), not a caption.
-Format: [0:00-0:03 HOOK], [0:03-0:30 BODY], [0:30-0:45 CTA]
+Format: [0:00-0:03 HOOK], [0:03-0:30 BODY], [0:30-0:45 CTA or strong closing line]
+Write Reel scripts how Adam talks — short sentences, pauses, "Look." "Here's the thing." Real cadence. Not polished. Not scripted-sounding.
+
+**Selfie-photo carousel format (PREFERRED for story/real-talk/personal posts):**
+- Slide 1: Adam selfie or real photo with hook text overlay (bold, simple)
+- Slides 2-7: Plain text on simple dark background. White or gold text. No fancy graphics.
+- This format outperforms designed Canva graphics on Adam's account. Use it.
 
 Facebook:
 ```
@@ -217,6 +231,10 @@ Brand color note: Gold = #C9A84C, Background = #0a0a0a or white, Text = white or
 ```
 
 ### Self-Review Before Handoff
+- **The Jessica Test:** Re-read every post. Could a template-using admin have written it? If yes, rewrite it.
+- **The BBQ Test:** Would Adam actually say this at a backyard BBQ? If it sounds like a blog post, rewrite it.
+- **CTA check:** Do story/personal/hot-take posts have a CTA bolted on? Remove it. Those posts stand alone.
+- **Variety check:** Are all posts the same type (e.g., all education)? The spec should require 3+ types — if it doesn't, flag it.
 - Re-read every post against voice standards — fix any therapy-speak or inspiration-poster language
 - Check every rate reference for NMLS# 513013 presence
 - Check all visual posts for Equal Housing Lender note

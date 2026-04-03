@@ -36,10 +36,13 @@ export function cadenceColor(
 
 const CHANNEL_TO_TYPE: Record<string, string> = {
   'Rate Update': 'Rate Update',
-  'Email':       'Newsletter',
+  'Email':       'Email',
+  'Newsletter':  'Newsletter',
   'Phone Call':  'Call',
   'LinkedIn':    'Social',
   'Facebook':    'Social',
+  'Instagram':   'Social',
+  'Google':      'Social',
   'Task':        'Task',
   'Other':       'Task',
 }

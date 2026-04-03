@@ -24,6 +24,7 @@ export default function HistoryTab({ mccState, onSave }: Props) {
   })
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // ── Week boundaries ────────────────────────────────────────────────────────
   const { start, end } = currentWeekBoundaries(weekOffset)
@@ -31,8 +32,6 @@ export default function HistoryTab({ mccState, onSave }: Props) {
   const isCurrentWeek = weekOffset === 0
 
   // ── Filter log entries for selected week ───────────────────────────────────
-  // entry.date is stored as UTC-noon anchor (T12:00:00) which keeps it
-  // within the correct local day for UTC-12 through UTC+12 timezones.
   const weekEntries = (mccState.log ?? []).filter(entry => {
     const d = new Date(entry.date)
     return d >= start && d <= end
@@ -52,7 +51,6 @@ export default function HistoryTab({ mccState, onSave }: Props) {
         notes:    logForm.notes,
       }
 
-      // Update social-post tracker if LinkedIn or Facebook
       const trackerUpdates: Record<string, string> = {}
       if (logForm.channel === 'LinkedIn' || logForm.channel === 'Facebook') {
         trackerUpdates['social-post'] = new Date(logForm.date + 'T12:00:00').toISOString()
@@ -70,6 +68,22 @@ export default function HistoryTab({ mccState, onSave }: Props) {
       setSaveError('Save failed. Please try again.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  // ── Delete log entry ───────────────────────────────────────────────────────
+  const handleDelete = async (entryId: string) => {
+    setDeletingId(entryId)
+    try {
+      const nextState: MCCState = {
+        ...mccState,
+        log: (mccState.log ?? []).filter(e => e.id !== entryId),
+      }
+      await onSave(nextState)
+    } catch {
+      setSaveError('Delete failed. Please try again.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -159,6 +173,8 @@ export default function HistoryTab({ mccState, onSave }: Props) {
         </div>
       )}
 
+      {saveError && !showLogForm && <p className="text-red-400 text-xs">{saveError}</p>}
+
       {/* Log table */}
       {weekEntries.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
@@ -172,12 +188,13 @@ export default function HistoryTab({ mccState, onSave }: Props) {
                 <th className="text-left pb-2 pr-4 font-bold">DATE</th>
                 <th className="text-left pb-2 pr-4 font-bold">ACTIVITY</th>
                 <th className="text-left pb-2 pr-4 font-bold">TYPE</th>
-                <th className="text-left pb-2 font-bold">CHANNEL</th>
+                <th className="text-left pb-2 pr-4 font-bold">CHANNEL</th>
+                <th className="text-right pb-2 font-bold w-8"></th>
               </tr>
             </thead>
             <tbody>
               {weekEntries.map(entry => (
-                <tr key={entry.id} className="border-b border-zinc-900 hover:bg-card transition-colors">
+                <tr key={entry.id} className="border-b border-zinc-900 hover:bg-card transition-colors group">
                   <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">
                     {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </td>
@@ -190,7 +207,18 @@ export default function HistoryTab({ mccState, onSave }: Props) {
                   <td className="py-2 pr-4">
                     <TypeBadge type={channelToType(entry.channel)} />
                   </td>
-                  <td className="py-2 text-muted-foreground">{entry.channel}</td>
+                  <td className="py-2 pr-4 text-muted-foreground">{entry.channel}</td>
+                  <td className="py-2 text-right">
+                    <button
+                      onClick={() => handleDelete(entry.id)}
+                      disabled={deletingId === entry.id}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400 disabled:opacity-30"
+                      style={{ fontSize: 10 }}
+                      title="Delete entry"
+                    >
+                      {deletingId === entry.id ? '...' : '✕'}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

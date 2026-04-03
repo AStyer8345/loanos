@@ -2,8 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 
-const GOLD = 'var(--primary)'
 const ACCEPTED_TYPES = 'image/*,video/*'
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
@@ -82,19 +82,19 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
 
   return (
     <div>
-      <div
-        className="font-bold mb-2 flex items-center justify-between"
-        style={{ color: GOLD, fontSize: 10, letterSpacing: '0.2em' }}
-      >
-        <span>MEDIA</span>
-        <span className="text-muted-foreground" style={{ fontSize: 10, letterSpacing: 'normal' }}>
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-semibold tracking-widest text-primary uppercase">
+          Media
+        </span>
+        <span className="text-muted-foreground text-[10px] tabular-nums">
           {mediaPaths.length} / {MAX_FILES}
         </span>
       </div>
 
       {/* Thumbnails with reorder + remove */}
       {signedUrls.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2.5 mb-3">
           {signedUrls.map((url, i) => (
             <div
               key={mediaPaths[i] || i}
@@ -114,17 +114,18 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
                 setDragIndex(null)
                 setDropTarget(null)
               }}
-              className="relative group rounded-md border overflow-hidden cursor-grab active:cursor-grabbing transition-all"
-              style={{
-                width: 80,
-                height: 80,
-                borderColor: dropTarget === i && dragIndex !== null ? GOLD : 'var(--border)',
-                opacity: dragIndex === i ? 0.4 : 1,
-              }}
+              className={cn(
+                'relative group rounded-lg border overflow-hidden cursor-grab active:cursor-grabbing transition-all',
+                dropTarget === i && dragIndex !== null ? 'border-primary ring-1 ring-primary/30' : 'border-input',
+                dragIndex === i && 'opacity-40',
+              )}
+              style={{ width: 80, height: 80 }}
             >
               {isVideo(url) ? (
                 <div className="w-full h-full bg-card flex items-center justify-center">
-                  <span className="text-muted-foreground text-xs font-bold">VIDEO</span>
+                  <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
                 </div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -136,27 +137,20 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
               )}
 
               {/* Order badge */}
-              <div
-                className="absolute top-0.5 left-0.5 w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold"
-                style={{ background: 'var(--bg)CC', color: GOLD, fontSize: 9 }}
-              >
+              <div className="absolute top-1 left-1 w-5 h-5 flex items-center justify-center rounded-full text-[9px] font-bold bg-background/80 text-primary backdrop-blur-sm">
                 {i + 1}
               </div>
 
               {/* Remove button */}
               <button
                 onClick={(e) => { e.stopPropagation(); removeFile(i) }}
-                className="absolute top-0.5 right-0.5 w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: '#E05252', color: '#fff', fontSize: 10 }}
+                className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity bg-destructive text-white"
               >
                 &times;
               </button>
 
               {/* Drag hint */}
-              <div
-                className="absolute bottom-0 inset-x-0 bg-black/60 text-center py-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ fontSize: 8, color: 'var(--muted-foreground)' }}
-              >
+              <div className="absolute bottom-0 inset-x-0 bg-black/60 text-center py-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-[8px] text-muted-foreground backdrop-blur-sm">
                 drag to reorder
               </div>
             </div>
@@ -164,16 +158,18 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
         </div>
       )}
 
-      {/* Upload zone */}
+      {/* Upload drop zone */}
       <div
-        className={`rounded-md border border-dashed px-4 py-4 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-yellow-500 bg-yellow-500/5' : 'border-input'
-        }`}
-        style={{ background: dragOver ? undefined : 'var(--surface)' }}
+        className={cn(
+          'rounded-lg border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-all',
+          dragOver
+            ? 'border-primary bg-primary/5 shadow-[inset_0_0_20px_rgba(201,168,76,0.05)]'
+            : 'border-input bg-card/50 hover:border-muted-foreground/40 hover:bg-card',
+        )}
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()
-          if (dragIndex === null) setDragOver(true) // only for external files
+          if (dragIndex === null) setDragOver(true)
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
@@ -196,18 +192,27 @@ export default function MediaManager({ mediaPaths, signedUrls, onChange }: Props
           }}
         />
         {uploading ? (
-          <span className="text-muted-foreground" style={{ fontSize: 11 }}>
-            Uploading...
-          </span>
+          <div className="flex flex-col items-center gap-1.5">
+            <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <span className="text-muted-foreground text-xs">Uploading...</span>
+          </div>
         ) : (
-          <span className="text-muted-foreground" style={{ fontSize: 11 }}>
-            + Add photos or video (drag &amp; drop or click)
-          </span>
+          <div className="flex flex-col items-center gap-1.5">
+            <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+            </svg>
+            <span className="text-muted-foreground text-xs">
+              Drop photos or video here, or <span className="text-primary font-medium">browse</span>
+            </span>
+          </div>
         )}
       </div>
 
       {error && (
-        <p className="text-red-400 mt-1" style={{ fontSize: 10 }}>
+        <p className="text-destructive text-[10px] mt-2 font-medium">
           {error}
         </p>
       )}

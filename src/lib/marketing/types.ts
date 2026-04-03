@@ -78,9 +78,12 @@ export const DEFAULT_RATE_ROWS: RateRow[] = [
 // Channel values for LogEntry and manual log entry form
 export const LOG_CHANNELS = [
   'Email',
+  'Newsletter',
   'Phone Call',
   'LinkedIn',
   'Facebook',
+  'Instagram',
+  'Google',
   'Rate Update',
   'Task',
   'Other',

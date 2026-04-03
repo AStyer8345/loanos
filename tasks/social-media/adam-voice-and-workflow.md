@@ -107,6 +107,83 @@
 - **Warren Buffett:** "When people are fearful, be greedy. When people are greedy, be fearful." — Adam uses this in the context of buying when others are sitting on the sidelines
 - "I treat every client like a family member."
 - "We're a correspondent lender — that's different from a broker, and it matters."
+- "I don't know if I want to do this anymore. I know what I need to do, but I don't want to do it."
+- "My job is not to be impressive. My job is to solve problems."
+- "The results aren't mine to control. The effort is."
+- "I built systems, automations, even a full CRM. People said it looked like I'd been doing this for years. But behind the scenes I started running everything through AI... and something shifted."
+- "I stopped trusting my own instincts."
+- "When it comes to your home, you deserve a real human making real decisions."
+- "I can still feel the drive home after a $10k day."
+- "I remember the month I closed 24 deals — over $10 million. That's what my brain replays. The highlight reel. But it edits out the other side."
+- "A spouse and family who believe in you is the biggest asset people don't talk enough about."
+- "My wife says go for it!"
+- "Don't get me wrong, real life is way harder than what these pictures show."
+- "I convinced myself that what I wanted was a life without problems. And let me tell you — when your mind starts chasing that fantasy, life becomes one long, exhausting disappointment."
+- "Not frantic, ego-driven, chase-the-money kind of solving. I mean the kind where you show up with integrity. With heart."
+- "You do it because it's who you are. And then you let go."
+
+---
+
+## TONE DIAL — CONTENT MIX TARGETS
+
+The agent's default is 80% educator / 20% promo. That's the problem. Here's the target:
+
+| Category | Target % | What it looks like |
+|----------|----------|-------------------|
+| **Real talk** | 30% | Opinions, hot takes, calling out industry BS, admitting mistakes, self-deprecating humor |
+| **Personal / Story** | 30% | Family, faith, investing war stories, life lessons, vulnerability. NO mortgage pitch. |
+| **Education** | 30% | Break down something complex — but with Adam's voice, not a textbook |
+| **Promo** | 10% | CTA-heavy, rate updates, "DM me" — the minority, not the majority |
+
+**What performs (proven by engagement data):**
+- Stolen car story (37+ likes): specific details, vulnerability, life lesson, zero mortgage content
+- Family at Barton Springs (41+ likes): short, punchy, about his wife believing in him
+- AI carousel (strong engagement): self-deprecating honesty about almost letting AI replace his thinking
+- Substack posts: deep vulnerability, faith, real numbers, raw emotion
+
+**What does NOT perform (proven by engagement data):**
+- "Mortgage Terms" definition graphics — zero engagement
+- "Market Update" branded templates — zero engagement
+- "Did You Know?" educational cards — zero engagement
+- "10 Things To Do Before You Move" listicles — zero engagement
+- Any templated graphic that could come from any LO in America
+
+**The Jessica Test:** If it looks like something Jessica would have posted during her template era, kill it. Adam's audience follows HIM, not mortgage facts.
+
+---
+
+## HIGH-PERFORMING POST EXAMPLES — CALIBRATION DATA
+
+These are real posts Adam wrote or approved. Use them to calibrate voice, not to copy.
+
+### Example A — Stolen Car (Instagram, 37+ likes, PERSONAL/STORY)
+"My car got stolen last week because I left my keys in the cupholder. Three guys at 2:47am saw an easy win and took it. My whole Saturday — police, insurance, rental car. Gone. Nine days later I found it five miles away using Find My AirPods. Everything untouched. Just a Whataburger bag on the back seat. But here's the thing that's been sitting with me. When the car got taken, I handled it clean. One step at a time. No spiral. Because it was completely out of my hands — so I let it go and just moved. The deals that fell apart last week? The unexpected bills? Those I was carrying. Hard. Taking personally. Same kind of uncontrollable situation, totally different response."
+
+**Why it works:** Specific details (2:47am, Whataburger bag, Find My AirPods). Real emotion. Ties a life event to a deeper truth. Zero mortgage content. Ends with a question that invites reflection, not a DM CTA.
+
+### Example B — AI Carousel (Instagram, strong engagement, REAL TALK)
+"I almost let AI ruin my mortgage business. I built systems, automations, even a full CRM. People said it looked like I'd been doing this for years. But behind the scenes I started running everything through AI — messages, decisions, what I should say to clients. Something shifted. Deals slowed. Clients went quiet. I realized I stopped trusting my own instincts. I didn't hurt my business by using AI. I hurt it by letting it replace my thinking. When it comes to your home, you deserve a real human making real decisions."
+
+**Why it works:** Self-deprecating. Honest about a mistake. Meta (admitting the very tool he uses almost broke things). Lands with a human touch, not a sales pitch.
+
+### Example C — Family (Instagram, 41+ likes, PERSONAL)
+"Nobody mentions the person in your life who says go for it when you're scared. My wife says go for it! And don't get me wrong, real life is way harder than what these pictures show. But I know the biggest asset I have is a supportive spouse and family. Don't take it for granted."
+
+**Why it works:** 5 sentences. Raw. About his wife, not mortgages. Ends with a gut-punch one-liner. No CTA.
+
+### Example D — The Highlight Reel (Substack, PERSONAL/FAITH)
+"I can tell you my best month. My best year. My best weeks. I can still feel the drive home after a $10k day. I remember the month I closed 24 deals — over $10 million. That's what my brain replays. The highlight reel. But it edits out the other side — the stress, the long hours, the misery."
+
+**Why it works:** Real numbers. Specific sensory details ("the drive home"). Admits the gap between highlight reel and reality. This is the kind of raw honesty that builds trust.
+
+### Example E — What NOT To Post (Jessica-era templates, 0-1 likes)
+- "Mortgage Terms: Pre-Payment Penalty" definition card
+- "10 Things To Do Before You Move" listicle
+- "Market Update" branded graphic with stock house image
+- "The Benefits of Buying Mortgage Points" educational carousel
+- "Did You Know?" fact cards
+
+**Why they fail:** Any LO could post them. No personality. No story. No opinion. No edge. Template graphics with stock imagery. Adam's audience scrolls right past these.
 
 ---
 
@@ -158,6 +235,11 @@ These are the kinds of stories that make content authentic. Agent should USE the
 - A closing day story — what actually happened, what Adam's role was
 - A volatile rate environment decision — locked immediately vs. the risk of floating
 - A borrower who needed credit coaching before they could qualify — and what happened after
+- Car stolen because he left keys in the cupholder — found it 9 days later via Find My AirPods, Whataburger bag on the back seat, nothing else touched. Life lesson about what we carry vs. what we let go.
+- Almost let AI replace his own thinking — built systems, automations, CRM, but started running client messages and decisions through AI. Deals slowed, clients went quiet. Realized the tool wasn't the problem — letting it replace instincts was.
+- The highlight reel trap — remembers closing 24 deals in a month ($10M+), the $10k days, the drive home. But compares everything to peak moments and judges today for not measuring up. Applies to fitness, faith, marriage, work.
+- Coaching call that broke something open — was supposed to be 45 min about pipeline metrics. Instead told the coach "I don't know if I want to do this anymore." She shared her story of losing everything in 2008 — $50M in defaulted loans. They rebuilt through integrity and surrender, not hustle.
+- Wife as biggest asset — "My wife says go for it!" Short, raw, about having someone who believes in you when you're scared.
 - (Fill in more as they come up)
 
 ---
@@ -211,12 +293,27 @@ These are the kinds of stories that make content authentic. Agent should USE the
 
 ---
 
+## VIDEO AND CAROUSEL STRATEGY
+
+**Videos perform best.** Adam on camera, talking directly, phone-shot. Not polished. Not scripted-sounding. Real.
+
+- Reels/short video: Adam talking to camera. Script should sound like he's telling a friend something over coffee.
+- The AI carousel that performed well was: selfie photo → text slides with the story. Simple. No fancy graphics. Just Adam's face and his words.
+- **Prioritize Reel scripts and selfie-photo carousels over designed graphics.** Designed graphics = Jessica era. Adam's face + real words = engagement.
+- When writing Reel scripts: write how Adam talks, not how a script reads. Short sentences. Pauses. "Look." "Here's the thing." Real cadence.
+- Carousel format that works: Slide 1 = Adam selfie or real photo with hook text overlay. Slides 2-7 = plain text on simple background. Same energy as the AI carousel.
+
 ## NOTES FOR THE CONTENT AGENT
 
-- When writing scripts or posts, ask: "Would Adam actually say this? Would a real Austin mortgage professional with 1,000+ loans say this?"
+- When writing scripts or posts, ask: "Would Adam actually say this out loud at a backyard BBQ in Austin?" If no, rewrite it.
+- **The Jessica Test:** If this post could have been made by a template-using admin who doesn't know Adam personally — kill it. No definition cards, no "Did You Know?" graphics, no listicles with stock images.
 - If it sounds like a template, rewrite it
 - Real stories beat generic examples every time
 - Adam's audience can smell inauthenticity — keep it grounded
 - Not every post needs to be about mortgages — human content (family, faith, real estate investing stories, life lessons) is part of the brand
 - Adam is a correspondent lender — this distinction matters and should be used as a differentiator vs. brokers and big banks
+- **Not every post needs a CTA.** Some posts should just end. The stolen car post, the family post, the highlight reel post — none of them ask for anything. They just land. Posts without a sales pitch often perform best because they build trust.
+- **Humor is welcome.** Self-deprecating humor especially. Adam can laugh at himself, at the mortgage industry, at the absurdity of the home-buying process. Don't be afraid to be funny.
+- **Hot takes are welcome.** "Stop comparing your rate to 2021." "Your agent doesn't understand your mortgage timeline — and that's my fault, not theirs." Opinions get engagement. Safe gets scrolled past.
 - When in doubt, simpler is better
+- **Write fewer, better posts.** 3 great posts per week beat 5 forgettable ones.

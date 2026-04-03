@@ -68,22 +68,45 @@ For each planned post, specify:
 ```
 Post #: [number]
 Classification: [EVERGREEN / TIMELY]
+Post Type: [story / hot-take / personal / education / myth-bust / industry-call-out / real-talk]
 Platform: [LinkedIn / Instagram / Facebook]
 Format: [Text-only / Carousel / Static Image / Reels / Story]
 Content Pillar: [Rate Education / Market Update / Client Win / Personal Brand / Realtor Resource]
 Topic: [specific — e.g. "30-year rate movement this week in Austin"]
 Angle / Hook: [first line or opening frame of the post]
-CTA: [specific — e.g. "DM me 'RATES' for a free rate comparison"]
+CTA: [specific CTA -OR- "none — post stands alone"]
 Compliance flag: [NMLS# required? Equal Housing? APR disclosure?]
-Canva image needed: [YES/NO — if YES, include brief]
+Canva image needed: [YES/NO — if YES, include brief. Prefer selfie-photo carousel over designed graphic.]
 Scheduled date/time: [YYYY-MM-DD HH:MM CST]
 Data sources needed (TIMELY only): [e.g. "Freddie Mac PMMS", "BLS CPI release", "Unlock MLS"]
 ```
+
+#### Post Type Definitions (MANDATORY — use these)
+
+| Type | Description | CTA? | Example |
+|------|-------------|------|---------|
+| `story` | Real deal or life story, specific details, names removed if needed | Usually no | Stolen car post, coaching call post |
+| `hot-take` | Contrarian opinion, <80 words, strong stance | No | "Stop comparing your rate to 2021. That market is gone." |
+| `personal` | Family, faith, investing lessons, life. Zero mortgage content. | No | Family at Barton Springs, wife "go for it" post |
+| `real-talk` | Honest industry observation, self-deprecating, admitting mistakes | Optional | AI carousel, "I don't know if I want to do this anymore" |
+| `education` | Break down a concept — but in Adam's voice, not a textbook | Yes | Buydown explainer, VA loan myths |
+| `myth-bust` | Name a common misconception, destroy it with specifics | Optional | "You need 20% down" myth |
+| `industry-call-out` | Something realtors/lenders/buyers get wrong | Optional | "Your agent told you to waive inspection?" |
 
 #### Weekly Calendar Balance
 - Aim for 3-4 EVERGREEN posts and 1-2 TIMELY posts per week
 - TIMELY posts should be scheduled for Tuesday-Thursday (gives Monday AM for data refresh)
 - Never schedule a TIMELY post for Monday — not enough time for weekend data to land
+
+#### Weekly Post Type Balance (MANDATORY)
+- **At least 3 different post types per week.** No week should be all-education.
+- **At least 1 personal or story post per week** — these consistently outperform everything else.
+- **At least 2 posts per week with NO CTA.** Let the content be the thing. Posts without a sales pitch build trust and often outperform CTA posts.
+- **Maximum 1 "education" post per week** that uses a designed graphic. The rest should be text-only, selfie-photo carousels, or Reel scripts. Designed graphics = Jessica era = zero engagement.
+- **At least 1 Reel script per week.** Adam on camera performs best. Phone-shot, not polished.
+
+#### The Jessica Test
+Before finalizing the calendar, review every post and ask: "Could a template-using admin who doesn't know Adam personally have created this?" If yes, replace it with something that requires Adam's actual voice, story, or opinion.
 
 ### 3. Voice Framework (design in Week 2, reference after)
 

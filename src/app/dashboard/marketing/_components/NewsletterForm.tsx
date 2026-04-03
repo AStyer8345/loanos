@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Card, SectionLabel, FieldLabel, Input, Textarea, Btn, Banner, Spinner, CadenceBadge } from './shared'
+import PreviewPanel from './PreviewPanel'
 import { type MCCState, type LogEntry } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
 
@@ -13,11 +14,11 @@ type NLPreview = {
   pageUrl:           string
   borrowerSubject:   string
   borrowerPreheader: string
-  borrowerEmailHtml: string
+  borrowerEmailHtml: string | null
   realtorSubject:    string
   realtorPreheader:  string
-  realtorEmailHtml:  string
-  webContent:        string
+  realtorEmailHtml:  string | null
+  webContent:        string | null
   linkedinPost:      string
   facebookPost:      string
 }
@@ -47,12 +48,16 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
   const [showSchedule, setShowSchedule] = useState(false)
   const [scheduleTime, setScheduleTime] = useState('')
   const [showConfirm, setShowConfirm]   = useState(false)
+  const [publishedMsg, setPublishedMsg] = useState<string | null>(null)
 
   const realtorTracker  = TRACKERS.find(t => t.key === 'realtor-nl')!
   const borrowerTracker = TRACKERS.find(t => t.key === 'borrower-nl')!
 
   const toggleAudience = (a: string) =>
     setAudiences(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])
+
+  // ── Validation ─────────────────────────────────────────────────────────────
+  const hasContent = mode === 'structured' ? topic.trim() !== '' : customPrompt.trim() !== ''
 
   const buildPayload = (nlMode: string, extraScheduleTime?: string) => {
     const base = {
@@ -67,9 +72,15 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
   }
 
   const handlePreview = async () => {
+    if (!hasContent) {
+      setErrorMsg(mode === 'structured' ? 'Enter a topic before previewing.' : 'Enter a prompt before previewing.')
+      setStatus('error')
+      return
+    }
     setStatus('loading')
     setErrorMsg('')
     setPreview(null)
+    setPublishedMsg(null)
     try {
       const res = await fetch(NETLIFY_URL, {
         method: 'POST',
@@ -84,14 +95,20 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
       setPreview(data.preview)
       setStatus('done')
     } catch (e: unknown) {
-      setErrorMsg(`Netlify error: ${e instanceof Error ? e.message : String(e)}`)
+      setErrorMsg(`Preview error: ${e instanceof Error ? e.message : String(e)}`)
       setStatus('error')
     }
   }
 
   const handlePublish = async (scheduledTime?: string) => {
+    if (!hasContent) {
+      setErrorMsg(mode === 'structured' ? 'Enter a topic before publishing.' : 'Enter a prompt before publishing.')
+      setStatus('error')
+      return
+    }
     setStatus('loading')
     setErrorMsg('')
+    setPublishedMsg(null)
     try {
       const res = await fetch(NETLIFY_URL, {
         method: 'POST',
@@ -132,11 +149,21 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
       }
       await onSave(nextState)
 
-      setPreview(prev => prev ? { ...prev, pageUrl: data.pageUrl ?? prev.pageUrl } : prev)
+      const pubUrl = data.pageUrl ?? preview?.pageUrl ?? ''
+      const msg = scheduledTime
+        ? `Published — email scheduled for ${new Date(scheduledTime).toLocaleString()}`
+        : `Published at ${pubUrl}`
+      setPublishedMsg(msg)
+
+      if (data.preview) {
+        setPreview(data.preview)
+      } else if (preview) {
+        setPreview({ ...preview, pageUrl: pubUrl })
+      }
       setStatus('done')
       setShowSchedule(false)
     } catch (e: unknown) {
-      setErrorMsg(`Netlify error: ${e instanceof Error ? e.message : String(e)}`)
+      setErrorMsg(`Publish error: ${e instanceof Error ? e.message : String(e)}`)
       setStatus('error')
     }
   }
@@ -154,7 +181,8 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
 
   const isLoading = status === 'loading'
 
-  return (
+  // ── Form content ──────────────────────────────────────────────────────────
+  const formContent = (
     <div className="space-y-4">
       {/* Cadence badges */}
       <div className="flex gap-2 flex-wrap">
@@ -254,10 +282,10 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
 
       {/* Actions */}
       <div className="flex gap-2 flex-wrap">
-        <Btn onClick={handlePreview} disabled={isLoading}>
+        <Btn onClick={handlePreview} disabled={isLoading || !hasContent}>
           {isLoading ? <><Spinner /> Loading...</> : '👁 Preview'}
         </Btn>
-        <Btn variant="secondary" onClick={() => setShowConfirm(true)} disabled={isLoading}>
+        <Btn variant="secondary" onClick={() => setShowConfirm(true)} disabled={isLoading || !hasContent}>
           ▶ Publish + Send Emails
         </Btn>
         <Btn variant="ghost" onClick={() => setShowSchedule(!showSchedule)} disabled={!preview || isLoading}>
@@ -314,31 +342,35 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
 
       {/* Error */}
       {status === 'error' && <Banner type="error">{errorMsg}</Banner>}
-
-      {/* Preview panel */}
-      {preview && (
-        <Card>
-          <SectionLabel>PREVIEW</SectionLabel>
-          <div className="space-y-2 text-xs">
-            <div>
-              <span className="text-muted-foreground">URL: </span>
-              <a href={preview.pageUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD }}>{preview.pageUrl}</a>
-            </div>
-            {preview.borrowerSubject && (
-              <div><span className="text-muted-foreground">Borrower subject: </span><span className="text-foreground">{preview.borrowerSubject}</span></div>
-            )}
-            {preview.realtorSubject && (
-              <div><span className="text-muted-foreground">Realtor subject: </span><span className="text-foreground">{preview.realtorSubject}</span></div>
-            )}
-            {preview.linkedinPost && (
-              <details className="mt-2">
-                <summary className="text-muted-foreground cursor-pointer">LinkedIn post draft</summary>
-                <p className="mt-1 text-foreground/80 leading-relaxed whitespace-pre-wrap">{preview.linkedinPost}</p>
-              </details>
-            )}
-          </div>
-        </Card>
-      )}
     </div>
   )
+
+  // ── Layout: side-by-side when preview exists ──────────────────────────────
+  if (preview) {
+    const socialDrafts: { platform: string; content: string }[] = []
+    if (preview.linkedinPost) socialDrafts.push({ platform: 'LinkedIn', content: preview.linkedinPost })
+    if (preview.facebookPost) socialDrafts.push({ platform: 'Facebook', content: preview.facebookPost })
+
+    return (
+      <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div>{formContent}</div>
+        <div>
+          <PreviewPanel
+            pageUrl={preview.pageUrl}
+            borrowerSubject={preview.borrowerSubject}
+            borrowerPreheader={preview.borrowerPreheader}
+            borrowerEmailHtml={preview.borrowerEmailHtml}
+            realtorSubject={preview.realtorSubject}
+            realtorPreheader={preview.realtorPreheader}
+            realtorEmailHtml={preview.realtorEmailHtml}
+            webContent={preview.webContent}
+            socialDrafts={socialDrafts}
+            statusMessage={publishedMsg}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  return formContent
 }

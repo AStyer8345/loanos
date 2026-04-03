@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { Card, SectionLabel, FieldLabel, Input, Textarea, Btn, Banner, Spinner, CadenceBadge } from './shared'
+import PreviewPanel from './PreviewPanel'
 import { aprForProduct, buildRatesString } from '@/lib/marketing/utils'
 import { DEFAULT_RATE_ROWS, type RateRow, type MCCState, type LogEntry } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
@@ -10,12 +11,15 @@ const NETLIFY_URL = 'https://styermortgage.com/.netlify/functions/generate-rate-
 const GOLD = 'var(--primary)'
 
 type RatePreview = {
-  pageTitle:         string
-  pageUrl:           string
-  borrowerSubject:   string
-  borrowerPreheader: string
-  realtorSubject:    string
-  realtorPreheader:  string
+  pageTitle:          string
+  pageUrl:            string
+  borrowerSubject:    string
+  borrowerPreheader:  string
+  realtorSubject:     string
+  realtorPreheader:   string
+  webContent:         string | null
+  borrowerEmailHtml:  string | null
+  realtorEmailHtml:   string | null
 }
 
 type Props = {
@@ -37,6 +41,7 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
   const [showSchedule, setShowSchedule] = useState(false)
   const [scheduleTime, setScheduleTime] = useState('')
   const [showConfirm, setShowConfirm]   = useState(false)
+  const [publishedMsg, setPublishedMsg] = useState<string | null>(null)
 
   const rateTracker = TRACKERS.find(t => t.key === 'rate-update')!
 
@@ -60,6 +65,9 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
   const toggleAudience = (a: string) =>
     setAudiences(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])
 
+  // ── Validation ─────────────────────────────────────────────────────────────
+  const hasRates = rows.some(r => r.rate.trim() !== '')
+
   // ── Build payload ──────────────────────────────────────────────────────────
   const buildPayload = (mode: string, extraScheduleTime?: string) => ({
     rates:     buildRatesString(rows),
@@ -74,9 +82,15 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
 
   // ── Preview ────────────────────────────────────────────────────────────────
   const handlePreview = async () => {
+    if (!hasRates) {
+      setErrorMsg('Enter at least one rate before previewing.')
+      setStatus('error')
+      return
+    }
     setStatus('loading')
     setErrorMsg('')
     setPreview(null)
+    setPublishedMsg(null)
     try {
       const res = await fetch(NETLIFY_URL, {
         method: 'POST',
@@ -91,15 +105,21 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
       setPreview(data.preview)
       setStatus('done')
     } catch (e: unknown) {
-      setErrorMsg(`Netlify error: ${e instanceof Error ? e.message : String(e)}`)
+      setErrorMsg(`Preview error: ${e instanceof Error ? e.message : String(e)}`)
       setStatus('error')
     }
   }
 
   // ── Publish ────────────────────────────────────────────────────────────────
   const handlePublish = async (scheduledTime?: string) => {
+    if (!hasRates) {
+      setErrorMsg('Enter at least one rate before publishing.')
+      setStatus('error')
+      return
+    }
     setStatus('loading')
     setErrorMsg('')
+    setPublishedMsg(null)
     try {
       const res = await fetch(NETLIFY_URL, {
         method: 'POST',
@@ -129,17 +149,34 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
       }
       await onSave(nextState)
 
-      setPreview({
-        ...preview!,
-        pageUrl: data.pageUrl ?? preview?.pageUrl ?? '',
-        pageTitle: scheduledTime
-          ? `Published — Email scheduled for ${scheduledTime}`
-          : `Published at ${data.pageUrl}`,
-      })
+      // Update preview with publish results
+      const pubUrl = data.pageUrl ?? preview?.pageUrl ?? ''
+      const msg = scheduledTime
+        ? `Published — email scheduled for ${new Date(scheduledTime).toLocaleString()}`
+        : `Published at ${pubUrl}`
+      setPublishedMsg(msg)
+
+      if (data.preview) {
+        setPreview(data.preview)
+      } else if (preview) {
+        setPreview({ ...preview, pageUrl: pubUrl })
+      } else {
+        setPreview({
+          pageUrl: pubUrl,
+          pageTitle: '',
+          borrowerSubject: '',
+          borrowerPreheader: '',
+          realtorSubject: '',
+          realtorPreheader: '',
+          webContent: null,
+          borrowerEmailHtml: null,
+          realtorEmailHtml: null,
+        })
+      }
       setStatus('done')
       setShowSchedule(false)
     } catch (e: unknown) {
-      setErrorMsg(`Netlify error: ${e instanceof Error ? e.message : String(e)}`)
+      setErrorMsg(`Publish error: ${e instanceof Error ? e.message : String(e)}`)
       setStatus('error')
     }
   }
@@ -157,7 +194,8 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
 
   const isLoading = status === 'loading'
 
-  return (
+  // ── Form content ──────────────────────────────────────────────────────────
+  const formContent = (
     <div className="space-y-4">
       {/* Cadence badge */}
       <div>
@@ -285,13 +323,13 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
 
       {/* Action buttons */}
       <div className="flex gap-2 flex-wrap">
-        <Btn onClick={handlePreview} disabled={isLoading}>
+        <Btn onClick={handlePreview} disabled={isLoading || !hasRates}>
           {isLoading ? <><Spinner /> Loading...</> : '👁 Preview'}
         </Btn>
         <Btn
           variant="secondary"
           onClick={() => setShowConfirm(true)}
-          disabled={isLoading}
+          disabled={isLoading || !hasRates}
         >
           ▶ Publish + Send Emails
         </Btn>
@@ -358,27 +396,30 @@ export default function RateUpdateForm({ mccState, onSave }: Props) {
 
       {/* Error */}
       {status === 'error' && <Banner type="error">{errorMsg}</Banner>}
-
-      {/* Preview panel */}
-      {preview && (
-        <Card>
-          <SectionLabel>PREVIEW</SectionLabel>
-          <div className="space-y-2 text-xs">
-            <div>
-              <span className="text-muted-foreground">URL: </span>
-              <a href={preview.pageUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD }}>
-                {preview.pageUrl}
-              </a>
-            </div>
-            {preview.borrowerSubject && (
-              <div><span className="text-muted-foreground">Borrower subject: </span><span className="text-foreground">{preview.borrowerSubject}</span></div>
-            )}
-            {preview.realtorSubject && (
-              <div><span className="text-muted-foreground">Realtor subject: </span><span className="text-foreground">{preview.realtorSubject}</span></div>
-            )}
-          </div>
-        </Card>
-      )}
     </div>
   )
+
+  // ── Layout: side-by-side when preview exists ──────────────────────────────
+  if (preview) {
+    return (
+      <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div>{formContent}</div>
+        <div>
+          <PreviewPanel
+            pageUrl={preview.pageUrl}
+            borrowerSubject={preview.borrowerSubject}
+            borrowerPreheader={preview.borrowerPreheader}
+            borrowerEmailHtml={preview.borrowerEmailHtml}
+            realtorSubject={preview.realtorSubject}
+            realtorPreheader={preview.realtorPreheader}
+            realtorEmailHtml={preview.realtorEmailHtml}
+            webContent={preview.webContent}
+            statusMessage={publishedMsg}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  return formContent
 }

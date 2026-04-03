@@ -80,14 +80,14 @@ export default function MarketingPage() {
       {activeTab === 'VOICE GUIDE' && (
         <VoiceGuideEditor />
       )}
-      <div className="max-w-3xl">
-        {activeTab === 'SEND' && (
-          <SendTab mccState={mcc} onSave={saveState} />
-        )}
-        {activeTab === 'HISTORY' && (
+      {activeTab === 'SEND' && (
+        <SendTab mccState={mcc} onSave={saveState} />
+      )}
+      {activeTab === 'HISTORY' && (
+        <div className="max-w-3xl">
           <HistoryTab mccState={mcc} onSave={saveState} />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

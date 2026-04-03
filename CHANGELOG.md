@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## [5.9.0] — 2026-04-03 — Share Page Branding + PDF Unification
+
+### Changed
+- **Share API route** (`src/app/api/share/[token]/route.ts`): Now fetches `organizations` + `user_settings` tables and returns `ShareBranding` object (loName, company, nmls, phone, email, logoUrl, brandColor, calendlyUrl, applicationUrl)
+- **SharePageLayout**: Accepts branding prop with sensible defaults. Added print-only branded header (company, NMLS, contact info, date). Comprehensive `@media print` styles — white background, dark text, color-adjust, page breaks, letter sizing
+- **ShareHero**: Dynamic LO name + company (no longer hardcoded)
+- **ShareCTA**: Dynamic Calendly + application URLs from branding. Conditionally renders buttons based on available URLs
+- **ShareFooter**: Dynamic company/NMLS/contact info. Removed "Powered by LoanOS" entirely. Added "Equal Housing Lender"
+- **NarrativeCard**: Header changed from "Our Recommendation" to "Analysis Summary". Added gold left border accent
+- **OptionCard**: Added gold top-border accent and hover transition
+- **PaymentComparisonChart**: Chart height increased from 260 to 300
+- **OptionCardsGrid delta chips**: Label changed from "interest (5 yr)" to "interest + MI (5 yr)" to accurately reflect `interestMIPaid5yr` field
+
+### Added
+- **PDF/Share unification**: "Download PDF" button now opens share page with `?print=1` query param, which auto-triggers `window.print()` after 800ms chart render delay. Eliminates the 627-line duplicate HTML template in `generate-pdf/route.ts`
+- **`ShareBranding` type** exported from share API route for client-side consumption
+
+### Removed
+- Unused `Btn` import in `PreviewPanel.tsx` (pre-existing lint error blocking builds)
+- Unused `MUTED` import in `SharePageLayout.tsx`
+
 ## [5.8.0] — 2026-04-03 — Dashboard Scenario Builder Renovation + Share Page Fixes
 
 ### Changed

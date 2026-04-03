@@ -251,3 +251,40 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Tier 3 item 1 (Email from builder) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-02 (scenarios-am)
+
+**What was built:**
+- ARM vs Fixed Comparison (`src/app/dashboard/scenarios/new/ArmVsFixedSection.tsx`)
+  - Client-side only — no API call, uses same math patterns as BuydownSection/DownPaymentSection
+  - ARM rate = fixed rate − 0.5% (typical 5/1 ARM spread at origination)
+  - Worst-case rate = fixed rate + 2.0% (conservative first-adjustment cap)
+  - 3 stat cards: Monthly Savings (yr 1-5 ARM period), 5-Yr Cumulative Savings, Break-Even after worst-case reset
+  - Year-by-year table: Year 1-5 ARM rows (gold badge "ARM FIXED"), Year 6+ worst-case row (red badge "WORST CASE")
+  - Monthly Delta column shows green savings (ARM period) vs red extra cost (after reset)
+  - Inline context box: plain-English explanation of break-even trade-off if ARM resets to worst case
+  - Break-even label: green if ARM always wins, amber if >36 months, red if ≤36 months post-reset
+  - Compliance footer: illustrative only, ARM rates adjust, not a product recommendation
+  - Renders when `loanAmount > 0` and `interestRate > 0` (no render on empty form)
+  - Wired into ScenarioBuilder.tsx after RentVsOwnSection in purchase mode results
+
+**MC gap closed:** Borrowers can now see ARM vs Fixed inside LoanOS. Before: Adam had to switch to Mortgage Coach or build 2 separate manual scenarios to answer "should I do the ARM?" After: enter any purchase scenario → ARM vs Fixed section appears automatically with savings, worst-case payment, and break-even year.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `3bda8ec` — pushed to main
+**Vercel:** `dpl_D6wxNX5ZGgbpMtpQtn5cqWhxXKhy` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/ArmVsFixedSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Total cost of waiting (Tier 3 item 3) — "What does waiting 6 months cost if rates stay flat or rise?" Shows price appreciation + payment delta + total interest cost difference. Pure client-side math, input: current rate, expected rate in 6 months, current home price.
+2. Engagement tracking — view_count display after save (schema column `view_count` already exists — just needs display in builder ActionsBar or results header after save)
+3. Share page: equity build curve chart — single most emotionally compelling visual per research. Overlaid loan balance vs equity line over 30 years.
+
+**Domain queue updates:**
+- Tier 3 item 2 (ARM vs Fixed) — ✅ COMPLETE this session

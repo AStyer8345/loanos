@@ -60,8 +60,8 @@ KNOWN GAPS (start here):
 - ~~**Rent vs own**: Monthly rent vs PITI + equity build, 5-year breakeven~~ ✅ DONE 2026-03-29 AM
 
 ### Tier 3 — Workflow integration
-- **Email from builder**: Send scenario link directly to borrower from the scenarios tab
-- **ARM vs fixed**: 5/1 ARM initial savings vs long-term risk
+- ~~**Email from builder**: Send scenario link directly to borrower from the scenarios tab~~ ✅ DONE 2026-03-30 AM
+- ~~**ARM vs fixed**: 5/1 ARM initial savings vs long-term risk~~ ✅ DONE 2026-04-02 AM
 - **Total cost of waiting**: What does waiting 6 months cost at today's rates?
 
 ---

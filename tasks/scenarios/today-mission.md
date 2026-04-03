@@ -1,35 +1,30 @@
-## Scenarios Mission Brief — 2026-03-30 AM
+## Scenarios Mission Brief — 2026-04-02 AM
 
 ### Focus Area
-Email from Builder — send scenario share link directly to borrower from the results tab
+ARM vs Fixed Comparison (Tier 3 item 2) — 5/1 ARM initial savings vs 30yr fixed with break-even year if rates rise
 
 ### Why This Matters
-Mortgage Coach lets LOs send the presentation with one click from inside the tool.
-LoanOS currently requires Adam to: (1) copy the share link, (2) open Outlook, (3) compose email, (4) paste link.
-That 4-step friction prevents the feature from being used consistently.
-This closes the single biggest workflow gap vs MC.
+Borrowers constantly ask "should I do the ARM?" when rate-sensitive. MC can show this in seconds with a visual comparison. LoanOS can't show it at all. Adam currently has to switch tools or build manual scenarios.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. "Email Borrower" button in ActionsBar — saves scenario (if needed), shows inline email input
-2. Adam enters borrower email → hits Send → Outlook draft created via n8n webhook
-3. Build passes, no TypeScript errors
+1. New ArmVsFixedSection component renders in purchase mode results
+2. Shows ARM initial savings, 5-yr cumulative savings, and worst-case break-even after rate adjustment
+3. Build passes, 0 TypeScript errors, deployed to Vercel READY
 
 ### Files in Scope
-- `src/app/dashboard/scenarios/new/ActionsBar.tsx` — add Email button + inline input
-- `src/app/api/scenarios/send-email/route.ts` — new API route
+- `src/app/dashboard/scenarios/new/ArmVsFixedSection.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
 
 ### Definition of Done
-- Email button appears in ActionsBar alongside PDF/Share/Save buttons
-- Clicking opens an inline email input panel (not a modal — stays in-page)
-- Adam enters email, clicks Send → success state shown
-- API route calls N8N_OUTLOOK_DRAFT_WEBHOOK_URL with share URL + borrower name
-- `npm run build` passes with 0 TypeScript errors
-- No auth/RLS/multi-tenant changes
+- Component renders when purchaseScenarios[0] has a valid rate and loan amount
+- Shows: ARM rate (fixed rate minus 0.5%), Year 1-5 payment, Year 6+ worst-case payment (rate+2%)
+- Shows: monthly savings first 5 yrs, 5-yr cumulative savings, break-even month vs staying fixed
+- Compliance note: illustrative only, ARM rates adjust — not a product recommendation
+- npm run build passes with 0 TypeScript errors
+- Pushed to Vercel, deployment READY
 
 ### Subagents to Activate
-[x] Builder (direct build — no research needed, pattern already established)
-[x] QA
-[x] Reporter
+(No subagent files exist for builder/QA/reporter — orchestrator building directly)

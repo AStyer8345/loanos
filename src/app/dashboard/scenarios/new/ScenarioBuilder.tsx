@@ -20,6 +20,7 @@ import NarrativeSection from './NarrativeSection'
 import BuydownSection from './BuydownSection'
 import DownPaymentSection from './DownPaymentSection'
 import RentVsOwnSection from './RentVsOwnSection'
+import ArmVsFixedSection from './ArmVsFixedSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
@@ -538,6 +539,11 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                           purchaseScenarios={purchaseScenarios}
                           propertyValue={propertyValue}
                         />
+                      )}
+
+                      {/* ── ARM vs. Fixed Comparison (purchase only) ── */}
+                      {displayData.mode === 'purchase' && (
+                        <ArmVsFixedSection purchaseScenarios={purchaseScenarios} />
                       )}
 
                       {/* ── Row 3: Total Interest Paid ──────────────────────── */}

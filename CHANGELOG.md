@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## [5.7.0] — 2026-04-03 — Share Page Redesign
+
+### Added
+- **12 new share page components** (`src/components/share/`): ShareHero, OptionCard, OptionCardsGrid, DeltaChip, PaymentComparisonChart, BreakEvenVisual, NarrativeCard, DetailAccordion, ShareCTA, ShareFooter, SharePageLayout, constants
+- **Card-based option display**: Each loan option gets its own card with payment breakdown, stats grid, and delta chips showing differences vs best option
+- **Winner highlighting**: Gold border glow + "Best Option" badge with crown icon on recommended option
+- **Payment comparison bar chart**: Recharts bar chart with gold winner bar and top labels
+- **Break-even progress bars**: Visual timeline replacing dense table — months-to-breakeven on 7-year scale
+- **Smart section visibility**: Chart only with 2+ options, break-even only when applicable, narrative only when exists
+- **Print styles**: `@media print` support — white background, hidden CTAs, color-adjust for paper output
+
+### Changed
+- **`src/app/share/[token]/page.tsx`**: Gutted from ~440 lines monolithic render to ~90 lines — delegates to `<SharePageLayout>`
+
+### Architecture
+- New `src/components/share/` directory — borrower-optimized components consuming same `DisplayData` type, independent from dashboard components
+
 ## [5.6.0] — 2026-04-03 — Marketing Dashboard Upgrade + History Auto-Logging
 
 ### Changed

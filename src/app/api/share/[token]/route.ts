@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
+export interface ShareBranding {
+  loName: string
+  company: string
+  nmls: string
+  phone: string
+  email: string
+  logoUrl: string | null
+  brandColor: string
+  calendlyUrl: string | null
+  applicationUrl: string | null
+}
+
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
   try {
     const supabase = createServiceClient()
@@ -26,7 +38,40 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       .update({ view_count: (data.view_count || 0) + 1 })
       .eq('id', data.id)
 
-    // Return only borrower-facing data (no internal fields)
+    // Fetch LO branding: org + user_settings
+    const [orgResult, settingsResult] = await Promise.all([
+      supabase
+        .from('organizations')
+        .select('name, nmls, logo_url, brand_color')
+        .eq('id', data.organization_id)
+        .single(),
+      supabase
+        .from('user_settings')
+        .select('key, value')
+        .eq('user_id', data.user_id!),
+    ])
+
+    const org = orgResult.data
+    const settings: Record<string, string> = {}
+    if (settingsResult.data) {
+      for (const row of settingsResult.data) {
+        settings[row.key] = String(row.value ?? '')
+      }
+    }
+
+    const branding: ShareBranding = {
+      loName: settings.lo_name || 'Your Loan Officer',
+      company: settings.company || org?.name || '',
+      nmls: settings.nmls || org?.nmls || '',
+      phone: settings.phone || '',
+      email: settings.email || '',
+      logoUrl: org?.logo_url || null,
+      brandColor: org?.brand_color || '#C9A84C',
+      calendlyUrl: settings.calendly_url || null,
+      applicationUrl: settings.application_url || null,
+    }
+
+    // Return borrower-facing data + LO branding
     return NextResponse.json({
       scenario_type: data.scenario_type,
       borrower_name: data.borrower_name,
@@ -38,6 +83,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       narrative: data.narrative,
       reinvestment_data: data.reinvestment_data,
       created_at: data.created_at,
+      branding,
     })
   } catch (error) {
     console.error('[share] error:', error)

@@ -9,9 +9,9 @@ export default function NarrativeCard({ text }: NarrativeCardProps) {
   if (!paragraphs.length) return null
 
   return (
-    <div className="rounded-2xl p-5 sm:p-6" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+    <div className="rounded-2xl p-5 sm:p-6" style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${GOLD}` }}>
       <p className="text-[10px] font-semibold uppercase tracking-widest mb-4" style={{ color: GOLD }}>
-        Our Recommendation
+        Analysis Summary
       </p>
       {paragraphs.map((para, i) => {
         if (i === 0) {

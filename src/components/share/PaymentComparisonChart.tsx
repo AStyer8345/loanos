@@ -51,7 +51,7 @@ export default function PaymentComparisonChart({ rows }: PaymentComparisonChartP
       <p className="text-[10px] mb-4" style={{ color: MUTED }}>
         Total monthly cost broken down by component
       </p>
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
           <XAxis
             dataKey="name"

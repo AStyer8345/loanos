@@ -6,6 +6,8 @@ interface ShareHeroProps {
   propertyAddress: string | null
   heroStat: { label: string; value: string; sublabel?: string }
   createdAt?: string
+  loName?: string
+  company?: string
 }
 
 export default function ShareHero({
@@ -14,16 +16,20 @@ export default function ShareHero({
   propertyAddress,
   heroStat,
   createdAt,
+  loName = 'Adam Styer',
+  company,
 }: ShareHeroProps) {
   const borrowerFirst = borrowerName ? borrowerName.split(' ')[0] : null
   const dateStr = createdAt
     ? new Date(createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : null
 
+  const preparedBy = company ? `${loName} · ${company}` : loName
+
   return (
     <div style={{ borderBottom: `1px solid ${BORDER}` }}>
       <div className="max-w-3xl mx-auto px-5 py-10 sm:py-14">
-        {/* Mode badge + date */}
+        {/* Mode badge + address */}
         <div className="flex items-center gap-3 mb-4">
           <span
             className="text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
@@ -46,7 +52,7 @@ export default function ShareHero({
         </h1>
 
         <p className="text-xs mb-6" style={{ color: MUTED }}>
-          Prepared by Adam Styer{dateStr ? ` \u00B7 ${dateStr}` : ''}
+          Prepared by {preparedBy}{dateStr ? ` \u00B7 ${dateStr}` : ''}
         </p>
 
         {/* Hero stat */}

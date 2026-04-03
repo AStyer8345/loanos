@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { buildPurchaseDisplayData, buildRefiDisplayData } from '@/lib/scenarios/displayData'
 import type { DisplayData } from '@/lib/scenarios/displayData'
 import {
@@ -10,6 +11,7 @@ import {
 } from '@/lib/scenarios/calculations'
 import type { PurchaseScenarioInput, RefiScenarioInput, CurrentLoanInput } from '@/lib/scenarios/types'
 import SharePageLayout from '@/components/share/SharePageLayout'
+import type { ShareBranding } from '@/app/api/share/[token]/route'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = Record<string, any>
@@ -23,6 +25,7 @@ interface SharedScenario {
   scenarios_data: AnyObj[]
   narrative: string | null
   created_at: string
+  branding?: ShareBranding
 }
 
 function buildDisplayData(data: SharedScenario): DisplayData {
@@ -44,6 +47,8 @@ export default function SharePage({ params }: { params: { token: string } }) {
   const [data, setData] = useState<SharedScenario | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
+  const isPrint = searchParams.get('print') === '1'
 
   useEffect(() => {
     fetch(`/api/share/${params.token}`)
@@ -57,6 +62,19 @@ export default function SharePage({ params }: { params: { token: string } }) {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [params.token])
+
+  // Auto-trigger print dialog when ?print=1
+  const triggerPrint = useCallback(() => {
+    if (isPrint && data && !loading) {
+      // Small delay to let charts render
+      const timer = setTimeout(() => window.print(), 800)
+      return () => clearTimeout(timer)
+    }
+  }, [isPrint, data, loading])
+
+  useEffect(() => {
+    return triggerPrint()
+  }, [triggerPrint])
 
   if (loading) {
     return (
@@ -87,5 +105,5 @@ export default function SharePage({ params }: { params: { token: string } }) {
 
   const displayData = buildDisplayData(data)
 
-  return <SharePageLayout data={data} displayData={displayData} />
+  return <SharePageLayout data={data} displayData={displayData} branding={data.branding} />
 }

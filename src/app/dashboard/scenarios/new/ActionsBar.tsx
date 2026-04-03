@@ -88,26 +88,17 @@ export default function ActionsBar({
   }
 
   const generatePdf = async () => {
-    let id = scenarioId
-    if (!id) {
+    let token = shareToken
+    if (!token) {
       const saved = await save()
       if (!saved) return
-      id = saved.id
+      token = saved.share_token
     }
     setGeneratingPdf(true)
     try {
-      const res = await fetch('/api/scenarios/generate-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenarioId: id }),
-      })
-      // API returns HTML — open in new window for print-to-PDF
-      const html = await res.text()
-      const w = window.open('', '_blank')
-      if (w) {
-        w.document.write(html)
-        w.document.close()
-      }
+      // Open the share page in a new tab — print styles handle PDF formatting
+      const url = `${window.location.origin}/share/${token}?print=1`
+      window.open(url, '_blank')
     } catch (e) {
       console.error('PDF generation failed:', e)
     } finally {

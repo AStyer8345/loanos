@@ -231,6 +231,34 @@ Save to the outputs folder:
 Use today's actual date. Always provide computer:// links to all files plus a subject
 line for the teaser email (under 50 characters).
 
+## Step 9: Log to Marketing History
+
+After all output files are saved, log the rate update to the LoanOS History tab so cadence badges stay current.
+
+Read the secret from `.env.local`:
+```bash
+AGENT_SECRET=$(grep LOANOS_AGENT_SECRET /Users/adamstyer/Documents/loanos-clone/.env.local | cut -d'"' -f2)
+```
+
+Then log:
+```bash
+curl -s -X POST https://loanos-self.vercel.app/api/marketing/log \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: $AGENT_SECRET" \
+  -d '{
+    "activity": "Rate update generated — <date>",
+    "channel": "Rate Update",
+    "notes": "<first 120 chars of rates summary>",
+    "tracker": "rate-update"
+  }'
+```
+
+Replace `<date>` with today's formatted date (e.g. "Apr 3, 2026") and `<notes>` with a compact summary of the rates. The `tracker` field updates the cadence badge on the History tab.
+
+If the curl fails, report the error but don't block — the output files are already saved.
+
+---
+
 ## Important Notes
 
 - Rate formatting: show rates as X.XXX% (3 decimal places) for both rate and APR

@@ -230,6 +230,34 @@ Generate a subject line for EACH teaser email. Present them alongside the file l
 - Borrower subject: speaks to their life/money/home
 - Realtor subject: speaks to their business/deals/clients
 
+## Log to Marketing History
+
+After all four output files are saved, log the newsletter to the LoanOS History tab so cadence badges stay current.
+
+Read the secret from `.env.local`:
+```bash
+AGENT_SECRET=$(grep LOANOS_AGENT_SECRET /Users/adamstyer/Documents/loanos-clone/.env.local | cut -d'"' -f2)
+```
+
+Then log:
+```bash
+curl -s -X POST https://loanos-self.vercel.app/api/marketing/log \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: $AGENT_SECRET" \
+  -d '{
+    "activity": "Weekly newsletter — <topic summary>",
+    "channel": "Newsletter",
+    "notes": "<borrower subject line>",
+    "tracker": "borrower-nl"
+  }'
+```
+
+Replace `<topic summary>` with 3-5 words describing the content and `<notes>` with the borrower subject line. The `tracker` field updates the cadence badge on the History tab.
+
+If the curl fails, report the error but don't block — the output files are already saved.
+
+---
+
 ## Quality Check
 
 Before delivering, verify:

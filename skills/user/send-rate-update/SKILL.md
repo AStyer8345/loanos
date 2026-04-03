@@ -114,6 +114,34 @@ Report:
 
 ---
 
+## Step 8: Log to Marketing History
+
+After a successful live publish, log the rate update to the LoanOS History tab so cadence badges stay current.
+
+Read the secret from `.env.local`:
+```bash
+AGENT_SECRET=$(grep LOANOS_AGENT_SECRET /Users/adamstyer/Documents/loanos-clone/.env.local | cut -d'"' -f2)
+```
+
+Then log:
+```bash
+curl -s -X POST https://loanos-self.vercel.app/api/marketing/log \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: $AGENT_SECRET" \
+  -d '{
+    "activity": "Rate update sent — <date>",
+    "channel": "Rate Update",
+    "notes": "<first 120 chars of rates string>",
+    "tracker": "rate-update"
+  }'
+```
+
+Replace `<date>` with today's formatted date (e.g. "Apr 3, 2026") and `<notes>` with a summary of the rates sent. The `tracker` field updates the cadence badge on the History tab.
+
+If the curl fails, report the error but don't block — the rate update itself already went out.
+
+---
+
 ## Error Handling
 
 - API error → show message, offer retry

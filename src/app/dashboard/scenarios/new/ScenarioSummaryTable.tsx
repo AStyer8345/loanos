@@ -70,7 +70,7 @@ function computeCtcWorksheet(row: ScenarioDisplayRow) {
 
 // ─── Shared cell styles ─────────────────────────────────────────────
 
-const SUB_BG = '#0d1520'
+const SUB_BG = 'var(--sc-card-alt, #0d1520)'
 
 const tdLabel = (indent = 32): React.CSSProperties => ({
   padding: `5px 16px 5px ${indent}px`,
@@ -92,7 +92,7 @@ const tdSection: React.CSSProperties = {
   padding: '7px 16px 4px 24px',
   fontSize: 9,
   fontWeight: 600,
-  color: 'rgba(201,168,76,0.6)',
+  color: 'var(--sc-accent)',
   letterSpacing: '0.07em',
   textTransform: 'uppercase',
   borderBottom: '1px solid var(--sc-border)',
@@ -104,7 +104,7 @@ const tdSubtotalLabel: React.CSSProperties = {
   color: 'var(--sc-text)',
   fontFamily: "'IBM Plex Mono', monospace",
   borderBottom: '1px solid var(--sc-border)',
-  borderTop: '1px solid rgba(255,255,255,0.08)',
+  borderTop: '1px solid var(--sc-border)',
 }
 const tdSubtotalValue: React.CSSProperties = {
   padding: '7px 16px',
@@ -114,13 +114,13 @@ const tdSubtotalValue: React.CSSProperties = {
   color: 'var(--sc-text)',
   fontFamily: "'IBM Plex Mono', monospace",
   borderBottom: '1px solid var(--sc-border)',
-  borderTop: '1px solid rgba(255,255,255,0.08)',
+  borderTop: '1px solid var(--sc-border)',
 }
 const tdTotalLabel: React.CSSProperties = {
   padding: '9px 16px 9px 24px',
   fontSize: 11,
   fontWeight: 700,
-  color: '#C9A84C',
+  color: 'var(--sc-accent)',
   fontFamily: "'IBM Plex Mono', monospace",
   borderBottom: '1px solid var(--sc-border)',
 }
@@ -129,7 +129,7 @@ const tdTotalValue: React.CSSProperties = {
   textAlign: 'right',
   fontSize: 11,
   fontWeight: 700,
-  color: '#C9A84C',
+  color: 'var(--sc-accent)',
   fontFamily: "'IBM Plex Mono', monospace",
   borderBottom: '1px solid var(--sc-border)',
 }
@@ -196,11 +196,11 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
           <thead>
-            <tr style={{ background: '#0A1628' }}>
+            <tr style={{ background: 'var(--sc-card-alt)' }}>
               <th style={{
                 textAlign: 'left', padding: '10px 16px', fontSize: 10, fontWeight: 500,
-                color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em',
-                borderBottom: '2px solid rgba(255,255,255,0.15)',
+                color: 'var(--sc-muted)', textTransform: 'uppercase', letterSpacing: '0.05em',
+                borderBottom: '2px solid var(--sc-border)',
               }}>
                 Metric
               </th>
@@ -210,8 +210,8 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
                   padding: '10px 16px',
                   fontSize: 11,
                   fontWeight: 700,
-                  color: '#ffffff',
-                  borderBottom: '2px solid rgba(255,255,255,0.15)',
+                  color: 'var(--sc-text)',
+                  borderBottom: '2px solid var(--sc-border)',
                 }}>
                   {row.label}
                 </th>
@@ -247,12 +247,12 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
             >
               <td style={{
                 padding: '9px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sc-text)',
-                borderBottom: isMonthlyOpen ? '1px solid rgba(201,168,76,0.2)' : '1px solid var(--sc-border)',
+                borderBottom: isMonthlyOpen ? '1px solid var(--sc-border)' : '1px solid var(--sc-border)',
                 fontFamily: "'IBM Plex Mono', monospace",
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {isMonthlyOpen
-                    ? <ChevronDown size={12} style={{ color: '#C9A84C' }} />
+                    ? <ChevronDown size={12} style={{ color: 'var(--sc-accent)' }} />
                     : <ChevronRight size={12} style={{ color: 'var(--sc-muted)' }} />}
                   Monthly Payment
                 </span>
@@ -261,7 +261,7 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
                 <td key={ci} style={{
                   padding: '9px 16px', textAlign: 'right', fontSize: 11, fontWeight: 600,
                   color: 'var(--sc-text)',
-                  borderBottom: isMonthlyOpen ? '1px solid rgba(201,168,76,0.2)' : '1px solid var(--sc-border)',
+                  borderBottom: isMonthlyOpen ? '1px solid var(--sc-border)' : '1px solid var(--sc-border)',
                   fontFamily: "'IBM Plex Mono', monospace",
                 }}>
                   {fmtCurrency(row.totalMonthlyPayment)}
@@ -303,11 +303,11 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
                 </tr>
               )}
               <tr style={{ background: SUB_BG }}>
-                <td style={{ ...tdSubtotalLabel, borderTop: '1px solid rgba(201,168,76,0.25)' }}>
+                <td style={{ ...tdSubtotalLabel, borderTop: '1px solid var(--sc-border)' }}>
                   Total Monthly Payment
                 </td>
                 {data.rows.map((row, ci) => (
-                  <td key={ci} style={{ ...tdSubtotalValue, borderTop: '1px solid rgba(201,168,76,0.25)', color: '#C9A84C' }}>
+                  <td key={ci} style={{ ...tdSubtotalValue, borderTop: '1px solid var(--sc-border)', color: 'var(--sc-accent)' }}>
                     {fmtCurrency(row.totalMonthlyPayment)}
                   </td>
                 ))}
@@ -321,12 +321,12 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
             >
               <td style={{
                 padding: '9px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sc-text)',
-                borderBottom: isCTCOpen ? '1px solid rgba(201,168,76,0.2)' : '1px solid var(--sc-border)',
+                borderBottom: isCTCOpen ? '1px solid var(--sc-border)' : '1px solid var(--sc-border)',
                 fontFamily: "'IBM Plex Mono', monospace",
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {isCTCOpen
-                    ? <ChevronDown size={12} style={{ color: '#C9A84C' }} />
+                    ? <ChevronDown size={12} style={{ color: 'var(--sc-accent)' }} />
                     : <ChevronRight size={12} style={{ color: 'var(--sc-muted)' }} />}
                   Cash to Close
                 </span>
@@ -335,7 +335,7 @@ export default function ScenarioSummaryTable({ data }: { data: DisplayData }) {
                 <td key={ci} style={{
                   padding: '9px 16px', textAlign: 'right', fontSize: 11, fontWeight: 600,
                   color: 'var(--sc-text)',
-                  borderBottom: isCTCOpen ? '1px solid rgba(201,168,76,0.2)' : '1px solid var(--sc-border)',
+                  borderBottom: isCTCOpen ? '1px solid var(--sc-border)' : '1px solid var(--sc-border)',
                   fontFamily: "'IBM Plex Mono', monospace",
                 }}>
                   {fmtCurrency(row.cashToClose)}

@@ -4,17 +4,25 @@ import { useMemo } from 'react'
 import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, ReferenceDot, Cell, LabelList,
+  ResponsiveContainer, ReferenceDot,
 } from 'recharts'
 import type { DisplayData } from '@/lib/scenarios/displayData'
 
-const CHART_COLORS = ['#5b8def', '#C9A84C', '#4CC98A', '#a78bfa']
+const SEGMENT_COLORS = {
+  pi: '#5b8def',
+  tax: '#a78bfa',
+  insurance: '#4CC98A',
+  hoa: '#f97316',
+  pmi: '#ec4899',
+}
 
 const fmtK = (v: number) => {
   if (Math.abs(v) >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`
   if (Math.abs(v) >= 1_000) return `$${(v / 1_000).toFixed(0)}K`
   return `$${v.toFixed(0)}`
 }
+
+const fmtCurrency = (v: number) => '$' + Math.round(v).toLocaleString('en-US')
 
 const tooltipStyle = {
   contentStyle: {
@@ -27,59 +35,53 @@ const tooltipStyle = {
   labelStyle: { color: 'var(--sc-muted)' },
 }
 
-function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[14px] p-5" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
-      <h4 className="text-sm font-semibold mb-5" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{title}</h4>
+      <h4 className="text-sm font-semibold mb-1" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{title}</h4>
+      {subtitle && <p className="text-[10px] mb-4" style={{ color: 'var(--sc-muted)' }}>{subtitle}</p>}
+      {!subtitle && <div className="mb-5" />}
       {children}
     </div>
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function BarTopLabel(props: any) {
-  const { x, y, width, value } = props
-  if (!value) return null
-  return (
-    <text
-      x={x + width / 2}
-      y={y - 6}
-      textAnchor="middle"
-      fontSize={10}
-      fontWeight={600}
-      fontFamily="'IBM Plex Mono', monospace"
-      fill="var(--sc-text)"
-    >
-      {fmtK(value)}
-    </text>
-  )
-}
-
-export { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart }
+export { MonthlyPaymentChart, CumulativeSavingsChart }
 
 export default function ScenarioCharts({ data }: { data: DisplayData }) {
   if (!data.rows.length) return null
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="space-y-5">
       <MonthlyPaymentChart data={data} />
-      <TotalInterestChart data={data} />
-      <div className="lg:col-span-2">
-        <CumulativeSavingsChart data={data} />
-      </div>
+      <CumulativeSavingsChart data={data} />
     </div>
   )
 }
 
-// ─── Chart 1: Monthly Payment Comparison ─────────────────────────
+// ─── Chart 1: Monthly Payment Comparison (Stacked) ──────────────
 function MonthlyPaymentChart({ data }: { data: DisplayData }) {
+  const hasHOA = data.rows.some(r => r.hoa > 0)
+  const hasPMI = data.rows.some(r => r.pmi > 0)
+
   const chartData = useMemo(() => data.rows.map(r => ({
     name: r.label,
-    payment: Math.round(r.totalMonthlyPayment),
-    isRecommended: r.isRecommended,
-  })), [data])
+    'P&I': Math.round(r.monthlyPI),
+    'Property Tax': Math.round(r.propertyTaxes),
+    Insurance: Math.round(r.homeownersInsurance),
+    ...(hasHOA ? { HOA: Math.round(r.hoa) } : {}),
+    ...(hasPMI ? { PMI: Math.round(r.pmi) } : {}),
+  })), [data, hasHOA, hasPMI])
+
+  const segments: { key: string; color: string }[] = [
+    { key: 'P&I', color: SEGMENT_COLORS.pi },
+    { key: 'Property Tax', color: SEGMENT_COLORS.tax },
+    { key: 'Insurance', color: SEGMENT_COLORS.insurance },
+    ...(hasHOA ? [{ key: 'HOA', color: SEGMENT_COLORS.hoa }] : []),
+    ...(hasPMI ? [{ key: 'PMI', color: SEGMENT_COLORS.pmi }] : []),
+  ]
 
   return (
-    <ChartCard title="Monthly Payment by Scenario">
+    <ChartCard title="Monthly Payment Comparison" subtitle="Total monthly cost broken down by component">
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={chartData} margin={{ top: 28, right: 10, bottom: 0, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" vertical={false} />
@@ -87,67 +89,30 @@ function MonthlyPaymentChart({ data }: { data: DisplayData }) {
           <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
           <Tooltip
             {...tooltipStyle}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Monthly Payment']}
+            formatter={(v: any) => [fmtCurrency(Number(v))]} // eslint-disable-line @typescript-eslint/no-explicit-any
           />
-          <Bar dataKey="payment" radius={[6, 6, 0, 0]} maxBarSize={80}>
-            {chartData.map((entry, i) => (
-              <Cell key={i} fill={entry.isRecommended ? '#C9A84C' : CHART_COLORS[i % CHART_COLORS.length]} />
-            ))}
-            <LabelList content={<BarTopLabel />} />
-          </Bar>
+          <Legend wrapperStyle={{ fontSize: 10, paddingTop: 8 }} iconType="circle" iconSize={8} />
+          {segments.map((seg, i) => (
+            <Bar
+              key={seg.key}
+              dataKey={seg.key}
+              stackId="payment"
+              fill={seg.color}
+              radius={i === segments.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
+              maxBarSize={80}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </ChartCard>
   )
 }
 
-// ─── Chart 2: Total Interest Paid ────────────────────────────────
-function TotalInterestChart({ data }: { data: DisplayData }) {
-  const firstInterest = data.rows[0]?.totalInterest ?? 0
-  const chartData = useMemo(() => data.rows.map(r => {
-    const diff = firstInterest - r.totalInterest
-    return {
-      name: r.label,
-      interest: Math.round(r.totalInterest),
-      diff: Math.round(diff),
-      isRecommended: r.isRecommended,
-    }
-  }), [data, firstInterest])
-
-  return (
-    <ChartCard title="Total Interest Paid">
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={chartData} margin={{ top: 28, right: 10, bottom: 0, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <Tooltip
-            {...tooltipStyle}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(v: any, _: any, props: any) => {
-              const diff = props?.payload?.diff ?? 0
-              const suffix = diff > 0 ? ` (saves ${fmtK(diff)} vs. first)` : diff < 0 ? ` (costs ${fmtK(-diff)} more)` : ''
-              return [`$${Number(v).toLocaleString()}${suffix}`, 'Total Interest']
-            }}
-          />
-          <Bar dataKey="interest" radius={[6, 6, 0, 0]} maxBarSize={80}>
-            {chartData.map((entry, i) => (
-              <Cell key={i} fill={entry.isRecommended ? '#C9A84C' : CHART_COLORS[i % CHART_COLORS.length]} />
-            ))}
-            <LabelList content={<BarTopLabel />} />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </ChartCard>
-  )
-}
-
-// ─── Chart 3: Cumulative Savings / Break-Even ─────────────────────
+// ─── Chart 2: Cumulative Savings / Break-Even ───────────────────
 function CumulativeSavingsChart({ data }: { data: DisplayData }) {
+  const CHART_COLORS = ['#5b8def', '#C9A84C', '#4CC98A', '#a78bfa']
   const { cumulativeSavingsData, rows, breakEvenRows } = data
 
-  // For purchase: skip baseline (index 0). For refi: show all.
   const chartLabels = data.mode === 'purchase'
     ? rows.filter((_, i) => i !== 0).map(r => r.label)
     : rows.map(r => r.label)
@@ -155,10 +120,7 @@ function CumulativeSavingsChart({ data }: { data: DisplayData }) {
   if (!chartLabels.length) return null
 
   return (
-    <ChartCard title="Cumulative Savings vs. Baseline (7 Years)">
-      <div className="text-[10px] mb-3" style={{ color: 'var(--sc-muted)' }}>
-        Positive = savings ahead of baseline. Gold dot = break-even point.
-      </div>
+    <ChartCard title="Cumulative Savings vs. Baseline (7 Years)" subtitle="Positive = savings ahead of baseline. Gold dot = break-even point.">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={cumulativeSavingsData} margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--sc-border)" />
@@ -170,10 +132,8 @@ function CumulativeSavingsChart({ data }: { data: DisplayData }) {
           <YAxis tickFormatter={fmtK} tick={{ fill: 'var(--sc-muted)', fontSize: 10 }} />
           <Tooltip
             {...tooltipStyle}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(v: any, name: any) => [fmtK(Number(v)), name]}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            labelFormatter={(month: any) => `Month ${month}`}
+            formatter={(v: any, name: any) => [fmtK(Number(v)), name]} // eslint-disable-line @typescript-eslint/no-explicit-any
+            labelFormatter={(month: any) => `Month ${month}`} // eslint-disable-line @typescript-eslint/no-explicit-any
           />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
           {chartLabels.map((label, i) => (
@@ -200,7 +160,7 @@ function CumulativeSavingsChart({ data }: { data: DisplayData }) {
                 value: `Break-even: Mo ${dot.breakEvenMonths}`,
                 position: 'top',
                 fontSize: 9,
-                fill: '#C9A84C',
+                fill: 'var(--sc-accent)',
                 fontFamily: "'IBM Plex Mono', monospace",
               }}
             />

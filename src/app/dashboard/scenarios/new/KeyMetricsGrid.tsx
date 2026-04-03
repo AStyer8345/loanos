@@ -32,26 +32,26 @@ function MoreInfoModal({
 
   const tdMuted: React.CSSProperties = {
     padding: '6px 14px', fontSize: 10,
-    color: 'rgba(240,237,232,0.55)',
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    color: 'var(--sc-muted)',
+    borderBottom: '1px solid var(--sc-border)',
     whiteSpace: 'nowrap',
     fontFamily: "'IBM Plex Mono', monospace",
   }
   const tdVal: React.CSSProperties = {
     padding: '6px 14px', textAlign: 'right', fontSize: 10,
-    color: '#F0EDE8', fontFamily: "'IBM Plex Mono', monospace",
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace",
+    borderBottom: '1px solid var(--sc-border)',
     fontWeight: 500,
   }
   const tdTotalLabel: React.CSSProperties = {
     padding: '9px 14px', fontSize: 11, fontWeight: 700,
-    color: '#C9A84C', borderTop: '1px solid rgba(201,168,76,0.3)',
+    color: 'var(--sc-accent)', borderTop: '1px solid var(--sc-border)',
     fontFamily: "'IBM Plex Mono', monospace",
   }
   const tdTotalVal: React.CSSProperties = {
     padding: '9px 14px', textAlign: 'right', fontSize: 11,
-    fontWeight: 700, color: '#C9A84C',
-    borderTop: '1px solid rgba(201,168,76,0.3)',
+    fontWeight: 700, color: 'var(--sc-accent)',
+    borderTop: '1px solid var(--sc-border)',
     fontFamily: "'IBM Plex Mono', monospace",
   }
 
@@ -60,7 +60,7 @@ function MoreInfoModal({
       <td colSpan={rows.length + 1} style={{
         padding: '12px 14px 4px',
         fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
-        textTransform: 'uppercase', color: '#C9A84C',
+        textTransform: 'uppercase', color: 'var(--sc-accent)',
       }}>
         {title}
       </td>
@@ -109,7 +109,7 @@ function MoreInfoModal({
     >
       <div
         style={{
-          background: '#141414', border: '1px solid #262626',
+          background: 'var(--sc-card)', border: '1px solid var(--sc-border)',
           borderRadius: 16, width: '100%', maxWidth: 720,
           maxHeight: '85vh', overflowY: 'auto',
           boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
@@ -119,21 +119,21 @@ function MoreInfoModal({
         {/* Header */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '18px 20px', borderBottom: '1px solid #262626',
-          position: 'sticky', top: 0, background: '#141414', zIndex: 1,
+          padding: '18px 20px', borderBottom: '1px solid var(--sc-border)',
+          position: 'sticky', top: 0, background: 'var(--sc-card)', zIndex: 1,
         }}>
           <div>
-            <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#C9A84C', fontWeight: 700 }}>
+            <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--sc-accent)', fontWeight: 700 }}>
               Scenario Analysis
             </div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#F0EDE8', marginTop: 2 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--sc-text)', marginTop: 2 }}>
               60-Month &amp; 15-Year Breakdown
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid #333',
+              background: 'var(--sc-border)', border: '1px solid var(--sc-border)',
               borderRadius: 8, padding: 6, cursor: 'pointer', color: '#888',
               display: 'flex', alignItems: 'center',
             }}
@@ -149,14 +149,14 @@ function MoreInfoModal({
                 <tr>
                   <th style={{
                     padding: '12px 14px', textAlign: 'left', fontSize: 10,
-                    color: 'rgba(255,255,255,0.35)', fontWeight: 500,
-                    borderBottom: '1px solid #262626',
+                    color: 'var(--sc-muted)', fontWeight: 500,
+                    borderBottom: '1px solid var(--sc-border)',
                   }} />
                   {rows.map((row, i) => (
                     <th key={i} style={{
                       padding: '12px 14px', textAlign: 'right', fontSize: 11,
-                      fontWeight: 700, color: '#F0EDE8',
-                      borderBottom: '1px solid #262626',
+                      fontWeight: 700, color: 'var(--sc-text)',
+                      borderBottom: '1px solid var(--sc-border)',
                     }}>
                       {row.label}
                     </th>
@@ -190,14 +190,14 @@ function MoreInfoModal({
           <div style={{
             margin: '16px 20px 0',
             padding: '10px 14px',
-            background: 'rgba(255,255,255,0.025)',
-            border: '1px solid #262626',
+            background: 'var(--sc-card-alt)',
+            border: '1px solid var(--sc-border)',
             borderRadius: 8,
             fontSize: 9,
-            color: 'rgba(240,237,232,0.4)',
+            color: 'var(--sc-muted)',
             lineHeight: 1.6,
           }}>
-            <strong style={{ color: 'rgba(240,237,232,0.55)' }}>Assumptions: </strong>
+            <strong style={{ color: 'var(--sc-muted)' }}>Assumptions: </strong>
             {isPurchase ? `Home appreciation at ${(APPRECIATION_RATE * 100).toFixed(0)}% per year. ` : ''}
             Savings calculated vs. baseline (highest monthly payment).
             Principal and balance from amortization schedule.
@@ -268,9 +268,9 @@ function SavingsCard({
           {showMath && (
             <div style={{
               position: 'absolute', bottom: '100%', left: 0, marginBottom: 6,
-              background: '#0A1628', border: '1px solid #C9A84C',
+              background: 'var(--sc-card-alt, #0A1628)', border: '1px solid var(--sc-accent)',
               borderRadius: 8, padding: '8px 10px', zIndex: 50,
-              fontSize: 9, color: '#F0EDE8', whiteSpace: 'pre-line',
+              fontSize: 9, color: 'var(--sc-text)', whiteSpace: 'pre-line',
               lineHeight: 1.6, minWidth: 180, maxWidth: 240,
               boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
               pointerEvents: 'none',
@@ -293,7 +293,7 @@ function SavingsCard({
             padding: '4px 10px',
             fontSize: 9,
             fontWeight: 600,
-            color: '#C9A84C',
+            color: 'var(--sc-accent)',
             cursor: 'pointer',
             letterSpacing: '0.04em',
             textTransform: 'uppercase',

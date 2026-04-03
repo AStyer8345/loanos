@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-import { Home, RefreshCw, ChevronRight, ChevronLeft, Check } from 'lucide-react'
+import { Home, RefreshCw, ChevronRight, ChevronLeft, Check, TableProperties, LineChart, Calculator } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type {
   ScenarioMode, ScenarioState, PurchaseScenarioInput, RefiScenarioInput,
   CurrentLoanInput, PurchaseCalculatedResult, RefiCalculatedResult,
@@ -14,7 +15,7 @@ import CurrentLoanCard from './CurrentLoanCard'
 import ScenarioSummaryTable from './ScenarioSummaryTable'
 import KeyMetricsGrid from './KeyMetricsGrid'
 import BreakEvenTable from './BreakEvenTable'
-import { MonthlyPaymentChart, TotalInterestChart, CumulativeSavingsChart } from './ScenarioCharts'
+import { MonthlyPaymentChart, CumulativeSavingsChart } from './ScenarioCharts'
 import ReinvestmentAnalysis from './ReinvestmentAnalysis'
 import NarrativeSection from './NarrativeSection'
 import BuydownSection from './BuydownSection'
@@ -484,132 +485,145 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                 )}
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Recalculate button */}
-                <div className="flex justify-end">
-                  <button
-                    onClick={runCalculation}
-                    disabled={calculating}
-                    className="px-5 py-2 rounded-[10px] text-xs font-semibold transition-all"
-                    style={{
-                      background: calculating ? 'var(--sc-border)' : 'var(--sc-card)',
-                      color: calculating ? 'var(--sc-muted)' : 'var(--sc-accent)',
-                      border: '1px solid var(--sc-accent)',
-                    }}
-                  >
-                    {calculating ? 'Calculating...' : '↻ Recalculate'}
-                  </button>
-                </div>
-
-                {(() => {
-                  const displayData = mode === 'purchase'
-                    ? buildPurchaseDisplayData(purchaseScenarios, purchaseResults)
-                    : buildRefiDisplayData(currentLoan, refiScenarios, refiResults)
-                  return (
-                    <div className="space-y-5">
-
-                      {/* ── Row 1: Scenario table (left) + Key Metrics (right) ── */}
-                      <div className="flex gap-5 items-start">
-                        <div className="overflow-x-auto">
-                          <ScenarioSummaryTable data={displayData} />
-                        </div>
-                        <div className="flex-shrink-0 w-72">
-                          <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} rows={displayData.rows} />
-                        </div>
-                      </div>
-
-                      {/* ── Row 2: Break-Even Analysis ──────────────────────── */}
-                      <BreakEvenTable rows={displayData.breakEvenRows} mode={displayData.mode} />
-
-                      {/* ── Buydown Schedule (purchase only, when any scenario has buydown) ── */}
-                      {displayData.mode === 'purchase' && (
-                        <BuydownSection rows={displayData.rows} />
-                      )}
-
-                      {/* ── Down Payment Comparison (purchase only) ── */}
-                      {displayData.mode === 'purchase' && (
-                        <DownPaymentSection
-                          purchaseScenarios={purchaseScenarios}
-                          propertyValue={propertyValue}
-                        />
-                      )}
-
-                      {/* ── Rent vs. Own Analysis (purchase only) ── */}
-                      {displayData.mode === 'purchase' && (
-                        <RentVsOwnSection
-                          purchaseScenarios={purchaseScenarios}
-                          propertyValue={propertyValue}
-                        />
-                      )}
-
-                      {/* ── ARM vs. Fixed Comparison (purchase only) ── */}
-                      {displayData.mode === 'purchase' && (
-                        <ArmVsFixedSection purchaseScenarios={purchaseScenarios} />
-                      )}
-
-                      {/* ── Cost of Waiting 6 Months (purchase only) ── */}
-                      {displayData.mode === 'purchase' && (
-                        <WaitingCostSection purchaseScenarios={purchaseScenarios} />
-                      )}
-
-                      {/* ── Row 3: Total Interest Paid ──────────────────────── */}
-                      <TotalInterestChart data={displayData} />
-
-                      {/* ── Row 4: Monthly Payment + Cumulative Savings ─────── */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                        <MonthlyPaymentChart data={displayData} />
-                        <div className="lg:col-span-2">
-                          <CumulativeSavingsChart data={displayData} />
-                        </div>
-                      </div>
-
+              (() => {
+                const displayData = mode === 'purchase'
+                  ? buildPurchaseDisplayData(purchaseScenarios, purchaseResults)
+                  : buildRefiDisplayData(currentLoan, refiScenarios, refiResults)
+                return (
+                  <div className="space-y-6">
+                    {/* ── Recalculate + Key Metrics (always visible) ── */}
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                        Results
+                      </h2>
+                      <button
+                        onClick={runCalculation}
+                        disabled={calculating}
+                        className="px-5 py-2 rounded-[10px] text-xs font-semibold transition-all"
+                        style={{
+                          background: calculating ? 'var(--sc-border)' : 'var(--sc-card)',
+                          color: calculating ? 'var(--sc-muted)' : 'var(--sc-accent)',
+                          border: '1px solid var(--sc-accent)',
+                        }}
+                      >
+                        {calculating ? 'Calculating...' : '↻ Recalculate'}
+                      </button>
                     </div>
-                  )
-                })()}
 
-                <ReinvestmentAnalysis
-                  mode={mode}
-                  purchaseResults={purchaseResults}
-                  refiResults={refiResults}
-                  settings={reinvestmentSettings}
-                  result={reinvestmentResult}
-                  onSettingsChange={setReinvestmentSettings}
-                  onRecalculate={runCalculation}
-                />
+                    <KeyMetricsGrid metrics={displayData.keyMetrics} mode={displayData.mode} rows={displayData.rows} />
 
-                <NarrativeSection
-                  mode={mode}
-                  narrative={narrative}
-                  narrativeEdited={narrativeEdited}
-                  purchaseScenarios={purchaseScenarios}
-                  purchaseResults={purchaseResults}
-                  refiScenarios={refiScenarios}
-                  refiResults={refiResults}
-                  currentLoan={currentLoan}
-                  reinvestmentResult={reinvestmentResult}
-                  borrowerName={borrowerName}
-                  propertyAddress={propertyAddress}
-                  onNarrativeChange={(text) => { setNarrative(text); setNarrativeEdited(true) }}
-                  onNarrativeGenerated={setNarrative}
-                />
+                    {/* ── Tabbed Content ── */}
+                    <Tabs defaultValue="comparison" className="w-full">
+                      <TabsList className="w-full justify-start gap-1 rounded-[14px] p-1.5" style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}>
+                        <TabsTrigger
+                          value="comparison"
+                          className="flex items-center gap-2 rounded-[10px] px-4 py-2 text-xs font-semibold data-[state=active]:shadow-none"
+                          style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+                        >
+                          <TableProperties size={14} />
+                          Comparison
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="analysis"
+                          className="flex items-center gap-2 rounded-[10px] px-4 py-2 text-xs font-semibold data-[state=active]:shadow-none"
+                          style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+                        >
+                          <Calculator size={14} />
+                          Analysis
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="charts"
+                          className="flex items-center gap-2 rounded-[10px] px-4 py-2 text-xs font-semibold data-[state=active]:shadow-none"
+                          style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+                        >
+                          <LineChart size={14} />
+                          Charts
+                        </TabsTrigger>
+                      </TabsList>
 
-                <ActionsBar
-                  mode={mode}
-                  borrowerName={borrowerName}
-                  propertyAddress={propertyAddress}
-                  propertyValue={propertyValue}
-                  purchaseScenarios={purchaseScenarios}
-                  purchaseResults={purchaseResults}
-                  refiScenarios={refiScenarios}
-                  refiResults={refiResults}
-                  currentLoan={currentLoan}
-                  narrative={narrative}
-                  narrativeEdited={narrativeEdited}
-                  reinvestmentResult={reinvestmentResult}
-                  scenarioId={scenarioId}
-                  onSaved={setScenarioId}
-                />
-              </div>
+                      {/* ── Tab: Comparison ── */}
+                      <TabsContent value="comparison" className="mt-5 space-y-5">
+                        <ScenarioSummaryTable data={displayData} />
+                        <BreakEvenTable rows={displayData.breakEvenRows} mode={displayData.mode} />
+                      </TabsContent>
+
+                      {/* ── Tab: Analysis ── */}
+                      <TabsContent value="analysis" className="mt-5 space-y-5">
+                        {displayData.mode === 'purchase' && (
+                          <BuydownSection rows={displayData.rows} />
+                        )}
+                        {displayData.mode === 'purchase' && (
+                          <DownPaymentSection
+                            purchaseScenarios={purchaseScenarios}
+                            propertyValue={propertyValue}
+                          />
+                        )}
+                        {displayData.mode === 'purchase' && (
+                          <RentVsOwnSection
+                            purchaseScenarios={purchaseScenarios}
+                            propertyValue={propertyValue}
+                          />
+                        )}
+                        {displayData.mode === 'purchase' && (
+                          <ArmVsFixedSection purchaseScenarios={purchaseScenarios} />
+                        )}
+                        {displayData.mode === 'purchase' && (
+                          <WaitingCostSection purchaseScenarios={purchaseScenarios} />
+                        )}
+                        <ReinvestmentAnalysis
+                          mode={mode}
+                          purchaseResults={purchaseResults}
+                          refiResults={refiResults}
+                          settings={reinvestmentSettings}
+                          result={reinvestmentResult}
+                          onSettingsChange={setReinvestmentSettings}
+                          onRecalculate={runCalculation}
+                        />
+                      </TabsContent>
+
+                      {/* ── Tab: Charts ── */}
+                      <TabsContent value="charts" className="mt-5 space-y-5">
+                        <MonthlyPaymentChart data={displayData} />
+                        <CumulativeSavingsChart data={displayData} />
+                      </TabsContent>
+                    </Tabs>
+
+                    {/* ── Narrative + Actions (always visible) ── */}
+                    <NarrativeSection
+                      mode={mode}
+                      narrative={narrative}
+                      narrativeEdited={narrativeEdited}
+                      purchaseScenarios={purchaseScenarios}
+                      purchaseResults={purchaseResults}
+                      refiScenarios={refiScenarios}
+                      refiResults={refiResults}
+                      currentLoan={currentLoan}
+                      reinvestmentResult={reinvestmentResult}
+                      borrowerName={borrowerName}
+                      propertyAddress={propertyAddress}
+                      onNarrativeChange={(text) => { setNarrative(text); setNarrativeEdited(true) }}
+                      onNarrativeGenerated={setNarrative}
+                    />
+
+                    <ActionsBar
+                      mode={mode}
+                      borrowerName={borrowerName}
+                      propertyAddress={propertyAddress}
+                      propertyValue={propertyValue}
+                      purchaseScenarios={purchaseScenarios}
+                      purchaseResults={purchaseResults}
+                      refiScenarios={refiScenarios}
+                      refiResults={refiResults}
+                      currentLoan={currentLoan}
+                      narrative={narrative}
+                      narrativeEdited={narrativeEdited}
+                      reinvestmentResult={reinvestmentResult}
+                      scenarioId={scenarioId}
+                      onSaved={setScenarioId}
+                    />
+                  </div>
+                )
+              })()
             )}
           </div>
         )}

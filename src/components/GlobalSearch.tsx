@@ -121,7 +121,7 @@ export default function GlobalSearch() {
       {/* Backdrop */}
       <div
         onClick={() => setOpen(false)}
-        style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
       />
 
       {/* Palette */}
@@ -129,11 +129,11 @@ export default function GlobalSearch() {
         position: 'fixed', top: '15vh', left: '50%', transform: 'translateX(-50%)',
         zIndex: 1000, width: '100%', maxWidth: 580,
         background: 'var(--card)', border: '1px solid var(--input)',
-        borderRadius: 8, boxShadow: '0 24px 64px rgba(0,0,0,0.7)', overflow: 'hidden',
+        borderRadius: 8, boxShadow: '0 24px 64px rgba(0,0,0,0.25)', overflow: 'hidden',
       }}>
         {/* Input row */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid var(--input)' }}>
-          <span style={{ color: '#666', marginRight: 10, fontSize: 16, lineHeight: 1 }}>⌕</span>
+          <span style={{ color: 'var(--muted-foreground)', marginRight: 10, fontSize: 16, lineHeight: 1 }}>⌕</span>
           <input
             ref={inputRef}
             value={query}
@@ -142,18 +142,18 @@ export default function GlobalSearch() {
             placeholder="Search contacts, loans…"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              fontFamily: 'IBM Plex Mono, monospace', fontSize: 13, color: '#f0f0f0',
+              fontFamily: 'IBM Plex Mono, monospace', fontSize: 13, color: 'var(--foreground)',
               padding: '14px 0',
             }}
           />
-          {loading && <span style={{ color: '#666', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}>…</span>}
+          {loading && <span style={{ color: 'var(--muted-foreground)', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}>…</span>}
         </div>
 
         {/* Results */}
         <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           {!query.trim() ? (
             <div style={{ padding: '12px 16px' }}>
-              <p style={{ fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', marginBottom: 8, letterSpacing: '0.1em' }}>QUICK JUMP</p>
+              <p style={{ fontSize: 10, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', marginBottom: 8, letterSpacing: '0.1em' }}>QUICK JUMP</p>
               {[
                 { label: 'All Contacts', href: '/dashboard/contacts' },
                 { label: 'All Loans', href: '/dashboard/loans' },
@@ -161,44 +161,44 @@ export default function GlobalSearch() {
                 <button key={link.href} onClick={() => { setOpen(false); router.push(link.href) }}
                   style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 4,
                     border: 'none', background: 'transparent', cursor: 'pointer',
-                    fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, color: '#c0c0c0' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, color: 'var(--foreground)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                   → {link.label}
                 </button>
               ))}
             </div>
           ) : allResults.length === 0 && !loading ? (
-            <p style={{ padding: '24px 16px', color: '#555', fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, textAlign: 'center' }}>
+            <p style={{ padding: '24px 16px', color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, textAlign: 'center' }}>
               No results for &quot;{query}&quot;
             </p>
           ) : (
             <>
               {results.contacts.length > 0 && (
                 <div>
-                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>CONTACTS</p>
+                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>CONTACTS</p>
                   {results.contacts.map((c, i) => (
                     <button key={c.id} onClick={() => navigate('contact', c.id)}
                       onMouseEnter={() => setHighlightIdx(i)}
                       style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 16px', border: 'none',
                         cursor: 'pointer', textAlign: 'left', gap: 8, minWidth: 0,
-                        background: i === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
-                        borderLeft: i === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
+                        background: i === highlightIdx ? 'color-mix(in srgb, var(--primary) 10%, transparent)' : 'transparent',
+                        borderLeft: i === highlightIdx ? '2px solid var(--primary)' : '2px solid transparent' }}>
                       {/* Type pill */}
-                      <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: 'var(--input)', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: 'var(--muted-foreground)', background: 'var(--accent)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
                         {c.contact_type ?? 'contact'}
                       </span>
                       {/* Name */}
-                      <span style={{ fontSize: 13, color: '#f0f0f0', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                      <span style={{ fontSize: 13, color: 'var(--foreground)', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
                         {[c.first_name, c.last_name].filter(Boolean).join(' ') || '—'}
                       </span>
                       {/* Detail: email */}
-                      <span style={{ fontSize: 11, color: '#666', fontFamily: 'IBM Plex Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160, flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160, flexShrink: 0 }}>
                         {c.email ?? ''}
                       </span>
                       {/* Stage badge */}
                       {c.stage && (
-                        <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 10, color: 'var(--primary)', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                           {c.stage}
                         </span>
                       )}
@@ -209,7 +209,7 @@ export default function GlobalSearch() {
 
               {results.loans.length > 0 && (
                 <div>
-                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>LOANS</p>
+                  <p style={{ padding: '10px 16px 4px', fontSize: 10, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '0.12em' }}>LOANS</p>
                   {results.loans.map((l, i) => {
                     const flatIdx = results.contacts.length + i
                     return (
@@ -217,23 +217,23 @@ export default function GlobalSearch() {
                         onMouseEnter={() => setHighlightIdx(flatIdx)}
                         style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '8px 16px', border: 'none',
                           cursor: 'pointer', textAlign: 'left', gap: 8, minWidth: 0,
-                          background: flatIdx === highlightIdx ? 'rgba(201,168,76,0.10)' : 'transparent',
-                          borderLeft: flatIdx === highlightIdx ? '2px solid #c9a84c' : '2px solid transparent' }}>
+                          background: flatIdx === highlightIdx ? 'color-mix(in srgb, var(--primary) 10%, transparent)' : 'transparent',
+                          borderLeft: flatIdx === highlightIdx ? '2px solid var(--primary)' : '2px solid transparent' }}>
                         {/* Type pill */}
-                        <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: '#888', background: 'var(--input)', border: '1px solid #3a3a3a', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
+                        <span style={{ fontSize: 9, fontFamily: 'IBM Plex Mono, monospace', color: 'var(--muted-foreground)', background: 'var(--accent)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, letterSpacing: '0.06em' }}>
                           loan
                         </span>
                         {/* Borrower name */}
-                        <span style={{ fontSize: 13, color: '#f0f0f0', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                        <span style={{ fontSize: 13, color: 'var(--foreground)', fontFamily: 'IBM Plex Mono, monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
                           {l.borrower_name ?? l.loan_name ?? '—'}
                         </span>
                         {/* Detail: amount */}
-                        <span style={{ fontSize: 11, color: '#888', fontFamily: 'IBM Plex Mono, monospace', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', flexShrink: 0, whiteSpace: 'nowrap' }}>
                           {l.loan_amount ? `$${l.loan_amount.toLocaleString()}` : '—'}
                         </span>
                         {/* Status badge */}
                         {l.status && (
-                          <span style={{ fontSize: 10, color: '#c9a84c', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 10, color: 'var(--primary)', fontFamily: 'IBM Plex Mono, monospace', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)', borderRadius: 3, padding: '1px 5px', flexShrink: 0, whiteSpace: 'nowrap' }}>
                             {l.status}
                           </span>
                         )}
@@ -247,10 +247,10 @@ export default function GlobalSearch() {
         </div>
 
         {/* Footer hint bar */}
-        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid var(--input)', background: 'rgba(0,0,0,0.3)' }}>
+        <div style={{ display: 'flex', gap: 16, padding: '8px 16px', borderTop: '1px solid var(--input)', background: 'var(--surface)' }}>
           {([['↵', 'select'], ['↑↓', 'navigate'], ['esc', 'close']] as const).map(([key, label]) => (
-            <span key={key} style={{ fontSize: 10, color: '#555', fontFamily: 'IBM Plex Mono, monospace', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <kbd style={{ background: 'var(--input)', borderRadius: 3, padding: '1px 5px', fontSize: 9, color: '#888' }}>{key}</kbd>
+            <span key={key} style={{ fontSize: 10, color: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <kbd style={{ background: 'var(--accent)', borderRadius: 3, padding: '1px 5px', fontSize: 9, color: 'var(--muted-foreground)', border: '1px solid var(--border)' }}>{key}</kbd>
               {label}
             </span>
           ))}

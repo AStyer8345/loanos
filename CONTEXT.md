@@ -18,34 +18,41 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01. Light Mode Polish: Pipeline + Contacts + Loan Detail per-page fixes — semantic tokens, font-sans data cells, layout restructure on loan detail 2026-04-02. Marketing Dashboard light mode: 16 component files themed with CSS variables, 40+ hardcoded dark-mode hex values replaced 2026-04-02. Drip Campaigns v1: Full drip campaign system — 4 new Supabase tables + RLS, TypeScript types + query helpers, 7 API routes, 3-level dashboard UI (overview, detail with 4 tabs, approval queue), 7 React components, TopNav link, 6 campaigns seeded with 23 steps covering past client retention, lead nurture (3 sub-campaigns), realtor relationships, long-term nurture 2026-04-02. n8n Drip Scheduler Upgrade: Workflow `LqBb3YDLjS2eUrDE` rebuilt from 7 nodes to 16 — daily 7am CT trigger, new `get_due_drip_enrollments` RPC, exit rule checking + 14-day frequency guardrail, Claude-powered email generation from skeleton prompts, approval queue branching (requires_approval → queued, else auto-send via Outlook), drip_sends record insert, enrollment step advancement, activity logging 2026-04-02. Migration 074 (`get_due_drip_enrollments` RPC) created and applied 2026-04-02. Marketing Dashboard post editor redesigned with shadcn/ui (SocialDraftList, SocialDraftDetail, MediaManager) 2026-04-03. History tab delete + auto-logging: HistoryTab delete button, `/api/marketing/log` webhook endpoint, n8n workflows wired (V6RhmJpOb7pOzMte + eJG4wckrj6SmSpm1) with correct auth + endpoint 2026-04-03. Social voice guide overhaul: 16 real Adam quotes, tone dial, quality scoring, Jessica Test, post type taxonomy, CTA rules, video/carousel strategy 2026-04-03. Share Page Redesign: 12 new borrower-optimized components in `src/components/share/`, card-based storytelling layout replacing dense data tables, Recharts bar chart, break-even progress bars, collapsible detail accordion, print styles for PDF 2026-04-03.**
 
-## Share Page Redesign — 2026-04-03
+## Share Page Fixes — 2026-04-03 (session 2)
+
+**Removed all recommendation UI, switched to 5yr interest, stacked bar charts.**
+
+- Removed "Best Option" badges, gold glow, crown icons from OptionCard — Adam doesn't want the system making recommendations
+- OptionCardsGrid deltas now compare against first option (index 0) instead of recommended
+- Replaced life-of-loan interest comparison with 5yr `horizonAnalysis.interestMIPaid5yr`
+- PaymentComparisonChart converted to stacked bars (P&I, tax, insurance, HOA, PMI segments)
+
+## Dashboard Scenario Builder Renovation — 2026-04-03 (session 2)
+
+**Results step rebuilt from monolithic wall-of-sections to tabbed progressive disclosure.**
+
+### Changes:
+- **ScenarioBuilder.tsx**: Key Metrics pinned full-width at top (was crushed in 288px `w-72` sidebar). Content split into 3 shadcn Tabs: Comparison (table + break-even) | Analysis (buydown, down payment, etc.) | Charts. Narrative + Actions pinned at bottom.
+- **ScenarioCharts.tsx**: Removed `TotalInterestChart` (life-of-loan numbers). Converted `MonthlyPaymentChart` to stacked bars matching share page pattern.
+- **ScenarioSummaryTable.tsx**: ~11 hardcoded dark-mode colors replaced with CSS variables
+- **KeyMetricsGrid.tsx**: ~20 hardcoded dark-mode colors replaced with CSS variables in MoreInfoModal + SavingsCard
+
+### Phase 2 (future):
+- PDF alignment: replace HTML template with share page + `@media print`
+- Mobile viewport testing
+
+## Share Page Redesign — 2026-04-03 (session 1)
 
 **Borrower-facing share page rebuilt from dense data dump into card-based storytelling flow.**
 
 ### New Components (`src/components/share/`):
-- **constants.ts**: Theme constants (GOLD, TEXT, MUTED, CARD_BG, BORDER, BG) + formatters (fmtCurrency, fmtK, fmtRate)
-- **ShareHero.tsx**: Hero section — borrower name, mode badge, property address, big hero stat number
-- **OptionCard.tsx**: Individual loan option card — header with loan type badge, hero payment, breakdown list, 2×2 stats grid, delta chips, gold glow for winner
-- **OptionCardsGrid.tsx**: Grid layout + `computeDeltas()` comparing each option to recommended
-- **DeltaChip.tsx**: Compact badge showing savings/cost diffs (green=saves, amber=costs)
-- **PaymentComparisonChart.tsx**: Recharts bar chart — gold for winner, muted for others, top labels
-- **BreakEvenVisual.tsx**: Progress bar timeline replacing table — months-to-breakeven on 7yr scale
-- **NarrativeCard.tsx**: AI recommendation with gold first-sentence emphasis
-- **DetailAccordion.tsx**: Collapsible deep-dive (full comparison table + 5yr/15yr horizon analysis)
-- **ShareCTA.tsx**: Calendly + application link buttons
-- **ShareFooter.tsx**: Disclaimer + "Powered by LoanOS"
-- **SharePageLayout.tsx**: Orchestrates all sections with smart visibility + print styles
+- 12 components: ShareHero, OptionCard, OptionCardsGrid, DeltaChip, PaymentComparisonChart, BreakEvenVisual, NarrativeCard, DetailAccordion, ShareCTA, ShareFooter, SharePageLayout, constants
 
 ### Modified:
-- **`src/app/share/[token]/page.tsx`**: Gutted from ~440 lines to ~90. Kept data fetch + loading/error states, replaced monolithic render with `<SharePageLayout>`
+- **`src/app/share/[token]/page.tsx`**: Gutted from ~440 lines to ~90. Delegates to `<SharePageLayout>`
 
 ### Architecture Decision:
-- Separate `src/components/share/` directory — borrower-optimized components that consume `DisplayData` independently from dashboard components
-- Dashboard Results step stays untouched
-
-### Phase 2 (future):
-- PDF alignment: current `generate-pdf` route uses HTML template — can be replaced with share page + `@media print`
-- Test on mobile viewport for card stacking
+- Separate `src/components/share/` directory — borrower-optimized components consuming `DisplayData` independently from dashboard
 
 ---
 

@@ -1,18 +1,29 @@
 # LoanOS Changelog
 
+## [5.8.0] — 2026-04-03 — Dashboard Scenario Builder Renovation + Share Page Fixes
+
+### Changed
+- **ScenarioBuilder Results step**: Rebuilt from monolithic wall-of-sections to tabbed layout. Key Metrics pinned full-width at top (was crushed in 288px sidebar). Content organized into Comparison | Analysis | Charts tabs via shadcn Tabs. Narrative + Actions pinned at bottom.
+- **ScenarioCharts**: Removed `TotalInterestChart` (life-of-loan numbers scare borrowers). Converted `MonthlyPaymentChart` to stacked bars showing P&I, tax, insurance, HOA, PMI segments.
+- **ScenarioSummaryTable + KeyMetricsGrid**: ~30 hardcoded dark-mode colors replaced with CSS variables for light/dark theme support.
+- **Share page OptionCard**: Removed "Best Option" badges, gold glow, crown icons — no system recommendations.
+- **Share page OptionCardsGrid**: Deltas compare against first option (not "recommended"). Interest comparison changed from life-of-loan to 5-year (`horizonAnalysis.interestMIPaid5yr`).
+- **Share page PaymentComparisonChart**: Converted to stacked bars matching dashboard pattern.
+
+### Removed
+- `TotalInterestChart` component (life-of-loan interest comparison)
+- All recommendation/winner UI from share page (badges, glow, crown)
+
 ## [5.7.0] — 2026-04-03 — Share Page Redesign
 
 ### Added
-- **12 new share page components** (`src/components/share/`): ShareHero, OptionCard, OptionCardsGrid, DeltaChip, PaymentComparisonChart, BreakEvenVisual, NarrativeCard, DetailAccordion, ShareCTA, ShareFooter, SharePageLayout, constants
-- **Card-based option display**: Each loan option gets its own card with payment breakdown, stats grid, and delta chips showing differences vs best option
-- **Winner highlighting**: Gold border glow + "Best Option" badge with crown icon on recommended option
-- **Payment comparison bar chart**: Recharts bar chart with gold winner bar and top labels
-- **Break-even progress bars**: Visual timeline replacing dense table — months-to-breakeven on 7-year scale
-- **Smart section visibility**: Chart only with 2+ options, break-even only when applicable, narrative only when exists
-- **Print styles**: `@media print` support — white background, hidden CTAs, color-adjust for paper output
+- **12 new share page components** (`src/components/share/`)
+- **Card-based option display** with payment breakdown, stats grid, and delta chips
+- **Break-even progress bars**: Visual timeline replacing dense table
+- **Print styles**: `@media print` support for PDF output
 
 ### Changed
-- **`src/app/share/[token]/page.tsx`**: Gutted from ~440 lines monolithic render to ~90 lines — delegates to `<SharePageLayout>`
+- **`src/app/share/[token]/page.tsx`**: Gutted from ~440 lines to ~90 — delegates to `<SharePageLayout>`
 
 ### Architecture
 - New `src/components/share/` directory — borrower-optimized components consuming same `DisplayData` type, independent from dashboard components

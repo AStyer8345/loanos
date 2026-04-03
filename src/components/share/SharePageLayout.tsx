@@ -84,7 +84,6 @@ export default function SharePageLayout({ data, displayData }: SharePageLayoutPr
           <OptionCardsGrid
             rows={displayData.rows}
             mode={mode}
-            recommendedIdx={displayData.recommendedIdx}
           />
         </section>
 
@@ -93,7 +92,6 @@ export default function SharePageLayout({ data, displayData }: SharePageLayoutPr
           <section>
             <PaymentComparisonChart
               rows={displayData.rows}
-              recommendedIdx={displayData.recommendedIdx}
             />
           </section>
         )}

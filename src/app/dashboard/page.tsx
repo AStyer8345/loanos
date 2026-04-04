@@ -20,19 +20,20 @@ export default async function DashboardPage() {
   }
   const supabase = createClient()
 
-  // Check onboarding state for setup banner
-  const { data: orgSettings } = await supabase
-    .from('org_settings')
-    .select('onboarding_completed')
-    .eq('organization_id', organizationId)
-    .single()
+  // Parallel fetch: org_settings + loans are independent
+  const [{ data: orgSettings }, { data: loans = [] }] = await Promise.all([
+    supabase
+      .from('org_settings')
+      .select('onboarding_completed')
+      .eq('organization_id', organizationId)
+      .single(),
+    supabase
+      .from('loans')
+      .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days')
+      .eq('organization_id', organizationId)
+      .order('estimated_closing_date', { ascending: true }),
+  ])
   const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
-
-  const { data: loans = [] } = await supabase
-    .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days')
-    .eq('organization_id', organizationId)
-    .order('estimated_closing_date', { ascending: true })
 
   const now = new Date()
   const thisMonth = now.getMonth()
@@ -153,23 +154,44 @@ export default async function DashboardPage() {
   const activeLoans = (loans ?? []).filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
   const activeLoanIds = activeLoans.map(l => l.id)
 
-  const lastActivityMap = new Map<string, string>() // loan_id → occurred_at ISO string
-  if (activeLoanIds.length > 0) {
-    const { data: activityRows = [] } = await supabase
-      .from('activity_log')
-      .select('loan_id, occurred_at, action')
-      .in('loan_id', activeLoanIds)
-      .not('loan_id', 'is', null)
-      .not('action', 'ilike', 'arive.%')
-      .not('action', 'ilike', '%.webhook%')
-      .not('action', 'ilike', 'error_%')
-      .order('occurred_at', { ascending: false })
-      .limit(500)
+  // Parallel fetch: activity_log + contacts are independent (both depend on loans, not each other)
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
-    for (const row of activityRows ?? []) {
-      if (row.loan_id && row.occurred_at && !lastActivityMap.has(row.loan_id)) {
-        lastActivityMap.set(row.loan_id, row.occurred_at)
-      }
+  const [activityResult, contactsResult] = await Promise.all([
+    activeLoanIds.length > 0
+      ? supabase
+          .from('activity_log')
+          .select('loan_id, occurred_at, action')
+          .in('loan_id', activeLoanIds)
+          .not('loan_id', 'is', null)
+          .not('action', 'ilike', 'arive.%')
+          .not('action', 'ilike', '%.webhook%')
+          .not('action', 'ilike', 'error_%')
+          .order('occurred_at', { ascending: false })
+          .limit(500)
+      : Promise.resolve({ data: [] as Array<{ loan_id: string | null; occurred_at: string | null; action: string | null }> }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.from('contacts') as any)
+      .select('id, first_name, last_name, email, phone, referred_by, created_at')
+      .eq('organization_id', organizationId)
+      .eq('stage', 'Lead')
+      .neq('hot_lead_dismissed', true)
+      .not('contact_type', 'in', '("realtor","agent","lender","title")')
+      .gte('created_at', fourteenDaysAgo.toISOString())
+      .order('created_at', { ascending: false }) as Promise<{ data: Array<{
+        id: string; first_name: string | null; last_name: string | null
+        email: string | null; phone: string | null; referred_by: string | null
+        created_at: string
+      }> | null }>,
+  ])
+
+  const activityRows = activityResult.data ?? []
+  const webLeadContacts = contactsResult.data ?? []
+
+  const lastActivityMap = new Map<string, string>() // loan_id → occurred_at ISO string
+  for (const row of activityRows) {
+    if (row.loan_id && row.occurred_at && !lastActivityMap.has(row.loan_id)) {
+      lastActivityMap.set(row.loan_id, row.occurred_at)
     }
   }
 
@@ -211,23 +233,6 @@ export default async function DashboardPage() {
   }))
 
   const scoredLoans = rankLoans(loansForScoring)
-
-  // ── Hot Leads — all Lead-stage contacts, created within 14 days, not dismissed ─
-  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: webLeadContacts = [] } = await (supabase.from('contacts') as any)
-    .select('id, first_name, last_name, email, phone, referred_by, created_at')
-    .eq('organization_id', organizationId)
-    .eq('stage', 'Lead')
-    .neq('hot_lead_dismissed', true)
-    .not('contact_type', 'in', '("realtor","agent","lender","title")')
-    .gte('created_at', fourteenDaysAgo.toISOString())
-    .order('created_at', { ascending: false }) as { data: Array<{
-      id: string; first_name: string | null; last_name: string | null
-      email: string | null; phone: string | null; referred_by: string | null
-      created_at: string
-    }> | null }
 
   // Get most recent contact_activity note per lead
   const webLeadIds = (webLeadContacts ?? []).map(c => c.id)

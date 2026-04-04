@@ -18,6 +18,33 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01. Light Mode Polish: Pipeline + Contacts + Loan Detail per-page fixes — semantic tokens, font-sans data cells, layout restructure on loan detail 2026-04-02. Marketing Dashboard light mode: 16 component files themed with CSS variables, 40+ hardcoded dark-mode hex values replaced 2026-04-02. Drip Campaigns v1: Full drip campaign system — 4 new Supabase tables + RLS, TypeScript types + query helpers, 7 API routes, 3-level dashboard UI (overview, detail with 4 tabs, approval queue), 7 React components, TopNav link, 6 campaigns seeded with 23 steps covering past client retention, lead nurture (3 sub-campaigns), realtor relationships, long-term nurture 2026-04-02. n8n Drip Scheduler Upgrade: Workflow `LqBb3YDLjS2eUrDE` rebuilt from 7 nodes to 16 — daily 7am CT trigger, new `get_due_drip_enrollments` RPC, exit rule checking + 14-day frequency guardrail, Claude-powered email generation from skeleton prompts, approval queue branching (requires_approval → queued, else auto-send via Outlook), drip_sends record insert, enrollment step advancement, activity logging 2026-04-02. Migration 074 (`get_due_drip_enrollments` RPC) created and applied 2026-04-02. Marketing Dashboard post editor redesigned with shadcn/ui (SocialDraftList, SocialDraftDetail, MediaManager) 2026-04-03. History tab delete + auto-logging: HistoryTab delete button, `/api/marketing/log` webhook endpoint, n8n workflows wired (V6RhmJpOb7pOzMte + eJG4wckrj6SmSpm1) with correct auth + endpoint 2026-04-03. Social voice guide overhaul: 16 real Adam quotes, tone dial, quality scoring, Jessica Test, post type taxonomy, CTA rules, video/carousel strategy 2026-04-03. Share Page Redesign: 12 new borrower-optimized components in `src/components/share/`, card-based storytelling layout replacing dense data tables, Recharts bar chart, break-even progress bars, collapsible detail accordion, print styles for PDF 2026-04-03. Share Page Branding + PDF Unification: dynamic LO branding from org+user_settings, print/PDF unified via `@media print` + `?print=1`, visual polish (NarrativeCard, OptionCard, chart height), delta chip label fix (interest→interest+MI), removed "Powered by LoanOS" 2026-04-03.**
 
+## Dashboard Analytics Upgrade — 2026-04-04 (session 4)
+
+**Full analytics overhaul: 7 new chart components, query parallelization.**
+
+### New Components (src/components/dashboard/charts/):
+- **SparklineCard.tsx**: Reusable KPI card with tiny AreaChart sparkline (30% opacity) — used for Active Loans, Pipeline Volume, Commission YTD, Funded YTD
+- **ConversionFunnel.tsx**: Horizontal bar funnel (Lead → Application → Pre-Approval → Submitted → Approved → CTC → Funded) with drop-off percentages
+- **ReferralLeaderboard.tsx**: Top 10 referral sources ranked by volume with percentage bars
+- **RateLockCountdown.tsx**: Color-coded progress bars for rate lock expiration (green/yellow/orange/red + expired state)
+- **YoYVolumeChart.tsx**: Side-by-side BarChart comparing this year vs last year monthly volume
+- **CommissionForecast.tsx**: Stacked BarChart showing actual (solid) + projected (30% opacity) commission from pipeline closing dates
+- **DaysToCloseGauge.tsx**: Horizontal bar gauge showing avg days-to-close by loan type with color coding
+
+### Data Layer Changes (src/app/dashboard/page.tsx):
+- Added `referral_source, rate_lock_date, rate_lock_days` to loans query select
+- Added 7 new computed data sets: sparklineMonths, funnelData, referralData, rateLockLoans, yoyChartData, forecastData, daysToCloseData
+- Parallelized queries with Promise.all: org_settings+loans (batch 1), activity_log+contacts (batch 2)
+
+### DashboardClient Changes:
+- Pipeline tab: KPI cards replaced with SparklineCard components, ConversionFunnel after Needs Attention, ReferralLeaderboard after Hot Leads, RateLockCountdown after Referral Leaderboard
+- Performance tab: Replaced inline charts with YoYVolumeChart + CommissionForecast, added DaysToCloseGauge
+- Stale loans: Removed `slice(0, 12)` cap, now shows all with scrollable container
+
+### Other:
+- Fixed pre-existing build error in chat/route.ts: cast `supabase` to `any` for `lenders` table queries (table not in generated types)
+- Lender database tool added to AI chat (separate commit by Adam)
+
 ## Share Page Branding + PDF Unification — 2026-04-03 (session 3)
 
 **Dynamic LO branding, print/PDF unification, visual polish.**

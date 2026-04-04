@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [6.0.0] — 2026-04-04 — Dashboard Analytics Upgrade
+
+### Added
+- **7 new chart components** (`src/components/dashboard/charts/`): SparklineCard, ConversionFunnel, ReferralLeaderboard, RateLockCountdown, YoYVolumeChart, CommissionForecast, DaysToCloseGauge
+- **Sparkline KPI cards**: Active Loans, Pipeline Volume, Commission YTD, Funded YTD now show trailing 6-month trend lines
+- **Conversion funnel**: Lead → Application → Pre-Approval → Submitted → Approved → CTC → Funded with drop-off percentages
+- **Referral source leaderboard**: Top 10 sources by funded + in-process volume
+- **Rate lock countdown bars**: Color-coded (green/yellow/orange/red) expiration tracking per loan
+- **YoY volume comparison**: Side-by-side monthly bars for this year vs last year
+- **Commission forecast**: Actual + projected commission from pipeline estimated closing dates
+- **Days-to-close gauge**: Avg days by loan type (Conventional, FHA, VA, etc.) with color thresholds
+
+### Changed
+- **Dashboard page.tsx**: Added 7 new computed data sets, parallelized independent Supabase queries with `Promise.all` (2 batches)
+- **DashboardClient.tsx**: Pipeline tab KPI cards → SparklineCards, added funnel/leaderboard/rate-lock sections; Performance tab → YoY/forecast/gauge charts
+- **Stale loans**: Removed 12-loan display cap, now shows all with `max-h-[400px] overflow-y-auto`
+
+### Fixed
+- Pre-existing build error in `chat/route.ts`: `lenders` table not in generated Supabase types (cast to `any` with eslint-disable)
+
 ## [5.9.0] — 2026-04-03 — Share Page Branding + PDF Unification
 
 ### Changed

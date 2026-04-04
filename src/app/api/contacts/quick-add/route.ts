@@ -31,16 +31,30 @@ async function extractContactInfoWithAI(raw: string): Promise<ExtractedContact> 
   "company_name": string | null
 }
 
+CRITICAL — Name parsing rules:
+- first_name and last_name are ONLY the person's actual name (typically 1-2 words each).
+- Do NOT include words from the surrounding sentence in the name. "Add John Smith, phone number..." → first_name: "John", last_name: "Smith". Stop at punctuation, commas, or transition words like "phone", "email", "he", "she", "from", etc.
+- If only one name is given, put it in first_name and set last_name to null.
+
 Stage inference rules (use exact string from list above):
 - "just met", "new lead", "open house", "reached out", no purchase context → "Lead"
 - "wants to apply", "ready to start", "filling out app" → "Application"
-- "pre-approved", "got approval", "has approval" → "Pre-Approved"
+- "pre-approved", "got approval", "has approval", "we discussed pre-approval" → "Pre-Approved"
 - "in process", "submitted to lender" → "In Process"
 - "closing soon", "clear to close" → "Closing"
 - "funded", "closed" → "Closed"
 - If unclear → null
 
-Notes: capture any free-form context not represented by other fields — personality, situation, timeline, follow-up reminders. Put it here verbatim or lightly paraphrased.
+Source rules (lead_source — how the borrower found us):
+- "web lead", "website", "online", "found my website" → "Web Lead"
+- "realtor referral", "referred by [realtor name]" → "Realtor Referral"
+- "Zillow", "LendingTree", "Bankrate" → use platform name
+- "open house" → "Open House"
+- "called me", "walked in" → "Direct"
+- "referral", "friend referred" → "Referral"
+- If unclear → null
+
+Notes: capture ALL free-form context not represented by other fields — situation details, conversation notes, action items, timeline, follow-up reminders, how the conversation went, next steps. This is the most important field for context. Include everything the user said that isn't a structured field.
 
 Return ONLY the JSON object, no markdown, no explanation.
 

@@ -19,6 +19,7 @@ const FIELD_LABELS: [keyof ExtractedContact, string][] = [
   ['referred_by', 'Referred By'],
   ['source', 'Source'],
   ['company_name', 'Company'],
+  ['notes', 'Notes'],
 ]
 
 export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, onCancel }: Props) {
@@ -39,6 +40,14 @@ export default function QuickAddConfirmation({ extracted, duplicate, onConfirm, 
         {FIELD_LABELS.map(([key, label]) => {
           const val = extracted[key]
           if (!val) return null
+          if (key === 'notes') {
+            return (
+              <div key={key} className="mt-2 pt-2 border-t border-input">
+                <span className="text-muted-foreground text-[10px] uppercase tracking-wide">{label}</span>
+                <p className="text-foreground text-xs mt-0.5 leading-relaxed">{val}</p>
+              </div>
+            )
+          }
           return (
             <div key={key} className="flex gap-2">
               <span className="text-muted-foreground w-20 shrink-0">{label}:</span>

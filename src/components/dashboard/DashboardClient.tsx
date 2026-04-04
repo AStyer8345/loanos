@@ -18,6 +18,7 @@ import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { Card } from '@/components/ui/card'
+import SparklineCard from './charts/SparklineCard'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -39,6 +40,7 @@ interface DashboardClientProps {
   scoredLoans: ScoredLoan[]
   hotLeads: HotLead[]
   showSetupBanner?: boolean
+  sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -131,34 +133,44 @@ export default function DashboardClient(props: DashboardClientProps) {
         <div className="space-y-4">
           {/* ── KPI Cards ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Link href="/dashboard/loans?stage=funded&period=ytd">
-              <Card className="border-l-4 border-l-[#10b981] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Commission Earned</div>
-                <div className="text-2xl font-mono font-bold text-emerald-400">{fmt(props.commissionYTD)}</div>
-                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.fundedYTD} loans · {fmtK(props.volumeYTD)} volume YTD</div>
-              </Card>
-            </Link>
-            <Link href="/dashboard/loans">
-              <Card className="border-l-4 border-l-primary p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Commission</div>
-                <div className="text-2xl font-mono font-bold text-primary">{fmt(props.pipelineCommission ?? props.totalActiveCommission)}</div>
-                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.pipelineCount ?? props.totalActive} loans · {fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
-              </Card>
-            </Link>
-            <Link href="/dashboard/loans?stage=funded&period=mtd">
-              <Card className="border-l-4 border-l-[#8b5cf6] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Closed This Month</div>
-                <div className="text-2xl font-mono font-bold text-violet-400">{fmt(props.commissionThisMonth)}</div>
-                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{props.fundedThisMonth} loans · {fmtK(props.volumeThisMonth)} volume</div>
-              </Card>
-            </Link>
-            <Link href="/dashboard/loans">
-              <Card className="border-l-4 border-l-[#3b82f6] p-3 hover:bg-secondary/50 transition-colors">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Pipeline Loans</div>
-                <div className="text-2xl font-mono font-bold text-foreground">{props.pipelineCount ?? props.totalActive}</div>
-                <div className="text-[11px] font-mono text-muted-foreground mt-0.5">{fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume</div>
-              </Card>
-            </Link>
+            <SparklineCard
+              href="/dashboard/loans?stage=funded&period=ytd"
+              label="Commission Earned"
+              value={fmt(props.commissionYTD)}
+              subtitle={`${props.fundedYTD} loans · ${fmtK(props.volumeYTD)} volume YTD`}
+              borderColor="#10b981"
+              valueColor="text-emerald-400"
+              data={props.sparklineMonths.map(m => ({ value: m.commission }))}
+              sparkColor="#10b981"
+            />
+            <SparklineCard
+              href="/dashboard/loans"
+              label="Pipeline Commission"
+              value={fmt(props.pipelineCommission ?? props.totalActiveCommission)}
+              subtitle={`${props.pipelineCount ?? props.totalActive} loans · ${fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume`}
+              borderColor="#C9A84C"
+              data={props.sparklineMonths.map(m => ({ value: m.volume }))}
+              sparkColor="#C9A84C"
+            />
+            <SparklineCard
+              href="/dashboard/loans?stage=funded&period=mtd"
+              label="Closed This Month"
+              value={fmt(props.commissionThisMonth)}
+              subtitle={`${props.fundedThisMonth} loans · ${fmtK(props.volumeThisMonth)} volume`}
+              borderColor="#8b5cf6"
+              valueColor="text-violet-400"
+              data={props.sparklineMonths.map(m => ({ value: m.funded }))}
+              sparkColor="#8b5cf6"
+            />
+            <SparklineCard
+              href="/dashboard/loans"
+              label="Pipeline Loans"
+              value={String(props.pipelineCount ?? props.totalActive)}
+              subtitle={`${fmtK(props.pipelineVolume ?? props.totalActiveVolume)} volume`}
+              borderColor="#3b82f6"
+              data={props.sparklineMonths.map(m => ({ value: m.volume }))}
+              sparkColor="#3b82f6"
+            />
           </div>
 
           {/* ── Needs Attention (merged urgent + stale) ── */}

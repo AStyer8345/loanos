@@ -252,6 +252,31 @@ export default async function DashboardPage() {
   const MONTH_ORDER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   const chartData = MONTH_ORDER.filter(m => monthlyMap[m]).map(m => ({ month: m, ...monthlyMap[m] }))
 
+  // ── Sparkline data: trailing 6 months of commission, volume, funded count ───
+  const sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }> = []
+  {
+    const today = new Date()
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+      const mk = d.toLocaleString('en-US', { month: 'short' })
+      const yr = d.getFullYear()
+      const mo = d.getMonth()
+      let commission = 0, volume = 0, funded = 0
+      for (const loan of loans ?? []) {
+        const rawStatus = (loan.status ?? '').toLowerCase()
+        const closingDate = loan.closing_date || loan.funding_date
+        if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+        const cd = new Date(closingDate)
+        if (cd.getFullYear() === yr && cd.getMonth() === mo) {
+          commission += loan.commission_amount ?? 0
+          volume += loan.loan_amount ?? 0
+          funded++
+        }
+      }
+      sparklineMonths.push({ month: mk, commission, volume, funded })
+    }
+  }
+
   return (
     <DashboardClient
       totalActive={totalActive}
@@ -271,6 +296,7 @@ export default async function DashboardPage() {
       urgentFlags={urgentFlags}
       staleLoans={staleLoans}
       chartData={chartData}
+      sparklineMonths={sparklineMonths}
       scoredLoans={scoredLoans}
       hotLeads={hotLeads}
       showSetupBanner={showSetupBanner}

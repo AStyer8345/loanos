@@ -360,6 +360,72 @@ export default async function DashboardPage() {
   }
   rateLockLoans.sort((a, b) => a.daysRemaining - b.daysRemaining)
 
+  // ── YoY comparison: last year monthly volume ─────────────────────────────
+  const lastYearMap: Record<string, { loans: number; volume: number; commission: number }> = {}
+  const lastYear = thisYear - 1
+  for (const loan of loans ?? []) {
+    const rawStatus = (loan.status ?? '').toLowerCase()
+    const closingDate = loan.closing_date || loan.funding_date
+    if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+    const cd = new Date(closingDate)
+    if (cd.getFullYear() !== lastYear) continue
+    const mk = cd.toLocaleString('en-US', { month: 'short' })
+    if (!lastYearMap[mk]) lastYearMap[mk] = { loans: 0, volume: 0, commission: 0 }
+    lastYearMap[mk].loans++
+    lastYearMap[mk].volume += loan.loan_amount ?? 0
+    lastYearMap[mk].commission += loan.commission_amount ?? 0
+  }
+
+  const yoyChartData = MONTH_ORDER.map(m => ({
+    month: m,
+    thisYear: monthlyMap[m]?.volume ?? 0,
+    lastYear: lastYearMap[m]?.volume ?? 0,
+  }))
+
+  // ── Commission forecast: actual + projected from pipeline closing dates ──
+  const forecastData = MONTH_ORDER.map((m, i) => {
+    const actual = monthlyMap[m]?.commission ?? 0
+    let projected = 0
+    for (const loan of activeLoans) {
+      if (!isInStageGroup(loan.status, STAGE_GROUPS.IN_PROCESS)) continue
+      const ecd = loan.estimated_closing_date
+      if (!ecd) continue
+      const cd = new Date(ecd)
+      if (cd.getFullYear() !== thisYear) continue
+      if (cd.getMonth() === i) {
+        projected += loan.commission_amount ?? 0
+      }
+    }
+    return { month: m, actual, projected }
+  })
+
+  // ── Avg days-to-close by loan type (YTD funded loans) ────────────────────
+  const dtcMap = new Map<string, { totalDays: number; count: number }>()
+  for (const loan of loans ?? []) {
+    const rawStatus = (loan.status ?? '').toLowerCase()
+    if (!(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+    const closingDate = loan.closing_date || loan.funding_date
+    if (!closingDate || !loan.created_at) continue
+    const cd = new Date(closingDate)
+    if (cd.getFullYear() !== thisYear) continue
+    const created = new Date(loan.created_at)
+    const days = Math.floor((cd.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))
+    if (days < 0 || days > 365) continue
+    const loanType = loan.loan_type ?? 'Other'
+    const entry = dtcMap.get(loanType) ?? { totalDays: 0, count: 0 }
+    entry.totalDays += days
+    entry.count++
+    dtcMap.set(loanType, entry)
+  }
+
+  const daysToCloseData = [...dtcMap.entries()]
+    .map(([type, data]) => ({
+      type,
+      avgDays: Math.round(data.totalDays / data.count),
+      count: data.count,
+    }))
+    .sort((a, b) => b.count - a.count)
+
   return (
     <DashboardClient
       totalActive={totalActive}
@@ -386,6 +452,9 @@ export default async function DashboardPage() {
       showSetupBanner={showSetupBanner}
       referralData={referralData}
       rateLockLoans={rateLockLoans}
+      yoyChartData={yoyChartData}
+      forecastData={forecastData}
+      daysToCloseData={daysToCloseData}
     />
   )
 }

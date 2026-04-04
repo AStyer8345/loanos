@@ -8,7 +8,7 @@ import {
 import SmartActionQueue from '@/components/SmartActionQueue'
 import type { ScoredLoan } from '@/lib/scoreLoans'
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
+  BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell,
 } from 'recharts'
 import DailyBriefingPanel from './DailyBriefingPanel'
@@ -22,6 +22,9 @@ import SparklineCard from './charts/SparklineCard'
 import ConversionFunnel from './charts/ConversionFunnel'
 import ReferralLeaderboard from './charts/ReferralLeaderboard'
 import RateLockCountdown from './charts/RateLockCountdown'
+import YoYVolumeChart from './charts/YoYVolumeChart'
+import CommissionForecast from './charts/CommissionForecast'
+import DaysToCloseGauge from './charts/DaysToCloseGauge'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -47,6 +50,9 @@ interface DashboardClientProps {
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
   referralData: Array<{ source: string; loans: number; volume: number; funded: number }>
   rateLockLoans: Array<{ id: string; name: string; daysRemaining: number; totalDays: number; expirationDate: string }>
+  yoyChartData: Array<{ month: string; thisYear: number; lastYear: number }>
+  forecastData: Array<{ month: string; actual: number; projected: number }>
+  daysToCloseData: Array<{ type: string; avgDays: number; count: number }>
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -291,43 +297,10 @@ export default function DashboardClient(props: DashboardClientProps) {
             ))}
           </div>
 
-          {/* Charts */}
+          {/* Charts — YoY Volume + Commission Forecast */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="p-4">
-              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">Volume by Month</h3>
-              {props.chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={props.chartData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
-                    <XAxis dataKey="month" tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} axisLine={{ stroke: '#1e293b' }} tickLine={false} />
-                    <YAxis tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} tickFormatter={v => fmtK(v as number)} />
-                    <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-                    <Bar dataKey="volume" name="Volume" fill="#3b82f6" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[220px] flex items-center justify-center text-muted-foreground font-mono text-sm">No funded loans this year</div>
-              )}
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">Commission Trend</h3>
-              {props.chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={props.chartData.reduce<Array<{ month: string; cumCommission: number }>>((acc, d) => {
-                    const prev = acc.length > 0 ? acc[acc.length - 1].cumCommission : 0
-                    acc.push({ month: d.month, cumCommission: prev + d.commission })
-                    return acc
-                  }, [])} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
-                    <XAxis dataKey="month" tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} axisLine={{ stroke: '#1e293b' }} tickLine={false} />
-                    <YAxis tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} tickFormatter={v => fmtK(v as number)} />
-                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#334155' }} />
-                    <Line type="monotone" dataKey="cumCommission" name="Cumulative Commission" stroke="#C9A84C" strokeWidth={2.5} dot={{ r: 4, fill: '#C9A84C' }} activeDot={{ r: 5 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[220px] flex items-center justify-center text-muted-foreground font-mono text-sm">No data yet</div>
-              )}
-            </Card>
+            <YoYVolumeChart data={props.yoyChartData} currentYear={new Date().getFullYear()} />
+            <CommissionForecast data={props.forecastData} />
           </div>
 
           {/* Loans by stage chart */}
@@ -346,6 +319,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               </BarChart>
             </ResponsiveContainer>
           </Card>
+
+          {/* Days to Close Gauge */}
+          <DaysToCloseGauge data={props.daysToCloseData} />
 
           {/* Monthly breakdown table */}
           {props.chartData.length > 0 && (

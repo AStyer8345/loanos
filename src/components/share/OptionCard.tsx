@@ -12,22 +12,23 @@ interface OptionCardProps {
   row: ScenarioDisplayRow
   deltas: DeltaItem[]
   mode: 'purchase' | 'refinance'
+  index: number
 }
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9px] font-medium uppercase tracking-wider" style={{ color: MUTED }}>
+      <p className="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: MUTED }}>
         {label}
       </p>
-      <p className="text-sm font-semibold" style={{ color: TEXT, fontFamily: "'IBM Plex Mono', monospace" }}>
+      <p className="text-sm font-bold" style={{ color: TEXT, fontFamily: "'IBM Plex Mono', monospace" }}>
         {value}
       </p>
     </div>
   )
 }
 
-export default function OptionCard({ row, deltas, mode }: OptionCardProps) {
+export default function OptionCard({ row, deltas, mode, index }: OptionCardProps) {
   const breakdownItems: { label: string; value: number }[] = [
     { label: 'Principal & Interest', value: row.monthlyPI },
     { label: 'Property Tax', value: row.propertyTaxes },
@@ -38,70 +39,96 @@ export default function OptionCard({ row, deltas, mode }: OptionCardProps) {
 
   return (
     <div
-      className="rounded-2xl p-5 flex flex-col gap-4"
+      className="rounded-2xl flex flex-col"
       style={{
-        background: CARD_BG,
-        border: `1px solid ${BORDER}`,
-        borderTop: `2px solid ${GOLD}30`,
-        transition: 'border-top-color 0.2s ease',
+        background: index === 0
+          ? `linear-gradient(180deg, #1a1710 0%, ${CARD_BG} 100%)`
+          : CARD_BG,
+        border: `1px solid ${index === 0 ? `${GOLD}30` : BORDER}`,
+        boxShadow: index === 0
+          ? `0 2px 16px rgba(201,168,76,0.06)`
+          : '0 2px 8px rgba(0,0,0,0.2)',
       }}
     >
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <h3 className="text-sm font-bold" style={{ color: TEXT }}>
-          {row.label}
-        </h3>
-        <span
-          className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md"
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            color: MUTED,
-            border: `1px solid ${BORDER}`,
-          }}
-        >
-          {row.loanType}
-        </span>
-      </div>
-
-      {/* Hero Payment */}
-      <div>
-        <p className="text-3xl font-bold" style={{ color: TEXT, fontFamily: "'IBM Plex Mono', monospace" }}>
-          {fmtCurrency(row.totalMonthlyPayment)}
-          <span className="text-sm font-medium" style={{ color: MUTED }}>/mo</span>
-        </p>
-      </div>
-
-      {/* Payment Breakdown */}
+      {/* Gold accent bar at top */}
       <div
-        className="rounded-xl p-3 space-y-1.5"
-        style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${BORDER}` }}
-      >
-        {breakdownItems.map((item) => (
-          <div key={item.label} className="flex items-center justify-between">
-            <span className="text-[10px]" style={{ color: MUTED }}>{item.label}</span>
-            <span className="text-[10px] font-medium" style={{ color: TEXT, fontFamily: "'IBM Plex Mono', monospace" }}>
-              {fmtCurrency(item.value)}
-            </span>
-          </div>
-        ))}
-      </div>
+        style={{
+          height: 3,
+          borderRadius: '16px 16px 0 0',
+          background: index === 0
+            ? `linear-gradient(90deg, ${GOLD}60, ${GOLD}, ${GOLD}60)`
+            : `linear-gradient(90deg, ${GOLD}00, ${GOLD}30, ${GOLD}00)`,
+        }}
+      />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <MiniStat label="Rate" value={fmtRate(row.interestRate)} />
-        <MiniStat label="APR" value={fmtRate(row.apr)} />
-        <MiniStat label="Loan Amount" value={fmtCurrency(row.loanAmount)} />
-        <MiniStat label={mode === 'purchase' ? 'Cash to Close' : 'Closing Costs'} value={fmtCurrency(row.cashToClose)} />
-      </div>
+      <div className="p-6 flex flex-col gap-5 flex-1">
+        {/* Header */}
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-base font-bold" style={{ color: TEXT }}>
+            {row.label}
+          </h3>
+          <span
+            className="text-[9px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-md"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              color: `${MUTED}CC`,
+              border: `1px solid ${BORDER}`,
+            }}
+          >
+            {row.loanType}
+          </span>
+        </div>
 
-      {/* Delta Chips */}
-      {deltas.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {deltas.map((d, i) => (
-            <DeltaChip key={i} value={d.value} label={d.label} type={d.type} />
+        {/* Hero Payment — the main event */}
+        <div className="py-1">
+          <p
+            className="text-4xl sm:text-[42px] font-bold leading-none"
+            style={{
+              color: TEXT,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {fmtCurrency(row.totalMonthlyPayment)}
+            <span className="text-base font-medium ml-0.5" style={{ color: MUTED }}>/mo</span>
+          </p>
+        </div>
+
+        {/* Payment Breakdown */}
+        <div
+          className="rounded-xl p-4 space-y-2.5"
+          style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${BORDER}` }}
+        >
+          {breakdownItems.map((item) => (
+            <div key={item.label} className="flex items-center justify-between">
+              <span className="text-[11px]" style={{ color: MUTED }}>{item.label}</span>
+              <span
+                className="text-[11px] font-semibold"
+                style={{ color: TEXT, fontFamily: "'IBM Plex Mono', monospace" }}
+              >
+                {fmtCurrency(item.value)}
+              </span>
+            </div>
           ))}
         </div>
-      )}
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <MiniStat label="Rate" value={fmtRate(row.interestRate)} />
+          <MiniStat label="APR" value={fmtRate(row.apr)} />
+          <MiniStat label="Loan Amount" value={fmtCurrency(row.loanAmount)} />
+          <MiniStat label={mode === 'purchase' ? 'Cash to Close' : 'Closing Costs'} value={fmtCurrency(row.cashToClose)} />
+        </div>
+
+        {/* Delta Chips — push to bottom */}
+        {deltas.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2 mt-auto">
+            {deltas.map((d, i) => (
+              <DeltaChip key={i} value={d.value} label={d.label} type={d.type} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

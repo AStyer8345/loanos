@@ -3,10 +3,10 @@
 import { useMemo } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer, Legend, Cell, LabelList,
 } from 'recharts'
 import type { ScenarioDisplayRow } from '@/lib/scenarios/displayData'
-import { TEXT, MUTED, CARD_BG, BORDER, fmtCurrency, fmtK } from './constants'
+import { TEXT, MUTED, CARD_BG, BORDER, GOLD, fmtCurrency, fmtK } from './constants'
 
 const SEGMENT_COLORS = {
   pi: '#5b8def',
@@ -31,6 +31,7 @@ export default function PaymentComparisonChart({ rows }: PaymentComparisonChartP
     Insurance: Math.round(r.homeownersInsurance),
     ...(hasHOA ? { HOA: Math.round(r.hoa) } : {}),
     ...(hasPMI ? { PMI: Math.round(r.pmi) } : {}),
+    total: Math.round(r.totalMonthlyPayment),
   })), [rows, hasHOA, hasPMI])
 
   if (rows.length < 2) return null
@@ -43,19 +44,28 @@ export default function PaymentComparisonChart({ rows }: PaymentComparisonChartP
     ...(hasPMI ? [{ key: 'PMI', color: SEGMENT_COLORS.pmi }] : []),
   ]
 
+  // Find the lowest-payment option index
+  const lowestIdx = rows.reduce(
+    (min, r, i) => (r.totalMonthlyPayment < rows[min].totalMonthlyPayment ? i : min),
+    0,
+  )
+
   return (
-    <div className="rounded-2xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
-      <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: '#C9A84C' }}>
+    <div className="rounded-2xl p-6" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-1"
+        style={{ color: GOLD }}
+      >
         Monthly Payment Comparison
       </p>
-      <p className="text-[10px] mb-4" style={{ color: MUTED }}>
-        Total monthly cost broken down by component
+      <p className="text-sm mb-6" style={{ color: MUTED }}>
+        See how each option breaks down — the lowest total is highlighted.
       </p>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={chartData} margin={{ top: 30, right: 10, bottom: 0, left: 0 }}>
           <XAxis
             dataKey="name"
-            tick={{ fill: MUTED, fontSize: 11, fontWeight: 500 }}
+            tick={{ fill: TEXT, fontSize: 12, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
@@ -70,29 +80,56 @@ export default function PaymentComparisonChart({ rows }: PaymentComparisonChartP
             contentStyle={{
               background: '#1a1a1a',
               border: `1px solid ${BORDER}`,
-              borderRadius: 10,
+              borderRadius: 12,
               fontSize: 12,
               color: TEXT,
               fontFamily: "'IBM Plex Mono', monospace",
+              boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
             }}
-            labelStyle={{ color: MUTED }}
+            labelStyle={{ color: GOLD, fontWeight: 600 }}
             formatter={(v: any) => fmtCurrency(Number(v))} // eslint-disable-line @typescript-eslint/no-explicit-any
           />
           <Legend
-            wrapperStyle={{ fontSize: 10, color: MUTED, paddingTop: 8 }}
+            wrapperStyle={{ fontSize: 11, color: MUTED, paddingTop: 12 }}
             iconType="circle"
             iconSize={8}
           />
-          {segments.map((seg, i) => (
-            <Bar
-              key={seg.key}
-              dataKey={seg.key}
-              stackId="payment"
-              fill={seg.color}
-              radius={i === segments.length - 1 ? [8, 8, 0, 0] : [0, 0, 0, 0]}
-              maxBarSize={90}
-            />
-          ))}
+          {segments.map((seg, i) => {
+            const isLast = i === segments.length - 1
+            return (
+              <Bar
+                key={seg.key}
+                dataKey={seg.key}
+                stackId="payment"
+                fill={seg.color}
+                radius={isLast ? [6, 6, 0, 0] : [0, 0, 0, 0]}
+                maxBarSize={80}
+              >
+                {/* Only put total label on the top segment */}
+                {isLast && (
+                  <LabelList
+                    dataKey="total"
+                    position="top"
+                    formatter={(v: any) => fmtCurrency(Number(v))} // eslint-disable-line @typescript-eslint/no-explicit-any
+                    style={{
+                      fill: TEXT,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                    }}
+                  />
+                )}
+                {/* Highlight lowest payment bar */}
+                {chartData.map((_, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={seg.color}
+                    fillOpacity={idx === lowestIdx ? 1 : 0.7}
+                  />
+                ))}
+              </Bar>
+            )
+          })}
         </BarChart>
       </ResponsiveContainer>
     </div>

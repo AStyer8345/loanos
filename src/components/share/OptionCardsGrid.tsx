@@ -53,7 +53,7 @@ export default function OptionCardsGrid({ rows, mode }: OptionCardsGridProps) {
 
   return (
     <div
-      className={`grid gap-4 ${
+      className={`grid gap-5 ${
         rows.length === 2
           ? 'grid-cols-1 sm:grid-cols-2'
           : rows.length === 3
@@ -69,6 +69,7 @@ export default function OptionCardsGrid({ rows, mode }: OptionCardsGridProps) {
             row={row}
             deltas={deltas}
             mode={mode}
+            index={i}
           />
         )
       })}

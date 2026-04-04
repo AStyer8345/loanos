@@ -2,7 +2,7 @@
 
 import type { DisplayData } from '@/lib/scenarios/displayData'
 import type { ShareBranding } from '@/app/api/share/[token]/route'
-import { BG, TEXT, GOLD, fmtCurrency } from './constants'
+import { BG, TEXT, GOLD, MUTED, fmtCurrency } from './constants'
 import ShareHero from './ShareHero'
 import OptionCardsGrid from './OptionCardsGrid'
 import PaymentComparisonChart from './PaymentComparisonChart'
@@ -57,7 +57,7 @@ function getHeroStat(displayData: DisplayData): { label: string; value: string; 
       return {
         label: 'Monthly Savings',
         value: `${fmtCurrency(savings)}/mo`,
-        sublabel: `${fmtCurrency(savings * 12)}/yr \u00B7 ${fmtCurrency(savings * 60)} over 5 years`,
+        sublabel: `${fmtCurrency(savings * 12)}/yr · ${fmtCurrency(savings * 60)} over 5 years`,
       }
     }
     const payments = displayData.rows.map(r => r.totalMonthlyPayment).filter(p => p > 0)
@@ -67,6 +67,26 @@ function getHeroStat(displayData: DisplayData): { label: string; value: string; 
     }
     return { label: 'Refinance Analysis Ready', value: 'See details below' }
   }
+}
+
+/** Section intro component for visual rhythm between sections */
+function SectionIntro({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-5">
+      <div className="flex items-center gap-3 mb-1">
+        <div style={{ width: 20, height: 1, background: GOLD }} />
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.15em]"
+          style={{ color: GOLD }}
+        >
+          {title}
+        </p>
+      </div>
+      {subtitle && (
+        <p className="text-sm ml-8" style={{ color: MUTED }}>{subtitle}</p>
+      )}
+    </div>
+  )
 }
 
 export default function SharePageLayout({ data, displayData, branding }: SharePageLayoutProps) {
@@ -113,10 +133,18 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
       />
 
       {/* Main content */}
-      <div className="max-w-3xl mx-auto px-5 py-8 sm:py-10 space-y-8">
+      <div className="max-w-3xl mx-auto px-6 py-10 sm:py-14 space-y-12">
 
         {/* 2. Option Cards */}
         <section>
+          <SectionIntro
+            title="Your Options"
+            subtitle={
+              displayData.rows.length > 1
+                ? `${displayData.rows.length} scenarios compared side by side.`
+                : undefined
+            }
+          />
           <OptionCardsGrid
             rows={displayData.rows}
             mode={mode}
@@ -126,6 +154,10 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
         {/* 3. Payment Comparison Chart */}
         {hasMultipleOptions && (
           <section className="no-break">
+            <SectionIntro
+              title="Payment Breakdown"
+              subtitle="How each option's monthly cost is composed."
+            />
             <PaymentComparisonChart
               rows={displayData.rows}
             />
@@ -148,6 +180,10 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
 
         {/* 6. Collapsible Deep Dive */}
         <section className="print:hidden">
+          <SectionIntro
+            title="Detailed Comparison"
+            subtitle="Expand for full numbers."
+          />
           <DetailAccordion displayData={displayData} />
         </section>
 
@@ -202,7 +238,8 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
           /* Override dark theme for print */
           .share-page [style*="background: #141414"],
           .share-page [style*="background: #0a0a0a"],
-          .share-page [style*="background: rgba(20,20,20"] {
+          .share-page [style*="background: rgba(20,20,20"],
+          .share-page [style*="background: linear-gradient"] {
             background: #f9f8f6 !important;
           }
           .share-page [style*="color: #F0EDE8"],

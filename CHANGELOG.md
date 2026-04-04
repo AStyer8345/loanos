@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## [7.0.0] — 2026-04-04 — Lender Knowledge System
+
+### Added
+- **Lender Resources dashboard** at `/dashboard/lenders` — searchable, filterable card layout showing all wholesale/correspondent lenders with AE contacts, product tags, and expandable notes
+- **LenderCard component** — channel-colored badges, phone/email links, product pills
+- **LenderFilters component** — search + channel filter pills + product tag filter (sorted by frequency)
+- **TopNav "Lenders" item** — between Marketing and Drip, Building2 icon
+- **4 NotebookLM sources** — Deephaven Product Guide, Champions Funding Matrix, Ameris Bank Non-QM Guide, FCM TPO Correspondent Guide
+- **n8n "Lender Email Ingest" workflow** (`hHXpKUirhnBCnQTO`) — daily 8am Outlook scan → domain+keyword filter → Claude extraction → NotebookLM feed → activity log
+
+### Changed
+- **Deephaven** lender record: 12 specialty products + detailed HELOC/product notes
+- **Ameris Bank** lender record: 10 Non-QM specialty products + notes
+
+### New Lenders
+- **Champions Funding** — Non-QM + CDFI wholesale (NMLS #2254210), 12 products, AEs: Jamee Lyon, Dylan Sundell
+- **FCM TPO** — Correspondent NDC2/NDC3 (NMLS #3112), 7 products, fees: NDC2 $895 / NDC3 $795
+
 ## [6.0.0] — 2026-04-04 — Dashboard Analytics Upgrade
 
 ### Added

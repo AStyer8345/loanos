@@ -18,6 +18,36 @@ Deploy: Vercel
 
 Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation complete as of 2026-03-18. Scenario Builder output rebuilt as of 2026-03-18. Audit + quick wins applied 2026-03-19. Scenario output layout restructured 2026-03-19. Multi-tenancy schema audit + onboarding expansion 2026-03-19 (session 9). Marketing Tab Redesign complete 2026-03-19 (session 10). Multi-tenancy RLS policy audit + policy cleanup + isolation verification script 2026-03-20 (session 11). Multi-tenancy data integrity + RLS fixes 2026-03-21 (session 13). Activity_log null org bugs fixed 2026-03-22 (daily prep). WF1 org_id + column fix + dead code removal 2026-03-23 (daily audit). Null org backfill (migration 048) + activity_log RLS tightened 2026-03-23 (daily prep). Chat v4.6 — attachments, voice, expand, AI contact extraction, Hot Leads dashboard widget, 4 new quick action chips 2026-03-23. contact_activity org_id added + RLS upgraded + null backfill (migrations 048+050) 2026-03-24 (daily prep). Schema hardening (NOT NULL on 8 tables, migration 053) + daily-briefing milestone query org scoping 2026-03-25 (daily prep). Social Media Dashboard — SOCIAL tab + VOICE GUIDE tab + scoped Claude chat + compose mode + 3 new tables 2026-03-29 PM. Loan Record View redesigned: flat layout + communication hub + actionable milestones 2026-03-29. Color coding added to loan detail: pipeline bar, milestones, parties, vital stats, key dates, tab bar all color-coded 2026-03-29. Social dashboard bug fixes (signed URLs, format validation, error display) + Enterprise Social Media spec + Email Automation Panel prompt 2026-03-29. Enterprise PM session: Social Media spec curated + web research (5 sources) added to NotebookLM + system log updated 2026-03-29 PM2. Build unblock: npm ci fixed corrupted node_modules, committed all missing source files (automation panel, lib files) that were never pushed 2026-03-29 PM2. Shared-email co-borrower bug fix + Szpitalak loan data repair + n8n party contact gap identified 2026-04-02. UI Renovation: shadcn/ui foundation + 21st.dev Navbar1 + Card/Badge/Table primitives + visual polish (card glow, badge depth, gold hover) deployed 2026-04-01. Light/Dark Mode: full theme toggle with next-themes, light mode as default, 300+ hardcoded color replacements across 60+ files 2026-04-01. Light Mode Polish: Pipeline + Contacts + Loan Detail per-page fixes — semantic tokens, font-sans data cells, layout restructure on loan detail 2026-04-02. Marketing Dashboard light mode: 16 component files themed with CSS variables, 40+ hardcoded dark-mode hex values replaced 2026-04-02. Drip Campaigns v1: Full drip campaign system — 4 new Supabase tables + RLS, TypeScript types + query helpers, 7 API routes, 3-level dashboard UI (overview, detail with 4 tabs, approval queue), 7 React components, TopNav link, 6 campaigns seeded with 23 steps covering past client retention, lead nurture (3 sub-campaigns), realtor relationships, long-term nurture 2026-04-02. n8n Drip Scheduler Upgrade: Workflow `LqBb3YDLjS2eUrDE` rebuilt from 7 nodes to 16 — daily 7am CT trigger, new `get_due_drip_enrollments` RPC, exit rule checking + 14-day frequency guardrail, Claude-powered email generation from skeleton prompts, approval queue branching (requires_approval → queued, else auto-send via Outlook), drip_sends record insert, enrollment step advancement, activity logging 2026-04-02. Migration 074 (`get_due_drip_enrollments` RPC) created and applied 2026-04-02. Marketing Dashboard post editor redesigned with shadcn/ui (SocialDraftList, SocialDraftDetail, MediaManager) 2026-04-03. History tab delete + auto-logging: HistoryTab delete button, `/api/marketing/log` webhook endpoint, n8n workflows wired (V6RhmJpOb7pOzMte + eJG4wckrj6SmSpm1) with correct auth + endpoint 2026-04-03. Social voice guide overhaul: 16 real Adam quotes, tone dial, quality scoring, Jessica Test, post type taxonomy, CTA rules, video/carousel strategy 2026-04-03. Share Page Redesign: 12 new borrower-optimized components in `src/components/share/`, card-based storytelling layout replacing dense data tables, Recharts bar chart, break-even progress bars, collapsible detail accordion, print styles for PDF 2026-04-03. Share Page Branding + PDF Unification: dynamic LO branding from org+user_settings, print/PDF unified via `@media print` + `?print=1`, visual polish (NarrativeCard, OptionCard, chart height), delta chip label fix (interest→interest+MI), removed "Powered by LoanOS" 2026-04-03.**
 
+## Lender Knowledge System — 2026-04-04 (session 5)
+
+**Complete lender knowledge system: structured DB + NotebookLM deep knowledge + dashboard UI + auto-ingest pipeline.**
+
+### Data Layer (Supabase `lenders` table):
+- **Deephaven** updated: 12 specialty products (Digital HELOC, Expanded Prime, Non Prime, DSCR 1-4, DSCR 5-9, ITIN, Jumbo, Super Jumbo, Equity Advantage, Closed End Seconds, Bank Statement, Asset Depletion) + detailed notes
+- **Ameris Bank** updated: 10 specialty products (Non-QM, Bank Statement, DSCR, Asset Depletion, Foreign National, ITIN, 1099 Only, Jumbo, Interest Only, Recent Credit Events) + Non-QM notes
+- **Champions Funding** added: Non-QM + CDFI wholesale (NMLS #2254210), 12 products, AEs Jamee Lyon + Dylan Sundell
+- **FCM TPO** added: Correspondent (NDC2/NDC3, NMLS #3112), 7 products, fees NDC2 $895 / NDC3 $795 / Streamline $695
+
+### Knowledge Base (NotebookLM notebook 3489e177):
+- 4 new text sources: Deephaven Product Guide, Champions Funding Product Matrix, Ameris Bank Non-QM Guide, FCM TPO Correspondent Guide
+
+### Dashboard — Lender Resources Tab:
+- New page: `/dashboard/lenders` (server component + client component)
+- Components: `LenderCard.tsx`, `LenderFilters.tsx`, `LendersClient.tsx`
+- Features: search (name, contacts, products, notes), filter by channel, filter by product tags
+- Cards show: name, channel badge (blue=Broker, amber=Correspondent), AE contacts with phone/email links, product tags, expandable notes
+- TopNav: "Lenders" item added between Marketing and Drip (Building2 icon)
+
+### n8n Auto-Ingest Workflow:
+- Workflow ID: `hHXpKUirhnBCnQTO` — "LoanOS — Lender Email Ingest", **active**
+- Daily 8am CT trigger → Outlook inbox scan (last 24h) → filter by 14 lender domains + guideline keywords → Claude extraction → NotebookLM /add-source → Supabase activity_log
+- 7 nodes: Schedule Trigger → Outlook Get Emails → Code (domain+keyword filter) → If (skip check) → HTTP (Claude API) → HTTP (NotebookLM) → HTTP (Supabase activity log)
+
+### AI Chat Integration:
+- Two tools: `query_lender_database` (structured Supabase lookups) + `query_mortgage_knowledge_base` (NotebookLM deep knowledge)
+- "Who is our AE for PRMG?" → lender DB tool
+- "What are Deephaven's HELOC FICO requirements?" → knowledge base tool
+
 ## Dashboard Analytics Upgrade — 2026-04-04 (session 4)
 
 **Full analytics overhaul: 7 new chart components, query parallelization.**

@@ -12,6 +12,7 @@ import DetailAccordion from './DetailAccordion'
 import ShareCTA from './ShareCTA'
 import ShareFooter from './ShareFooter'
 import ShareEquityChart from './ShareEquityChart'
+import CashToCloseBreakdown from './CashToCloseBreakdown'
 import LOSidebarCard from './LOSidebarCard'
 
 interface SharedScenario {
@@ -152,6 +153,15 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
                 }
               />
               <OptionCardsGrid rows={displayData.rows} mode={mode} />
+            </section>
+
+            {/* Cash to Close / Fee Breakdown */}
+            <section className="no-break">
+              <SectionIntro
+                title={mode === 'purchase' ? 'Cash to Close' : 'Closing Costs'}
+                subtitle="See how your upfront costs break down."
+              />
+              <CashToCloseBreakdown rows={displayData.rows} mode={mode} />
             </section>
 
             {/* AI Narrative */}

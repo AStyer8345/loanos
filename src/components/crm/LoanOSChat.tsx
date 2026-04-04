@@ -6,6 +6,7 @@ import { parseCommand, CommandType, type ExtractedContact } from '@/lib/chat-com
 import { bulkMailtoLink, imessageLink } from '@/lib/native-app-links'
 import QuickAddConfirmation from '@/components/outreach/QuickAddConfirmation'
 import BulkActionPreview from '@/components/outreach/BulkActionPreview'
+import ReactMarkdown from 'react-markdown'
 
 const ACCENT = 'var(--accent)'
 const BG = 'var(--bg)'
@@ -854,13 +855,32 @@ export default function LoanOSChat() {
                     background: isUser ? ACCENT : SURFACE,
                     color: isUser ? 'var(--primary-foreground)' : TEXT,
                     border: isUser ? 'none' : `1px solid ${BORDER}`,
-                    whiteSpace: 'pre-wrap',
+                    whiteSpace: isUser ? 'pre-wrap' : undefined,
                     lineHeight: 1.55,
                     fontSize: 13,
                     boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.08)',
                   }}
+                  className={isUser ? undefined : 'chat-markdown'}
                 >
-                  {msg.content}
+                  {isUser ? msg.content : (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p style={{ margin: '0 0 8px', lineHeight: 1.55 }}>{children}</p>,
+                        strong: ({ children }) => <strong style={{ fontWeight: 600, color: 'var(--foreground)' }}>{children}</strong>,
+                        ul: ({ children }) => <ul style={{ margin: '4px 0 8px', paddingLeft: 18, listStyleType: 'disc' }}>{children}</ul>,
+                        ol: ({ children }) => <ol style={{ margin: '4px 0 8px', paddingLeft: 18 }}>{children}</ol>,
+                        li: ({ children }) => <li style={{ margin: '2px 0', lineHeight: 1.45 }}>{children}</li>,
+                        h1: ({ children }) => <p style={{ fontWeight: 700, fontSize: 14, margin: '0 0 6px', color: 'var(--foreground)' }}>{children}</p>,
+                        h2: ({ children }) => <p style={{ fontWeight: 700, fontSize: 14, margin: '0 0 6px', color: 'var(--foreground)' }}>{children}</p>,
+                        h3: ({ children }) => <p style={{ fontWeight: 600, fontSize: 13, margin: '0 0 4px', color: 'var(--foreground)' }}>{children}</p>,
+                        hr: () => <hr style={{ border: 'none', borderTop: `1px solid ${BORDER}`, margin: '8px 0' }} />,
+                        a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT, textDecoration: 'underline' }}>{children}</a>,
+                        code: ({ children }) => <code style={{ background: 'var(--muted)', padding: '1px 4px', borderRadius: 3, fontSize: 12 }}>{children}</code>,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               )
             })}

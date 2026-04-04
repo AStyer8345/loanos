@@ -172,3 +172,8 @@ body {
   background: var(--gold);
   color: #0c0e14;
 }
+
+/* Chat markdown — remove trailing margin on last element */
+.chat-markdown > :last-child {
+  margin-bottom: 0 !important;
+}

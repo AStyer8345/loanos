@@ -1,5 +1,25 @@
 # LoanOS Changelog
 
+## [6.1.0] — 2026-04-04 — Dashboard Redesign
+
+### Added
+- **Mini pipeline table** on dashboard — clickable rows navigate to loan detail, shows borrower, address, status, amount, lock info
+- **New Apps & Pre-Approvals table** — recent leads/applications/pre-approvals sorted by date, max 15
+- **LeadSourceChart component** — horizontal bar chart grouping all loans by `referral_source`, gold gradient bars, count + volume
+- **MarketingActivity component** — recent marketing sends from `mcc_state` log, color-coded channel badges, relative time display
+
+### Changed
+- **ConversionFunnel**: Fixed from cumulative to exclusive stage counts (funded loans no longer count as leads), renamed to "Pipeline Snapshot", added % of total share labels
+- **ReferralLeaderboard**: Expanded from top 10 to top 20, renamed to "Top Realtors"
+- **DashboardClient layout**: Restructured pipeline tab — KPIs → Pipeline Table → New Apps → Action Required (compact) → Hot Leads + Rate Lock (side-by-side, 5 each) → Lead Sources + Funnel (side-by-side) → Top Realtors → Marketing + Schedule (side-by-side)
+- **Needs Attention**: Now shows urgent flags only (removed stale loans wall)
+- **TodoList**: Removed from pipeline and queue tabs
+
+### Data Layer
+- Added `mcc_state` query to first `Promise.all` batch for marketing log
+- Added 4 new computed data sets: `pipelineLoans`, `newAppsAndPAs`, `leadSourceData`, `marketingLog`
+- Zero additional DB round trips for pipeline/apps/lead sources (derived from existing loans query)
+
 ## [7.0.0] — 2026-04-04 — Lender Knowledge System
 
 ### Added

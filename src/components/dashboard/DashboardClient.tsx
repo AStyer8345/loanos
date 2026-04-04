@@ -13,7 +13,6 @@ import {
 } from 'recharts'
 import DailyBriefingPanel from './DailyBriefingPanel'
 import DailyScheduleWidget from './DailyScheduleWidget'
-import TodoList from './TodoList'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
@@ -25,6 +24,7 @@ import RateLockCountdown from './charts/RateLockCountdown'
 import YoYVolumeChart from './charts/YoYVolumeChart'
 import CommissionForecast from './charts/CommissionForecast'
 import DaysToCloseGauge from './charts/DaysToCloseGauge'
+import TodoList from './TodoList'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -53,6 +53,10 @@ interface DashboardClientProps {
   yoyChartData: Array<{ month: string; thisYear: number; lastYear: number }>
   forecastData: Array<{ month: string; actual: number; projected: number }>
   daysToCloseData: Array<{ type: string; avgDays: number; count: number }>
+  pipelineLoans: Array<{ id: string; name: string; amount: number; status: string | null; closingDate: string | null; rate: number | null; commission: number; rateLockExp: string | null; lender: string | null }>
+  newAppsAndPAs: Array<{ id: string; name: string; amount: number; status: string | null; stage: string; createdAt: string | null; loanType: string | null; referralSource: string | null }>
+  leadSourceData: Array<{ source: string; count: number; volume: number }>
+  marketingLog: Array<{ id: string; date: string; activity: string; channel: string; notes?: string }>
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────

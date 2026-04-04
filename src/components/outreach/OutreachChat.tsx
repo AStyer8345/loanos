@@ -8,10 +8,12 @@ import QuickAddConfirmation from './QuickAddConfirmation'
 import BulkActionPreview from './BulkActionPreview'
 
 // ── Theme (matches LoanOSChat) ─────────────────────────────────────────────
-const ACCENT = '#C9A84C'
+const ACCENT = 'var(--accent)'
 const BG = 'var(--bg)'
 const SURFACE = 'var(--card)'
-const BORDER = 'var(--input)'
+const BORDER = 'var(--border)'
+const TEXT = 'var(--text)'
+const MUTED_FG = 'var(--muted-foreground)'
 const FONT = '"IBM Plex Mono", "Courier New", monospace'
 
 type Message = {
@@ -395,7 +397,7 @@ export default function OutreachChat() {
           height: 52,
           borderRadius: '50%',
           background: ACCENT,
-          color: '#000',
+          color: 'var(--primary-foreground)',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
@@ -404,7 +406,7 @@ export default function OutreachChat() {
           fontFamily: FONT,
           fontSize: 20,
           fontWeight: 700,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
           transition: 'transform 0.15s',
           transform: isOpen ? 'rotate(45deg)' : 'none',
         }}
@@ -434,8 +436,9 @@ export default function OutreachChat() {
             flexDirection: 'column',
             fontFamily: FONT,
             fontSize: 13,
-            color: '#e0e0e0',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+            color: TEXT,
+            boxShadow: '0 8px 40px rgba(0,0,0,0.25)',
+            backdropFilter: 'blur(20px)',
             overflow: 'hidden',
           }}
         >
@@ -452,7 +455,7 @@ export default function OutreachChat() {
             <div>
               <div style={{ fontWeight: 700, color: ACCENT, fontSize: 14 }}>Outreach</div>
               {hasSelected && (
-                <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: MUTED_FG, marginTop: 2 }}>
                   {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''} selected
                   <button
                     onClick={clearSelected}
@@ -477,7 +480,7 @@ export default function OutreachChat() {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#666',
+                color: MUTED_FG,
                 cursor: 'pointer',
                 fontSize: 18,
                 fontFamily: FONT,
@@ -500,7 +503,7 @@ export default function OutreachChat() {
             }}
           >
             {messages.length === 0 && (
-              <div style={{ color: '#555', fontSize: 12, textAlign: 'center', marginTop: 40 }}>
+              <div style={{ color: MUTED_FG, fontSize: 12, textAlign: 'center', marginTop: 40 }}>
                 {hasSelected
                   ? `${selectedContacts.length} contacts selected. Email, text, or manage them.`
                   : 'Add contacts, draft messages, or ask anything.'}
@@ -556,14 +559,15 @@ export default function OutreachChat() {
                   style={{
                     alignSelf: isUser ? 'flex-end' : 'flex-start',
                     maxWidth: '85%',
-                    padding: '8px 12px',
-                    borderRadius: 8,
+                    padding: '10px 14px',
+                    borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
                     background: isUser ? ACCENT : SURFACE,
-                    color: isUser ? '#000' : '#e0e0e0',
+                    color: isUser ? 'var(--primary-foreground)' : TEXT,
                     border: isUser ? 'none' : `1px solid ${BORDER}`,
                     whiteSpace: 'pre-wrap',
-                    lineHeight: 1.5,
-                    fontSize: 12,
+                    lineHeight: 1.55,
+                    fontSize: 13,
+                    boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.08)',
                   }}
                 >
                   {msg.content}
@@ -579,7 +583,7 @@ export default function OutreachChat() {
                   borderRadius: 8,
                   background: SURFACE,
                   border: `1px solid ${BORDER}`,
-                  color: '#888',
+                  color: MUTED_FG,
                   fontSize: 12,
                 }}
               >
@@ -613,7 +617,7 @@ export default function OutreachChat() {
                   fontFamily: FONT,
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#222')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface2)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = SURFACE)}
               >
                 {a.label}
@@ -646,7 +650,7 @@ export default function OutreachChat() {
                 border: `1px solid ${BORDER}`,
                 borderRadius: 8,
                 padding: '8px 10px',
-                color: '#e0e0e0',
+                color: TEXT,
                 fontFamily: FONT,
                 fontSize: 12,
                 outline: 'none',
@@ -667,7 +671,7 @@ export default function OutreachChat() {
                 border: 'none',
                 borderRadius: 8,
                 padding: '8px 14px',
-                color: '#000',
+                color: 'var(--primary-foreground)',
                 fontFamily: FONT,
                 fontSize: 12,
                 fontWeight: 700,

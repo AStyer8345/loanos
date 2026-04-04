@@ -56,7 +56,9 @@ Use this tool whenever the user asks about:
 - Underwriting criteria or overlays
 - Marketing strategies for loan officers
 - Industry best practices or regulatory questions
-Do NOT use for general CRM questions, pipeline updates, or contact management.`,
+- Lender-specific guidelines, overlays, or product details (use this for deep guideline questions)
+Do NOT use for general CRM questions, pipeline updates, or contact management.
+Do NOT use for looking up lender contacts/AEs — use query_lender_database for that.`,
   input_schema: {
     type: 'object' as const,
     properties: {
@@ -66,6 +68,30 @@ Do NOT use for general CRM questions, pipeline updates, or contact management.`,
       },
     },
     required: ['question'],
+  },
+}
+
+const LENDER_DB_TOOL = {
+  name: 'query_lender_database',
+  description: `Look up wholesale/correspondent lender information from the lender database.
+Use this tool whenever the user asks about:
+- Who is our AE (account executive) for a specific lender
+- Lender contact information (name, phone, email)
+- Which lenders we work with or are approved with
+- Which lenders offer a specific product or specialty (HELOC, Non-QM, DSCR, ITIN, Bank Statement, etc.)
+- Lender portal/website URLs
+- Broker IDs for specific lenders
+- Lender channel type (broker only vs. correspondent)
+This is a structured database lookup — use it for contacts, products, and lender info. For deep guideline or overlay questions, use query_mortgage_knowledge_base instead.`,
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      search: {
+        type: 'string',
+        description: 'The lender name to search for, or a product/specialty to find lenders that offer it (e.g. "PRMG", "HELOC", "Non-QM", "all").',
+      },
+    },
+    required: ['search'],
   },
 }
 
@@ -87,6 +113,50 @@ async function queryNotebookLM(question: string): Promise<string> {
     // Service not running or unreachable — Claude answers from its own knowledge
     return ''
   }
+}
+
+async function queryLenderDatabase(search: string, organizationId: string): Promise<string> {
+  const supabase = createServiceClient()
+  const term = search.trim().toLowerCase()
+
+  // If searching for "all" or "list", return all lenders
+  if (term === 'all' || term === 'list' || term === 'lenders') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any)
+      .from('lenders')
+      .select('name, channel, contacts, specialty_products, website, broker_id, notes')
+      .eq('organization_id', organizationId)
+      .order('name')
+    if (!data?.length) return 'No lenders found in the database.'
+    return JSON.stringify(data, null, 2)
+  }
+
+  // Try name match first
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: nameMatch } = await (supabase as any)
+    .from('lenders')
+    .select('name, channel, contacts, specialty_products, website, broker_id, notes')
+    .eq('organization_id', organizationId)
+    .ilike('name', `%${term}%`)
+
+  if (nameMatch?.length) return JSON.stringify(nameMatch, null, 2)
+
+  // Try specialty product match
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: allLenders } = await (supabase as any)
+    .from('lenders')
+    .select('name, channel, contacts, specialty_products, website, broker_id, notes')
+    .eq('organization_id', organizationId)
+    .order('name')
+
+  const productMatch = (allLenders ?? []).filter((l: Record<string, unknown>) =>
+    (l.specialty_products as string[])?.some((p: string) => p.toLowerCase().includes(term))
+    || (l.notes as string | null)?.toLowerCase().includes(term)
+  )
+
+  if (productMatch.length) return JSON.stringify(productMatch, null, 2)
+
+  return `No lenders found matching "${search}". Try a lender name (e.g. "PRMG") or product type (e.g. "HELOC", "Non-QM").`
 }
 
 type SelectedContact = {
@@ -261,8 +331,9 @@ Today's date: ${todayStr}`
     prompt += `\n\nGenerate a short text message. Keep it under 300 characters. Casual but professional. No signature block needed.`
   }
 
-  // Routing hint for knowledge-base chips
+  // Routing hints for tool usage
   prompt += `\n\nWhen the user's message begins with "Sales question:" or "Underwriting question:", call the query_mortgage_knowledge_base tool before answering.`
+  prompt += `\nWhen the user asks about a lender's AE, contact info, which lenders offer a product, or anything about your approved lender list, call the query_lender_database tool.`
 
   return prompt
 }
@@ -315,12 +386,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const tools = [MORTGAGE_KB_TOOL, LENDER_DB_TOOL]
+
     // First call — Claude may invoke a tool
     let response = await anthropic.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: systemPrompt,
-      tools: [MORTGAGE_KB_TOOL],
+      tools,
       messages: apiMessages,
     })
 
@@ -328,18 +401,25 @@ export async function POST(req: NextRequest) {
     if (response.stop_reason === 'tool_use') {
       const toolUseBlock = response.content.find((b) => b.type === 'tool_use')
       if (toolUseBlock?.type === 'tool_use') {
-        const question = (toolUseBlock.input as { question: string }).question
-        const kbAnswer = await queryNotebookLM(question)
+        let toolResultContent: string
 
-        const toolResultContent = kbAnswer
-          ? kbAnswer
-          : 'The mortgage knowledge base is not available right now. Please answer from your own knowledge.'
+        if (toolUseBlock.name === 'query_lender_database') {
+          const search = (toolUseBlock.input as { search: string }).search
+          toolResultContent = await queryLenderDatabase(search, organizationId)
+        } else {
+          // query_mortgage_knowledge_base
+          const question = (toolUseBlock.input as { question: string }).question
+          const kbAnswer = await queryNotebookLM(question)
+          toolResultContent = kbAnswer
+            ? kbAnswer
+            : 'The mortgage knowledge base is not available right now. Please answer from your own knowledge.'
+        }
 
         response = await anthropic.messages.create({
           model: CLAUDE_MODEL,
           max_tokens: 2048,
           system: systemPrompt,
-          tools: [MORTGAGE_KB_TOOL],
+          tools,
           messages: [
             ...apiMessages,
             { role: 'assistant', content: response.content },

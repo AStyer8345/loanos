@@ -7,10 +7,12 @@ import { bulkMailtoLink, imessageLink } from '@/lib/native-app-links'
 import QuickAddConfirmation from '@/components/outreach/QuickAddConfirmation'
 import BulkActionPreview from '@/components/outreach/BulkActionPreview'
 
-const ACCENT = '#C9A84C'
+const ACCENT = 'var(--accent)'
 const BG = 'var(--bg)'
 const SURFACE = 'var(--card)'
-const BORDER = 'var(--input)'
+const BORDER = 'var(--border)'
+const TEXT = 'var(--text)'
+const MUTED_FG = 'var(--muted-foreground)'
 const FONT = '"IBM Plex Mono", "Courier New", monospace'
 
 type Message = {
@@ -634,8 +636,8 @@ export default function LoanOSChat() {
           fontFamily: FONT,
           fontSize: hasSelected ? 14 : 20,
           fontWeight: 700,
-          color: '#000',
-          boxShadow: '0 4px 20px rgba(201,168,76,0.4)',
+          color: 'var(--primary-foreground)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
           transition: 'transform 0.15s ease',
           transform: isOpen ? 'rotate(45deg)' : 'none',
         }}
@@ -661,7 +663,7 @@ export default function LoanOSChat() {
                   flexDirection: 'column',
                   fontFamily: FONT,
                   fontSize: 13,
-                  color: '#e0e0e0',
+                  color: TEXT,
                   overflow: 'hidden',
                 }
               : {
@@ -678,8 +680,9 @@ export default function LoanOSChat() {
                   flexDirection: 'column',
                   fontFamily: FONT,
                   fontSize: 13,
-                  color: '#e0e0e0',
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+                  color: TEXT,
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.25)',
+                  backdropFilter: 'blur(20px)',
                   overflow: 'hidden',
                 }
           }
@@ -698,7 +701,7 @@ export default function LoanOSChat() {
             <div>
               <div style={{ fontWeight: 700, color: ACCENT, fontSize: 13 }}>{headerTitle}</div>
               {headerSub && (
-                <div style={{ fontSize: 11, color: '#666', marginTop: 2, textTransform: 'capitalize' }}>
+                <div style={{ fontSize: 11, color: MUTED_FG, marginTop: 2, textTransform: 'capitalize' }}>
                   {headerSub}
                 </div>
               )}
@@ -730,7 +733,7 @@ export default function LoanOSChat() {
                     background: 'none',
                     border: `1px solid ${BORDER}`,
                     borderRadius: 6,
-                    color: '#666',
+                    color: MUTED_FG,
                     cursor: 'pointer',
                     fontSize: 11,
                     padding: '3px 8px',
@@ -747,7 +750,7 @@ export default function LoanOSChat() {
                   background: 'none',
                   border: `1px solid ${BORDER}`,
                   borderRadius: 6,
-                  color: '#666',
+                  color: MUTED_FG,
                   cursor: 'pointer',
                   fontSize: 13,
                   padding: '3px 7px',
@@ -758,7 +761,7 @@ export default function LoanOSChat() {
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px' }}
+                style={{ background: 'none', border: 'none', color: MUTED_FG, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px' }}
               >
                 ×
               </button>
@@ -772,7 +775,7 @@ export default function LoanOSChat() {
           >
             {messages.length === 0 && !isLoading && (
               <div style={{ marginTop: 16 }}>
-                <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginBottom: 12 }}>
+                <div style={{ color: MUTED_FG, fontSize: 11, textAlign: 'center', marginBottom: 12 }}>
                   {activeRecord
                     ? `Ask anything about this ${activeRecord.type}`
                     : hasSelected
@@ -788,7 +791,7 @@ export default function LoanOSChat() {
                         background: SURFACE,
                         border: `1px solid ${BORDER}`,
                         borderRadius: 6,
-                        color: '#888',
+                        color: MUTED_FG,
                         cursor: 'pointer',
                         fontSize: 11,
                         padding: '8px 12px',
@@ -797,7 +800,7 @@ export default function LoanOSChat() {
                         transition: 'border-color 0.1s, color 0.1s',
                       }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = ACCENT; (e.currentTarget as HTMLElement).style.color = ACCENT }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; (e.currentTarget as HTMLElement).style.color = '#888' }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; (e.currentTarget as HTMLElement).style.color = '' }}
                     >
                       {a.label}
                     </button>
@@ -846,14 +849,15 @@ export default function LoanOSChat() {
                   style={{
                     alignSelf: isUser ? 'flex-end' : 'flex-start',
                     maxWidth: '85%',
-                    padding: '8px 12px',
-                    borderRadius: 8,
+                    padding: '10px 14px',
+                    borderRadius: isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
                     background: isUser ? ACCENT : SURFACE,
-                    color: isUser ? '#000' : '#e0e0e0',
+                    color: isUser ? 'var(--primary-foreground)' : TEXT,
                     border: isUser ? 'none' : `1px solid ${BORDER}`,
                     whiteSpace: 'pre-wrap',
-                    lineHeight: 1.5,
-                    fontSize: 12,
+                    lineHeight: 1.55,
+                    fontSize: 13,
+                    boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.08)',
                   }}
                 >
                   {msg.content}
@@ -862,7 +866,7 @@ export default function LoanOSChat() {
             })}
 
             {isLoading && !messages.some((m) => m.bulkPreview) && (
-              <div style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 8, background: SURFACE, border: `1px solid ${BORDER}`, color: '#888', fontSize: 12 }}>
+              <div style={{ alignSelf: 'flex-start', padding: '8px 12px', borderRadius: 8, background: SURFACE, border: `1px solid ${BORDER}`, color: MUTED_FG, fontSize: 12 }}>
                 Thinking...
               </div>
             )}
@@ -902,7 +906,7 @@ export default function LoanOSChat() {
                     <span>{att.name.length > 20 ? att.name.slice(0, 17) + '…' : att.name}</span>
                     <button
                       onClick={() => removeAttachment(att.uid)}
-                      style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 12, padding: '0 0 0 2px', lineHeight: 1 }}
+                      style={{ background: 'none', border: 'none', color: MUTED_FG, cursor: 'pointer', fontSize: 12, padding: '0 0 0 2px', lineHeight: 1 }}
                     >
                       ✕
                     </button>
@@ -913,14 +917,14 @@ export default function LoanOSChat() {
 
             {/* Attachment error */}
             {attachError && (
-              <div style={{ fontSize: 11, color: '#e05555', marginBottom: 6 }}>{attachError}</div>
+              <div style={{ fontSize: 11, color: 'var(--red)', marginBottom: 6 }}>{attachError}</div>
             )}
 
             {/* Interim voice transcript */}
             {isListening && (
               <div style={{
                 fontSize: 11,
-                color: '#888',
+                color: MUTED_FG,
                 marginBottom: 6,
                 padding: '4px 8px',
                 background: SURFACE,
@@ -946,7 +950,7 @@ export default function LoanOSChat() {
                     borderRadius: 6,
                     background: SURFACE,
                     border: `1px solid ${BORDER}`,
-                    color: isLoading ? '#444' : '#888',
+                    color: MUTED_FG,
                     cursor: isLoading ? 'default' : 'pointer',
                     fontSize: 14,
                     display: 'flex',
@@ -966,9 +970,9 @@ export default function LoanOSChat() {
                       width: 30,
                       height: 30,
                       borderRadius: 6,
-                      background: isListening ? '#2a1a00' : SURFACE,
+                      background: isListening ? 'var(--accent-light)' : SURFACE,
                       border: `1px solid ${isListening ? ACCENT : BORDER}`,
-                      color: isListening ? ACCENT : (isLoading ? '#444' : '#888'),
+                      color: isListening ? ACCENT : MUTED_FG,
                       cursor: isLoading ? 'default' : 'pointer',
                       fontSize: 14,
                       display: 'flex',
@@ -1005,7 +1009,7 @@ export default function LoanOSChat() {
                   border: `1px solid ${BORDER}`,
                   borderRadius: 8,
                   padding: '8px 10px',
-                  color: '#e0e0e0',
+                  color: TEXT,
                   fontFamily: FONT,
                   fontSize: 12,
                   outline: 'none',
@@ -1027,7 +1031,7 @@ export default function LoanOSChat() {
                   background: (input.trim() || attachments.length > 0) && !isLoading ? ACCENT : 'var(--input)',
                   border: 'none',
                   borderRadius: 8,
-                  color: (input.trim() || attachments.length > 0) && !isLoading ? '#000' : '#444',
+                  color: (input.trim() || attachments.length > 0) && !isLoading ? 'var(--primary-foreground)' : MUTED_FG,
                   cursor: (input.trim() || attachments.length > 0) && !isLoading ? 'pointer' : 'default',
                   fontSize: 16,
                   height: 36,

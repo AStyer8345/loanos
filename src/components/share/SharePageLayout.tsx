@@ -11,6 +11,7 @@ import BreakEvenVisual from './BreakEvenVisual'
 import DetailAccordion from './DetailAccordion'
 import ShareCTA from './ShareCTA'
 import ShareFooter from './ShareFooter'
+import ShareEquityChart from './ShareEquityChart'
 
 interface SharedScenario {
   scenario_type: string
@@ -178,7 +179,18 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
           </section>
         )}
 
-        {/* 6. Collapsible Deep Dive */}
+        {/* 6. Equity Build Curve — purchase only */}
+        {mode === 'purchase' && (
+          <section className="no-break">
+            <SectionIntro
+              title="Your Equity Over Time"
+              subtitle="How your loan balance declines as your equity grows."
+            />
+            <ShareEquityChart rows={displayData.rows} />
+          </section>
+        )}
+
+        {/* 7. Collapsible Deep Dive */}
         <section className="print:hidden">
           <SectionIntro
             title="Detailed Comparison"

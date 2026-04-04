@@ -12,19 +12,18 @@ interface ConversionFunnelProps {
 }
 
 export default function ConversionFunnel({ data }: ConversionFunnelProps) {
-  const max = data[0]?.count || 1
+  const max = Math.max(...data.map(d => d.count), 1)
+  const total = data.reduce((sum, d) => sum + d.count, 0)
 
   return (
     <Card className="p-4">
       <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
-        Pipeline Funnel
+        Pipeline Snapshot
       </h3>
       <div className="space-y-2">
-        {data.map((step, i) => {
+        {data.map((step) => {
           const pct = max > 0 ? (step.count / max) * 100 : 0
-          const dropoff = i > 0 && data[i - 1].count > 0
-            ? Math.round(((data[i - 1].count - step.count) / data[i - 1].count) * 100)
-            : null
+          const share = total > 0 ? Math.round((step.count / total) * 100) : 0
 
           return (
             <div key={step.stage} className="flex items-center gap-3">
@@ -43,11 +42,9 @@ export default function ConversionFunnel({ data }: ConversionFunnelProps) {
                   {step.count}
                 </span>
               </div>
-              {dropoff !== null && dropoff > 0 && (
-                <span className="text-[10px] font-mono text-red-400 w-10 flex-shrink-0">
-                  -{dropoff}%
-                </span>
-              )}
+              <span className="text-[10px] font-mono text-muted-foreground w-10 flex-shrink-0">
+                {share}%
+              </span>
             </div>
           )
         })}

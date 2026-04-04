@@ -122,31 +122,27 @@ export default async function DashboardPage() {
     commission: stageCounts[stage]?.commission ?? 0,
   }))
 
-  // ── Conversion funnel: count loans that reached each stage (YTD) ────────
-  const funnelStages = [
-    { key: 'lead' as const, label: 'Lead' },
-    { key: 'new_application' as const, label: 'Application' },
-    { key: 'pre_approval' as const, label: 'Pre-Approval' },
-    { key: 'submitted' as const, label: 'Submitted' },
-    { key: 'approved' as const, label: 'Approved' },
-    { key: 'clear_to_close' as const, label: 'CTC' },
-    { key: 'funded' as const, label: 'Funded' },
-  ] as const
-
-  const STAGE_ORDER: Record<string, number> = {
-    lead: 0, new_application: 1, pre_approval: 2, setup: 3,
-    disclosed: 3, processing: 3, submitted: 4, underwriting: 4,
-    approved: 5, resubmit: 5, clear_to_close: 6, funded: 7,
+  // ── Conversion funnel: count loans currently AT each stage ────────────
+  const STAGE_TO_FUNNEL: Record<string, string> = {
+    lead: 'Lead',
+    new_application: 'Application',
+    pre_approval: 'Pre-Approval',
+    setup: 'Submitted', disclosed: 'Submitted', processing: 'Submitted',
+    submitted: 'Submitted', underwriting: 'Submitted',
+    approved: 'Approved', resubmit: 'Approved',
+    clear_to_close: 'CTC',
+    funded: 'Funded',
   }
+  const FUNNEL_LABELS = ['Lead', 'Application', 'Pre-Approval', 'Submitted', 'Approved', 'CTC', 'Funded']
 
-  const funnelData = funnelStages.map(fs => {
-    const threshold = STAGE_ORDER[fs.key] ?? 0
-    const count = (loans ?? []).filter(l => {
-      const key = normalizeToStageKey(l.status)
-      return (STAGE_ORDER[key] ?? 0) >= threshold
-    }).length
-    return { stage: fs.label, count }
-  })
+  const funnelCounts: Record<string, number> = {}
+  for (const label of FUNNEL_LABELS) funnelCounts[label] = 0
+  for (const loan of loans ?? []) {
+    const key = normalizeToStageKey(loan.status)
+    const bucket = STAGE_TO_FUNNEL[key]
+    if (bucket) funnelCounts[bucket]++
+  }
+  const funnelData = FUNNEL_LABELS.map(label => ({ stage: label, count: funnelCounts[label] }))
 
   // recentLoans removed — pipeline tab no longer shows Active Loans table
 

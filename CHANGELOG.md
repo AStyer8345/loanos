@@ -20,6 +20,26 @@
 - Added 4 new computed data sets: `pipelineLoans`, `newAppsAndPAs`, `leadSourceData`, `marketingLog`
 - Zero additional DB round trips for pipeline/apps/lead sources (derived from existing loans query)
 
+## [7.1.0] — 2026-04-04 — Lender Knowledge System: Product Guides + Detail Pages
+
+### Added
+- **Clickable lender detail pages** at `/dashboard/lenders/[id]` — full lender profile with AE contacts card, specialty products card, parsed product details & guidelines
+- **LenderDetailClient component** — back button, Building2 icon header, channel badge, website link, broker ID, parsed notes with section splitting
+- **8 NotebookLM sources** (notebook `3489e177`) — NewRez SmartSelf, NewRez RezPool Plus, PennyMac Non-QM A, PennyMac Non-QM A+, Mega Capital MVP, Huntington Doctors Only, Plaza HomeStyle Renovation, The Loan Store TLS Flex NQM
+- **Smart n8n contact updates** — Claude extraction node now outputs structured JSON for AE contact changes, new products, and guideline summaries; Update Lender Record code node auto-replaces contacts and appends products
+
+### Changed
+- **LenderCard** — now clickable (navigates to detail page), `e.stopPropagation()` on links/buttons
+- **NewRez** — added 9 specialty products (SmartSelf, RezPool Plus, Bank Statement, 1099, P&L, Freddie Mac Conforming, HomeOne, Manufactured Housing) + detailed notes
+- **PennyMac** — added 8 specialty products (Non-QM A, Non-QM A+, Bank Statement, Asset Depletion, DSCR, 1099 Only, Jumbo Non-QM) + detailed notes
+- **Mega Capital Funding** — added 9 specialty products (MVP, Bank Statement, 1099, P&L, Asset Depletion, Full Doc Non-QM, Interest Only, Non-Warrantable Condo) + detailed notes
+- **Plaza Home Mortgage** — added 5 specialty products (HomeStyle Renovation, HomeReady, Conforming, High Balance, Buydowns) + detailed notes, AE updated to Jillian Sorenson
+- **n8n Lender Email Ingest** — removed NotebookLM node (local CLI only), fixed Outlook credential ID, upgraded Claude prompt for structured extraction
+
+### New Lenders
+- **Huntington Bank** — Broker & Correspondent, 4 products (Doctors Only Portfolio, Physician Loans, No MI, High Balance)
+- **The Loan Store** — Broker & Correspondent, 9 products (TLS Flex NQM, Non-QM, Bank Statement, 1099, DSCR, Asset Depletion, Foreign National, ITIN, Jumbo Non-QM)
+
 ## [7.0.0] — 2026-04-04 — Lender Knowledge System
 
 ### Added

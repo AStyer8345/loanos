@@ -12,6 +12,7 @@ import DetailAccordion from './DetailAccordion'
 import ShareCTA from './ShareCTA'
 import ShareFooter from './ShareFooter'
 import ShareEquityChart from './ShareEquityChart'
+import LOSidebarCard from './LOSidebarCard'
 
 interface SharedScenario {
   scenario_type: string
@@ -70,21 +71,21 @@ function getHeroStat(displayData: DisplayData): { label: string; value: string; 
   }
 }
 
-/** Section intro component for visual rhythm between sections */
+/** Section intro component for visual rhythm */
 function SectionIntro({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-5">
-      <div className="flex items-center gap-3 mb-1">
-        <div style={{ width: 20, height: 1, background: GOLD }} />
+    <div className="mb-4">
+      <div className="flex items-center gap-3 mb-0.5">
+        <div style={{ width: 16, height: 1, background: GOLD }} />
         <p
-          className="text-[11px] font-semibold uppercase tracking-[0.15em]"
+          className="text-[10px] font-semibold uppercase tracking-[0.15em]"
           style={{ color: GOLD }}
         >
           {title}
         </p>
       </div>
       {subtitle && (
-        <p className="text-sm ml-8" style={{ color: MUTED }}>{subtitle}</p>
+        <p className="text-xs ml-7" style={{ color: MUTED }}>{subtitle}</p>
       )}
     </div>
   )
@@ -122,7 +123,7 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
         </div>
       </div>
 
-      {/* 1. Hero */}
+      {/* 1. Hero — full width */}
       <ShareHero
         borrowerName={data.borrower_name}
         mode={mode}
@@ -133,91 +134,107 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
         company={b.company}
       />
 
-      {/* Main content */}
-      <div className="max-w-3xl mx-auto px-6 py-10 sm:py-14 space-y-12">
+      {/* 2. Two-column layout */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 sm:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
 
-        {/* 2. Option Cards */}
-        <section>
-          <SectionIntro
-            title="Your Options"
-            subtitle={
-              displayData.rows.length > 1
-                ? `${displayData.rows.length} scenarios compared side by side.`
-                : undefined
-            }
-          />
-          <OptionCardsGrid
-            rows={displayData.rows}
-            mode={mode}
-          />
-        </section>
+          {/* ═══ LEFT COLUMN: Main content ═══ */}
+          <div className="space-y-8 min-w-0">
 
-        {/* 3. Payment Comparison Chart */}
-        {hasMultipleOptions && (
-          <section className="no-break">
-            <SectionIntro
-              title="Payment Breakdown"
-              subtitle="How each option's monthly cost is composed."
+            {/* Option Cards */}
+            <section>
+              <SectionIntro
+                title="Your Options"
+                subtitle={
+                  displayData.rows.length > 1
+                    ? `${displayData.rows.length} scenarios side by side`
+                    : undefined
+                }
+              />
+              <OptionCardsGrid rows={displayData.rows} mode={mode} />
+            </section>
+
+            {/* AI Narrative */}
+            {hasNarrative && (
+              <section className="no-break">
+                <NarrativeCard text={data.narrative!} />
+              </section>
+            )}
+
+            {/* Break-Even Visual */}
+            {hasBreakEven && (
+              <section className="no-break">
+                <BreakEvenVisual breakEvenRows={displayData.breakEvenRows} />
+              </section>
+            )}
+
+            {/* Collapsible Deep Dive */}
+            <section className="print:hidden">
+              <SectionIntro
+                title="Detailed Comparison"
+                subtitle="Expand for full numbers."
+              />
+              <DetailAccordion displayData={displayData} />
+            </section>
+
+          </div>
+
+          {/* ═══ RIGHT COLUMN: Sidebar ═══ */}
+          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+
+            {/* LO Branding Card */}
+            <div className="print:hidden">
+              <LOSidebarCard
+                loName={b.loName}
+                company={b.company}
+                nmls={b.nmls}
+                phone={b.phone}
+                email={b.email}
+                calendlyUrl={b.calendlyUrl}
+                applicationUrl={b.applicationUrl}
+              />
+            </div>
+
+            {/* Payment Comparison Chart */}
+            {hasMultipleOptions && (
+              <section className="no-break">
+                <PaymentComparisonChart rows={displayData.rows} />
+              </section>
+            )}
+
+            {/* Equity Build Curve — purchase only */}
+            {mode === 'purchase' && (
+              <section className="no-break">
+                <ShareEquityChart rows={displayData.rows} />
+              </section>
+            )}
+
+          </div>
+        </div>
+
+        {/* ═══ FULL WIDTH BOTTOM ═══ */}
+        <div className="mt-10 space-y-8">
+
+          {/* CTA — full width, only on mobile since sidebar has buttons */}
+          <section className="print:hidden lg:hidden">
+            <ShareCTA
+              calendlyUrl={b.calendlyUrl}
+              applicationUrl={b.applicationUrl}
+              loName={b.loName}
+              company={b.company}
+              nmls={b.nmls}
             />
-            <PaymentComparisonChart
-              rows={displayData.rows}
-            />
           </section>
-        )}
 
-        {/* 4. AI Narrative */}
-        {hasNarrative && (
-          <section className="no-break">
-            <NarrativeCard text={data.narrative!} />
-          </section>
-        )}
-
-        {/* 5. Break-Even Visual */}
-        {hasBreakEven && (
-          <section className="no-break">
-            <BreakEvenVisual breakEvenRows={displayData.breakEvenRows} />
-          </section>
-        )}
-
-        {/* 6. Equity Build Curve — purchase only */}
-        {mode === 'purchase' && (
-          <section className="no-break">
-            <SectionIntro
-              title="Your Equity Over Time"
-              subtitle="How your loan balance declines as your equity grows."
-            />
-            <ShareEquityChart rows={displayData.rows} />
-          </section>
-        )}
-
-        {/* 7. Collapsible Deep Dive */}
-        <section className="print:hidden">
-          <SectionIntro
-            title="Detailed Comparison"
-            subtitle="Expand for full numbers."
-          />
-          <DetailAccordion displayData={displayData} />
-        </section>
-
-        {/* 7. CTA */}
-        <section className="print:hidden">
-          <ShareCTA
-            calendlyUrl={b.calendlyUrl}
-            applicationUrl={b.applicationUrl}
-            loName={b.loName}
+          {/* Footer */}
+          <ShareFooter
             company={b.company}
             nmls={b.nmls}
+            loName={b.loName}
+            phone={b.phone}
+            email={b.email}
           />
-        </section>
-
-        {/* 8. Footer */}
-        <ShareFooter
-          company={b.company}
-          nmls={b.nmls}
-          loName={b.loName}
-          phone={b.phone}
-          email={b.email}
-        />
+        </div>
       </div>
 
       {/* Print styles */}
@@ -246,6 +263,10 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
           @page {
             margin: 0.5in 0.6in;
             size: letter;
+          }
+          /* Force single column for print */
+          .share-page .grid {
+            grid-template-columns: 1fr !important;
           }
           /* Override dark theme for print */
           .share-page [style*="background: #141414"],

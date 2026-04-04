@@ -20,6 +20,7 @@ import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWid
 import { Card } from '@/components/ui/card'
 import SparklineCard from './charts/SparklineCard'
 import ConversionFunnel from './charts/ConversionFunnel'
+import ReferralLeaderboard from './charts/ReferralLeaderboard'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -43,6 +44,7 @@ interface DashboardClientProps {
   funnelData: Array<{ stage: string; count: number }>
   showSetupBanner?: boolean
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
+  referralData: Array<{ source: string; loans: number; volume: number; funded: number }>
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -218,8 +220,8 @@ export default function DashboardClient(props: DashboardClientProps) {
                     <Clock size={11} className="text-orange-400" />
                     <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">No activity 7+ days</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                    {props.staleLoans.slice(0, 12).map(l => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-[400px] overflow-y-auto">
+                    {props.staleLoans.map(l => (
                       <Link
                         key={l.id}
                         href={`/dashboard/loans/${l.id}`}
@@ -249,6 +251,9 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* ── Hot Leads ── */}
           <HotLeadsWidget hotLeads={props.hotLeads} />
+
+          {/* ── Referral Leaderboard ── */}
+          <ReferralLeaderboard data={props.referralData} />
 
           {/* ── Today's Priorities: Marketing Schedule + To-Do ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

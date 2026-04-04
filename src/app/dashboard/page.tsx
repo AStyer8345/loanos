@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source')
     .eq('organization_id', organizationId)
     .order('estimated_closing_date', { ascending: true })
 
@@ -303,6 +303,28 @@ export default async function DashboardPage() {
     }
   }
 
+  // ── Referral leaderboard: top sources by funded + in-process volume ──────
+  const referralMap = new Map<string, { loans: number; volume: number; funded: number }>()
+  for (const loan of loans ?? []) {
+    const source = loan.referral_source
+    if (!source) continue
+    const rawStatus = (loan.status ?? '').toLowerCase()
+    const isFunded = rawStatus.includes('closed') || rawStatus.includes('funded')
+    const isActive = !INACTIVE.has(rawStatus)
+    if (!isFunded && !isActive) continue
+
+    const entry = referralMap.get(source) ?? { loans: 0, volume: 0, funded: 0 }
+    entry.loans++
+    entry.volume += loan.loan_amount ?? 0
+    if (isFunded) entry.funded++
+    referralMap.set(source, entry)
+  }
+
+  const referralData = [...referralMap.entries()]
+    .map(([source, data]) => ({ source, ...data }))
+    .sort((a, b) => b.volume - a.volume)
+    .slice(0, 10)
+
   return (
     <DashboardClient
       totalActive={totalActive}
@@ -327,6 +349,7 @@ export default async function DashboardPage() {
       hotLeads={hotLeads}
       funnelData={funnelData}
       showSetupBanner={showSetupBanner}
+      referralData={referralData}
     />
   )
 }

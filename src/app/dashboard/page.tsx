@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   const { data: loans = [] } = await supabase
     .from('loans')
-    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source')
+    .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days')
     .eq('organization_id', organizationId)
     .order('estimated_closing_date', { ascending: true })
 
@@ -325,6 +325,41 @@ export default async function DashboardPage() {
     .sort((a, b) => b.volume - a.volume)
     .slice(0, 10)
 
+  // ── Rate lock countdown data ─────────────────────────────────────────────
+  const rateLockLoans: Array<{
+    id: string
+    name: string
+    daysRemaining: number
+    totalDays: number
+    expirationDate: string
+  }> = []
+  for (const loan of activeLoans) {
+    if (!loan.rate_lock_expiration) continue
+    const lockExp = new Date(loan.rate_lock_expiration + 'T00:00:00')
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const daysRemaining = Math.ceil((lockExp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    if (daysRemaining < -7) continue // skip long-expired locks
+
+    const lockStart = loan.rate_lock_date
+      ? new Date(loan.rate_lock_date + 'T00:00:00')
+      : null
+    const totalDays = lockStart
+      ? Math.ceil((lockExp.getTime() - lockStart.getTime()) / (1000 * 60 * 60 * 24))
+      : loan.rate_lock_days ?? 30
+
+    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+      || loan.loan_name || 'Unknown'
+
+    rateLockLoans.push({
+      id: loan.id,
+      name: borrowerName,
+      daysRemaining,
+      totalDays: Math.max(totalDays, 1),
+      expirationDate: loan.rate_lock_expiration,
+    })
+  }
+  rateLockLoans.sort((a, b) => a.daysRemaining - b.daysRemaining)
+
   return (
     <DashboardClient
       totalActive={totalActive}
@@ -350,6 +385,7 @@ export default async function DashboardPage() {
       funnelData={funnelData}
       showSetupBanner={showSetupBanner}
       referralData={referralData}
+      rateLockLoans={rateLockLoans}
     />
   )
 }

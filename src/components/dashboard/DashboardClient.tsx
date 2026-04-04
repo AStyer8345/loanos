@@ -21,6 +21,7 @@ import { Card } from '@/components/ui/card'
 import SparklineCard from './charts/SparklineCard'
 import ConversionFunnel from './charts/ConversionFunnel'
 import ReferralLeaderboard from './charts/ReferralLeaderboard'
+import RateLockCountdown from './charts/RateLockCountdown'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -45,6 +46,7 @@ interface DashboardClientProps {
   showSetupBanner?: boolean
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
   referralData: Array<{ source: string; loans: number; volume: number; funded: number }>
+  rateLockLoans: Array<{ id: string; name: string; daysRemaining: number; totalDays: number; expirationDate: string }>
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -254,6 +256,9 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* ── Referral Leaderboard ── */}
           <ReferralLeaderboard data={props.referralData} />
+
+          {/* ── Rate Lock Countdown ── */}
+          <RateLockCountdown locks={props.rateLockLoans} />
 
           {/* ── Today's Priorities: Marketing Schedule + To-Do ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

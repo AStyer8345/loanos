@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## [7.2.0] — 2026-04-04 — AI Chat: Tool Loop Fix + Markdown Rendering
+
+### Fixed
+- **Multi-round tool use loop** — chat API route now supports up to 4 sequential tool rounds per message (was single-round, causing "Let me try a broader search..." to hang without executing)
+- **All tool_use blocks per response** processed — Claude can call multiple tools in parallel within a single round
+
+### Added
+- **Markdown rendering** for assistant messages — `react-markdown` with custom styled components (bold, lists, headings, links, code blocks, horizontal rules)
+- **`.chat-markdown` CSS class** — removes trailing margin on last element in assistant bubbles
+
+### Changed
+- `src/app/api/chat/route.ts` — tool use `if` → `while` loop with `MAX_TOOL_ROUNDS = 4`, processes all `tool_use` blocks per round
+- `src/components/crm/LoanOSChat.tsx` — assistant messages use `<ReactMarkdown>` instead of plain text `{msg.content}`
+- `src/app/globals.css` — added `.chat-markdown > :last-child { margin-bottom: 0 }` rule
+
 ## [6.1.0] — 2026-04-04 — Dashboard Redesign
 
 ### Added

@@ -57,6 +57,8 @@ Phase 1 complete. Phase 2 (Automation) ~95% complete. **Multi-tenancy foundation
 - Two tools: `query_lender_database` (structured Supabase lookups) + `query_mortgage_knowledge_base` (NotebookLM deep knowledge)
 - "Who is our AE for PRMG?" → lender DB tool
 - "What are Deephaven's HELOC FICO requirements?" → knowledge base tool
+- **Multi-round tool use fix (session 8)**: Replaced single-round `if` with `while` loop (max 4 rounds) — Claude can now call tool A, get results, call tool B in sequence without hanging
+- **Markdown rendering (session 8)**: Assistant messages render via `react-markdown` with styled components (bold, lists, headings, links, code, HR) instead of raw text. CSS class `chat-markdown` on assistant bubbles removes trailing margin.
 
 ## Dashboard Redesign v6.1 — 2026-04-04 (session 6)
 

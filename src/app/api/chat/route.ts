@@ -397,45 +397,57 @@ export async function POST(req: NextRequest) {
       messages: apiMessages,
     })
 
-    // Tool-use loop — execute any tool calls then get Claude's final answer
-    if (response.stop_reason === 'tool_use') {
-      const toolUseBlock = response.content.find((b) => b.type === 'tool_use')
-      if (toolUseBlock?.type === 'tool_use') {
+    // Tool-use loop — keep executing tool calls until Claude gives a final text answer
+    let loopMessages: MessageParam[] = [...apiMessages]
+    let toolRounds = 0
+    const MAX_TOOL_ROUNDS = 4
+
+    while (response.stop_reason === 'tool_use' && toolRounds < MAX_TOOL_ROUNDS) {
+      toolRounds++
+
+      // Process ALL tool_use blocks in this response (Claude may call multiple tools at once)
+      const toolUseBlocks = response.content.filter((b) => b.type === 'tool_use')
+      if (toolUseBlocks.length === 0) break
+
+      const toolResults: { type: 'tool_result'; tool_use_id: string; content: string }[] = []
+
+      for (const block of toolUseBlocks) {
+        if (block.type !== 'tool_use') continue
         let toolResultContent: string
 
-        if (toolUseBlock.name === 'query_lender_database') {
-          const search = (toolUseBlock.input as { search: string }).search
+        if (block.name === 'query_lender_database') {
+          const search = (block.input as { search: string }).search
           toolResultContent = await queryLenderDatabase(search, organizationId)
         } else {
           // query_mortgage_knowledge_base
-          const question = (toolUseBlock.input as { question: string }).question
+          const question = (block.input as { question: string }).question
           const kbAnswer = await queryNotebookLM(question)
           toolResultContent = kbAnswer
             ? kbAnswer
             : 'The mortgage knowledge base is not available right now. Please answer from your own knowledge.'
         }
 
-        response = await anthropic.messages.create({
-          model: CLAUDE_MODEL,
-          max_tokens: 2048,
-          system: systemPrompt,
-          tools,
-          messages: [
-            ...apiMessages,
-            { role: 'assistant', content: response.content },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'tool_result',
-                  tool_use_id: toolUseBlock.id,
-                  content: toolResultContent,
-                },
-              ],
-            },
-          ],
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: block.id,
+          content: toolResultContent,
         })
       }
+
+      // Build up conversation with assistant tool calls + user tool results
+      loopMessages = [
+        ...loopMessages,
+        { role: 'assistant', content: response.content },
+        { role: 'user', content: toolResults },
+      ]
+
+      response = await anthropic.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: 2048,
+        system: systemPrompt,
+        tools,
+        messages: loopMessages,
+      })
     }
 
     const text = response.content.find((b) => b.type === 'text')?.text ?? ''

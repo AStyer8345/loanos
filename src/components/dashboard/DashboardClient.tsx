@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  AlertTriangle, Clock, Brain, ListChecks, ArrowRight,
+  AlertTriangle, Brain, ListChecks, ArrowRight,
 } from 'lucide-react'
 import SmartActionQueue from '@/components/SmartActionQueue'
 import type { ScoredLoan } from '@/lib/scoreLoans'
@@ -24,7 +24,8 @@ import RateLockCountdown from './charts/RateLockCountdown'
 import YoYVolumeChart from './charts/YoYVolumeChart'
 import CommissionForecast from './charts/CommissionForecast'
 import DaysToCloseGauge from './charts/DaysToCloseGauge'
-import TodoList from './TodoList'
+import LeadSourceChart from './charts/LeadSourceChart'
+import MarketingActivity from './charts/MarketingActivity'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -86,7 +87,7 @@ export default function DashboardClient(props: DashboardClientProps) {
   const [tab, setTab] = useState<'pipeline' | 'performance' | 'briefing' | 'queue'>('pipeline')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
-  const needsAttentionCount = props.urgentFlags.length + props.staleLoans.length
+  const needsAttentionCount = props.urgentFlags.length
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-4 lg:p-6 space-y-4">
@@ -189,95 +190,124 @@ export default function DashboardClient(props: DashboardClientProps) {
             />
           </div>
 
-          {/* ── Needs Attention (merged urgent + stale) ── */}
-          {needsAttentionCount > 0 && (
-            <div className="bg-amber-950/20 border border-amber-800/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle size={14} className="text-amber-400" />
-                  <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Needs Attention</span>
-                  <span className="text-[11px] font-mono text-muted-foreground">{needsAttentionCount} items</span>
-                </div>
+          {/* ── Mini Pipeline Table ── */}
+          {props.pipelineLoans.length > 0 && (
+            <Card className="overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-input">
+                <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Active Pipeline</span>
                 <Link href="/dashboard/loans" className="flex items-center gap-1 text-[11px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  View pipeline <ArrowRight size={9} />
+                  Full pipeline <ArrowRight size={9} />
                 </Link>
               </div>
-
-              {/* Urgent flags — rate locks, past closing, expiring pre-approvals */}
-              {props.urgentFlags.length > 0 && (
-                <div className="space-y-1 mb-3">
-                  {props.urgentFlags.map(f => (
-                    <Link
-                      key={f.id + f.flag}
-                      href={`/dashboard/loans/${f.id}`}
-                      className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-3 py-2 -mx-1 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                        <span className="text-foreground">{f.name}</span>
-                      </div>
-                      <span className="text-amber-400">{f.flag} — {fmtDateShort(f.date)}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              {/* Stale loans — 7+ days no human touch */}
-              {props.staleLoans.length > 0 && (
-                <>
-                  {props.urgentFlags.length > 0 && (
-                    <div className="border-t border-amber-800/30 my-2" />
-                  )}
-                  <div className="flex items-center gap-2 mb-2 px-2">
-                    <Clock size={11} className="text-orange-400" />
-                    <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">No activity 7+ days</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-[400px] overflow-y-auto">
-                    {props.staleLoans.map(l => (
-                      <Link
-                        key={l.id}
-                        href={`/dashboard/loans/${l.id}`}
-                        className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-3 py-2 -mx-1 transition-colors"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                          <span className="text-foreground/80 truncate">{l.name}</span>
-                          {l.status && <StageBadge status={l.status} />}
-                        </div>
-                        <div className="flex items-center gap-3 ml-2 flex-shrink-0">
-                          {l.estimated_closing_date && (
-                            <span className="text-muted-foreground text-[11px]">close {fmtDateShort(l.estimated_closing_date)}</span>
-                          )}
-                          <span className="text-orange-400">{l.daysSinceActivity}d idle</span>
-                        </div>
-                      </Link>
+              <div className="max-h-[360px] overflow-y-auto">
+                <Table className="font-mono text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-left">Borrower</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Closing</TableHead>
+                      <TableHead className="text-right">Rate</TableHead>
+                      <TableHead className="text-right">Commission</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {props.pipelineLoans.map(l => (
+                      <TableRow key={l.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => window.location.href = `/dashboard/loans/${l.id}`}>
+                        <TableCell className="font-medium text-foreground">{l.name}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{fmtK(l.amount)}</TableCell>
+                        <TableCell>{l.status && <StageBadge status={l.status} />}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{fmtDateShort(l.closingDate)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{l.rate ? `${l.rate}%` : '—'}</TableCell>
+                        <TableCell className="text-right text-primary">{fmt(l.commission)}</TableCell>
+                      </TableRow>
                     ))}
-                  </div>
-                </>
-              )}
-            </div>
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
           )}
 
-          {/* ── Conversion Funnel ── */}
-          <ConversionFunnel data={props.funnelData} />
+          {/* ── New Applications & Pre-Approvals ── */}
+          {props.newAppsAndPAs.length > 0 && (
+            <Card className="overflow-hidden">
+              <div className="px-4 py-3 border-b border-input">
+                <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">New Applications & Pre-Approvals</span>
+              </div>
+              <div className="max-h-[280px] overflow-y-auto">
+                <Table className="font-mono text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-left">Borrower</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead className="text-right">Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {props.newAppsAndPAs.map(l => (
+                      <TableRow key={l.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => window.location.href = `/dashboard/loans/${l.id}`}>
+                        <TableCell className="font-medium text-foreground">{l.name}</TableCell>
+                        <TableCell>{l.status && <StageBadge status={l.status} />}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{l.amount ? fmtK(l.amount) : '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{l.loanType ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-[120px]">{l.referralSource ?? '—'}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{fmtDateShort(l.createdAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          )}
 
-          {/* ── Hot Leads ── */}
-          <HotLeadsWidget hotLeads={props.hotLeads} />
+          {/* ── Action Required (compact urgent flags only) ── */}
+          {props.urgentFlags.length > 0 && (
+            <Card className="p-4 border-amber-800/50 bg-amber-950/10">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle size={12} className="text-amber-400" />
+                <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Action Required</span>
+                <span className="text-[11px] font-mono text-muted-foreground">{props.urgentFlags.length}</span>
+              </div>
+              <div className="space-y-1">
+                {props.urgentFlags.map(f => (
+                  <Link
+                    key={f.id + f.flag}
+                    href={`/dashboard/loans/${f.id}`}
+                    className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-2 py-1.5 -mx-1 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                      <span className="text-foreground">{f.name}</span>
+                    </div>
+                    <span className="text-amber-400 text-[11px]">{f.flag}</span>
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          )}
 
-          {/* ── Referral Leaderboard ── */}
+          {/* ── Two-column: Hot Leads (compact) + Rate Lock (compact) ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <HotLeadsWidget hotLeads={props.hotLeads.slice(0, 5)} />
+            <RateLockCountdown locks={props.rateLockLoans.slice(0, 5)} />
+          </div>
+
+          {/* ── Two-column: Lead Sources + Pipeline Snapshot ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <LeadSourceChart data={props.leadSourceData} />
+            <ConversionFunnel data={props.funnelData} />
+          </div>
+
+          {/* ── Top Realtors ── */}
           <ReferralLeaderboard data={props.referralData} />
 
-          {/* ── Rate Lock Countdown ── */}
-          <RateLockCountdown locks={props.rateLockLoans} />
-
-          {/* ── Today's Priorities: Marketing Schedule + To-Do ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <DailyScheduleWidget />
-            </div>
-            <div>
-              <TodoList />
-            </div>
+          {/* ── Two-column: Marketing Activity + Schedule ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MarketingActivity log={props.marketingLog} />
+            <DailyScheduleWidget />
           </div>
         </div>
       )}
@@ -373,14 +403,7 @@ export default function DashboardClient(props: DashboardClientProps) {
 
       {/* ═══ QUEUE TAB ═══ */}
       {tab === 'queue' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <SmartActionQueue scoredLoans={props.scoredLoans} />
-          </div>
-          <div>
-            <TodoList />
-          </div>
-        </div>
+        <SmartActionQueue scoredLoans={props.scoredLoans} />
       )}
     </div>
   )

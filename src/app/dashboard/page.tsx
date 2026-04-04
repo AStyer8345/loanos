@@ -12,16 +12,18 @@ const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
 
 export default async function DashboardPage() {
   let organizationId: string
+  let userId: string
   try {
     const ctx = await getOrganization()
     organizationId = ctx.organizationId
+    userId = ctx.userId
   } catch {
     redirect('/auth/login')
   }
   const supabase = createClient()
 
-  // Parallel fetch: org_settings + loans are independent
-  const [{ data: orgSettings }, { data: loans = [] }] = await Promise.all([
+  // Parallel fetch: org_settings + loans + mcc_state are independent
+  const [{ data: orgSettings }, { data: loans = [] }, { data: mccRow }] = await Promise.all([
     supabase
       .from('org_settings')
       .select('onboarding_completed')
@@ -32,6 +34,12 @@ export default async function DashboardPage() {
       .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days')
       .eq('organization_id', organizationId)
       .order('estimated_closing_date', { ascending: true }),
+    supabase
+      .from('mcc_state')
+      .select('value')
+      .eq('user_id', userId)
+      .eq('key', 'mcc')
+      .single(),
   ])
   const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
 
@@ -324,7 +332,7 @@ export default async function DashboardPage() {
   const referralData = [...referralMap.entries()]
     .map(([source, data]) => ({ source, ...data }))
     .sort((a, b) => b.volume - a.volume)
-    .slice(0, 10)
+    .slice(0, 20)
 
   // ── Rate lock countdown data ─────────────────────────────────────────────
   const rateLockLoans: Array<{
@@ -427,6 +435,60 @@ export default async function DashboardPage() {
     }))
     .sort((a, b) => b.count - a.count)
 
+  // ── Pipeline loans for mini-table (active in-process loans) ─────────────
+  const pipelineLoans = activeLoans
+    .filter(l => isInStageGroup(l.status, STAGE_GROUPS.IN_PROCESS))
+    .map(l => ({
+      id: l.id,
+      name: [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.loan_name || 'Unknown',
+      amount: l.loan_amount ?? 0,
+      status: l.status,
+      closingDate: l.estimated_closing_date ?? l.closing_date,
+      rate: l.interest_rate,
+      commission: l.commission_amount ?? 0,
+      rateLockExp: l.rate_lock_expiration,
+      lender: l.lender_name,
+    }))
+
+  // ── New applications & pre-approvals (recent, sorted by created_at) ─────
+  const newAppsAndPAs = (loans ?? [])
+    .filter(l => {
+      const key = normalizeToStageKey(l.status)
+      return key === 'new_application' || key === 'pre_approval' || key === 'lead'
+    })
+    .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
+    .slice(0, 15)
+    .map(l => ({
+      id: l.id,
+      name: [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.loan_name || 'Unknown',
+      amount: l.loan_amount ?? 0,
+      status: l.status,
+      stage: normalizeToStageKey(l.status),
+      createdAt: l.created_at,
+      loanType: l.loan_type,
+      referralSource: l.referral_source,
+    }))
+
+  // ── Lead source breakdown ───────────────────────────────────────────────
+  const sourceMap = new Map<string, { count: number; volume: number }>()
+  for (const loan of loans ?? []) {
+    const source = loan.referral_source?.trim() || 'Direct / No Source'
+    const entry = sourceMap.get(source) ?? { count: 0, volume: 0 }
+    entry.count++
+    entry.volume += loan.loan_amount ?? 0
+    sourceMap.set(source, entry)
+  }
+  const leadSourceData = [...sourceMap.entries()]
+    .map(([source, data]) => ({ source, ...data }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 15)
+
+  // ── Marketing activity log (from mcc_state JSON blob) ───────────────────
+  interface MarketingLogEntry { id: string; date: string; activity: string; channel: string; notes?: string }
+  const mccValue = mccRow?.value as Record<string, unknown> | null
+  const rawLog = (mccValue?.log ?? []) as MarketingLogEntry[]
+  const marketingLog = rawLog.slice(0, 10) // most recent 10
+
   return (
     <DashboardClient
       totalActive={totalActive}
@@ -456,6 +518,10 @@ export default async function DashboardPage() {
       yoyChartData={yoyChartData}
       forecastData={forecastData}
       daysToCloseData={daysToCloseData}
+      pipelineLoans={pipelineLoans}
+      newAppsAndPAs={newAppsAndPAs}
+      leadSourceData={leadSourceData}
+      marketingLog={marketingLog}
     />
   )
 }

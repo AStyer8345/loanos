@@ -21,7 +21,7 @@ export default function ReferralLeaderboard({ data }: ReferralLeaderboardProps) 
   return (
     <Card className="p-4">
       <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
-        Top Referral Sources
+        Top Realtors
       </h3>
       <div className="space-y-2">
         {data.map((entry, i) => {

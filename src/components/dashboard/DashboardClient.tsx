@@ -19,6 +19,7 @@ import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { Card } from '@/components/ui/card'
 import SparklineCard from './charts/SparklineCard'
+import ConversionFunnel from './charts/ConversionFunnel'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
@@ -39,6 +40,7 @@ interface DashboardClientProps {
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
   hotLeads: HotLead[]
+  funnelData: Array<{ stage: string; count: number }>
   showSetupBanner?: boolean
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
 }
@@ -241,6 +243,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               )}
             </div>
           )}
+
+          {/* ── Conversion Funnel ── */}
+          <ConversionFunnel data={props.funnelData} />
 
           {/* ── Hot Leads ── */}
           <HotLeadsWidget hotLeads={props.hotLeads} />

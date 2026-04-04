@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS } from '@/lib/constants/loan-stages'
+import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 
@@ -120,6 +120,32 @@ export default async function DashboardPage() {
     volume: stageCounts[stage]?.volume ?? 0,
     commission: stageCounts[stage]?.commission ?? 0,
   }))
+
+  // ── Conversion funnel: count loans that reached each stage (YTD) ────────
+  const funnelStages = [
+    { key: 'lead' as const, label: 'Lead' },
+    { key: 'new_application' as const, label: 'Application' },
+    { key: 'pre_approval' as const, label: 'Pre-Approval' },
+    { key: 'submitted' as const, label: 'Submitted' },
+    { key: 'approved' as const, label: 'Approved' },
+    { key: 'clear_to_close' as const, label: 'CTC' },
+    { key: 'funded' as const, label: 'Funded' },
+  ] as const
+
+  const STAGE_ORDER: Record<string, number> = {
+    lead: 0, new_application: 1, pre_approval: 2, setup: 3,
+    disclosed: 3, processing: 3, submitted: 4, underwriting: 4,
+    approved: 5, resubmit: 5, clear_to_close: 6, funded: 7,
+  }
+
+  const funnelData = funnelStages.map(fs => {
+    const threshold = STAGE_ORDER[fs.key] ?? 0
+    const count = (loans ?? []).filter(l => {
+      const key = normalizeToStageKey(l.status)
+      return (STAGE_ORDER[key] ?? 0) >= threshold
+    }).length
+    return { stage: fs.label, count }
+  })
 
   // recentLoans removed — pipeline tab no longer shows Active Loans table
 
@@ -299,6 +325,7 @@ export default async function DashboardPage() {
       sparklineMonths={sparklineMonths}
       scoredLoans={scoredLoans}
       hotLeads={hotLeads}
+      funnelData={funnelData}
       showSetupBanner={showSetupBanner}
     />
   )

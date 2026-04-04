@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Building2, Globe, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -34,9 +35,13 @@ function channelVariant(channel: string | null): 'info' | 'warning' | 'outline' 
 
 export default function LenderCard({ lender }: { lender: Lender }) {
   const [notesOpen, setNotesOpen] = useState(false)
+  const router = useRouter()
 
   return (
-    <Card className="flex flex-col">
+    <Card
+      className="flex flex-col cursor-pointer hover:border-primary/50 transition-colors"
+      onClick={() => router.push(`/dashboard/lenders/${lender.id}`)}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -57,6 +62,7 @@ export default function LenderCard({ lender }: { lender: Lender }) {
               href={lender.website.startsWith('http') ? lender.website : `https://${lender.website}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 hover:text-primary transition-colors"
             >
               <Globe className="size-3" />
@@ -83,13 +89,13 @@ export default function LenderCard({ lender }: { lender: Lender }) {
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-muted-foreground">
                   {c.phone && (
-                    <a href={`tel:${c.phone}`} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                    <a href={`tel:${c.phone}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
                       <Phone className="size-3" />
                       {c.phone}
                     </a>
                   )}
                   {c.email && (
-                    <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                    <a href={`mailto:${c.email}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
                       <Mail className="size-3" />
                       {c.email}
                     </a>
@@ -116,7 +122,7 @@ export default function LenderCard({ lender }: { lender: Lender }) {
           <div>
             <button
               type="button"
-              onClick={() => setNotesOpen(!notesOpen)}
+              onClick={(e) => { e.stopPropagation(); setNotesOpen(!notesOpen) }}
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {notesOpen ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}

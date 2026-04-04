@@ -451,8 +451,10 @@ export default async function DashboardPage() {
     }))
 
   // ── New applications & pre-approvals (recent, sorted by created_at) ─────
+  const EXCLUDED_STATUSES = ['Dead', 'Cancelled', 'canceled', 'Denied', 'Withdrawn', 'Suspended']
   const newAppsAndPAs = (loans ?? [])
     .filter(l => {
+      if (!l.status || EXCLUDED_STATUSES.includes(l.status)) return false
       const key = normalizeToStageKey(l.status)
       return key === 'new_application' || key === 'pre_approval' || key === 'lead'
     })

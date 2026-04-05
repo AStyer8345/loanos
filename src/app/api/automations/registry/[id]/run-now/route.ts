@@ -11,8 +11,7 @@ export async function POST(
   try {
     const { id } = params
     const { organizationId } = await getOrganization()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const { data: automation, error } = await supabase
       .from('automation_registry')
@@ -33,12 +32,13 @@ export async function POST(
     }
 
     const n8nApiKey = process.env.N8N_API_KEY
-    if (!n8nApiKey) {
-      return NextResponse.json({ error: 'N8N_API_KEY not configured' }, { status: 500 })
+    const n8nApiBase = process.env.N8N_API_BASE
+    if (!n8nApiKey || !n8nApiBase) {
+      return NextResponse.json({ error: 'N8N_API_KEY or N8N_API_BASE not configured' }, { status: 500 })
     }
 
     const n8nRes = await fetch(
-      `https://styer.app.n8n.cloud/api/v1/workflows/${automation.source_id}/run`,
+      `${n8nApiBase}/workflows/${automation.source_id}/run`,
       {
         method: 'POST',
         headers: {

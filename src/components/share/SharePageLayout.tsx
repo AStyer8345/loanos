@@ -30,16 +30,19 @@ interface SharePageLayoutProps {
   branding?: ShareBranding
 }
 
+// Neutral fallback used ONLY if the API route somehow returns no branding block.
+// Personal identifiers (name, NMLS, phone, email, links) MUST stay empty so a
+// misconfigured tenant never renders Adam's license info on their share page.
 const DEFAULT_BRANDING: ShareBranding = {
-  loName: 'Adam Styer',
-  company: 'Adam Styer | Mortgage Solutions LP',
-  nmls: '513013',
-  phone: '(512) 956-6010',
-  email: 'adam@styermortgage.com',
+  loName: 'Your Loan Officer',
+  company: '',
+  nmls: '',
+  phone: '',
+  email: '',
   logoUrl: null,
   brandColor: '#C9A84C',
-  calendlyUrl: 'https://calendly.com/adamstyer/15minutes',
-  applicationUrl: 'https://mslp.my1003app.com/513013/register',
+  calendlyUrl: null,
+  applicationUrl: null,
 }
 
 function getHeroStat(displayData: DisplayData): { label: string; value: string; sublabel?: string } {

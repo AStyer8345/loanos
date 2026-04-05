@@ -46,7 +46,16 @@ export async function POST(req: NextRequest) {
 
     const identity = await getLoIdentity(organizationId)
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loanos.vercel.app'
+    // Share link must resolve to *this* deployment — never fall back to the
+    // master loanos.vercel.app URL, which would send tenants' borrowers into
+    // the wrong deployment if NEXT_PUBLIC_APP_URL is missing.
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl) {
+      return NextResponse.json(
+        { error: 'NEXT_PUBLIC_APP_URL env var not configured on the server' },
+        { status: 500 }
+      )
+    }
     const shareUrl = `${baseUrl}/share/${scenario.share_token}`
     const borrowerFirst = scenario.borrower_name
       ? scenario.borrower_name.split(/[\s,&]+/)[0]

@@ -1,5 +1,28 @@
 # LoanOS Changelog
 
+## [8.1.0] — 2026-04-05 — Security Hardening Sweep (findings A-2, A-3, A-4, S-1-4, F-1)
+
+### Security
+- **Agent-secret routes now require explicit `org_slug`** — no more ambient "first org in DB" fallbacks:
+  - `GET /api/agents/daily-briefing` — `?org_slug=...` query param required
+  - `POST /api/marketing/log` / `DELETE` — `?org_slug=...` or `X-Org-Slug:` header required; resolves to owner/admin profile for `mcc_state.user_id`
+  - `POST /api/contacts/web-lead` — `org_slug` required in body; `LOANOS_SYSTEM_USER_ID` env var dependency removed
+- **Hardcoded Publer account IDs removed** from `/api/social/publish` — now loads per-org `publer_config` from `social_settings`, fails 400 if unconfigured. No more posting customer content to Adam's personal IG/LI/FB.
+- **Hardcoded NMLS 513013 / Adam Styer identity stripped** from share pages, carousel renderer + builder, social post preview, scenarios PDF generator, default outreach prompt. All now load per-org branding from `organizations` + `user_settings`. Fail-closed to empty strings.
+- **Hardcoded `https://styer.app.n8n.cloud` / `https://loanos.vercel.app` URLs removed** — `scenarios/generate-pdf`, `scenarios/send-email`, `automations/email/generate`, `automations/registry/[id]`, `automations/registry/[id]/run-now`, `getting-started` wizard, `loans/[id]` trigger UI all now require `N8N_API_BASE` / `N8N_WEBHOOK_BASE` / `NEXT_PUBLIC_APP_URL` env vars and 500 if missing.
+- **Waitlist admin page** — `src/app/dashboard/waitlist/page.tsx` moved off direct `createSupabaseClient(URL, SERVICE_ROLE_KEY)` to the `createServiceClient()` helper; admin gate now reads `system_admins` table by `user_id` instead of hardcoded `ADAM_EMAIL` check.
+
+### Added
+- **`CarouselBranding` type + `loadCarouselBranding()`** in `src/app/dashboard/marketing/_components/carouselRenderer.ts` — tenant-aware branding loader used by `CarouselBuilder`, `SocialDraftDetail`, `SocialPostPreview`.
+- Feature gating primitive `src/lib/billing/requirePlan.ts` + middleware enforcement for professional-tier routes (F-1).
+- Migration 076 — RLS + policy + storage hardening.
+
+### Changed
+- `src/lib/defaultOutreachPrompt.ts` — default prompt now generic ("a mortgage loan officer's outreach assistant"). Callers should use `buildOutreachPrompt(identity)` for tenant-specific prompts.
+- `tasks/security-hardening-critical-gaps.md` — completions section added.
+
+---
+
 ## [8.0.0] — 2026-04-05 — Multi-Tenant Arive Webhook + Security Hardening Scaffold
 
 ### Added

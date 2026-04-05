@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
 import MediaManager from './MediaManager'
 import SocialPostPreview from './SocialPostPreview'
-import { parseContentToSlides, regenerateCarouselImages } from './carouselRenderer'
+import { parseContentToSlides, regenerateCarouselImages, loadCarouselBranding } from './carouselRenderer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -393,8 +393,10 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     setRegenError(null)
 
     try {
-      // Regenerate slide images
-      const newMediaPaths = await regenerateCarouselImages(nonEmpty)
+      // Regenerate slide images — load per-org branding fresh each time so
+      // the slide footer reflects the current tenant, not a hardcoded default.
+      const branding = await loadCarouselBranding()
+      const newMediaPaths = await regenerateCarouselImages(nonEmpty, branding)
 
       // Rebuild structured content
       const contentLines: string[] = []

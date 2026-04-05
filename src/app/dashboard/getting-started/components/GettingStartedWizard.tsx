@@ -13,6 +13,7 @@ interface WizardProps {
   setupImportDone: boolean
   setupAutomationsDone: boolean
   orgName: string
+  orgSlug: string
   userName: string
   plan: string
   contactCount: number
@@ -38,6 +39,7 @@ export default function GettingStartedWizard({
   setupImportDone,
   setupAutomationsDone,
   orgName,
+  orgSlug,
   userName,
   plan,
   contactCount: initialContactCount,
@@ -56,7 +58,13 @@ export default function GettingStartedWizard({
   const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const webhookUrl = 'https://styer.app.n8n.cloud/webhook/arive-new-loan'
+  // Tenant-specific Arive webhook URL. Points at LoanOS's multi-tenant ingress
+  // (/api/webhooks/los/arive/[org_slug]) which routes by slug + signed secret
+  // to the correct org. Never hardcode Adam's personal n8n URL here.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+  const webhookUrl = orgSlug && appUrl
+    ? `${appUrl}/api/webhooks/los/arive/${orgSlug}`
+    : ''
 
   async function markStep(step: 'arive' | 'import' | 'automations' | 'complete') {
     setSaving(true)

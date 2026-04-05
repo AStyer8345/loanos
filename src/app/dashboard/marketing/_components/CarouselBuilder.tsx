@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { SocialDraft } from './SocialDraftList'
-import { renderSlideToCtx, SLIDE_SIZE, type Slide } from './carouselRenderer'
+import { renderSlideToCtx, SLIDE_SIZE, loadCarouselBranding, type Slide, type CarouselBranding } from './carouselRenderer'
 
 const GOLD = 'var(--primary)'
 const PREVIEW_SIZE = 340
@@ -23,6 +23,7 @@ function SlidePreview({
   bgDataUrl,
   bgMode,
   size,
+  branding,
 }: {
   slide: Slide
   index: number
@@ -30,6 +31,7 @@ function SlidePreview({
   bgDataUrl: string | null
   bgMode: BgMode
   size: number
+  branding: CarouselBranding
 }) {
   const isFirst = index === 0
   const isLast = index === total - 1
@@ -85,11 +87,11 @@ function SlidePreview({
           }}
         >
           <span style={{ color: 'var(--muted-foreground)', fontSize: 17 * scale }}>
-            Adam Styer | Mortgage Solutions LP
+            {branding.company}
           </span>
-          {isLast && (
+          {isLast && branding.nmls && (
             <span style={{ color: GOLD, fontSize: 17 * scale, fontWeight: 700 }}>
-              NMLS# 513013
+              NMLS# {branding.nmls}
             </span>
           )}
         </div>
@@ -114,6 +116,13 @@ export default function CarouselBuilder({ onDraftCreated, onClose }: Props) {
   const bgInputRef = useRef<HTMLInputElement>(null)
   // Keep the raw file for potential future use
   const bgFileRef = useRef<File | null>(null)
+
+  // Per-org branding for the slide footer. Loaded from DB on mount; starts
+  // empty so we never flash hardcoded values even for one render.
+  const [branding, setBranding] = useState<CarouselBranding>({ company: '', nmls: '' })
+  useEffect(() => {
+    loadCarouselBranding().then(setBranding).catch(() => {})
+  }, [])
 
   // AI generation state
   const [aiPrompt, setAiPrompt] = useState('')
@@ -310,7 +319,7 @@ Rules:
       const total = slides.length
 
       for (let i = 0; i < total; i++) {
-        renderSlideToCtx(ctx, SLIDE_SIZE, slides[i], i, total, bgImage)
+        renderSlideToCtx(ctx, SLIDE_SIZE, slides[i], i, total, bgImage, branding)
 
         const blob = await new Promise<Blob>((resolve) =>
           canvas.toBlob((b) => resolve(b!), 'image/png'),
@@ -686,6 +695,7 @@ Rules:
               bgDataUrl={bgDataUrl}
               bgMode={bgMode}
               size={PREVIEW_SIZE}
+              branding={branding}
             />
 
             {/* Navigation */}
@@ -741,6 +751,7 @@ Rules:
                     bgDataUrl={bgDataUrl}
                     bgMode={bgMode}
                     size={80}
+                    branding={branding}
                   />
                 </button>
               ))}

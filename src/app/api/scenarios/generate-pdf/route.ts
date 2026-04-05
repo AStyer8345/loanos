@@ -492,11 +492,14 @@ function generatePDFHTML(
   const narrative = scenario.narrative as string || ''
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   const mode = data.mode
-  const loName = settings?.lo_name || 'Adam Styer'
-  const nmls = settings?.nmls || '513013'
-  const company = settings?.company || 'Adam Styer | Mortgage Solutions LP'
-  const phone = settings?.phone || '(512) 956-6010'
-  const email = settings?.email || 'adam@styermortgage.com'
+  // Fail-closed branding fallbacks — never embed another tenant's personal info.
+  // An unconfigured org will render a neutral "Your Loan Officer" label instead
+  // of accidentally stamping the PDF with Adam's NMLS.
+  const loName = settings?.lo_name || 'Your Loan Officer'
+  const nmls = settings?.nmls || ''
+  const company = settings?.company || ''
+  const phone = settings?.phone || ''
+  const email = settings?.email || ''
 
   // Bar chart data
   const paymentBars = data.rows.map(r => ({ label: r.label, value: Math.round(r.totalMonthlyPayment) }))
@@ -537,10 +540,9 @@ function generatePDFHTML(
   </div>
   <div style="height:3px;background:#C9A84C;"></div>
   <div style="background:#0A1628;padding:5px 40px;display:flex;justify-content:center;gap:20px;">
-    <span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">NMLS #${nmls}</span>
-    <span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">${phone}</span>
-    <span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">${email}</span>
-    <span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">styermortgage.com</span>
+    ${nmls ? `<span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">NMLS #${nmls}</span>` : ''}
+    ${phone ? `<span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">${phone}</span>` : ''}
+    ${email ? `<span style="color:#F0D98A;font-size:9px;letter-spacing:0.03em;">${email}</span>` : ''}
   </div>
 
   <div style="max-width:900px;margin:0 auto;padding:28px 40px 24px;">
@@ -612,12 +614,12 @@ function generatePDFHTML(
   <div style="background:#0A1628;padding:16px 40px;margin-top:24px;">
     <div style="text-align:center;padding:10px;border:1px solid #C9A84C;border-radius:6px;margin-bottom:12px;">
       <div style="color:#fff;font-size:12px;font-weight:600;">Questions? Let's talk.</div>
-      <div style="color:#F0D98A;font-size:10px;margin-top:4px;">${loName} · ${phone} · ${email} · styermortgage.com</div>
+      <div style="color:#F0D98A;font-size:10px;margin-top:4px;">${[loName, phone, email].filter(Boolean).join(' · ')}</div>
     </div>
     <div style="text-align:center;font-size:8px;color:#8A8A8A;line-height:1.6;">
       This analysis is for informational purposes only and does not constitute a loan commitment or financial advice.
       Consult with your loan officer for personalized guidance. This analysis was generated with AI assistance and reviewed by ${loName}.
-      Equal Housing Lender | ${company} | NMLS #${nmls}
+      Equal Housing Lender${company ? ` | ${company}` : ''}${nmls ? ` | NMLS #${nmls}` : ''}
     </div>
   </div>
 

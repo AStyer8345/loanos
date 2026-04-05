@@ -124,6 +124,23 @@ onboarding of additional LOs.
 
 ---
 
+## ✅ Completed in 2026-04-05 hardening session
+
+Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
+
+- **A-1 Arive webhook multi-tenant** — scaffolded via Zapier middleman (`/api/webhooks/los/arive/[org_slug]`), legacy route deprecated with 30-day grace
+- **A-2 Daily-briefing first-org fallback** — agent-secret path now requires explicit `org_slug` query param
+- **A-3 Web-lead route** — `org_slug` is now a required body field; removed `LOANOS_SYSTEM_USER_ID` ambient resolution; attribution now goes to org owner/admin profile
+- **A-4 Marketing/log first-org fallback** — agent-secret path now requires `org_slug` (query or `X-Org-Slug` header), resolves to owner/admin profile
+- **S-1 Hardcoded n8n/loanos.vercel.app URLs** — removed from `scenarios/generate-pdf`, `scenarios/send-email`, `automations/email/generate`, `automations/registry/*`, `getting-started` wizard, `loans/[id]` trigger UI. All now require env vars (`N8N_API_BASE`, `N8N_WEBHOOK_BASE`, `NEXT_PUBLIC_APP_URL`, etc.) and fail closed.
+- **S-2 Hardcoded Publer account IDs** — `/api/social/publish` now loads `publer_config` from `social_settings` per-org; fails 400 if unconfigured. No more posting customer content to Adam's personal IG/LI/FB.
+- **S-3 Hardcoded NMLS 513013 / Adam Styer identity** — stripped from share pages, carousel renderer, carousel builder, social post preview, scenarios PDF generator, default outreach prompt. All now load per-org branding from `organizations` + `user_settings`.
+- **S-4 Waitlist page direct service-role + hardcoded email admin** — moved to `createServiceClient()` helper; admin gate now reads `system_admins` table by user_id.
+- **F-1 Plan gating** — `src/lib/billing/requirePlan.ts` + middleware enforcement for professional-tier routes.
+- **Migration 076** — RLS + policy + storage fixes applied to Supabase.
+
+---
+
 ## Non-code items (business / legal)
 
 - [ ] GLBA-aware attorney consultation before taking first LO payment

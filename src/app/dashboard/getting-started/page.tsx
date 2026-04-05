@@ -33,7 +33,7 @@ export default async function GettingStartedPage() {
   // Load org + user profile for personalization
   const { data: org } = await supabase
     .from('organizations')
-    .select('name, plan')
+    .select('name, plan, slug')
     .eq('id', organizationId)
     .single()
 
@@ -58,6 +58,7 @@ export default async function GettingStartedPage() {
       setupImportDone={settings?.setup_import_done ?? false}
       setupAutomationsDone={settings?.setup_automations_done ?? false}
       orgName={org?.name ?? 'Your Organization'}
+      orgSlug={org?.slug ?? ''}
       userName={firstName}
       plan={org?.plan ?? 'starter'}
       contactCount={contactCount ?? 0}

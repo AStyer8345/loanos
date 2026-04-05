@@ -23,8 +23,7 @@ export async function GET(
   try {
     const { id } = params
     const { organizationId } = await getOrganization()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const { data, error } = await supabase
       .from('automation_registry')
@@ -52,8 +51,7 @@ export async function PATCH(
   try {
     const { id } = params
     const { organizationId } = await getOrganization()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const body = await req.json()
 
@@ -102,10 +100,11 @@ export async function PATCH(
     const statusChanged = 'status' in body && body.status !== existing.status
     if (statusChanged && existing.source === 'n8n' && existing.source_id) {
       const n8nApiKey = process.env.N8N_API_KEY
-      if (n8nApiKey) {
+      const n8nApiBase = process.env.N8N_API_BASE
+      if (n8nApiKey && n8nApiBase) {
         try {
           const n8nRes = await fetch(
-            `https://styer.app.n8n.cloud/api/v1/workflows/${existing.source_id}`,
+            `${n8nApiBase}/workflows/${existing.source_id}`,
             {
               method: 'PATCH',
               headers: {

@@ -3,14 +3,42 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 
 const PUBLER_API_KEY = process.env.PUBLER_API_KEY || ''
-const PUBLER_WORKSPACE = process.env.PUBLER_WORKSPACE || ''
 
-// Publer account IDs → keyed by platform name AND Publer network provider name
-const PLATFORM_ACCOUNTS: Record<string, { id: string; network: string }> = {
-  instagram: { id: '69b0530110a77a0ed895847d', network: 'instagram' },
-  linkedin:  { id: '69b0536404b824ffb2c05426', network: 'linkedin' },
-  facebook:  { id: '69b05329de86f5e15b7c0722', network: 'facebook' },
-  google:    { id: '69c3e3f548d8e4e643d45438', network: 'google' },
+type PublerAccount = { id: string; network: string }
+type PublerConfig = {
+  workspace_id: string
+  accounts: Partial<Record<'instagram' | 'linkedin' | 'facebook' | 'google', PublerAccount>>
+}
+
+/**
+ * Load per-org Publer configuration from social_settings (key='publer_config').
+ * Returns null if the org hasn't wired up Publer yet — caller must fail closed.
+ *
+ * Stored shape (JSON-stringified in social_settings.value):
+ *   { "workspace_id": "...", "accounts": { "instagram": {"id":"...","network":"instagram"}, ... } }
+ *
+ * This replaces the old hardcoded PLATFORM_ACCOUNTS map that pointed every tenant
+ * at Adam's personal Publer workspace (security audit S-2, 2026-04-05).
+ */
+async function loadPublerConfig(
+  supabase: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  organizationId: string
+): Promise<PublerConfig | null> {
+  const { data } = await supabase
+    .from('social_settings')
+    .select('value')
+    .eq('organization_id', organizationId)
+    .eq('key', 'publer_config')
+    .maybeSingle()
+
+  if (!data?.value) return null
+  try {
+    const parsed = JSON.parse(data.value) as PublerConfig
+    if (!parsed?.workspace_id || !parsed?.accounts) return null
+    return parsed
+  } catch {
+    return null
+  }
 }
 
 /** Extract the main caption from structured draft content.
@@ -66,8 +94,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    if (!PUBLER_API_KEY || !PUBLER_WORKSPACE) {
-      return NextResponse.json({ error: 'Publer credentials not configured — add PUBLER_API_KEY and PUBLER_WORKSPACE env vars' }, { status: 500 })
+    if (!PUBLER_API_KEY) {
+      return NextResponse.json({ error: 'Publer credentials not configured — add PUBLER_API_KEY env var' }, { status: 500 })
     }
 
     const { draftId } = await req.json()
@@ -76,6 +104,21 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    // Load per-org Publer config — fail closed if tenant hasn't set up Publer.
+    // Replaces hardcoded account IDs that used to point every tenant at Adam's workspace.
+    const publerConfig = await loadPublerConfig(supabase, organizationId)
+    if (!publerConfig) {
+      return NextResponse.json(
+        {
+          error: 'Publer not configured for this organization',
+          detail: 'Add your Publer workspace ID and social account IDs in Settings → Integrations before publishing.',
+        },
+        { status: 400 }
+      )
+    }
+    const PUBLER_WORKSPACE = publerConfig.workspace_id
+    const PLATFORM_ACCOUNTS = publerConfig.accounts
 
     // Fetch the draft
     const { data: draft, error: fetchError } = await supabase
@@ -93,13 +136,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Draft must be approved before publishing' }, { status: 400 })
     }
 
-    // Determine which Publer accounts to post to
-    const targets = draft.platform === 'all'
-      ? [PLATFORM_ACCOUNTS.instagram, PLATFORM_ACCOUNTS.linkedin, PLATFORM_ACCOUNTS.facebook, PLATFORM_ACCOUNTS.google]
-      : PLATFORM_ACCOUNTS[draft.platform] ? [PLATFORM_ACCOUNTS[draft.platform]] : []
+    // Determine which Publer accounts to post to — filter out platforms the org hasn't connected.
+    const platformKey = draft.platform as 'instagram' | 'linkedin' | 'facebook' | 'google' | 'all'
+    const targets: PublerAccount[] = platformKey === 'all'
+      ? (['instagram', 'linkedin', 'facebook', 'google'] as const)
+          .map((k) => PLATFORM_ACCOUNTS[k])
+          .filter((a): a is PublerAccount => !!a?.id)
+      : PLATFORM_ACCOUNTS[platformKey]?.id
+        ? [PLATFORM_ACCOUNTS[platformKey] as PublerAccount]
+        : []
 
     if (targets.length === 0) {
-      return NextResponse.json({ error: 'No platform accounts configured' }, { status: 400 })
+      return NextResponse.json(
+        { error: `No Publer account configured for platform "${draft.platform}"` },
+        { status: 400 }
+      )
     }
 
     // Publer v1 requires: bulk.posts[].networks + bulk.posts[].accounts

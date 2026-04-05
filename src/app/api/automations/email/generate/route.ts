@@ -4,7 +4,10 @@ import { checkRateLimit } from '@/lib/rateLimit'
 import { createServiceClient } from '@/lib/supabase/service'
 import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 
-const N8N_BASE = process.env.N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
+// No hardcoded fallback — if N8N_WEBHOOK_BASE is missing in env, the request
+// must fail closed rather than silently routing every tenant's automations
+// through Adam's personal n8n instance. Each deployment owns its own base URL.
+const N8N_BASE = process.env.N8N_WEBHOOK_BASE ?? ''
 
 export async function POST(req: NextRequest) {
   let userId: string
@@ -32,8 +35,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Look up automation in registry
     const { data: automation, error: regError } = await supabase
@@ -102,6 +104,12 @@ export async function POST(req: NextRequest) {
       (automation.config as Record<string, unknown> | null)?.webhook_path ||
       automation.name
 
+    if (!N8N_BASE) {
+      return NextResponse.json(
+        { error: 'N8N_WEBHOOK_BASE env var not configured on the server' },
+        { status: 500 }
+      )
+    }
     const webhookUrl = `${N8N_BASE}/${resolvedWebhookPath}`
 
     // Call n8n webhook
@@ -124,8 +132,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'n8n webhook call failed' }, { status: 502 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const n8nData: any = await n8nRes.json()
+    const n8nData: any = await n8nRes.json() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const subject: string = n8nData.subject || ''
     const body: string = n8nData.body || n8nData.body_html || ''

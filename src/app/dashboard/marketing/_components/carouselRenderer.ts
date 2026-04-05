@@ -10,6 +10,13 @@ export const SLIDE_SIZE = 1080
 
 export type Slide = { text: string }
 
+/**
+ * Branding shown on the carousel slide footer bar. Must be supplied by the
+ * caller — the renderer never falls back to hardcoded identifiers so tenants
+ * can't accidentally publish under another broker's NMLS.
+ */
+export type CarouselBranding = { company: string; nmls: string }
+
 /** Word-wrap text for Canvas rendering */
 export function wrapText(
   ctx: CanvasRenderingContext2D,
@@ -46,6 +53,7 @@ export function renderSlideToCtx(
   index: number,
   total: number,
   bgImage: HTMLImageElement | null,
+  branding: CarouselBranding,
 ) {
   // Background
   if (bgImage) {
@@ -110,13 +118,15 @@ export function renderSlideToCtx(
   ctx.fillStyle = '#52525b'
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
-  ctx.fillText('Adam Styer | Mortgage Solutions LP', pad, barY + 12 * scale)
+  if (branding.company) {
+    ctx.fillText(branding.company, pad, barY + 12 * scale)
+  }
 
-  if (isLast) {
+  if (isLast && branding.nmls) {
     ctx.fillStyle = GOLD
     ctx.textAlign = 'right'
     ctx.font = `bold ${brandSize}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`
-    ctx.fillText('NMLS# 513013', size - pad, barY + 12 * scale)
+    ctx.fillText(`NMLS# ${branding.nmls}`, size - pad, barY + 12 * scale)
   }
 }
 
@@ -141,9 +151,56 @@ export function parseContentToSlides(content: string): { caption: string; slides
   return { caption, slides }
 }
 
+/**
+ * Load the current user's carousel branding from the DB.
+ * Pulls company name from organizations.name and NMLS from user_settings
+ * (falls back to organizations.nmls). Returns empty strings if anything is
+ * missing — the renderer will simply omit the footer text rather than
+ * leaking another tenant's info.
+ */
+export async function loadCarouselBranding(): Promise<CarouselBranding> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { company: '', nmls: '' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single()
+
+  const [orgRes, settingsRes] = await Promise.all([
+    profile?.organization_id
+      ? supabase
+          .from('organizations')
+          .select('name, nmls')
+          .eq('id', profile.organization_id)
+          .single()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from('user_settings')
+      .select('key, value')
+      .eq('user_id', user.id)
+      .in('key', ['company', 'nmls']),
+  ])
+
+  const settings: Record<string, string> = {}
+  for (const row of (settingsRes.data || [])) {
+    settings[row.key] = String(row.value ?? '')
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const org = orgRes.data as any
+  return {
+    company: settings.company || org?.name || '',
+    nmls: settings.nmls || org?.nmls || '',
+  }
+}
+
 /** Render slides to PNG blobs, upload to Supabase, return new storage paths */
 export async function regenerateCarouselImages(
   slides: Slide[],
+  branding: CarouselBranding,
 ): Promise<string[]> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -158,7 +215,7 @@ export async function regenerateCarouselImages(
   const total = slides.length
 
   for (let i = 0; i < total; i++) {
-    renderSlideToCtx(ctx, SLIDE_SIZE, slides[i], i, total, null)
+    renderSlideToCtx(ctx, SLIDE_SIZE, slides[i], i, total, null, branding)
 
     const blob = await new Promise<Blob>((resolve) =>
       canvas.toBlob((b) => resolve(b!), 'image/png'),

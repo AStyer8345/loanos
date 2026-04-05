@@ -36,16 +36,29 @@ async function resolveAuth(request: NextRequest): Promise<{ userId: string } | n
   )
 
   if (hasValidSecret) {
+    // Require explicit org_slug — no ambient "first org" fallback.
+    const orgSlug =
+      request.nextUrl.searchParams.get('org_slug') ||
+      request.headers.get('x-org-slug')
+    if (!orgSlug) return null
     try {
       const svc = createServiceClient()
-      const { data: profile } = await svc
+      const { data: org } = await svc
+        .from('organizations')
+        .select('id')
+        .eq('slug', orgSlug)
+        .single()
+      if (!org?.id) return null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: owner } = await (svc as any)
         .from('profiles')
         .select('id')
-        .not('organization_id', 'is', null)
+        .eq('organization_id', org.id)
+        .in('role', ['owner', 'admin'])
         .order('created_at', { ascending: true })
         .limit(1)
-        .single()
-      if (profile?.id) return { userId: profile.id }
+        .maybeSingle()
+      if (owner?.id) return { userId: owner.id }
     } catch { /* fall through */ }
     return null
   }

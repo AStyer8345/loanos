@@ -16,7 +16,9 @@ import AutomationPanel from '@/components/automations/AutomationPanel'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
 
-const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? 'https://styer.app.n8n.cloud/webhook'
+// No hardcoded fallback — a missing env var must fail closed rather than
+// route every tenant's manual automation triggers through Adam's n8n instance.
+const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? ''
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -928,23 +930,21 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
       {/* ── Section 1: Parties (full width) ── */}
       <CommunicationHub loan={loan} activity={activity} contact={contact} />
 
-      {/* ── Section 2: Key Dates — directly below parties ── */}
-      <KeyDatesGrid loan={loan} onSave={handleSaveField} />
-
-      {/* ── Section 3: Documents + Activity side-by-side ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
-        <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
-        <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
+      {/* ── Section 2: Key Dates (3/4) + Documents & Activity sidebar (1/4) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-6">
+        <KeyDatesGrid loan={loan} onSave={handleSaveField} />
+        <div className="flex flex-col gap-6">
+          <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
+          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
+        </div>
       </div>
 
       <div className="border-t border-input/40 my-6" />
 
-      {/* ── Section 4: Loan Details ── */}
-      <div>
-        <div className="space-y-6 max-w-3xl">
-
-          {/* Borrower + Co-Borrower — side-by-side columns */}
-          <div className={`grid gap-6 ${loan.co_borrower_name ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+      {/* ── Section 4: Loan Details — horizontal grid to reduce scrolling ── */}
+      <div className="space-y-6">
+        {/* Row 1: Borrower (1/2) + Co-Borrower (1/2) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
               { label: 'First Name',     displayValue: loan.borrower_first_name, field: 'borrower_first_name', rawValue: loan.borrower_first_name },
               { label: 'Last Name',      displayValue: loan.borrower_last_name,  field: 'borrower_last_name',  rawValue: loan.borrower_last_name },
@@ -960,7 +960,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
               { label: 'Back DTI',       displayValue: fmtPct(loan.back_end_dti),  field: 'back_end_dti',  rawValue: loan.back_end_dti,  type: 'percent' as const },
             ]} />
 
-            {loan.co_borrower_name && (
+            {loan.co_borrower_name ? (
               <EditableSectionCard title="Co-Borrower" onSave={handleSaveField} fields={[
                 { label: 'Name',           displayValue: loan.co_borrower_name,    field: 'co_borrower_name',    rawValue: loan.co_borrower_name },
                 { label: 'Email',          displayValue: <EmailLink email={loan.co_borrower_email} />, field: 'co_borrower_email', rawValue: loan.co_borrower_email },
@@ -970,9 +970,11 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
                 { label: 'DOB',            displayValue: loan.co_borrower_birthdate ? fmtDate(loan.co_borrower_birthdate) : null, field: 'co_borrower_birthdate', rawValue: loan.co_borrower_birthdate },
                 { label: 'Marital Status', displayValue: loan.co_borrower_marital_status, field: 'co_borrower_marital_status', rawValue: loan.co_borrower_marital_status },
               ]} />
-            )}
-          </div>
+            ) : <div />}
+        </div>
 
+        {/* Row 2: Property (1/2) + Loan Terms (1/2) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EditableSectionCard title="Property" onSave={handleSaveField} fields={[
             { label: 'Address',        displayValue: loan.property_address, field: 'property_address', rawValue: loan.property_address },
             { label: 'City',           displayValue: loan.property_city,    field: 'property_city',    rawValue: loan.property_city },
@@ -997,7 +999,10 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
             { label: 'LTV',           displayValue: fmtPct(loan.ltv),   field: 'ltv',   rawValue: loan.ltv,   type: 'percent' },
             ...(loan.cltv ? [{ label: 'CLTV', displayValue: fmtPct(loan.cltv) as React.ReactNode, field: 'cltv', rawValue: loan.cltv, type: 'percent' as const }] : []),
           ]} />
+        </div>
 
+        {/* Row 2: Financials + Parties & Agents side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EditableSectionCard title="Financials" onSave={handleSaveField} fields={[
             { label: 'Commission',      displayValue: fmtCurrency(loan.commission_amount), field: 'commission_amount', rawValue: loan.commission_amount, type: 'number', labelColor: 'text-[#C9A84C]' },
             ...(loan.gross_loan_revenue ? [{ label: 'Gross Revenue', displayValue: fmtCurrency(loan.gross_loan_revenue) as React.ReactNode, field: 'gross_loan_revenue', rawValue: loan.gross_loan_revenue, type: 'number' as const }] : []),
@@ -1032,7 +1037,10 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
             ...(loan.underwriter_name ? [{ label: 'Underwriter', displayValue: loan.underwriter_name as React.ReactNode, field: 'underwriter_name', rawValue: loan.underwriter_name }] : []),
             ...(loan.lender_name ? [{ label: 'Lender', displayValue: loan.lender_name as React.ReactNode, field: 'lender_name', rawValue: loan.lender_name }] : []),
           ]} />
+        </div>
 
+        {/* Row 3: Attribution + Linked Contact side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {(loan.lead_source || loan.referral_source || loan.channel) && (
             <EditableSectionCard title="Attribution" onSave={handleSaveField} fields={[
               ...(loan.lead_source ? [{ label: 'Lead Source', displayValue: loan.lead_source as React.ReactNode, field: 'lead_source', rawValue: loan.lead_source }] : []),
@@ -1040,8 +1048,6 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
               ...(loan.channel ? [{ label: 'Channel', displayValue: loan.channel as React.ReactNode, field: 'channel', rawValue: loan.channel }] : []),
             ]} />
           )}
-
-          {/* Linked Contact */}
           <LinkedContactCard loan={loan} contact={contact} onReassignContact={handleReassignContact} />
         </div>
       </div>
@@ -2256,6 +2262,11 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         contact_id: loan.contact_id,
       }
 
+      if (!N8N_BASE) {
+        setError('Automation webhook base URL is not configured for this deployment.')
+        setSending(false)
+        return
+      }
       let res: Response
       if (workflow.triggerType === 'pdf') {
         if (!file) { setError('Please select a file.'); setSending(false); return }

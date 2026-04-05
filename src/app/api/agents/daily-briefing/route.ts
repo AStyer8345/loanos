@@ -33,25 +33,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
   } else {
-    // Agent-secret path: no user session — look up the primary org.
-    // Single-tenant: uses the first profile with a non-null org.
-    // If org cannot be resolved, fail hard (never run unscoped queries).
+    // Agent-secret path: caller MUST supply an explicit org_slug query param.
+    // No ambient "first org" fallback — that would cross-contaminate tenants.
+    const orgSlug = request.nextUrl.searchParams.get('org_slug')
+    if (!orgSlug) {
+      return NextResponse.json(
+        { error: 'org_slug query parameter is required when using agent secret' },
+        { status: 400 }
+      )
+    }
     try {
       const svcClient = createServiceClient()
-      const { data: sysProfile } = await svcClient
-        .from('profiles')
-        .select('organization_id, id')
-        .not('organization_id', 'is', null)
-        .order('created_at', { ascending: true })
-        .limit(1)
+      const { data: org } = await svcClient
+        .from('organizations')
+        .select('id')
+        .eq('slug', orgSlug)
         .single()
-      organizationId = sysProfile?.organization_id ?? null
+      organizationId = org?.id ?? null
     } catch {
-      // swallow — null check below will return 500
+      // swallow — null check below will return 404
     }
     if (!organizationId) {
-      console.error('[daily-briefing] Could not resolve org for agent-secret path — aborting')
-      return NextResponse.json({ error: 'Could not resolve organization' }, { status: 500 })
+      console.error('[daily-briefing] Unknown org_slug for agent-secret path:', orgSlug)
+      return NextResponse.json({ error: 'Unknown org_slug' }, { status: 404 })
     }
   }
 

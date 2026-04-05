@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 
 import type { SocialDraft } from './SocialDraftList'
+import { loadCarouselBranding, type CarouselBranding } from './carouselRenderer'
 
 type Props = {
   draft: SocialDraft
@@ -382,12 +383,14 @@ function CarouselSlidePreview({
   slideIndex,
   onPrev,
   onNext,
+  branding,
 }: {
   slide: ParsedSlide
   total: number
   slideIndex: number
   onPrev: () => void
   onNext: () => void
+  branding: CarouselBranding
 }) {
   const isFirst = slide.num === 1
   const isLast = slide.num === total
@@ -462,10 +465,10 @@ function CarouselSlidePreview({
         {/* Bottom: branding */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--card)' }}>
           <span style={{ color: 'var(--muted-foreground)', fontSize: 9, letterSpacing: '0.05em' }}>
-            Adam Styer | Mortgage Solutions LP
+            {branding.company}
           </span>
-          {isCTA && (
-            <span style={{ color: GOLD, fontSize: 9, fontWeight: 700 }}>NMLS# 513013</span>
+          {isCTA && branding.nmls && (
+            <span style={{ color: GOLD, fontSize: 9, fontWeight: 700 }}>NMLS# {branding.nmls}</span>
           )}
         </div>
       </div>
@@ -540,6 +543,10 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
   )
   const [expanded, setExpanded] = useState(false)
   const [slideIndex, setSlideIndex] = useState(0)
+  const [branding, setBranding] = useState<CarouselBranding>({ company: '', nmls: '' })
+  useEffect(() => {
+    loadCarouselBranding().then(setBranding).catch(() => {})
+  }, [])
 
   useEffect(() => {
     setPlatform(detectedPlatform === 'all' ? 'facebook' : detectedPlatform)
@@ -712,6 +719,7 @@ export default function SocialPostPreview({ draft, signedMediaUrls, onClose }: P
                     slide={slides[Math.min(slideIndex, slides.length - 1)]}
                     total={slides.length}
                     slideIndex={slideIndex}
+                    branding={branding}
                     onPrev={() => setSlideIndex((i) => Math.max(0, i - 1))}
                     onNext={() => setSlideIndex((i) => Math.min(slides.length - 1, i + 1))}
                   />

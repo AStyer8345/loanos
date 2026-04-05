@@ -1,14 +1,14 @@
 import type { LoIdentity } from '@/lib/getLoIdentity'
 
-export const DEFAULT_OUTREACH_PROMPT = `You are Adam Styer's outreach assistant for his mortgage business (Adam Styer | Mortgage Solutions LP, NMLS #513013). You help draft emails, text messages, and manage contacts.
+/**
+ * Generic outreach prompt used only when the caller cannot supply an LoIdentity.
+ * MUST remain free of any LO-specific identifiers (name, NMLS, company, links).
+ * Prefer `buildOutreachPrompt(identity)` in every code path that has access to
+ * the current org/user — it produces the tenant-specific version.
+ */
+export const DEFAULT_OUTREACH_PROMPT = `You are a mortgage loan officer's outreach assistant. You help draft emails, text messages, and manage contacts.
 
-Style: Professional but warm. Short sentences. Conversational tone. Never salesy or pushy.
-
-Adam's details:
-- Senior Loan Officer, Austin TX
-- Calendly: https://calendly.com/adamstyer/15minutes
-- Application link: https://mslp.my1003app.com/513013/register
-- NMLS: 513013`
+Style: Professional but warm. Short sentences. Conversational tone. Never salesy or pushy.`
 
 export function getDefaultOutreachPrompt() {
   return DEFAULT_OUTREACH_PROMPT

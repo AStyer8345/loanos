@@ -7,8 +7,10 @@ type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
 /**
  * POST /api/contacts/web-lead
- * Machine-facing route for n8n / styermortgage.com form leads.
+ * Machine-facing route for per-tenant web-form leads (n8n, Zapier, etc.).
  * Auth: Authorization: Bearer LOANOS_AGENT_SECRET
+ * Body MUST include `org_slug` — the lead is attached to that org. No
+ * ambient LOANOS_SYSTEM_USER_ID fallback: a missing or unknown slug is a 400.
  */
 export async function POST(req: NextRequest) {
   // ── 1. Auth ──────────────────────────────────────────────────────────────────
@@ -24,6 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   const {
+    org_slug,
     first_name,
     last_name,
     email,
@@ -46,6 +49,7 @@ export async function POST(req: NextRequest) {
     situation,
     campaign,
   } = body as {
+    org_slug?: string
     first_name?: string
     last_name?: string
     email?: string
@@ -68,6 +72,9 @@ export async function POST(req: NextRequest) {
     campaign?: string
   }
 
+  if (!org_slug) {
+    return NextResponse.json({ error: 'org_slug is required' }, { status: 400 })
+  }
   if (!first_name) {
     return NextResponse.json({ error: 'first_name is required' }, { status: 400 })
   }
@@ -75,25 +82,37 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
   const now = new Date().toISOString()
 
-  // ── 3. Get organization_id from system user profile ───────────────────────────
-  const systemUserId = process.env.LOANOS_SYSTEM_USER_ID
-  if (!systemUserId) {
-    console.error('[web-lead] LOANOS_SYSTEM_USER_ID env var not set')
-    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
-  }
-
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', systemUserId)
+  // ── 3. Resolve org + owner user from slug ─────────────────────────────────────
+  const { data: org, error: orgError } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('slug', org_slug)
     .single()
 
-  if (profileError || !profile?.organization_id) {
-    console.error('[web-lead] Could not resolve organization_id:', profileError)
-    return NextResponse.json({ error: 'Could not resolve organization' }, { status: 500 })
+  if (orgError || !org) {
+    console.error('[web-lead] Unknown org_slug:', org_slug, orgError)
+    return NextResponse.json({ error: 'Unknown org_slug' }, { status: 404 })
   }
+  const organization_id = org.id
 
-  const organization_id = profile.organization_id
+  // Use the org owner as the user_id for the insert (any admin also works).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: ownerRow } = await (supabase as any)
+    .from('profiles')
+    .select('id')
+    .eq('organization_id', organization_id)
+    .in('role', ['owner', 'admin'])
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (!ownerRow?.id) {
+    return NextResponse.json(
+      { error: 'Org has no owner profile to attribute the lead to' },
+      { status: 500 }
+    )
+  }
+  const systemUserId = ownerRow.id as string
 
   // ── 4. Dedup check ────────────────────────────────────────────────────────────
   const dupConditions: string[] = []

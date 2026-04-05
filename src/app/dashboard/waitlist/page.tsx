@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-
-const ADAM_EMAIL = 'adam@thestyerteam.com'
+import { createServiceClient } from '@/lib/supabase/service'
 
 type WaitlistSignup = {
   id: string
@@ -16,20 +14,28 @@ type WaitlistSignup = {
 }
 
 export default async function WaitlistPage() {
-  // ── Auth gate — Adam only ─────────────────────────────────────────────────
+  // ── Auth gate — system admins only ────────────────────────────────────────
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
 
-  if (!user || user.email !== ADAM_EMAIL) {
+  // Look up admin status via the system_admins table instead of a hardcoded
+  // email. The table has deny-all RLS for normal users; we use the service
+  // client here specifically so the lookup succeeds for the admin themselves.
+  const service = createServiceClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: adminRow } = await (service as any)
+    .from('system_admins')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!adminRow) {
     redirect('/dashboard')
   }
 
-  // ── Fetch signups (raw client — waitlist_signups not in generated types) ──
-  const service = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data: signups, error } = await service
+  // ── Fetch signups ─────────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: signups, error } = await (service as any)
     .from('waitlist_signups')
     .select('*')
     .order('created_at', { ascending: false })

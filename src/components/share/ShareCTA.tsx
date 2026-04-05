@@ -9,11 +9,11 @@ interface ShareCTAProps {
 }
 
 export default function ShareCTA({
-  calendlyUrl = 'https://calendly.com/adamstyer/15minutes',
-  applicationUrl = 'https://mslp.my1003app.com/513013/register',
-  loName = 'Adam Styer',
-  company = 'Adam Styer | Mortgage Solutions LP',
-  nmls = '513013',
+  calendlyUrl = null,
+  applicationUrl = null,
+  loName = '',
+  company = '',
+  nmls = '',
 }: ShareCTAProps) {
   return (
     <div

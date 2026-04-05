@@ -9,9 +9,9 @@ interface ShareFooterProps {
 }
 
 export default function ShareFooter({
-  company = 'Adam Styer | Mortgage Solutions LP',
-  nmls = '513013',
-  loName = 'Adam Styer',
+  company = '',
+  nmls = '',
+  loName = '',
   phone,
   email,
 }: ShareFooterProps) {

@@ -69,3 +69,25 @@ COMPLIANCE:
 - NMLS #513013 required on all landing pages and rate-related emails
 - Equal Housing Lender disclosure on all landing pages and email footers
 - No guaranteed approval language anywhere
+
+---
+
+## 2026-04-05 — LO Waitlist Capture (LoanOS stream dependency)
+
+**Priority:** HIGH — blocks first-run gate for LoanOS content stream
+**Spec reference:** `tasks/social-media/specs/2026-04-05-pillar-framework-v2.md` Section 9.2 + Section 13
+**Goal:** Build a minimum-viable LO waitlist capture page + Mailchimp list + n8n intake workflow
+
+**Deliverables:**
+1. Simple landing page on styermortgage.com (path: `/loanos-waitlist` or similar) with:
+   - Headline: "Building software loan officers actually want. Get on the waitlist."
+   - Form fields: first name, last name, email, NMLS# (optional), company
+   - Single CTA button: "Join the waitlist"
+   - No fluff. No pricing. No feature list. Raw.
+2. New Mailchimp list: "LoanOS Waitlist"
+3. n8n workflow: form submit → Mailchimp add → Supabase log → notification to Adam
+4. Form URL gets added to the Audience: LO pool entries in `loanos-pool.md` as the CTA target
+
+**Copy approval required from Adam before deploy.** Draft the copy, commit to repo, request Adam review.
+
+**Blocks:** LoanOS first-run gate in `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md` Task 14

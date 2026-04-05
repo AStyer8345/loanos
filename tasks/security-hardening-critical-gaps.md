@@ -138,6 +138,9 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **S-4 Waitlist page direct service-role + hardcoded email admin** — moved to `createServiceClient()` helper; admin gate now reads `system_admins` table by user_id.
 - **F-1 Plan gating** — `src/lib/billing/requirePlan.ts` + middleware enforcement for professional-tier routes.
 - **Migration 076** — RLS + policy + storage fixes applied to Supabase.
+- **A-5 Public share endpoint column whitelist** — `/api/share/[token]` replaced `.select('*')` with explicit column list so future scenarios columns don't leak to borrowers.
+- **A-7 Drip steps cross-tenant enumeration** — `getSteps()` now requires `orgId` and filters `drip_steps` by `org_id`. (A-8 POST insert verified — already sets `org_id: organizationId` explicitly.)
+- **A-10 Unauthenticated admin routes** — `requireAdmin()` gate added to `/api/admin/backfill-party-links` and `/api/admin/import-salesforce-referrals`. Both were previously accessible to any authenticated user.
 
 ---
 

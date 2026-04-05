@@ -47,6 +47,19 @@ Executed audit findings A-2, A-3, A-4, S-1, S-2, S-3, S-4, F-1 from `audits/SECU
 
 **Next up:** audit findings 5–27 — rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, admin route sweep, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 3)
+
+Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT-2026-04-05.md`.
+
+**Findings landed:**
+- **A-5** — `/api/share/[token]/route.ts` replaced `.select('*')` on `scenarios` with an explicit column whitelist so future columns (internal notes, commission, LO pricing) cannot leak to the public borrower-facing endpoint.
+- **A-7** — `src/lib/drip/queries.ts`: `getSteps()` now takes `orgId` as a required first argument and filters `drip_steps` by `org_id`. Caller in `/api/drip/campaigns/[id]/steps/route.ts` passes `organizationId`. Prevents cross-tenant enumeration by campaign id. A-8 verified already correct — `POST` insert sets `org_id: organizationId` explicitly.
+- **A-10** — `requireAdmin()` gate added to `/api/admin/backfill-party-links` and `/api/admin/import-salesforce-referrals`. Both routes were previously accessible to any authenticated user; now return 403 unless the caller has a row in `system_admins`. Gate runs before `getOrganization()` so unauthorized callers see a typed 401/403 instead of a swallowed 500.
+
+**Parallelization pattern used this session:** delegated A-7/A-8 drip-query scoping to a Codex subagent while an Explore subagent audited admin routes in parallel. Explore surfaced the two unauthenticated admin POST handlers (bugs found, not just audit items), and those were fixed in the main thread after Codex landed its changes.
+
+**Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
+
 ## Security Audit + Arive Webhook Architecture Pivot — 2026-04-05
 
 **Multi-tenant security readiness review before onboarding LO #2. Full architecture pivot on Arive integration after reading Arive's API docs end to end.**

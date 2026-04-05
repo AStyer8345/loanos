@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [8.1.1] — 2026-04-05 — Security Hardening Sweep pt 2 (A-5, A-7, A-10)
+
+### Security
+- **`/api/share/[token]` — explicit column whitelist (A-5)**. Replaced `.select('*')` with a named column list (`id, organization_id, user_id, share_token, share_expires_at, view_count, scenario_type, borrower_name, property_address, property_value, current_loan_data, scenarios_data, results_data, narrative, reinvestment_data, created_at`) so any future column added to `scenarios` (internal notes, commission, LO pricing, etc.) is not silently exposed through this public borrower-facing endpoint.
+- **`getSteps()` now org-scoped (A-7)**. `src/lib/drip/queries.ts` — `getSteps(orgId, campaignId)` filters `drip_steps` by `.eq('org_id', orgId)`. Caller in `/api/drip/campaigns/[id]/steps/route.ts` updated. Prevents cross-tenant step enumeration by campaign id.
+- **Admin backfill routes now require `requireAdmin()` (A-10)**:
+  - `POST /api/admin/backfill-party-links` — previously accessible to any authenticated user; now 403 unless `system_admins` row exists.
+  - `POST /api/admin/import-salesforce-referrals` — same fix.
+  Both call the admin gate before any DB work so the typed 401/403 response is surfaced instead of a swallowed 500.
+
+---
+
 ## [8.1.0] — 2026-04-05 — Security Hardening Sweep (findings A-2, A-3, A-4, S-1-4, F-1)
 
 ### Security

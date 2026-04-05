@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## [8.0.0] — 2026-04-05 — Multi-Tenant Arive Webhook + Security Hardening Scaffold
+
+### Added
+- **`los_integrations` table** (migration 075) — per-org webhook config for Loan Origination Systems (Arive today; Encompass/Calyx/Byte later). Hashed shared secret (SHA-256 + salt), payload identity allowlist (`external_user_id` / `external_user_email`), per-row `active` flag. RLS: org members read, admins write, owners delete.
+- **`org_settings.los_verification_mode`** column — `'shadow'` (default, log layer-3 mismatches) vs `'enforce'` (reject with 403). Flip after 14-day clean observation.
+- **`src/lib/los/hashSecret.ts`** — `generateSecret()` / `hashSecret()` / `verifySecret()` with `crypto.timingSafeEqual`. Secret format: `whsec_` + 48 url-safe base64 chars (~288 bits entropy).
+- **`src/lib/los/resolveOrgFromSlug.ts`** — slug → org + active integration rows via service-role client (bypasses RLS for webhook context).
+- **`src/lib/los/verifyLosPayload.ts`** — layer-3 matcher. Extracts `loanOfficerEmail` from Zapier-enriched Arive payload (confirmed via Adam's 2026-04-04 Zap run, loan 15755447). Matches against org allowlist with null-allowlist escape hatch for initial rollout.
+- **`POST /api/webhooks/los/arive/[org_slug]`** — multi-tenant Arive webhook route with 3-layer verification: (1) slug → org, (2) `X-Webhook-Secret` timing-safe verify, (3) payload identity allowlist. Returns generic 401/403/404 to prevent slug enumeration / layer probing.
+- **`tasks/security-hardening-critical-gaps.md`** — tracker for all 12 pre-LO-#2 security gaps (critical/medium/low + non-code business items).
+
+### Changed
+- **`src/app/api/arive-webhook/route.ts`** — deprecated with 30-day grace period. Logs `[arive-webhook] DEPRECATED` on every invocation so legacy traffic can be tracked via Vercel log grep. Scheduled removal after new multi-tenant route has clean shadow logs.
+
+### Architecture Notes
+- **Arive integration path:** Arive does NOT offer direct API access to third-party SaaS integrators. Zapier is the only supported path — each LO runs their own Zapier account ($20/mo required add-on) with their own Arive credentials, enriches Arive's thin webhook ping into the full loan payload, and POSTs to LoanOS with their org's shared secret. Discovered during a brief Option A detour after reading Arive's API docs; confirmed with Adam that every LO will pay for Zapier separately.
+- **Layer 3 threat model:** Slug + secret already prevent cross-tenant leaks in the normal case. Layer 3 catches *misconfiguration* — LO pasting wrong slug into their Zap, cloning Zaps without updating slug, reusing stale secrets across orgs. Shadow mode runs 14 days before enforce flip.
+- **Security audit summary:** Pre-rollout readiness scored ~65/100. Remaining critical gaps (rate limiting on public endpoints, PII masking in activity logs, admin-route authorization audit) tracked in `tasks/security-hardening-critical-gaps.md`.
+
 ## [7.2.0] — 2026-04-04 — AI Chat: Tool Loop Fix + Markdown Rendering
 
 ### Fixed

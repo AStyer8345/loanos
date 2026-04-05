@@ -1,6 +1,21 @@
 /**
  * src/app/api/arive-webhook/route.ts
  *
+ * ⚠️ DEPRECATED ⚠️ — Single-tenant legacy Arive webhook.
+ *
+ * This route is preserved for a 30-day grace period while Adam's production
+ * Arive instance is migrated to the multi-tenant route:
+ *
+ *     POST /api/webhooks/los/arive/[org_slug]
+ *
+ * After migration is verified (shadow mode clean for 14 days) and the grace
+ * period expires, DELETE THIS FILE. The new route supports everything this
+ * one did plus proper multi-tenant isolation, per-org secret hashing, and
+ * payload identity verification.
+ *
+ * Scheduled removal: 30 days after 075_los_integrations.sql deploys.
+ *
+ * ─────────────────────────────────────────────────────────────────────────
  * Receives Arive webhook → upserts contact + loan in Supabase → logs activity.
  *
  * Auth: validates X-Webhook-Secret header against ARIVE_WEBHOOK_SECRET env var.
@@ -13,7 +28,6 @@
  * Org resolution: reads user_id from the webhook payload body. If the Arive
  * payload does not include a user_id field, falls back to a single-tenant
  * lookup (first profile with a non-null organization_id).
- * TODO: implement proper multi-tenant routing once Arive sends a user_id field.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -32,6 +46,16 @@ function n(val: unknown): string | number | null {
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  // DEPRECATION WARNING — logged once per invocation so we can track how many
+  // webhooks are still hitting the legacy route vs. the new multi-tenant one.
+  // Grep Vercel logs for "[arive-webhook] DEPRECATED" to confirm migration
+  // traffic has dropped to zero before deleting this file.
+  console.warn(
+    '[arive-webhook] DEPRECATED — this route will be removed after the 30-day ' +
+      'grace period. Migrate to /api/webhooks/los/arive/[org_slug]. ' +
+      'See src/app/api/webhooks/los/arive/[org_slug]/route.ts'
+  )
+
   // Validate webhook secret
   const incomingSecret =
     request.headers.get('x-webhook-secret') ?? request.headers.get('X-Webhook-Secret')

@@ -1,5 +1,63 @@
 # LoanOS Changelog
 
+## [8.2.0] — 2026-04-05 — Share Page Cash to Close Breakdown
+
+### Added
+- **`src/components/share/CashToCloseBreakdown.tsx`** — new borrower-facing section on the share page that shows how Cash to Close is derived. Waterfall-style table with side-by-side columns per scenario:
+  - Down Payment (purchase mode)
+  - Closing Costs — grouped summary plus an expandable "Show fee detail" toggle that reveals three sub-groups with individual line items: **Lender Fees** (origination, underwriting, processing, application, admin), **Third Party / Title** (appraisal, credit report, doc prep, flood cert, attorney, settlement, title search, title endorsements, recording, lender's title policy), **Prepaids & Escrows** (prepaid interest, hazard insurance, tax escrow, insurance escrow).
+  - Discount Points (only if `pointsPercent > 0` on any row) — computed as `loanAmount * pointsPercent / 100`
+  - Seller Credits (shown in green with `($X,XXX)` accounting notation — subtracted from total)
+  - Lender Credits (shown in green with `($X,XXX)` — subtracted; computed from `creditsPercent * loanAmount`)
+  - **= Cash to Close total** — bold gold row, separated by a gold rule divider
+- `SharePageLayout.tsx` wired the new section in the left column between Option Cards and the AI narrative, with a `SectionIntro` titled "Cash to Close" (purchase) or "Closing Costs" (refinance).
+
+### Why
+Adam's feedback: "I don't see any of the fees on here. The closing costs and that kind of stuff, or how we get to the cash to close." Mortgage Coach's yellow-highlighted summary table is one of the things borrowers actually ask about — the share page had all the data on `ScenarioDisplayRow.closingCostBreakdown` but never rendered it.
+
+### Data Source
+All fields come from `ScenarioDisplayRow` (built in `src/lib/scenarios/displayData.ts`):
+- `closingCostBreakdown: ClosingCostBreakdown` (18 granular fee fields — already populated from scenario input)
+- `downPaymentAmount`, `sellerCredits`, `pointsPercent`, `creditsPercent`, `loanAmount`
+- `cashToClose` (total — computed by `calculations.ts` line 202: `downPaymentAmount + totalClosingCosts + pointsCost - sellerCredits - lenderCredits`)
+
+No calc logic was duplicated — the component just renders the existing numbers. The toggle button is hidden under `@media print` so the PDF always shows the expanded detail.
+
+### Files Changed
+- `src/components/share/CashToCloseBreakdown.tsx` — new
+- `src/components/share/SharePageLayout.tsx` — added import + section block
+
+### Deploy
+Commit `1c04ca3`, Vercel deployment `dpl_7Qe3eot8rpGzmzxFUa19PPUjXDLH` → `state: READY`.
+
+---
+
+## [8.1.6] — 2026-04-05 — Chatbot UX: readability + quick-add accuracy
+
+### Fixed
+- **Chatbot invisible text (light mode)** — `LoanOSChat.tsx` and `OutreachChat.tsx` were hardcoding dark-theme colors (`#e0e0e0` text, `#888`/`#666`/`#555` muted) against `var(--card)`, which resolves to `#f0f1f5` in light mode. Result: near-white text on near-white background. Replaced every hardcoded hex with CSS variables (`var(--text)`, `var(--muted-foreground)`, `var(--accent)`, `var(--primary-foreground)`) so the chat respects both themes automatically. New theme constants at top of each file: `ACCENT`, `BG`, `SURFACE`, `BORDER`, `TEXT`, `MUTED_FG`.
+- **Quick-add name parsing ("Smith He We" bug)** — The AI extraction prompt in `/api/contacts/quick-add/route.ts` wasn't strict enough about name boundaries, so the extractor bled sentence fragments into `last_name`. Added explicit CRITICAL section telling the model to stop at punctuation, commas, and transition words (`phone`, `email`, `he`, `she`, `from`). "Add John Smith, phone number..." now correctly parses as first_name=John, last_name=Smith.
+- **Quick-add notes not shown in confirmation UI** — `QuickAddConfirmation.tsx` listed every ExtractedContact field in `FIELD_LABELS` except `notes`, so even when the AI extracted notes correctly they were invisible before the user hit Confirm. Added `notes` to the label list with a distinct multi-line layout (border separator + uppercase tracking label + relaxed leading) instead of the single-line field row used by other fields.
+- **Quick-add source/lead_source not detected** — Prompt had a `source` field but no examples of what values to return. Added full rule block: "web lead"/"found my website" → `Web Lead`, "realtor referral" → `Realtor Referral`, "called me"/"walked in" → `Direct`, etc. Also expanded `Notes:` guidance to emphasize capturing ALL free-form context verbatim.
+
+### Design polish
+- Chat message bubbles now use asymmetric `borderRadius` (`14px 14px 4px 14px` for user, mirror for assistant) — modern chat-tail look
+- Slightly larger bubble text (13px vs 12px) and padding (10px 14px vs 8px 12px) for legibility
+- Chat panel gets `backdropFilter: blur(20px)` + softer shadow (`rgba(0,0,0,0.25)` vs `0.6`) for a frosted-glass feel
+- Assistant bubbles get `0 1px 3px rgba(0,0,0,0.08)` elevation; user bubbles stay flat
+
+### Files touched
+- `src/components/crm/LoanOSChat.tsx`
+- `src/components/outreach/OutreachChat.tsx`
+- `src/app/api/contacts/quick-add/route.ts`
+- `src/components/outreach/QuickAddConfirmation.tsx`
+
+### Commits
+- `09702ef` — initial chat text color fix (caught inside the lender-database commit)
+- `84dc38c` — quick-add name/notes/source improvements
+
+---
+
 ## [8.1.5] — 2026-04-05 — Security Hardening Sweep pt 6 (CSP + HSTS)
 
 ### Security

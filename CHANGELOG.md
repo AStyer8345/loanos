@@ -1,5 +1,27 @@
 # LoanOS Changelog
 
+## [8.1.7] — 2026-04-05 — Secret Rotation Runbook + KB Security Section
+
+### Added
+- **`docs/security/secret-rotation-runbook.md`** — executable runbook covering every LoanOS secret: Supabase service role, anon key, `LOANOS_AGENT_SECRET`, `ANTHROPIC_API_KEY`, per-org Arive webhook secrets (`los_integrations`), `PUBLER_API_KEY`. Each section has **When / Steps / Verify / Rollback** and names the specific n8n workflows + Vercel env vars + Supabase rows that must be touched.
+- **`LOANOS_SYSTEM_KNOWLEDGE_BASE.md` § Security Posture** — new reference section in the KB covering tenant isolation primitives, webhook security architecture, rate limiting, atomic writes, response headers, security-related tables, full secret inventory with rotation-doc pointers, outstanding tracker items, and key security file locations.
+
+### Why
+- **Runbook:** tracker item #7. Blocker-adjacent for LO #2 onboarding — we can't accept a second tenant's PII without a documented procedure for rotating every key that protects their data. Also documents an actual limitation: `validateAgentSecret()` doesn't support dual-secret overlap today, so agent secret rotation has a ~30s switch-over window. Flagged as future work instead of silently ignored.
+- **KB section:** every future AI session now has a security quick-reference in the KB it already reads. Prevents "where is the admin check?" / "what does `los_integrations` do?" context-rebuilding every session.
+
+### Security / Tracker
+Closes `tasks/security-hardening-critical-gaps.md` item **#7 — Secret rotation runbook**.
+
+### Files Changed
+- `docs/security/secret-rotation-runbook.md` — new
+- `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` — new § Security Posture
+
+### Deploy
+Doc-only change — no code affected. Vercel will redeploy on push but only the static file set changes.
+
+---
+
 ## [8.1.6] — 2026-04-05 — Webhook Delivery Idempotency
 
 ### Added

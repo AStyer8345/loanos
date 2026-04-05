@@ -86,11 +86,11 @@ onboarding of additional LOs.
 - **HSTS** (`max-age=2y; includeSubDomains; preload`) added alongside CSP.
 - **CORS audit — no action needed.** Zero `Access-Control-Allow-Origin` in `src/`; Next.js SOP already covers browser cross-site calls, and server-to-server callers (n8n, Zapier, Arive) are CORS-exempt.
 
-### 7. Secret rotation runbook
-- Document how to rotate `LOANOS_AGENT_SECRET`, Arive per-org secrets, service
-  role key without downtime
-- `los_integrations` table already supports rotation via `secret_last_rotated`
-  column + multiple active rows during overlap window
+### 7. ~~Secret rotation runbook~~ ✅ DONE (2026-04-05)
+- **`docs/security/secret-rotation-runbook.md`** — executable runbook covering every LoanOS secret: Supabase service role key, anon key, `LOANOS_AGENT_SECRET`, `ANTHROPIC_API_KEY`, per-org Arive webhook secrets, `PUBLER_API_KEY`. Each section has When / Steps / Verify / Rollback and names the exact n8n workflow IDs, Vercel env vars, and `los_integrations` rows to touch.
+- **Constraint documented honestly:** `validateAgentSecret()` holds a single secret, so `LOANOS_AGENT_SECRET` rotation has a ~30s switch-over window. Runbook flags this and proposes a dual-secret overlap enhancement as future work.
+- **Per-org Arive rotation is clean** — `los_integrations` allows multiple `active = TRUE` rows per (org, provider), and the webhook handler iterates on layer 2. Insert new row, shift traffic, deactivate old row. No downtime.
+- **KB cross-linked:** `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` § Security Posture has a full secret inventory table with pointers back to the runbook sections.
 
 ### 8. ~~Webhook idempotency~~ ✅ DONE (2026-04-05)
 - **Migration 078** — new `webhook_deliveries` table with `UNIQUE (organization_id, source, idempotency_key)`, deny-all RLS, partial index on `loan_id`.
@@ -141,6 +141,7 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **Atomic scenarios view_count** — migration 077 adds `increment_scenario_view_count(uuid)` RPC (SECURITY DEFINER). Share route no longer does lossy read-then-write.
 - **Middleware admin gate** — `/api/admin/*` now enforced at `src/middleware.ts` via inline service-role `system_admins` lookup. All 5 existing admin handlers still call `requireAdmin()` on line 1 (verified) — middleware is the resilience floor for future routes.
 - **Webhook delivery idempotency** — migration 078 `webhook_deliveries` table + `src/lib/webhooks/idempotency.ts` helpers + Arive route dedupe check. Duplicate Zapier retries no longer double-process party contact upserts or activity log inserts.
+- **Secret rotation runbook** — `docs/security/secret-rotation-runbook.md` ships with procedures for every secret LoanOS holds. `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` § Security Posture added as the AI-session reference entry point.
 
 ---
 

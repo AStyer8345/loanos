@@ -169,6 +169,86 @@ Stripe billing, white-label (slug-based custom domains), admin dashboard for ten
 
 ---
 
+## Security Posture (as of 2026-04-05)
+
+Pre-launch hardening sweep driven by `audits/SECURITY-AUDIT-2026-04-05.md`. All work tracked in `tasks/security-hardening-critical-gaps.md`.
+
+### Tenant isolation primitives
+- **`system_admins`** table — deny-all RLS (`FOR SELECT USING (false)`). Read only via service role. Source of truth for cross-tenant admin access.
+- **`requireAdmin()`** helper (`src/lib/admin/auth.ts`) — primary code-level gate on every `/api/admin/*` route.
+- **Middleware admin gate** (`src/middleware.ts`) — inline service-role `system_admins` lookup on every `/api/admin/*` request. Resilience floor so a future route missing `requireAdmin()` still can't leak.
+- **Plan gate middleware** — professional-tier routes 402 / 403 at the edge, enforced from `PROFESSIONAL_API_PREFIXES` + `PROFESSIONAL_UI_PREFIXES` in `src/middleware.ts`.
+- **No ambient tenant resolution** — every agent-secret route requires explicit `org_slug` (query param, header, or body field). "First org in the DB" fallbacks have been purged.
+- **No hardcoded Adam identity** — NMLS, Publer IDs, Calendly, email, company, n8n URLs, app URLs all load from `organizations` + `user_settings` + env vars. Routes fail closed if config missing.
+
+### Webhook security (Arive / LOS)
+- **Per-org webhook routes** — `/api/webhooks/los/arive/[org_slug]` with 3-layer verification:
+  1. Layer 1: slug resolves to an org (else 404)
+  2. Layer 2: `X-Webhook-Secret` timing-safe match against hashed secret in `los_integrations` (SHA-256 + salt)
+  3. Layer 3: payload identity (email / external_user_id) matches org allowlist
+- **Shadow vs enforce** — per-org `org_settings.los_verification_mode`. Layer-3 mismatches log in shadow, reject in enforce.
+- **Idempotency** — `webhook_deliveries` table with `UNIQUE (organization_id, source, idempotency_key)`. Helper: `src/lib/webhooks/idempotency.ts`. Prefers `X-Idempotency-Key` header, falls back to SHA-256 of `[arive_loan_id, arive_updated_at]`. Duplicate retries return `{deduped: true}` without re-running party upserts / activity log inserts.
+- **Legacy single-tenant `/api/arive-webhook`** — deprecated, 30-day grace period, logs `[DEPRECATED]` on every hit.
+- **Upstream path** — Arive → per-LO Zapier account → LoanOS. Arive doesn't offer direct third-party API access.
+
+### Rate limiting
+- **`/api/contacts/web-lead`** — 30 req/min per client IP (in-memory sliding window via `checkRateLimit`)
+- **`/api/share/[token]`** — two-key defense: 60/min per IP + 30/min per token
+- **In-memory only** — per-instance counters, not cluster-aware. Acceptable for current traffic (<1 req/s); move to Upstash/Redis if we scale horizontally.
+
+### Atomic writes
+- **`increment_scenario_view_count(uuid)` RPC** (migration 077) — `SECURITY DEFINER` + pinned `search_path = public`. Replaces lossy read-then-write in `/api/share/[token]`.
+
+### Response headers (`next.config.mjs`)
+- **CSP** — `default-src 'self'`; `connect-src` scoped to Supabase (https+wss) + Vercel analytics; `frame-src` Calendly; `frame-ancestors 'self'`; `object-src 'none'`; `upgrade-insecure-requests`. **Still carries `'unsafe-inline'` + `'unsafe-eval'` in script-src** because Next.js 14 ships inline scripts without nonces — future nonce rollout would drop both.
+- **HSTS** — `max-age=63072000; includeSubDomains; preload` (~2 years)
+- **X-Frame-Options: SAMEORIGIN**, **X-Content-Type-Options: nosniff**, **Referrer-Policy: strict-origin-when-cross-origin**, **Permissions-Policy** camera/mic/geo off
+- **CORS** — no custom `Access-Control-Allow-Origin` anywhere. Next.js SOP handles browser calls; server-to-server callers are CORS-exempt.
+
+### Security-related tables
+| Table | Purpose | RLS |
+|-------|---------|-----|
+| `system_admins` | Cross-tenant admin membership | Deny-all (service role only) |
+| `los_integrations` | Per-org webhook secrets + identity allowlist | Scoped to org members |
+| `webhook_deliveries` | Idempotency + delivery audit trail | Deny-all (service role only) |
+| `org_settings` | Per-tenant feature flags (`los_verification_mode`, onboarding_completed, etc.) | Scoped to org members |
+
+### Secret inventory
+| Secret | Location | Rotation doc |
+|--------|----------|--------------|
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel env (all envs) | `docs/security/secret-rotation-runbook.md` |
+| `LOANOS_AGENT_SECRET` | Vercel env | `docs/security/secret-rotation-runbook.md` |
+| `ANTHROPIC_API_KEY` | Vercel env | `docs/security/secret-rotation-runbook.md` |
+| Per-org Arive webhook secrets | `los_integrations.webhook_secret_hash` (SHA-256) | `docs/security/secret-rotation-runbook.md` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel env (public by design) | `docs/security/secret-rotation-runbook.md` |
+
+### Outstanding (as of 2026-04-05)
+- 🔴 **PII masking in `activity_log`** — biggest remaining GLBA exposure (tracker #3)
+- 🟡 SSN/DOB/income field-level encryption at rest (tracker #5)
+- 🟡 Admin action audit log (separate immutable 7yr-retention log) (tracker #9)
+- 🟡 System admin vs org admin role separation (tracker #10)
+- 🟢 IP allowlisting, SOC 2 Type 1, file upload size caps (tracker #11–13)
+
+### Key security files
+| File | Purpose |
+|------|---------|
+| `tasks/security-hardening-critical-gaps.md` | Running tracker of all pre-launch gaps |
+| `audits/SECURITY-AUDIT-2026-04-05.md` | Full audit report (A-findings + S-findings + F-findings) |
+| `src/lib/admin/auth.ts` | `requireAdmin()` helper |
+| `src/lib/los/{hashSecret,resolveOrgFromSlug,verifyLosPayload}.ts` | LOS webhook verification |
+| `src/lib/webhooks/idempotency.ts` | Delivery dedupe helpers |
+| `src/lib/rateLimit.ts` | In-memory sliding window |
+| `src/middleware.ts` | Edge-level admin + plan gates |
+| `next.config.mjs` | CSP, HSTS, security headers |
+| `supabase/migrations/076_security_hardening.sql` | RLS/policy fixes |
+| `supabase/migrations/077_scenarios_increment_view_count.sql` | Atomic RPC |
+| `supabase/migrations/078_webhook_deliveries.sql` | Idempotency table |
+| `docs/security/WISP.md` | Written Information Security Program |
+| `docs/security/data-retention-policy.md` | Retention schedule |
+| `docs/security/secret-rotation-runbook.md` | Secret rotation procedures |
+
+---
+
 ## Architectural Decisions (Locked)
 
 - **One org per LO** by default. Team plan = multiple users per org.

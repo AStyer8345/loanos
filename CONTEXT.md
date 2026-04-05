@@ -80,6 +80,24 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 9)
+
+Closed tracker item #7 (secret rotation runbook) + added Security Posture section to the system knowledge base.
+
+**Landed:**
+- **`docs/security/secret-rotation-runbook.md`** — full rotation procedures for every secret LoanOS holds: Supabase service role, anon key, `LOANOS_AGENT_SECRET`, `ANTHROPIC_API_KEY`, per-org Arive webhook secrets, `PUBLER_API_KEY`. Each section: When / Steps / Verify / Rollback. Names specific n8n workflow IDs, Vercel env vars, and `los_integrations` rows that must be touched.
+- **`LOANOS_SYSTEM_KNOWLEDGE_BASE.md` § Security Posture** — new KB reference section consolidating tenant isolation, webhook architecture, rate limiting, atomic writes, response headers, security tables, full secret inventory with rotation pointers, outstanding tracker items, key file locations.
+
+**Honest limitations documented:**
+- `validateAgentSecret()` holds a single secret — agent-secret rotation has a ~30s window where only one secret is valid. Runbook names this and flags a future "dual-secret overlap" enhancement rather than papering over it.
+- Per-org Arive webhook rotation is clean because `los_integrations` supports multiple `active = TRUE` rows per (org, provider) — the route iterates on layer 2. Migration 075's design paid off here.
+
+**Tracker status:** 🔴 Critical — #3 PII masking is the sole outstanding Critical. 🟡 Medium — #7 done, #5/#9/#10 still open.
+
+**Next recommended:** Critical #3 PII masking in `activity_log` — the last real blocker for LO #2 onboarding.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 8)
 
 Closed tracker item #8 (webhook idempotency).

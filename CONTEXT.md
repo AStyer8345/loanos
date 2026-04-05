@@ -60,6 +60,16 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 4)
+
+Continued execution of audit findings A-9, A-12 from `audits/SECURITY-AUDIT-2026-04-05.md`.
+
+**Findings landed:**
+- **A-9** — `src/lib/chat/lenderQueries.ts` created. Chat tool `queryLenderDatabase` no longer builds its own Supabase queries inline; it goes through `listLendersForOrg(orgId)` and `searchLendersByName(orgId, term)`. Every entry point asserts a non-blank `organizationId` and logs the caller name on violation. Adds a second tenant-discipline layer on top of the existing `.eq('organization_id', …)` filter.
+- **A-12** — `/api/onboarding/step` swapped `createServiceClient()` → `createClient()`. RLS on `org_settings` (role ∈ owner/admin + org match) matches the caller shape so nothing changes functionally, but the DB now enforces tenant scoping.
+
+**Remaining:** A-6 (large refactor — deferred), A-11 (structural move of all agent routes under `/api/webhooks/agents/[org_slug]/...` — deferred), M-1 (already partially landed via session 2 `org_slug` requirement on marketing/log + daily-briefing), rate limiting on web-lead, PII masking in activity_log, CORS/CSP, secret rotation runbook.
+
 ## Security Audit + Arive Webhook Architecture Pivot — 2026-04-05
 
 **Multi-tenant security readiness review before onboarding LO #2. Full architecture pivot on Arive integration after reading Arive's API docs end to end.**

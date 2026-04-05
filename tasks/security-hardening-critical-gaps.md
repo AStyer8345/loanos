@@ -141,6 +141,8 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **A-5 Public share endpoint column whitelist** — `/api/share/[token]` replaced `.select('*')` with explicit column list so future scenarios columns don't leak to borrowers.
 - **A-7 Drip steps cross-tenant enumeration** — `getSteps()` now requires `orgId` and filters `drip_steps` by `org_id`. (A-8 POST insert verified — already sets `org_id: organizationId` explicitly.)
 - **A-10 Unauthenticated admin routes** — `requireAdmin()` gate added to `/api/admin/backfill-party-links` and `/api/admin/import-salesforce-referrals`. Both were previously accessible to any authenticated user.
+- **A-9 Chat lender tool tenant discipline** — queries extracted into `src/lib/chat/lenderQueries.ts`. All entry points require `organizationId` as first arg, throw on blank ids, log mismatches. Adds second layer of safety on top of the existing `.eq()` filter.
+- **A-12 Onboarding step user-scoped** — `/api/onboarding/step` swapped from `createServiceClient()` to `createClient()`. RLS backstop applies.
 
 ---
 

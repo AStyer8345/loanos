@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## [8.1.2] — 2026-04-05 — Security Hardening Sweep pt 3 (A-9, A-12)
+
+### Security
+- **A-9: Chat lender tool now routes through tenant-scoped helper.** New `src/lib/chat/lenderQueries.ts` exports `listLendersForOrg(orgId)` and `searchLendersByName(orgId, term)`. Every entry point requires `organizationId` as its first argument, throws on blank/missing ids, and logs mismatches. The `queryLenderDatabase` tool in `/api/chat/route.ts` no longer builds its own Supabase queries — a future refactor that drops the `.eq('organization_id', …)` filter will fail loudly instead of silently leaking lenders across tenants.
+- **A-12: `/api/onboarding/step` migrated off service-role.** Route now uses `createClient()` (user-scoped). RLS on `org_settings` already requires `role in ('owner','admin')` + `organization_id = get_my_organization_id()` — which matches the onboarding actor (org owner completing their own setup) — so this gains defense-in-depth with zero behavior change.
+
+---
+
 ## [8.1.1] — 2026-04-05 — Security Hardening Sweep pt 2 (A-5, A-7, A-10)
 
 ### Security

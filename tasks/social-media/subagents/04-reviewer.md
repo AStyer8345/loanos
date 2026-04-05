@@ -68,6 +68,33 @@ Testimonials:
 - [ ] Any post featuring a client quote or story → check Build Report for FTC disclosure note
 - [ ] If testimonial was incentivized (gift card, referral fee, etc.) → FTC "#ad" or "paid review" disclosure required → flag if unclear
 
+### LoanOS Stream Checks
+
+For any post with `stream: loanos`, verify ALL of the following. Any failure = post rejected.
+
+1. **Pool entry reference present.** The `social_drafts` row has a non-empty `pool_entry_id` field.
+2. **Pool entry exists.** Open `tasks/social-media/loanos-pool.md` and confirm the referenced entry ID is present in the file.
+3. **Pool entry status is `ready`.** If the referenced entry is `published`, `killed`, or `drafted`, reject the post — the Architect grabbed a stale entry.
+4. **NMLS# rule:**
+   - If the post mentions rates, loan products, pricing, qualification, or APR — NMLS #513013 must be present.
+   - If the post is pure build-in-public (architecture, automations, "why I built this") with NO rate/loan/qualification mention, NMLS# is NOT required.
+5. **No borrower PII.** Scan the post body for patterns like `[FirstName] [LastName] — $[amount]` or similar. Any real-name + dollar-amount combination = reject.
+6. **No guarantee language.** "I can get you approved," "guaranteed," "will close in X days" — all blocked, even when framed around LoanOS features.
+7. **No licensing promises.** For posts tagged Audience: LO, reject any language promising when LoanOS opens to other LOs (e.g., "launching Q3"). Allowed: "DM me about it," "building a waitlist."
+8. **CTA alignment.** The CTA in the post must match the `CTA` field on the referenced pool entry. If pool entry says `none`, post must not end with a CTA.
+
+### Rolling 4-Week Pillar Mix Check
+
+Before approving this week's batch of posts:
+
+1. Query `social_drafts` for all posts (published + scheduled + drafted) dated within the last 28 days including this batch.
+2. Count by pillar: Real Talk, Personal/Story, Education, Promo.
+3. Calculate percentage of each pillar across the 28-day window.
+4. Verify each pillar is within 30/30/30/10 ± 5%.
+5. If any pillar is more than 5% off target, reject this week's plan and instruct the Architect to rebalance.
+
+Single-week drift is fine. Rolling 28-day drift is not.
+
 ### 5. Brand Review
 - [ ] Business name: "Adam Styer | Mortgage Solutions LP" — never "The Styer Team" → REJECT if wrong name appears
 - [ ] Loan application link (if present): https://mslp.my1003app.com/513013/register → verify correct

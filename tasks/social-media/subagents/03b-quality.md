@@ -84,6 +84,26 @@ You MUST read these before scoring. These are the standard.
 "Mortgage Terms: Pre-Payment Penalty — A mortgage lender charges this penalty for paying all or part of the loan's principal balance before the date the outstanding balance is due."
 **Why 3:** Dictionary definition on a branded graphic. Zero personality. Zero Adam. This is what the agent must NEVER produce.
 
+### Jessica Test (2 points of the total score)
+
+Ask: "Could this post have been made by a template-using admin who doesn't know Adam personally?"
+
+- **0 points:** Yes, it reads like a template. Kill the post or rewrite before scoring.
+- **1 point:** Partial — has some Adam voice, but still has template-era elements (definition cards, "Did You Know?" framing, generic listicle structure).
+- **2 points:** No — this is unmistakably Adam. Has his cadence, his specifics, his vulnerability, his hot takes.
+
+A post below 2 points on this rubric cannot exceed a 6/10 total score. Adam's guide explicitly names template content as the thing he hates. Hold the line.
+
+### LoanOS Stream Visual Format Check
+
+For any post with `stream: loanos`:
+
+1. Verify the `social_drafts` row has a `visual_format` field set to one of: `selfie_carousel`, `whiteboard_photo`, `hand_drawn_diagram`, `screenshot_deferred`.
+2. If the value is `screenshot_deferred`, verify `/Users/adamstyer/Documents/loanos-clone/CONTEXT.md` contains the literal line `Demo environment: READY`. If not, fail the post and instruct Builder to select a different pool entry.
+3. If `visual_format` is missing or blank on a LoanOS post, the post fails quality with a hard fail (not a score deduction — kill it).
+
+Text-only LoanOS posts are BLOCKED at this stage. Always.
+
 **IMPORTANT:** If you score every post 7+ with zero rewrites, you are rubber-stamping. That means you're not doing your job. At least 1 in 3 posts from the Builder should need a rewrite. If nothing needs improvement, your standards are too low.
 
 ### Step 3 — Rewrite anything below 7

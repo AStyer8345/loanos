@@ -22,7 +22,7 @@ const PROFESSIONAL_API_PREFIXES = [
 ]
 
 const PROFESSIONAL_UI_PREFIXES = [
-  '/dashboard/drip',
+  '/dashboard/drip-campaigns',
   '/dashboard/automations',
   '/dashboard/marketing',
   '/dashboard/performance',

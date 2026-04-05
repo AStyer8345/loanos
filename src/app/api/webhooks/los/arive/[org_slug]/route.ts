@@ -37,6 +37,12 @@ import { processAriveWebhook } from '@/lib/arive/processWebhook'
 import { resolveOrgFromSlug } from '@/lib/los/resolveOrgFromSlug'
 import { verifySecret } from '@/lib/los/hashSecret'
 import { verifyLosPayload } from '@/lib/los/verifyLosPayload'
+import {
+  computeIdempotencyKey,
+  claimDelivery,
+  completeDelivery,
+  failDelivery,
+} from '@/lib/webhooks/idempotency'
 
 export async function POST(
   request: NextRequest,
@@ -89,6 +95,45 @@ export async function POST(
     body = raw ? JSON.parse(raw) : {}
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  // ─── Idempotency: dedupe retried deliveries ───────────────────────────────
+  // Prefer an explicit X-Idempotency-Key header (Zapier can set this per Zap
+  // run). Fall back to a hash of arive_loan_id + arive_updated_at so we still
+  // dedupe when Arive re-fires the same state without a header.
+  const idempotencyKey = computeIdempotencyKey(request, [
+    typeof body.loanId === 'string' || typeof body.loanId === 'number' ? body.loanId : null,
+    typeof body.updatedAt === 'string' || typeof body.updatedAt === 'number' ? body.updatedAt : null,
+  ])
+
+  let deliveryId: string | null = null
+  if (idempotencyKey) {
+    try {
+      const claim = await claimDelivery(serviceClient, {
+        organization_id: org.organization_id,
+        source: 'arive',
+        idempotency_key: idempotencyKey,
+      })
+      if (claim.deduped) {
+        console.log('[los/arive] Deduped retry', {
+          org_id: org.organization_id,
+          slug: org_slug,
+          idempotency_key: idempotencyKey.slice(0, 16) + '…',
+        })
+        return NextResponse.json({ success: true, deduped: true }, { status: 200 })
+      }
+      deliveryId = claim.delivery_id
+    } catch (err) {
+      // If the idempotency table itself errors, fail closed rather than
+      // silently re-processing. This surfaces a real infra problem fast.
+      console.error('[los/arive] claimDelivery failed:', err)
+      return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    }
+  } else {
+    console.warn('[los/arive] No idempotency key — processing without dedupe', {
+      org_id: org.organization_id,
+      slug: org_slug,
+    })
   }
 
   // ─── Layer 3: payload identity allowlist ──────────────────────────────────
@@ -151,11 +196,18 @@ export async function POST(
   const result = await processAriveWebhook(body, org.organization_id, resolvedUserId)
 
   if (!result.success) {
+    if (deliveryId) {
+      await failDelivery(serviceClient, deliveryId, result.error ?? 'unknown error')
+    }
     const is400 = result.error?.startsWith('Missing required field')
     return NextResponse.json(
       { success: false, error: result.error },
       { status: is400 ? 400 : 500 }
     )
+  }
+
+  if (deliveryId) {
+    await completeDelivery(serviceClient, deliveryId, result.loan_id ?? null)
   }
 
   return NextResponse.json(

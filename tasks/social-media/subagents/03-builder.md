@@ -244,6 +244,32 @@ Brand color note: Gold = #C9A84C, Background = #0a0a0a or white, Text = white or
 
 ---
 
+## LoanOS Stream Posts (special handling)
+
+When the Architect hands you a post with `stream: loanos`, you do NOT write freely. You assemble the post from the pool entry fields verbatim.
+
+### Mapping pool entry to post
+
+| Pool entry field | Post use |
+|---|---|
+| `The Hook` | Caption opening line (first sentence of post body) |
+| `The Beats` (numbered list) | Carousel slide text, one beat per slide |
+| `The Vulnerability Angle` + `The Authority Angle` | These inform the TONE of each beat's expansion, but are not written verbatim into the post — they're voice checks |
+| `Visual Format` | Determines the image/media type — DO NOT override |
+| `Visual Notes` | Literal instructions to the image slot — include verbatim in the draft so Adam knows what to upload at publish |
+| `CTA` | If `none`, post ends with the last beat verbatim. No "DM me" appended. If `DM_loanos`, add CTA line verbatim: "DM me the word LOANOS and I'll show you what I built." |
+
+### Hard rules for LoanOS stream
+
+- No text-only posts. If `Visual Format` is missing, abort and log a BLOCKER.
+- No added CTAs. Only the CTA specified in the pool entry.
+- Include `pool_entry_id: <entry-id>` as a field on the `social_drafts` row.
+- Every beat becomes one carousel slide. Do not compress beats into longer paragraphs.
+- Keep the Hook as the caption lead. Do not rewrite it for "flow."
+- If `Visual Format: screenshot_deferred` AND `loanos-clone/CONTEXT.md` does NOT contain the line `Demo environment: READY`, skip this entry and select the next available one. Do not write the post.
+
+---
+
 ## OUTPUT
 
 The drafts inserted into the `social_drafts` Supabase table ARE the primary output. Each post is a row in the table with full copy, platform, format, pillar, hashtags, compliance flags, and agent notes.

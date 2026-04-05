@@ -198,7 +198,7 @@ Implemented `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md`:
   - seo-sem/backlog.md: /loanos landing page brief
   - gbp-optimization task prompt + gbp-weekly-optimization parent SKILL: LoanOS content inclusion rule
 
-- **Task 12 BLOCKED:** n8n `Weekly GBP + Social Post` workflow (V6RhmJpOb7pOzMte) needs MCP access toggled in n8n UI before the `loanos-build` theme branch can be added. See `BLOCKERS.md`.
+- **Task 12 RESOLVED (2026-04-05 PM):** Adam toggled `availableInMCP` on workflow `V6RhmJpOb7pOzMte`. Modification applied via n8n REST API PUT: `Gemini: Adapt for Platforms` body now ternary-branches on `theme === 'loanos-build'` → builder-voice prompt (no mortgage/rate/NMLS language), and `Extract Imagen Base64` Code node fetches `image_url` from webhook body via `this.helpers.httpRequest` instead of using Imagen output when theme is `loanos-build`. No new nodes, no connection rewiring. Verified: both edits present, workflow active.
 
 - **Tasks 3, 14, 15 pending Adam:**
   - Task 3: review 6 Phase 1A pool entries, correct voice, kill any that don't land

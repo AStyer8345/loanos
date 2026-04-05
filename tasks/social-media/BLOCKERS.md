@@ -1,17 +1,17 @@
 # Active Blockers — Social Media
 
-## 2026-04-05 — BLOCKED: n8n GBP webhook `loanos-build` theme branch (Task 12)
+_No active blockers._
 
-**Blocker:** The `Weekly GBP + Social Post` workflow (ID `V6RhmJpOb7pOzMte`) has `availableInMCP: false` and cannot be modified via the n8n MCP. Attempted `get_workflow_details` returns: `"Workflow is not available in MCP. Enable MCP access in workflow settings."`
+---
 
-**What Adam needs to do:**
-1. Open https://styer.app.n8n.cloud
-2. Open workflow `Weekly GBP + Social Post` (ID `V6RhmJpOb7pOzMte`)
-3. In workflow Settings, enable MCP access (toggle)
-4. Save
+## Resolved
 
-**After unblock:** Re-run Task 12 of `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md` — adds `loanos-build` theme branch with builder-voice Gemini prompt + Imagen-skip + direct-image passthrough.
+### 2026-04-05 — RESOLVED: n8n GBP webhook `loanos-build` theme branch (Task 12)
 
-**Impact if not resolved:** GBP + cross-platform distribution of LoanOS content will still run through the existing rate/blog/newsletter theme prompts, which will incorrectly adapt LoanOS build-in-public posts with mortgage sales language. Only affects Tier 1 (immediate) GBP distribution of LoanOS content — Tier 2 (platform-native posts drafted by Architect/Builder) is unaffected and continues working.
+**Was blocked on:** `availableInMCP: false` on workflow `Weekly GBP + Social Post` (`V6RhmJpOb7pOzMte`).
 
-**Codex fallback unavailable:** Codex CLI is not installed on this machine, so could not delegate the modification.
+**Resolution:** Adam toggled MCP access in the workflow settings. Modification applied via n8n REST API `PUT /workflows/V6RhmJpOb7pOzMte`:
+- `Gemini: Adapt for Platforms` body expression now branches on `$json.body.theme === 'loanos-build'` — uses builder-voice prompt (no mortgage sales language, no rate data, no NMLS#) when true, mortgage prompt otherwise.
+- `Extract Imagen Base64` Code node now fetches `$json.body.image_url` via `this.helpers.httpRequest` when theme is `loanos-build` (bypasses Imagen for LoanOS posts where Adam supplies the selfie/screenshot directly).
+
+**Verified:** workflow active, both node edits landed, no new nodes or connections required.

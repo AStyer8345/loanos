@@ -17,9 +17,12 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
   try {
     const supabase = createServiceClient()
 
+    // Explicit column whitelist — do NOT use .select('*'). Any new column added
+    // to `scenarios` later (internal notes, commission, LO pricing, etc.) would
+    // otherwise leak out through this public borrower-facing endpoint.
     const { data, error } = await supabase
       .from('scenarios')
-      .select('*')
+      .select('id, organization_id, user_id, share_token, share_expires_at, view_count, scenario_type, borrower_name, property_address, property_value, current_loan_data, scenarios_data, results_data, narrative, reinvestment_data, created_at')
       .eq('share_token', params.token)
       .single()
 

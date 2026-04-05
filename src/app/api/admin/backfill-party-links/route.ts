@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
+import { requireAdmin } from '@/lib/admin/auth'
 
 // POST /api/admin/backfill-party-links
 // One-time (re-runnable) backfill: matches agent name strings on loans
 // to contact records by case-insensitive name, then sets the FK columns.
 export async function POST() {
+  const adminCheck = await requireAdmin()
+  if (adminCheck.error) return adminCheck.error
+
   try {
     const { organizationId } = await getOrganization()
     const supabase = createServiceClient()

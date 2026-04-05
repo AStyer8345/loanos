@@ -14,7 +14,7 @@ export async function GET(
     if (!campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
-    const steps = await getSteps(params.id)
+    const steps = await getSteps(organizationId, params.id)
     return NextResponse.json({ steps })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

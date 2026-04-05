@@ -78,10 +78,11 @@ export async function updateCampaign(
 
 // ── Steps ──────────────────────────────────────────────────
 
-export async function getSteps(campaignId: string): Promise<DripStepRow[]> {
+export async function getSteps(orgId: string, campaignId: string): Promise<DripStepRow[]> {
   const { data, error } = await supabase()
     .from('drip_steps')
     .select('*')
+    .eq('org_id', orgId)
     .eq('campaign_id', campaignId)
     .order('step_order')
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
+import { requireAdmin } from '@/lib/admin/auth'
 import type { TablesInsert } from '@/lib/database.types'
 
 interface SalesforceRecord {
@@ -19,6 +20,9 @@ interface SalesforceRecord {
 // Body: { contacts: SalesforceRecord[] }
 // Upserts contacts from Salesforce export, matches "Referred By" to realtor contacts.
 export async function POST(req: NextRequest) {
+  const adminCheck = await requireAdmin()
+  if (adminCheck.error) return adminCheck.error
+
   try {
     const { organizationId } = await getOrganization()
     const supabase = createServiceClient()

@@ -65,6 +65,8 @@ Run these queries:
 /Users/adamstyer/.local/bin/notebooklm ask "What did the last session complete and what was deferred?" --json
 ```
 
+After pulling, read `tasks/social-media/loanos-pool.md` to load current pool state into working memory for the Architect.
+
 ### Step 3 — Write Pull Report
 
 Save to `tasks/social-media/notebooklm-pull-[YYYY-MM-DD].md`:
@@ -255,6 +257,24 @@ cat >> "$MASTER_LOG" << ENTRY
 ## $ENTRY_DATE | $AGENT_ID
 
 [Paste the EXACT digest body content here — same content sent by email]
+
+## LoanOS Pool State (as of this session)
+
+- Total entries: [count from `grep -c "^## Entry" tasks/social-media/loanos-pool.md`]
+- Ready: [count of `Status: ready` entries]
+- Drafted: [count of `Status: drafted`]
+- Scheduled: [count of `Status: scheduled`]
+- Published: [count of `Status: published`]
+- Killed: [count of `Status: killed`]
+
+## Arc Phase Progress
+- 1A Foundation: [ready count] / [total 1A entries]
+- 1B In Motion: [ready count] / [total 1B entries]
+- 1C Automations: [ready count] / [total 1C entries]
+- 1D Transfer of Value: [ready count] / [total 1D entries]
+
+## Proposed Entries (Lane 2, awaiting Adam review)
+[List any entries in `loanos-pool-proposed.md`]
 
 ### Action Items for Adam
 - [Each item requiring human approval, roadblocks, or GAPS items needing initialization]

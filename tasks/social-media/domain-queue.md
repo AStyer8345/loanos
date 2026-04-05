@@ -88,3 +88,13 @@ COMPLIANCE REQUIREMENTS:
 - Equal Housing Lender on visual posts
 - FTC: disclose if client testimonial is paid/incentivized
 - Scheduling tool: Publer — DRAFTS only, never publish live from agent
+
+---
+
+## 2026-04-05 — LoanOS Stream Launch (Phase 1A)
+
+Focus: Launch the new 4-pillar framework (30/30/30/10) and the LoanOS content stream inside Real Talk.
+Spec: `tasks/social-media/specs/2026-04-05-pillar-framework-v2.md`
+Plan: `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md`
+Applies to: Post 57 onward (clean break — Posts 50-56 unchanged)
+First-run gate: 6 Phase 1A pool entries ready + selfies uploaded + /loanos landing page live

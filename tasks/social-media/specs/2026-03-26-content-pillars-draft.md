@@ -1,7 +1,7 @@
 # Content Pillar Framework — Draft
 ## Adam Styer | Mortgage Solutions LP
 Date: 2026-03-26
-Status: DRAFT — finalize after account audit baseline is complete
+Status: SUPERSEDED by `tasks/social-media/specs/2026-04-05-pillar-framework-v2.md` on 2026-04-05
 Author: Social Media Research Subagent (Session 2, AM)
 
 ---

@@ -92,10 +92,11 @@ onboarding of additional LOs.
 - `los_integrations` table already supports rotation via `secret_last_rotated`
   column + multiple active rows during overlap window
 
-### 8. Webhook idempotency
-- Add unique constraint on `(arive_loan_id, organization_id, arive_event_id)` if
-  Arive sends event IDs, so duplicate deliveries can't double-process
-- Already have `(arive_loan_id, organization_id)` unique from migration 070
+### 8. ~~Webhook idempotency~~ ✅ DONE (2026-04-05)
+- **Migration 078** — new `webhook_deliveries` table with `UNIQUE (organization_id, source, idempotency_key)`, deny-all RLS, partial index on `loan_id`.
+- **`src/lib/webhooks/idempotency.ts`** — shared helpers. Key derivation prefers `X-Idempotency-Key` header, falls back to SHA-256 of `[arive_loan_id, arive_updated_at]`.
+- **Arive route** now claims a delivery row before processing. Postgres `23505` unique-violation short-circuits to `200 {success: true, deduped: true}` without re-running party contact upserts, date derivation, or activity log inserts. Failed deliveries keep the row (no retry storm on broken payloads; bump the key upstream to retry).
+- The existing `(arive_loan_id, organization_id)` unique on `loans` from migration 070 already handled loan-record merging; this closes the gap on *surrounding* work (5 party upserts + activity_log rows per retry).
 
 ### 9. Admin action audit log
 - Separate from borrower `activity_log` — logs org creation, role changes,
@@ -139,6 +140,7 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **Rate limit web-lead + share** — `/api/contacts/web-lead` (30/min per IP) and `/api/share/[token]` (60/min per IP + 30/min per token) now throttled via `checkRateLimit`.
 - **Atomic scenarios view_count** — migration 077 adds `increment_scenario_view_count(uuid)` RPC (SECURITY DEFINER). Share route no longer does lossy read-then-write.
 - **Middleware admin gate** — `/api/admin/*` now enforced at `src/middleware.ts` via inline service-role `system_admins` lookup. All 5 existing admin handlers still call `requireAdmin()` on line 1 (verified) — middleware is the resilience floor for future routes.
+- **Webhook delivery idempotency** — migration 078 `webhook_deliveries` table + `src/lib/webhooks/idempotency.ts` helpers + Arive route dedupe check. Duplicate Zapier retries no longer double-process party contact upserts or activity log inserts.
 
 ---
 

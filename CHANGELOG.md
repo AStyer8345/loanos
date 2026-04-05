@@ -1,5 +1,30 @@
 # LoanOS Changelog
 
+## [8.1.6] — 2026-04-05 — Webhook Delivery Idempotency
+
+### Added
+- **`supabase/migrations/078_webhook_deliveries.sql`** — new `webhook_deliveries` table with `UNIQUE (organization_id, source, idempotency_key)`, deny-all RLS, plus `(org, received_at DESC)` and partial `loan_id` indexes. Tracks every incoming webhook delivery with received/processed timestamps, status, and resolved loan FK.
+- **`src/lib/webhooks/idempotency.ts`** — shared helper with three functions:
+  - `computeIdempotencyKey(request, fallbackFields)` — prefers `X-Idempotency-Key` header, falls back to SHA-256 of joined fallback fields
+  - `claimDelivery(client, args)` — inserts a row, returns `{deduped: true}` on `23505` unique violation
+  - `completeDelivery(client, id, loan_id)` / `failDelivery(client, id, error)` — row lifecycle
+
+### Changed
+- **`src/app/api/webhooks/los/arive/[org_slug]/route.ts`** — now claims a delivery row after layer-2 secret verification, before layer-3 allowlist + processing. Duplicate retries short-circuit to `200 {success: true, deduped: true}` without re-running party contact upserts or activity log inserts. Key derived from `loanId + updatedAt` when the header is absent.
+
+### Why
+The loans table already had `UNIQUE (arive_loan_id, organization_id)` from migration 070, so duplicate deliveries merged into the same loan row via upsert. But the surrounding work — 5 party contact upserts, derived date patches, activity log insert — ran every time. A Zapier retry loop could easily create 10+ activity log rows for a single Arive state change. This closes that window and gives us an audit trail for every delivery attempt.
+
+### Security / Tracker
+Resolves `tasks/security-hardening-critical-gaps.md` item **#8 — Webhook idempotency**. Failed deliveries intentionally keep their row (same key still dedupes on retry) so a broken payload can't trigger a retry storm.
+
+### Deploy
+- Commit: `1c52e8c`
+- Migration applied to project `uuqedsvjlkeszrbwzizl` via Supabase MCP
+- Vercel deploy `dpl_3JXxjW1XEcgxYtrR3G5GgrAb7yQi` — state READY
+
+---
+
 ## [8.2.0] — 2026-04-05 — Share Page Cash to Close Breakdown
 
 ### Added

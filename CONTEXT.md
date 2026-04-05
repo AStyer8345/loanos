@@ -80,6 +80,24 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 8)
+
+Closed tracker item #8 (webhook idempotency).
+
+**Landed:**
+- **Migration 078 `webhook_deliveries`** — new audit + dedupe table with `UNIQUE (organization_id, source, idempotency_key)`, deny-all RLS, partial index on `loan_id`. Applied to project `uuqedsvjlkeszrbwzizl` via Supabase MCP.
+- **`src/lib/webhooks/idempotency.ts`** — shared helpers (`computeIdempotencyKey`, `claimDelivery`, `completeDelivery`, `failDelivery`). Header-preferred key (`X-Idempotency-Key`) with SHA-256 fallback over `[arive_loan_id, arive_updated_at]`. Postgres `23505` unique-violation → `{deduped: true}` short-circuit.
+- **`src/app/api/webhooks/los/arive/[org_slug]/route.ts`** — claims a delivery row after layer-2 secret verify, before layer-3 allowlist + `processAriveWebhook`. Duplicate retry returns `200 {success: true, deduped: true}` without re-running 5 party contact upserts, date derivation, or activity log inserts. Failed deliveries keep their row (no retry storm on broken payloads; bump the key upstream to retry).
+
+**Why the separate table instead of `loans.arive_event_id`:**
+One loan accumulates many webhook deliveries across its lifecycle (status, milestone, rate lock, CTC). We need to dedupe each *delivery* independently. The existing `UNIQUE (arive_loan_id, organization_id)` on `loans` already merges upserts for the loan record itself — this fix closes the gap on the *surrounding* work (party upserts + activity log rows).
+
+**Deploy:** Commit `1c52e8c`, Vercel `dpl_3JXxjW1XEcgxYtrR3G5GgrAb7yQi` → READY.
+
+**Tracker status:** 🔴 Critical items 1/2/4 done, #3 PII masking is the last remaining Critical. 🟡 Medium: #6 CORS/CSP and #8 idempotency done; #5 PII encryption, #7 rotation runbook, #9 admin action log, #10 sys-vs-org admin separation still open.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 7)
 
 Closed tracker item #6 (CORS + CSP headers).

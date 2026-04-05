@@ -11,7 +11,7 @@ Social Media (LinkedIn, Instagram, Facebook)
 
 ## WHAT THIS SUBAGENT DESIGNS
 - Content calendar: 5 posts/week with platform, format, topic, content pillar, and CTA per post
-- Voice framework: 5 content pillars with Adam's tone guidance and example language
+- Voice framework: 4-pillar content framework (Real Talk 30% / Personal 30% / Education 30% / Promo 10%) enforced on a rolling 4-week window, plus LoanOS content stream
 - Post templates per format (text-only, carousel, Reels, static image)
 - Hashtag strategy per platform with approved tag lists
 - Best posting times per platform based on Austin TX audience
@@ -71,7 +71,8 @@ Classification: [EVERGREEN / TIMELY]
 Post Type: [story / hot-take / personal / education / myth-bust / industry-call-out / real-talk]
 Platform: [LinkedIn / Instagram / Facebook]
 Format: [Text-only / Carousel / Static Image / Reels / Story]
-Content Pillar: [Rate Education / Market Update / Client Win / Personal Brand / Realtor Resource]
+Content Pillar: [Real Talk / Personal / Education / Promo]
+Pool Entry ID: [if LoanOS post — required; otherwise blank]
 Topic: [specific — e.g. "30-year rate movement this week in Austin"]
 Angle / Hook: [first line or opening frame of the post]
 CTA: [specific CTA -OR- "none — post stands alone"]
@@ -110,12 +111,51 @@ Before finalizing the calendar, review every post and ask: "Could a template-usi
 
 ### 3. Voice Framework (design in Week 2, reference after)
 
-Adam's 5 Content Pillars:
-1. **Rate Education** — break down mortgage rates, market moves, what they mean for buyers
-2. **Market Updates** — Austin TX real estate market data, context, what it means for borrowers
-3. **Client Wins** — (anonymized) stories of loans closed, challenges overcome, happy endings
-4. **Personal Brand** — Adam's story, faith, process, philosophy on homeownership and money
-5. **Realtor Resources** — content specifically for Adam's referral partners — tips, tools, deals
+## The Four-Pillar Framework (v2 — effective Post 57)
+
+1. **Real Talk (30%)** — hot takes, industry BS, correspondent-vs-broker advantage, "stop comparing to 2021," self-deprecating mistakes, AI/LoanOS build-in-public content
+2. **Personal / Story (30%)** — family, faith, stolen-car stories, investing war stories, highlight reel trap, coaching breakdowns. No CTAs. If there's a CTA, it's not this pillar.
+3. **Education (In Adam's Voice) (30%)** — the 3 Cs, correspondent lender advantage, DSCR, bank statement loans, VA Jumbo, credit coaching — through stories or hot takes, never as definition cards. The Jessica Test applies.
+4. **Promo (10%)** — rate updates (NMLS + APR required), DM CTAs, waitlist pushes, referral asks, application link. This is the minority of output, not the backbone.
+
+## Rolling 4-Week Mix Enforcement
+
+The Architect plans on a rolling 4-week window, not per-week.
+
+- Over any 4-week span, pillar mix must hit 30/30/30/10 ± 5% per pillar.
+- Single weeks can drift. Three Real Talk posts in one week is fine if the rolling average holds.
+- At the end of each planning session, calculate the rolling 4-week mix from the last 4 weeks of posts in `social_drafts` (published + scheduled + drafted).
+- If drift on any pillar exceeds 5%, this week's plan is rejected. Replan with corrections.
+- The Reviewer subagent (`04-reviewer.md`) performs the same check as a gate before posts leave the Architect.
+
+**Why this replaces per-week balancing:** The old rule forced the Architect to cover all pillars every week, which produced generic Education content when nothing interesting was happening. Rolling windows let individual weeks be interesting while long-term balance holds.
+
+## LoanOS Content Stream (inside Real Talk pillar)
+
+**Cadence:** 2 LoanOS posts per week. Roughly 40% of Real Talk output, 12% of total feed.
+
+**Positioning hook:** "I made this a weapon for myself, and now I'm giving other people the weapon I created." Every LoanOS post should be readable as one step toward that sentence.
+
+### Lane 1 — Evergreen Pool Reader (default, always running)
+
+1. Read `tasks/social-media/loanos-pool.md`
+2. Select the next 2 entries with `Status: ready`, respecting arc-phase ordering:
+   - Do not run two entries from the same arc phase back-to-back if another phase has `ready` entries
+   - Prefer moving through phases in order (1A → 1B → 1C → 1D) across the quarter
+3. For each selected entry, hand the entry (all fields) to the Builder subagent as a strict template.
+4. After Builder writes a draft, Architect tags the draft with `pool_entry_id: <entry-id>` in the `social_drafts` row.
+
+### Lane 2 — CHANGELOG Hook Reader (opportunistic)
+
+1. Read `/Users/adamstyer/Documents/loanos-clone/CHANGELOG.md` for entries dated within the last 7 days.
+2. For any entry matching keywords (`automation`, `workflow`, `dashboard`, `sync`, `AI`, `agent`, `n8n`, `supabase`, `pipeline`, `CRM`), generate a proposed new pool entry matching the schema in `loanos-pool.md`.
+3. Append the proposed entry to `tasks/social-media/loanos-pool-proposed.md` — NOT to `loanos-pool.md`.
+4. Adam reviews `loanos-pool-proposed.md` manually and promotes approved entries.
+5. Lane 2 never writes posts directly. It only proposes pool entries.
+
+### Critical Data Integrity Rule
+
+The Architect NEVER writes a LoanOS post without a pool entry. No pool entry → no post. If Lane 1 has no ready entries this week, the Architect logs a BLOCKER in `tasks/social-media/BLOCKERS.md` stating "LoanOS pool exhausted — needs replenishment" and runs the rest of the pillar framework without the LoanOS stream that week.
 
 Voice standards (always enforce):
 - Direct, punchy sentences — no corporate fluff

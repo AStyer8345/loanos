@@ -81,9 +81,10 @@ onboarding of additional LOs.
 - Use application-layer encryption (pgsodium or encrypt-before-insert) for the
   top sensitive fields. GLBA attorney conversation needed to finalize scope.
 
-### 6. CORS + CSP headers
-- Verify `next.config.js` has strict CORS (allow styermortgage.com + Arive only)
-- Add CSP header in middleware to prevent XSS / third-party script injection
+### 6. ~~CORS + CSP headers~~ ✅ DONE (2026-04-05)
+- **CSP** added to `next.config.mjs`: default-src self, connect-src scoped to Supabase + Vercel analytics, frame-ancestors self, object-src none, upgrade-insecure-requests. Script-src still includes `'unsafe-inline'` + `'unsafe-eval'` because Next.js 14 ships inline scripts without nonces — future nonce rollout would let us drop both.
+- **HSTS** (`max-age=2y; includeSubDomains; preload`) added alongside CSP.
+- **CORS audit — no action needed.** Zero `Access-Control-Allow-Origin` in `src/`; Next.js SOP already covers browser cross-site calls, and server-to-server callers (n8n, Zapier, Arive) are CORS-exempt.
 
 ### 7. Secret rotation runbook
 - Document how to rotate `LOANOS_AGENT_SECRET`, Arive per-org secrets, service

@@ -60,6 +60,19 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 7)
+
+Closed tracker item #6 (CORS + CSP headers).
+
+**Landed:**
+- **CSP** in `next.config.mjs` alongside existing security headers. Directives tuned to actual runtime deps: Supabase (https+wss), Vercel analytics + Live, Calendly iframe for share page. Anthropic/n8n/Publer are server-side only → no connect-src entries needed. Script-src still carries `'unsafe-inline' 'unsafe-eval'` because Next.js 14 inline scripts aren't nonce-enabled out of the box — future work.
+- **HSTS** `max-age=63072000; includeSubDomains; preload`.
+- **CORS audit:** grepped `src/` for `Access-Control-Allow-Origin` — zero matches. Next.js same-origin policy already protects browser-side cross-site calls; server-to-server callers are CORS-exempt. No action taken.
+
+**Follow-ups deferred:** CSP nonce rollout (drop `'unsafe-inline'` script-src), CSP `report-uri` endpoint to catch violations, domain allowlist once LoanOS is on a custom domain.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 6)
 
 Closed Critical #4 (admin-route authorization audit) from the security tracker.

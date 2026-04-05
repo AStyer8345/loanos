@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## [8.1.5] — 2026-04-05 — Security Hardening Sweep pt 6 (CSP + HSTS)
+
+### Security
+- **Content Security Policy** added to `next.config.mjs` security headers block. Blocks third-party script injection, mixed content, plugin injection (`object-src 'none'`), clickjacking (`frame-ancestors 'self'`), and stray `<base>` tag hijacks. Connect-src allows only Supabase (https + wss for realtime), Vercel analytics, and Vercel Live overlay. Frame-src allows Calendly for share-page embeds. Script-src still requires `'unsafe-inline'` + `'unsafe-eval'` because Next.js 14 ships inline scripts without nonces by default — a future nonce rollout via middleware would let us drop both.
+- **Strict-Transport-Security** (`max-age=2y; includeSubDomains; preload`) added so browsers refuse plain-HTTP downgrade for 2 years after first visit.
+- **CORS audit — no changes needed.** Grepped `src/` for `Access-Control-Allow-Origin` → zero matches. Next.js's default same-origin policy already blocks cross-site browser fetches with session cookies, and every server-to-server caller (n8n, Zapier, Arive, Publer) is CORS-exempt by definition. Nothing to tighten.
+
+---
+
 ## [8.1.4] — 2026-04-05 — Security Hardening Sweep pt 5 (middleware admin gate)
 
 ### Security

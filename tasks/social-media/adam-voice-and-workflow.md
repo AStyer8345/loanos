@@ -1,5 +1,5 @@
 # Adam Styer — Voice, Workflow & Training Guide
-# STATUS: DRAFT — Adam needs to review and correct everything in this document.
+# STATUS: ACTIVE — promoted 2026-04-05 as part of pillar framework v2 launch.
 # Last updated: 2026-03-29
 
 ---
@@ -317,3 +317,26 @@ These are the kinds of stories that make content authentic. Agent should USE the
 - **Hot takes are welcome.** "Stop comparing your rate to 2021." "Your agent doesn't understand your mortgage timeline — and that's my fault, not theirs." Opinions get engagement. Safe gets scrolled past.
 - When in doubt, simpler is better
 - **Write fewer, better posts.** 3 great posts per week beat 5 forgettable ones.
+
+---
+
+## LoanOS / AI Content Stream
+
+A named content thread that lives primarily inside the Real Talk pillar. 2 posts per week. Driven by an evergreen pool (`tasks/social-media/loanos-pool.md`) plus opportunistic CHANGELOG.md reading. Every post has a photo or video — NEVER text-only.
+
+**Core positioning (the closing beat every post leads toward):**
+> "I made this a weapon for myself, and now I'm giving other people the weapon I created."
+
+**Narrative arc (Phase 1):**
+- 1A Foundation — What LoanOS is (dashboard, loans, contacts, why Adam built it himself)
+- 1B In Motion — Loan scenarios running through the system
+- 1C Automations — n8n workflows, agents, manual tasks replaced
+- 1D Transfer of Value — LO-targeted waitlist CTAs
+
+**Audience CTAs:**
+- LO → DM for waitlist
+- Realtor → no CTA, positioning only
+- Borrower → no CTA, trust signal
+- Builder → no CTA, LinkedIn personal brand
+
+Full spec: `tasks/social-media/specs/2026-04-05-pillar-framework-v2.md`

@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
+import { checkRateLimit } from '@/lib/rateLimit'
 import type { Database } from '@/lib/database.types'
+
+/**
+ * Best-effort client IP extraction. On Vercel `x-forwarded-for` is the public
+ * client address; on local dev it can be missing, in which case we fall back
+ * to a constant that still rate-limits across the whole dev instance.
+ */
+function getClientIp(req: NextRequest): string {
+  const xff = req.headers.get('x-forwarded-for')
+  if (xff) return xff.split(',')[0].trim()
+  return req.headers.get('x-real-ip') || 'unknown'
+}
 
 type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
@@ -16,6 +28,17 @@ export async function POST(req: NextRequest) {
   // ── 1. Auth ──────────────────────────────────────────────────────────────────
   const authError = validateAgentSecret(req)
   if (authError) return authError
+
+  // ── 1a. Rate limit ───────────────────────────────────────────────────────────
+  // The agent secret is shared across all of Adam's (and future tenants') n8n
+  // Zaps, so we can't rely on it to throttle abuse — if someone exfiltrates the
+  // secret from a Zapier step they can hammer this endpoint at will. Throttle
+  // by client IP (legitimate traffic is 1-2 req/min from a known n8n worker).
+  const ip = getClientIp(req)
+  const { allowed } = checkRateLimit(`web-lead:${ip}`, 30, 60_000)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
 
   // ── 2. Parse body ────────────────────────────────────────────────────────────
   let body: Record<string, unknown>

@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { checkRateLimit } from '@/lib/rateLimit'
+
+function getClientIp(req: NextRequest): string {
+  const xff = req.headers.get('x-forwarded-for')
+  if (xff) return xff.split(',')[0].trim()
+  return req.headers.get('x-real-ip') || 'unknown'
+}
 
 export interface ShareBranding {
   loName: string
@@ -15,6 +22,20 @@ export interface ShareBranding {
 
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
   try {
+    // Rate limit — public endpoint, no auth. Throttle both by IP (stop enumeration
+    // attacks crawling random tokens) and by token (cap view-count inflation by a
+    // single attacker holding a valid link). Legit borrower traffic is a handful
+    // of loads per link.
+    const ip = getClientIp(req)
+    const ipCheck = checkRateLimit(`share-ip:${ip}`, 60, 60_000)
+    if (!ipCheck.allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+    }
+    const tokenCheck = checkRateLimit(`share-token:${params.token}`, 30, 60_000)
+    if (!tokenCheck.allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+    }
+
     const supabase = createServiceClient()
 
     // Explicit column whitelist — do NOT use .select('*'). Any new column added
@@ -35,11 +56,12 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       return NextResponse.json({ error: 'Share link has expired' }, { status: 410 })
     }
 
-    // Increment view count
-    await supabase
-      .from('scenarios')
-      .update({ view_count: (data.view_count || 0) + 1 })
-      .eq('id', data.id)
+    // Atomic view_count increment via RPC (migration 077). Read-then-write
+    // loses updates under concurrent viewers — a single SQL UPDATE is atomic.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).rpc('increment_scenario_view_count', {
+      p_share_token: params.token,
+    })
 
     // Fetch LO branding: org + user_settings
     const [orgResult, settingsResult] = await Promise.all([

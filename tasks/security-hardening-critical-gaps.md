@@ -48,16 +48,12 @@ onboarding of additional LOs.
   10. Pricing note: each LO must pay for their own Zapier Starter plan ($20/mo)
      — include in LoanOS pricing page as a required add-on
 
-### 2. Rate limiting on public endpoints
-- **Endpoint:** `POST /api/contacts/web-lead` (and any other unauthenticated form submit)
-- **Risk:** No throttle, no CAPTCHA. Script kiddie → activity log + Supabase row explosion + junk contacts.
-- **Fix:**
-  - Add IP-based rate limit (10/min per IP) using `@upstash/ratelimit` or
-    equivalent — the `src/lib/rateLimit.ts` helper already exists, check if reusable
-  - Add hCaptcha on `styermortgage.com` side before webhook fires
-  - Add idempotency key support (if same key seen twice in 5min → no-op)
-- **Effort:** ~2 hours
-- **Blocker for:** public launch
+### 2. ~~Rate limiting on public endpoints~~ ✅ PARTIAL (2026-04-05)
+- **Done:** `POST /api/contacts/web-lead` throttled at 30 req/min by client IP via `checkRateLimit`. `GET /api/share/[token]` throttled at 60/min by IP + 30/min by token (two-key defense). Both return 429 on exceed.
+- **Still pending:**
+  - hCaptcha on `styermortgage.com` side before webhook fires
+  - Idempotency key support (same key in 5min → no-op)
+  - Audit remaining unauthenticated form-submit routes for same treatment
 
 ### 3. PII masking in activity logs
 - **Risk:** `activity_log` stores borrower names, emails, full loan details in
@@ -143,6 +139,8 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **A-10 Unauthenticated admin routes** — `requireAdmin()` gate added to `/api/admin/backfill-party-links` and `/api/admin/import-salesforce-referrals`. Both were previously accessible to any authenticated user.
 - **A-9 Chat lender tool tenant discipline** — queries extracted into `src/lib/chat/lenderQueries.ts`. All entry points require `organizationId` as first arg, throw on blank ids, log mismatches. Adds second layer of safety on top of the existing `.eq()` filter.
 - **A-12 Onboarding step user-scoped** — `/api/onboarding/step` swapped from `createServiceClient()` to `createClient()`. RLS backstop applies.
+- **Rate limit web-lead + share** — `/api/contacts/web-lead` (30/min per IP) and `/api/share/[token]` (60/min per IP + 30/min per token) now throttled via `checkRateLimit`.
+- **Atomic scenarios view_count** — migration 077 adds `increment_scenario_view_count(uuid)` RPC (SECURITY DEFINER). Share route no longer does lossy read-then-write.
 
 ---
 

@@ -60,6 +60,19 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 5)
+
+Closed the last immediately-exploitable HIGH findings from the security tracker.
+
+**Landed:**
+- **Rate limit on `/api/contacts/web-lead`** — 30 req/min per IP via `checkRateLimit`. The agent secret is shared across every tenant's n8n/Zapier so it can't be used as an identity signal — IP is the only throttle available. Legit n8n workers fire 1–2 req/min so 30/min is massive headroom while still blocking abuse.
+- **Rate limit on `/api/share/[token]`** — two-key defense: `share-ip:<ip>` at 60/min (stops enumeration crawlers) + `share-token:<token>` at 30/min (caps view-count inflation by an attacker holding one valid link).
+- **Atomic `view_count` increment** — migration 077 adds `increment_scenario_view_count(uuid)` RPC with `SECURITY DEFINER` + pinned `search_path`. Share route previously did read-then-write (`view_count = X; update = X+1`), losing writes under concurrent borrowers. Replaced with a single atomic UPDATE via RPC.
+
+**Still pending:** hCaptcha on styermortgage.com side, idempotency keys (5-min dedupe), A-6 route consolidation, A-11 agent route restructure, PII masking in activity_log, CORS/CSP, secret rotation runbook.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 4)
 
 Continued execution of audit findings A-9, A-12 from `audits/SECURITY-AUDIT-2026-04-05.md`.

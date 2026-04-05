@@ -1,5 +1,17 @@
 # LoanOS Changelog
 
+## [8.1.3] — 2026-04-05 — Security Hardening Sweep pt 4 (rate limits + atomic view_count)
+
+### Security
+- **Rate limit on `/api/contacts/web-lead`** (Critical #2 in security-hardening tracker). Throttles by client IP at 30 req/min via the existing `checkRateLimit` sliding window. The agent secret is shared across every tenant's n8n/Zapier, so an exfiltrated key can't be used as an identity signal — IP is the only per-source throttle available. Legit n8n workers push 1–2 req/min, so 30/min leaves massive headroom while blocking script-kiddie row explosions.
+- **Rate limit on `/api/share/[token]`** (public, unauthenticated). Two-key throttle: `share-ip:<ip>` at 60/min stops enumeration of random tokens; `share-token:<token>` at 30/min caps view-count inflation and scraping by an attacker holding one valid link.
+- **Atomic `view_count` increment** — new `increment_scenario_view_count(uuid)` RPC (migration 077, `SECURITY DEFINER`, search_path pinned). The share route previously did `read view_count → update = X+1`, which silently loses writes under concurrent borrowers hitting a link at once. Single-statement `UPDATE … SET view_count = view_count + 1` is atomic.
+
+### Added
+- `supabase/migrations/077_scenarios_increment_view_count.sql` — RPC + `GRANT EXECUTE` to anon/authenticated/service_role.
+
+---
+
 ## [8.1.2] — 2026-04-05 — Security Hardening Sweep pt 3 (A-9, A-12)
 
 ### Security

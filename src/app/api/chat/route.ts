@@ -7,6 +7,7 @@ import { DEFAULT_SYSTEM_PROMPT } from '@/lib/defaultSystemPrompt'
 import { DEFAULT_OUTREACH_PROMPT } from '@/lib/defaultOutreachPrompt'
 import { getLoIdentity } from '@/lib/getLoIdentity'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
+import { listLendersForOrg, searchLendersByName } from '@/lib/chat/lenderQueries'
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages'
 
 type Attachment = {
@@ -116,42 +117,24 @@ async function queryNotebookLM(question: string): Promise<string> {
 }
 
 async function queryLenderDatabase(search: string, organizationId: string): Promise<string> {
-  const supabase = createServiceClient()
+  // All lender queries go through the tenant-scoped helper in
+  // `src/lib/chat/lenderQueries.ts`, which throws on missing orgId and
+  // enforces `.eq('organization_id', organizationId)` in one place. See A-9.
   const term = search.trim().toLowerCase()
 
-  // If searching for "all" or "list", return all lenders
   if (term === 'all' || term === 'list' || term === 'lenders') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
-      .from('lenders')
-      .select('name, channel, contacts, specialty_products, website, broker_id, notes')
-      .eq('organization_id', organizationId)
-      .order('name')
-    if (!data?.length) return 'No lenders found in the database.'
-    return JSON.stringify(data, null, 2)
+    const rows = await listLendersForOrg(organizationId)
+    if (!rows.length) return 'No lenders found in the database.'
+    return JSON.stringify(rows, null, 2)
   }
 
-  // Try name match first
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: nameMatch } = await (supabase as any)
-    .from('lenders')
-    .select('name, channel, contacts, specialty_products, website, broker_id, notes')
-    .eq('organization_id', organizationId)
-    .ilike('name', `%${term}%`)
+  const nameMatch = await searchLendersByName(organizationId, term)
+  if (nameMatch.length) return JSON.stringify(nameMatch, null, 2)
 
-  if (nameMatch?.length) return JSON.stringify(nameMatch, null, 2)
-
-  // Try specialty product match
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: allLenders } = await (supabase as any)
-    .from('lenders')
-    .select('name, channel, contacts, specialty_products, website, broker_id, notes')
-    .eq('organization_id', organizationId)
-    .order('name')
-
-  const productMatch = (allLenders ?? []).filter((l: Record<string, unknown>) =>
-    (l.specialty_products as string[])?.some((p: string) => p.toLowerCase().includes(term))
-    || (l.notes as string | null)?.toLowerCase().includes(term)
+  const allLenders = await listLendersForOrg(organizationId)
+  const productMatch = allLenders.filter((l) =>
+    l.specialty_products?.some((p) => p.toLowerCase().includes(term))
+    || l.notes?.toLowerCase().includes(term)
   )
 
   if (productMatch.length) return JSON.stringify(productMatch, null, 2)

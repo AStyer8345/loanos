@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 
 type OnboardingStep = 'arive' | 'import' | 'automations' | 'complete'
@@ -27,10 +27,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid step' }, { status: 400 })
     }
 
-    const service = createServiceClient()
+    // Use user-scoped client so RLS on org_settings applies as a defense-in-depth
+    // backstop. Policy requires role in ('owner','admin') which matches the
+    // onboarding actor (org owner completing their own setup).
+    const supabase = createClient()
     const column = STEP_COLUMN[step]
 
-    const { error } = await service
+    const { error } = await supabase
       .from('org_settings')
       .update({
         [column]: true,

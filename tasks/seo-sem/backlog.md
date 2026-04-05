@@ -75,18 +75,18 @@
 - [P4 — GSC BLOCKED] Check impressions on 6th blog post (How to Choose a Lender) — after April 10
 
 ## ADDED 2026-04-01 AM
-- [MEDIUM_RISK] Blog post: "How to Qualify for a Mortgage When Self-Employed in Austin TX" — large underserved keyword cluster, natural follow-on to the lender selection post
+- ~~[MEDIUM_RISK] Blog post: "How to Qualify for a Mortgage When Self-Employed in Austin TX"~~ ✅ DONE 2026-04-02 — blog/2026-04-02-self-employed-mortgage-austin-tx.html (written outside session, found in AM audit)
 - [LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms (after TCPA required — SMS opt-in is optional/separate per 2026 FCC rules, same pattern as /get-preapproved)
-- [LOW_RISK] Blog post CTA audit: verify all 12 blog posts link CTAs to /get-preapproved (not raw loan app URL)
+- ~~[LOW_RISK] Blog post CTA audit: verify all 12 blog posts link CTAs to /get-preapproved (not raw loan app URL)~~ ✅ DONE 2026-04-05 — all 17 posts pass; mslp.my1003app.com appears only in global nav "Apply Now" button (by design)
 
 ## ADDED 2026-04-01 — SEO AUDIT FINDINGS (source: April 2026 full-site audit)
 
 ### P1 — HIGH PRIORITY CONTENT GAPS
-- [MEDIUM_RISK] New page: Austin Condo Mortgage Guide — competitor Leaman Team owns this niche with 20+ named condo projects, zero condo content on our site. Dedicated landing page + building list.
-- [MEDIUM_RISK] New page: "How to Buy a House in Austin TX" — top-of-funnel pillar page (3,000+ words), step-by-step homebuying process. High informational demand keyword.
-- [MEDIUM_RISK] Monthly Austin Housing Market Report — recurring blog series with median prices, inventory, rate trends, Adam's market take. Fresh content signal + realtor sharing.
-- [LOW_RISK] Expand Non-QM page to cover bank statement loans, asset depletion (currently only DSCR). Keyword: "non-QM loan Texas"
-- [LOW_RISK] Add veteran-specific FAQ + eligibility detail to VA loan page. Keyword: "VA loan Austin Texas"
+- ~~[MEDIUM_RISK] New page: Austin Condo Mortgage Guide~~ ✅ DONE 2026-04-03 — blog/2026-04-03-condo-mortgage-austin-tx.html (written outside session, found in AM audit)
+- ~~[MEDIUM_RISK] New page: "How to Buy a House in Austin TX"~~ ✅ DONE 2026-04-03 — how-to-buy-a-house-in-austin-tx.html in sitemap (written outside session, QA clean: 51-char title, 132-char meta)
+- ~~[MEDIUM_RISK] Monthly Austin Housing Market Report — recurring blog series~~ ✅ DONE 2026-04-04 — blog/2026-04-04-austin-housing-market-report-april-2026.html (written outside session, found in AM audit)
+- ~~[LOW_RISK] Expand Non-QM page to cover bank statement loans, asset depletion (currently only DSCR)~~ ✅ DONE (pre-existing) — full bank statement + asset depletion section already in dscr-loan-austin-tx.html at #non-qm
+- ~~[LOW_RISK] Add veteran-specific FAQ + eligibility detail to VA loan page~~ ✅ DONE 2026-04-05 — added "What credit score do I need?" + "How do I get a COE?" to accordion + FAQPage schema; dateModified + sitemap lastmod updated
 
 ### P2 — MEDIUM PRIORITY CONTENT GAPS
 - [LOW_RISK] Mortgage glossary / terms resource page — internal linking opportunity for every loan page
@@ -95,8 +95,40 @@
 - [LOW_RISK] Add construction loan builder partner content + process walkthrough. Keyword: "construction loan Austin TX"
 
 ### P3 — ONGOING MAINTENANCE (from audit)
-- [LOW_RISK] blog.html noscript links — keep in sync when new posts are added (new agent rule needed)
-- [LOW_RISK] blog.html CollectionPage schema — keep in sync when new posts are added (new agent rule needed)
+- ~~[LOW_RISK] blog.html noscript links — keep in sync when new posts are added~~ ✅ VERIFIED 2026-04-05 — all 4 new April posts already in noscript block
+- ~~[LOW_RISK] blog.html CollectionPage schema — keep in sync when new posts are added~~ ✅ VERIFIED 2026-04-05 — all 4 new April posts already in schema (positions 1-4)
 - [LOW_RISK] City pages: add unique local data per city (median prices, school districts, commute times) to reduce duplicate content risk — do 2-3 cities per session
 - [P4 — GSC BLOCKED] Validate suburb page impressions — which are getting traffic vs. dead weight
 - [P4 — GSC BLOCKED] Keyword gap analysis — competitor keywords we're not targeting
+
+## ADDED 2026-04-05 AM
+
+- [P4 — GSC BLOCKED] April 5 GSC window reached — Adam needs to pull GSC export for first impression data on 9 blog posts published Mar 28–Apr 4
+- [LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms (carried forward from Apr 1)
+- [LOW_RISK] VA page: add IRRRL (VA streamline refinance) FAQ question — natural follow-on to COE and credit score additions
+- [LOW_RISK] QA check: how-to-buy-a-house-in-austin-tx.html — verify GTM, canonical, internal links (new pillar page, not yet fully audited)
+- [LOW_RISK] Mortgage document checklist blog post — high-intent keyword, easy to rank, supports all loan type pages
+
+---
+
+## 2026-04-05 — /loanos Landing Page (LoanOS stream dependency)
+
+**Priority:** HIGH — blocks first-run gate for LoanOS content stream
+**Spec reference:** `tasks/social-media/specs/2026-04-05-pillar-framework-v2.md` Section 9.2 + Section 13
+**Goal:** Build a long-form "What LoanOS is and why I built it" page on styermortgage.com
+
+**Deliverables:**
+1. New page at `styermortgage.com/loanos` (or `/ai`)
+2. Content: long-form explainer matching Adam's voice (consult `tasks/social-media/adam-voice-and-workflow.md`). Not a feature list. A story:
+   - Why Adam built it (the Jessica → Janie → Claude arc)
+   - What it does (dashboard, loans, contacts, automations — plain English)
+   - Who it's for (mostly "me", but hints at the waitlist)
+   - Call to action: waitlist signup (route to the form built in `tasks/lead-gen/domain-queue.md` entry)
+3. SEO metadata: title, description, schema
+4. Link from main nav OR footer (Adam decision)
+
+**Copy approval required from Adam before deploy.** Use Adam's voice guide strictly. Apply the Jessica Test — if any section sounds corporate, rewrite.
+
+**Template decision needed from Adam:** Does the page use the existing styermortgage.com template or get a custom layout?
+
+**Blocks:** LoanOS first-run gate in `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md` Task 14

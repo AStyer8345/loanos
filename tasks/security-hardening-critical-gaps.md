@@ -68,14 +68,10 @@ onboarding of additional LOs.
 - **Effort:** ~4-6 hours
 - **Blocker for:** first paying LO
 
-### 4. Admin-route authorization audit
-- **Risk:** Not every `/api/admin/*` route consistently calls `requireAdmin()`.
-  Missing a check → cross-tenant data leak via one forgotten endpoint.
-- **Fix:**
-  - Grep all files under `src/app/api/admin/` and verify each calls `requireAdmin()`
-  - Create a middleware matcher for `/api/admin/*` that enforces automatically
-  - Add a lint rule or test that fails if an admin route doesn't import `requireAdmin`
-- **Effort:** ~1 hour
+### 4. ~~Admin-route authorization audit~~ ✅ DONE (2026-04-05)
+- Audited all 5 existing `/api/admin/*` routes — every handler calls `requireAdmin()` on line 1. Clean.
+- Added middleware-level enforcement in `src/middleware.ts`: every `/api/admin/*` request hits a `system_admins` membership check via an inline service-role client before reaching the route. 401 if no session, 403 if not an admin. Defense-in-depth so a future dev forgetting `requireAdmin()` still can't leak.
+- **Still deferred:** lint rule / unit test that flags admin routes missing the import (nice-to-have).
 
 ---
 
@@ -141,6 +137,7 @@ Audit findings from `audits/SECURITY-AUDIT-2026-04-05.md` resolved:
 - **A-12 Onboarding step user-scoped** — `/api/onboarding/step` swapped from `createServiceClient()` to `createClient()`. RLS backstop applies.
 - **Rate limit web-lead + share** — `/api/contacts/web-lead` (30/min per IP) and `/api/share/[token]` (60/min per IP + 30/min per token) now throttled via `checkRateLimit`.
 - **Atomic scenarios view_count** — migration 077 adds `increment_scenario_view_count(uuid)` RPC (SECURITY DEFINER). Share route no longer does lossy read-then-write.
+- **Middleware admin gate** — `/api/admin/*` now enforced at `src/middleware.ts` via inline service-role `system_admins` lookup. All 5 existing admin handlers still call `requireAdmin()` on line 1 (verified) — middleware is the resilience floor for future routes.
 
 ---
 

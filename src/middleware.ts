@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createServiceRoleClient } from '@supabase/supabase-js'
 
 /**
  * Path prefixes that require the $197 professional tier.
@@ -60,6 +61,32 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // ── Admin route gate ──────────────────────────────────────────────────────
+  // Every /api/admin/* route must be hit by a system_admins member. The
+  // per-route `requireAdmin()` helper is the primary gate, but enforcing it
+  // in middleware means a future dev who forgets the helper can't leak
+  // cross-tenant data. `system_admins` has deny-all RLS, so we need the
+  // service role client to read it.
+  if (pathname.startsWith('/api/admin')) {
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const serviceClient = createServiceRoleClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    )
+    const { data: admin } = await serviceClient
+      .from('system_admins')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (!admin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    return response
+  }
 
   // For API routes gated by plan, we need both a session and a pro plan.
   // For agent-secret API routes, the per-route Bearer check still applies;

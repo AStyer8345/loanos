@@ -1,5 +1,12 @@
 # LoanOS Changelog
 
+## [8.1.4] — 2026-04-05 — Security Hardening Sweep pt 5 (middleware admin gate)
+
+### Security
+- **Middleware-level `/api/admin/*` enforcement** — `src/middleware.ts` now checks `system_admins` membership for every request matching `/api/admin/*`, via an inline service-role client (the table is deny-all RLS). Returns 401 if unauthenticated, 403 if not an admin. The per-route `requireAdmin()` helper is still called as the code-level gate; middleware is defense-in-depth so any future `/api/admin/foo` route added without the helper is still safe. Audited all 5 existing admin routes — every handler calls `requireAdmin()` on line 1, so this change introduces no behavior gap, only a resilience floor.
+
+---
+
 ## [8.1.3] — 2026-04-05 — Security Hardening Sweep pt 4 (rate limits + atomic view_count)
 
 ### Security

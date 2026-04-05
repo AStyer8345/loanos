@@ -60,6 +60,18 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening Sweep — 2026-04-05 (session 6)
+
+Closed Critical #4 (admin-route authorization audit) from the security tracker.
+
+**Landed:**
+- Audited all 5 routes under `src/app/api/admin/*` — every handler calls `requireAdmin()` on line 1. No gaps in the existing code.
+- Added middleware-level enforcement in `src/middleware.ts`: `/api/admin/*` now hits a `system_admins` lookup via an inline service-role client (the table is deny-all RLS, so can't use the user-cookie client). Returns 401 if no session, 403 if not a member. Per-route `requireAdmin()` stays as the code-level gate — middleware is the resilience floor so any future `/api/admin/foo/route.ts` added without the helper is still safe.
+
+**Tracker status:** All 4 "Critical — must ship before LO #2" items from `tasks/security-hardening-critical-gaps.md` are now done or scaffolded: #1 Arive webhook (Zapier middleman scaffolded, shadow mode), #2 rate limiting (web-lead + share), #3 PII masking in activity_log (deferred — medium session), #4 admin-route audit. Remaining gaps are medium/structural.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 5)
 
 Closed the last immediately-exploitable HIGH findings from the security tracker.

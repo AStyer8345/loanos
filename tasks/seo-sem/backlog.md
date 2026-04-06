@@ -104,10 +104,18 @@
 ## ADDED 2026-04-05 AM
 
 - [P4 — GSC BLOCKED] April 5 GSC window reached — Adam needs to pull GSC export for first impression data on 9 blog posts published Mar 28–Apr 4
-- [LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms (carried forward from Apr 1)
-- [LOW_RISK] VA page: add IRRRL (VA streamline refinance) FAQ question — natural follow-on to COE and credit score additions
-- [LOW_RISK] QA check: how-to-buy-a-house-in-austin-tx.html — verify GTM, canonical, internal links (new pillar page, not yet fully audited)
-- [LOW_RISK] Mortgage document checklist blog post — high-intent keyword, easy to rank, supports all loan type pages
+- ~~[LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms~~ ✅ DONE 2026-04-06 — commit 6fb8883, all 4 form variants handled (V1 22-space, V2 btn-full, V3 16-space, V4 18-space)
+- ~~[LOW_RISK] VA page: add IRRRL (VA streamline refinance) FAQ question~~ ✅ DONE 2026-04-06 — commit 6fb8883, added to accordion + FAQPage schema
+- ~~[LOW_RISK] QA check: how-to-buy-a-house-in-austin-tx.html~~ ✅ DONE 2026-04-06 — QA PASS: title 51 chars, meta 132 chars, GTM ✓, canonical ✓, strong internal links ✓
+- ~~[LOW_RISK] Mortgage document checklist blog post~~ ✅ DONE 2026-04-06 — commit 6fb8883, blog/2026-04-06-mortgage-document-checklist-austin-tx.html, FAQPage 6 questions, W-2/self-employed/VA/DSCR checklists, added to sitemap + manifest + blog.html
+
+## ADDED 2026-04-06 AM
+
+- [P4 — GSC BLOCKED] April 10 window: check first impression data on "How to Choose a Lender" post (published Apr 1)
+- [P4 — GSC BLOCKED] April 12 window: check first impression data on new doc checklist post (published Apr 6)
+- [LOW_RISK] City page enrichment: continue 2-3 cities per session — Georgetown ✅ and Taylor ✅ done this session; remaining: Bastrop, Bee Cave, Leander, Hutto, Manor, Smithville, Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
+- [LOW_RISK] Mortgage glossary page — internal linking anchor for every loan type page (P2 from April audit)
+- [LOW_RISK] Investment property ROI examples on DSCR page — keyword: "investment property loan Austin" (P2 from April audit)
 
 ---
 

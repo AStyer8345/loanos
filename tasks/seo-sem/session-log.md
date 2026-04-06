@@ -475,3 +475,106 @@ Priority 3: Blog CTA audit — 12 posts, verify all CTAs route to /get-preapprov
 
 Advance queue: YES
 ---
+---
+## Session: 2026-04-05 AM — SEO + SEM
+Focus: New blog QA batch + CTA audit + VA FAQ expansion
+Type: Execution (LOW_RISK QA fixes + content expansion)
+
+### Discovered — 5 new blog posts written outside session (Apr 1–4)
+- blog/2026-04-01-spring-market-update.html ✓ in sitemap + manifest + blog.html
+- blog/2026-04-01-test.html ✓ noindexed, in robots.txt Disallow
+- blog/2026-04-02-self-employed-mortgage-austin-tx.html ✓ in sitemap + manifest + blog.html
+- blog/2026-04-03-condo-mortgage-austin-tx.html ✓ in sitemap + manifest + blog.html
+- blog/2026-04-04-austin-housing-market-report-april-2026.html ✓ in sitemap + manifest + blog.html
+- how-to-buy-a-house-in-austin-tx.html ✓ in sitemap, QA clean (51-char title, 132-char meta, no noindex)
+- blog.html noscript + CollectionPage schema: already synced with all 4 new live posts ✓
+
+### Title/Meta QA Fixes (LOW_RISK)
+- spring-market-update.html: title 70→57 chars ("Austin Mortgage Market Update: Spring 2026 | NMLS #513013")
+- self-employed-mortgage-austin-tx.html: title 84→52 chars, meta 165→147 chars
+- austin-housing-market-report-april-2026.html: title 71→54 chars ("Austin Housing Market Report April 2026 | NMLS #513013")
+
+### Blog CTA Audit (LOW_RISK): PASS
+- All 17 live blog posts link to /get-preapproved ✓
+- mslp.my1003app.com appears only in global nav "Apply Now" button — by design, not a content CTA issue
+
+### VA Loan Page FAQ Expansion (LOW_RISK)
+- Added 2 new accordion FAQ items: "What credit score do I need for a VA loan in Austin TX?" + "How do I get a Certificate of Eligibility (COE) for a VA loan in Texas?"
+- Added matching questions to FAQPage JSON-LD schema (now 7 questions total)
+- Updated dateModified to 2026-04-05
+- Sitemap lastmod updated to 2026-04-05
+
+### Non-QM Expansion
+- Pre-existing: bank statement + asset depletion section already in dscr-loan-austin-tx.html at #non-qm — backlog item closed as already done
+
+### GSC Note
+- April 5 window reached — Adam needs to pull GSC export for impression data on 9 blog posts published Mar 28–Apr 4
+- Cannot query GSC directly — requires Adam to share export or grant access
+
+### Git commit: [pending — see push step]
+
+### Deferred
+- SMS opt-in checkbox on 24 suburb forms (next LOW_RISK session item)
+- City page enrichment: add local data to 2-3 suburb pages
+- Full QA audit of how-to-buy-a-house-in-austin-tx.html (internal links, schema)
+
+### Next Session Instructions
+Priority 1: Adam to pull GSC export (April 5 window) — share data for blog impression analysis
+Priority 2: SMS opt-in checkbox on 24 suburb forms (LOW_RISK batch)
+Priority 3: how-to-buy-a-house-in-austin-tx.html full QA + internal link audit
+Priority 4: Mortgage document checklist blog post (LOW_RISK new content)
+
+Advance queue: YES
+---
+---
+## Session: 2026-04-06 AM — SEO + SEM
+Focus: LOW_RISK batch execution — SMS opt-in, doc checklist blog, VA IRRRL, city enrichment
+Type: Execution
+
+### Completed
+
+**SMS opt-in on all 24 suburb hero forms (LOW_RISK):**
+- Added optional `sms_opt_in` checkbox below TCPA required checkbox on all 24 suburb pages
+- Discovered 4 form variants (not 3 as previously documented): V1=22-space (14 pages), V2=btn-full (buda+westlake), V3=16-space (6 pages), V4=18-space (kyle+san-marcos)
+- All 24 confirmed via grep — zero errors
+- Consistent copy: "Yes, I also consent to receive automated text messages from Adam Styer at the number I provided. This is separate and optional. Message frequency varies. Reply STOP to cancel."
+
+**how-to-buy-a-house-in-austin-tx.html QA (LOW_RISK):**
+- QA PASS: title 51 chars ✓, meta 132 chars ✓, GTM 2x ✓, canonical .html ✓, no noindex ✓
+- Strong internal links to 15+ pages confirmed — no fixes needed
+
+**New blog post (MEDIUM_RISK):**
+- Created: blog/2026-04-06-mortgage-document-checklist-austin-tx.html
+- Title: "Mortgage Document Checklist Austin TX | NMLS #513013" (52 chars ✓)
+- Meta: "What documents do you need for a mortgage in Austin TX? W-2s, tax returns, bank statements, and more — organized by loan type. NMLS #513013." (142 chars ✓)
+- H1: "Mortgage Document Checklist Austin TX 2026"
+- Content: W-2 checklist, self-employed additions, VA additions, FHA notes, DSCR/conventional investment table, "5 things that slow down every closing", quick-start guide
+- Schema: Article + FAQPage (6 questions) + BreadcrumbList
+- Internal links: /get-preapproved, pre-approval blog, self-employed blog, VA eligibility blog, FHA vs conventional blog, how-to-buy pillar page
+- Added to sitemap.xml (lastmod 2026-04-06), manifest.json (first position), blog.html noscript + CollectionPage schema (positions shifted +1)
+
+**VA page IRRRL FAQ (LOW_RISK):**
+- Added "What is the VA IRRRL (VA Streamline Refinance)?" to accordion + FAQPage schema
+- Now 8 total FAQ questions on VA page
+- dateModified + sitemap lastmod updated to 2026-04-06
+
+**City page enrichment — 2 cities (LOW_RISK):**
+- Georgetown: added commute times (~35-45 min Austin, ~20 min Round Rock), school campuses (Georgetown High + East View High), neighborhood price ranges by community
+- Taylor: added commute times (~15 min Samsung, ~45-55 min Austin via SH-130), Taylor ISD context, SH-130 bypass commuter note
+
+**Git commit:** 6fb8883 — 30 files changed, 793 insertions, pushed to GitHub
+
+### Deferred
+- GSC data: Adam needs to pull export — April 5 window reached for 9 blog posts
+- /loanos landing page: requires Adam copy approval + template decision before deploy
+- City enrichment: 15 suburb pages remaining — continue 2-3 per session
+- Mortgage glossary page: P2 content gap, carry forward
+
+### Next Session Instructions
+Priority 1: Adam to pull GSC export (April 5 window) — critical for impression data on 9+ blog posts
+Priority 2: City page enrichment — 2-3 more suburbs (start with Leander, Hutto, Bastrop)
+Priority 3: Mortgage glossary page — high internal linking value across all loan type pages
+Priority 4: Investment property ROI examples on DSCR page
+
+Advance queue: YES
+---

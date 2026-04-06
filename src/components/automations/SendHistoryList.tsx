@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { relativeTime } from './AutomationRow'
 
 const GOLD = '#C9A84C'
@@ -82,18 +81,15 @@ export default function SendHistoryList({ automationName }: SendHistoryListProps
     setError(null)
 
     try {
-      const supabase = createClient()
-      const { data, error: supabaseError } = await supabase
-        .from('activity_log')
-        .select('*')
-        .eq('type', 'email_sent')
-        .ilike('action', `%${automationName}%`)
-        .order('created_at', { ascending: false })
-        .range(currentOffset, currentOffset + LIMIT - 1)
-
-      if (supabaseError) throw new Error(supabaseError.message)
-
-      const rows = (data ?? []) as unknown as ActivityLogRow[]
+      const params = new URLSearchParams({
+        type: 'email_sent',
+        action: `%${automationName}%`,
+        limit: String(LIMIT),
+        offset: String(currentOffset),
+      })
+      const res = await fetch(`/api/activity?${params}`)
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+      const rows = (await res.json()) as ActivityLogRow[]
       setEntries(prev => append ? [...prev, ...rows] : rows)
       setHasMore(rows.length === LIMIT)
       setOffset(currentOffset + rows.length)

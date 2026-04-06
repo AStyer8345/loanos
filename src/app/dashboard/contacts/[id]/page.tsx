@@ -107,15 +107,11 @@ export default function ContactRecordPage() {
   }, [id, supabase])
 
   const fetchActivity = useCallback(async () => {
-    // 1. Activity directly linked to this contact
-    const { data: contactRows } = await supabase
-      .from('activity_log')
-      .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id, loan_id')
-      .eq('contact_id', id)
-      .order('created_at', { ascending: false })
-      .limit(200)
+    // 1. Activity directly linked to this contact (via server-side PII decryption)
+    const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id`)
+    const contactRows: ActivityEntry[] = contactRes.ok ? await contactRes.json() : []
 
-    const merged: ActivityEntry[] = (contactRows ?? []) as ActivityEntry[]
+    const merged: ActivityEntry[] = contactRows
     const seen = new Set(merged.map(r => r.id))
 
     // 2. Activity from loans linked to this contact
@@ -126,14 +122,10 @@ export default function ContactRecordPage() {
 
     if (linkedLoans && linkedLoans.length > 0) {
       const loanIds = linkedLoans.map((l: { id: string }) => l.id)
-      const { data: loanRows } = await supabase
-        .from('activity_log')
-        .select('id, created_at, action, entity_type, metadata, type, summary, raw_payload, external_id, loan_id')
-        .in('loan_id', loanIds)
-        .order('created_at', { ascending: false })
-        .limit(200)
+      const loanRes = await fetch(`/api/activity?loan_id=${loanIds.join(',')}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id`)
+      const loanRows: ActivityEntry[] = loanRes.ok ? await loanRes.json() : []
 
-      for (const row of (loanRows ?? []) as ActivityEntry[]) {
+      for (const row of loanRows) {
         if (seen.has(row.id)) continue
         const loan = linkedLoans.find((l: { id: string }) => l.id === row.loan_id)
         const label = (loan as { loan_name?: string | null } | undefined)?.loan_name

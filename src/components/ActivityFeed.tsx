@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 const LS_KEY = 'loanos_activity_last_read'
 
@@ -74,7 +73,6 @@ function navTarget(entry: ActivityEntry): string | null {
 }
 
 export default function ActivityFeed() {
-  const supabase = createClient()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [entries, setEntries] = useState<ActivityEntry[]>([])
@@ -89,14 +87,14 @@ export default function ActivityFeed() {
 
   const fetchEntries = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('activity_log')
-      .select('id, created_at, action, entity_type, metadata, summary, contact_id, loan_id, contacts(first_name, last_name), loans(loan_name)')
-      .order('created_at', { ascending: false })
-      .limit(50)
-    setEntries((data ?? []) as ActivityEntry[])
+    try {
+      const res = await fetch('/api/activity?limit=50&include_joins=contacts,loans')
+      if (res.ok) {
+        setEntries(await res.json())
+      }
+    } catch { /* ignore fetch errors */ }
     setLoading(false)
-  }, [supabase])
+  }, [])
 
   // Fetch on mount so badge is populated immediately
   useEffect(() => { fetchEntries() }, [fetchEntries])

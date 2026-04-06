@@ -416,10 +416,10 @@ export default function LoanDetailPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const [loanRes, docsRes, actRes, draftsRes, contactEmailsRes] = await Promise.all([
+    const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
-      supabase.from('activity_log').select('id, created_at, action, type, summary, entity_type, metadata').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(50),
+      fetch(`/api/activity?loan_id=${loanId}&limit=50&columns=id,created_at,action,type,summary,entity_type,metadata`).then(r => r.ok ? r.json() : []),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
       supabase.from('contact_emails').select('id, subject, body_html, body_text, automation_source, sent_at, created_at').eq('loan_id', loanId).order('sent_at', { ascending: false }).limit(100),
     ])
@@ -428,30 +428,20 @@ export default function LoanDetailPage() {
       setLoan(loanRes.data as unknown as Loan)
       const contactId = loanRes.data.contact_id
       if (contactId) {
-        const [{ data: c }, { data: inbound }] = await Promise.all([
+        const [{ data: c }, inbound] = await Promise.all([
           supabase.from('contacts').select('id, first_name, last_name, email, phone, referred_by').eq('id', contactId).single(),
-          supabase.from('activity_log')
-            .select('id, subject, from_address, body_snippet, occurred_at, created_at, metadata, contact_id, loan_id')
-            .eq('type', 'email_inbound')
-            .or(`loan_id.eq.${loanId},contact_id.eq.${contactId}`)
-            .order('occurred_at', { ascending: false })
-            .limit(100),
+          fetch(`/api/activity?type=email_inbound&or_filter=loan_id.eq.${loanId},contact_id.eq.${contactId}&order=occurred_at&limit=100&columns=id,subject,from_address,body_snippet,occurred_at,created_at,metadata,contact_id,loan_id`).then(r => r.ok ? r.json() : []),
         ])
         setContact(c)
         setInboundEmails((inbound || []) as InboundEmailRow[])
       } else {
-        const { data: inbound } = await supabase.from('activity_log')
-          .select('id, subject, from_address, body_snippet, occurred_at, created_at, metadata, contact_id, loan_id')
-          .eq('type', 'email_inbound')
-          .eq('loan_id', loanId)
-          .order('occurred_at', { ascending: false })
-          .limit(100)
+        const inbound = await fetch(`/api/activity?type=email_inbound&loan_id=${loanId}&order=occurred_at&limit=100&columns=id,subject,from_address,body_snippet,occurred_at,created_at,metadata,contact_id,loan_id`).then(r => r.ok ? r.json() : [])
         setInboundEmails((inbound || []) as InboundEmailRow[])
       }
 
     }
     setDocs(docsRes.data || [])
-    setActivity((actRes.data || []) as ActivityRow[])
+    setActivity((activityRows || []) as ActivityRow[])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)

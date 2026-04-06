@@ -102,6 +102,30 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 ---
 
+## PII Encryption Phase 2 — Server-Side Read Path — 2026-04-05 (session 11)
+
+Completed Phase 2 of tracker #3 (PII masking in `activity_log`). All client-side reads of activity_log now go through a server-side endpoint that decrypts PII from the encrypted companion table.
+
+**Architecture:**
+- `GET /api/activity` — flexible server-side endpoint accepting query params (contact_id, loan_id, type, action, unmatched, or_filter, not_action, order, limit, offset, columns, include_joins). Joins `activity_log_pii`, decrypts server-side via `decryptActivityPii()`, flattens PII fields back into rows so clients see the same shape as before.
+- Client components switched from `supabase.from('activity_log')` to `fetch('/api/activity?...')`.
+- Admin tenant detail route (already server-side) modified to join + decrypt directly.
+
+**Files changed:**
+- MOD `src/app/api/activity/route.ts` — added GET handler with PII decryption
+- MOD `src/components/ActivityFeed.tsx` — fetch('/api/activity?...'), removed supabase client
+- MOD `src/components/automations/SendHistoryList.tsx` — fetch('/api/activity?...')
+- MOD `src/app/dashboard/contacts/[id]/page.tsx` — two activity queries → fetch
+- MOD `src/app/dashboard/loans/[id]/page.tsx` — three activity queries → fetch
+- MOD `src/app/dashboard/emails/unmatched/page.tsx` — fetchEmails → fetch
+- MOD `src/app/api/admin/tenants/[id]/route.ts` — join + decrypt server-side
+
+**Not changed (no PII read):** Dashboard page (only reads action, loan_id, occurred_at), admin tenants list (only reads org_id, created_at), email link route (only does UPDATEs).
+
+**Tracker status:** 🔴 Critical #3 Phase 2 DONE. Remaining: Phase 3 (backfill 1,089 rows), Phase 4 (DROP plaintext columns). 🟡 Medium: #5, #9, #10 open.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 9)
 
 Closed tracker item #7 (secret rotation runbook) + added Security Posture section to the system knowledge base.

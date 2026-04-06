@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin/auth'
+import { decryptActivityPii } from '@/lib/activity/pii'
 
 export async function GET(
   _req: Request,
@@ -29,13 +30,17 @@ export async function GET(
     .eq('organization_id', orgId)
     .order('created_at')
 
-  // Get recent activity (last 20)
-  const { data: activity } = await serviceClient!
+  // Get recent activity (last 20) with PII decryption
+  const { data: activityRaw } = await serviceClient!
     .from('activity_log')
-    .select('id, action, entity_type, entity_id, summary, created_at')
+    .select('id, action, entity_type, entity_id, summary, created_at, activity_log_pii(pii_ciphertext, pii_iv, pii_tag, key_version)')
     .eq('organization_id', orgId)
     .order('created_at', { ascending: false })
     .limit(20)
+  const activity = decryptActivityPii((activityRaw ?? []) as Record<string, unknown>[]).map(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ({ pii, activity_log_pii, ...rest }) => ({ ...rest, summary: pii?.summary ?? rest.summary })
+  )
 
   // Get loan count
   const { count: loanCount } = await serviceClient!

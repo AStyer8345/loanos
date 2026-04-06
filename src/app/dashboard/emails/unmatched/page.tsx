@@ -115,21 +115,15 @@ export default function UnmatchedEmailsPage() {
 
   const fetchEmails = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('activity_log')
-      .select('id, from_address, subject, body_snippet, occurred_at, created_at, metadata')
-      .eq('type', 'email_inbound')
-      .is('contact_id', null)
-      .is('loan_id', null)
-      .not('dismissed', 'eq', true)
-      .order('occurred_at', { ascending: false })
-      .limit(200)
-    const rows = (data ?? []) as UnmatchedEmail[]
-    setEmails(rows)
+    try {
+      const res = await fetch('/api/activity?type=email_inbound&unmatched=true&order=occurred_at&limit=200&columns=id,from_address,subject,body_snippet,occurred_at,created_at,metadata')
+      const rows = res.ok ? ((await res.json()) as UnmatchedEmail[]) : []
+      setEmails(rows)
+      // Run auto-matching in background after load
+      runAutoMatch(rows)
+    } catch { /* ignore */ }
     setLoading(false)
-    // Run auto-matching in background after load
-    runAutoMatch(rows)
-  }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Terminal loan statuses — exclude from auto-match suggestions
   const TERMINAL = '("Closed","Cancelled","Denied","Withdrawn","Funded","LOAN_FUNDED")'

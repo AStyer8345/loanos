@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## [8.1.9] — 2026-04-05 — PII Encryption Phase 2: Server-Side Read Path
+
+### Added
+- **`GET /api/activity`** — flexible server-side read endpoint with PII decryption. Accepts query params for filtering (contact_id, loan_id, type, action, unmatched, or_filter, not_action), pagination (limit, offset), column selection, and FK joins (contacts, loans). Decrypts from `activity_log_pii` companion table and flattens PII fields back into rows.
+
+### Changed
+- 6 client-side activity_log read sites converted from direct Supabase queries to `fetch('/api/activity?...')`:
+  - `src/components/ActivityFeed.tsx` (bell notification panel)
+  - `src/components/automations/SendHistoryList.tsx` (automation send history)
+  - `src/app/dashboard/contacts/[id]/page.tsx` (contact detail activity)
+  - `src/app/dashboard/loans/[id]/page.tsx` (loan activity + inbound emails)
+  - `src/app/dashboard/emails/unmatched/page.tsx` (unmatched emails)
+- `src/app/api/admin/tenants/[id]/route.ts` — now joins `activity_log_pii` and decrypts server-side.
+
 ## [8.1.8] — 2026-04-05 — PII Encryption Phase 1 + Billing Page
 
 ### Added

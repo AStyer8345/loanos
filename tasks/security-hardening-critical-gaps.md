@@ -68,11 +68,20 @@ onboarding of additional LOs.
     contacts/quick-add, contacts/web-lead, processWebhook.ts (Arive)
   - `scripts/backfill-activity-pii.ts` — re-runnable backfill for existing rows
   - Encryption key in `PII_ENCRYPTION_KEY` env var (Vercel), never in DB
-- **Remaining phases (next sessions):**
-  - Phase 2: Server-side `/api/activity/feed` read endpoint + update read sites
+- **Phase 2 DONE (2026-04-05):** Server-side `GET /api/activity` read endpoint
+  with PII decryption. All 6 client-side read sites converted from direct
+  `supabase.from('activity_log')` to `fetch('/api/activity?...')`:
+  - `ActivityFeed.tsx` (bell notification panel)
+  - `SendHistoryList.tsx` (automation send history)
+  - `contacts/[id]/page.tsx` (contact detail — two queries: by contact + by linked loans)
+  - `loans/[id]/page.tsx` (loan detail — activity + inbound emails, 3 queries)
+  - `emails/unmatched/page.tsx` (unmatched inbound emails)
+  - `admin/tenants/[id]/route.ts` (server-side — joins + decrypts directly)
+  - Dashboard page NOT changed (only reads non-PII: action, loan_id, occurred_at)
+- **Remaining phases:**
   - Phase 3: Run backfill script against production (1,089 rows)
   - Phase 4: Migration 080 — DROP plaintext columns from activity_log
-- **Effort:** Phase 1 complete. ~2 hours for remaining phases.
+- **Effort:** Phase 1-2 complete. ~1 hour for remaining phases.
 
 ### 4. ~~Admin-route authorization audit~~ ✅ DONE (2026-04-05)
 - Audited all 5 existing `/api/admin/*` routes — every handler calls `requireAdmin()` on line 1. Clean.

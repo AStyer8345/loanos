@@ -181,7 +181,7 @@ Today's date: ${todayStr}`
   const [loansRes, contactsRes] = await Promise.all([
     supabase
       .from('loans')
-      .select('loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date, property_city, property_state, loan_type')
+      .select('loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date, property_city, property_state, loan_type, rate_lock_expiration, milestone')
       .eq('organization_id', organizationId)
       .not('status', 'in', '("Closed","Funded","Cancelled","Withdrawn")')
       .order('closing_date', { ascending: true })
@@ -214,7 +214,8 @@ Today's date: ${todayStr}`
       const location = [l.property_city, l.property_state].filter(Boolean).join(', ')
       const close = l.closing_date || l.estimated_closing_date
       const amount = l.loan_amount ? `$${Number(l.loan_amount).toLocaleString()}` : null
-      const parts = [l.status, l.loan_type, location, amount, close ? `closes ${close}` : null].filter(Boolean)
+      const lockExp = l.rate_lock_expiration ? `lock expires ${l.rate_lock_expiration}` : null
+      const parts = [l.status, l.loan_type, location, amount, close ? `closes ${close}` : null, l.milestone, lockExp].filter(Boolean)
       return `  - ${name}${parts.length ? ` — ${parts.join(', ')}` : ''}`
     })
     prompt += '\n' + loanLines.join('\n')
@@ -230,7 +231,7 @@ Today's date: ${todayStr}`
         notes, closing_date,
         realtor_email, realtor_phone,
         mailing_street, mailing_city, mailing_state, mailing_zip,
-        group_tag
+        group_tag, last_activity_date, last_outreach_date
       `)
       .eq('id', recordId)
       .eq('organization_id', organizationId)
@@ -239,7 +240,7 @@ Today's date: ${todayStr}`
     if (data) {
       const { data: loanRows } = await supabase
         .from('loans')
-        .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name')
+        .select('loan_amount, property_address, property_city, property_state, status, loan_type, loan_program, interest_rate, closing_date, estimated_closing_date, sales_price, buyer_agent_name, rate_lock_date, rate_lock_expiration, lock_status, milestone')
         .eq('contact_id', recordId)
         .eq('organization_id', organizationId)
         .limit(1)
@@ -249,10 +250,10 @@ Today's date: ${todayStr}`
       const mailingParts = [data.mailing_street, data.mailing_city, data.mailing_state, data.mailing_zip].filter(Boolean)
       const mailingAddress = mailingParts.length ? mailingParts.join(', ') : null
 
-      prompt += `\n\n## Active Contact Record\n- Name: ${fullName || 'N/A'}\n- Email: ${data.email || 'N/A'}\n- Phone: ${data.phone || 'N/A'}\n- Type: ${data.contact_type || 'N/A'}\n- Stage: ${data.stage || 'N/A'}\n- Group: ${data.group_tag || 'N/A'}\n- Source: ${data.source || 'N/A'}\n- Mailing Address: ${mailingAddress || 'N/A'}\n- Closing Date: ${data.closing_date || 'N/A'}\n- Realtor Email: ${data.realtor_email || 'N/A'}\n- Realtor Phone: ${data.realtor_phone || 'N/A'}\n- Notes: ${data.notes || 'None'}`
+      prompt += `\n\n## Active Contact Record\n- Name: ${fullName || 'N/A'}\n- Email: ${data.email || 'N/A'}\n- Phone: ${data.phone || 'N/A'}\n- Type: ${data.contact_type || 'N/A'}\n- Stage: ${data.stage || 'N/A'}\n- Group: ${data.group_tag || 'N/A'}\n- Source: ${data.source || 'N/A'}\n- Mailing Address: ${mailingAddress || 'N/A'}\n- Closing Date: ${data.closing_date || 'N/A'}\n- Last Activity: ${data.last_activity_date || 'N/A'}\n- Last Outreach: ${data.last_outreach_date || 'N/A'}\n- Realtor Email: ${data.realtor_email || 'N/A'}\n- Realtor Phone: ${data.realtor_phone || 'N/A'}\n- Notes: ${data.notes || 'None'}`
 
       if (loan) {
-        prompt += `\n\n## Associated Loan\n- Amount: ${loan.loan_amount ? `$${Number(loan.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${loan.sales_price ? `$${Number(loan.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${loan.interest_rate ? `${loan.interest_rate}%` : 'N/A'}\n- Property: ${[loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || 'N/A'}\n- Type: ${loan.loan_type || 'N/A'}\n- Program: ${loan.loan_program || 'N/A'}\n- Status: ${loan.status || 'N/A'}\n- Close Date: ${loan.closing_date || loan.estimated_closing_date || 'N/A'}\n- Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}`
+        prompt += `\n\n## Associated Loan\n- Amount: ${loan.loan_amount ? `$${Number(loan.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${loan.sales_price ? `$${Number(loan.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${loan.interest_rate ? `${loan.interest_rate}%` : 'N/A'}\n- Rate Lock: ${loan.rate_lock_date || 'Not locked'}${loan.rate_lock_expiration ? ` → expires ${loan.rate_lock_expiration}` : ''}\n- Lock Status: ${loan.lock_status || 'N/A'}\n- Milestone: ${loan.milestone || 'N/A'}\n- Property: ${[loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', ') || 'N/A'}\n- Type: ${loan.loan_type || 'N/A'}\n- Program: ${loan.loan_program || 'N/A'}\n- Status: ${loan.status || 'N/A'}\n- Close Date: ${loan.closing_date || loan.estimated_closing_date || 'N/A'}\n- Buyer's Agent: ${loan.buyer_agent_name || 'N/A'}`
       }
     }
   }
@@ -269,7 +270,8 @@ Today's date: ${todayStr}`
         listing_agent_name, listing_agent_email,
         title_company, county, seller_concessions,
         down_payment_pct, estimated_ltv, effective_date,
-        borrower_name, borrower_first_name, borrower_last_name
+        borrower_name, borrower_first_name, borrower_last_name,
+        rate_lock_date, rate_lock_expiration, rate_lock_days, lock_status, milestone
       `)
       .eq('id', recordId)
       .eq('organization_id', organizationId)
@@ -294,7 +296,16 @@ Today's date: ${todayStr}`
       const propertyFull = [data.property_address, data.property_city, data.property_state].filter(Boolean).join(', ')
       const closeDate = data.closing_date || data.estimated_closing_date
 
-      prompt += `\n\n## Active Loan Record\n- Loan Name: ${data.loan_name || 'N/A'}\n- Loan Number: ${data.loan_number || 'N/A'}\n- Borrower: ${borrowerName}\n- Borrower Email: ${contact?.email || 'N/A'}\n- Borrower Phone: ${contact?.phone || 'N/A'}\n- Loan Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${data.sales_price ? `$${Number(data.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${data.interest_rate ? `${data.interest_rate}%` : 'N/A'}\n- Down Payment: ${data.down_payment_pct ? `${data.down_payment_pct}%` : 'N/A'}\n- LTV: ${data.estimated_ltv ? `${data.estimated_ltv}%` : 'N/A'}\n- Seller Concessions: ${data.seller_concessions ? `$${Number(data.seller_concessions).toLocaleString()}` : 'N/A'}\n- Type: ${data.loan_type || 'N/A'}\n- Program: ${data.loan_program || 'N/A'}\n- Purpose: ${data.loan_purpose || 'N/A'}\n- Occupancy: ${data.occupancy || 'N/A'}\n- Property: ${propertyFull || 'N/A'}\n- County: ${data.county || 'N/A'}\n- Status: ${data.status || 'N/A'}\n- Close Date: ${closeDate || 'N/A'}\n- Effective Date: ${data.effective_date || 'N/A'}\n- Title Company: ${data.title_company || 'N/A'}\n- Buyer's Agent: ${data.buyer_agent_name || 'N/A'}${data.buyer_agent_email ? ` (${data.buyer_agent_email})` : ''}${data.buyer_agent_brokerage ? ` — ${data.buyer_agent_brokerage}` : ''}\n- Listing Agent: ${data.listing_agent_name || 'N/A'}${data.listing_agent_email ? ` (${data.listing_agent_email})` : ''}`
+      // Calculate days until lock expires
+      let lockUrgency = ''
+      if (data.rate_lock_expiration) {
+        const daysLeft = Math.ceil((new Date(data.rate_lock_expiration).getTime() - Date.now()) / 86400000)
+        if (daysLeft < 0) lockUrgency = ' ⚠️ EXPIRED'
+        else if (daysLeft <= 3) lockUrgency = ` ⚠️ EXPIRES IN ${daysLeft} DAY${daysLeft === 1 ? '' : 'S'}`
+        else if (daysLeft <= 7) lockUrgency = ` (${daysLeft} days left)`
+      }
+
+      prompt += `\n\n## Active Loan Record\n- Loan Name: ${data.loan_name || 'N/A'}\n- Loan Number: ${data.loan_number || 'N/A'}\n- Borrower: ${borrowerName}\n- Borrower Email: ${contact?.email || 'N/A'}\n- Borrower Phone: ${contact?.phone || 'N/A'}\n- Loan Amount: ${data.loan_amount ? `$${Number(data.loan_amount).toLocaleString()}` : 'N/A'}\n- Purchase Price: ${data.sales_price ? `$${Number(data.sales_price).toLocaleString()}` : 'N/A'}\n- Interest Rate: ${data.interest_rate ? `${data.interest_rate}%` : 'N/A'}\n- Rate Lock Date: ${data.rate_lock_date || 'N/A'}\n- Rate Lock Expiration: ${data.rate_lock_expiration || 'Not locked'}${lockUrgency}\n- Lock Period: ${data.rate_lock_days ? `${data.rate_lock_days} days` : 'N/A'}\n- Lock Status: ${data.lock_status || 'N/A'}\n- Milestone: ${data.milestone || 'N/A'}\n- Down Payment: ${data.down_payment_pct ? `${data.down_payment_pct}%` : 'N/A'}\n- LTV: ${data.estimated_ltv ? `${data.estimated_ltv}%` : 'N/A'}\n- Seller Concessions: ${data.seller_concessions ? `$${Number(data.seller_concessions).toLocaleString()}` : 'N/A'}\n- Type: ${data.loan_type || 'N/A'}\n- Program: ${data.loan_program || 'N/A'}\n- Purpose: ${data.loan_purpose || 'N/A'}\n- Occupancy: ${data.occupancy || 'N/A'}\n- Property: ${propertyFull || 'N/A'}\n- County: ${data.county || 'N/A'}\n- Status: ${data.status || 'N/A'}\n- Close Date: ${closeDate || 'N/A'}\n- Effective Date: ${data.effective_date || 'N/A'}\n- Title Company: ${data.title_company || 'N/A'}\n- Buyer's Agent: ${data.buyer_agent_name || 'N/A'}${data.buyer_agent_email ? ` (${data.buyer_agent_email})` : ''}${data.buyer_agent_brokerage ? ` — ${data.buyer_agent_brokerage}` : ''}\n- Listing Agent: ${data.listing_agent_name || 'N/A'}${data.listing_agent_email ? ` (${data.listing_agent_email})` : ''}`
     }
   }
 

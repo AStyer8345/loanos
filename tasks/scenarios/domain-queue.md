@@ -62,7 +62,17 @@ KNOWN GAPS (start here):
 ### Tier 3 — Workflow integration
 - ~~**Email from builder**: Send scenario link directly to borrower from the scenarios tab~~ ✅ DONE 2026-03-30 AM
 - ~~**ARM vs fixed**: 5/1 ARM initial savings vs long-term risk~~ ✅ DONE 2026-04-02 AM
-- **Total cost of waiting**: What does waiting 6 months cost at today's rates?
+- ~~**Total cost of waiting**: What does waiting 6 months cost at today's rates?~~ ✅ DONE 2026-04-03 AM
+- ~~**Refi timing**: Should I refi now or wait? Break-even + rate threshold~~ ✅ DONE 2026-04-05 AM
+- ~~**Equity build curve chart**: Loan balance vs equity on share page~~ ✅ DONE 2026-04-03 (Share Page Redesign)
+- ~~**Engagement tracking**: view_count badge in ActionsBar with live 30s poll~~ ✅ DONE 2026-04-06 AM
+
+---
+
+## Tier 4 — Polish + Emotional Impact (next focus)
+- **Mobile share page audit** — test at 390px viewport; fix any layout issues (70%+ of borrowers on phones)
+- **"Best option" highlight (no recommendation)** — visually guide borrowers to the recommended scenario without compliance violation; use "Most Popular" or "Commonly Chosen" framing
+- **Share page: video/loom embed placeholder** — Adam records a 60-second walkthrough; embed above the options on the share page
 
 ---
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Download, Link2, Save, Mail, CheckCircle, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Download, Link2, Save, Mail, CheckCircle, X, Eye } from 'lucide-react'
 import type {
   ScenarioMode, PurchaseScenarioInput,
   RefiScenarioInput, CurrentLoanInput, ReinvestmentResult,
@@ -38,6 +38,37 @@ export default function ActionsBar({
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [viewCount, setViewCount] = useState<number | null>(null)
+  const [viewCountJustIncreased, setViewCountJustIncreased] = useState(false)
+  const prevViewCount = useRef<number | null>(null)
+
+  // Poll view_count every 30 seconds after save so Adam sees when borrower opens the link
+  useEffect(() => {
+    if (!scenarioId) return
+
+    const fetchViewCount = async () => {
+      try {
+        const res = await fetch(`/api/scenarios/views?id=${scenarioId}`)
+        if (!res.ok) return
+        const data = await res.json() as { view_count: number }
+        const newCount = data.view_count ?? 0
+        setViewCount(prev => {
+          if (prev !== null && newCount > prev) {
+            setViewCountJustIncreased(true)
+            setTimeout(() => setViewCountJustIncreased(false), 3000)
+          }
+          return newCount
+        })
+        prevViewCount.current = newCount
+      } catch {
+        // Silently ignore — view count is non-critical
+      }
+    }
+
+    fetchViewCount()
+    const interval = setInterval(fetchViewCount, 30_000)
+    return () => clearInterval(interval)
+  }, [scenarioId])
 
   // Returns { id, share_token } so callers can use it immediately (avoids React state race)
   const save = async (): Promise<{ id: string; share_token: string } | null> => {
@@ -234,6 +265,30 @@ export default function ActionsBar({
           <p className="mt-2 text-[10px]" style={{ color: 'var(--sc-muted)' }}>
             Creates an Outlook draft in your inbox — review and send from there.
           </p>
+        </div>
+      )}
+
+      {viewCount !== null && (
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-500"
+            style={{
+              border: `1px solid ${viewCountJustIncreased ? '#C9A84C' : 'var(--sc-border)'}`,
+              color: viewCountJustIncreased ? '#C9A84C' : viewCount > 0 ? '#C9A84C' : 'var(--sc-muted)',
+              background: viewCountJustIncreased ? 'rgba(201,168,76,0.1)' : 'transparent',
+              fontFamily: "'IBM Plex Mono', monospace",
+            }}
+          >
+            <Eye size={12} />
+            {viewCount === 0
+              ? 'Not yet viewed'
+              : viewCount === 1
+                ? '1 view'
+                : `${viewCount} views`}
+            {viewCountJustIncreased && (
+              <span style={{ color: '#C9A84C', marginLeft: 4 }}>↑ Borrower just opened it!</span>
+            )}
+          </div>
         </div>
       )}
 

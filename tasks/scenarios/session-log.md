@@ -320,3 +320,37 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Tier 3 item 3 (Total cost of waiting) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-06 (scenarios-am)
+
+**What was built:**
+- Engagement Tracking: View Count in ActionsBar (`src/app/dashboard/scenarios/new/ActionsBar.tsx`, `src/app/api/scenarios/views/route.ts`)
+  - New `GET /api/scenarios/views?id=XXX` endpoint — returns `{view_count}` for a saved scenario (org-scoped, authenticated)
+  - `ActionsBar.tsx`: `useEffect` polls every 30 seconds when `scenarioId` is set — fetches current view_count
+  - View count badge renders below action buttons: "Not yet viewed" (muted), "1 view" / "N views" (gold when > 0)
+  - First-view alert: when count transitions from 0→N (or goes up), badge animates to gold with "↑ Borrower just opened it!" for 3 seconds
+  - Silently ignores network errors — view count is non-critical UI
+  - No new dependencies — uses existing fetch pattern + lucide-react `Eye` icon
+
+**Prior sessions (no log entries — reconstructed from code):**
+- ShareEquityChart.tsx — built in Apr 3 Share Page Redesign, wired into SharePageLayout.tsx ✅
+- RefiTimingSection.tsx — built in Apr 5 session ("Should You Refi Now?" with break-even + rate threshold + cost of waiting) ✅
+
+**MC gap closed:** Adam now sees when a borrower opens the share link while he's in the builder. Before: "did they even look at it?" was answered only by checking the Scenarios list. After: "↑ Borrower just opened it!" appears live in the ActionsBar — the exact follow-up trigger moment Mortgage Coach charges for.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx`
+- `src/app/api/scenarios/views/route.ts` (new)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Share page: mobile polish audit — 70%+ of borrowers open on phones; run through the share page on 390px viewport and fix any layout issues
+2. Scenario comparison UX — "pin" a best option visually on the share page so borrowers know which scenario to focus on (without implying a recommendation)
+3. domain-queue.md update — all Tier 1/2/3 items complete; define Tier 4 (share page depth, mobile, emotional visuals)
+
+**Domain queue updates:**
+- Engagement tracking (view_count in ActionsBar) — ✅ COMPLETE this session

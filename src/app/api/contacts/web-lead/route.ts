@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { writeActivityWithPii } from '@/lib/activity/pii'
 import type { Database } from '@/lib/database.types'
 
 /**
@@ -232,20 +233,18 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 7. Log activity ───────────────────────────────────────────────────────────
-  await supabase
-    .from('activity_log')
-    .insert({
-      organization_id,
-      contact_id:   newContact.id,
-      record_id:    newContact.id,
-      record_type:  'contact',
-      action:       'contact_created',
-      details:      `Web lead created via styermortgage.com — ${loan_type || 'unknown loan type'}`,
-      occurred_at:  now,
-    })
-    .then(({ error }) => {
-      if (error) console.error('[web-lead] activity log error:', error)
-    })
+  await writeActivityWithPii(supabase, {
+    organization_id,
+    contact_id:   newContact.id,
+    action:       'contact_created',
+    entity_type:  'contact',
+    entity_id:    newContact.id,
+    occurred_at:  now,
+  }, {
+    summary: `Web lead created via styermortgage.com — ${loan_type || 'unknown loan type'}`,
+  }).then(({ error }) => {
+    if (error) console.error('[web-lead] activity log error:', error)
+  })
 
   // ── 8. Log to contact_activity (powers Hot Leads notes column) ───────────────
   const activityNoteLines: string[] = []

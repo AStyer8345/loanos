@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
+import { writeActivityWithPii } from '@/lib/activity/pii'
 
 export async function POST(
   _req: NextRequest,
@@ -27,8 +28,7 @@ export async function POST(
       )
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = createServiceClient()
+    const supabase: any = createServiceClient() // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Fetch draft
     const { data: draft, error: fetchError } = await supabase
@@ -84,46 +84,35 @@ export async function POST(
     // Log activity + update last_touch_at if contact linked
     const summary = `Email sent to ${draft.recipient_name || draft.recipient_email}`
 
+    const activityPublic = {
+      contact_id: draft.contact_id || null,
+      loan_id: draft.loan_id || null,
+      action: 'email_sent',
+      type: 'email_sent',
+      entity_type: 'contact',
+      occurred_at: new Date().toISOString(),
+      user_id: userId,
+      organization_id: organizationId,
+    }
+    const activityPii = {
+      summary,
+      metadata: {
+        automation_name: draft.automation_name,
+        subject: draft.subject,
+        draft_id: draftId,
+      },
+    }
+
     if (draft.contact_id) {
       await Promise.all([
         supabase
           .from('contacts')
           .update({ last_touch_at: new Date().toISOString() })
           .eq('id', draft.contact_id),
-        supabase.from('activity_log').insert({
-          contact_id: draft.contact_id,
-          loan_id: draft.loan_id || null,
-          action: 'email_sent',
-          type: 'email_sent',
-          summary,
-          entity_type: 'contact',
-          occurred_at: new Date().toISOString(),
-          user_id: userId,
-          organization_id: organizationId,
-          metadata: {
-            automation_name: draft.automation_name,
-            subject: draft.subject,
-            draft_id: draftId,
-          } as never,
-        }),
+        writeActivityWithPii(supabase, activityPublic, activityPii),
       ])
     } else {
-      await supabase.from('activity_log').insert({
-        contact_id: null,
-        loan_id: draft.loan_id || null,
-        action: 'email_sent',
-        type: 'email_sent',
-        summary,
-        entity_type: 'contact',
-        occurred_at: new Date().toISOString(),
-        user_id: userId,
-        organization_id: organizationId,
-        metadata: {
-          automation_name: draft.automation_name,
-          subject: draft.subject,
-          draft_id: draftId,
-        } as never,
-      })
+      await writeActivityWithPii(supabase, activityPublic, activityPii)
     }
 
     return NextResponse.json({ success: true })

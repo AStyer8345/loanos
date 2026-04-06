@@ -80,6 +80,28 @@ Continued execution of audit findings A-5, A-7, A-10 from `audits/SECURITY-AUDIT
 
 **Next up:** A-6 (consolidate ~30 service-role routes onto a `createUserScopedClient()` helper — large refactor), A-9 (wrap chat lender-tool queries), A-11 (move agent routes under `/api/webhooks/agents/[org_slug]/...`), A-12 (`/api/onboarding/step` → user-scoped client), M-1 (tenant enforcement in webhook-adjacent routes), rate limiting on `/api/contacts/web-lead`, PII masking in `activity_log`, CORS/CSP headers, secret rotation runbook.
 
+## Security Hardening + Billing Fix — 2026-04-05 (session 10)
+
+**PII Encryption Phase 1 (tracker #3):**
+- `supabase/migrations/079_activity_log_pii.sql` ��� encrypted PII companion table (AES-256-GCM), owner/admin-only RLS
+- `src/lib/activity/pii.ts` — encrypt/decrypt helpers, `writeActivityWithPii` dual-write function
+- `POST /api/activity` — server-side endpoint for client components
+- 5 high-PII write sites converted to dual-write: automations/send, email/draft/send, contacts/quick-add, contacts/web-lead, processWebhook (Arive)
+- `scripts/backfill-activity-pii.ts` — re-runnable Node script for existing 1,089 rows
+- `PII_ENCRYPTION_KEY` added to Vercel env (32-byte hex, AES-256-GCM)
+- **Dual-write pattern:** PII goes to BOTH inline columns (for current read sites) AND encrypted companion (for future cutover). No read-site changes needed this session.
+- **Remaining phases:** server-side read endpoint → backfill execution → plaintext column drop
+
+**Billing page fix:**
+- `src/app/dashboard/billing/page.tsx` — new page with plan comparison + mailto upgrade CTA. Fixes 404 from plan-gate redirect.
+- `src/middleware.ts` — `/dashboard/drip` prefix renamed to `/dashboard/drip-campaigns` to match actual route folder.
+
+**Pre-existing lint fixes:** RefiTimingSection.tsx (unescaped entity), ScenarioBuilder.tsx (unused import).
+
+**Tracker status:** 🔴 Critical #3 Phase 1 DONE. Remaining: #3 Phases 2-4 (read endpoint, backfill, column drop). 🟡 Medium: #5, #9, #10 open.
+
+---
+
 ## Security Hardening Sweep — 2026-04-05 (session 9)
 
 Closed tracker item #7 (secret rotation runbook) + added Security Posture section to the system knowledge base.

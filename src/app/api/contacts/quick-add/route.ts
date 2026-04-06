@@ -3,6 +3,7 @@ import { extractContactInfo, type ExtractedContact } from '@/lib/chat-command-pa
 import { normalizeContactStage } from '@/lib/constants/loan-stages'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
+import { writeActivityWithPii } from '@/lib/activity/pii'
 import type { Database } from '@/lib/database.types'
 import { getAnthropicClient } from '@/lib/anthropic/client'
 import { CLAUDE_MODEL } from '@/lib/anthropic/model'
@@ -216,12 +217,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Log Activity ─────────────────────────────────────────────────────────
-    await supabase.from('activity_log').insert({
-      record_id: newContact.id,
-      record_type: 'contact',
+    await writeActivityWithPii(supabase, {
       action: 'contact_created',
-      details: `Quick-added via AI chat: ${newContact.first_name} ${newContact.last_name || ''}`.trim(),
+      entity_type: 'contact',
+      entity_id: newContact.id,
       organization_id: organizationId,
+    }, {
+      summary: `Quick-added via AI chat: ${newContact.first_name} ${newContact.last_name || ''}`.trim(),
     }).then(({ error }) => {
       if (error) console.error('[quick-add] activity log error:', error)
     })

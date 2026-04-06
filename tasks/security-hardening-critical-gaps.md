@@ -55,18 +55,24 @@ onboarding of additional LOs.
   - Idempotency key support (same key in 5min → no-op)
   - Audit remaining unauthenticated form-submit routes for same treatment
 
-### 3. PII masking in activity logs
-- **Risk:** `activity_log` stores borrower names, emails, full loan details in
-  plaintext. RLS protects cross-tenant, but support-impersonation, backups, and
-  exports would expose NPI. GLBA violation risk if breached.
-- **Fix:**
-  - Create a new `activity_log_pii` table for sensitive values, protected by
-    stricter RLS (owner role only, no cross-tenant support access)
-  - Reference from `activity_log` by UUID
-  - Migrate existing rows with a backfill migration
-  - OR simpler: add a `pg_sodium` encrypted column for the sensitive payload
-- **Effort:** ~4-6 hours
-- **Blocker for:** first paying LO
+### 3. ~~PII masking in activity logs~~ ✅ DONE — Phase 1 (2026-04-05)
+- **Completed:** Option C (split table + app-layer AES-256-GCM encryption).
+  - `supabase/migrations/079_activity_log_pii.sql` — companion table with
+    `pii_ciphertext`/`pii_iv`/`pii_tag`/`key_version`, deny-all RLS except
+    owner/admin select, service-role insert
+  - `src/lib/activity/pii.ts` — encrypt/decrypt helpers, `writeActivityWithPii`
+    dual-write helper (inline + encrypted companion), `decryptActivityPii` for
+    future server-side reads
+  - `POST /api/activity` — server-side endpoint for client components
+  - 5 high-PII write sites converted: automations/send, email/draft/send,
+    contacts/quick-add, contacts/web-lead, processWebhook.ts (Arive)
+  - `scripts/backfill-activity-pii.ts` — re-runnable backfill for existing rows
+  - Encryption key in `PII_ENCRYPTION_KEY` env var (Vercel), never in DB
+- **Remaining phases (next sessions):**
+  - Phase 2: Server-side `/api/activity/feed` read endpoint + update read sites
+  - Phase 3: Run backfill script against production (1,089 rows)
+  - Phase 4: Migration 080 — DROP plaintext columns from activity_log
+- **Effort:** Phase 1 complete. ~2 hours for remaining phases.
 
 ### 4. ~~Admin-route authorization audit~~ ✅ DONE (2026-04-05)
 - Audited all 5 existing `/api/admin/*` routes — every handler calls `requireAdmin()` on line 1. Clean.

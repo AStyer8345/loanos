@@ -24,7 +24,8 @@ This runbook is executable. Every section starts with **When**, ends with **Veri
 | 4 | `ANTHROPIC_API_KEY` | Vercel env + n8n credentials | Chat API, outreach generation, drip scheduler | Annually or on suspected leak | [§4](#4-anthropic-api-key) |
 | 5 | Per-org Arive webhook secrets | `los_integrations.secret_hash` (hashed) + each LO's Zap header | `/api/webhooks/los/arive/[org_slug]` | On LO offboarding, or on request | [§5](#5-per-org-arive-webhook-secrets) |
 | 6 | `PUBLER_API_KEY` | Vercel env + `social_settings.publer_config` | `/api/social/publish` | Annually or on suspected leak | [§6](#6-publer-api-key) |
-| 7 | Supabase Storage signed URL key | Auto-rotated by Supabase | Document downloads | Automatic | N/A |
+| 7 | `PII_ENCRYPTION_KEY` | Vercel env (never in DB) | `src/lib/activity/pii.ts`, `processWebhook.ts`, backfill script | Annually or on suspected leak | [§7](#7-pii_encryption_key) |
+| 8 | Supabase Storage signed URL key | Auto-rotated by Supabase | Document downloads | Automatic | N/A |
 
 **Not covered here (platform-managed, rotate via provider):** GitHub deploy tokens, Vercel OIDC, Supabase OAuth providers, Stripe keys (Phase 4).
 
@@ -293,6 +294,40 @@ Publer allows multiple active API keys simultaneously — if rotation fails, you
 
 ---
 
+## 7. `PII_ENCRYPTION_KEY`
+
+| | |
+|---|---|
+| **Where** | Vercel → LoanOS → Environment Variables |
+| **What** | 32-byte hex string (AES-256-GCM key for `activity_log_pii`) |
+| **Consumers** | `src/lib/activity/pii.ts`, `src/lib/arive/processWebhook.ts`, `scripts/backfill-activity-pii.ts` |
+| **When to rotate** | If the key is exposed, if mandated by compliance, or annually |
+
+### Steps (dual-key rotation with `key_version`)
+
+1. Generate new key: `openssl rand -hex 32`
+2. In Vercel, add new env var: `PII_ENCRYPTION_KEY_V2` = new key value (all scopes)
+3. In `src/lib/activity/pii.ts`, bump `CURRENT_KEY_VERSION` from `1` to `2`
+4. Update the `getKey()` function: version 2 reads `PII_ENCRYPTION_KEY_V2`, version 1 reads `PII_ENCRYPTION_KEY` (old)
+5. Deploy. New writes now use key v2. Old rows still decrypt with key v1 (via `key_version` column).
+6. Run re-encryption script (future — not yet built):
+   ```bash
+   PII_ENCRYPTION_KEY=<old_key> PII_ENCRYPTION_KEY_V2=<new_key> \
+   npx tsx scripts/reencrypt-activity-pii.ts
+   ```
+7. After re-encryption: remove `PII_ENCRYPTION_KEY` (v1) from Vercel. All rows now key_version=2.
+8. Rename `PII_ENCRYPTION_KEY_V2` to `PII_ENCRYPTION_KEY` in Vercel + update `CURRENT_KEY_VERSION` back to 1. Deploy again.
+
+### Verify
+- `SELECT count(*) FROM activity_log_pii WHERE key_version = 1` → should be 0 after re-encryption
+- Test: open a loan detail page, trigger an automation send, verify the activity feed shows the email summary
+- Check Vercel runtime logs for `[pii] decrypt failed` — should be 0
+
+### Rollback
+The old key is still set during the overlap window. If decryption fails, revert `CURRENT_KEY_VERSION` to 1 and redeploy. Old rows decrypt fine; new rows written with v2 will need the v2 key to read — keep it in your password manager.
+
+---
+
 ## Post-rotation checklist (every rotation)
 
 - [ ] Old secret removed from password manager (after verification window)
@@ -318,3 +353,5 @@ If a rotation causes outage longer than 15 minutes and you cannot resolve:
 - `tasks/security-hardening-critical-gaps.md` — hardening tracker
 - `src/lib/los/hashSecret.ts` — webhook secret hashing
 - `src/lib/auth/validateAgentSecret.ts` — agent secret validator
+- `src/lib/activity/pii.ts` — PII encryption/decryption helpers
+- `scripts/backfill-activity-pii.ts` — backfill existing rows into encrypted companion

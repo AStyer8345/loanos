@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getAutomationById } from '@/lib/automations/definitions'
+import { writeActivityWithPii } from '@/lib/activity/pii'
 
 export async function POST(req: NextRequest) {
   let organizationId: string
@@ -85,17 +86,18 @@ export async function POST(req: NextRequest) {
           .from('contacts')
           .update({ last_touch_at: new Date().toISOString() })
           .eq('id', draft.contact_id),
-        supabase.from('activity_log').insert({
+        writeActivityWithPii(supabase, {
           contact_id: draft.contact_id,
           loan_id: draft.loan_id || null,
           action: 'email_sent',
           type: 'email_sent',
-          summary: `${automationLabel} sent to ${draft.recipient_name || draft.recipient_email}`,
           entity_type: 'contact',
           occurred_at: new Date().toISOString(),
           user_id: userId,
           organization_id: organizationId,
-          metadata: { automation_id: draft.automation_name, subject: draft.subject } as never,
+        }, {
+          summary: `${automationLabel} sent to ${draft.recipient_name || draft.recipient_email}`,
+          metadata: { automation_id: draft.automation_name, subject: draft.subject },
         }),
       ])
     }

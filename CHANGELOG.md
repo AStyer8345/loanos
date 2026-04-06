@@ -1,5 +1,44 @@
 # LoanOS Changelog
 
+## [8.1.8] — 2026-04-05 — PII Encryption Phase 1 + Billing Page
+
+### Added
+- **`supabase/migrations/079_activity_log_pii.sql`** — companion table for encrypted PII. Columns: `pii_ciphertext` (AES-256-GCM), `pii_iv` (12-byte nonce), `pii_tag` (auth tag), `key_version` (for rotation). RLS: owner/admin SELECT, service-role INSERT, deny UPDATE/DELETE.
+- **`src/lib/activity/pii.ts`** — encryption/decryption helpers + `writeActivityWithPii` dual-write function. Handles dev fallback (no key → legacy inline behavior).
+- **`POST /api/activity`** — server-side endpoint for client components to write PII-bearing activity entries (encryption key stays server-side).
+- **`scripts/backfill-activity-pii.ts`** — re-runnable Node script to encrypt existing 1,089 activity_log rows into the companion table. Batch processing, dry-run support, skip-existing logic.
+- **`src/app/dashboard/billing/page.tsx`** — new billing/plan page. Shows starter vs professional tiers with feature list. Upgrade CTA is mailto-based (no Stripe yet). Fixes 404 from middleware plan-gate redirect.
+
+### Changed
+- 5 high-PII write sites converted to `writeActivityWithPii` dual-write (inline + encrypted companion):
+  - `src/app/api/automations/send/route.ts`
+  - `src/app/api/automations/email/[draftId]/send/route.ts`
+  - `src/app/api/contacts/quick-add/route.ts`
+  - `src/app/api/contacts/web-lead/route.ts`
+  - `src/lib/arive/processWebhook.ts`
+- `src/middleware.ts` — renamed `/dashboard/drip` prefix to `/dashboard/drip-campaigns` to match actual route folder.
+- Fixed pre-existing lint errors in `RefiTimingSection.tsx` and `ScenarioBuilder.tsx`.
+
+### Security / Tracker
+- Closes `tasks/security-hardening-critical-gaps.md` item **#3 — PII masking** (Phase 1). Remaining phases: server-side read endpoint, backfill execution, plaintext column drop.
+- New `PII_ENCRYPTION_KEY` env var in Vercel (32 bytes hex). Key never enters the database — backups are useless without it.
+
+### Files Changed
+- `supabase/migrations/079_activity_log_pii.sql` — new
+- `src/lib/activity/pii.ts` — new
+- `src/app/api/activity/route.ts` — new
+- `scripts/backfill-activity-pii.ts` — new
+- `src/app/dashboard/billing/page.tsx` — new
+- `src/app/api/automations/send/route.ts` — modified
+- `src/app/api/automations/email/[draftId]/send/route.ts` — modified
+- `src/app/api/contacts/quick-add/route.ts` — modified
+- `src/app/api/contacts/web-lead/route.ts` — modified
+- `src/lib/arive/processWebhook.ts` — modified
+- `src/middleware.ts` — modified
+- `tasks/security-hardening-critical-gaps.md` — #3 marked Phase 1 DONE
+
+---
+
 ## [8.1.7] — 2026-04-05 — Secret Rotation Runbook + KB Security Section
 
 ### Added

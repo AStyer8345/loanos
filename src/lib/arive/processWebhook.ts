@@ -9,6 +9,8 @@
  *   - /api/arive-webhook/[slug] (multi-tenant route)
  */
 
+import { randomBytes, createCipheriv } from 'crypto'
+
 const SUPABASE_URL = process.env.SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
@@ -61,6 +63,50 @@ async function sbInsert(table: string, body: Record<string, unknown>) {
     const text = await res.text()
     throw new Error(`Supabase insert ${table} → ${res.status}: ${text}`)
   }
+}
+
+async function sbInsertWithId(table: string, body: Record<string, unknown>): Promise<{ id: string }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: { ...sbHeaders(), Prefer: 'return=representation' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Supabase insert ${table} → ${res.status}: ${text}`)
+  }
+  const data = await res.json()
+  return Array.isArray(data) ? data[0] : data
+}
+
+/** Insert activity_log + encrypted PII companion row via raw HTTP. */
+async function sbInsertActivityWithPii(
+  publicFields: Record<string, unknown>,
+  pii: Record<string, unknown>
+) {
+  const keyHex = process.env.PII_ENCRYPTION_KEY
+  if (!keyHex) {
+    // No encryption key (dev) — write PII inline (legacy)
+    await sbInsert('activity_log', { ...publicFields, ...pii })
+    return
+  }
+  const key = Buffer.from(keyHex, 'hex')
+  const iv = randomBytes(12)
+  const cipher = createCipheriv('aes-256-gcm', key, iv)
+  const plaintext = JSON.stringify(pii)
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
+  const tag = cipher.getAuthTag()
+
+  // Dual-write: PII inline for current read sites + encrypted companion
+  const activity = await sbInsertWithId('activity_log', { ...publicFields, ...pii })
+  await sbInsert('activity_log_pii', {
+    activity_id: activity.id,
+    organization_id: publicFields.organization_id,
+    pii_ciphertext: `\\x${encrypted.toString('hex')}`,
+    pii_iv: `\\x${iv.toString('hex')}`,
+    pii_tag: `\\x${tag.toString('hex')}`,
+    key_version: 1,
+  })
 }
 
 // Patch only the fields that are currently null (never overwrite user-set dates)
@@ -548,23 +594,27 @@ export async function processAriveWebhook(
       await sbPatchNulls('loans', loan.id, derivedDates)
     }
 
-    // ── 4. Log activity ───────────────────────────────────────────────────────
-    await sbInsert('activity_log', {
-      action: 'arive_sync',
-      entity_type: 'loan',
-      entity_id: loan.id,
-      loan_id: loan.id,
-      contact_id: contact.id,
-      metadata: {
-        arive_loan_id: ariveLoanId,
-        loan_number: loanNumber,
-        status: n(body.status),
-        milestone: n(body.milestone),
-        source: 'arive_webhook',
+    // ── 4. Log activity (PII-encrypted) ────────────────────────────────────────
+    await sbInsertActivityWithPii(
+      {
+        action: 'arive_sync',
+        entity_type: 'loan',
+        entity_id: loan.id,
+        loan_id: loan.id,
+        contact_id: contact.id,
+        user_id: resolvedUserId,
+        organization_id: organizationId,
       },
-      user_id: resolvedUserId,
-      organization_id: organizationId,
-    })
+      {
+        metadata: {
+          arive_loan_id: ariveLoanId,
+          loan_number: loanNumber,
+          status: n(body.status),
+          milestone: n(body.milestone),
+          source: 'arive_webhook',
+        },
+      }
+    )
 
     return {
       success: true,

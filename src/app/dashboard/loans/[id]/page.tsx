@@ -2238,6 +2238,8 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
+
   const handleSubmit = async () => {
     setSending(true)
     setError('')
@@ -2245,7 +2247,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
       const loanContext = {
         loan_id: loan.id,
         loan_name: loan.loan_name,
-        borrower_name: loan.borrower_name,
+        borrower_name: displayName,
         loan_amount: loan.loan_amount,
         property_address: [loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', '),
         closing_date: loan.closing_date,
@@ -2288,7 +2290,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         <div className="px-5 py-4 border-b border-input flex items-center justify-between">
           <div>
             <p className="font-mono font-semibold text-foreground">{workflow.icon} {workflow.name}</p>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5">For: {loan.borrower_name || loan.loan_name}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">For: {displayName}</p>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground/80 text-lg leading-none">×</button>
         </div>
@@ -2302,7 +2304,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
           ) : (
             <>
               <div className="bg-muted rounded-lg p-3 mb-4 text-xs text-muted-foreground font-mono space-y-1 border border-input">
-                <p><span className="font-medium">Borrower:</span> {loan.borrower_name || '—'}</p>
+                <p><span className="font-medium">Borrower:</span> {displayName}</p>
                 <p><span className="font-medium">Amount:</span> {fmtCurrency(loan.loan_amount)}</p>
                 {loan.closing_date && <p><span className="font-medium">Closing:</span> {fmtDate(loan.closing_date)}</p>}
                 {loan.property_address && <p><span className="font-medium">Property:</span> {loan.property_address}</p>}

@@ -1,6 +1,6 @@
 # LoanOS — Architecture Reference
 
-> Snapshot: March 2026 | Phase 2 ~95% complete
+> Last updated: 2026-04-07 | Version 8.1.9
 
 ---
 
@@ -338,39 +338,17 @@ Contract PDF received
 
 ---
 
-## 11. Multi-Tenancy Status
+## 11. Multi-Tenancy
 
-### What's built (migrations 029–031)
-
-- ✅ `organizations` table with `slug` for subdomain routing
-- ✅ `profiles` table — 1:1 with `auth.users`, holds `organization_id` + `role`
-- ✅ `organization_id` added to: `loans`, `contacts`, `activity_log`, `todo_items`
-- ✅ Org-scoped RLS policies on all four tables (replaces single-user policies)
-- ✅ `get_my_organization_id()` + `get_my_role()` SQL helper functions (SECURITY DEFINER)
-- ✅ `getOrganization()` server helper in `src/lib/getOrganization.ts`
-- ✅ Role hierarchy: owner/admin = full CRUD | member = no DELETE
-
-### What's NOT done yet (gaps before real multi-tenant launch)
-
-| Gap | Impact | Fix needed |
-|-----|--------|-----------|
-| `organization_id` missing from: `documents`, `email_drafts`, `scenarios`, `chat_sessions`, `outlook_tokens`, `user_settings`, `mcc_state`, `loan_status_history`, `marketing_activity_log` | Those tables still use single-user RLS | Migration: add `organization_id` column + update RLS |
-| Most pages/API routes still query by `user_id` directly instead of calling `getOrganization()` | Data not shared within an org | Refactor queries to use `organization_id` |
-| No sign-up flow assigns a new user to an organization | Users have no `profiles` row → `getOrganization()` throws | Build onboarding: create org → create profile |
-| n8n workflows use hardcoded `user_id` in Supabase writes | n8n can't know which org to write to | Add `organization_id` to webhook payloads |
-| No UI for org management (invite users, change roles) | Can't add a second user to an org | Build admin settings page |
-| Storage bucket RLS not updated for org scoping | Documents would cross org boundaries | Supabase Storage policy update |
-
-### Assessment
-
-**The foundation is solid.** The hard architectural decisions (org table, RLS pattern, helper functions) are done correctly. The gap is completeness — about 40% of tables and 80% of app pages haven't been wired to the org layer yet. This is migration + refactor work, not a rearchitect.
-
-**Estimated effort to go multi-tenant**:
-1. Migration: add `organization_id` to remaining ~8 tables + update their RLS — 1 session
-2. App layer: update all page/API queries to use `getOrganization()` — 2–3 sessions
-3. Onboarding flow (sign-up → create org → create profile) — 1 session
-4. n8n webhook updates — 1 session
-5. Org admin UI (invite, roles) — 1 session
+- `organizations` table with `slug` for subdomain routing
+- `profiles` table — 1:1 with `auth.users`, holds `organization_id` + `role`
+- `organization_id` on all core tables (loans, contacts, activity_log, documents, email_drafts, scenarios, todo_items, contact_activity, chat_sessions) with NOT NULL constraints (migration 053)
+- Org-scoped RLS policies on all tables via `get_my_organization_id()` + `get_my_role()` (SECURITY DEFINER)
+- `getOrganization()` server helper in `src/lib/getOrganization.ts`
+- Role hierarchy: owner/admin = full CRUD | member = no DELETE
+- `system_admins` table + `requireAdmin()` middleware gate on `/api/admin/*`
+- Multi-tenant Arive webhook: `/api/webhooks/los/arive/[org_slug]` with 3-layer verification (slug + hashed secret + payload allowlist)
+- Remaining gaps tracked in `tasks/security-hardening-critical-gaps.md`
 
 ---
 

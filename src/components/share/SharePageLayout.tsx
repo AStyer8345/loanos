@@ -139,7 +139,7 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
       />
 
       {/* 2. Two-column layout */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 sm:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
 
           {/* ═══ LEFT COLUMN: Main content ═══ */}
@@ -195,8 +195,8 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
           {/* ═══ RIGHT COLUMN: Sidebar ═══ */}
           <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
 
-            {/* LO Branding Card */}
-            <div className="print:hidden">
+            {/* LO Branding Card — sidebar only on desktop; mobile uses ShareCTA at bottom */}
+            <div className="hidden lg:block print:hidden">
               <LOSidebarCard
                 loName={b.loName}
                 company={b.company}

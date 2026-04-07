@@ -30,7 +30,7 @@ export default function ShareHero({
         borderBottom: `1px solid ${GOLD}15`,
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 sm:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
           {/* Left: Greeting + context */}
           <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ export default function ShareHero({
           {/* Right: Hero stat */}
           {heroStat.value !== 'See details below' && (
             <div
-              className="rounded-xl px-6 py-4 text-right shrink-0"
+              className="rounded-xl px-5 py-4 text-left sm:text-right shrink-0"
               style={{
                 background: `linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.03) 100%)`,
                 border: `1px solid ${GOLD}20`,

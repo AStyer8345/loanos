@@ -88,9 +88,9 @@ interface WaterfallLineProps {
 function WaterfallLine({ label, values, isSubtract, isTotal, isBold, isSubItem }: WaterfallLineProps) {
   return (
     <div
-      className="grid items-center gap-4"
+      className="grid items-center gap-3"
       style={{
-        gridTemplateColumns: `1fr repeat(${values.length}, minmax(90px, 120px))`,
+        gridTemplateColumns: `1fr repeat(${values.length}, minmax(80px, 100px))`,
         borderTop: isTotal ? `1px solid ${GOLD}40` : undefined,
         paddingTop: isTotal ? 8 : 0,
         marginTop: isTotal ? 4 : 0,
@@ -138,35 +138,40 @@ export default function CashToCloseBreakdown({ rows, mode }: CashToCloseBreakdow
       {/* Gold accent */}
       <div style={{ height: 3, background: `linear-gradient(90deg, ${GOLD}20, ${GOLD}60, ${GOLD}20)` }} />
 
-      <div className="p-6">
-        {/* Header row with labels */}
-        <div
-          className="grid items-end gap-4 mb-5"
-          style={{ gridTemplateColumns: `1fr repeat(${rows.length}, minmax(90px, 120px))` }}
-        >
-          <div>
-            <p
-              className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-1"
-              style={{ color: GOLD }}
-            >
-              {isPurchase ? 'Cash to Close' : 'Closing Costs'}
-            </p>
-            <p className="text-xs" style={{ color: MUTED }}>
-              {isPurchase
-                ? 'How your upfront costs break down for each option.'
-                : 'Your closing cost breakdown for each option.'}
-            </p>
-          </div>
-          {rows.map((r, i) => (
-            <div key={i} className="text-right">
-              <p className="text-[11px] font-bold" style={{ color: TEXT }}>{r.label}</p>
-              <p className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>{r.loanType}</p>
-            </div>
-          ))}
+      <div className="p-4 sm:p-6">
+        {/* Title — outside scroll area */}
+        <div className="mb-4">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.15em] mb-1"
+            style={{ color: GOLD }}
+          >
+            {isPurchase ? 'Cash to Close' : 'Closing Costs'}
+          </p>
+          <p className="text-xs" style={{ color: MUTED }}>
+            {isPurchase
+              ? 'How your upfront costs break down for each option.'
+              : 'Your closing cost breakdown for each option.'}
+          </p>
         </div>
 
-        {/* ─── Waterfall Lines ─── */}
-        <div className="space-y-2.5">
+        {/* Scrollable waterfall — overflow-x-auto prevents horizontal blowout on mobile */}
+        <div className="overflow-x-auto">
+          {/* Scenario column headers */}
+          <div
+            className="grid items-end gap-3 mb-4"
+            style={{ gridTemplateColumns: `1fr repeat(${rows.length}, minmax(80px, 100px))` }}
+          >
+            <div /> {/* empty label column */}
+            {rows.map((r, i) => (
+              <div key={i} className="text-right">
+                <p className="text-[11px] font-bold" style={{ color: TEXT }}>{r.label}</p>
+                <p className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>{r.loanType}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ─── Waterfall Lines ─── */}
+          <div className="space-y-2.5">
           {/* Down Payment (purchase only) */}
           {isPurchase && (
             <WaterfallLine
@@ -331,7 +336,8 @@ export default function CashToCloseBreakdown({ rows, mode }: CashToCloseBreakdow
             values={rows.map(r => r.cashToClose)}
             isTotal
           />
-        </div>
+          </div>
+        </div>{/* end overflow-x-auto */}
       </div>
     </div>
   )

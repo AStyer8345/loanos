@@ -1,27 +1,34 @@
-## Scenarios Mission Brief — 2026-04-06 AM
+## Scenarios Mission Brief — 2026-04-07 AM
 
 ### Focus Area
-Engagement tracking — view_count live display in ActionsBar after save
+Mobile Share Page Audit + Fixes — 390px viewport
 
 ### Why This Matters
-Mortgage Coach notifies loan officers when a borrower opens the link. LoanOS already increments view_count atomically via Supabase RPC when the share page loads — but Adam can only see it in the Scenarios list, not in the builder. Adding a live "views" counter in ActionsBar gives Adam the follow-up trigger signal exactly when it matters: while he's still in the builder with the borrower's file open.
+70%+ of borrowers open share links on phones. The share page redesign (Apr 3) was built desktop-first. Multiple components have known mobile layout issues: CashToCloseBreakdown overflows without overflow-x-auto, LOSidebarCard is buried below all content, ShareHero hero stat is misaligned. Mortgage Coach's biggest mobile advantage is that their share pages render cleanly at any screen size. Closing this gap means Adam's borrowers get a polished experience on the device they actually use.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Add `GET /api/scenarios/views?id=XXX` — lightweight endpoint returning `{view_count}`
-2. Add live view_count display to ActionsBar — fetches on scenarioId set, polls every 30s
-3. Visual: "👁 N views" badge near Copy Share Link — gold + subtle animation on first view (0→1 transition)
+1. Fix CashToCloseBreakdown horizontal overflow on mobile (grid columns overflow at 390px)
+2. Hide LOSidebarCard on mobile (ShareCTA already provides CTAs)
+3. Fix ShareHero hero stat alignment on mobile
+4. Reduce OptionCard padding on mobile (p-4 sm:p-6)
+5. Add px-4 sm:px-6 to main layout container for tighter mobile padding
 
 ### Files in Scope
-- `src/app/api/scenarios/views/route.ts` (NEW)
-- `src/app/dashboard/scenarios/new/ActionsBar.tsx` (add view count badge)
+- src/components/share/CashToCloseBreakdown.tsx
+- src/components/share/ShareHero.tsx
+- src/components/share/OptionCard.tsx
+- src/components/share/SharePageLayout.tsx
 
 ### Definition of Done
-- After saving, a view count badge appears in ActionsBar
-- Counter live-updates on 30s interval
-- npm run build passes, 0 TypeScript errors, git committed, Vercel READY
+- npm run build passes (0 TypeScript errors)
+- At 390px: no horizontal overflow on any section
+- CashToClose scrolls horizontally if needed (overflow-x-auto)
+- Hero stat is readable and well-aligned on mobile
+- LOSidebarCard hidden on mobile (lg:block)
+- ShareCTA still shows at bottom on mobile
 
 ### Subagents to Activate
-[x] Builder (direct)
+[x] Builder Subagent (direct — this session)

@@ -61,7 +61,7 @@ export default function OptionCard({ row, deltas, mode, index }: OptionCardProps
         }}
       />
 
-      <div className="p-6 flex flex-col gap-5 flex-1">
+      <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 flex-1">
         {/* Header */}
         <div className="flex items-center gap-2.5">
           <h3 className="text-base font-bold" style={{ color: TEXT }}>

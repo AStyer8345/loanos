@@ -354,3 +354,33 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Engagement tracking (view_count in ActionsBar) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-07 (scenarios-am)
+
+**What was built:**
+- Mobile Share Page Audit + Fixes (`src/components/share/CashToCloseBreakdown.tsx`, `ShareHero.tsx`, `OptionCard.tsx`, `SharePageLayout.tsx`)
+  - **CashToCloseBreakdown** — critical fix: added `overflow-x-auto` wrapper around the entire waterfall table (column headers + rows). Before: CSS grid with `minmax(90px, 120px)` columns silently overflowed the page at 390px. After: table scrolls horizontally on small screens with no page-wide overflow. Also changed `p-6` → `p-4 sm:p-6` to recover 16px on each side at mobile.
+  - **ShareHero** — hero stat card was `text-right` even on mobile when it takes full width. Changed to `text-left sm:text-right` so the "Starting At $X/mo" number aligns naturally on phones. Also tightened padding to `px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10`.
+  - **OptionCard** — reduced padding `p-6` → `p-4 sm:p-6`, gap `gap-5` → `gap-4 sm:gap-5`. Each card recovers ~16px horizontal breathing room at 390px.
+  - **SharePageLayout** — two fixes: (1) LOSidebarCard wrapped in `hidden lg:block` so it's hidden on mobile (ShareCTA at bottom already covers the actions, and the LO card was buried below 6+ sections). (2) Main container padding tightened to `px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10`.
+
+**MC gap closed:** Borrowers on phones now see a clean, non-overflowing share page. Before: the Cash to Close table would exceed the viewport width and cause silent horizontal overflow on iPhones. The hero stat number was right-aligned against a full-width box which looked broken. LO contact card appeared buried below all content at mobile. After: every section fits cleanly at 390px.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+
+**Files touched:**
+- `src/components/share/CashToCloseBreakdown.tsx`
+- `src/components/share/ShareHero.tsx`
+- `src/components/share/OptionCard.tsx`
+- `src/components/share/SharePageLayout.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. "Most Popular" highlight on share page (Tier 4 item 2) — visually guide borrowers to one scenario using "Commonly Chosen" or "Most Popular" framing. NO "Best Option" badge. Compliant framing: what is the scenario that most similar borrowers selected?
+2. Share page: video/loom embed placeholder (Tier 4 item 3) — Adam records a 60-second walkthrough; embed above the options
+3. OptionCard: highlight the scenario that has the lowest monthly payment with a subtle visual cue (this is already in the PaymentComparisonChart but not on the cards themselves)
+
+**Domain queue updates:**
+- Mobile share page audit (Tier 4 item 1) — ✅ COMPLETE this session

@@ -36,7 +36,8 @@ Working with an EXISTING HTML/CSS/JS site — all changes must match existing co
 Read in order:
 1. `tasks/seo-sem/today-mission.md`
 2. `tasks/seo-sem/research/[most recent research file]`
-3. `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/styermortgage-context.md` (site structure reference)
+3. `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/CONTEXT.md` (site state)
+4. `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/ARCHITECTURE.md` (tech stack, page inventory, tracking config)
 4. `tasks/seo-sem/notebooklm-pull-[TODAY].md` (prior knowledge)
 
 ---

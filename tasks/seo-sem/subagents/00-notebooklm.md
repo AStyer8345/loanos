@@ -57,9 +57,14 @@ If `tasks/seo-sem/domain-queue.md` is not present — add it:
 /Users/adamstyer/.local/bin/notebooklm source add /Users/adamstyer/Documents/loanos-clone/tasks/seo-sem/domain-queue.md --json
 ```
 
-If `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/styermortgage-context.md` is not present — add it:
+If `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/CONTEXT.md` is not present — add it:
 ```bash
-/Users/adamstyer/.local/bin/notebooklm source add /Users/adamstyer/Documents/Claude/styerteam-mortgage-site/styermortgage-context.md --json
+/Users/adamstyer/.local/bin/notebooklm source add /Users/adamstyer/Documents/Claude/styerteam-mortgage-site/CONTEXT.md --json
+```
+
+Also add ARCHITECTURE.md (page inventory, tracking, Google Ads config):
+```bash
+/Users/adamstyer/.local/bin/notebooklm source add /Users/adamstyer/Documents/Claude/styerteam-mortgage-site/ARCHITECTURE.md --json
 ```
 
 ### Step 2 — Pull Prior Context for Today's Topic
@@ -180,7 +185,7 @@ For each confirmed stale source:
 ```
 
 **Removal rules:**
-- Never remove domain-queue.md or styermortgage-context.md (foundational docs)
+- Never remove domain-queue.md, CONTEXT.md, or ARCHITECTURE.md (foundational docs)
 - Never remove a source if it's the ONLY source on that topic
 - When in doubt, keep it — flag for manual review instead
 - Max 50 sources total — enforce during this audit
@@ -235,9 +240,9 @@ Any blog brief files created today in `tasks/seo-sem/specs/` — add to notebook
 
 #### 4e — Update Foundational Docs (if modified)
 ```bash
-git -C /Users/adamstyer/Documents/Claude/styerteam-mortgage-site diff --name-only HEAD | grep -E "styermortgage-context.md"
+git -C /Users/adamstyer/Documents/Claude/styerteam-mortgage-site diff --name-only HEAD | grep -E "(CONTEXT|ARCHITECTURE)\.md"
 ```
-If styermortgage-context.md was modified this session — remove the old version and re-add the updated file.
+If CONTEXT.md or ARCHITECTURE.md was modified this session — remove the old version and re-add the updated file.
 Use `notebooklm source delete <id> --json` (NOT `source remove`).
 
 #### 4f — APPEND TO MASTER SOURCE LOG (replaces note create)
@@ -416,7 +421,7 @@ It is additive infrastructure — the session continues regardless.
 ## NOTEBOOK HYGIENE RULES
 
 1. Max 50 sources in the notebook at any time — enforce during staleness audit
-2. Foundational docs (domain-queue.md, styermortgage-context.md) are permanent — never remove
+2. Foundational docs (domain-queue.md, CONTEXT.md, ARCHITECTURE.md) are permanent — never remove
 3. Web sources older than 90 days get re-evaluated — remove if superseded
 4. Duplicate sources on the same topic — keep the most recent, remove the older
 5. Session notes are permanent — never remove (they are the audit trail)

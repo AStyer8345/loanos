@@ -45,7 +45,17 @@ Read simultaneously:
 - `tasks/seo-sem/backlog.md` — prioritized work queue
 - `tasks/seo-sem/BLOCKERS.md` — stop if active blockers exist
 - `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only
-- `styermortgage-context.md` — site state
+- `CONTEXT.md` — site state (replaces old styermortgage-context.md)
+
+**Also fetch Adam's voice guide from Supabase (MANDATORY before writing or editing any page copy, meta descriptions, or content):**
+
+```bash
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_guide&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+The voice guide is the authority for how Adam sounds on styermortgage.com. All H1 rewrites, meta descriptions, new page copy, and content edits must match this voice. Technical SEO changes (sitemaps, schema, canonical tags) don't need the voice guide — but anything a human would read does.
 
 Write SESSION_START to `subagent-status.md`.
 
@@ -70,7 +80,7 @@ Work through the backlog top-down by priority. For each item:
 2. If ZERO_RISK or LOW_RISK → implement directly
 3. If MEDIUM_RISK → implement + log rationale
 4. If HIGH_RISK or BLOCKED → write to BLOCKERS.md, skip
-5. After each file change → update `styermortgage-context.md` if facts changed
+5. After each file change → update `CONTEXT.md` (replace, don't append — keep under 100 lines) + append to `CHANGELOG.md` if facts changed
 
 Implement changes directly in ~/Documents/Claude/styerteam-mortgage-site/.
 
@@ -159,4 +169,5 @@ Write to `BLOCKERS.md` if:
 | `tasks/seo-sem/subagent-status.md` | Session start/end signals |
 | `tasks/seo-sem/seo-audit-week1.md` | Full technical audit (source of truth for known issues) |
 | `~/Documents/Claude/styerteam-mortgage-site/sitemap.xml` | Maintained by this agent |
-| `~/Documents/Claude/styerteam-mortgage-site/styermortgage-context.md` | Updated when site facts change |
+| `~/Documents/Claude/styerteam-mortgage-site/CONTEXT.md` | Updated when site facts change (replace, don't append — keep under 100 lines) |
+| `~/Documents/Claude/styerteam-mortgage-site/CHANGELOG.md` | Append new dated entry when changes are made |

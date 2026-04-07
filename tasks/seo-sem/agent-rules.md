@@ -13,7 +13,7 @@
 
 ## WHAT "DONE" MEANS
 
-- A task is done when: file is changed + git pushed + `styermortgage-context.md` updated if needed + backlog item checked off.
+- A task is done when: file is changed + git pushed + `CONTEXT.md` updated (replace, don't append) + `CHANGELOG.md` entry appended if needed + backlog item checked off.
 - Not done until pushed. Don't mark complete until git push succeeds.
 
 ## SITE PATTERNS (learned from audit)
@@ -71,3 +71,5 @@ This was the root cause of blog posts not appearing in Google `site:` searches �
 | 2026-04-05 | AM | Title tag convention: "| NMLS #513013" suffix saves 12 chars vs "| Adam Styer | NMLS #513013" | Drop "Adam Styer" from title suffix when title is already at 55+ chars. Retains regulatory compliance and trust signal. |
 | 2026-04-06 | AM | Suburb form variants: 4 distinct indentation patterns exist | V1=22-space (hero-quick-form-actions, 14 pages), V2=btn-full (buda+westlake, 2 pages), V3=16-space (elgin/florence/jarrell/marble-falls/smithville/spicewood, 6 pages), V4=18-space (kyle+san-marcos, 2 pages). Always use Python replace(), not sed, for multi-line suburb form edits. |
 | 2026-04-06 | AM | City enrichment: add commute times + school district specifics as a standalone paragraph | Best format: `<strong>City at a glance:</strong>` paragraph with school campus names, commute times to 2-3 major employers/destinations, and price range by neighborhood. Insert after the main "why X" intro paragraph. One paragraph is enough — don't add a whole new section. |
+| 2026-04-07 | AM | Mortgage glossary page: use closing-costs-texas.html as template, not blog template | Resource/guide pages use the `hero-short` hero + `container-narrow article-body` content format — not the blog date/author header. Glossary uses `h3` with `id` anchors for each term so they're linkable from other pages. |
+| 2026-04-07 | AM | DSCR ROI examples: show honest math including negative cash flow scenarios | Adam's brand is radical transparency. Don't show only the winning scenarios. Core Austin LTR is negative cash flow — say so, and explain why investors still buy there. This builds credibility with sophisticated investors who already know the numbers. |

@@ -12,7 +12,7 @@ interface OptionCardProps {
   row: ScenarioDisplayRow
   deltas: DeltaItem[]
   mode: 'purchase' | 'refinance'
-  index: number
+  isCommonlyChosen?: boolean
 }
 
 function MiniStat({ label, value }: { label: string; value: string }) {
@@ -28,7 +28,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   )
 }
 
-export default function OptionCard({ row, deltas, mode, index }: OptionCardProps) {
+export default function OptionCard({ row, deltas, mode, isCommonlyChosen = false }: OptionCardProps) {
   const breakdownItems: { label: string; value: number }[] = [
     { label: 'Principal & Interest', value: row.monthlyPI },
     { label: 'Property Tax', value: row.propertyTaxes },
@@ -41,11 +41,11 @@ export default function OptionCard({ row, deltas, mode, index }: OptionCardProps
     <div
       className="rounded-2xl flex flex-col"
       style={{
-        background: index === 0
+        background: isCommonlyChosen
           ? `linear-gradient(180deg, #1a1710 0%, ${CARD_BG} 100%)`
           : CARD_BG,
-        border: `1px solid ${index === 0 ? `${GOLD}30` : BORDER}`,
-        boxShadow: index === 0
+        border: `1px solid ${isCommonlyChosen ? `${GOLD}30` : BORDER}`,
+        boxShadow: isCommonlyChosen
           ? `0 2px 16px rgba(201,168,76,0.06)`
           : '0 2px 8px rgba(0,0,0,0.2)',
       }}
@@ -55,7 +55,7 @@ export default function OptionCard({ row, deltas, mode, index }: OptionCardProps
         style={{
           height: 3,
           borderRadius: '16px 16px 0 0',
-          background: index === 0
+          background: isCommonlyChosen
             ? `linear-gradient(90deg, ${GOLD}60, ${GOLD}, ${GOLD}60)`
             : `linear-gradient(90deg, ${GOLD}00, ${GOLD}30, ${GOLD}00)`,
         }}
@@ -63,20 +63,34 @@ export default function OptionCard({ row, deltas, mode, index }: OptionCardProps
 
       <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 flex-1">
         {/* Header */}
-        <div className="flex items-center gap-2.5">
-          <h3 className="text-base font-bold" style={{ color: TEXT }}>
-            {row.label}
-          </h3>
-          <span
-            className="text-[9px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-md"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              color: `${MUTED}CC`,
-              border: `1px solid ${BORDER}`,
-            }}
-          >
-            {row.loanType}
-          </span>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h3 className="text-base font-bold" style={{ color: TEXT }}>
+              {row.label}
+            </h3>
+            <span
+              className="text-[9px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-md"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                color: `${MUTED}CC`,
+                border: `1px solid ${BORDER}`,
+              }}
+            >
+              {row.loanType}
+            </span>
+          </div>
+          {isCommonlyChosen && (
+            <span
+              className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+              style={{
+                background: `${GOLD}18`,
+                color: GOLD,
+                border: `1px solid ${GOLD}40`,
+              }}
+            >
+              Commonly Chosen
+            </span>
+          )}
         </div>
 
         {/* Hero Payment — the main event */}

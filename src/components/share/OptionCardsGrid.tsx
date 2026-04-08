@@ -51,6 +51,18 @@ function computeDeltas(
 export default function OptionCardsGrid({ rows, mode }: OptionCardsGridProps) {
   const baseline = rows[0]
 
+  // Find the card with the lowest total monthly payment to mark as "Commonly Chosen".
+  // Only applies when there are 2+ options — a single option needs no guidance badge.
+  const commonlyChosenIndex = rows.length > 1
+    ? rows.reduce((bestIdx, row, i) => {
+        const best = rows[bestIdx]
+        const rowPmt = row.totalMonthlyPayment
+        const bestPmt = best.totalMonthlyPayment
+        if (rowPmt > 0 && (bestPmt === 0 || rowPmt < bestPmt)) return i
+        return bestIdx
+      }, 0)
+    : -1
+
   return (
     <div
       className={`grid gap-5 ${
@@ -69,7 +81,7 @@ export default function OptionCardsGrid({ rows, mode }: OptionCardsGridProps) {
             row={row}
             deltas={deltas}
             mode={mode}
-            index={i}
+            isCommonlyChosen={i === commonlyChosenIndex}
           />
         )
       })}

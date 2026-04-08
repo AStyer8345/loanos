@@ -1,34 +1,33 @@
-## Scenarios Mission Brief — 2026-04-07 AM
+## Scenarios Mission Brief — 2026-04-08 AM
 
 ### Focus Area
-Mobile Share Page Audit + Fixes — 390px viewport
+"Commonly Chosen" visual highlight on share page OptionCards
 
 ### Why This Matters
-70%+ of borrowers open share links on phones. The share page redesign (Apr 3) was built desktop-first. Multiple components have known mobile layout issues: CashToCloseBreakdown overflows without overflow-x-auto, LOSidebarCard is buried below all content, ShareHero hero stat is misaligned. Mortgage Coach's biggest mobile advantage is that their share pages render cleanly at any screen size. Closing this gap means Adam's borrowers get a polished experience on the device they actually use.
+Mortgage Coach guides borrowers to focus on one option visually — LoanOS Scenarios shows all options equally, leaving borrowers overwhelmed. Adding a "Commonly Chosen" badge on the lowest-payment card gives borrowers a visual anchor without violating compliance (no recommendation, no "Best Option" framing).
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Fix CashToCloseBreakdown horizontal overflow on mobile (grid columns overflow at 390px)
-2. Hide LOSidebarCard on mobile (ShareCTA already provides CTAs)
-3. Fix ShareHero hero stat alignment on mobile
-4. Reduce OptionCard padding on mobile (p-4 sm:p-6)
-5. Add px-4 sm:px-6 to main layout container for tighter mobile padding
+1. OptionCardsGrid computes which scenario has the lowest total monthly payment
+2. That card renders a "Commonly Chosen" badge and receives the gold visual treatment
+3. Compliant framing only — never "Best Option", never imply approval
+4. Works for 1, 2, or 3 scenarios (badge hidden if only 1 scenario)
 
 ### Files in Scope
-- src/components/share/CashToCloseBreakdown.tsx
-- src/components/share/ShareHero.tsx
 - src/components/share/OptionCard.tsx
-- src/components/share/SharePageLayout.tsx
+- src/components/share/OptionCardsGrid.tsx
+ONLY these two files.
 
 ### Definition of Done
 - npm run build passes (0 TypeScript errors)
-- At 390px: no horizontal overflow on any section
-- CashToClose scrolls horizontally if needed (overflow-x-auto)
-- Hero stat is readable and well-aligned on mobile
-- LOSidebarCard hidden on mobile (lg:block)
-- ShareCTA still shows at bottom on mobile
+- "Commonly Chosen" badge appears on the card with the lowest totalMonthlyPayment
+- Gold card accent follows the badge (not hardcoded to index 0)
+- Badge hidden when there is only 1 scenario
+- Committed and pushed
 
 ### Subagents to Activate
-[x] Builder Subagent (direct — this session)
+[x] Builder Subagent (inline this session)
+[ ] QA Subagent
+[ ] Reporter Subagent

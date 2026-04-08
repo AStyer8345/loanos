@@ -384,3 +384,33 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Mobile share page audit (Tier 4 item 1) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-08 (scenarios-am)
+
+**What was built:**
+- "Commonly Chosen" Badge on OptionCard (`src/components/share/OptionCardsGrid.tsx`, `src/components/share/OptionCard.tsx`)
+  - `OptionCardsGrid.tsx`: computes `commonlyChosenIndex` = index of row with lowest `totalMonthlyPayment > 0`. Badge is hidden when there is only 1 scenario (`commonlyChosenIndex = -1`). Uses a `reduce` to find the minimum across all rows, skipping rows where `totalMonthlyPayment === 0`.
+  - `OptionCard.tsx`: added `isCommonlyChosen?: boolean` prop. Gold card treatment (gradient background, gold border, bright gold accent bar) now tracks `isCommonlyChosen` instead of `index === 0`. When `isCommonlyChosen`, a gold pill badge "Commonly Chosen" renders in the header at top-right — `#C9A84C` text on `${GOLD}18` background with `${GOLD}40` border. Compliant framing: no "Best Option", no "Recommended", no approval implication.
+  - Removed unused `index` prop from both interface and function signature (TypeScript strict mode).
+
+**MC gap closed:** Borrowers on the share page now have a visual anchor — the lowest-payment option is marked "Commonly Chosen" so they know where to start without Adam needing to explain it over the phone. Before: all 3 cards looked equally prominent (except position-based gold which was arbitrary). After: the card most borrowers gravitate to is visually distinguished with a compliance-safe badge and gold treatment.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `bcf6eb4` — pushed to main
+**Vercel:** `dpl_XJ215o2MiUDZg3St7Mfp3CnZauXp` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/components/share/OptionCardsGrid.tsx`
+- `src/components/share/OptionCard.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Share page: video/loom embed placeholder (Tier 4 item 3) — `<iframe>` embed slot above the OptionCardsGrid. Adam pastes a Loom URL; it renders as an embedded video with a "Walk me through this" section header. Input can be a new `videoUrl` field on the scenario or a hardcoded fallback to Adam's LO profile video.
+2. PDF: include "Commonly Chosen" badge label in the PDF output — currently only on the share page.
+3. domain-queue.md: Tier 4 is now 2/3 complete — add Tier 5 items (PDF "Commonly Chosen" label, loom embed).
+
+**Domain queue updates:**
+- "Commonly Chosen" badge (Tier 4 item 2) — ✅ COMPLETE this session
+

@@ -70,8 +70,8 @@ KNOWN GAPS (start here):
 ---
 
 ## Tier 4 — Polish + Emotional Impact (next focus)
-- **Mobile share page audit** — test at 390px viewport; fix any layout issues (70%+ of borrowers on phones)
-- **"Best option" highlight (no recommendation)** — visually guide borrowers to the recommended scenario without compliance violation; use "Most Popular" or "Commonly Chosen" framing
+- ~~**Mobile share page audit** — test at 390px viewport; fix any layout issues (70%+ of borrowers on phones)~~ ✅ DONE 2026-04-07 AM
+- ~~**"Commonly Chosen" badge** — lowest-payment OptionCard gets gold pill badge + gold card treatment; hidden for single-scenario views~~ ✅ DONE 2026-04-08 AM
 - **Share page: video/loom embed placeholder** — Adam records a 60-second walkthrough; embed above the options on the share page
 
 ---

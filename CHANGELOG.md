@@ -1,5 +1,12 @@
 # LoanOS Changelog
 
+## 2026-04-08 — Scenarios AM: Commonly Chosen Badge
+
+- `OptionCardsGrid`: computes lowest-payment scenario index; passes `isCommonlyChosen` to each card
+- `OptionCard`: gold card treatment now tracks `isCommonlyChosen` (not array position); removed unused `index` prop
+- "Commonly Chosen" gold pill badge renders in card header when active; hidden for single-scenario views
+- Build ✅ | Commit `bcf6eb4` | Vercel `dpl_XJ215o2MiUDZg3St7Mfp3CnZauXp`
+
 ## 2026-04-08 — Launch Standup
 
 - Created `tasks/standup-log.md` — daily standup log file initialized with first entry

@@ -75,6 +75,34 @@ See `memory/tools/n8n.md` for full index. Key ones:
 | `docs/security/secret-rotation-runbook.md` | Rotation procedures for every secret |
 | `/skills/user/` | 10+ user-defined Claude skills |
 
+## Social Media Agent Status
+<!-- Social media agent updates these three fields each session. Replace, never append. -->
+
+**Last worked on:** 2026-04-08 AM — Week 14 build (Posts 82-86, June 10-16). 5 EVERGREEN posts in social_drafts. Personal pillar rebalanced to 30%. QA PASS.
+
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS content stream blocked). Posts 29+30 (Liberation Day) pending decision — auto-archive April 28 if no response.
+
+**What's next:** Week 15 build (Posts 87-91). MANDATORY: 2 Promo posts (Promo at 0% Wks 11-14). Post 39 CPI fill April 10 AM session. Post 80 NFP fill June 5 AM.
+
+
+## Lead Gen Agent Status
+<!-- Lead gen agent updates these three fields each session. Replace, never append. -->
+
+**Last worked on:** 2026-04-08 AM — Built n8n workflows: Anniversary Check-In (ZUeGy8u8P4o6DPM3, INACTIVE) and Set Rate webhook (3iXImUkjgMitpJKt, INACTIVE). Activity_log schema confirmed (uses `action` col, requires org_id).
+
+**Active blockers:** Outlook credential must be connected in n8n UI before Anniversary workflow can activate. FRED API key not registered (blocks Sequence A). Sequences A and D copy approval pending (Adam). LO Waitlist not deployed.
+
+**What's next:** Sequence A (Rate Drop Alert) — pending FRED API key in n8n env. Sequence D (Warm-Up) — pending email copy approval. LO Waitlist smoke test — pending Adam deploy.
+
+## SEO/SEM Agent Status
+<!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
+
+**Last worked on:** 2026-04-07 PM — City enrichment (Leander/Hutto/Bastrop), mortgage-glossary.html created, DSCR ROI examples added. NotebookLM: deprecated styermortgage-context.md removed, CONTEXT.md+ARCHITECTURE.md added as foundational docs.
+
+**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). Suburb quick-forms: generate_lead fires but thank_you_page_view missing — Google Ads conversion undercount. mortgage-glossary.html not in nav yet. ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
+
+**What's next:** Add mortgage-glossary.html to Resources nav + link from loan type pages. Fix suburb quick-form conversion tracking. City enrichment: Bee Cave, Manor, Liberty Hill. Adam: pull GSC export.
+
 ## Rules For AI Sessions
 
 - **UI changes**: Prefer `docs/THEME.md` + text spec. Don't require screenshots.

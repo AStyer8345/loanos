@@ -1,5 +1,55 @@
 # LoanOS Changelog
 
+## 2026-04-08 — Launch Standup
+
+- Created `tasks/standup-log.md` — daily standup log file initialized with first entry
+- Vercel: latest deploy READY (7b57bef — pre-approval modal name field fix)
+- n8n: all active workflows healthy; Outlook CD & Contract Extractor flagged INACTIVE (GOALS.md #2 email automation unactivated)
+- 18 days to April 26 target; Renovation Phases 3-6 + 4 of 7 GOALS.md priorities unstarted
+- Risk: timeline tight — notes/activity log fix + email automation activation are day-1 priorities
+
+## 2026-04-08 — Lead Gen AM Session — Refi Watch Anniversary Check-In Build
+
+- Built n8n workflow "LoanOS — Refi Watch Anniversary Check-In" (ID: ZUeGy8u8P4o6DPM3) — INACTIVE, 10 nodes, runs 1st of month 8am CT; emails past clients whose loan closed in current calendar month; deduplication via activity_log; requires Adam to connect Outlook credential before activating
+- Built n8n workflow "LoanOS — Refi Watch Set Rate" (ID: 3iXImUkjgMitpJKt) — INACTIVE, 4 nodes, webhook POST /refi-watch-set-rate; Adam calls weekly with current rate; stores to activity_log (action=refi_rate_update); feeds Sequence A Rate Drop Alert when built
+- Confirmed activity_log schema: uses `action` (NOT activity_type), requires `organization_id` — spec corrected; all log inserts use org_id 18613f82-fdd9-42dd-a09e-f3c577328258
+- Added 3 ADAM-TODO items: connect Outlook credential, approve to activate, Set Rate usage instructions
+- NotebookLM PULL complete for 2026-04-08; pull report saved
+
+## 2026-04-08 — Social Media AM Session — Week 14 Build
+
+- Built 5 posts (82-86) for June 10-16 publish window — all EVERGREEN, no TIMELY posts needed (no major economic events that week)
+- Personal pillar rebalanced: 3/5 posts this week = Personal (was at 20% rolling, now at 30%)
+- Post 83 ("For Their Beds" — Ruthie/cereal story) rated 9/10 — highest-quality post this week
+- Post 84 rewritten by Quality subagent (6→7): "closing fast vs closing right" + "That's still the goal"
+- Reviewer flagged: Promo pillar at 0% across Wks 11-14 — Week 15 must include 2 Promo posts
+- BLOCKER-LOANOS-001 still active (selfies/ empty); Post 39 CPI template unchanged (fills April 10 AM)
+- NotebookLM: 3 sources pushed; Styer Growth Log synced to Master notebook
+
+## 2026-04-07 — SEO/SEM PM Session — NotebookLM PUSH+CURATE
+
+- Removed deprecated `styermortgage-context.md` from SEO notebook — file is now a deprecation notice; replaced with live `CONTEXT.md` + `ARCHITECTURE.md`
+- Removed stale `2026-04-06.md` run log from SEO notebook (wrong source type — run logs don't belong in SEO knowledge base)
+- Master log appended: AM session covered city enrichment (Leander, Hutto, Bastrop), `mortgage-glossary.html` creation, DSCR ROI examples; synced to Styer Mortgage Master notebook
+- Daily digest written UNSENT — `ZAPIER_DISPATCH_WEBHOOK_URL` not set in environment (saved to `tasks/seo-sem/digests/2026-04-07-digest.md`)
+- Staleness audit filed: `tasks/seo-sem/notebooklm-audit-2026-04-07.md` — no 60-day-old sources, 2 removed for hygiene
+
+## 2026-04-07 — Lead Gen PM Session — Refi Watch Unblocking + NotebookLM Curation
+
+- FRED API (MORTGAGE30US) selected as permanent rate source for Refi Watch — free, automated, Freddie Mac weekly data; replaces manual entry recommendation from Apr 5 spec
+- Execution order finalized: Sequence D warm-up → 2-week wait → Sequences B & A (anniversary + rate drop alerts) targeting 644 past clients
+- Nurture Gap documented: leads captured on site receive zero follow-up; 3 Mailchimp Customer Journeys required (Pre-Approval, Rate Watch, FTB DPA) — spec queued for AM build session
+- NotebookLM curated: 9 stale sources removed (Netlify docs, 2018 article, old Mar–Apr research files); 5 added (CONTEXT.md refresh, FRED API docs, 2 Scotsman Guide refi retention, PM web research)
+- Daily digest sent to adam@thestyerteam.com via Zapier (status: success)
+
+## 2026-04-07 — Social Media PM Session — Week 13 Build
+
+- Built 5 posts (77-81) for June 3-9 publish window: LinkedIn personal story (coaching call), Instagram Reel (Fed cuts ≠ mortgage rates), Facebook Real Talk (pre-approval quality), LinkedIn TIMELY template (June 5 NFP), Instagram carousel (rate history)
+- All 5 posts inserted into social_drafts via Supabase; QA PASS; compliance APPROVED WITH NOTES
+- Daily digest sent to adam@thestyerteam.com via Zapier; NotebookLM synced (3 sources added)
+- BLOCKER-LOANOS-001 still active (selfies not uploaded — LoanOS stream remains blocked)
+- Rolling 4-week pillar mix: Real Talk slightly over at 32%; Week 14 must add Personal posts to rebalance
+
 ## [8.1.9] — 2026-04-05 — PII Encryption Phase 2: Server-Side Read Path
 
 ### Added

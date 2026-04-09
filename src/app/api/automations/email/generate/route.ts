@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
           .from('contacts')
           .select('first_name, last_name, email, phone')
           .eq('id', loan.contact_id)
+          .eq('organization_id', organizationId)
           .single()
 
         if (contact) {

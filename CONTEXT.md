@@ -108,9 +108,9 @@ See `memory/tools/n8n.md` for full index. Key ones:
 
 **Last worked on:** 2026-04-07 PM — City enrichment (Leander/Hutto/Bastrop), mortgage-glossary.html created, DSCR ROI examples added. NotebookLM: deprecated styermortgage-context.md removed, CONTEXT.md+ARCHITECTURE.md added as foundational docs.
 
-**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). ~~Suburb quick-forms: generate_lead fires but thank_you_page_view missing~~ FIXED 2026-04-08. mortgage-glossary.html not in nav yet. ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
+**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). ~~Suburb quick-forms~~ FIXED 2026-04-08. ~~mortgage-glossary.html not in nav~~ FIXED 2026-04-08 AM (added to 64 pages). ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
 
-**What's next:** Add mortgage-glossary.html to Resources nav + link from loan type pages. Fix suburb quick-form conversion tracking. City enrichment: Bee Cave, Manor, Liberty Hill. Adam: pull GSC export.
+**What's next:** ~~Add mortgage-glossary.html to Resources nav~~ DONE 2026-04-08. ~~Fix suburb quick-form conversion tracking~~ DONE 2026-04-08. City enrichment: Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, Lakeway, Elgin. Adam: pull GSC export.
 
 ## Rules For AI Sessions
 

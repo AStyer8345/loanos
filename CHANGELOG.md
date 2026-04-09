@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## 2026-04-08 — Interactive Session: 6 Priority Items
+
+- **P1 FIX: Notes + Activity Log** — `contact_activity` table never created in any migration despite being referenced by API routes, UI, and migration 048. Created migration 081 (full schema, indexes, org-scoped RLS). Applied to live Supabase. Build ✅ | Commit `34661ae`.
+- **P2: Migration 075 (los_integrations)** — Already applied. Verified: 12 columns, 4 RLS policies present.
+- **P3 FIX: Weeks 1–3 Social Posts** — Confirmed Posts 1–21 missing from `social_drafts`. Rebuilt all 21 from on-disk build reports. Inserted via Supabase MCP. Verified 21 rows.
+- **P4 FIX: Suburb Quick-Form Conversion Tracking** — analytics.js broadened to `form[data-netlify]`, removed premature `thank_you_page_view`, added to script.js fetch success. initHeroQuickForm() now falls back to any data-netlify form (fixes Buda/Westlake). Commit `54a4c10`.
+- **P5: Temp Placeholder Blog Posts** — Oil Prices already renamed. 2026-03-30 temp converted to meta-refresh redirect. Commit `eab273b`.
+- **P6: Contact Schema Questions** — Answered Q2–Q8 in `tasks/crm/research/2026-03-25-contact-data-architecture.md`. production_tier/realtor_stage exist, interest_rate populated via Arive, last_touch_at NOT backfilled. One Adam decision: sms_opt_in scope.
+
 ## 2026-04-08 — Scenarios AM: Commonly Chosen Badge
 
 - `OptionCardsGrid`: computes lowest-payment scenario index; passes `isCommonlyChosen` to each card

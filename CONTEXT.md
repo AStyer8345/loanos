@@ -37,9 +37,18 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 ## Blockers for LO #2 Onboarding
 
 1. Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts` (check a Zapier run for the field name)
-2. Apply migration 075 (`los_integrations`) to Supabase
+2. ~~Apply migration 075 (`los_integrations`) to Supabase~~ — done 2026-04-08
 3. Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns
 4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`
+
+## Recent Fixes (2026-04-08)
+
+- **Migration 081 (`contact_activity`)**: Table was referenced by API routes, UI, types, and migration 048 but never created. Now live with full RLS (org-scoped). Notes + activity log functional.
+- **Migration 075 (`los_integrations`)**: Applied to live Supabase.
+- **Social drafts**: Weeks 1-3 (Posts 1-21) rebuilt from build reports and inserted into `social_drafts`.
+- **Suburb quick-form tracking**: Fixed `generate_lead` + `thank_you_page_view` gap on styermortgage.com suburb pages.
+- **Blog slug rename**: temp-placeholder posts converted to meta-refresh redirects to canonical URLs.
+- **Contact schema research**: Q2-Q8 answered in `tasks/crm/research/2026-03-25-contact-data-architecture.md`.
 
 ## Active n8n Workflows
 
@@ -99,7 +108,7 @@ See `memory/tools/n8n.md` for full index. Key ones:
 
 **Last worked on:** 2026-04-07 PM — City enrichment (Leander/Hutto/Bastrop), mortgage-glossary.html created, DSCR ROI examples added. NotebookLM: deprecated styermortgage-context.md removed, CONTEXT.md+ARCHITECTURE.md added as foundational docs.
 
-**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). Suburb quick-forms: generate_lead fires but thank_you_page_view missing — Google Ads conversion undercount. mortgage-glossary.html not in nav yet. ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
+**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). ~~Suburb quick-forms: generate_lead fires but thank_you_page_view missing~~ FIXED 2026-04-08. mortgage-glossary.html not in nav yet. ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
 
 **What's next:** Add mortgage-glossary.html to Resources nav + link from loan type pages. Fix suburb quick-form conversion tracking. City enrichment: Bee Cave, Manor, Liberty Hill. Adam: pull GSC export.
 

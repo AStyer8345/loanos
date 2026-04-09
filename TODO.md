@@ -6,11 +6,11 @@
 ## Now (this week)
 
 - [ ] Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`
-- [ ] Apply migration 075 (`los_integrations`) to Supabase
+- [x] Apply migration 075 (`los_integrations`) to Supabase (done 2026-04-08)
 - [ ] Run PII backfill script (`scripts/backfill-activity-pii.ts`)
 - [ ] Adam: register FRED API key → unblocks Refi Watch automation
 - [ ] Adam: upload selfies → unblocks LoanOS social content stream
-- [ ] Week 1 social posts overdue — run Publer curl commands
+- [ ] Social posts: now at Week 13 (Posts 77-81 built). Adam must film Post 78 Reel (by June 4) + create Post 81 Canva (by June 7).
 - [ ] Adam: build 3 Mailchimp Customer Journeys (PA Welcome, Rate Watch, DPA Guide)
 - [ ] NMLS# 513013 profile audit on all 4 social platforms
 - [ ] Adam: review/approve Refi Watch email copy (Sequences A + D)
@@ -34,4 +34,4 @@
 - [ ] SOC 2 Type 1 kickoff
 - [ ] Film Reels: Posts 44, 51, 23, 16, 18
 - [ ] Create Canva assets: Posts 1, 5, 6, 8, 10, 12, 13, 22, 27, 43, 47, 52, 55, 60
-- [ ] Weeks 1-3 social posts may not exist in social_drafts — investigate/rebuild
+- [x] Weeks 1-3 social posts rebuilt in social_drafts (21 posts inserted 2026-04-08)

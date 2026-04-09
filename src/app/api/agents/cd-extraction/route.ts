@@ -48,6 +48,11 @@ export async function POST(req: NextRequest) {
       .single()
     const organizationId = loan?.organization_id ?? null
 
+    if (!organizationId) {
+      console.error('[cd-extraction] Loan has no organization_id:', loan_id)
+      return NextResponse.json({ error: 'Loan is not assigned to an organization' }, { status: 400 })
+    }
+
     // Build update payload — only include fields that were provided
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (closing_date)            updates.closing_date             = closing_date
@@ -71,6 +76,7 @@ export async function POST(req: NextRequest) {
       .from('loans')
       .update(updates)
       .eq('id', loan_id)
+      .eq('organization_id', organizationId)
 
     if (updateError) {
       console.error('[cd-extraction] Loan update failed:', updateError)

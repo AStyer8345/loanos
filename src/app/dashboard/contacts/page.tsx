@@ -368,12 +368,14 @@ function ContactTypeahead({
   value,
   onChange,
   supabase,
+  organizationId,
   placeholder = 'referred by…',
   inputStyle,
 }: {
   value: string
   onChange: (val: string) => void
   supabase: ReturnType<typeof createClient>
+  organizationId: string | null
   placeholder?: string
   inputStyle?: React.CSSProperties
 }) {
@@ -386,10 +388,12 @@ function ContactTypeahead({
   function runSearch(term: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (!term.trim()) { setResults([]); setOpen(false); return }
+    if (!organizationId) return
     debounceRef.current = setTimeout(async () => {
       const { data } = await supabase
         .from('contacts')
         .select('id, first_name, last_name, contact_type')
+        .eq('organization_id', organizationId)
         .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
         .limit(20)
       const sorted = ((data ?? []) as TypeaheadResult[]).sort((a, b) => {
@@ -661,50 +665,53 @@ export default function ContactsPage() {
     const id = selectedContact?.id
     if (!id) { setContactLoans([]); return }
     setContactLoansLoading(true)
+    if (!organizationId) { setContactLoans([]); setContactLoansLoading(false); return }
     supabase
       .from('loans')
       .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date')
+      .eq('organization_id', organizationId)
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
       .then(({ data }) => {
         setContactLoans(data || [])
         setContactLoansLoading(false)
       })
-  }, [selectedContact?.id, supabase])
+  }, [selectedContact?.id, supabase, organizationId])
 
   // ── fetchCounts ─────────────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
+    if (!organizationId) return
     const h = { count: 'exact', head: true } as const
     const base = [
-      supabase.from('contacts').select('*', h),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower'),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'borrower').in('stage', ['Closed']),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor'),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').not('production_tier', 'is', null),
-      supabase.from('contacts').select('*', h).or(
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower'),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Closed']),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor'),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').not('production_tier', 'is', null),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).or(
         'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
         'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
       ),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').gte('deals_ytd_count', 1),
-      supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').gte('referral_ytd_count', 2),
-      (() => { const c = new Date(Date.now() - 60*24*60*60*1000).toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${c}`) })(),
-      (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); const s = d.toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${s}`) })(),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').gte('deals_ytd_count', 1),
+      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').gte('referral_ytd_count', 2),
+      (() => { const c = new Date(Date.now() - 60*24*60*60*1000).toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${c}`) })(),
+      (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); const s = d.toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${s}`) })(),
     ]
     const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned', 'active_deal_partners', 'top_producers', 'due_for_outreach', 'tier_a_not_this_month']
     const results = await Promise.all(base)
     const next: Record<string, number> = {}
     builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })
     for (const list of customLists) {
-      let q = supabase.from('contacts').select('*', h)
+      let q = supabase.from('contacts').select('*', h).eq('organization_id', organizationId)
       if (list.rules?.length) q = applyCustomListRulesContact(q, list.rules)
       const { count } = await q
       next[list.id] = count ?? 0
     }
     setCounts(next)
-  }, [supabase, customLists])
+  }, [supabase, customLists, organizationId])
 
   // ── fetchContacts ────────────────────────────────────────────────────────────
   const buildContactQuery = useCallback((q: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -722,9 +729,10 @@ export default function ContactsPage() {
   }, [activeList, search, customLists])
 
   const fetchContacts = useCallback(async () => {
+    if (!organizationId) return
     setLoading(true)
     offsetRef.current = 0
-    let q = buildContactQuery(supabase.from('contacts').select('*'))
+    let q = buildContactQuery(supabase.from('contacts').select('*').eq('organization_id', organizationId))
     q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
          .range(0, CONTACTS_PAGE_SIZE - 1)
     const { data, error } = await q
@@ -735,12 +743,13 @@ export default function ContactsPage() {
     }
     setLoading(false)
     setSelectedIds(new Set())
-  }, [supabase, buildContactQuery, sort])
+  }, [supabase, buildContactQuery, sort, organizationId])
 
   const loadMoreContacts = useCallback(async () => {
+    if (!organizationId) return
     setLoadingMore(true)
     const nextOffset = offsetRef.current + CONTACTS_PAGE_SIZE
-    let q = buildContactQuery(supabase.from('contacts').select('*'))
+    let q = buildContactQuery(supabase.from('contacts').select('*').eq('organization_id', organizationId))
     q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
          .range(nextOffset, nextOffset + CONTACTS_PAGE_SIZE - 1)
     const { data, error } = await q
@@ -751,18 +760,19 @@ export default function ContactsPage() {
       setHasMore(data.length === CONTACTS_PAGE_SIZE)
     }
     setLoadingMore(false)
-  }, [supabase, buildContactQuery, sort])
+  }, [supabase, buildContactQuery, sort, organizationId])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
 
   const fetchKanbanContacts = useCallback(async () => {
+    if (!organizationId) return
     setKanbanLoading(true)
     const grouped: Record<string, Contact[]> = {}
     STAGES.forEach(s => { grouped[s] = [] })
     await Promise.all(
       STAGES.map(async stage => {
-        let q = buildContactQuery(supabase.from('contacts').select('*'))
+        let q = buildContactQuery(supabase.from('contacts').select('*').eq('organization_id', organizationId))
         q = q.eq('stage', stage).order('updated_at', { ascending: false }).limit(50)
         const { data } = await q
         grouped[stage] = data ?? []
@@ -770,7 +780,7 @@ export default function ContactsPage() {
     )
     setKanbanContacts(grouped)
     setKanbanLoading(false)
-  }, [supabase, buildContactQuery])
+  }, [supabase, buildContactQuery, organizationId])
 
   useEffect(() => {
     if (viewMode === 'kanban') fetchKanbanContacts()
@@ -799,9 +809,11 @@ export default function ContactsPage() {
       return { ...prev, [fromStage]: fromList, [toStage]: toList }
     })
     // Persist to Supabase
+    if (!organizationId) return
     const { error } = await supabase
       .from('contacts')
       .update({ stage: normalizeContactStage(toStage), updated_at: new Date().toISOString() })
+      .eq('organization_id', organizationId)
       .eq('id', contactId)
     if (error) {
       console.error('Stage update failed:', error)
@@ -836,7 +848,9 @@ export default function ContactsPage() {
       if (selectedContact?.id === contactId)
         setSelectedContact(prev => prev ? { ...prev, stage: stageValue } : null)
     }
-    await supabase.from('contacts').update({ stage: normalizeContactStage(stageValue) }).eq('id', contactId)
+    if (organizationId) {
+      await supabase.from('contacts').update({ stage: normalizeContactStage(stageValue) }).eq('organization_id', organizationId).eq('id', contactId)
+    }
     updateLastTouch(supabase, contactId, 'stage_changed', `Stage changed to ${stageValue ?? '(none)'}`)
     fetchCounts()
   }
@@ -866,7 +880,9 @@ export default function ContactsPage() {
     const ids = Array.from(selectedIds)
     const field = bulkAction === 'stage' ? 'stage' : bulkAction === 'type' ? 'contact_type' : 'referred_by'
     const writeValue = field === 'stage' ? normalizeContactStage(bulkValue) : bulkValue
-    await supabase.from('contacts').update({ [field]: writeValue }).in('id', ids)
+    if (organizationId) {
+      await supabase.from('contacts').update({ [field]: writeValue }).eq('organization_id', organizationId).in('id', ids)
+    }
     setBulkAction(null)
     setBulkValue('')
     await Promise.all([fetchContacts(), fetchCounts()])
@@ -877,7 +893,9 @@ export default function ContactsPage() {
     if (selectedIds.size === 0) return
     setBulkProcessing(true)
     const ids = Array.from(selectedIds)
-    await supabase.from('contacts').delete().in('id', ids)
+    if (organizationId) {
+      await supabase.from('contacts').delete().eq('organization_id', organizationId).in('id', ids)
+    }
     setDeleteConfirmOpen(false)
     setBulkAction(null)
     await Promise.all([fetchContacts(), fetchCounts()])
@@ -888,7 +906,8 @@ export default function ContactsPage() {
   async function handleSaveEdit() {
     if (!selectedContact) return
     setSaving(true)
-    const { error } = await supabase.from('contacts').update(editData as any).eq('id', selectedContact.id) // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (!organizationId) { setSaving(false); return }
+    const { error } = await supabase.from('contacts').update(editData as any).eq('organization_id', organizationId).eq('id', selectedContact.id) // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!error) {
       setEditMode(false)
       setSelectedContact(prev => prev ? { ...prev, ...editData } as Contact : null)
@@ -1843,17 +1862,19 @@ export default function ContactsPage() {
                   onClick={async () => {
                     const valid = csvRows.filter(r => r.last_name?.trim() && r.email?.trim())
                     if (!valid.length) return
+                    if (!organizationId) return
                     setCsvImporting(true)
                     const BATCH = 50
                     let inserted = 0
                     let failed   = 0
                     for (let i = 0; i < valid.length; i += BATCH) {
                       const batch = valid.slice(i, i + BATCH).map(r => ({
-                        first_name:   r.first_name?.trim()   || null,
-                        last_name:    r.last_name.trim(),
-                        email:        r.email.trim().toLowerCase(),
-                        phone:        r.phone?.trim()         || null,
-                        contact_type: r.contact_type?.trim() || null,
+                        first_name:     r.first_name?.trim()   || null,
+                        last_name:      r.last_name.trim(),
+                        email:          r.email.trim().toLowerCase(),
+                        phone:          r.phone?.trim()         || null,
+                        contact_type:   r.contact_type?.trim() || null,
+                        organization_id: organizationId,
                       }))
                       const { error } = await supabase.from('contacts').insert(batch as any) // eslint-disable-line @typescript-eslint/no-explicit-any
                       if (error) failed += batch.length
@@ -1926,6 +1947,7 @@ export default function ContactsPage() {
               value={newContact.referred_by ?? ''}
               onChange={val => setNewContact(prev => ({ ...prev, referred_by: val }))}
               supabase={supabase}
+              organizationId={organizationId}
               placeholder="referred by…"
             />
 

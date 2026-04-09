@@ -414,3 +414,39 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - "Commonly Chosen" badge (Tier 4 item 2) — ✅ COMPLETE this session
 
+---
+
+## AM Session — 2026-04-09 (scenarios-am)
+
+**What was built:**
+- Video/Loom embed on share page (`src/components/share/ShareVideoEmbed.tsx`, `SharePageLayout.tsx`, `src/app/api/share/[token]/route.ts`)
+  - `ShareVideoEmbed.tsx`: new component — responsive 16:9 iframe (padding-bottom: 56.25% intrinsic ratio), LoanOS dark card style, "Walk Me Through This" section header in gold, `print:hidden` so it doesn't appear in PDF
+  - URL normalization: Loom share URLs (`/share/abc`) auto-converted to embed URLs (`/embed/abc`); YouTube watch + short URLs also normalized; any other URL passed through unchanged; invalid URLs silently return null
+  - `ShareBranding` type: added `videoUrl: string | null` field
+  - API route: reads `settings.scenario_video_url` from `user_settings` key-value table — zero-migration, Adam sets it once from Dashboard → Settings, appears on all share pages
+  - `SharePageLayout`: renders `<ShareVideoEmbed videoUrl={b.videoUrl} />` above "Your Options" section; renders nothing if videoUrl not set (no empty gap)
+  - `DEFAULT_BRANDING` fallback: `videoUrl: null`
+
+**MC gap closed:** Share page now has a video walkthrough slot. Before: borrowers land on numbers with no voice — they call Adam confused. After: Adam records one 60-second Loom and it plays above every share page he sends, guiding borrowers before they pick up the phone. MC charges extra for this. LoanOS does it for free via a user_settings key.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `6f3d3bd` — pushed to main
+**Vercel:** `dpl_4Vh7Bx8rYtyCw63PvmBtvwEPp8pA` — ✅ READY
+
+**Files touched:**
+- `src/app/api/share/[token]/route.ts`
+- `src/components/share/ShareVideoEmbed.tsx` (new)
+- `src/components/share/SharePageLayout.tsx`
+- `tasks/scenarios/domain-queue.md` (Tier 4 complete, Tier 5 defined)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. PDF: "Commonly Chosen" label in PDF output — mirror the share page badge. Currently the lowest-payment scenario is visually distinguished on the web but the label disappears in the printed PDF. Affects `src/app/api/scenarios/generate-pdf/route.ts`.
+2. Scenario naming in builder — let LO label each scenario ("Conservative", "Seller Buydown", etc.) instead of "Option A / B / C"; names carry through to share page and PDF
+3. Comparison table on share page — side-by-side data table below option cards for borrowers who want all numbers in one view (currently only in DetailAccordion behind a tap)
+
+**Domain queue updates:**
+- Video/loom embed (Tier 4 item 3) — ✅ COMPLETE this session
+- Tier 4 COMPLETE
+- Tier 5 defined in domain-queue.md (5 items)
+

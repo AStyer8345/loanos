@@ -87,30 +87,39 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-08 AM — Week 14 build (Posts 82-86, June 10-16). 5 EVERGREEN posts in social_drafts. Personal pillar rebalanced to 30%. QA PASS.
+**Last worked on:** 2026-04-09 AM — Week 15 QA complete (Posts 87-91 scheduled June 17-23; PM session had created posts but crashed before scheduling). Week 16 built (Posts 92-96, June 24-30). Rolling 30/30/30/10 pillar mix ACHIEVED across Wks 11-16. DB note: "promo" violates pillar_check — use "authority" for promo posts.
 
 **Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS content stream blocked). Posts 29+30 (Liberation Day) pending decision — auto-archive April 28 if no response.
 
-**What's next:** Week 15 build (Posts 87-91). MANDATORY: 2 Promo posts (Promo at 0% Wks 11-14). Post 39 CPI fill April 10 AM session. Post 80 NFP fill June 5 AM.
+**What's next:** April 10 AM — CPI releases 8:30 AM ET → Refresh fills Post 39 TIMELY template AFTER data release. Week 17 build (Posts 97-101, July 1-7 window).
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-08 AM — Built n8n workflows: Anniversary Check-In (ZUeGy8u8P4o6DPM3, INACTIVE) and Set Rate webhook (3iXImUkjgMitpJKt, INACTIVE). Activity_log schema confirmed (uses `action` col, requires org_id).
+**Last worked on:** 2026-04-09 AM — Sequences A + D built. n8n workflow IDs: Sequence A (Rate Drop Alert) `iyKFy0ODkyyqQaAS`, Sequence D (Pre-Drop Warm-Up) `W0K4YDzkZd0Hzv6g`. Both INACTIVE. Sequence A: daily 7AM CT, reads rate from activity_log (Set Rate webhook), fires when rate ≤ 6.00% + borrower rate ≥ 6.75%, 30-day per-loan dedup. Sequence D: manual one-shot, filters already-touched clients, warm-up HTML email, logs refi_warmup.
 
-**Active blockers:** Outlook credential must be connected in n8n UI before Anniversary workflow can activate. FRED API key not registered (blocks Sequence A). Sequences A and D copy approval pending (Adam). LO Waitlist not deployed.
+**Active blockers:** Outlook credential not verified in n8n UI — blocks all Refi Watch sequences (A, B, D). Set Rate webhook must be called once before Sequence A can fire. Sequence D requires Adam approval before manual trigger (irreversible — all 644 contacts). FRED API key still unregistered (blocks future automated Option B — current Option A works). LO Waitlist not deployed to Netlify.
 
-**What's next:** Sequence A (Rate Drop Alert) — pending FRED API key in n8n env. Sequence D (Warm-Up) — pending email copy approval. LO Waitlist smoke test — pending Adam deploy.
+**What's next:** Adam actions: (1) connect Outlook credential in n8n, (2) activate + call Set Rate webhook with current rate, (3) activate Sequence A, (4) review + manually trigger Sequence D when ready. Next PM: reduce notebook below 50 sources (remove Mar 25-28 PM research). No new AM build work until blockers cleared.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-07 PM — City enrichment (Leander/Hutto/Bastrop), mortgage-glossary.html created, DSCR ROI examples added. NotebookLM: deprecated styermortgage-context.md removed, CONTEXT.md+ARCHITECTURE.md added as foundational docs.
+**Last worked on:** 2026-04-08 PM — NotebookLM PUSH+CURATE. AM session: glossary nav added to 64 pages, city enrichment Bee Cave/Manor/Smithville (commit e4ee80b). Notebook: 3 removed (content-strategy Mar 27, stale CONTEXT.md, redundant GSC URL inspection), 3 added (refreshed CONTEXT.md, SEL meta/CTR guide, audit file). 50/50 maintained. Digest UNSENT (no webhook).
 
-**Active blockers:** GSC 90-day export OVERDUE (April 5 window passed). ~~Suburb quick-forms~~ FIXED 2026-04-08. ~~mortgage-glossary.html not in nav~~ FIXED 2026-04-08 AM (added to 64 pages). ZAPIER_DISPATCH_WEBHOOK_URL not set (digest UNSENT).
+**Active blockers:** GSC 90-day export overdue — all keyword prioritization inference-based. Suburb pages not indexed — 24 pages need manual "Request Indexing" in GSC (Round Rock, Georgetown, Cedar Park first). ZAPIER_DISPATCH_WEBHOOK_URL not set (digests saving locally).
 
-**What's next:** ~~Add mortgage-glossary.html to Resources nav~~ DONE 2026-04-08. ~~Fix suburb quick-form conversion tracking~~ DONE 2026-04-08. City enrichment: Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, Lakeway, Elgin. Adam: pull GSC export.
+**What's next:** AEO answer-first paragraphs on Tier 1 suburbs (San Marcos, Georgetown, Round Rock, Leander, Pflugerville). City enrichment remaining queue (check session-log for remaining cities). Adam: (1) pull GSC export, (2) manually request indexing via GSC URL Inspection tool.
+
+## Scenarios Agent Status
+<!-- Scenarios agent updates these three fields each session. Replace, never append. -->
+
+**Last worked on:** 2026-04-09 AM — Video/Loom embed on share page. ShareVideoEmbed.tsx (new component), videoUrl added to ShareBranding, reads from user_settings.scenario_video_url. Tier 4 COMPLETE. Tier 5 defined (PDF badge, scenario naming, refi pre-fill, comparison table, social proof).
+
+**Active blockers:** None — next item is pure code (PDF "Commonly Chosen" label in generate-pdf route).
+
+**What's next:** PDF "Commonly Chosen" label in `src/app/api/scenarios/generate-pdf/route.ts` — mirror the share page badge in PDF output so the lowest-payment scenario is visually distinguished in print.
 
 ## Rules For AI Sessions
 

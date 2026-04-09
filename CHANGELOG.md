@@ -1,5 +1,51 @@
 # LoanOS Changelog
 
+## 2026-04-09 AM — Scenarios: Video/Loom Embed on Share Page (Tier 4 Complete)
+
+- **ShareVideoEmbed.tsx** (new): responsive 16:9 iframe embed component — LoanOS dark card style, gold "Walk Me Through This" header, `print:hidden`, Loom + YouTube URL normalization, returns null when no URL set
+- **ShareBranding**: added `videoUrl` field, reads from `user_settings.scenario_video_url` (zero-migration key-value entry — Adam adds key in Settings to activate)
+- **SharePageLayout**: video embed renders above "Your Options" section; invisible when no URL set
+- **Tier 4 COMPLETE** (all 3 items done: mobile audit, Commonly Chosen badge, video embed)
+- **Tier 5 defined** in domain-queue.md: PDF badge, scenario naming, refi pre-fill, comparison table, social proof block
+- BUILD: ✅ PASS | Commit: 6f3d3bd | Vercel: dpl_4Vh7Bx8rYtyCw63PvmBtvwEPp8pA → READY
+
+## 2026-04-09 — Launch Standup (automated)
+
+- Vercel deployment: READY (commit `a23dfc8` — fixer reconciliation)
+- n8n: 19 active workflows, no errors; 7 inactive (Refi Watch series, Waitlist, CD Extractor — all intentional)
+- No audit files in `audits/` to surface
+- Standup log appended to `tasks/standup-log.md`
+
+## 2026-04-09 AM — Lead Gen: Refi Watch Sequences A + D Built
+
+- **Sequence A — Rate Drop Alert** (ID: `iyKFy0ODkyyqQaAS`): Daily 7AM CT CRON. Reads current rate from `activity_log` (action=`refi_rate_update`) set by existing Set Rate webhook. Rate threshold: 6.00%. Borrower segment: interest_rate ≥ 6.75%. 30-day per-loan dedup via activity_log check. HTML email with savings estimate (spread × loan_amount/12 × 0.75), Reg Z disclaimer, CAN-SPAM footer. INACTIVE — needs Outlook credential + Set Rate called first.
+- **Sequence D — Pre-Drop Warm-Up** (ID: `W0K4YDzkZd0Hzv6g`): Manual trigger. Pulls all past clients with closed loans + email, cross-references activity_log to exclude already-touched (any refi_watch action). Sends warm-up HTML email to untouched contacts. Logs `refi_warmup` to activity_log. INACTIVE — requires Adam's explicit approval before manual trigger. One-shot, irreversible.
+- All 4 Refi Watch workflows now exist: Seq A (`iyKFy0ODkyyqQaAS`), Seq B (`ZUeGy8u8P4o6DPM3`), Seq D (`W0K4YDzkZd0Hzv6g`), Set Rate (`3iXImUkjgMitpJKt`). Activation blocked on Outlook credential.
+
+## 2026-04-09 AM — Social Media: Week 15 Rescue + Week 16 Build
+
+- **Week 15 QA + scheduling**: PM session (Apr 8, 9 PM CDT) created Posts 87-91 in Supabase but crashed before scheduling step. AM session ran Quality (avg 7.8/10) + Reviewer (APPROVED) and set scheduled_for dates for all 5 posts (June 17-23 window).
+- **Week 16 built**: Posts 92-96 written and inserted into `social_drafts` (June 24-30 window). Platforms: LinkedIn (2), Instagram (1), Facebook (2). All EVERGREEN.
+- **Pillar milestone**: Rolling 30/30/30/10 mix achieved for first time across 30-post window (Wks 11-16). No pillar corrections needed for Week 17.
+- **DB fix noted**: "promo" violates `social_drafts_pillar_check` — use "authority" as DB pillar value for promo-type posts.
+- **Refresh**: Post 39 CPI TIMELY confirmed — fills April 10 AM session AFTER 8:30 AM ET BLS release.
+
+## 2026-04-08 PM — SEO/SEM PM Agent: PUSH+CURATE Session
+
+- **NotebookLM staleness audit**: Removed 3 sources (2026-03-27 content-strategy [superseded by Mar 30 version], stale CONTEXT.md, redundant GSC URL inspection article). Added 3 (refreshed CONTEXT.md, SEL page titles/meta CTR guide, audit file). 50/50 maintained.
+- **AM session work captured**: Mortgage glossary added to Resources nav on 64 pages; city enrichment (Bee Cave, Manor, Smithville at-a-glance paragraphs); commit e4ee80b (65 files).
+- **Web research**: SEL "SEO for page titles and meta descriptions" added — CTR optimization angle for Week 3 meta description work. Week 8 Reg Z compliance URLs noted for future addition.
+- **Master log + Master notebook**: Appended session entry to `Styer_Growth_Log.md`; re-synced to Styer Mortgage Master notebook.
+- **Daily digest**: Saved to `tasks/seo-sem/digests/2026-04-08-digest.md` (UNSENT — ZAPIER_DISPATCH_WEBHOOK_URL not set).
+
+## 2026-04-08 PM — Lead Gen PM Agent: PUSH+CURATE Session
+
+- **NotebookLM staleness audit**: Removed 3 sources (2 National Mortgage News error/paywalled, 1 superseded Apr 5 PM research). Notebook at 57 sources; 7 over 50-limit, flagged for next session.
+- **Web research**: Identified Homebuyers Privacy Protection Act (effective Mar 5, 2026) banning trigger leads — validates Adam's owned-channel refi watch approach. Added 2 new sources (MPA servicer retention, Scotsman Guide lock-in 2026).
+- **PM research file**: Created `tasks/lead-gen/research/2026-04-08-pm-web-research.md` with trigger lead ban analysis and anniversary sequence research gap note.
+- **Master log + Master notebook**: Appended session entry to `Styer_Growth_Log.md`; re-synced to Styer Mortgage Master notebook.
+- **Daily digest**: Generated and sent to adam@thestyerteam.com (Zapier: success). Topic: Refi Watch Sequences B + Set Rate built; key blockers = FRED API key + Outlook credential.
+
 ## 2026-04-08 — Interactive Session: 6 Priority Items
 
 - **P1 FIX: Notes + Activity Log** — `contact_activity` table never created in any migration despite being referenced by API routes, UI, and migration 048. Created migration 081 (full schema, indexes, org-scoped RLS). Applied to live Supabase. Build ✅ | Commit `34661ae`.
@@ -2422,3 +2468,12 @@ Arive (loan event)
 - Netlify deployment with `@netlify/plugin-nextjs` v5
 - `docs/` — `loanos.html` (build tracker) + `loanos-system-map.html` (architecture diagram)
 - GitHub repo: `AStyer8345/loanos` on `main`
+
+## 2026-04-08 — Social Media PM Session — Week 15 Build
+
+- Built Week 15 content (Posts 87–91, June 17–23 window): 5 EVERGREEN posts inserted into `social_drafts` via REST API
+- Promo pillar corrected: was 0% across Wks 11-14, Week 15 delivers 2 Promo posts → rolling mix restored to 30/30/30/10
+- Research: rate snapshot April 8 (30-yr ~6.12-6.32%, recovering from Liberation Day highs); FOMC June 17-18 confirmed as content hook
+- QA PASS 5/5 | Reviewer APPROVED WITH NOTES (0 compliance failures)
+- 2 Adam action items added: Post 88 Reel film (Jun 18), Post 91 Canva create (Jun 23)
+- Daily digest sent via Zapier to adam@thestyerteam.com

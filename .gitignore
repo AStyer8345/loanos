@@ -10,6 +10,7 @@
 # next.js
 /.next/
 /.next.nosync/
+/.next */
 /out/
 
 # production
@@ -26,6 +27,10 @@ yarn-error.log*
 
 # local env files
 .env*.local
+
+# claude / superpowers (local tooling)
+.claude/
+.superpowers/
 
 # vercel
 .vercel

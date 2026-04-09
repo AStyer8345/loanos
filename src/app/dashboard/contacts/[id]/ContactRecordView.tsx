@@ -95,12 +95,16 @@ export type ActivityEntry = {
   // Legacy columns
   action: string
   entity_type: string | null
-  metadata: Record<string, unknown> | null
+  metadata: Record<string, unknown> | string | null
   // New columns added in migration 008
   type?: string | null
   summary?: string | null
   raw_payload?: Record<string, unknown> | null
   external_id?: string | null
+  // Email-specific fields (migration 025)
+  subject?: string | null
+  from_address?: string | null
+  body_snippet?: string | null
   // Cross-entity fields
   loan_id?: string | null
   _source?: string
@@ -704,6 +708,31 @@ const ACTIVITY_TYPE_CONFIG: Record<string, { icon: typeof Phone; color: string; 
   note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
 }
 
+// ── System activity styling by action type ──────────────────────────────────
+function getSystemActivityStyle(action: string): { icon: typeof Phone; color: string; bg: string; label: string } {
+  if (action === 'imessage.received') return { icon: MessageSquare, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', label: 'iMessage' }
+  if (action === 'email.received') return { icon: Inbox, color: '#34d399', bg: 'rgba(52,211,153,0.12)', label: 'Inbound' }
+  return { icon: Clock, color: 'var(--muted)', bg: 'rgba(255,255,255,0.04)', label: '' }
+}
+
+function getSystemActivitySnippet(entry: ActivityEntry): string | null {
+  if (entry.action === 'imessage.received') {
+    const meta = typeof entry.metadata === 'string' ? tryParseJson(entry.metadata) : entry.metadata
+    const snippet = (meta as Record<string, unknown> | null)?.snippet
+    return typeof snippet === 'string' ? snippet : null
+  }
+  if (entry.action === 'email.received') {
+    const subject = entry.subject || ''
+    const from = entry.from_address || ''
+    return [from && `From: ${from}`, subject].filter(Boolean).join(' ') || null
+  }
+  return null
+}
+
+function tryParseJson(s: string): Record<string, unknown> | null {
+  try { return JSON.parse(s) } catch { return null }
+}
+
 // ── System activity feed item (activity_log entries) ────────────────────────
 function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
   const ts = new Date(entry.created_at)
@@ -715,27 +744,35 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
     : diffDays < 7 ? `${diffDays}d ago`
     : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
-  const description = entry.summary || entry.action || 'System event'
+  const style = getSystemActivityStyle(entry.action)
+  const Icon = style.icon
+  const description = style.label || entry.summary || entry.action || 'System event'
   const sourceLabel = entry._source ? ` · ${entry._source}` : ''
+  const snippet = getSystemActivitySnippet(entry)
 
   return (
     <div style={{ borderBottom: '1px solid var(--border)', padding: '8px 0' }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <div style={{
           width: 28, height: 28, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          background: style.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <Clock size={12} style={{ color: 'var(--muted)' }} />
+          <Icon size={12} style={{ color: style.color }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: style.label ? style.color : 'var(--muted)', fontWeight: style.label ? 600 : 400 }}>
               {description}{sourceLabel}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, opacity: 0.6 }}>
               {timeLabel}
             </span>
           </div>
+          {snippet && (
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {snippet}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -866,10 +903,15 @@ export function ContactRecordView(props: Props) {
     onAddNote,
   } = props
 
+  // Actions created by updateLastTouch that duplicate contact_activity entries
+  const TOUCH_ECHO_ACTIONS = new Set(['call_logged', 'email_outbound', 'sms_sent', 'note_added'])
+
   // Merge contact_activity + activity_log into one chronological feed
   const unifiedFeed: UnifiedFeedItem[] = [
     ...contactActivity.map(item => ({ kind: 'user' as const, item })),
-    ...activity.map(item => ({ kind: 'system' as const, item })),
+    ...activity
+      .filter(item => !TOUCH_ECHO_ACTIONS.has(item.action))
+      .map(item => ({ kind: 'system' as const, item })),
   ].sort((a, b) => getUnifiedTime(b) - getUnifiedTime(a))
 
   const { setActiveRecord } = useOutreachChat()

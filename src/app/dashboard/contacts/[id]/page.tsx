@@ -120,7 +120,7 @@ export default function ContactRecordPage() {
 
   const fetchActivity = useCallback(async () => {
     // 1. Activity directly linked to this contact (via server-side PII decryption)
-    const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id`)
+    const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
     const contactRows: ActivityEntry[] = contactRes.ok ? await contactRes.json() : []
 
     const merged: ActivityEntry[] = contactRows
@@ -136,7 +136,7 @@ export default function ContactRecordPage() {
 
     if (linkedLoans && linkedLoans.length > 0) {
       const loanIds = linkedLoans.map((l: { id: string }) => l.id)
-      const loanRes = await fetch(`/api/activity?loan_id=${loanIds.join(',')}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id`)
+      const loanRes = await fetch(`/api/activity?loan_id=${loanIds.join(',')}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
       const loanRows: ActivityEntry[] = loanRes.ok ? await loanRes.json() : []
 
       for (const row of loanRows) {

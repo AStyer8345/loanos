@@ -66,3 +66,14 @@ Master notebook: PUSHED (LoanOS Enterprise synced, source 3670cbb8)
 SESSION FULLY COMPLETE ✓
 SESSION_START — Thu Apr  9 09:04:48 CDT 2026
 NOTEBOOKLM (PULL): COMPLETE — Thu Apr  9 09:06:51 CDT 2026
+SESSION_END — Thu Apr  9 09:27:00 CDT 2026
+BUILT: Video/Loom embed on share page — ShareVideoEmbed.tsx (new), videoUrl in ShareBranding, user_settings.scenario_video_url key, renders above "Your Options" section. Tier 4 COMPLETE.
+BUILD: ✅ PASS | Commit: 6f3d3bd | Vercel: dpl_4Vh7Bx8rYtyCw63PvmBtvwEPp8pA → READY
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 2 (domain-queue.md refreshed, session-log.md added)
+Stale removed: 1 (old domain-queue.md)
+Session note: YES (appended to LoanOS_System_Log.md)
+Master notebook: PUSHED (LoanOS Enterprise synced, source 2fc758f4)
+Daily digest: PENDING (AM session — PM session will send)
+Timestamp: Thu Apr  9 09:27:00 CDT 2026
+SESSION FULLY COMPLETE ✓

@@ -2,6 +2,316 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-09 AM — Lead Generation
+Focus: Refi Watch Builder — Sequence A (Rate Drop Alert) + Sequence D (Pre-Drop Warm-Up)
+Type: Execute / Build
+
+### Completed
+- Loaded NotebookLM PULL — context briefing confirmed Sequences A + D as focus
+- Resolved FRED API key blocker: Option A (manual Set Rate webhook, already built) is sufficient for Sequence A today; FRED API only needed for Option B (fully automated). Built Sequence A reading rate from activity_log.
+- Built n8n workflow: **LoanOS — Refi Watch Rate Drop Alert** (ID: `iyKFy0ODkyyqQaAS`)
+  - 13 nodes: Daily Trigger (7AM CT cron `0 12 * * *`) → Get Current Rate (activity_log, action=refi_rate_update) → Parse Rate + Check Threshold (JS: stops if rate > 6.00%) → Get Segment A Candidates (loans, interest_rate≥6.75, closed, has email) → Attach Rate to Candidates (JS: filters test emails, attaches currentRate) → SplitInBatches → Check Recent Alert 30d (fullResponse:true dedup) → No Recent Alert? (IF: body.length===0) → Build Rate Drop Email (JS: HTML + savings calc) → Send Rate Drop Alert (Outlook) → Log Rate Drop Alert (activity_log, action=rate_drop_alert) → Wait 2s → (done branch) Notify Adam
+  - Rate math: spread = borrower_rate - currentRate; monthly_savings = spread/100 × loan_amount/12 × 0.75; 5yr = monthly × 60
+  - CAN-SPAM: physical address (5900 Balcones Dr Ste 100 Austin TX 78731), NMLS #513013, Equal Housing Lender, reply STOP
+  - Reg Z: "not an offer to lend, estimates are approximate"
+  - INACTIVE — Outlook credential must be connected + Set Rate webhook called before activation
+- Built n8n workflow: **LoanOS — Refi Watch Pre-Drop Warm-Up** (ID: `W0K4YDzkZd0Hzv6g`)
+  - 10 nodes: Manual Trigger → Get All Past Clients (loans: closed, has email, limit 1000) → Get Already Touched (activity_log: action in refi_warmup/anniversary_checkin/rate_drop_alert) → Filter Untouched Clients (JS: cross-reference, exclude test emails) → SplitInBatches → Build Warm-Up Email (JS: HTML, personalized, explains proactive rate monitoring) → Send Warm-Up Email (Outlook) → Log Warm-Up Send (activity_log, action=refi_warmup) → Wait 3s → Notify Adam (done branch)
+  - INACTIVE — requires Adam approval before manual trigger (irreversible: all untouched past clients)
+- Added 3 ADAM-TODO items: (1) connect Outlook Seq A, (2) activate Seq A after Set Rate called, (3) approve + trigger Seq D
+- Updated CONTEXT.md Lead Gen status, CHANGELOG.md
+
+### Refi Watch Workflow Index (complete)
+| Sequence | n8n ID | Status |
+|----------|--------|--------|
+| Set Rate webhook | `3iXImUkjgMitpJKt` | INACTIVE — needs activation |
+| Sequence A — Rate Drop Alert | `iyKFy0ODkyyqQaAS` | INACTIVE — needs Outlook + Set Rate |
+| Sequence B — Anniversary Check-In | `ZUeGy8u8P4o6DPM3` | INACTIVE — needs Outlook + Adam approval |
+| Sequence D — Pre-Drop Warm-Up | `W0K4YDzkZd0Hzv6g` | INACTIVE — needs Outlook + Adam approval to trigger |
+
+### Blockers (post-session)
+- Outlook credential not connected in n8n UI — blocks A, B, D
+- Set Rate webhook must be activated and called once before Seq A can fire
+- Seq D is irreversible — requires Adam's manual review and trigger
+- FRED API key still unregistered (no impact now; unlocks fully automated Option B later)
+
+---
+## Session: 2026-04-08 AM — Lead Generation
+Focus: Refi Watch Builder — Sequence B (Anniversary Check-In) + Set Rate webhook
+Type: Execute / Build (Sequence C — partial)
+Week in Queue: Week 6 of 8 (Sequence B built; Sequences A and D still blocked on Adam)
+
+### Completed
+- Loaded NotebookLM PULL — briefing at tasks/lead-gen/notebooklm-pull-2026-04-08.md
+- Confirmed all prior blockers still with Adam: FRED API key not registered, Refi Watch copy not approved, LO Waitlist not deployed
+- Assessed Sequence B (Anniversary Check-In) as fully unblocked: no rate source dependency, email copy finalized in spec, no Adam action needed to BUILD (only to ACTIVATE)
+- Confirmed Supabase activity_log schema via MCP: uses `action` column (NOT `activity_type`), requires `organization_id` NOT NULL — spec had wrong column names; corrected in build
+- Built n8n workflow: **LoanOS — Refi Watch Anniversary Check-In** (ID: ZUeGy8u8P4o6DPM3)
+  - 10 nodes: Schedule Trigger → Get All Loans → Filter to This Month → Any This Month? (IF) → Check Dedup (Code + $http.get) → Skip If Sent (IF) → Build Email → Send Anniversary Email (Outlook) → Log to Activity Log → Wait 2s
+  - INACTIVE — Outlook credential needs manual connection in n8n UI, then Adam approves before first run (May 1)
+  - Dedup: per-loan check against activity_log WHERE action='anniversary_checkin' AND created_at >= Jan 1 current year
+  - Activity log pattern: action='anniversary_checkin', organization_id=18613f82-..., loan_id, contact_id, summary, subject, to_address
+- Built n8n workflow: **LoanOS — Refi Watch Set Rate** (ID: 3iXImUkjgMitpJKt)
+  - 4 nodes: Webhook → Validate Rate → Store to activity_log → Respond OK
+  - INACTIVE — Adam activates, then calls weekly: POST /webhook/refi-watch-set-rate {"rate": 6.05}
+  - Stores rate in activity_log (action='refi_rate_update', summary=rate value)
+  - Sequence A (Rate Drop Alert) will read from this when built
+- Added 3 ADAM-TODO items (connect Outlook credential, approve to activate, Set Rate usage)
+- Updated CHANGELOG.md, CONTEXT.md Lead Gen status
+
+### Deferred
+- Refi Watch Sequence D (Pre-Drop Warm-Up): still blocked on email copy approval from Adam
+- Refi Watch Sequence A (Rate Drop Alert): still blocked on FRED API key in n8n env
+- LO Waitlist smoke test: still blocked (Adam hasn't deployed or activated workflow)
+- Mailchimp Customer Journeys: Adam action (step-by-step guide available)
+
+### Output Produced
+- Build: n8n workflow ZUeGy8u8P4o6DPM3 (Anniversary Check-In)
+- Build: n8n workflow 3iXImUkjgMitpJKt (Set Rate webhook)
+- Research: None (prior session covered all research)
+- NotebookLM pull: tasks/lead-gen/notebooklm-pull-2026-04-08.md
+
+### Lead Gen Metrics Updated
+- Funnels live: 4 (unchanged)
+- Refi Watch workflows built: 2 of 4 (Anniversary + Set Rate complete; Pre-Drop Warm-Up + Rate Drop Alert pending)
+- Email sequences active: 0 (Mailchimp journeys still not built; Refi Watch inactive pending Adam)
+- Progress vs goal: 644 past clients reachable via Anniversary Check-In once activated
+
+### Compliance Checks Passed
+- TCPA: ✅ Email only, no SMS
+- CAN-SPAM: ✅ Physical address in footer, reply STOP opt-out in every template
+- NMLS #513013: ✅ In email signature
+- No guaranteed approval language: ✅ Verified
+- Fair lending: ✅ Segmentation is purely financial (loan month + rate) — no protected class
+- Organization_id: ✅ All activity_log entries include required org_id
+
+### Quality Ratings
+Research: N/A | Strategy: N/A | Execution: 4/5 (Outlook credential gap is known; documented clearly) | Review: N/A | QA: N/A
+
+### BLOCKERS
+- BLOCKER-001: TCPA homepage forms — status LOW, unchanged
+- Refi Watch Sequences A and D: not formal blockers but functionally blocked on Adam decisions (since 2026-04-05)
+
+### Next Session Instructions
+Priority 1: **Check if Adam has connected Outlook credential + approved Anniversary workflow.** If active → verify May 1 run will work by checking n8n execution history.
+Priority 2: **Check if FRED API key added to n8n env.** If yes → build Sequence A (Rate Drop Alert) immediately (all other pieces are in place: rate storage pattern confirmed, activity_log schema confirmed, Supabase query in spec).
+Priority 3: **LO Waitlist smoke test** — if deployed and n8n activated, submit test form and verify Supabase log + Outlook notification.
+Priority 4: **Pre-Drop Warm-Up (Sequence D)** — if email copy approved in ADAM-TODO → build and present to Adam for manual trigger.
+
+Advance queue to next topic: NO — remain at Refi Watch until all 4 workflows are either built or formally blocked.
+
+---
+
+## Session: 2026-04-07 AM — Lead Generation
+Focus: Refi Watch Unblocking Research — FRED API analysis, email re-engagement, Mailchimp Journey setup guide
+Type: Research (Sequence A)
+Week in Queue: Week 5 of 8 (Refi Watch Builder still blocked on Adam decisions)
+
+### Completed
+- Loaded NotebookLM PULL — briefing at tasks/lead-gen/notebooklm-pull-2026-04-07.md
+- Confirmed both top priorities still blocked: Refi Watch Builder (no rate source decision, no copy approval), LO Waitlist deploy (no git push from Adam)
+- Identified research mission: produce decision-support material to unblock Adam on Refi Watch
+- Researched FRED API (MORTGAGE30US) as rate source for Sequence A — clear winner: free, automated, Freddie Mac data, updates every Thursday
+  - API endpoint documented with n8n Code Node snippet
+  - Comparison table: FRED vs manual webhook vs Optimal Blue — FRED wins on all criteria
+  - Key gotcha: FRED returns `"."` as value when data not yet published for current week — filter before rate comparison
+- Researched email re-engagement best practices for lapsed mortgage clients
+  - 15–20% open rate expected for cold/lapsed audience
+  - Rate-specific subject lines outperform generic: 2–3x higher CTR when exact rate mentioned
+  - Confirmed spec's existing copy and subject lines are on the right track
+  - Recommended execution order: Sequence D (warm-up) → wait 2 weeks → Sequence B (anniversary CRON) + Sequence A (rate drop alerts) concurrently
+- Researched Mailchimp Customer Journey setup — wrote step-by-step guide for all 3 pending journeys
+  - Key limitation confirmed: contacts tagged before Journey is active won't enroll (only new tag events trigger)
+  - Estimated time: ~45 min total for all 3 journeys
+  - DPA Guide journey requires hosted PDF URL before email #1 can be sent
+- Added 3 new ADAM-TODO items:
+  - FRED API key registration (unblocks Sequence A entirely — 5 min)
+  - Rate source decision confirmed: FRED API recommended
+  - Mailchimp Customer Journey setup guide (45 min, unblocks all 3 nurture sequences)
+- Posted 3 action items to LoanOS Supabase todo_items table (see Reporter completion)
+
+### Deferred
+- Refi Watch Builder execution: still blocked on Adam's rate source decision (FRED API key) + email copy approval for Sequences A and D
+- LO Waitlist deploy: still blocked on Adam's copy review + git push
+- Mailchimp Customer Journeys: Adam action — step-by-step guide now in research file
+- Sequence A (Rate Drop Alert) email copy: not yet written — needs rate source confirmed first (do in same session as Builder)
+
+### Output Produced
+- Research: `tasks/lead-gen/research/2026-04-07-refi-watch-unblocking.md`
+- Spec: None (research only)
+- Build: None (research only)
+- Review: N/A
+- QA: N/A
+
+### Lead Gen Metrics Updated
+- Funnels live: 4 (unchanged — LO Waitlist not yet deployed)
+- Email sequences active: 0 (Mailchimp journeys still not built)
+- Estimated leads/month from owned channels: ~5–10 (unchanged)
+- Research quality: FRED API recommendation is actionable — once Adam registers key, Builder can wire all 3 Refi Watch workflows in a single session
+
+### Compliance Checks Passed
+- TCPA: ✅ N/A — research only, no SMS
+- CAN-SPAM: ✅ Confirmed spec's Sequences B and D copy are compliant (confirmed in research file)
+- NMLS #513013: ✅ In existing spec copy
+- Equal Housing: ✅ In existing spec copy
+- FRED API: ✅ Data usage complies with St. Louis Fed terms (free for commercial use)
+
+### Quality Ratings
+Research: 4 | Strategy: N/A | Execution: N/A | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- The master-agent.md "Week 1 Rule" (Sequence A only) is stale — we're at Week 5. Master agent correctly identified Sequence A was appropriate due to blockers, but the rule language can confuse. Consider updating master-agent.md to say "When top 2 priorities are blocked, default to Sequence A until unblocked."
+- The notebooklm PULL query "What did the last session complete?" returns good context but sometimes over-focuses on the most recent session. Consider adding a query for "What are the 3 most important unresolved decisions blocking progress?" as a standard PULL query.
+
+### BLOCKERS
+- BLOCKER-001: TCPA — homepage forms still not fixed. Status: LOW. Not escalated.
+- Refi Watch: Not a formal BLOCKER but functionally blocked — same root cause (Adam decisions pending since 2026-04-05).
+
+### Next Session Instructions
+Priority 1: **Refi Watch Builder** — CHECK IF ADAM HAS: (a) registered for FRED API key and added `FRED_API_KEY` to n8n env, (b) approved Refi Watch email copy in ADAM-TODO. If both done → run Sequence C to build all 3 Refi Watch n8n workflows immediately.
+Priority 2: **LO Waitlist smoke test** — If Adam has pushed loanos-waitlist.html to Netlify AND activated n8n workflow Rn6rtlKeoQ0CrUkb → submit test form, verify Supabase activity_log entry + Outlook notification fires.
+Priority 3: **Sequence A email copy** — Once rate source is confirmed (FRED API), write the Rate Drop Alert email copy (currently missing from spec). Add to spec, request Adam approval.
+
+Advance queue to next topic: NO — remain at Week 5 (Refi Watch Builder) until Sequences B and D are deployed.
+
+---
+## Session: 2026-04-06 AM — Lead Generation
+Focus: LO Waitlist Capture Page
+Type: Execute / Build (Sequence C)
+Week in Queue: Week 5 of 8 (Refi Watch Builder blocked — pivoted to LO Waitlist)
+
+### Completed
+- Loaded NotebookLM PULL — briefing at tasks/lead-gen/notebooklm-pull-2026-04-06.md
+- Confirmed Refi Watch Builder still blocked (Adam hasn't responded to rate source decision or email copy approval in ADAM-TODO.md)
+- Assessed LO Waitlist as HIGH priority per domain-queue.md (added 2026-04-05) — not blocked, built today
+- Wrote LO Waitlist spec: tasks/lead-gen/specs/2026-04-06-lo-waitlist-spec.md — EXECUTED SAME SESSION
+- Built `loanos-waitlist.html` — landing page at `/loanos-waitlist.html` on styermortgage.com
+  - Navy hero, gold CTA, IBM Plex fonts — matches existing design system
+  - Form: fname, lname, email, NMLS# (optional), company (optional)
+  - Adam's voice: raw, no fluff, "building software LOs actually want"
+  - Full compliance footer: NMLS #513013, Equal Housing Lender, Texas Complaint Notice
+- Built `netlify/functions/subscribe-lo.js` — new function (does NOT touch subscribe-lead.js)
+  - Routes to n8n webhook `/loanos-waitlist`
+  - Handles missing MAILCHIMP_LO_LIST_ID gracefully (Mailchimp add is optional at launch)
+  - Full CORS headers, proper error handling
+- Updated `thank-you.html` — added `?type=lo-waitlist` branch
+  - Message: "You're on the LoanOS Waitlist. I'll reach out personally when LoanOS is ready for other LOs."
+- Created n8n workflow "LoanOS — LO Waitlist Intake" (ID: Rn6rtlKeoQ0CrUkb) via REST API
+  - Webhook: POST /loanos-waitlist
+  - Normalizes payload → parallel branches: Supabase activity_log insert + Outlook notify Adam
+  - Supabase node: `continueErrorOutput` — email still fires even if DB insert fails
+  - INACTIVE — Adam must activate after Microsoft Outlook credential verified
+- Git commit: 300c019 in styerteam-mortgage-site — committed, NOT pushed (copy review gate)
+- Updated ADAM-TODO.md with 4 new items
+
+### Deferred
+- Refi Watch Builder: still blocked on Adam's rate source decision + email copy approval
+- Mailchimp LO Waitlist audience: Adam creates in UI + adds MAILCHIMP_LO_LIST_ID env var to Netlify
+- Production deploy of loanos-waitlist.html: pending Adam copy review + git push
+
+### Output Produced
+- Spec: tasks/lead-gen/specs/2026-04-06-lo-waitlist-spec.md
+- Build: loanos-waitlist.html + netlify/functions/subscribe-lo.js + thank-you.html update
+- n8n workflow: Rn6rtlKeoQ0CrUkb (inactive, ready to activate)
+- Git commit: 300c019 (styerteam-mortgage-site, not pushed)
+
+### Lead Gen Metrics Updated
+- Funnels live: 4 (unchanged — LO Waitlist not yet deployed)
+- LO Waitlist: 1 funnel built, pending deploy + activation
+- Refi Watch sequences designed: 3 (still not built)
+- Estimated leads/month from owned channels: ~5–10 (unchanged)
+
+### Compliance Checks Passed
+- TCPA: ✅ N/A — no phone field, no SMS on LO Waitlist page
+- CAN-SPAM: ✅ future emails via Mailchimp Journey will have footer; current page has no emails
+- NMLS #513013: ✅ in footer + builder stats chip on landing page
+- Equal Housing Lender: ✅ in footer
+- No guaranteed approval language: ✅
+- No protected class targeting: ✅ LOs segmented by job function only
+- LO Waitlist page is NOT a mortgage solicitation: ✅ explicit disclaimer in footer
+
+### Quality Rating
+Research: N/A | Strategy: 5 | Execution: 4 | Review: 4 | QA: 4
+
+### BLOCKERS
+- No new blockers
+- BLOCKER-001: TCPA on homepage forms — still LOW, still active
+
+### Next Session Instructions
+Priority 1: **Refi Watch Builder** — once Adam approves rate source + email copy (still pending from 2026-04-05 AM). Start with Sequence B (Anniversary Check-In) as lowest-risk.
+Priority 2: **Verify LO Waitlist deploy** — after Adam reviews copy + pushes to Netlify + activates n8n workflow + creates Mailchimp list. If Adam has done these by next session, run a smoke test (submit test form, verify Supabase log + email notify).
+Priority 3: **No queue advancement** — remain at Week 5 (Refi Watch Builder) until Sequences B and D are deployed.
+
+---
+## Session: 2026-04-05 AM — Lead Generation
+Focus: Week 5 — Refi Watch Funnel Architecture
+Type: Strategy (Sequence B)
+Week in Queue: Week 5 of 8
+
+### Completed
+- Loaded NotebookLM PULL — briefing at tasks/lead-gen/notebooklm-pull-2026-04-05.md
+- Confirmed current state: 4 funnels live (FTB Guide, PA, Rate Alert, DPA) — all built and deployed through 2026-04-03
+- Confirmed Refi Watch research was completed 2026-04-04 (tasks/lead-gen/research/2026-04-04-refi-watch-research.md) — used as input for today's Architect session
+- Wrote complete Refi Watch Funnel spec: tasks/lead-gen/specs/2026-04-05-refi-watch-funnel-spec.md
+- Designed 3 executable n8n sequences:
+  - Sequence B (Anniversary Check-In): Monthly CRON → Supabase query by closing_date month → personalized Outlook email → activity_log entry
+  - Sequence D (Pre-Drop Warm-Up): One-time manual trigger → email all 644 past clients → activity_log
+  - Sequence A (Rate Drop Alert): Daily CRON → rate threshold check → query Segment A (rate ≥6.75%) → personalized savings estimate email
+- Wrote full email copy for all 3 sequences (Reg Z compliant, personal tone, Adam's voice, CAN-SPAM footer in every email)
+- Made email platform decision: n8n → Outlook (not Mailchimp) — personal feel appropriate for past clients, existing credential, small volume
+- Identified 4 Adam decisions required before Builder can activate (rate source, copy approval, launch order, rate threshold)
+- Deferred Segment C (Equity/HELOC Alerts) — requires AVM API data enrichment
+- Updated today-mission.md, subagent-status.md, ADAM-TODO.md
+
+### Deferred
+- Builder execution of 3 n8n workflows: pending Adam's rate source decision + email copy approval
+- Segment C (Equity Milestone Alerts): deferred until AVM data strategy decided
+- Mailchimp Customer Journeys (PA, Rate Watch, DPA Guide): still pending Adam — existing item, 3 journeys total
+- DPA Guide PDF hosting: existing item, Adam action needed
+
+### Output Produced
+- Research: None (used 2026-04-04 research file)
+- Spec: tasks/lead-gen/specs/2026-04-05-refi-watch-funnel-spec.md — READY FOR BUILDER (pending Adam decisions)
+- Build: None (strategy session)
+- Review: N/A
+- QA: N/A
+- NotebookLM pull: tasks/lead-gen/notebooklm-pull-2026-04-05.md
+
+### Lead Gen Metrics Updated
+- Funnels live: 4 (FTB Guide, PA, Rate Alert, DPA Guide — all deployed)
+- Refi Watch sequences designed: 3 (not yet built or activated)
+- Past client audience: 644 (loans with closing_date + email)
+- Segment A (immediate refi candidates at 6.0% rate): 11 loans at ≥6.75%
+- Estimated leads/month from owned channels: ~5–10 (inbound funnels active; Mailchimp journeys still pending Adam)
+
+### Compliance Checks Passed
+- TCPA: N/A — email-only, no SMS ✅
+- CAN-SPAM: Physical address + reply STOP opt-out in all email templates ✅
+- NMLS #513013: In every email signature in spec ✅
+- Equal Housing Lender: In rate-related email (Sequence A) footer ✅
+- No guaranteed approval language: All copy reviewed — none present ✅
+- Regulation Z: No specific rate quoted as "available rate"; all estimates labeled as approximate with disclaimer ✅
+- No protected class targeting: Segments defined by financial criteria only (rate, closing date) ✅
+- Prior business relationship: All recipients are past clients with funded loans ✅
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: 5 | Execution: N/A | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- Session log entries for 2026-04-02, 2026-04-03, and 2026-04-04 appear MISSING from session-log.md despite NotebookLM confirming those sessions ran and produced output (FTB DPA build report 2026-04-03, Refi Watch research 2026-04-04). Reporter subagent must have failed to write session log entries on those days. Add explicit validation in master-agent.md: before running Reporter, check session-log.md modification timestamp — if file hasn't been updated today, the Reporter MUST write a new entry before signaling SESSION COMPLETE.
+
+### BLOCKERS
+- BLOCKER-001: TCPA on homepage Quick Quote/Quick Contact forms — LOW (no SMS live)
+- BLOCKER-006 (NEW — soft): Adam's Mailchimp Customer Journeys not created — 3 funnels capturing leads but nurture email sequences not firing. Not a code blocker, but a revenue blocker. Impact: every PA, Rate Alert, and DPA funnel lead gets no email nurture after the first n8n notification.
+
+### Next Session Instructions
+Priority 1: **Builder — Refi Watch n8n workflows** — After Adam approves email copy and makes rate source decision, Builder creates 3 n8n workflows per spec. Start with Sequence B (Anniversary) as lowest-risk first activation.
+Priority 2: **QA / Soft-Launch Sequence B** — Test Anniversary workflow with fake loan data. When QA passes, Adam activates it.
+Priority 3: **Adam confirms** (needed before Builder runs): (a) Rate source for Sequence A — recommend Option A (manual webhook), (b) Email copy approval for Sequences A and D, (c) Mailchimp Customer Journeys for PA, Rate Watch, DPA (still pending since 2026-03-28)
+
+Advance queue to next topic: NO — Refi Watch Builder execution is next. Do not advance to Week 6 (Realtor Referral System) until Sequences B and D are deployed and Sequence A is built (even if not activated).
+
+---
 ## Session: 2026-04-01 AM — Lead Generation
 Focus: BLOCKER-004 + BLOCKER-005 Resolution Verification
 Type: Execute / Build (Sequence C — QA verification)

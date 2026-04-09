@@ -41,10 +41,12 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 3. Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns
 4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`
 
-## Recent Fixes (2026-04-08)
+## Recent Fixes (2026-04-09)
 
-- **Migration 081 (`contact_activity`)**: Table was referenced by API routes, UI, types, and migration 048 but never created. Now live with full RLS (org-scoped). Notes + activity log functional.
-- **Migration 075 (`los_integrations`)**: Applied to live Supabase.
+- **Activity log + notes** (GOALS.md #1): Fully working. Migration 081 (`contact_activity`) live with RLS. Duplicate entries fixed — `updateLastTouch()` echo actions filtered from system feed.
+- **iMessage integration** (GOALS.md #4): n8n workflow `nccX5ml82mMGyE9T` updated — writes `contact_id`, `loan_id`, `occurred_at` to columns (was metadata-only). 126 entries backfilled. Blue icon + snippet in UI.
+- **Inbound email rendering**: `email.received` entries show From + Subject with green icon in activity feed.
+- **Migration 075 (`los_integrations`)**: Applied to live Supabase (2026-04-08).
 - **Social drafts**: Weeks 1-3 (Posts 1-21) rebuilt from build reports and inserted into `social_drafts`.
 - **Suburb quick-form tracking**: Fixed `generate_lead` + `thank_you_page_view` gap on styermortgage.com suburb pages.
 - **Blog slug rename**: temp-placeholder posts converted to meta-refresh redirects to canonical URLs.

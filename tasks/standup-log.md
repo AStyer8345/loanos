@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-04-09
+
+**Days to launch:** 17
+
+**Yesterday shipped:**
+- Scoped all loans + contacts list/detail queries by `organization_id` (4 fixes) — closes multi-tenancy data-leakage vectors
+- Applied migration 075 (`los_integrations`) to live Supabase
+- Migration 081 (`contact_activity`) created — notes + activity log now functional (was broken; table never existed despite being referenced in API routes, UI, and types)
+- Daily fixer reconciliation: marked 2 ADAM-TODO items completed
+
+**Today shipped:**
+- **Activity log fixed** (GOALS.md #1): notes + activity log fully working — migration 081 live, UI rendering correctly
+- **iMessage integration fixed** (GOALS.md #4): n8n workflow `nccX5ml82mMGyE9T` updated to write `contact_id`, `loan_id`, `occurred_at` to actual columns (was only writing to metadata JSON). 126 existing entries backfilled. iMessages now appear on contact pages with blue icon + snippet.
+- **Duplicate activity entries fixed**: `updateLastTouch()` was creating echo entries in `activity_log` for every manually logged call/email/text. UI now filters out `call_logged`, `email_outbound`, `sms_sent`, `note_added` from system feed.
+- **Inbound email rendering**: email.received entries now show From + Subject with green icon in activity feed.
+- Vercel: READY (dpl_EMZKkWKXnSjzsPwngYmCSHaygojL). n8n: iMessage workflow active + published.
+
+**Blockers:**
+- Adam: fill in `extractPayloadIdentity()` in `verifyLosPayload.ts` (check Zapier run for field name) — blocks LO #2 onboarding
+- Adam: verify Microsoft Outlook credential in n8n UI — blocks all Refi Watch sequences
+- PII backfill script (`scripts/backfill-activity-pii.ts`) not run — blocks plaintext column drop
+- Phase 2 not yet Adam-confirmed — blocks Phase 3 start per renovation protocol
+
+**Today's focus:**
+- ~~Notes + activity log fix~~ ✅ DONE
+- ~~Text message integration~~ ✅ DONE
+- Email automation (GOALS.md Priority #2): CD & Contract Extractor workflow (`HkLjsnnhT5MgrX5H`) is built but INACTIVE — activate and test end-to-end (Outlook inbox → attachment detection → Supabase upload → draft reply)
+
+**Risk watch:**
+- 17 days to launch. Renovation Phases 3-6 not started. Phase 3 gate = Adam confirms Phase 2. Marketing site demo data cleanup (separate repo) unstarted — blocks May 1 launch screenshots. 3 Adam-action blockers outstanding (extractPayloadIdentity, Outlook credential, PII backfill).
+
+**Open audit findings:**
+- No files in `audits/`. Security tracker: 3 of 12 gaps remain (#5 field-level encryption, #9 admin action log, #10 sys vs org admin).
+
+---
+
 ## 2026-04-08
 
 **Days to launch:** 18 (target: 2026-04-26)

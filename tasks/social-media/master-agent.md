@@ -31,7 +31,7 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 ## CRITICAL RULES — SOCIAL MEDIA DOMAIN
 
 - **NEVER FABRICATE DATA.** Do not write economic events (CPI, Fed decisions, jobs reports, rate movements, market stats) as if they have occurred when they have not. This is the #1 rule. Posts are classified as EVERGREEN (can be pre-written) or TIMELY (need real data). TIMELY posts use `~[LIVE DATA NEEDED]` placeholders until the Refresh subagent fills them with verified data on publish day.
-- NEVER publish a post live. All post content goes into the social_drafts Supabase table. Adam reviews and publishes from the LoanOS Marketing → Social tab.
+- **TWO-TIER PUBLISHING:** GBP and blog posts can auto-publish without approval. Instagram, Facebook, and LinkedIn posts MUST go into the `social_drafts` table as `status: draft` for Adam to review and approve in the Marketing Dashboard. NEVER auto-publish to IG/FB/LI.
 - NEVER publish rate-related content without NMLS# 513013 present.
 - NEVER post guaranteed approval language — blocked by RESPA/Reg Z.
 - NEVER use "The Styer Team" — always "Adam Styer | Mortgage Solutions LP".
@@ -76,10 +76,42 @@ If BLOCKERS.md contains active blockers → resolve them before any new work.
 
 ## STEP 1B — GBP CONTENT DISTRIBUTION (AM session only — run BEFORE regular subagent sequence)
 
-**Purpose:** Detect new website content (rate updates, blog posts, newsletter landing pages) published since last check, and automatically post each one to GBP + all social platforms via the existing n8n webhook.
+**Purpose:** Detect new website content (rate updates, blog posts, newsletter landing pages) published since last check, and distribute them across platforms.
+
+**TWO-TIER PUBLISHING POLICY:**
+- **Google Business Profile (GBP):** Auto-publish. Post directly to Publer targeting ONLY the GBP account (`69c3e3f548d8e4e643d45438`). No approval needed.
+- **Instagram, Facebook, LinkedIn:** Approval required. Insert as `status: draft` into `social_drafts` table. Adam reviews and approves in the Marketing Dashboard before anything goes live on these platforms.
+- **NEVER use the n8n `/gbp-social-post` webhook** — it posts to ALL 4 platforms at once and would bypass approval for IG/FB/LI.
+
+### 0. Fetch Voice Guide + Feedback (MANDATORY)
+
+Before writing ANY content, fetch Adam's voice guide and feedback from Supabase:
+
+```bash
+# Fetch voice guide
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_guide&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+```bash
+# Fetch voice feedback
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_feedback&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+Read the voice guide first. It is the source of truth for Adam's voice. Apply these content rules to ALL posts generated in this step:
+
+**Tone dial:** 30% real talk, 30% personal/story, 30% education, 10% promo
+**Jessica Test:** If this post could have been made by a template admin who doesn't know Adam personally — rewrite it.
+**BBQ Test:** Would Adam say this at a backyard BBQ in Austin? If no — rewrite it.
+**Banned patterns:** No emoji checkmark listicles. No definition cards. No "Did You Know?" posts. No stock image captions. No corporate tone. No "dream home." No "seamless process."
+**Platform-specific:** Write for the specific platform — Instagram, LinkedIn, Facebook, and GBP are different audiences.
+**CTAs:** Not every post needs a CTA — some posts just end. One idea per post. Real stories beat generic examples. Simpler is better.
 
 ### 1. Read the tracker
-Read `tasks/social-media/gbp-content-tracker.md` — this lists content already posted to GBP.
+Read `tasks/social-media/gbp-content-tracker.md` — this lists content already queued to the dashboard.
 
 ### 2. Scan for new content in the site directory
 
@@ -96,48 +128,129 @@ ls -1t ~/Documents/Claude/styerteam-mortgage-site/blog/2026-*.html 2>/dev/null |
 ls -1t ~/Documents/Claude/styerteam-mortgage-site/realtor-updates/*.html 2>/dev/null | head -5
 ```
 
-Compare against the tracker. Any file not in the "Posted to GBP" section is NEW.
+Compare against the tracker. Any file not in the "Queued to Dashboard" section is NEW.
 
-### 3. For each new content piece, fire the GBP webhook
+### 3. For each new content piece, create platform-specific posts
 
-Read the HTML file to extract the `<title>` and first paragraph of body content, then craft a GBP-appropriate summary.
+Read the HTML file to extract the `<title>` and first paragraph of body content, then craft platform-specific posts.
 
-**GBP post rules:**
+**Content rules (all platforms):**
 - Rate updates: Include rate direction (up/down/flat), 1-2 key rate points, link to full rate page. MUST include NMLS #513013.
 - Blog posts: 2-3 sentence teaser of the article, link to the blog post URL. Educational tone.
 - Newsletter content: Key takeaway + link. Realtor version gets peer-to-peer tone; borrower version gets educational tone.
 - ALL posts must include: "Adam Styer | Mortgage Solutions LP | NMLS #513013" at the end.
-- Keep GBP posts under 300 words. Google truncates longer posts.
+- Keep GBP posts under 300 words.
 
-**Fire the webhook:**
+#### 3A. GBP — AUTO-PUBLISH (no approval needed)
+
+Post the GBP version directly to Publer targeting ONLY the GBP account:
+
 ```bash
-curl -s -X POST "https://styer.app.n8n.cloud/webhook/gbp-social-post" \
+PUBLER_API_KEY="14ff59c284cf0e2d0720672cf1e1ccdc81af5fa56f8a88c2"
+PUBLER_WORKSPACE="69b052bf835c8c689fab8fd8"
+GBP_ACCOUNT="69c3e3f548d8e4e643d45438"
+SCHEDULED_AT=$(date -u -v+5M +"%Y-%m-%dT%H:%M:%SZ")  # 5 minutes from now
+
+curl -s -X POST "https://app.publer.com/api/v1/posts/schedule" \
+  -H "Authorization: Bearer-API $PUBLER_API_KEY" \
+  -H "Publer-Workspace-Id: $PUBLER_WORKSPACE" \
   -H "Content-Type: application/json" \
   -d '{
-    "theme": "[TOPIC — e.g., rate update, first-time buyers, VA loans]",
-    "gbp_post": "[YOUR GBP POST TEXT HERE]"
+    "bulk": {
+      "state": "scheduled",
+      "posts": [{
+        "networks": {
+          "google": {
+            "type": "status",
+            "text": "<GBP POST TEXT>"
+          }
+        },
+        "accounts": [{
+          "id": "'$GBP_ACCOUNT'",
+          "scheduled_at": "'$SCHEDULED_AT'"
+        }]
+      }]
+    }
   }'
 ```
 
-The webhook handles everything downstream — Gemini adapts for Facebook/Instagram/LinkedIn, Imagen generates an image, Publer posts to all 4 platforms (GBP account `69c3e3f548d8e4e643d45438`, FB `69b05329de86f5e15b7c0722`, IG `69b0530110a77a0ed895847d`, LI `69b0536404b824ffb2c05426`).
+Also insert a record into `social_drafts` with `status: posted` so it shows in the dashboard history:
+
+```bash
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "platform": "google",
+    "format": "text_only",
+    "pillar": "<education|authority|market>",
+    "title": "<short title>",
+    "content": "<GBP POST TEXT>",
+    "status": "posted",
+    "created_by": "agent",
+    "agent_notes": "Auto-published to GBP. Source: [filename]."
+  }'
+```
+
+#### 3B. Instagram, Facebook, LinkedIn — DRAFT FOR APPROVAL
+
+Insert each as a draft into `social_drafts`. Adam reviews and approves in the Marketing Dashboard.
+
+```bash
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
+  -d '{
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "platform": "<facebook|instagram|linkedin>",
+    "format": "text_only",
+    "pillar": "<education|authority|market>",
+    "title": "<short title>",
+    "content": "<PLATFORM-ADAPTED POST COPY>",
+    "hashtags": "<platform-appropriate hashtags or empty>",
+    "status": "draft",
+    "created_by": "agent",
+    "agent_notes": "Auto-generated from new site content: [filename]. Awaiting Adam's approval."
+  }'
+```
+
+**Log activity after each insert (GBP and IG/FB/LI):**
+```bash
+curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_activity" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
+    "action": "<posted|drafted>",
+    "detail": "Agent <auto-published|created>: \"<TITLE>\" (<PLATFORM>)"
+  }'
+```
+
+Adapt each post for its platform's audience — GBP gets plain text, Facebook gets conversational, Instagram gets visual-first caption with hashtags, LinkedIn gets professional framing. Do NOT create one "all" post.
 
 ### 4. Update the tracker
 
-After each successful webhook call, append to `tasks/social-media/gbp-content-tracker.md`:
+After each successful post/insert, append to `tasks/social-media/gbp-content-tracker.md`:
 ```
-YYYY-MM-DD | [rate/blog/newsletter] | [filename] | posted
+YYYY-MM-DD | [rate/blog/newsletter] | [filename] | gbp:posted, ig/fb/li:drafted
 ```
 
 ### 5. Log it
 
 Include in the session log under a "GBP Distribution" heading:
 - How many new content pieces detected
-- Which ones were posted
-- Any failures (webhook returned non-200)
+- GBP: which ones were auto-published
+- IG/FB/LI: which ones were queued as drafts for Adam's approval
+- Any failures
 
 ### 6. Queue platform-native posts for the Builder
 
-The webhook gives you instant distribution — but it's the same content on all platforms. For higher-quality, platform-native posts, also queue new content for the Builder subagent to create deeper versions:
+For higher-quality, deeper versions, also queue new content for the Builder subagent:
 
 For each new content piece detected, add an entry to `tasks/social-media/content-repost-queue.md`:
 ```
@@ -152,7 +265,7 @@ YYYY-MM-DD | [rate/blog/newsletter] | [filename] | [suggested angle for native p
 | Blog post | Carousel: 4-5 slides summarizing key points | Carousel or Reel: educational breakdown | Text post: teaser + link |
 | Newsletter | Text post: key takeaway reframed for professionals | Story: 3-slide summary of top insights | Text post: conversational version + link |
 
-The Architect picks these up during the next planning session and weaves them into the content calendar alongside original content. **This is not urgent** — the webhook already handled immediate distribution. These native versions can publish 2-3 days after the original to extend content lifespan.
+The Architect picks these up during the next planning session and weaves them into the content calendar alongside original content. **This is not urgent** — the dashboard drafts handle immediate distribution once Adam approves. These native versions extend content lifespan.
 
 **If no new content is found → skip this step entirely and proceed to Step 2.**
 

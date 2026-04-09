@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-09 PM — Activity Log Fix: iMessages, Dedup, Email Rendering
+
+- **iMessage workflow fix** (`nccX5ml82mMGyE9T`): Updated n8n "Log and Update Records" node to write `contact_id`, `loan_id`, `occurred_at` directly to `activity_log` columns (was only in metadata JSON). Backfilled 126 existing iMessage entries via SQL.
+- **Duplicate activity entries fixed**: `updateLastTouch()` creates echo `activity_log` entries for every manually logged call/email/text. Added `TOUCH_ECHO_ACTIONS` filter (`call_logged`, `email_outbound`, `sms_sent`, `note_added`) to unified feed in ContactRecordView.tsx.
+- **iMessage + email rendering**: New `getSystemActivityStyle()` and `getSystemActivitySnippet()` — iMessages show blue MessageSquare icon with snippet; emails show green Inbox icon with From + Subject.
+- **ActivityEntry type expanded**: Added `subject`, `from_address`, `body_snippet`, `loan_id` fields; page.tsx fetch URLs updated to request these columns.
+- **TypeScript fix**: `getSystemActivitySnippet` return type narrowed — `metadata?.snippet` could return `{}`, added explicit `typeof === 'string'` guard.
+- **Standup log + CONTEXT.md updated**: GOALS.md priorities #1 (notes/activity) and #4 (text messages) marked resolved.
+- BUILD: ✅ PASS | Commit: c9f56d0 | Vercel: dpl_EMZKkWKXnSjzsPwngYmCSHaygojL → READY
+
 ## 2026-04-09 AM — Scenarios: Video/Loom Embed on Share Page (Tier 4 Complete)
 
 - **ShareVideoEmbed.tsx** (new): responsive 16:9 iframe embed component — LoanOS dark card style, gold "Walk Me Through This" header, `print:hidden`, Loom + YouTube URL normalization, returns null when no URL set

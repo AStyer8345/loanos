@@ -2,6 +2,28 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-08 AM — Glossary nav + city enrichment
+
+### Completed
+- Mortgage Glossary added to Resources nav dropdown on 64 pages (batch Python replace — exact string, no regex needed)
+- Glossary "Helpful articles" link added: conventional.html, fha.html, va.html
+- Glossary link added to DSCR page investment section (contextual anchor: "Unfamiliar with terms like DSCR, LTV...")
+- City enrichment "at a glance" paragraphs added: Bee Cave, Manor, Smithville
+  - Bee Cave: Lake Travis ISD campuses, SH-71 commutes, Falconhead/Sweetwater/Spanish Oaks price ranges
+  - Manor: Manor ISD campuses, Tesla/Samsung commutes, ShadowGlen/Presidential Meadows price ranges
+  - Smithville: Smithville ISD campuses, SH-71/SH-130 commutes, in-town vs acreage price ranges
+- QA: GTM ✅ (2 hits/page), no noindex added, canonicals untouched
+- Commit: e4ee80b — 65 files, deployed clean
+
+### Skipped
+- NotebookLM pull — session-log + backlog had sufficient context
+- GSC-blocked items (impressions data)
+
+### Next Session Priority
+1. City enrichment — Spicewood, Florence, Jarrell (next 3 in queue)
+2. Continue monitoring GSC for blog posts published Mar 28–Apr 6 (April 10 window for "How to Choose a Lender")
+
+---
 ## Session Log Entry
 Date: 2026-03-25
 Time: INIT
@@ -575,6 +597,52 @@ Priority 1: Adam to pull GSC export (April 5 window) — critical for impression
 Priority 2: City page enrichment — 2-3 more suburbs (start with Leander, Hutto, Bastrop)
 Priority 3: Mortgage glossary page — high internal linking value across all loan type pages
 Priority 4: Investment property ROI examples on DSCR page
+
+Advance queue: YES
+---
+---
+## Session: 2026-04-07 AM — SEO + SEM
+Focus: City enrichment (Leander, Hutto, Bastrop) + Mortgage Glossary page + DSCR ROI examples
+Type: Execution (LOW_RISK + MEDIUM_RISK)
+
+### Completed
+
+**City page enrichment — 3 cities (LOW_RISK):**
+- leander-mortgage-lender.html: added "Leander at a glance" paragraph — Leander High + Glenn High school campuses, commute times (~35–45 min downtown Austin, ~15 min Cedar Park, ~20 min Round Rock), price ranges by community (Crystal Falls/Travisso $450K–$750K+, Mason Hills/Summerlyn $360K–$480K, Block House Creek <$400K)
+- hutto-mortgage-lender.html: added "Hutto at a glance" paragraph — Hutto High School, commutes (~20 min Samsung Taylor, ~35–40 min Round Rock, ~45–55 min Austin), price ranges (Star Ranch/Riverwalk $300K–$410K, Emory Crossing $340K–$460K)
+- bastrop-mortgage-lender.html: added "Bastrop at a glance" paragraph — Bastrop HS + Cedar Creek HS, commutes (~20 min Tesla Gigafactory, ~40–45 min downtown Austin, ~25 min ABIA), price ranges (in-town $280K–$430K, Tahitian Village $250K–$380K, acreage $350K–$600K+)
+- sitemap.xml lastmod updated for all three pages to 2026-04-07
+
+**Mortgage glossary page — new page (MEDIUM_RISK):**
+- Created: mortgage-glossary.html
+- Title: "Mortgage Glossary Austin TX | Terms Explained | NMLS #513013" (60 chars)
+- Meta: 152 chars
+- Content: 30+ mortgage terms organized by category (Qualification, Loan Types, Costs & Fees, Process & Documents)
+- Schema: Article + FAQPage (6 questions) + BreadcrumbList
+- Internal links: every loan type page linked from relevant terms
+- GTM ✓, canonical ✓, no noindex ✓
+- Added to sitemap.xml (lastmod 2026-04-07, priority 0.7)
+
+**Investment property ROI examples on DSCR page (LOW_RISK):**
+- Added section "Investment Property ROI Examples — Austin TX" to dscr-loan-austin-tx.html
+- 3 realistic 2026 Austin scenarios with honest math:
+  1. Core Austin SFR (LTR): $480K, DSCR 0.78, negative cash flow — transparent about why investors still buy
+  2. Suburban Austin SFR (Round Rock/Pflugerville): $340K, DSCR 1.06, thin positive cash flow
+  3. Short-term rental: $510K, AirDNA-based, DSCR 1.05–1.32, strongest cash flow
+- Keyword target: "investment property loan Austin"
+- sitemap.xml lastmod updated to 2026-04-07
+
+### Deferred
+- GSC data: Adam still needs to pull export — April 5 window has passed
+- /loanos landing page: copy approval + template decision still needed
+- Nav update: mortgage-glossary.html not yet in Resources nav dropdown
+- City enrichment remaining: Bee Cave, Manor, Smithville, Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
+
+### Next Session Instructions
+Priority 1: Adam to pull GSC export (April 5 window reached for 9+ blog posts)
+Priority 2: Add mortgage-glossary.html to Resources nav dropdown + link from loan type pages
+Priority 3: City page enrichment — 2-3 more (Bee Cave, Manor, Liberty Hill)
+Priority 4: Verify glossary page indexed after 3-5 days
 
 Advance queue: YES
 ---

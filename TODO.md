@@ -8,9 +8,10 @@
 - [ ] Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`
 - [x] Apply migration 075 (`los_integrations`) to Supabase (done 2026-04-08)
 - [ ] Run PII backfill script (`scripts/backfill-activity-pii.ts`)
-- [ ] Adam: register FRED API key → unblocks Refi Watch automation
+- [ ] Adam: register FRED API key → unblocks Refi Watch Sequence A (Rate Drop Alert) for 644 past clients
+- [ ] Adam: verify Microsoft Outlook credential in n8n UI → activates Refi Watch Sequences B + Set Rate (both built, both INACTIVE)
 - [ ] Adam: upload selfies → unblocks LoanOS social content stream
-- [ ] Social posts: now at Week 13 (Posts 77-81 built). Adam must film Post 78 Reel (by June 4) + create Post 81 Canva (by June 7).
+- [ ] Social posts: at Week 15 (Posts 87-91 built). Adam must film Post 88 Reel (by June 18) + create Post 91 Canva (by June 23). Posts 29+30 Liberation Day decision by April 28.
 - [ ] Adam: build 3 Mailchimp Customer Journeys (PA Welcome, Rate Watch, DPA Guide)
 - [ ] NMLS# 513013 profile audit on all 4 social platforms
 - [ ] Adam: review/approve Refi Watch email copy (Sequences A + D)

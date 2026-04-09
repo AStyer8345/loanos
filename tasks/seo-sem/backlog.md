@@ -113,9 +113,15 @@
 
 - [P4 — GSC BLOCKED] April 10 window: check first impression data on "How to Choose a Lender" post (published Apr 1)
 - [P4 — GSC BLOCKED] April 12 window: check first impression data on new doc checklist post (published Apr 6)
-- [LOW_RISK] City page enrichment: continue 2-3 cities per session — Georgetown ✅ and Taylor ✅ done this session; remaining: Bastrop, Bee Cave, Leander, Hutto, Manor, Smithville, Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
-- [LOW_RISK] Mortgage glossary page — internal linking anchor for every loan type page (P2 from April audit)
-- [LOW_RISK] Investment property ROI examples on DSCR page — keyword: "investment property loan Austin" (P2 from April audit)
+- ~~[LOW_RISK] City page enrichment: continue 2-3 cities per session — Georgetown ✅ and Taylor ✅ done 2026-04-06; Leander ✅, Hutto ✅, Bastrop ✅ done 2026-04-07~~ Remaining: Bee Cave, Manor, Smithville, Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
+- ~~[LOW_RISK] Mortgage glossary page~~ ✅ DONE 2026-04-07 — mortgage-glossary.html, FAQPage 6 questions, BreadcrumbList, Article schema, added to sitemap
+- ~~[LOW_RISK] Investment property ROI examples on DSCR page~~ ✅ DONE 2026-04-07 — 3 Austin scenarios (core Austin LTR, suburban LTR, STR), honest ROI math
+
+## ADDED 2026-04-07 AM
+
+- [LOW_RISK] City page enrichment: continue 2-3 cities per session — ~~Bee Cave ✅, Manor ✅, Smithville ✅~~ done 2026-04-08 AM. Remaining: Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
+- ~~[LOW_RISK] Add mortgage-glossary.html link to Resources nav dropdown (currently not in nav)~~ ✅ DONE 2026-04-08 AM — 64 pages updated, commit e4ee80b
+- ~~[LOW_RISK] Add internal links to mortgage-glossary.html from loan type pages (conventional, FHA, VA, DSCR) for key terms they define~~ ✅ DONE 2026-04-08 AM — all 4 loan pages updated
 
 ---
 

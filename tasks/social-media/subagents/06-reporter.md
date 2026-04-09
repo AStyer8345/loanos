@@ -128,7 +128,7 @@ After writing the session log, check: does Adam need to do anything manually bec
 Only act if there is a genuine action Adam must take. Skip if nothing requires his manual intervention.
 
 Examples of things that DO belong here:
-- Publer API credential expired — Adam must re-auth
+- Publer API credential expired — Adam must re-auth in LoanOS Settings → Integrations
 - A post was flagged below 7/10 after two rewrites and needs Adam's rewrite
 - A platform account was disconnected and needs reconnection
 - A compliance issue requires Adam's judgment call

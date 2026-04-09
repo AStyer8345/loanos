@@ -120,7 +120,10 @@ curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
   }'
 ```
 
-**IMPORTANT:** Adam reviews, edits, and approves all drafts in the LoanOS Marketing → Social tab. Do NOT push to Publer — that happens from the dashboard.
+**IMPORTANT — TWO-TIER PUBLISHING:**
+- **GBP (google) posts:** Can be auto-published. Insert with `status: posted` and post directly to Publer (GBP account `69c3e3f548d8e4e643d45438` only).
+- **Instagram, Facebook, LinkedIn posts:** Insert with `status: draft`. Adam reviews, edits, and approves in the Marketing Dashboard. NEVER auto-publish to these platforms.
+- **NEVER use the n8n `/gbp-social-post` webhook** — it targets all 4 platforms and would bypass approval for IG/FB/LI.
 
 ### Log Activity After Each Draft Insert (MANDATORY)
 
@@ -152,6 +155,14 @@ Replace `<TITLE>` and `<PLATFORM>` with the actual values from the draft you jus
 - Self-deprecating humor is welcome. Adam can laugh at himself.
 - Hot takes are welcome. Strong opinions get engagement. Safe gets scrolled past.
 - **Write like Adam talks at a BBQ, not like a marketing department.**
+
+**Tone Dial (apply to every post):** 30% real talk, 30% personal/story, 30% education, 10% promo
+
+**Banned Content Patterns:**
+- No emoji checkmark listicles. No definition cards. No "Did You Know?" posts. No stock image captions.
+- No "dream home." No "seamless process." No "trusted advisor" (show it, don't say it).
+- Write for the specific platform — Instagram, LinkedIn, and Facebook are different audiences.
+- Not every post needs a CTA — some posts just end. One idea per post. Real stories beat generic examples. Simpler is better.
 
 **CTA Rules — NOT every post gets one:**
 - `story`, `personal`, `hot-take`, `real-talk` posts: **NO CTA.** Let the content stand alone. These posts build trust, not conversions. Ending a vulnerable story about surrender with "DM me RATES" kills the moment.

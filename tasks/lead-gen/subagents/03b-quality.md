@@ -35,6 +35,26 @@ A landing page passes quality if a first-time visitor would:
 
 ## PROCESS
 
+### Step 0 — FETCH VOICE GUIDE (MANDATORY — do this BEFORE scoring anything)
+
+Before scoring ANY email or landing page, fetch Adam's voice guide from Supabase. This is the scoring standard for voice and tone.
+
+```bash
+# Fetch voice guide
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_guide&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+```bash
+# Fetch voice feedback (learnings from Adam's edits and rejections)
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_feedback&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+The voice guide contains Adam's tone targets, banned words, high-performing examples, and The Jessica Test. Read it carefully — it is the scoring authority for voice. An email with perfect conversion structure but wrong voice still fails. The standards below handle conversion mechanics; the voice guide handles how Adam sounds.
+
 ### Step 1 — Read builder output
 Read:
 1. `tasks/lead-gen/specs/[most recent spec]`

@@ -34,3 +34,18 @@
 
 #### Newsletter / Realtor Updates
 2026-04-01 | newsletter | realtor-updates/2026-02-27-ai-for-realtors-rates-drop-below-6.html | seeded
+
+### Posted 2026-04-05 AM Session
+
+#### Rate Pages
+2026-04-05 | rate | rates/2026-04-03.html | posted
+
+#### Blog Posts
+2026-04-05 | blog | blog/2026-04-02-self-employed-mortgage-austin-tx.html | posted
+2026-04-05 | blog | blog/2026-04-03-condo-mortgage-austin-tx.html | posted
+2026-04-05 | blog | blog/2026-04-04-austin-housing-market-report-april-2026.html | posted
+
+### Posted 2026-04-07 AM Session
+
+#### Blog Posts
+2026-04-07 | blog | blog/2026-04-06-mortgage-document-checklist-austin-tx.html | posted

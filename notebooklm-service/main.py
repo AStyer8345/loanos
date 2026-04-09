@@ -10,8 +10,10 @@ Run:
 """
 
 import os
+import json
 import asyncio
 import logging
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -35,15 +37,39 @@ _client: Optional[NotebookLMClient] = None
 _client_lock = asyncio.Lock()
 
 
+def _ensure_storage_state():
+    """If NOTEBOOKLM_STORAGE_STATE env var is set (base64 or JSON), write it to
+    the default path so from_storage() can find it."""
+    env_val = os.environ.get("NOTEBOOKLM_STORAGE_STATE")
+    if not env_val:
+        logger.warning("NOTEBOOKLM_STORAGE_STATE env var is not set")
+        return
+    logger.info("NOTEBOOKLM_STORAGE_STATE env var found (%d chars)", len(env_val))
+    storage_dir = Path.home() / ".notebooklm"
+    storage_dir.mkdir(parents=True, exist_ok=True)
+    storage_path = storage_dir / "storage_state.json"
+    if storage_path.exists():
+        logger.info("storage_state.json already exists, skipping")
+        return
+    try:
+        import base64
+        data = base64.b64decode(env_val, validate=True)
+        storage_path.write_bytes(data)
+        logger.info("Wrote storage_state.json from base64 (%d bytes)", len(data))
+    except Exception as e:
+        logger.warning("Base64 decode failed (%s), trying raw write", e)
+        storage_path.write_text(env_val)
+        logger.info("Wrote storage_state.json as raw text")
+
+
 async def get_client() -> NotebookLMClient:
     global _client
     if _client is not None:
         return _client
     async with _client_lock:
         if _client is None:
+            _ensure_storage_state()
             logger.info("Initialising NotebookLM client from saved auth...")
-            # from_storage() is async and returns a NotebookLMClient instance.
-            # __aenter__ activates the HTTP session (must be called separately).
             instance = await NotebookLMClient.from_storage(timeout=120.0)
             _client = await instance.__aenter__()
             logger.info("NotebookLM client ready (notebook: %s)", NOTEBOOK_ID)
@@ -114,13 +140,19 @@ class HealthResponse(BaseModel):
 
 
 # ── Routes ───────────────────────────────────────────────────────────────────
-@app.get("/health", response_model=HealthResponse)
+@app.get("/health")
 async def health():
-    return HealthResponse(
-        status="ok",
-        notebook_id=NOTEBOOK_ID,
-        client_ready=_client is not None,
-    )
+    storage_path = Path.home() / ".notebooklm" / "storage_state.json"
+    env_set = bool(os.environ.get("NOTEBOOKLM_STORAGE_STATE"))
+    return {
+        "status": "ok",
+        "notebook_id": NOTEBOOK_ID,
+        "client_ready": _client is not None,
+        "storage_file_exists": storage_path.exists(),
+        "env_var_set": env_set,
+        "env_var_len": len(os.environ.get("NOTEBOOKLM_STORAGE_STATE", "")),
+        "home_dir": str(Path.home()),
+    }
 
 
 @app.post("/query", response_model=QueryResponse)

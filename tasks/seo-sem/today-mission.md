@@ -1,7 +1,6 @@
-## Mission Brief — 2026-04-06 AM
+# Today's Mission — 2026-04-09 AM
 
-Date: 2026-04-06 | Mode: AM | Focus: LOW_RISK batch + new content
-
-1. SMS opt-in checkbox — all 24 suburb forms (4 variants handled) ✅
-2. Mortgage document checklist blog post ✅
-3. VA IRRRL FAQ + Georgetown/Taylor city enrichment ✅
+Focus: City page enrichment — at-a-glance paragraphs for next 3 suburb pages
+1. Spicewood — Lake Travis ISD, SH-71 commutes, lakefront/Hill Country price ranges [LOW_RISK]
+2. Florence — Florence ISD, FM 487/I-35 commutes, acreage price ranges [LOW_RISK]
+3. Jarrell — Jarrell ISD, I-35 commutes, new construction vs existing price ranges [LOW_RISK]

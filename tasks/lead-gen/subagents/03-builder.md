@@ -28,6 +28,30 @@ Read in order:
 
 ---
 
+## STEP 0 — FETCH VOICE GUIDE + FEEDBACK (MANDATORY — do this BEFORE writing any content)
+
+Before writing ANY email copy, landing page copy, or funnel content, fetch Adam's voice guide and recent feedback from Supabase. This is the source of truth for how Adam sounds — it overrides the generic design system copy guidance below.
+
+```bash
+# Fetch voice guide
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_guide&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+```bash
+# Fetch voice feedback (learnings from Adam's edits and rejections)
+curl -s "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_settings?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&key=eq.voice_feedback&select=value" \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ"
+```
+
+**Read the voice guide carefully.** It contains Adam's actual tone, phrases, topics, and preferences. Email subject lines, body copy, landing page headlines, and CTA language must all match this voice. The design system below handles visual standards — the voice guide handles how Adam sounds. If they conflict, the voice guide wins.
+
+**Read the voice feedback.** It contains patterns from Adam's edits — things the agent got wrong before. Do not repeat mistakes.
+
+---
+
 ## DESIGN SYSTEM — NEVER DEVIATE
 
 **styermortgage.com HTML/CSS standards:**
@@ -64,6 +88,8 @@ Read in order:
 ## EXECUTION PROTOCOL
 
 ### Pre-Execution Checklist
+- [ ] Voice guide fetched from Supabase and read completely
+- [ ] Voice feedback fetched and patterns noted
 - [ ] Full spec read — understand scope and definition of done
 - [ ] Scope boundaries clear — know exactly what NOT to touch
 - [ ] Existing working funnels identified — will NOT modify them

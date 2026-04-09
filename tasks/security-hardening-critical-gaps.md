@@ -78,10 +78,12 @@ onboarding of additional LOs.
   - `emails/unmatched/page.tsx` (unmatched inbound emails)
   - `admin/tenants/[id]/route.ts` (server-side — joins + decrypts directly)
   - Dashboard page NOT changed (only reads non-PII: action, loan_id, occurred_at)
-- **Remaining phases:**
-  - Phase 3: Run backfill script against production (1,089 rows)
-  - Phase 4: Migration 080 — DROP plaintext columns from activity_log
-- **Effort:** Phase 1-2 complete. ~1 hour for remaining phases.
+- **Phase 3 DONE (2026-04-05):** Backfill script run against production.
+  1,094 rows encrypted into `activity_log_pii` companion table (1:1 match verified).
+- **Remaining:**
+  - Phase 4: Migration 080 — DROP plaintext PII columns from activity_log
+    (summary, metadata, subject, body_snippet, from_address, raw_payload)
+- **Effort:** Phase 1-3 complete. Phase 4 is a single migration.
 
 ### 4. ~~Admin-route authorization audit~~ ✅ DONE (2026-04-05)
 - Audited all 5 existing `/api/admin/*` routes — every handler calls `requireAdmin()` on line 1. Clean.

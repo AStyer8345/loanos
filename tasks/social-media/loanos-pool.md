@@ -81,7 +81,7 @@ LoanOS has one dashboard. It shows me three things: loans in motion, leads that 
 Whiteboard photo: hand-drawn sketch of a dashboard showing three boxes labeled "Live Loans", "Hot Leads", "Overnight Automations" with arrows pointing to a single "Today's Actions" box. Keep it raw. Adam draws this on a real whiteboard or notebook, snaps a photo.
 
 ### Status
-ready
+drafted — Post 65 (social_drafts ID: 804629b7-9267-4ba5-a28a-8f35fb8c6610), scheduled 2026-05-17. ADAM ACTION REQUIRED: draw + photograph whiteboard sketch before May 17.
 
 ---
 
@@ -213,4 +213,4 @@ LoanOS has a Loans module that treats every file like a living organism. Status.
 Whiteboard photo: hand-drawn flow of a loan file from "Lead" → "PA Issued" → "Under Contract" → "Disclosures" → "Conditional Approval" → "Clear to Close" → "Funded", with little notes under each stage showing "what can go wrong here". Raw, messy, real.
 
 ### Status
-ready
+drafted — Post 69 (social_drafts ID: 0a507a5c-d8d1-4ad8-b71c-3a81f2fb1547), scheduled 2026-05-22. ADAM ACTION REQUIRED: draw + photograph whiteboard loan flow sketch before May 22.

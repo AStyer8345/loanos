@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/components/OrgProvider'
 import { AlertCircle } from 'lucide-react'
 
 export default function ContactByNameRedirectPage() {
   const params = useParams()
   const router = useRouter()
+  const { organizationId } = useOrg()
   const encodedName = params.name as string
   const name = decodeURIComponent(encodedName?.replace(/\+/g, ' ') ?? '')
   const [status, setStatus] = useState<'loading' | 'found' | 'not-found'>('loading')
@@ -18,11 +20,12 @@ export default function ContactByNameRedirectPage() {
       setStatus('not-found')
       return
     }
+    if (!organizationId) return
     const supabase = createClient()
     const parts = name.trim().split(/\s+/)
     const firstName = parts[0] ?? ''
     const lastName = parts.slice(1).join(' ') || ''
-    let q = supabase.from('contacts').select('id, first_name, last_name')
+    let q = supabase.from('contacts').select('id, first_name, last_name').eq('organization_id', organizationId)
     if (firstName) q = q.ilike('first_name', firstName)
     if (lastName) q = q.ilike('last_name', lastName)
     q.limit(50).then(({ data: list }) => {
@@ -37,7 +40,7 @@ export default function ContactByNameRedirectPage() {
         setStatus('not-found')
       }
     })
-  }, [name, router])
+  }, [name, router, organizationId])
 
   if (status === 'loading') {
     return (

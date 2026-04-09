@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Phone, Mail, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/components/OrgProvider'
 import { Card } from '@/components/ui/card'
 
 export type HotLead = {
@@ -25,16 +26,19 @@ interface HotLeadsWidgetProps {
 export default function HotLeadsWidget({ hotLeads }: HotLeadsWidgetProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const supabase = createClient()
+  const { organizationId } = useOrg()
 
   const visible = hotLeads.filter(l => !dismissed.has(l.id))
 
   async function handleDismiss(id: string) {
     setDismissed(prev => new Set([...prev, id]))
+    if (!organizationId) return
     await supabase
       .from('contacts')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update({ hot_lead_dismissed: true } as any)
       .eq('id', id)
+      .eq('organization_id', organizationId)
   }
 
   if (visible.length === 0) return null

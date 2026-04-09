@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/components/OrgProvider'
 import Link from 'next/link'
 import { ArrowLeft, Users, TrendingUp, DollarSign, AlertCircle } from 'lucide-react'
 import { fmtCurrency, fmtDate } from '@/lib/formatters'
@@ -74,6 +75,7 @@ function LoanStatusBadge({ status }: { status: string | null }) {
 export default function ReferralPage() {
   const params = useParams()
   const referrerName = decodeURIComponent(params.referrerName as string)
+  const { organizationId } = useOrg()
 
   const [contacts, setContacts] = useState<ReferralContact[]>([])
   const [loans, setLoans] = useState<ReferralLoan[]>([])
@@ -83,13 +85,14 @@ export default function ReferralPage() {
 
   useEffect(() => {
     async function load() {
+      if (!organizationId) return
       setLoading(true)
 
       // Resolve referrer name to contact id (for link to contact record)
       const parts = referrerName.trim().split(/\s+/)
       const firstName = parts[0] ?? ''
       const lastName = parts.slice(1).join(' ') || ''
-      let q = supabase.from('contacts').select('id, first_name, last_name')
+      let q = supabase.from('contacts').select('id, first_name, last_name').eq('organization_id', organizationId)
       if (firstName) q = q.ilike('first_name', firstName)
       if (lastName) q = q.ilike('last_name', lastName)
       const { data: referrerList } = await q.limit(50)
@@ -103,6 +106,7 @@ export default function ReferralPage() {
       const { data: contactData } = await supabase
         .from('contacts')
         .select('id, first_name, last_name, email, phone, stage, contact_type, created_at')
+        .eq('organization_id', organizationId)
         .ilike('referred_by', referrerName)
         .order('created_at', { ascending: false })
 
@@ -115,6 +119,7 @@ export default function ReferralPage() {
         const { data: loanData } = await supabase
           .from('loans')
           .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, loan_purpose, loan_program, closing_date, property_city, property_state')
+          .eq('organization_id', organizationId)
           .in('contact_id', ids)
           .order('closing_date', { ascending: false, nullsFirst: false })
         setLoans(loanData || [])
@@ -125,7 +130,7 @@ export default function ReferralPage() {
       setLoading(false)
     }
     load()
-  }, [referrerName])
+  }, [referrerName, organizationId])
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const closedLoans = useMemo(() => loans.filter(l => isClosedLoan(l.status)), [loans])

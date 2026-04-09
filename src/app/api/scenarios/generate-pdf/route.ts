@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getOrganization } from '@/lib/getOrganization'
 import {
   calculatePurchaseScenario,
   calculateCurrentLoan,
@@ -14,10 +14,17 @@ import type {
 } from '@/lib/scenarios/types'
 
 export async function POST(req: NextRequest) {
+  let organizationId: string
+  let userId: string
   try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const ctx = await getOrganization()
+    organizationId = ctx.organizationId
+    userId = ctx.userId
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
 
     const { scenarioId } = await req.json()
     if (!scenarioId) return NextResponse.json({ error: 'Missing scenarioId' }, { status: 400 })
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
       .from('scenarios')
       .select('*')
       .eq('id', scenarioId)
-      .eq('user_id', user.id)
+      .eq('organization_id', organizationId)
       .single()
 
     if (error || !scenario) {
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
     const { data: settingsRows } = await serviceClient
       .from('user_settings')
       .select('key, value')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
     // Convert key-value rows into a flat settings object
     const userSettings: Record<string, string> | null = settingsRows?.length

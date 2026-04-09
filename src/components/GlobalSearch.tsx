@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useOrg } from '@/components/OrgProvider'
 
 type ContactResult = {
   id: string
@@ -26,6 +27,7 @@ type SearchResults = { contacts: ContactResult[]; loans: LoanResult[] }
 export default function GlobalSearch() {
   const router = useRouter()
   const supabase = createClient()
+  const { organizationId } = useOrg()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResults>({ contacts: [], loans: [] })
@@ -59,7 +61,7 @@ export default function GlobalSearch() {
 
   // ── Search: parallel Supabase ilike queries ───────────────────────────────
   const search = useCallback(async (term: string) => {
-    if (!term.trim()) {
+    if (!term.trim() || !organizationId) {
       setResults({ contacts: [], loans: [] })
       setLoading(false)
       return
@@ -70,18 +72,20 @@ export default function GlobalSearch() {
       supabase
         .from('contacts')
         .select('id, first_name, last_name, email, stage, contact_type')
+        .eq('organization_id', organizationId)
         .or(`first_name.ilike.%${t}%,last_name.ilike.%${t}%,email.ilike.%${t}%`)
         .limit(5),
       supabase
         .from('loans')
         .select('id, borrower_name, loan_name, status, loan_amount')
+        .eq('organization_id', organizationId)
         .or(`borrower_name.ilike.%${t}%,loan_name.ilike.%${t}%`)
         .limit(5),
     ])
     setResults({ contacts: contacts ?? [], loans: loans ?? [] })
     setLoading(false)
     setHighlightIdx(0)
-  }, [supabase])
+  }, [supabase, organizationId])
 
   // ── Debounce: 300ms after last keystroke ──────────────────────────────────
   useEffect(() => {

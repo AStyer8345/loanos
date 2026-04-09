@@ -14,6 +14,7 @@ import ShareFooter from './ShareFooter'
 import ShareEquityChart from './ShareEquityChart'
 import CashToCloseBreakdown from './CashToCloseBreakdown'
 import LOSidebarCard from './LOSidebarCard'
+import ShareVideoEmbed from './ShareVideoEmbed'
 
 interface SharedScenario {
   scenario_type: string
@@ -43,6 +44,7 @@ const DEFAULT_BRANDING: ShareBranding = {
   brandColor: '#C9A84C',
   calendlyUrl: null,
   applicationUrl: null,
+  videoUrl: null,
 }
 
 function getHeroStat(displayData: DisplayData): { label: string; value: string; sublabel?: string } {
@@ -144,6 +146,9 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
 
           {/* ═══ LEFT COLUMN: Main content ═══ */}
           <div className="space-y-8 min-w-0">
+
+            {/* Video Walkthrough — renders only when LO has set scenario_video_url */}
+            {b.videoUrl && <ShareVideoEmbed videoUrl={b.videoUrl} />}
 
             {/* Option Cards */}
             <section>

@@ -69,10 +69,20 @@ KNOWN GAPS (start here):
 
 ---
 
-## Tier 4 — Polish + Emotional Impact (next focus)
+## Tier 4 — Polish + Emotional Impact ✅ COMPLETE
 - ~~**Mobile share page audit** — test at 390px viewport; fix any layout issues (70%+ of borrowers on phones)~~ ✅ DONE 2026-04-07 AM
 - ~~**"Commonly Chosen" badge** — lowest-payment OptionCard gets gold pill badge + gold card treatment; hidden for single-scenario views~~ ✅ DONE 2026-04-08 AM
-- **Share page: video/loom embed placeholder** — Adam records a 60-second walkthrough; embed above the options on the share page
+- ~~**Share page: video/loom embed placeholder** — responsive 16:9 iframe, Loom + YouTube URL normalization, reads from `user_settings.scenario_video_url`~~ ✅ DONE 2026-04-09 AM
+
+---
+
+## Tier 5 — Depth + Conversion (next focus)
+
+- **PDF: "Commonly Chosen" label** — mirror the share page badge in the PDF output (currently only on the web share page; the LO who prints it loses context)
+- **Scenario comparison table on share page** — side-by-side data table below the option cards for borrowers who want all numbers in one view (currently in DetailAccordion behind a tap)
+- **Builder: scenario naming** — let LO label each scenario (e.g., "Conservative", "Aggressive", "Seller Buydown") instead of "Option A / B / C" — names carry through to share page and PDF
+- **Refi builder: current loan pre-fill** — when entering refi mode from a loan record, auto-populate current rate + remaining balance + months remaining from the loan detail
+- **Share page: social proof block** — "X borrowers in Austin chose a 30yr fixed this month" — purely illustrative, compliance-safe framing
 
 ---
 

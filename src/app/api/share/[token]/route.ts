@@ -18,6 +18,7 @@ export interface ShareBranding {
   brandColor: string
   calendlyUrl: string | null
   applicationUrl: string | null
+  videoUrl: string | null
 }
 
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
@@ -94,6 +95,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       brandColor: org?.brand_color || '#C9A84C',
       calendlyUrl: settings.calendly_url || null,
       applicationUrl: settings.application_url || null,
+      videoUrl: settings.scenario_video_url || null,
     }
 
     // Return borrower-facing data + LO branding

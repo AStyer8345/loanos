@@ -22,6 +22,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { updateLastTouch } from '@/lib/updateLastTouch'
+import { useOrg } from '@/components/OrgProvider'
 import {
   IN_PROCESS_STATUSES, FUNDED_STATUSES, PRE_APPROVAL_STATUSES,
   LEAD_STATUSES, NEW_APP_STATUSES,
@@ -327,6 +328,7 @@ export default function LoansPage() {
   const supabase = createClient()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { organizationId } = useOrg()
   const urlStage = searchParams.get('stage')
   const urlFilter = searchParams.get('filter')
   const urlPeriod = searchParams.get('period')
@@ -377,13 +379,14 @@ export default function LoansPage() {
 
   // Fetch distinct status + lender values for filter dropdowns
   useEffect(() => {
-    supabase.from('loans').select('status').then(({ data }) => {
+    if (!organizationId) return
+    supabase.from('loans').select('status').eq('organization_id', organizationId).then(({ data }) => {
       if (data) {
         const vals = [...new Set(data.map(r => r.status).filter(Boolean) as string[])].sort()
         setDistinctStatuses(vals)
       }
     })
-    supabase.from('loans').select('lender, lender_name').then(({ data }) => {
+    supabase.from('loans').select('lender, lender_name').eq('organization_id', organizationId).then(({ data }) => {
       if (data) {
         const vals = [...new Set(
           data.flatMap(r => [r.lender, r.lender_name]).filter(Boolean) as string[]
@@ -391,7 +394,7 @@ export default function LoansPage() {
         setDistinctLenders(vals)
       }
     })
-  }, [supabase])
+  }, [supabase, organizationId])
 
   // Restore column visibility + order from localStorage
   useEffect(() => {
@@ -470,27 +473,29 @@ export default function LoansPage() {
 
   // ── Fetch counts ───────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
+    if (!organizationId) return
     const map: Record<string, number> = {}
     for (const list of SMART_LISTS) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('organization_id', organizationId)
       if (list.statuses) q = q.in('status', list.statuses)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     for (const list of customLists) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true })
+      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('organization_id', organizationId)
       if (list.rules?.length) q = applyCustomListRulesLoan(q, list.rules)
       const { count } = await q
       map[list.id] = count ?? 0
     }
     setCounts(map)
-  }, [customLists, supabase])
+  }, [customLists, supabase, organizationId])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
       .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, estimated_closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .eq('organization_id', organizationId!)
       .order('closing_date', { ascending: false, nullsFirst: false })
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
@@ -500,9 +505,10 @@ export default function LoansPage() {
       if (list?.statuses) q = q.in('status', list.statuses)
     }
     return q
-  }, [customLists, supabase])
+  }, [customLists, supabase, organizationId])
 
   const fetchLoans = useCallback(async (listId: string) => {
+    if (!organizationId) return
     setLoading(true)
     loansOffsetRef.current = 0
     const { data, error } = await buildLoansQuery(listId).range(0, LOANS_PAGE_SIZE - 1)
@@ -514,7 +520,7 @@ export default function LoansPage() {
       setHasMore(false)
     }
     setLoading(false)
-  }, [buildLoansQuery])
+  }, [buildLoansQuery, organizationId])
 
   const loadMoreLoans = useCallback(async () => {
     setLoadingMore(true)
@@ -529,17 +535,18 @@ export default function LoansPage() {
   }, [buildLoansQuery, activeList])
 
   const handleCommissionChange = useCallback(async (loanId: string, rawValue: string) => {
+    if (!organizationId) return
     const value = rawValue.trim()
     const amount = value ? Number(value.replace(/[^0-9.]/g, '')) : 0
     if (Number.isNaN(amount)) return
     setEditingCommissionId(null)
     setEditingCommissionValue('')
-    const { error } = await supabase.from('loans').update({ commission_amount: amount }).eq('id', loanId)
+    const { error } = await supabase.from('loans').update({ commission_amount: amount }).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.map(l => l.id === loanId ? { ...l, commission_amount: amount } : l))
       await fetchCounts()
     }
-  }, [supabase, fetchCounts])
+  }, [supabase, fetchCounts, organizationId])
 
   // URL param-based filtering on initial load
   useEffect(() => {
@@ -581,9 +588,10 @@ export default function LoansPage() {
 
   // ── Inline status change ───────────────────────────────────────────────
   const handleStatusChange = useCallback(async (loanId: string, newStatus: string) => {
+    if (!organizationId) return
     setEditingStatusId(null)
     const loan = loans.find(l => l.id === loanId)
-    const { error } = await supabase.from('loans').update({ status: newStatus }).eq('id', loanId)
+    const { error } = await supabase.from('loans').update({ status: newStatus }).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.map(l => l.id === loanId ? { ...l, status: newStatus } : l))
       supabase.from('activity_log').insert({ action: 'loan.status_changed', entity_type: 'loan', loan_id: loanId, metadata: { to: newStatus } })
@@ -593,7 +601,7 @@ export default function LoansPage() {
       await fetchCounts()
       if (!activeList.startsWith('custom-')) fetchLoans(activeList)
     }
-  }, [supabase, activeList, loans, fetchCounts, fetchLoans])
+  }, [supabase, activeList, loans, fetchCounts, fetchLoans, organizationId])
 
   // ── Bulk actions ──────────────────────────────────────────────────────
   const toggleSelect = (id: string) => setSelected(prev => {
@@ -608,9 +616,9 @@ export default function LoansPage() {
   }
 
   const handleBulkStatusUpdate = useCallback(async (newStatus: string) => {
-    if (!selected.size) return
+    if (!selected.size || !organizationId) return
     const ids = [...selected]
-    const { error } = await supabase.from('loans').update({ status: newStatus }).in('id', ids)
+    const { error } = await supabase.from('loans').update({ status: newStatus }).in('id', ids).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.map(l => ids.includes(l.id) ? { ...l, status: newStatus } : l))
       supabase.from('activity_log').insert(ids.map(id => ({ action: 'loan.status_changed', entity_type: 'loan', loan_id: id, metadata: { to: newStatus } })))
@@ -618,28 +626,29 @@ export default function LoansPage() {
       setBulkStatus('')
       await fetchCounts()
     }
-  }, [selected, supabase, fetchCounts])
+  }, [selected, supabase, fetchCounts, organizationId])
 
   const handleBulkDelete = useCallback(async () => {
-    if (!selected.size || !confirm(`Delete ${selected.size} loan(s)? This cannot be undone.`)) return
+    if (!selected.size || !organizationId || !confirm(`Delete ${selected.size} loan(s)? This cannot be undone.`)) return
     const ids = [...selected]
-    const { error } = await supabase.from('loans').delete().in('id', ids)
+    const { error } = await supabase.from('loans').delete().in('id', ids).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.filter(l => !ids.includes(l.id)))
       setSelected(new Set())
       await fetchCounts()
     }
-  }, [selected, supabase, fetchCounts])
+  }, [selected, supabase, fetchCounts, organizationId])
 
   // ── Single loan delete ────────────────────────────────────────────────
   const handleDeleteLoan = useCallback(async (loanId: string) => {
-    const { error } = await supabase.from('loans').delete().eq('id', loanId)
+    if (!organizationId) return
+    const { error } = await supabase.from('loans').delete().eq('id', loanId).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.filter(l => l.id !== loanId))
       setDeletingLoanId(null)
       await fetchCounts()
     }
-  }, [supabase, fetchCounts])
+  }, [supabase, fetchCounts, organizationId])
 
   // ── Sort + search ──────────────────────────────────────────────────────
   const handleSort = (key: SortKey) => {

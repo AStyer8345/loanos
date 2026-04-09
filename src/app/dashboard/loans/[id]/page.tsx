@@ -379,6 +379,7 @@ export default function LoanDetailPage() {
   const params = useParams()
   const router = useRouter()
   const loanId = params.id as string
+  const { organizationId } = useOrg()
 
   const [loan, setLoan] = useState<Loan | null>(null)
   const [contact, setContact] = useState<ContactRow | null>(null)
@@ -415,9 +416,10 @@ export default function LoanDetailPage() {
   }, [actionsOpen])
 
   const fetchAll = useCallback(async () => {
+    if (!organizationId) return
     setLoading(true)
     const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes] = await Promise.all([
-      supabase.from('loans').select('*').eq('id', loanId).single(),
+      supabase.from('loans').select('*').eq('id', loanId).eq('organization_id', organizationId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
       fetch(`/api/activity?loan_id=${loanId}&limit=50&columns=id,created_at,action,type,summary,entity_type,metadata`).then(r => r.ok ? r.json() : []),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
@@ -429,7 +431,7 @@ export default function LoanDetailPage() {
       const contactId = loanRes.data.contact_id
       if (contactId) {
         const [{ data: c }, inbound] = await Promise.all([
-          supabase.from('contacts').select('id, first_name, last_name, email, phone, referred_by').eq('id', contactId).single(),
+          supabase.from('contacts').select('id, first_name, last_name, email, phone, referred_by').eq('id', contactId).eq('organization_id', organizationId).single(),
           fetch(`/api/activity?type=email_inbound&or_filter=loan_id.eq.${loanId},contact_id.eq.${contactId}&order=occurred_at&limit=100&columns=id,subject,from_address,body_snippet,occurred_at,created_at,metadata,contact_id,loan_id`).then(r => r.ok ? r.json() : []),
         ])
         setContact(c)
@@ -445,7 +447,7 @@ export default function LoanDetailPage() {
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
-  }, [loanId, supabase])
+  }, [loanId, supabase, organizationId])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -476,8 +478,9 @@ export default function LoanDetailPage() {
 
   // Header inline edit save helper
   const handleDeleteLoan = async () => {
+    if (!organizationId) return
     setDeleting(true)
-    const { error } = await supabase.from('loans').delete().eq('id', loanId)
+    const { error } = await supabase.from('loans').delete().eq('id', loanId).eq('organization_id', organizationId)
     if (error) {
       setDeleting(false)
       alert('Failed to delete loan: ' + error.message)
@@ -487,7 +490,8 @@ export default function LoanDetailPage() {
   }
 
   const saveHeaderField = async (field: string, value: string | number | null) => {
-    await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
+    if (!organizationId) return
+    await supabase.from('loans').update({ [field]: value }).eq('id', loanId).eq('organization_id', organizationId)
     setLoan({ ...loan, [field]: value } as Loan)
     setEditingHeader(null)
     setHeaderInput('')
@@ -895,24 +899,28 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   onRefresh: () => void
 }) {
   const supabase = createClient()
+  const { organizationId } = useOrg()
 
   const handleSaveField = useCallback(async (field: string, value: string | number | null) => {
-    const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId)
+    if (!organizationId) return
+    const { error } = await supabase.from('loans').update({ [field]: value }).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) setLoan({ ...loan, [field]: value } as Loan)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loanId, loan])
+  }, [loanId, loan, organizationId])
 
   const handleSaveMultiple = useCallback(async (fields: Record<string, string | null>) => {
-    const { error } = await supabase.from('loans').update(fields).eq('id', loanId)
+    if (!organizationId) return
+    const { error } = await supabase.from('loans').update(fields).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) setLoan({ ...loan, ...fields } as Loan)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loanId, loan])
+  }, [loanId, loan, organizationId])
 
   const handleReassignContact = useCallback(async (contactId: string) => {
-    const { error } = await supabase.from('loans').update({ contact_id: contactId }).eq('id', loanId)
+    if (!organizationId) return
+    const { error } = await supabase.from('loans').update({ contact_id: contactId }).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) onRefresh()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loanId, onRefresh])
+  }, [loanId, onRefresh, organizationId])
 
   return (
     <div className="p-6 space-y-6">
@@ -2823,13 +2831,14 @@ function InlineStatusSelect({ status, loanId, onUpdate }: {
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
+  const { organizationId } = useOrg()
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value
-    if (!newStatus || newStatus === status) { setOpen(false); return }
+    if (!newStatus || newStatus === status || !organizationId) { setOpen(false); return }
     setSaving(true)
     setOpen(false)
-    await supabase.from('loans').update({ status: newStatus }).eq('id', loanId)
+    await supabase.from('loans').update({ status: newStatus }).eq('id', loanId).eq('organization_id', organizationId)
     onUpdate(newStatus)
     setSaving(false)
   }

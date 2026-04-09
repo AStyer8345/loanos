@@ -10,7 +10,8 @@
 # next.js
 /.next/
 /.next.nosync/
-/.next */
+.next */
+.next?*
 /out/
 
 # production

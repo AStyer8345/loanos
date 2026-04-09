@@ -6,11 +6,13 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
+import { useOrg } from '@/components/OrgProvider'
 import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow, type DripEnrollment } from './ContactRecordView'
 
 export default function ContactRecordPage() {
   const params = useParams()
   const id = params.id as string
+  const { organizationId } = useOrg()
 
   const [contact, setContact] = useState<Contact | null>(null)
   const [loans, setLoans] = useState<ContactLoan[]>([])
@@ -30,36 +32,43 @@ export default function ContactRecordPage() {
   const supabase = createClient()
 
   const fetchContact = useCallback(async () => {
+    if (!organizationId) return null
     const { data, error } = await supabase
       .from('contacts')
       .select('*')
+      .eq('organization_id', organizationId)
       .eq('id', id)
       .single()
     if (!error && data) setContact(data as Contact)
     return data as Contact | null
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   const fetchLoans = useCallback(async () => {
+    if (!organizationId) return
     const { data } = await supabase
       .from('loans')
       .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program, employer_name, monthly_income, co_borrower_contact_id, co_borrower_name, created_at')
+      .eq('organization_id', organizationId)
       .eq('contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setLoans((data as ContactLoan[]) ?? [])
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   // Fetch loans where this contact is the co-borrower
   const fetchCoBorrowerLoans = useCallback(async () => {
+    if (!organizationId) return
     const { data } = await supabase
       .from('loans')
       .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type, loan_program')
+      .eq('organization_id', organizationId)
       .eq('co_borrower_contact_id', id)
       .order('closing_date', { ascending: false, nullsFirst: false })
     setCoBorrowerLoans((data as ContactLoan[]) ?? [])
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   // Fetch loans referred by this agent — buyer/listing agent FK, or referring_agent_email match
   const fetchReferredLoans = useCallback(async (contactEmail?: string | null) => {
+    if (!organizationId) return
     const orParts = [`buyer_agent_contact_id.eq.${id}`, `listing_agent_contact_id.eq.${id}`]
     if (contactEmail?.trim()) {
       orParts.push(`referring_agent_email.eq.${contactEmail.trim()}`)
@@ -67,18 +76,21 @@ export default function ContactRecordPage() {
     const { data } = await supabase
       .from('loans')
       .select('id, loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, interest_rate, closing_date, estimated_closing_date, property_address, property_city, property_state, loan_purpose, loan_type')
+      .eq('organization_id', organizationId)
       .or(orParts.join(','))
       .order('closing_date', { ascending: false, nullsFirst: false })
     // Deduplicate in case a loan matches multiple criteria
     const seen = new Set<string>()
     const unique = (data ?? []).filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
     setReferredLoans(unique as unknown as ContactLoan[])
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   const fetchDripEnrollments = useCallback(async () => {
+    if (!organizationId) return
     const { data } = await supabase
       .from('drip_enrollments')
       .select('id, contact_id, campaign_id, organization_id, status, current_step, next_send_at, enrolled_at, cancelled_at')
+      .eq('organization_id', organizationId)
       .eq('contact_id', id)
       .order('enrolled_at', { ascending: false })
     const rows = data ?? []
@@ -104,7 +116,7 @@ export default function ContactRecordPage() {
       total_steps: stepCountMap.get(e.campaign_id) ?? 0,
     }))
     setDripEnrollments(enriched)
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   const fetchActivity = useCallback(async () => {
     // 1. Activity directly linked to this contact (via server-side PII decryption)
@@ -115,9 +127,11 @@ export default function ContactRecordPage() {
     const seen = new Set(merged.map(r => r.id))
 
     // 2. Activity from loans linked to this contact
+    if (!organizationId) { setActivity(merged); return }
     const { data: linkedLoans } = await supabase
       .from('loans')
       .select('id, loan_name')
+      .eq('organization_id', organizationId)
       .eq('contact_id', id)
 
     if (linkedLoans && linkedLoans.length > 0) {
@@ -138,7 +152,7 @@ export default function ContactRecordPage() {
 
     merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     setActivity(merged)
-  }, [id, supabase])
+  }, [id, supabase, organizationId])
 
   const fetchContactActivity = useCallback(async () => {
     const { data } = await supabase
@@ -151,10 +165,11 @@ export default function ContactRecordPage() {
 
   const resolveReferrer = useCallback(async (referredBy: string | null) => {
     if (!referredBy?.trim()) { setReferrerContactId(null); return }
+    if (!organizationId) return
     const parts = referredBy.trim().split(/\s+/)
     const firstName = parts[0] ?? ''
     const lastName = parts.slice(1).join(' ') || ''
-    let q = supabase.from('contacts').select('id, first_name, last_name')
+    let q = supabase.from('contacts').select('id, first_name, last_name').eq('organization_id', organizationId)
     if (firstName) q = q.ilike('first_name', firstName)
     if (lastName) q = q.ilike('last_name', lastName)
     const { data: list } = await q.limit(50)
@@ -163,7 +178,7 @@ export default function ContactRecordPage() {
         `${(c.first_name ?? '').trim()} ${(c.last_name ?? '').trim()}`.trim() === referredBy.trim()
     )
     setReferrerContactId(match ? (match as { id: string }).id : null)
-  }, [supabase])
+  }, [supabase, organizationId])
 
   useEffect(() => {
     let cancelled = false
@@ -203,16 +218,18 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
+  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
     setSavingNote(true)
     const dateLabel = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
     const appended = (contact.notes ?? '') + '\n\n--- ' + dateLabel + ' ---\n' + newNote.trim()
+    if (!organizationId) { setSavingNote(false); return }
     const { error: updateErr } = await supabase
       .from('contacts')
       .update({ notes: appended })
+      .eq('organization_id', organizationId)
       .eq('id', contact.id)
     if (!updateErr) {
       await updateLastTouch(supabase, contact.id, 'note_added', 'Added a note')
@@ -224,8 +241,8 @@ export default function ContactRecordPage() {
   }
 
   const handleSaveField = async (field: keyof Contact, value: string | null) => {
-    if (!contact) return
-    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
+    if (!contact || !organizationId) return
+    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('organization_id', organizationId).eq('id', contact.id)
     if (!error) {
       updateLastTouch(supabase, contact.id, 'contact_updated', 'Updated contact record', undefined, { field })
       setContact(prev => prev ? { ...prev, [field]: value } : null)
@@ -233,8 +250,8 @@ export default function ContactRecordPage() {
   }
 
   const handleSaveBoolField = async (field: keyof Contact, value: boolean) => {
-    if (!contact) return
-    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('id', contact.id)
+    if (!contact || !organizationId) return
+    const { error } = await supabase.from('contacts').update({ [field]: value }).eq('organization_id', organizationId).eq('id', contact.id)
     if (!error) {
       setContact(prev => prev ? { ...prev, [field]: value } : null)
     }

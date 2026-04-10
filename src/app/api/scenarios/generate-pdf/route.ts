@@ -151,12 +151,28 @@ function renderSummaryTable(rows: ScenarioDisplayRow[], mode: 'purchase' | 'refi
   const hasHOA = rows.some(r => r.hoa > 0)
   const hasPMI = rows.some(r => r.pmi > 0)
 
-  const headerCells = rows.map(r =>
-    `<th style="background:#f5f5f5;color:#333;padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">
+  // "Commonly Chosen" — lowest monthly payment, purchase mode only, 2+ scenarios
+  const commonlyChosenIndex = mode === 'purchase' && rows.length > 1
+    ? rows.reduce((bestIdx, r, i) => {
+        if (r.totalMonthlyPayment <= 0) return bestIdx
+        if (bestIdx === -1) return i
+        return r.totalMonthlyPayment < rows[bestIdx].totalMonthlyPayment ? i : bestIdx
+      }, -1)
+    : -1
+
+  const headerCells = rows.map((r, i) => {
+    const isChosen = i === commonlyChosenIndex
+    const bg = isChosen ? '#C9A84C' : '#f5f5f5'
+    const color = isChosen ? '#fff' : '#333'
+    const loanTypeColor = isChosen ? 'rgba(255,255,255,0.7)' : '#999'
+    const badge = isChosen
+      ? `<br><span style="display:inline-block;margin-top:5px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:10px;padding:1px 8px;font-size:8px;font-weight:700;color:#fff;letter-spacing:0.05em;text-transform:uppercase;">Commonly Chosen</span>`
+      : ''
+    return `<th style="background:${bg};color:${color};padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">
       ${r.label}
-      <br><span style="font-size:9px;font-weight:500;color:#999;text-transform:uppercase;">${r.loanType}</span>
+      <br><span style="font-size:9px;font-weight:500;color:${loanTypeColor};text-transform:uppercase;">${r.loanType}</span>${badge}
     </th>`
-  ).join('')
+  }).join('')
 
   const cell = (val: string) =>
     `<td style="padding:6px 12px;font-size:10.5px;text-align:center;font-family:'IBM Plex Mono',monospace;">${val}</td>`

@@ -1,31 +1,30 @@
-## Scenarios Mission Brief — 2026-04-09 AM
+## Scenarios Mission Brief — 2026-04-10 AM
 
 ### Focus Area
-Share page: video/loom embed placeholder (Tier 4 item 3 — final Tier 4 item)
+PDF: "Commonly Chosen" label — mirror share page badge in PDF output
 
 ### Why This Matters
-Mortgage Coach presentations include a video walkthrough from the LO. Adam records a 60-second Loom explaining the options and borrowers watch it before calling. This turns a confusing spreadsheet into a guided experience. LoanOS share page has all the data but no voice. Adding a video slot closes this MC advantage at zero extra infrastructure cost: no new tables, just a key in `user_settings` (key: `scenario_video_url`).
+The share page now visually anchors borrowers to the lowest-payment scenario with a gold "Commonly Chosen" pill. When Adam prints or sends the PDF, that signal disappears. Borrowers who review the PDF alone have no visual anchor. Closing this gap means the PDF and the share page tell the same story.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Add `videoUrl` field to `ShareBranding` type, read from `user_settings.scenario_video_url`
-2. Create `ShareVideoEmbed.tsx` — responsive 16:9 iframe embed, Loom + YouTube URL normalization, renders null when no URL set
-3. Wire embed above "Your Options" section in `SharePageLayout.tsx`
-4. Update `domain-queue.md` with Tier 4 complete + Tier 5 items
+1. Add "Commonly Chosen" gold pill badge to the scenario column header in the PDF Summary Table that corresponds to the lowest total monthly payment (purchase mode only, 2+ scenarios)
+2. Apply gold column header treatment (gold background, white text) to that column to match the visual weight of the share page card treatment
+3. Build must pass — no TypeScript errors
 
 ### Files in Scope
-- `src/app/api/share/[token]/route.ts` — add `videoUrl` to ShareBranding + read from settings
-- `src/components/share/ShareVideoEmbed.tsx` (new)
-- `src/components/share/SharePageLayout.tsx` — import + render above OptionCardsGrid
-- `tasks/scenarios/domain-queue.md` — mark Tier 4 done, define Tier 5
+- `src/app/api/scenarios/generate-pdf/route.ts` — ONLY this file
 
 ### Definition of Done
-- `npm run build` passes with 0 TypeScript errors
-- Responsive 16:9 iframe at 390px mobile through desktop
-- Loom share URLs auto-converted to embed URLs
-- No URL set → component renders nothing
-- Section header "Walk Me Through This" in LoanOS gold style
-- `print:hidden` — does not appear in PDF
-- Committed and pushed
+- `npm run build` passes
+- "Commonly Chosen" gold badge appears in the column header of the lowest-payment scenario when there are 2+ scenarios
+- Badge is hidden (column renders normally) when only 1 scenario
+- No change for refi mode (refi has no "Commonly Chosen" concept)
+- Pushed to main, Vercel READY
+
+### Subagents to Activate
+[x] Builder (this session — inline implementation)
+[x] QA (build check)
+[x] Reporter

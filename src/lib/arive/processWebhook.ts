@@ -79,16 +79,20 @@ async function sbInsertWithId(table: string, body: Record<string, unknown>): Pro
   return Array.isArray(data) ? data[0] : data
 }
 
-/** Insert activity_log + encrypted PII companion row via raw HTTP. */
+/**
+ * Insert activity_log + encrypted PII companion row via raw HTTP.
+ *
+ * Writes only public fields into activity_log. PII is encrypted into
+ * activity_log_pii. PII_ENCRYPTION_KEY is required — no dev fallback,
+ * no dual-write (see 2026-04-10 PII hardening).
+ */
 async function sbInsertActivityWithPii(
   publicFields: Record<string, unknown>,
   pii: Record<string, unknown>
 ) {
   const keyHex = process.env.PII_ENCRYPTION_KEY
   if (!keyHex) {
-    // No encryption key (dev) — write PII inline (legacy)
-    await sbInsert('activity_log', { ...publicFields, ...pii })
-    return
+    throw new Error('PII_ENCRYPTION_KEY is not set — refusing to write activity_log from arive webhook')
   }
   const key = Buffer.from(keyHex, 'hex')
   const iv = randomBytes(12)
@@ -97,8 +101,8 @@ async function sbInsertActivityWithPii(
   const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
   const tag = cipher.getAuthTag()
 
-  // Dual-write: PII inline for current read sites + encrypted companion
-  const activity = await sbInsertWithId('activity_log', { ...publicFields, ...pii })
+  // Public-only insert; PII goes to the companion table below.
+  const activity = await sbInsertWithId('activity_log', publicFields)
   await sbInsert('activity_log_pii', {
     activity_id: activity.id,
     organization_id: publicFields.organization_id,

@@ -137,12 +137,15 @@ function decrypt(
 // ── Write helper ─────────────────────────────────────────────────────────────
 
 /**
- * Insert an activity_log row + its encrypted PII companion in one call.
- * Uses service-role client so RLS doesn't block the PII insert.
+ * Insert an activity_log row + its encrypted PII companion.
  *
- * If PII_ENCRYPTION_KEY is not set (e.g. local dev without env), falls back
- * to writing PII fields directly into activity_log (legacy behavior) so
- * dev/test environments aren't broken.
+ * Writes ONLY public fields into activity_log. PII is encrypted into
+ * activity_log_pii and never touches the main table. Callers must set
+ * PII_ENCRYPTION_KEY — we fail loudly if it's missing rather than silently
+ * writing plaintext (see the 2026-04-10 hardening doc for why).
+ *
+ * If the companion insert fails, the whole operation returns an error so
+ * callers don't end up with an activity row whose PII is gone forever.
  */
 export async function writeActivityWithPii(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,22 +153,17 @@ export async function writeActivityWithPii(
   publicFields: ActivityPublicFields,
   pii: PiiPayload
 ): Promise<{ activityId: string | null; error: string | null }> {
-  // Fallback: if no encryption key, write PII inline (legacy behavior for dev)
   if (!process.env.PII_ENCRYPTION_KEY) {
-    const { data, error } = await client
-      .from('activity_log')
-      .insert({ ...publicFields, ...pii })
-      .select('id')
-      .single()
-    return { activityId: data?.id ?? null, error: error?.message ?? null }
+    return {
+      activityId: null,
+      error: 'PII_ENCRYPTION_KEY is not set — refusing to write activity_log without encryption',
+    }
   }
 
-  // Step 1: insert the row with PII inline (dual-write for transition).
-  // Read sites still consume inline columns; once reads are migrated to
-  // the server-side decrypt endpoint, this merges back to publicFields only.
+  // Step 1: insert the public row. No PII fields — those live in the companion.
   const { data: activity, error: activityError } = await client
     .from('activity_log')
-    .insert({ ...publicFields, ...pii })
+    .insert(publicFields)
     .select('id')
     .single()
 
@@ -173,8 +171,8 @@ export async function writeActivityWithPii(
     return { activityId: null, error: activityError?.message ?? 'activity_log insert failed' }
   }
 
-  // Step 2: encrypt and insert the PII companion.
-  // Encode Buffers as PG bytea hex-escape literals — see byteaEncode() above.
+  // Step 2: encrypt + insert the PII companion.
+  // Buffers encoded as PG bytea hex-escape literals — see byteaEncode() above.
   const blob = encrypt(pii)
   const { error: piiError } = await client
     .from('activity_log_pii')
@@ -188,10 +186,17 @@ export async function writeActivityWithPii(
     })
 
   if (piiError) {
-    // PII insert failed — the activity row exists but has no PII.
-    // Log the error but don't fail the whole operation; the activity
-    // record is still valuable for audit even without decryptable PII.
-    console.error('[pii] activity_log_pii insert failed:', piiError.message)
+    // Companion insert failed — roll back the orphan activity row so we don't
+    // leave an audit record with unrecoverable PII. Best-effort; log if rollback
+    // also fails, but surface the original error to the caller either way.
+    const { error: rollbackErr } = await client
+      .from('activity_log')
+      .delete()
+      .eq('id', activity.id)
+    if (rollbackErr) {
+      console.error('[pii] orphan rollback failed:', rollbackErr.message, 'for activity', activity.id)
+    }
+    return { activityId: null, error: `activity_log_pii insert failed: ${piiError.message}` }
   }
 
   return { activityId: activity.id, error: null }
@@ -206,29 +211,22 @@ export interface ActivityWithPii extends Record<string, unknown> {
 }
 
 /**
- * Decrypt PII for a batch of activity rows that have been joined with
- * activity_log_pii. Expects each row to optionally have:
+ * Decrypt PII for a batch of activity rows joined with activity_log_pii.
+ * Expects each row to have:
  *   activity_log_pii.pii_ciphertext, .pii_iv, .pii_tag, .key_version
  *
- * Returns the same rows with a `pii` object merged in (or null if no PII
- * row exists or decryption fails).
+ * Returns the same rows with a decrypted `pii` object merged in. `pii` is
+ * null when the companion row is missing or decryption fails (callers
+ * should render "[encrypted]" in that case).
+ *
+ * PII_ENCRYPTION_KEY is required — we never fall back to reading inline
+ * columns, which no longer exist after migration 083.
  */
 export function decryptActivityPii<T extends Record<string, unknown>>(
   rows: T[]
 ): (T & { pii: PiiPayload | null })[] {
   if (!process.env.PII_ENCRYPTION_KEY) {
-    // No encryption key — PII is still inline in the main row (legacy/dev)
-    return rows.map(r => ({
-      ...r,
-      pii: {
-        summary: r.summary as string | null ?? null,
-        subject: r.subject as string | null ?? null,
-        body_snippet: r.body_snippet as string | null ?? null,
-        from_address: r.from_address as string | null ?? null,
-        raw_payload: r.raw_payload as Record<string, unknown> | null ?? null,
-        metadata: r.metadata as Record<string, unknown> | null ?? null,
-      },
-    }))
+    throw new Error('PII_ENCRYPTION_KEY is not set — refusing to decrypt activity_log PII')
   }
 
   return rows.map(row => {
@@ -240,18 +238,11 @@ export function decryptActivityPii<T extends Record<string, unknown>>(
     } | null
 
     if (!piiRow?.pii_ciphertext || !piiRow?.pii_iv || !piiRow?.pii_tag) {
-      // No PII companion row — return inline fields as fallback (pre-migration data)
-      return {
-        ...row,
-        pii: {
-          summary: row.summary as string | null ?? null,
-          subject: row.subject as string | null ?? null,
-          body_snippet: row.body_snippet as string | null ?? null,
-          from_address: row.from_address as string | null ?? null,
-          raw_payload: row.raw_payload as Record<string, unknown> | null ?? null,
-          metadata: row.metadata as Record<string, unknown> | null ?? null,
-        },
-      }
+      // No companion row at all — nothing to decrypt. This should never
+      // happen after migration 083 (writes are transactional), so log it
+      // but don't crash the page.
+      console.warn('[pii] decryptActivityPii: missing companion for activity', row.id)
+      return { ...row, pii: null }
     }
 
     const pii = decrypt(

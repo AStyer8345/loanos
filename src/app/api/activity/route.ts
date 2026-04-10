@@ -104,7 +104,20 @@ export async function POST(request: NextRequest) {
 
 const MAX_LIMIT = 200
 const DEFAULT_COLUMNS = 'id, created_at, action, entity_type, entity_id, type, occurred_at, contact_id, loan_id, external_id, dismissed'
-const PII_COLUMNS = 'summary, metadata, subject, body_snippet, from_address, raw_payload'
+
+// Field names that live in activity_log_pii (never in activity_log).
+// Callers can still ask for these via `columns=...` — the route strips them
+// from the SELECT, pulls them from the companion, and merges in flattenActivity.
+const PII_FIELDS = new Set(['summary', 'subject', 'body_snippet', 'from_address', 'raw_payload', 'metadata'])
+
+/** Strip PII field names from a user-supplied column list. */
+function stripPiiColumns(columnsParam: string): string {
+  return columnsParam
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s && !PII_FIELDS.has(s))
+    .join(', ')
+}
 
 export async function GET(request: NextRequest) {
   let organizationId: string
@@ -129,14 +142,11 @@ export async function GET(request: NextRequest) {
   const columnsParam = params.get('columns')
   const includeJoins = params.get('include_joins')
 
-  // Build column list — always include PII columns for decryption + the PII companion join
-  const requestedColumns = columnsParam || DEFAULT_COLUMNS
+  // Build column list — strip any PII field names the caller asked for
+  // (those come from the companion, not activity_log) and always join the
+  // encrypted companion for decryption downstream.
+  const requestedColumns = stripPiiColumns(columnsParam || DEFAULT_COLUMNS)
   const selectParts = [requestedColumns]
-
-  // Always include PII fields so we can decrypt them server-side
-  if (!requestedColumns.includes('summary')) selectParts.push(PII_COLUMNS)
-
-  // Join the encrypted PII companion table
   selectParts.push('activity_log_pii(pii_ciphertext, pii_iv, pii_tag, key_version)')
 
   // Optional FK joins

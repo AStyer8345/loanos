@@ -8,10 +8,10 @@
 - [x] ~~Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`~~ — DONE. Implemented with `loanOfficerEmail` (confirmed 2026-04-04 Zap run). Verified 2026-04-09.
 - [x] Apply migration 075 (`los_integrations`) to Supabase (done 2026-04-08)
 - [ ] Run PII backfill script (`scripts/backfill-activity-pii.ts`)
-- [ ] Adam: register FRED API key → unblocks Refi Watch Sequence A (Rate Drop Alert) for 644 past clients
-- [ ] Adam: verify Microsoft Outlook credential in n8n UI → activates Refi Watch Sequences B + Set Rate (both built, both INACTIVE)
+- [x] ~~Adam: register FRED API key~~ — NOT NEEDED. Sequence A uses Set Rate webhook (Option A). Resolved 2026-04-09.
+- [x] ~~Adam: verify Microsoft Outlook credential in n8n UI~~ — DONE 2026-04-10 AM. Sequence A + Anniversary Check-In both ACTIVE (verified via MCP).
 - [ ] Adam: upload selfies → unblocks LoanOS social content stream
-- [ ] Social posts: at Week 15 (Posts 87-91 built). Adam must film Post 88 Reel (by June 18) + create Post 91 Canva (by June 23). Posts 29+30 Liberation Day decision by April 28.
+- [ ] Social posts: through Week 18 (Posts 102-106, July 8-15 built and drafted). Adam: film Post 98 Reel (by July 2) + film Post 103 Reel (by July 9) + approve Post 101 after NFP Refresh (July 4/7). **Posts 29+30 Liberation Day: decision required by April 28** (archive/convert/publish-as-is). Canva backlog: Posts 43, 44, 47, 51, 52, 55, 60, 81. Post 39 CPI fill: PM session handles today after 7:30 AM CT data drop.
 - [ ] Adam: build 3 Mailchimp Customer Journeys (PA Welcome, Rate Watch, DPA Guide)
 - [ ] NMLS# 513013 profile audit on all 4 social platforms
 - [ ] Adam: review/approve Refi Watch email copy (Sequences A + D)

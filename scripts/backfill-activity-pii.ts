@@ -63,6 +63,19 @@ function encrypt(payload: PiiPayload) {
   return { ciphertext: encrypted, iv, tag: cipher.getAuthTag() }
 }
 
+/**
+ * Encode a Buffer as PostgreSQL's canonical bytea hex-escape literal (`\x...`).
+ *
+ * Why this is critical: if you pass a Node Buffer directly into supabase-js
+ * `.insert({ col: buf })`, supabase-js JSON-serializes it as
+ * `{"type":"Buffer","data":[…]}` and PostgREST stores that literal string
+ * into the bytea column. The 2026-04-06 backfill hit exactly this bug —
+ * 1094 rows of unparseable garbage. Explicit hex-escape encoding is the fix.
+ */
+function byteaEncode(buf: Buffer): string {
+  return '\\x' + buf.toString('hex')
+}
+
 function hasPii(row: Record<string, unknown>): boolean {
   return !!(row.summary || row.subject || row.body_snippet || row.from_address || row.raw_payload || row.metadata)
 }
@@ -97,6 +110,32 @@ async function main() {
 
   console.log(`Existing activity_log_pii rows: ${existingPii}`)
 
+  // Preload ALL existing activity_log_pii.activity_id values into a Set.
+  // Doing this per-batch via .in() builds a query URL that exceeds PostgREST's
+  // URL-length limit once batches grow (PostgREST returns 414 URI Too Long,
+  // the client drops the error, and every row looks like an orphan).
+  // One upfront paginated scan is O(n) memory but eliminates that failure mode.
+  const existingSet = new Set<string>()
+  {
+    const PAGE = 1000
+    let from = 0
+    while (true) {
+      const { data, error: loadErr } = await supabase
+        .from('activity_log_pii')
+        .select('activity_id')
+        .range(from, from + PAGE - 1)
+      if (loadErr) {
+        console.error('Error preloading existing companions:', loadErr.message)
+        process.exit(1)
+      }
+      if (!data || data.length === 0) break
+      for (const r of data) existingSet.add(r.activity_id as string)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    console.log(`Preloaded ${existingSet.size} existing companion IDs\n`)
+  }
+
   let processed = 0
   let encrypted = 0
   let skippedNoPii = 0
@@ -117,21 +156,12 @@ async function main() {
 
     if (!batch || batch.length === 0) break
 
-    // Check which rows already have companions
-    const ids = batch.map(r => r.id)
-    const { data: existingRows } = await supabase
-      .from('activity_log_pii')
-      .select('activity_id')
-      .in('activity_id', ids)
-
-    const existingSet = new Set((existingRows ?? []).map(r => r.activity_id))
-
     const toInsert: Array<{
       activity_id: string
       organization_id: string
-      pii_ciphertext: Buffer
-      pii_iv: Buffer
-      pii_tag: Buffer
+      pii_ciphertext: string
+      pii_iv: string
+      pii_tag: string
       key_version: number
     }> = []
 
@@ -153,9 +183,9 @@ async function main() {
       toInsert.push({
         activity_id: row.id,
         organization_id: row.organization_id,
-        pii_ciphertext: blob.ciphertext,
-        pii_iv: blob.iv,
-        pii_tag: blob.tag,
+        pii_ciphertext: byteaEncode(blob.ciphertext),
+        pii_iv: byteaEncode(blob.iv),
+        pii_tag: byteaEncode(blob.tag),
         key_version: 1,
       })
     }

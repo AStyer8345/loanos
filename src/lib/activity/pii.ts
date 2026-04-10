@@ -70,6 +70,34 @@ function getKey(version: number = CURRENT_KEY_VERSION): Buffer {
   return key
 }
 
+// ── Postgres bytea serialization ─────────────────────────────────────────────
+// PostgREST serializes Buffer inserts to JSON as `{"type":"Buffer","data":[…]}`
+// and stores that *literal string* into the bytea column, which is catastrophic:
+// the "encrypted" row round-trips as unparseable garbage even with the right key.
+// Fix: explicitly encode Buffers as PostgreSQL's canonical hex-escape format
+// (`\x<hex>`) before insert, and parse the same format on read. PostgREST
+// accepts that string, the server unpacks it into raw bytes, and reads return
+// the `\x<hex>` shape by default.
+
+/** Encode a Buffer as the PG bytea hex-escape literal (`\x48656c6c6f`). */
+function byteaEncode(buf: Buffer): string {
+  return '\\x' + buf.toString('hex')
+}
+
+/** Decode a PG bytea value back to a Buffer. Handles both hex-escape
+ *  (`\x...`, PostgREST default) and base64 (some client configs) so a
+ *  config change upstream doesn't silently corrupt reads. */
+function byteaDecode(input: unknown): Buffer {
+  if (Buffer.isBuffer(input)) return input
+  if (input instanceof Uint8Array) return Buffer.from(input)
+  if (typeof input !== 'string') {
+    throw new Error(`byteaDecode: expected string, got ${typeof input}`)
+  }
+  if (input.startsWith('\\x')) return Buffer.from(input.slice(2), 'hex')
+  // Fallback — treat as base64 (legacy behavior the read path used to assume)
+  return Buffer.from(input, 'base64')
+}
+
 // ── Encrypt / Decrypt ────────────────────────────────────────────────────────
 
 function encrypt(payload: PiiPayload): EncryptedBlob {
@@ -145,16 +173,17 @@ export async function writeActivityWithPii(
     return { activityId: null, error: activityError?.message ?? 'activity_log insert failed' }
   }
 
-  // Step 2: encrypt and insert the PII companion
+  // Step 2: encrypt and insert the PII companion.
+  // Encode Buffers as PG bytea hex-escape literals — see byteaEncode() above.
   const blob = encrypt(pii)
   const { error: piiError } = await client
     .from('activity_log_pii')
     .insert({
       activity_id: activity.id,
       organization_id: publicFields.organization_id,
-      pii_ciphertext: blob.ciphertext,
-      pii_iv: blob.iv,
-      pii_tag: blob.tag,
+      pii_ciphertext: byteaEncode(blob.ciphertext),
+      pii_iv: byteaEncode(blob.iv),
+      pii_tag: byteaEncode(blob.tag),
       key_version: blob.key_version,
     })
 
@@ -204,9 +233,9 @@ export function decryptActivityPii<T extends Record<string, unknown>>(
 
   return rows.map(row => {
     const piiRow = row.activity_log_pii as {
-      pii_ciphertext: string | null
-      pii_iv: string | null
-      pii_tag: string | null
+      pii_ciphertext: unknown
+      pii_iv: unknown
+      pii_tag: unknown
       key_version: number | null
     } | null
 
@@ -226,9 +255,9 @@ export function decryptActivityPii<T extends Record<string, unknown>>(
     }
 
     const pii = decrypt(
-      Buffer.from(piiRow.pii_ciphertext, 'base64'),
-      Buffer.from(piiRow.pii_iv, 'base64'),
-      Buffer.from(piiRow.pii_tag, 'base64'),
+      byteaDecode(piiRow.pii_ciphertext),
+      byteaDecode(piiRow.pii_iv),
+      byteaDecode(piiRow.pii_tag),
       piiRow.key_version ?? CURRENT_KEY_VERSION
     )
     return { ...row, pii }

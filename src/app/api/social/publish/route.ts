@@ -98,10 +98,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Publer credentials not configured — add PUBLER_API_KEY env var' }, { status: 500 })
     }
 
-    const { draftId } = await req.json()
+    const { draftId, mode: rawMode } = await req.json()
     if (!draftId) {
       return NextResponse.json({ error: 'draftId required' }, { status: 400 })
     }
+    // mode controls whether we publish immediately (2 min from now) or honor draft.scheduled_for.
+    // Default = 'scheduled' for backwards compatibility with any non-dashboard callers (n8n, agent-secret routes).
+    // The dashboard always passes mode explicitly.
+    const mode: 'now' | 'scheduled' = rawMode === 'now' ? 'now' : 'scheduled'
 
     const supabase = createServiceClient() as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -156,7 +160,29 @@ export async function POST(req: NextRequest) {
     // Publer v1 requires: bulk.posts[].networks + bulk.posts[].accounts
     // Each network key = provider name (facebook, instagram, linkedin)
     // Each account = { id, scheduled_at }
-    const scheduledAt = draft.scheduled_for || new Date(Date.now() + 2 * 60_000).toISOString() // default: 2 min from now
+    //
+    // Resolve scheduledAt based on mode:
+    //   'now'       → 2 minutes from now (Publer has no "immediate" state; 2 min is the de-facto now)
+    //   'scheduled' → draft.scheduled_for, which must exist and be in the future
+    let scheduledAt: string
+    if (mode === 'now') {
+      scheduledAt = new Date(Date.now() + 2 * 60_000).toISOString()
+    } else {
+      if (!draft.scheduled_for) {
+        return NextResponse.json(
+          { error: 'Cannot schedule: draft has no scheduled_for date. Use mode:"now" to publish immediately.' },
+          { status: 400 }
+        )
+      }
+      const ts = new Date(draft.scheduled_for).getTime()
+      if (!Number.isFinite(ts) || ts <= Date.now()) {
+        return NextResponse.json(
+          { error: 'Cannot schedule: scheduled_for is in the past. Use mode:"now" to publish immediately.' },
+          { status: 400 }
+        )
+      }
+      scheduledAt = draft.scheduled_for
+    }
 
     // Upload media to Publer first (required — Publer needs media IDs, not raw URLs)
     // Flow: sign Supabase URL → upload to Publer via from-url → poll for media ID
@@ -323,8 +349,10 @@ export async function POST(req: NextRequest) {
     const publerJobId = publerData.job_id || publerData.id || null
     console.log('[social/publish] Publer job ID:', publerJobId)
 
-    // Poll Publer job status to confirm scheduling succeeded (max 20s)
-    let publerStatus = 'unknown'
+    // Poll Publer job status to confirm scheduling succeeded (max 20s).
+    // NOTE: we only capture `failures` here — draft status is driven by `mode` below,
+    // not by Publer's job status. See Bug #5 in the backlog: we currently trust
+    // `complete` without verifying an actual post ID was returned.
     let publerFailures: unknown = null
     if (publerJobId) {
       for (let attempt = 0; attempt < 10; attempt++) {
@@ -337,14 +365,12 @@ export async function POST(req: NextRequest) {
         console.log('[social/publish] Schedule job status:', jobData.status)
 
         if (jobData.status === 'complete') {
-          publerStatus = 'complete'
           if (jobData.payload?.failures && Object.keys(jobData.payload.failures).length > 0) {
             publerFailures = jobData.payload.failures
             console.error('[social/publish] Publer scheduling failures:', JSON.stringify(publerFailures).substring(0, 500))
           }
           break
         } else if (jobData.status === 'failed') {
-          publerStatus = 'failed'
           publerFailures = jobData.payload || jobData
           console.error('[social/publish] Publer job failed:', JSON.stringify(jobData).substring(0, 500))
           break
@@ -360,11 +386,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Update draft status to 'scheduled' (not 'posted' — it hasn't been delivered yet)
+    // Update draft status based on mode:
+    //   'now'       → 'posted' (fires in ~2 min; UX-wise users think of this as done)
+    //   'scheduled' → 'scheduled' (sitting in Publer's queue until scheduled_for)
     const { error: updateError } = await supabase
       .from('social_drafts')
       .update({
-        status: publerStatus === 'complete' ? 'posted' : 'posted',
+        status: mode === 'now' ? 'posted' : 'scheduled',
         publer_post_id: publerJobId,
         updated_at: new Date().toISOString(),
       })
@@ -375,13 +403,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to update draft status' }, { status: 500 })
     }
 
-    // Log activity
+    // Log activity — tell the truth about whether we posted now or queued for later
+    const scheduledDateLabel = new Date(scheduledAt).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    })
     const { error: activityError } = await supabase
       .from('social_activity')
       .insert({
         organization_id: organizationId,
-        action: 'posted',
-        detail: `Published "${draft.title}" to Publer (${draft.platform})`,
+        action: mode === 'now' ? 'posted' : 'scheduled',
+        detail: mode === 'now'
+          ? `Published "${draft.title}" to Publer (${draft.platform})`
+          : `Scheduled "${draft.title}" for ${scheduledDateLabel} to Publer (${draft.platform})`,
       })
 
     if (activityError) {

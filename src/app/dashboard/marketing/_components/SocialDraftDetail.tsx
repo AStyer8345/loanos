@@ -470,21 +470,34 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     } catch { /* non-blocking */ }
   }
 
-  async function handlePublish() {
+  // Shared publish path — 4 buttons all route through here, differing only in
+  // (1) mode: 'now' vs 'scheduled', and (2) whether we need to approve first.
+  async function publishDraft(mode: 'now' | 'scheduled', approveFirst: boolean) {
+    if (mode === 'scheduled' && !draft.scheduled_for) {
+      setPublishError('Cannot schedule: no scheduled_for date set on this draft')
+      return
+    }
     setPublishing(true)
     setPublishError(null)
     try {
+      if (approveFirst) {
+        // Optimistic approve — onUpdate persists via parent. 500ms delay lets the
+        // write land before the publish API reads draft.status from DB.
+        onUpdate({ ...draft, status: 'approved' })
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
       const res = await fetch('/api/social/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftId: draft.id }),
+        body: JSON.stringify({ draftId: draft.id, mode }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({ error: 'Unknown error' }))
-        setPublishError(data.error || `Publish failed (${res.status})`)
+        const verb = mode === 'now' ? 'Publish' : 'Schedule'
+        setPublishError(data.error || `${verb} failed (${res.status})`)
         return
       }
-      onUpdate({ ...draft, status: 'posted' })
+      onUpdate({ ...draft, status: mode === 'now' ? 'posted' : 'scheduled' })
     } catch {
       setPublishError('Network error — could not reach publish API')
     } finally {
@@ -492,29 +505,10 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
     }
   }
 
-  async function handleApproveAndPublish() {
-    setPublishing(true)
-    setPublishError(null)
-    try {
-      onUpdate({ ...draft, status: 'approved' })
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      const res = await fetch('/api/social/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftId: draft.id }),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Unknown error' }))
-        setPublishError(data.error || `Publish failed (${res.status})`)
-        return
-      }
-      onUpdate({ ...draft, status: 'posted' })
-    } catch {
-      setPublishError('Network error — could not reach publish API')
-    } finally {
-      setPublishing(false)
-    }
-  }
+  const handlePublishNow = () => publishDraft('now', false)
+  const handleSchedule = () => publishDraft('scheduled', false)
+  const handleApproveAndPublishNow = () => publishDraft('now', true)
+  const handleApproveAndSchedule = () => publishDraft('scheduled', true)
 
   async function handleDelete() {
     const confirmed = window.confirm('Delete this draft?')
@@ -709,7 +703,14 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
           </Card>
 
           {/* Action Bar */}
-          {!editing && (
+          {!editing && (() => {
+            // Schedule button only appears when there's a real future date to honor.
+            const scheduleTs = draft.scheduled_for ? new Date(draft.scheduled_for).getTime() : NaN
+            const canSchedule = Number.isFinite(scheduleTs) && scheduleTs > Date.now()
+            const scheduleLabel = canSchedule && draft.scheduled_for
+              ? `Schedule for ${formatDate(draft.scheduled_for)}`
+              : ''
+            return (
             <Card>
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -721,9 +722,16 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                     Approve
                   </Button>
                   {draft.status === 'draft' && (
-                    <Button size="sm" onClick={handleApproveAndPublish} disabled={publishing}>
-                      {publishing ? 'Publishing...' : 'Approve & Publish'}
-                    </Button>
+                    <>
+                      <Button size="sm" onClick={handleApproveAndPublishNow} disabled={publishing}>
+                        {publishing ? 'Publishing...' : 'Approve & Publish Now'}
+                      </Button>
+                      {canSchedule && (
+                        <Button size="sm" variant="outline" onClick={handleApproveAndSchedule} disabled={publishing} className="text-cyan-400 border-cyan-400/40 hover:bg-cyan-400/10">
+                          {publishing ? '...' : `Approve & ${scheduleLabel}`}
+                        </Button>
+                      )}
+                    </>
                   )}
                   <Button size="sm" variant="outline" onClick={handleEdit} className="text-blue-400 border-blue-400/40 hover:bg-blue-400/10">
                     Edit
@@ -741,9 +749,16 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                   </Button>
 
                   {draft.status === 'approved' && (
-                    <Button size="sm" onClick={handlePublish} disabled={publishing}>
-                      {publishing ? 'Publishing...' : 'Publish to Publer'}
-                    </Button>
+                    <>
+                      <Button size="sm" onClick={handlePublishNow} disabled={publishing}>
+                        {publishing ? 'Publishing...' : 'Publish Now'}
+                      </Button>
+                      {canSchedule && (
+                        <Button size="sm" variant="outline" onClick={handleSchedule} disabled={publishing} className="text-cyan-400 border-cyan-400/40 hover:bg-cyan-400/10">
+                          {publishing ? '...' : scheduleLabel}
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -780,7 +795,8 @@ export default function SocialDraftDetail({ draft, onUpdate, onDelete, onOpenVoi
                 )}
               </CardContent>
             </Card>
-          )}
+            )
+          })()}
 
           {/* Agent Notes */}
           {draft.agent_notes && (

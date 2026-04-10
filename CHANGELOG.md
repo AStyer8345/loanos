@@ -1,5 +1,31 @@
 # LoanOS Changelog
 
+## 2026-04-10 — Standup: Day 16 Check-In
+
+- **Vercel:** READY (dpl_75q7kfKasjsoKWRTdGpjRCESSM53) — latest commit "daily-fixer: reconcile tracking files [2026-04-10]"
+- **n8n:** 26 active workflows healthy; 3 intentionally inactive (CD & Contract Extractor, Refi Watch Pre-Drop Warm-Up, Refi Watch Quarterly Rate Review Seq C)
+- **GOALS.md #2 (email automation) still blocked:** CD & Contract Extractor (`HkLjsnnhT5MgrX5H`) inactive, 0 trigger runs — no progress
+- **Audit flag:** SECURITY-AUDIT-2026-04-05.md has 3 CRITICAL + 2 HIGH DB-level tenant isolation findings (T-1 through T-5) — status unclear; 3 medium gaps (#5/#9/#10) confirmed open per TODO.md
+- **Standup log:** entry appended to `tasks/standup-log.md`
+
+## 2026-04-10 AM — Lead Gen: Refi Watch Sequence C Built
+
+- **Refi Watch Sequence C built**: n8n workflow "LoanOS — Refi Watch Quarterly Rate Review" (ID: `LfLSDgqgb6yCe93C`) created via REST API. 12 nodes. Quarterly CRON (Jan/Apr/Jul/Oct 1 at 8am CT). 90-day dedup across all refi action types. INACTIVE pending Outlook credential.
+- **Seq A/B/Set Rate confirmed ACTIVE**: Adam activated all 3 workflows between 2026-04-09 and 2026-04-10 AM — verified via n8n MCP. Refi Watch system is now 3/5 live.
+- **Seq D org_id bug flagged**: Pre-Drop Warm-Up uses wrong org_id (`45a5b7e8-...`) — would send 0 emails if triggered. Logged in ADAM-TODO for fix before trigger.
+- **n8n MCP SDK broken**: `validate_workflow` + `create_workflow_from_code` fail with `builder.regenerateNodeIds is not a function`. Workaround: n8n REST API direct POST. Issue logged.
+- **ADAM-TODO updated**: Seq A/B/Outlook activation items marked [x]. Seq C activation + Seq D bug fix items added.
+
+## 2026-04-09 PM — Social Media: Week 17 Content Build (Posts 97-101)
+
+- **Week 17 full cycle complete**: 5 posts written for July 1-7, 2026 publish window (Posts 97-101). LinkedIn x2, Instagram Reel x1, Facebook x2. 1 TIMELY template (Post 101, NFP Jobs Report).
+- **Rolling 28-day pillar mix**: Personal 35% / Education 25% / RT 30% / Promo 10% — within ±5% tolerance. All 20 rolling posts verified.
+- **Quality avg 7.4/10**: 3 rewrites — Post 97 (contractions), Post 99 (full rewrite, stronger opener + ending), Post 100 (contractions). Post 101 typo patched inline ("today is number matters" → "today's number matters").
+- **Reviewer: APPROVED WITH NOTES** — 0 compliance rejections. NMLS #513013 present on all rate-mentioning posts. Post 101 placeholder count = 4 (verified via SQL).
+- **Lane 2 pool proposals**: PROPOSED-03 (iMessage activity feed) + PROPOSED-04 (Refi Watch 644 clients) added to loanos-pool-proposed.md.
+- **Adam action items**: 2 added — Post 98 Reel filming (by July 2) + Post 101 Refresh review (July 4/7 window).
+- **NotebookLM PUSH**: 3 files synced. Styer_Growth_Log.md updated. Daily digest sent.
+
 ## 2026-04-09 PM — Activity Log Fix: iMessages, Dedup, Email Rendering
 
 - **iMessage workflow fix** (`nccX5ml82mMGyE9T`): Updated n8n "Log and Update Records" node to write `contact_id`, `loan_id`, `occurred_at` directly to `activity_log` columns (was only in metadata JSON). Backfilled 126 existing iMessage entries via SQL.
@@ -2487,3 +2513,23 @@ Arive (loan event)
 - QA PASS 5/5 | Reviewer APPROVED WITH NOTES (0 compliance failures)
 - 2 Adam action items added: Post 88 Reel film (Jun 18), Post 91 Canva create (Jun 23)
 - Daily digest sent via Zapier to adam@thestyerteam.com
+
+## 2026-04-09 — Nightly NotebookLM Sync (SEO/SEM + Lead Gen)
+
+- SEO/SEM: City page enrichment — at-a-glance paragraphs for Spicewood, Florence, Jarrell (AM); AEO paragraph for San Marcos (AEO rollout 13/25 confirmed)
+- SEO/SEM NotebookLM: 3 stale sources removed (keyword-research superseded, FTB content strategy superseded, old CONTEXT.md), 3 added (CONTEXT.md refresh, SEL location pages guide, audit file) — 50/50 maintained
+- Lead Gen: All 4 Refi Watch workflows now built (Set Rate, Seq A, Seq B, Seq D) — all INACTIVE, blocked on Outlook credential + FRED API key
+- Lead Gen NotebookLM: 10 stale sources removed (duplicate CONTEXT.md, Cloudflare block, completed QA/build files for live funnels), 1 added — returned from 59 to 50/50
+- Master growth log updated + synced to Styer Mortgage Master notebook
+- Both daily digests sent via Zapier (status: success)
+
+## 2026-04-10 — Social Media AM Session — Week 18 Build
+
+- Refresh check: CPI releases April 10 at 8:30 AM ET (7:30 AM CT) — data not available at 2 AM run time. Post 39 template stays unfilled. PM session will handle.
+- GBP Step 1B scan: no new website content found — tracker current through 2026-04-07
+- Week 18 content build (Posts 102-106, July 8-15): 5 EVERGREEN posts inserted into `social_drafts` via REST API
+- Pillar rebalancing: 2 Personal posts + 1 Promo post address rolling-window deficits (promo was 0%, personal was 20% vs 30% target)
+- QA PASS 5/5 | Reviewer APPROVED WITH 0 compliance failures | Quality avg 8.0/10
+- Session priorities updated: Week 16 and 17 were already complete — this session correctly identified Week 18 as next build target
+- Posts 29+30 Liberation Day: still sitting past-due — deadline to decide (archive/convert/publish-as-is) is April 28
+- LoanOS pool: 6 entries, 0 ready — stream fully blocked pending selfies + pool replenishment

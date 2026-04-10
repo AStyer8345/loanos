@@ -2,6 +2,35 @@
 
 ---
 
+## 2026-04-10
+
+**Days to launch:** 16
+
+**Yesterday shipped:**
+- Activity log + notes fully fixed: migration 081 (`contact_activity`) live, duplicate echo entries filtered from system feed
+- iMessage integration fixed: n8n workflow `nccX5ml82mMGyE9T` updated to write `contact_id`/`loan_id`/`occurred_at` to columns (was metadata-only); 126 entries backfilled, blue icon + snippet in UI
+- `extractPayloadIdentity()` verified done + FRED API confirmed not needed (Seq A uses Set Rate webhook Option A)
+
+**Blockers:**
+- **GOALS.md #2 (email automation):** Outlook CD & Contract Extractor (`HkLjsnnhT5MgrX5H`) still INACTIVE with 0 trigger runs — no progress yet
+- PII backfill script (`scripts/backfill-activity-pii.ts`) not run — blocks plaintext column drop
+- Renovation Phase 2 not Adam-confirmed — blocks Phase 3 (Follow-Up List) start per protocol
+- Refi Watch Seq C (`LfLSDgqgb6yCe93C`) built but inactive — needs Adam activation + Outlook credential verify
+- Adam: upload selfies — blocks LoanOS social pool (BLOCKER-LOANOS-001)
+- Seq D org_id bug (`45a5b7e8-...` should be `18613f82-...`) — flagged in ADAM-TODO, 5-min fix
+
+**Today's focus:**
+- Activate Outlook CD & Contract Extractor (`HkLjsnnhT5MgrX5H`) — GOALS.md #2, highest-value unstarted automation
+- Fix Seq D org_id bug (lead gen agent task)
+
+**Risk watch:**
+- 16 days to April 26. Renovation Phases 3-6 not started; Phase 3 gate requires Adam Phase 2 confirmation. GOALS.md #2 (email automation) has zero progress. Marketing site demo data unstarted — blocks May 1 launch screenshots. Refi Watch Seq C built but not activated. Timeline is tight.
+
+**Open audit findings:**
+- SECURITY-AUDIT-2026-04-05.md: 3 CRITICAL (T-1: activity_log INSERT open, T-2: 6 tables RLS disabled, T-3: USING true on challenges/responses/kids) + 2 HIGH (T-4: milestone tables user-scoped, T-5: marketing_activity_log user-scoped) — DB-level, status unclear. CONTEXT.md tracker shows Critical #1-#4 (Arive webhook, rate limiting, PII, admin routes) addressed. 3 medium gaps (#5/#9/#10) confirmed open per TODO.md.
+
+---
+
 ## 2026-04-09
 
 **Days to launch:** 17

@@ -89,30 +89,30 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-09 AM — Week 15 QA complete (Posts 87-91 scheduled June 17-23; PM session had created posts but crashed before scheduling). Week 16 built (Posts 92-96, June 24-30). Rolling 30/30/30/10 pillar mix ACHIEVED across Wks 11-16. DB note: "promo" violates pillar_check — use "authority" for promo posts.
+**Last worked on:** 2026-04-10 AM — Week 18 complete (Posts 102-106, July 8-15). Full cycle: context load → refresh report (CPI not yet released at 2 AM) → architect → builder → quality (avg 8.0/10, all 5 ≥7/10) → reviewer (APPROVED, 0 compliance failures) → QA (5/5 PASS). Pillar rebalancing: 2 Personal + 1 Promo address rolling-window deficit. All 5 posts evergreen.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS content stream blocked). Posts 29+30 (Liberation Day) pending decision — auto-archive April 28 if no response.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS pool has 0 ready entries). Post 39 CPI template awaits Refresh fill — CPI releases April 10 at 7:30 AM CT. Posts 29+30 Liberation Day decision due April 28.
 
-**What's next:** April 10 AM — CPI releases 8:30 AM ET → Refresh fills Post 39 TIMELY template AFTER data release. Week 17 build (Posts 97-101, July 1-7 window).
+**What's next:** PM session: fill Post 39 CPI template after 7:30 AM CT data drop. Week 19 build (Posts 107-111). Posts 29+30 Liberation Day decision — 18 days to April 28 deadline. Promo still low in rolling mix — Week 19 should include 1 promo post.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-09 AM — Sequences A + D built. n8n workflow IDs: Sequence A (Rate Drop Alert) `iyKFy0ODkyyqQaAS`, Sequence D (Pre-Drop Warm-Up) `W0K4YDzkZd0Hzv6g`. Both INACTIVE. Sequence A: daily 7AM CT, reads rate from activity_log (Set Rate webhook), fires when rate ≤ 6.00% + borrower rate ≥ 6.75%, 30-day per-loan dedup. Sequence D: manual one-shot, filters already-touched clients, warm-up HTML email, logs refi_warmup.
+**Last worked on:** 2026-04-10 AM — Sequence C (Quarterly Rate Review) built. Confirmed Adam activated Seq A, B, Set Rate webhook since last session. Seq D org_id bug flagged.
 
-**Active blockers:** Outlook credential not verified in n8n UI — blocks all Refi Watch sequences (A, B, D). Set Rate webhook must be called once before Sequence A can fire. Sequence D requires Adam approval before manual trigger (irreversible — all 644 contacts). FRED API key still unregistered (blocks future automated Option B — current Option A works). LO Waitlist not deployed to Netlify.
+**Active blockers:** Seq C needs Outlook credential connected + activation (Adam). Seq D has org_id bug (`45a5b7e8-...` → fix to `18613f82-...`) — flagged in ADAM-TODO. FRED API key not registered (low priority — not blocking anything).
 
-**What's next:** Adam actions: (1) connect Outlook credential in n8n, (2) activate + call Set Rate webhook with current rate, (3) activate Sequence A, (4) review + manually trigger Sequence D when ready. Next PM: reduce notebook below 50 sources (remove Mar 25-28 PM research). No new AM build work until blockers cleared.
+**What's next:** Fix Seq D org_id bug (agent task, 5 min). Verify Set Rate webhook has been called with current rate. End-to-end test: check activity_log for refi_rate_update entries + Seq A execution history. Seq C: Adam activates once Outlook verified.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-08 PM — NotebookLM PUSH+CURATE. AM session: glossary nav added to 64 pages, city enrichment Bee Cave/Manor/Smithville (commit e4ee80b). Notebook: 3 removed (content-strategy Mar 27, stale CONTEXT.md, redundant GSC URL inspection), 3 added (refreshed CONTEXT.md, SEL meta/CTR guide, audit file). 50/50 maintained. Digest UNSENT (no webhook).
+**Last worked on:** 2026-04-09 PM — NotebookLM PUSH+CURATE. AM session: city enrichment for Spicewood/Florence/Jarrell (commit 06fbfad) + San Marcos AEO paragraph (commit 55d6797). AEO rollout: 13/25 suburb pages confirmed; Buda + Westlake remain. Notebook: 3 removed (keyword-research superseded, FTB content strategy superseded, old CONTEXT.md), 3 added (CONTEXT.md refresh, SEL location pages guide, audit file). 50/50 maintained. Digest SENT (Zapier success).
 
-**Active blockers:** GSC 90-day export overdue — all keyword prioritization inference-based. Suburb pages not indexed — 24 pages need manual "Request Indexing" in GSC (Round Rock, Georgetown, Cedar Park first). ZAPIER_DISPATCH_WEBHOOK_URL not set (digests saving locally).
+**Active blockers:** GSC 90-day export overdue — keyword prioritization inference-based. 24 suburb pages need manual "Request Indexing" in GSC. Buda + Westlake AEO paragraphs deferred (Thursday target).
 
-**What's next:** AEO answer-first paragraphs on Tier 1 suburbs (San Marcos, Georgetown, Round Rock, Leander, Pflugerville). City enrichment remaining queue (check session-log for remaining cities). Adam: (1) pull GSC export, (2) manually request indexing via GSC URL Inspection tool.
+**What's next:** Thursday: AEO paragraphs for Buda + Westlake. Funnel audit: 3 pages + thank-you + contact.html. Rename temp placeholder blog posts to permanent slugs. Adam: pull GSC export + request indexing for suburb pages.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
@@ -122,6 +122,15 @@ See `memory/tools/n8n.md` for full index. Key ones:
 **Active blockers:** None — next item is pure code (PDF "Commonly Chosen" label in generate-pdf route).
 
 **What's next:** PDF "Commonly Chosen" label in `src/app/api/scenarios/generate-pdf/route.ts` — mirror the share page badge in PDF output so the lowest-payment scenario is visually distinguished in print.
+
+## Standup Agent Status
+<!-- Standup agent updates these three fields each session. Replace, never append. -->
+
+**Last worked on:** 2026-04-10 — Day 16 standup. Vercel READY. n8n: 26 active healthy, 3 intentionally inactive. CD & Contract Extractor still INACTIVE (GOALS.md #2 unstarted). Seq D org_id bug flagged. 3 CRITICAL + 2 HIGH DB-level audit findings unresolved; 3 medium open per TODO.
+
+**Active blockers:** GOALS.md #2 (email automation) has zero progress — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive. Phase 3 gate requires Adam Phase 2 confirmation. PII backfill not run. Adam: selfies upload, Seq C activation, Seq D org_id fix.
+
+**What's next:** Activate CD & Contract Extractor — highest-value unstarted automation per GOALS.md. Fix Seq D org_id bug. Adam: confirm Phase 2 to unblock Renovation Phase 3.
 
 ## Rules For AI Sessions
 

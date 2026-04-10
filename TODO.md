@@ -5,7 +5,7 @@
 
 ## Now (this week)
 
-- [ ] Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`
+- [x] ~~Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`~~ — DONE. Implemented with `loanOfficerEmail` (confirmed 2026-04-04 Zap run). Verified 2026-04-09.
 - [x] Apply migration 075 (`los_integrations`) to Supabase (done 2026-04-08)
 - [ ] Run PII backfill script (`scripts/backfill-activity-pii.ts`)
 - [ ] Adam: register FRED API key → unblocks Refi Watch Sequence A (Rate Drop Alert) for 644 past clients

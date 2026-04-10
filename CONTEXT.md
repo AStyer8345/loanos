@@ -36,7 +36,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Blockers for LO #2 Onboarding
 
-1. Adam: fill in `extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts` (check a Zapier run for the field name)
+1. ~~`extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`~~ — DONE. Function implemented with `loanOfficerEmail` field (confirmed from 2026-04-04 Zapier run on loan 15755447). Verified by daily briefing agent 2026-04-09.
 2. ~~Apply migration 075 (`los_integrations`) to Supabase~~ — done 2026-04-08
 3. Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns
 4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`

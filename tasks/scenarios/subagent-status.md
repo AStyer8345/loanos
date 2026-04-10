@@ -79,3 +79,10 @@ Timestamp: Thu Apr  9 09:27:00 CDT 2026
 SESSION FULLY COMPLETE ✓
 SESSION_START — Fri Apr 10 07:29:38 CDT 2026
 NOTEBOOKLM (PULL): COMPLETE — Fri Apr 10 07:34:06 CDT 2026
+SESSION_END — Fri Apr 10 07:46:00 CDT 2026
+BUILT: PDF "Commonly Chosen" badge — renderSummaryTable in generate-pdf/route.ts, gold column header + pill badge on lowest-payment scenario, hidden for single-scenario + refi PDFs
+BUILD: ✅ PASS | Commit: 57ca36e | Vercel: dpl_ASfRzZqbyMSGw3hpczmDmpbprjdt → READY
+Master notebook: PUSHED (LoanOS Enterprise synced, source d10149df)
+Daily digest: PENDING (AM session — PM session will send)
+Timestamp: Fri Apr 10 07:46:00 CDT 2026
+SESSION FULLY COMPLETE ✓

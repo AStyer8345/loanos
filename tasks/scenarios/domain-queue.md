@@ -78,7 +78,7 @@ KNOWN GAPS (start here):
 
 ## Tier 5 — Depth + Conversion (next focus)
 
-- **PDF: "Commonly Chosen" label** — mirror the share page badge in the PDF output (currently only on the web share page; the LO who prints it loses context)
+- ~~**PDF: "Commonly Chosen" label** — mirror the share page badge in the PDF output (currently only on the web share page; the LO who prints it loses context)~~ ✅ DONE 2026-04-10 AM
 - **Scenario comparison table on share page** — side-by-side data table below the option cards for borrowers who want all numbers in one view (currently in DetailAccordion behind a tap)
 - **Builder: scenario naming** — let LO label each scenario (e.g., "Conservative", "Aggressive", "Seller Buydown") instead of "Option A / B / C" — names carry through to share page and PDF
 - **Refi builder: current loan pre-fill** — when entering refi mode from a loan record, auto-populate current rate + remaining balance + months remaining from the loan detail

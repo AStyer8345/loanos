@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-04-10 AM — Scenarios: PDF "Commonly Chosen" Badge (Tier 5 Item 1)
+
+- **PDF "Commonly Chosen" badge**: `renderSummaryTable` in `generate-pdf/route.ts` now computes `commonlyChosenIndex` (lowest non-zero `totalMonthlyPayment`, purchase mode only, 2+ scenarios)
+- **Gold column header treatment**: Chosen scenario column gets `#C9A84C` background, white text, and a white-on-gold "Commonly Chosen" pill badge — matching share page visual weight
+- **Single-scenario / refi PDFs unaffected**: badge renders only when there are 2+ purchase scenarios
+- **Build:** ✅ pass | Commit: `57ca36e` | Vercel: `dpl_ASfRzZqbyMSGw3hpczmDmpbprjdt` → BUILDING
+- **MC gap closed**: PDF and share page now tell the same story — the lowest-payment option is visually anchored in print, not just on the web
+
 ## 2026-04-10 — Standup: Day 16 Check-In
 
 - **Vercel:** READY (dpl_75q7kfKasjsoKWRTdGpjRCESSM53) — latest commit "daily-fixer: reconcile tracking files [2026-04-10]"

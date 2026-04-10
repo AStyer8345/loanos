@@ -117,11 +117,11 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-09 AM — Video/Loom embed on share page. ShareVideoEmbed.tsx (new component), videoUrl added to ShareBranding, reads from user_settings.scenario_video_url. Tier 4 COMPLETE. Tier 5 defined (PDF badge, scenario naming, refi pre-fill, comparison table, social proof).
+**Last worked on:** 2026-04-10 AM — PDF "Commonly Chosen" badge. `renderSummaryTable` in `generate-pdf/route.ts` now marks the lowest-payment scenario column with gold header + "Commonly Chosen" pill. Tier 5 item 1 COMPLETE.
 
-**Active blockers:** None — next item is pure code (PDF "Commonly Chosen" label in generate-pdf route).
+**Active blockers:** None — next item is pure code (scenario naming in builder).
 
-**What's next:** PDF "Commonly Chosen" label in `src/app/api/scenarios/generate-pdf/route.ts` — mirror the share page badge in PDF output so the lowest-payment scenario is visually distinguished in print.
+**What's next:** Scenario naming in builder (Tier 5 item 3) — let LO label each scenario ("Conservative", "Seller Buydown", etc.) instead of "Option A / B / C"; names carry through to share page and PDF.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->

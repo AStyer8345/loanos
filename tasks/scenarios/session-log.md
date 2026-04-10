@@ -450,3 +450,33 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 - Tier 4 COMPLETE
 - Tier 5 defined in domain-queue.md (5 items)
 
+
+---
+
+## AM Session — 2026-04-10 (scenarios-am)
+
+**What was built:**
+- PDF "Commonly Chosen" badge (`src/app/api/scenarios/generate-pdf/route.ts`)
+  - `renderSummaryTable`: added `commonlyChosenIndex` — `reduce` over rows to find index with lowest `totalMonthlyPayment > 0`; returns `-1` when only 1 scenario or mode is refi
+  - Chosen column header: gold (`#C9A84C`) background, white text, white-on-gold "Commonly Chosen" pill badge (`rgba(255,255,255,0.2)` bg, `rgba(255,255,255,0.4)` border)
+  - Non-chosen columns: unchanged (grey `#f5f5f5` header, dark text)
+  - Zero-payment rows skip selection (empty form returns no badge)
+  - Single-scenario PDFs and all refi PDFs: no badge rendered
+
+**MC gap closed:** PDF and share page now match. Before: "Commonly Chosen" appeared only on the web share page — borrowers who read the PDF had no visual anchor. After: the gold badge appears in the PDF column header, same as the share page card treatment. Share link and PDF tell the same story.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `57ca36e` — pushed to main
+**Vercel:** `dpl_ASfRzZqbyMSGw3hpczmDmpbprjdt` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/api/scenarios/generate-pdf/route.ts` only — no auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Scenario naming in builder (Tier 5 item 3) — let LO label each scenario ("Conservative", "Seller Buydown", etc.) instead of "Option A / B / C"; names carry through to share page and PDF. Requires: new optional `name` field on each scenario input, stored in `scenarios_data` JSON, surfaced in label rendering.
+2. Comparison table on share page (Tier 5 item 2) — side-by-side data table below option cards for borrowers who want all numbers in one view (currently in DetailAccordion behind a tap).
+3. Refi builder: current loan pre-fill (Tier 5 item 4) — auto-populate rate + remaining balance + months remaining from loan record when entering refi mode via `?loan_id=`.
+
+**Domain queue updates:**
+- PDF "Commonly Chosen" label (Tier 5 item 1) — ✅ COMPLETE this session
+

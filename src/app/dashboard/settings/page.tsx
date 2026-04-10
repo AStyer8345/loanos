@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   Mail, CheckCircle, Loader2,
-  Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send,
+  Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send, Megaphone,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -38,7 +38,19 @@ interface IdentitySettings {
   phone_number: string
 }
 
-type SectionKey = 'integrations' | 'website' | 'social' | 'identity' | 'ai' | 'outreach'
+// Per-org Publer wiring — lives in social_settings (not user_settings) because multiple
+// team members on the same org must share the same Publer workspace and account IDs.
+// Shape mirrors PublerConfig in src/app/api/social/publish/route.ts.
+interface PublerSettings {
+  workspace_id: string
+  api_key: string
+  facebook_account_id: string
+  instagram_account_id: string
+  linkedin_account_id: string
+  google_account_id: string
+}
+
+type SectionKey = 'integrations' | 'website' | 'social' | 'identity' | 'ai' | 'outreach' | 'publer'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -178,13 +190,17 @@ export default function SettingsPage() {
   const [identity, setIdentity] = useState<IdentitySettings>({
     lo_full_name: '', company_name: '', nmls_number: '', email_address: '', phone_number: '',
   })
+  const [publer, setPubler] = useState<PublerSettings>({
+    workspace_id: '', api_key: '',
+    facebook_account_id: '', instagram_account_id: '', linkedin_account_id: '', google_account_id: '',
+  })
 
   // ── Per-section metadata ──
   const [timestamps, setTimestamps] = useState<Record<SectionKey, string | null>>({
-    integrations: null, website: null, social: null, identity: null, ai: null, outreach: null,
+    integrations: null, website: null, social: null, identity: null, ai: null, outreach: null, publer: null,
   })
   const [saving, setSaving] = useState<Record<SectionKey, boolean>>({
-    integrations: false, website: false, social: false, identity: false, ai: false, outreach: false,
+    integrations: false, website: false, social: false, identity: false, ai: false, outreach: false, publer: false,
   })
 
   // ── AI prompt state ──
@@ -237,6 +253,33 @@ export default function SettingsPage() {
         setOutreachPrompt(d.content ?? '')
         setOutreachIsCustom(d.isCustom ?? false)
         if (d.updatedAt) setTimestamps(prev => ({ ...prev, outreach: d.updatedAt }))
+      })
+      .catch(() => {})
+    // Load publer_config (org-scoped, not user-scoped — that's why it's a separate fetch,
+    // not a user_settings row). The API route lives at /api/social/settings and reads from
+    // social_settings table.
+    fetch('/api/social/settings?key=publer_config')
+      .then(r => r.json())
+      .then(d => {
+        if (!d?.value) return
+        try {
+          const parsed = JSON.parse(d.value) as {
+            workspace_id?: string
+            api_key?: string
+            accounts?: Record<string, { id?: string }>
+          }
+          setPubler({
+            workspace_id: parsed.workspace_id || '',
+            api_key: parsed.api_key || '',
+            facebook_account_id: parsed.accounts?.facebook?.id || '',
+            instagram_account_id: parsed.accounts?.instagram?.id || '',
+            linkedin_account_id: parsed.accounts?.linkedin?.id || '',
+            google_account_id: parsed.accounts?.google?.id || '',
+          })
+          if (d.updatedAt) setTimestamps(prev => ({ ...prev, publer: d.updatedAt }))
+        } catch {
+          // Corrupt row — leave form blank so user can fix by re-saving
+        }
       })
       .catch(() => {})
   }, [supabase, userId, orgLoading])
@@ -330,6 +373,48 @@ export default function SettingsPage() {
       .upsert({ user_id: userId, key, value: value as any, updated_at: now }, { onConflict: 'user_id,key' })
     setSaving(prev => ({ ...prev, [key]: false }))
     setTimestamps(prev => ({ ...prev, [key]: now }))
+  }
+
+  // ── Save Publer (org-scoped, writes to social_settings via API) ──
+  async function savePubler() {
+    setSaving(prev => ({ ...prev, publer: true }))
+    try {
+      // Reassemble into the exact PublerConfig shape the publish route expects.
+      // Drop empty account IDs so the config stays clean and loadPublerConfig's null check works.
+      const accounts: Record<string, { id: string; network: string }> = {}
+      if (publer.facebook_account_id.trim())
+        accounts.facebook = { id: publer.facebook_account_id.trim(), network: 'facebook' }
+      if (publer.instagram_account_id.trim())
+        accounts.instagram = { id: publer.instagram_account_id.trim(), network: 'instagram' }
+      if (publer.linkedin_account_id.trim())
+        accounts.linkedin = { id: publer.linkedin_account_id.trim(), network: 'linkedin' }
+      if (publer.google_account_id.trim())
+        accounts.google = { id: publer.google_account_id.trim(), network: 'google' }
+
+      const payload = {
+        workspace_id: publer.workspace_id.trim(),
+        api_key: publer.api_key.trim(),
+        accounts,
+      }
+
+      const res = await fetch('/api/social/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'publer_config', value: JSON.stringify(payload) }),
+      })
+      if (res.ok) {
+        setTimestamps(prev => ({ ...prev, publer: new Date().toISOString() }))
+        setFlashMsg('✓ Publer config saved.')
+      } else {
+        const d = await res.json().catch(() => ({ error: 'Unknown error' }))
+        setFlashMsg(`✗ Failed to save Publer config: ${d.error}`)
+      }
+    } catch (err) {
+      console.error('[savePubler] error', err)
+      setFlashMsg('✗ Network error saving Publer config.')
+    } finally {
+      setSaving(prev => ({ ...prev, publer: false }))
+    }
   }
 
   // ── Test connections ──
@@ -501,6 +586,60 @@ export default function SettingsPage() {
         <SecretField label="LinkedIn Access Token" value={social.linkedin_access_token} onChange={v => setSocial(p => ({ ...p, linkedin_access_token: v }))} />
         <SecretField label="Facebook Page Access Token" value={social.facebook_page_access_token} onChange={v => setSocial(p => ({ ...p, facebook_page_access_token: v }))} />
         <TextField label="Facebook Page ID" value={social.facebook_page_id} onChange={v => setSocial(p => ({ ...p, facebook_page_id: v }))} placeholder="123456789" />
+      </SectionCard>
+
+      {/* ── PUBLER (SOCIAL PUBLISHING) ── */}
+      <SectionCard
+        icon={Megaphone}
+        title="Social Publishing (Publer)"
+        subtitle="Per-org Publer wiring. Required before you can publish or schedule social drafts from the dashboard."
+        updatedAt={timestamps.publer}
+        saving={saving.publer}
+        onSave={savePubler}
+      >
+        <SecretField
+          label="Publer API Key"
+          value={publer.api_key}
+          onChange={v => setPubler(p => ({ ...p, api_key: v }))}
+          placeholder="Bearer token from Publer → Settings → API"
+        />
+        <TextField
+          label="Publer Workspace ID"
+          value={publer.workspace_id}
+          onChange={v => setPubler(p => ({ ...p, workspace_id: v }))}
+          placeholder="24-char workspace ID"
+        />
+        <p className="text-[11px] font-mono text-muted-foreground -mt-1">
+          Account IDs — leave blank for any platform you don&apos;t use. Find them in Publer under Accounts → click the gear icon.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <TextField
+            label="Facebook Account ID"
+            value={publer.facebook_account_id}
+            onChange={v => setPubler(p => ({ ...p, facebook_account_id: v }))}
+            placeholder="24-char ID"
+          />
+          <TextField
+            label="Instagram Account ID"
+            value={publer.instagram_account_id}
+            onChange={v => setPubler(p => ({ ...p, instagram_account_id: v }))}
+            placeholder="24-char ID"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <TextField
+            label="LinkedIn Account ID"
+            value={publer.linkedin_account_id}
+            onChange={v => setPubler(p => ({ ...p, linkedin_account_id: v }))}
+            placeholder="24-char ID"
+          />
+          <TextField
+            label="Google (GBP) Account ID"
+            value={publer.google_account_id}
+            onChange={v => setPubler(p => ({ ...p, google_account_id: v }))}
+            placeholder="24-char ID"
+          />
+        </div>
       </SectionCard>
 
       {/* ── AI SYSTEM PROMPT ── */}

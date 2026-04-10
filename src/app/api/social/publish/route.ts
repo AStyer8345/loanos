@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 
-const PUBLER_API_KEY = process.env.PUBLER_API_KEY || ''
+const PUBLER_API_KEY_ENV = process.env.PUBLER_API_KEY || ''
 
 type PublerAccount = { id: string; network: string }
 type PublerConfig = {
   workspace_id: string
+  /** Optional per-tenant API key. When present, overrides PUBLER_API_KEY env var.
+   *  Unblocks multi-tenant publishing (LO #2, #3, ...) without redeploying env vars. */
+  api_key?: string
   accounts: Partial<Record<'instagram' | 'linkedin' | 'facebook' | 'google', PublerAccount>>
 }
 
@@ -39,6 +42,37 @@ async function loadPublerConfig(
   } catch {
     return null
   }
+}
+
+/** Recursively walk a Publer job payload looking for post IDs.
+ *  Publer's payload shape varies across API versions:
+ *    - { posts: [{ id: "..." }, ...] }
+ *    - { successes: [{ id: "..." }, ...] }
+ *    - { successes: ["id1", "id2"] }
+ *    - { ids: ["id1", "id2"] }
+ *  We pattern-match all known shapes and fall back to a flat regex scan
+ *  for 24-char hex ObjectIds (Publer's ID format) as a last resort.
+ *
+ *  Returns an empty array if nothing resembling a post ID is found — the caller
+ *  treats that as a silent failure per Bug #5. */
+function extractPublerPostIds(payload: unknown): string[] {
+  if (!payload || typeof payload !== 'object') return []
+  const p = payload as Record<string, unknown>
+  const candidates = [p.posts, p.successes, p.ids, p.success]
+  for (const c of candidates) {
+    if (!Array.isArray(c)) continue
+    const ids = c
+      .map((item) => (typeof item === 'string' ? item : (item as { id?: unknown })?.id))
+      .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    if (ids.length > 0) return ids
+  }
+  // Fallback: scan for any 24-char hex strings (Publer/Mongo ObjectId format)
+  const flat = JSON.stringify(payload)
+  const matches = flat.match(/"([a-f0-9]{24})"/g)
+  if (matches) {
+    return Array.from(new Set(matches.map((m) => m.replace(/"/g, ''))))
+  }
+  return []
 }
 
 /** Extract the main caption from structured draft content.
@@ -94,10 +128,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    if (!PUBLER_API_KEY) {
-      return NextResponse.json({ error: 'Publer credentials not configured — add PUBLER_API_KEY env var' }, { status: 500 })
-    }
-
     const { draftId, mode: rawMode } = await req.json()
     if (!draftId) {
       return NextResponse.json({ error: 'draftId required' }, { status: 400 })
@@ -123,6 +153,18 @@ export async function POST(req: NextRequest) {
     }
     const PUBLER_WORKSPACE = publerConfig.workspace_id
     const PLATFORM_ACCOUNTS = publerConfig.accounts
+    // Prefer per-tenant API key from publer_config; fall back to global env var for legacy single-tenant.
+    // Fail closed if neither is set — no point continuing without a key.
+    const PUBLER_API_KEY = publerConfig.api_key?.trim() || PUBLER_API_KEY_ENV
+    if (!PUBLER_API_KEY) {
+      return NextResponse.json(
+        {
+          error: 'Publer API key not configured',
+          detail: 'Add your Publer API key in Settings → Integrations → Social Publishing, or set PUBLER_API_KEY env var.',
+        },
+        { status: 400 }
+      )
+    }
 
     // Fetch the draft
     const { data: draft, error: fetchError } = await supabase
@@ -155,6 +197,35 @@ export async function POST(req: NextRequest) {
         { error: `No Publer account configured for platform "${draft.platform}"` },
         { status: 400 }
       )
+    }
+
+    // Bug #4 guard: refuse to schedule a media-required post with no media attached.
+    // Meta silently rejects text-only Stories/Reels/Carousels/Images at post time, and
+    // Instagram rejects ALL text-only posts. Fail fast here rather than find out weeks later
+    // that a scheduled post never actually made it to the platform.
+    const hasMedia = Array.isArray(draft.media_urls) && draft.media_urls.length > 0
+    const rawFormat = (draft.format || '').toLowerCase()
+    const isTextOnly = rawFormat === 'text_only' || rawFormat === 'text'
+    const targetsInstagram = targets.some((t) => t.network === 'instagram')
+    if (!hasMedia) {
+      if (!isTextOnly) {
+        return NextResponse.json(
+          {
+            error: `Cannot publish: format "${draft.format}" requires media but no media is attached to this draft.`,
+            detail: 'Upload an image or video, or switch the format to Text Only.',
+          },
+          { status: 400 }
+        )
+      }
+      if (targetsInstagram) {
+        return NextResponse.json(
+          {
+            error: 'Cannot publish to Instagram: Instagram does not allow text-only posts.',
+            detail: 'Add media or remove Instagram from the post targets.',
+          },
+          { status: 400 }
+        )
+      }
     }
 
     // Publer v1 requires: bulk.posts[].networks + bulk.posts[].accounts
@@ -350,10 +421,11 @@ export async function POST(req: NextRequest) {
     console.log('[social/publish] Publer job ID:', publerJobId)
 
     // Poll Publer job status to confirm scheduling succeeded (max 20s).
-    // NOTE: we only capture `failures` here — draft status is driven by `mode` below,
-    // not by Publer's job status. See Bug #5 in the backlog: we currently trust
-    // `complete` without verifying an actual post ID was returned.
+    // Bug #5 fix: don't trust `status: 'complete'` alone — also verify Publer returned
+    // actual post IDs in the payload. A complete job with zero successes is a silent
+    // failure and should be reported to the user, not swallowed as success.
     let publerFailures: unknown = null
+    let publerPostIds: string[] = []
     if (publerJobId) {
       for (let attempt = 0; attempt < 10; attempt++) {
         await new Promise(r => setTimeout(r, 2000))
@@ -369,6 +441,10 @@ export async function POST(req: NextRequest) {
             publerFailures = jobData.payload.failures
             console.error('[social/publish] Publer scheduling failures:', JSON.stringify(publerFailures).substring(0, 500))
           }
+          // Extract post IDs from payload. Publer's API has shifted shapes over time, so try
+          // multiple known locations: payload.posts, payload.successes, payload.ids.
+          publerPostIds = extractPublerPostIds(jobData.payload)
+          console.log('[social/publish] Extracted Publer post IDs:', publerPostIds)
           break
         } else if (jobData.status === 'failed') {
           publerFailures = jobData.payload || jobData
@@ -386,14 +462,32 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Bug #5: complete-but-empty is a silent failure. Report it instead of marking success.
+    // Only enforce when we have a job ID to poll — if Publer skipped the job flow entirely
+    // (older API behavior), fall through and trust the 200 from /posts/schedule.
+    if (publerJobId && publerPostIds.length === 0) {
+      console.error('[social/publish] Publer returned complete with no post IDs — silent failure')
+      return NextResponse.json(
+        {
+          error: 'Publer accepted the request but returned no post IDs',
+          detail: 'This usually means the post was rejected silently (bad media, missing caption, account disconnected). Check Publer directly.',
+          jobId: publerJobId,
+        },
+        { status: 502 }
+      )
+    }
+
     // Update draft status based on mode:
     //   'now'       → 'posted' (fires in ~2 min; UX-wise users think of this as done)
     //   'scheduled' → 'scheduled' (sitting in Publer's queue until scheduled_for)
+    // Store the first real Publer post ID — prefer it over the job ID so the column lives up
+    // to its name and so we can later build "view in Publer" deeplinks. Fall back to the job
+    // ID if post-ID extraction came up empty (older API behavior).
     const { error: updateError } = await supabase
       .from('social_drafts')
       .update({
         status: mode === 'now' ? 'posted' : 'scheduled',
-        publer_post_id: publerJobId,
+        publer_post_id: publerPostIds[0] || publerJobId,
         updated_at: new Date().toISOString(),
       })
       .eq('id', draftId)
@@ -467,7 +561,7 @@ export async function POST(req: NextRequest) {
       console.error('[social/publish] Failed to log to mcc_state:', logErr)
     }
 
-    return NextResponse.json({ success: true, publerJobId })
+    return NextResponse.json({ success: true, publerJobId, publerPostIds })
   } catch (error) {
     console.error('[social/publish] POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -4,6 +4,13 @@
  *
  * The encryption key only exists server-side, so client components call
  * these endpoints instead of querying activity_log directly.
+ *
+ * POST auth:
+ *   - Session cookie (browser client components) — uses getOrganization()
+ *   - Agent secret (n8n workflows) — Authorization: Bearer LOANOS_AGENT_SECRET
+ *     + required `org_slug` query param or X-Org-Slug header. No ambient
+ *     first-org fallback (A-4 audit). user_id is left NULL for agent writes
+ *     because the action is a system event, not a user action.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -13,14 +20,58 @@ import { writeActivityWithPii, decryptActivityPii, type ActivityPublicFields, ty
 
 // ── POST — write activity with PII encryption ──────────────────────────────
 
+interface PostAuth {
+  organizationId: string
+  userId: string | null
+  source: 'session' | 'agent'
+}
+
+async function resolvePostAuth(request: NextRequest): Promise<PostAuth | null> {
+  const authHeader = request.headers.get('authorization')
+  const agentSecret = process.env.LOANOS_AGENT_SECRET
+
+  // Agent-secret path (n8n) — requires explicit org_slug, no fallback
+  if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+    const orgSlug =
+      request.nextUrl.searchParams.get('org_slug') ||
+      request.headers.get('x-org-slug')
+    if (!orgSlug) return null
+
+    const svc = createServiceClient()
+    const { data: org } = await svc
+      .from('organizations')
+      .select('id')
+      .eq('slug', orgSlug)
+      .single()
+    if (!org?.id) return null
+
+    return { organizationId: org.id, userId: null, source: 'agent' }
+  }
+
+  // Session-cookie path (browser)
+  try {
+    const { organizationId, userId } = await getOrganization()
+    return { organizationId, userId, source: 'session' }
+  } catch {
+    return null
+  }
+}
+
 export async function POST(request: NextRequest) {
-  const { organizationId, userId } = await getOrganization()
+  const auth = await resolvePostAuth(request)
+  if (!auth) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const body = await request.json()
 
   const publicFields: ActivityPublicFields = {
     ...body.publicFields,
-    organization_id: organizationId, // enforce from session, never trust client
-    user_id: body.publicFields?.user_id ?? userId,
+    organization_id: auth.organizationId, // enforce from auth, never trust client
+    // For session writes, default user_id to the session user.
+    // For agent writes, leave user_id null unless the caller supplied one
+    // (e.g. n8n resolving the LO from the incoming email address).
+    user_id: body.publicFields?.user_id ?? (auth.source === 'session' ? auth.userId : null),
   }
 
   const pii: PiiPayload = body.pii ?? {}

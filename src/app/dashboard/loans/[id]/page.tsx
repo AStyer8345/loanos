@@ -1490,18 +1490,29 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
     setActiveType(null)
     setLogNotes('')
 
-    const { error } = await supabase.from('activity_log').insert({
-      loan_id: loanId,
-      action: `Logged ${activeType}`,
-      type: activeType,
-      summary: logNotes.trim() || null,
-      entity_type: 'loan',
-      metadata: { activity_type: activeType },
-      user_id: userId ?? null,
+    const res = await fetch('/api/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        publicFields: {
+          loan_id: loanId,
+          action: `Logged ${activeType}`,
+          type: activeType,
+          entity_type: 'loan',
+          user_id: userId ?? null,
+        },
+        pii: {
+          summary: logNotes.trim() || null,
+          metadata: { activity_type: activeType },
+        },
+      }),
+    }).catch(err => {
+      console.error('[loan.activityLog] write failed:', err)
+      return { ok: false } as Response
     })
 
     setSaving(false)
-    if (error) { setActivity(activity); return }
+    if (!res.ok) { setActivity(activity); return }
     onRefresh()
   }
 
@@ -2409,20 +2420,31 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     setLogModal(null)
     setLogNotes('')
 
-    // Persist to Supabase
-    const { error } = await supabase.from('activity_log').insert({
-      loan_id: loanId,
-      action: `Logged ${logModal}`,
-      type: logModal,
-      summary: logNotes.trim() || null,
-      entity_type: 'loan',
-      metadata: { activity_type: logModal },
-      user_id: userId ?? null,
+    // Persist via /api/activity (handles PII encryption server-side)
+    const res = await fetch('/api/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        publicFields: {
+          loan_id: loanId,
+          action: `Logged ${logModal}`,
+          type: logModal,
+          entity_type: 'loan',
+          user_id: userId ?? null,
+        },
+        pii: {
+          summary: logNotes.trim() || null,
+          metadata: { activity_type: logModal },
+        },
+      }),
+    }).catch(err => {
+      console.error('[loan.logModal] write failed:', err)
+      return { ok: false } as Response
     })
 
     setLogSaving(false)
 
-    if (error) {
+    if (!res.ok) {
       // Rollback optimistic update on failure
       setActivity(activity)
       return

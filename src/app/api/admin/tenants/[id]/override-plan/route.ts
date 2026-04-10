@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin/auth'
-import type { Database } from '@/lib/database.types'
-
-type ActivityLogInsert = Database['public']['Tables']['activity_log']['Insert']
+import { writeActivityWithPii } from '@/lib/activity/pii'
 
 export async function POST(
   req: Request,
@@ -42,16 +40,20 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Log the override
-  const logEntry = {
-    organization_id: orgId,
-    action: 'admin_plan_override',
-    entity_type: 'billing',
-    entity_id: orgId,
-    summary: `Plan changed from ${previousPlan} to ${plan} by admin`,
-    metadata: { previous_plan: previousPlan, new_plan: plan, overridden_by: user!.id },
-  } as unknown as ActivityLogInsert
-  await serviceClient!.from('activity_log').insert(logEntry)
+  // Log the override with encrypted PII companion
+  await writeActivityWithPii(
+    serviceClient!,
+    {
+      organization_id: orgId,
+      action: 'admin_plan_override',
+      entity_type: 'billing',
+      entity_id: orgId,
+    },
+    {
+      summary: `Plan changed from ${previousPlan} to ${plan} by admin`,
+      metadata: { previous_plan: previousPlan, new_plan: plan, overridden_by: user!.id },
+    },
+  )
 
   return NextResponse.json({ success: true, previous_plan: previousPlan, new_plan: plan })
 }

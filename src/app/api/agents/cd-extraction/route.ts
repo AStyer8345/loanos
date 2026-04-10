@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { createServiceClient } from '@/lib/supabase/service'
 import { logSecurityEvent } from '@/lib/audit'
+import { writeActivityWithPii } from '@/lib/activity/pii'
 
 // ── POST /api/agents/cd-extraction ───────────────────────────────────────────
 // Called by n8n after extracting Closing Disclosure fields via Claude.
@@ -83,14 +84,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to update loan record' }, { status: 500 })
     }
 
-    // Log to activity_log
-    await supabase.from('activity_log').insert({
-      action: 'loan.cd_received',
-      entity_type: 'loan',
-      loan_id,
-      metadata: { updated_fields: updatedFields, source: 'n8n' },
-      ...(organizationId ? { organization_id: organizationId } : {}),
-    })
+    // Log to activity_log with encrypted PII companion
+    await writeActivityWithPii(
+      supabase,
+      {
+        action: 'loan.cd_received',
+        entity_type: 'loan',
+        loan_id,
+        organization_id: organizationId,
+      },
+      {
+        metadata: { updated_fields: updatedFields, source: 'n8n' },
+      },
+    )
 
     return NextResponse.json({ ok: true, loan_id, updated_fields: updatedFields })
   } catch (err) {

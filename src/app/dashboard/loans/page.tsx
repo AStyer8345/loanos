@@ -594,7 +594,14 @@ export default function LoansPage() {
     const { error } = await supabase.from('loans').update({ status: newStatus }).eq('id', loanId).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.map(l => l.id === loanId ? { ...l, status: newStatus } : l))
-      supabase.from('activity_log').insert({ action: 'loan.status_changed', entity_type: 'loan', loan_id: loanId, metadata: { to: newStatus } })
+      fetch('/api/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicFields: { action: 'loan.status_changed', entity_type: 'loan', loan_id: loanId },
+          pii: { metadata: { to: newStatus } },
+        }),
+      }).catch(err => console.error('[loans.handleStatusChange] activity log failed:', err))
       if (loan?.contact_id) {
         updateLastTouch(supabase, loan.contact_id, 'loan_stage_changed', `Loan moved to ${newStatus}`, loanId)
       }
@@ -621,7 +628,15 @@ export default function LoansPage() {
     const { error } = await supabase.from('loans').update({ status: newStatus }).in('id', ids).eq('organization_id', organizationId)
     if (!error) {
       setLoans(prev => prev.map(l => ids.includes(l.id) ? { ...l, status: newStatus } : l))
-      supabase.from('activity_log').insert(ids.map(id => ({ action: 'loan.status_changed', entity_type: 'loan', loan_id: id, metadata: { to: newStatus } })))
+      // Fire one POST per loan — the server endpoint handles dual-write + encryption
+      await Promise.all(ids.map(id => fetch('/api/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicFields: { action: 'loan.status_changed', entity_type: 'loan', loan_id: id },
+          pii: { metadata: { to: newStatus } },
+        }),
+      }).catch(err => console.error('[loans.handleBulkStatusUpdate] activity log failed:', err))))
       setSelected(new Set())
       setBulkStatus('')
       await fetchCounts()

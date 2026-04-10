@@ -120,20 +120,28 @@ export default function UploadForm({ loans, userId, organizationId }: { loans: L
 
       if (docErr) throw new Error(`Document record: ${docErr.message}`)
 
-      // ── activity_log row ───────────────────────────────────────
-      await supabase.from('activity_log').insert({
-        user_id:     userId,
-        action:      'document.uploaded',
-        entity_type: 'document',
-        entity_id:   doc.id,
-        metadata: {
-          file_name:    file.name,
-          file_size:    file.size,
-          doc_type:     docType,
-          loan_id:      loanId,
-          storage_path: storagePath,
-        },
-      })
+      // ── activity_log row (encrypted PII via /api/activity) ─────
+      await fetch('/api/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicFields: {
+            user_id: userId,
+            action: 'document.uploaded',
+            entity_type: 'document',
+            entity_id: doc.id,
+          },
+          pii: {
+            metadata: {
+              file_name: file.name,
+              file_size: file.size,
+              doc_type: docType,
+              loan_id: loanId,
+              storage_path: storagePath,
+            },
+          },
+        }),
+      }).catch(err => console.error('[UploadForm] activity log failed:', err))
 
       setResult({ ok: true, msg: `${file.name} uploaded successfully.` })
       resetForm()

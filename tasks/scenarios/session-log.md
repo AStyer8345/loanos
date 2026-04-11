@@ -480,3 +480,40 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - PDF "Commonly Chosen" label (Tier 5 item 1) — ✅ COMPLETE this session
 
+---
+
+## AM Session — 2026-04-11 (scenarios-am)
+
+**What was built:**
+- Scenario naming affordance (`src/app/dashboard/scenarios/new/ScenarioCard.tsx`)
+  - Import: added `Pencil` from lucide-react
+  - Purchase card: label button now shows a gold `Pencil` icon (11px) that's `opacity-0` by default and `opacity-60` on `group-hover/label` — makes the click-to-edit affordance visible without cluttering the UI
+  - Refi card: same treatment applied to `RefiCard` function
+  - Both cards: inline edit input now has a `placeholder` matching the fallback label (`Option A`/`B`/etc.) and `minWidth: 120` so it doesn't collapse
+  - `title="Click to rename scenario"` tooltip on the button for accessibility
+
+**What was confirmed (no code change needed):**
+- `scenario.label` field already exists on `PurchaseScenarioInput` and `RefiScenarioInput`
+- Label already saves to `scenarios_data` JSON in Supabase via ActionsBar `save()`
+- Label already flows through `buildPurchaseDisplayData` → `ScenarioDisplayRow.label`
+- Share page `OptionCard` already renders `row.label` as the card heading
+- PDF `renderSummaryTable` already uses `r.label` in column headers
+- Saved scenario reload via `[id]/page.tsx` already restores labels from `scenarios_data`
+
+**MC gap closed:** LOs can now label scenarios with descriptive names ("Conservative 30yr", "Seller Buydown 2-1", "20% Down") instead of generic "Option A / B / C". The pencil icon makes this discoverable. Names carry through to the share page card titles and PDF column headers — matching Mortgage Coach's named presentation format.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `7648a9a` — pushed to main
+**Vercel:** `dpl_FpVDzNMBG1H9T4hBSsWNurM3s43U` — ✅ READY
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/ScenarioCard.tsx` — no auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Comparison table on share page (Tier 5 item 2) — persistent side-by-side data table below OptionCardsGrid. Currently hidden in DetailAccordion behind a tap.
+2. Refi builder: current loan pre-fill (Tier 5 item 4) — auto-populate current rate + remaining balance + months remaining from loan record when entering refi mode via `?loan_id=`.
+3. Social proof block (Tier 5 item 5) — "X borrowers in Austin chose a 30yr fixed this month" — illustrative, compliance-safe.
+
+**Domain queue updates:**
+- Scenario naming (Tier 5 item 3) — ✅ COMPLETE this session
+

@@ -117,11 +117,11 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-10 AM — PDF "Commonly Chosen" badge. `renderSummaryTable` in `generate-pdf/route.ts` now marks the lowest-payment scenario column with gold header + "Commonly Chosen" pill. Tier 5 item 1 COMPLETE.
+**Last worked on:** 2026-04-11 AM — Scenario naming affordance. Both ScenarioCard variants now show a gold pencil icon on hover next to the label. Click opens inline edit input with placeholder fallback. Label saves to `scenarios_data` JSON and renders on share page + PDF column headers (already wired). Tier 5 item 3 COMPLETE. Commit 7648a9a | Vercel dpl_FpVDzNMBG1H9T4hBSsWNurM3s43U → READY.
 
-**Active blockers:** None — next item is pure code (scenario naming in builder).
+**Active blockers:** None.
 
-**What's next:** Scenario naming in builder (Tier 5 item 3) — let LO label each scenario ("Conservative", "Seller Buydown", etc.) instead of "Option A / B / C"; names carry through to share page and PDF.
+**What's next:** Comparison table on share page (Tier 5 item 2) — persistent side-by-side data table below OptionCardsGrid. Refi builder pre-fill (Tier 5 item 4) also queued.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->

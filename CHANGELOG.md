@@ -1,5 +1,12 @@
 # LoanOS Changelog
 
+## 2026-04-11 AM — Scenarios: Scenario Naming Affordance (Tier 5 item 3)
+
+- **ScenarioCard.tsx (purchase + refi):** Gold pencil icon now appears on hover next to each scenario label — makes the existing click-to-edit affordance discoverable. Clicking opens inline input with placeholder fallback (`Option A`, etc.)
+- **Label data flow confirmed end-to-end:** `scenario.label` → `scenarios_data` JSON in Supabase → `buildPurchaseDisplayData` → share page `OptionCard` heading + PDF column header
+- **Build:** ✅ PASS | Commit: `7648a9a` | Vercel: `dpl_FpVDzNMBG1H9T4hBSsWNurM3s43U` → READY
+- **MC gap closed:** LOs can now label scenarios "Conservative 30yr", "Seller Buydown 2-1", etc. — names carry to borrower share page and printed PDF. Matches Mortgage Coach's named presentation format.
+
 ## 2026-04-11 — Standup Day 17
 
 - **Vercel:** READY — latest deploy `dpl_2BWFuqf8U8u8DD5ooswbhRoNMgHr` (commit `f055271`, PII Deploy #2)

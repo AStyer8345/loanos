@@ -1,5 +1,44 @@
 # LoanOS Changelog
 
+## 2026-04-11 — Standup Day 17
+
+- **Vercel:** READY — latest deploy `dpl_2BWFuqf8U8u8DD5ooswbhRoNMgHr` (commit `f055271`, PII Deploy #2)
+- **n8n health:** 26/29 active; 3 intentionally inactive (CD Extractor, Refi Quarterly Review, Refi Pre-Drop Warm-Up) — no failed/errored workflows
+- **Standup logged:** `tasks/standup-log.md` updated with Day 17 entry — 15 days to launch
+- **Key blockers surfaced:** GOALS.md #2 email automation unstarted; PII backfill not run; Set Rate webhook never called; Adam decisions pending (Phase 2 confirm, Post 39 by Apr 15, selfies upload)
+- **No audit files in `audits/`** — security status tracked via CONTEXT.md: Critical #3 partial (PII deploy 1+2 done, backfill + column drop pending), Critical #1 partial (shadow mode), 3 mediums open
+
+## 2026-04-11 AM — Lead Gen: Seq D Bug Fix + Refi Watch Verification
+
+- **Seq D org_id bug fixed:** Corrected `45a5b7e8-...` → `18613f82-...` in 3 nodes of workflow `W0K4YDzkZd0Hzv6g` (Get All Past Clients, Get Already Touched, Log Warm-Up Send). Verified via REST API re-fetch — 0 wrong occurrences remaining. Seq D is now safe to trigger.
+- **Critical finding — Set Rate webhook never called:** Zero `refi_rate_update` entries in activity_log. Seq A is ACTIVE (daily 7am CT) but exits immediately — no rate to evaluate against. No rate drop alerts have ever been sent. Flagged in ADAM-TODO with exact curl command.
+- **Seq C status:** Still INACTIVE — Adam has not yet activated/connected Outlook credential. Item remains in ADAM-TODO.
+- **ADAM-TODO updated:** Seq D bug marked [x], 2 new items added (Set Rate + Seq D trigger-ready notice).
+
+## 2026-04-11 AM — Social Media: FHA Blog Distribution + Week 20 Build (Posts 112-116)
+
+- **FHA blog distributed (Step 1B):** `2026-04-10-fha-loan-requirements-texas-2026.html` detected as new. GBP auto-published via Publer (job_id: 69d9f8b91eb2733c546ea717). Facebook, Instagram, LinkedIn drafted to `social_drafts` (IDs: 0185e9ca, 1d7ec98b, 4714666a).
+- **Week 20 built (Posts 112-116, July 22-28):** Platform mix 2 LI + 2 IG + 1 FB. Avg quality 7.8/10. Reviewer approved all 5, 0 compliance failures. QA 5/5 PASS.
+- **Post 115 (LinkedIn carousel):** Picks up FHA blog Tier 2 from content-repost-queue. PMI vs MIP cost breakdown. NMLS# 513013 + Equal Housing Lender on slide 6. Canva brief in build report.
+- **Pillar balance:** RT(2)+Personal(2)+Education(1) brings rolling window to ~30/30/31/10. Back in tolerance.
+- **BLOCKER-LOANOS-001:** Selfies still not uploaded. LoanOS stream paused for 7th consecutive session.
+
+## 2026-04-10 PM — Nightly NotebookLM Sync (SEO/SEM + Lead Gen)
+
+- **SEO/SEM notebook:** Removed 2 stale sources (404 FHA URL, superseded Apr 8 audit); added audit-2026-04-10.md; web research file saved locally (SEJ financial services SEO); count at 50/50
+- **Lead Gen notebook:** Removed 1 stale source (Q4 2024 landing page benchmarks); audit file + web research saved locally (at 50-source capacity); count at 50/50
+- **Master log:** Both seo-sem-pm and lead-gen-pm entries appended to Styer_Growth_Log.md + synced to Styer Mortgage Master notebook
+- **Digests sent:** Both SEO/SEM and Lead Gen daily digests sent to adam@thestyerteam.com (Zapier status: success)
+- **CONTEXT.md:** SEO/SEM Agent Status fields updated
+
+## 2026-04-10 PM — Social Media: Post 39 CPI Fill + Week 19 Build (Posts 107-111)
+
+- **Post 39 CPI fill complete:** March CPI +3.3% YoY headline (energy-driven), +2.6% core; 30-yr at 6.39% (flat post-release). All 3 `~[LIVE DATA NEEDED]` placeholders replaced. Awaiting Adam approval for April 15 publish.
+- **Week 19 built:** Posts 107-111 (July 15-21) inserted to `social_drafts`. Platform mix: 2 Instagram, 2 LinkedIn, 1 Facebook. Avg quality 8.4/10. Reviewer: 0 compliance failures.
+- **Post IDs:** 107=eb06e5fb, 108=c3dd3985, 109=2c430aad, 110=c497fa36, 111=c211af9f
+- **Pillar note:** Education at 33% rolling — capped at 1 Education post/week starting Week 20.
+- **BLOCKER-LOANOS-001:** LoanOS selfies still not uploaded. Stream remains paused.
+
 ## 2026-04-10 AM — Scenarios: PDF "Commonly Chosen" Badge (Tier 5 Item 1)
 
 - **PDF "Commonly Chosen" badge**: `renderSummaryTable` in `generate-pdf/route.ts` now computes `commonlyChosenIndex` (lowest non-zero `totalMonthlyPayment`, purchase mode only, 2+ scenarios)

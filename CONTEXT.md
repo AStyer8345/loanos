@@ -89,30 +89,30 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-10 AM — Week 18 complete (Posts 102-106, July 8-15). Full cycle: context load → refresh report (CPI not yet released at 2 AM) → architect → builder → quality (avg 8.0/10, all 5 ≥7/10) → reviewer (APPROVED, 0 compliance failures) → QA (5/5 PASS). Pillar rebalancing: 2 Personal + 1 Promo address rolling-window deficit. All 5 posts evergreen.
+**Last worked on:** 2026-04-11 AM — FHA blog (2026-04-10) distributed: GBP auto-published via Publer, FB/IG/LI drafted to social_drafts. Week 20 built (Posts 112-116, July 22-28): 2 LI + 2 IG + 1 FB, avg quality 7.8/10, all approved, QA 5/5 PASS. Pillar: RT(2)+Personal(2)+Education(1). Post 115 picks up FHA blog Tier 2 carousel (PMI vs MIP). content-repost-queue FHA entry → Completed.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS pool has 0 ready entries). Post 39 CPI template awaits Refresh fill — CPI releases April 10 at 7:30 AM CT. Posts 29+30 Liberation Day decision due April 28.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream still paused). Posts 29+30 Liberation Day: decision due April 28 (17 days). Post 39: Adam approve before April 15 (4 days).
 
-**What's next:** PM session: fill Post 39 CPI template after 7:30 AM CT data drop. Week 19 build (Posts 107-111). Posts 29+30 Liberation Day decision — 18 days to April 28 deadline. Promo still low in rolling mix — Week 19 should include 1 promo post.
+**What's next:** Week 21 build (Posts 117-121, July 29 – Aug 4). Consider 1 TIMELY for Fed decision (July 29-30 FOMC). Adam: upload selfies, approve Post 39, decide Posts 29+30 by April 18.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-10 AM — Sequence C (Quarterly Rate Review) built. Confirmed Adam activated Seq A, B, Set Rate webhook since last session. Seq D org_id bug flagged.
+**Last worked on:** 2026-04-11 AM — Seq D org_id bug fixed (all 3 nodes corrected via REST API). End-to-end verification: Set Rate webhook never called — zero `refi_rate_update` entries in activity_log. Seq A active but idle (no rate to check). Seq C still INACTIVE (Adam hasn't activated yet).
 
-**Active blockers:** Seq C needs Outlook credential connected + activation (Adam). Seq D has org_id bug (`45a5b7e8-...` → fix to `18613f82-...`) — flagged in ADAM-TODO. FRED API key not registered (low priority — not blocking anything).
+**Active blockers:** Set Rate webhook never called — Seq A won't fire until Adam POSTs current rate (`curl -X POST .../webhook/refi-watch-set-rate -d '{"rate": 6.39}'`). Seq C still INACTIVE — Adam must connect Outlook credential + activate.
 
-**What's next:** Fix Seq D org_id bug (agent task, 5 min). Verify Set Rate webhook has been called with current rate. End-to-end test: check activity_log for refi_rate_update entries + Seq A execution history. Seq C: Adam activates once Outlook verified.
+**What's next:** Confirm Set Rate called next session (check activity_log). Seq C activation check. If Set Rate + Seq C still unresolved after 2 more sessions, consider pivoting to Mailchimp Customer Journeys (largest unbuilt lead gen piece).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-09 PM — NotebookLM PUSH+CURATE. AM session: city enrichment for Spicewood/Florence/Jarrell (commit 06fbfad) + San Marcos AEO paragraph (commit 55d6797). AEO rollout: 13/25 suburb pages confirmed; Buda + Westlake remain. Notebook: 3 removed (keyword-research superseded, FTB content strategy superseded, old CONTEXT.md), 3 added (CONTEXT.md refresh, SEL location pages guide, audit file). 50/50 maintained. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-10 PM — NotebookLM PUSH+CURATE. AM session: AEO optimization on doc checklist (answer-first paragraph + 2 H2 rewrites), city enrichment for New Braunfels + Lakeway (15/25 suburb pages complete), FHA Loan Requirements Texas 2026 blog post published (3 social drafts queued), GSC stale indexing flag removed (suburb pages confirmed indexed). Notebook: 2 removed (404 FHA URL added before page was live, superseded Apr 8 audit), 1 added (audit-2026-04-10.md). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC 90-day export overdue — keyword prioritization inference-based. 24 suburb pages need manual "Request Indexing" in GSC. Buda + Westlake AEO paragraphs deferred (Thursday target).
+**Active blockers:** GSC 90-day export overdue — keyword prioritization inference-based. FHA blog URL removed from notebook (was 404 at indexing time — re-add once page is confirmed indexed). Liberty Hill + Elgin are 2 remaining suburb pages without at-a-glance enrichment.
 
-**What's next:** Thursday: AEO paragraphs for Buda + Westlake. Funnel audit: 3 pages + thank-you + contact.html. Rename temp placeholder blog posts to permanent slugs. Adam: pull GSC export + request indexing for suburb pages.
+**What's next:** City enrichment for Liberty Hill + Elgin (2 remaining — completes 25/25). Verify FHA blog deploy on Netlify + re-add to notebook. GSC April 10 window: check "How to Choose a Lender" impressions (published Apr 1). Adam: pull GSC export.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
@@ -126,11 +126,11 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-10 — Day 16 standup. Vercel READY. n8n: 26 active healthy, 3 intentionally inactive. CD & Contract Extractor still INACTIVE (GOALS.md #2 unstarted). Seq D org_id bug flagged. 3 CRITICAL + 2 HIGH DB-level audit findings unresolved; 3 medium open per TODO.
+**Last worked on:** 2026-04-11 — Day 17 standup. Vercel READY (dpl_2BWFuqf8U8u8DD5ooswbhRoNMgHr). PII Deploy #2 shipped: activity_log no longer receives inline PII; verify-live-decrypt helper added; Publer publish backlog closed. n8n: 26/29 active, 3 intentionally inactive. CD & Contract Extractor still INACTIVE (GOALS.md #2 unstarted). PII backfill still not run.
 
-**Active blockers:** GOALS.md #2 (email automation) has zero progress — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive. Phase 3 gate requires Adam Phase 2 confirmation. PII backfill not run. Adam: selfies upload, Seq C activation, Seq D org_id fix.
+**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, zero progress. PII backfill not run (blocks column drop + Critical #3 close). Set Rate webhook never called (Seq A idle). Adam: Phase 2 confirmation, selfies upload, Seq C activation, Post 39 approval (due April 15).
 
-**What's next:** Activate CD & Contract Extractor — highest-value unstarted automation per GOALS.md. Fix Seq D org_id bug. Adam: confirm Phase 2 to unblock Renovation Phase 3.
+**What's next:** PII Phase 3 (run backfill → verify-live-decrypt → migration 083 column drop). Then activate CD & Contract Extractor. Adam must confirm Phase 2 to unblock Renovation Phase 3.
 
 ## Rules For AI Sessions
 

@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-04-11 — Day 17 of 26 (15 days to launch)
+
+**Days to launch:** 15
+
+**Yesterday shipped:**
+- `security(pii)`: Deploy #2 of PII hardening — `writeActivityWithPii` now writes only public fields to `activity_log` inline; PII goes exclusively to encrypted companion (`activity_log_pii`). Orphan rollback on companion insert failure. Read path removes inline-column fallback.
+- `test(pii)`: `verify-live-decrypt` helper script — decrypts companion rows via real helpers, byte-compares against inline plaintext. Gates the migration that drops plaintext columns.
+- `fix(social)`: Closed Publer publish backlog — media guard (refuse media-less formats), post-ID extraction from response, per-tenant Publer API key, settings UI, split "publish now" vs "schedule" modes.
+
+**Blockers:**
+- GOALS.md #2 (email automation) — `HkLjsnnhT5MgrX5H` (CD & Contract Extractor) still INACTIVE. Zero progress. Highest-value unstarted automation.
+- PII backfill (`scripts/backfill-activity-pii.ts`) not run — 306 orphan rows still have plaintext inline. Column drop blocked until backfill + verify-live-decrypt both pass.
+- Set Rate webhook never called — Seq A (Refi Watch) active but idle; no refi alerts have ever fired. Adam must `POST /webhook/refi-watch-set-rate` with current rate.
+- Renovation Phase 3 blocked — Adam hasn't confirmed Phase 2 done.
+- Demo data cleanup (marketing site) — blocks May 1 launch screenshots.
+
+**Today's focus:** PII Phase 3 — run backfill script, run verify-live-decrypt, confirm pass, then drop plaintext columns via migration 083. Closes Critical #3 fully and clears last hard security gate before LO #2.
+
+**Risk watch:** 15 days out. Email automation (GOALS.md #2) unstarted. Renovation Phases 3–6 not started. Marketing site demo data blocked. Social selfies upload still pending (7 sessions). Adam decisions stacking: Phase 2 confirmation, Set Rate webhook, Seq C activation, Post 39 approval (due April 15 — 4 days). Timeline is tight but not broken — needs Adam to unblock items this weekend.
+
+**Open audit findings:** PII Critical #3 partial (deploy 1+2 done today, backfill + column drop pending). Arive webhook Critical #1 partial (shadow mode, not enforced). Mediums #5 (field-level encryption), #9 (admin action log), #10 (sys/org admin) open. n8n: 26/29 active, 3 intentionally inactive (CD Extractor, Refi Quarterly Review, Refi Pre-Drop Warm-Up).
+
+---
+
 ## 2026-04-10
 
 **Days to launch:** 16

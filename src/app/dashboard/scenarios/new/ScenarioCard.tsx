@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, ChevronDown, ChevronRight } from 'lucide-react'
+import { X, ChevronDown, ChevronRight, Pencil } from 'lucide-react'
 import type { PurchaseScenarioInput, RefiScenarioInput, CurrentLoanInput, LoanType, LoanTerm, BuydownType, ClosingCostBreakdown } from '@/lib/scenarios/types'
 import { CurrencyField, PercentField, SelectField } from './FormFields'
 import { sumClosingCosts } from './ScenarioBuilder'
@@ -310,12 +310,19 @@ export default function ScenarioCard({
               onChange={e => onUpdate({ label: e.target.value })}
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
+              placeholder={`Option ${String.fromCharCode(65 + index)}`}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace", minWidth: 120 }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
+            <button
+              onClick={() => setEditingLabel(true)}
+              title="Click to rename scenario"
+              className="flex items-center gap-1.5 group/label text-sm font-semibold"
+              style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+            >
               {label}
+              <Pencil size={11} className="opacity-0 group-hover/label:opacity-60 transition-opacity" style={{ color: 'var(--sc-accent)' }} />
             </button>
           )}
           <select
@@ -459,12 +466,19 @@ function RefiCard({ scenario, onUpdate, currentLoan, index, canRemove, onRemove,
               onChange={e => onUpdate({ label: e.target.value })}
               onBlur={() => setEditingLabel(false)}
               onKeyDown={e => e.key === 'Enter' && setEditingLabel(false)}
+              placeholder={`Option ${index + 1}`}
               className="bg-transparent border-b text-sm font-semibold outline-none px-1 py-0.5"
-              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+              style={{ borderColor: 'var(--sc-accent)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace", minWidth: 120 }}
             />
           ) : (
-            <button onClick={() => setEditingLabel(true)} className="text-sm font-semibold hover:underline" style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
+            <button
+              onClick={() => setEditingLabel(true)}
+              title="Click to rename scenario"
+              className="flex items-center gap-1.5 group/label text-sm font-semibold"
+              style={{ color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}
+            >
               {label}
+              <Pencil size={11} className="opacity-0 group-hover/label:opacity-60 transition-opacity" style={{ color: 'var(--sc-accent)' }} />
             </button>
           )}
           <select

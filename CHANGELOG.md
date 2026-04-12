@@ -1,5 +1,9 @@
 # LoanOS Changelog
 
+## 2026-04-12 PM — Outbound iMessage capture + trigger crash fix
+
+- **Outbound iMessage capture:** Removed `is_from_me = 0` filter from `imessage-sync.py` — script now sends both inbound and outbound messages to n8n. n8n workflow updated: outbound → `action: imessage.sent`, `event_type: imessage_sent`; inbound unchanged. Contact `last_activity_type` distinguishes `imessage_outbound` vs `imessage_inbound`. UI: `imessage_sent` gets cyan icon (vs blue for received). Script deployed to `~/.local/bin/imessage-sync.py`. Cursor at ROWID 109509 — new outbound messages captured going forward.
+
 ## 2026-04-12 PM — Fix: Trigger crash + iMessage pipeline silent failure
 
 - **Migration 085 — `enrich_activity_log_contact()` trigger fix:** Migration 083 dropped `from_address`/`to_address` from `activity_log`, but the `enrich_activity_log_contact()` trigger still referenced `NEW.from_address`. Every `/api/activity` POST returned 500 ("record new has no field from_address") since the column drop. Additional bug: NULL logic in the guard clause — `NULL NOT IN (...)` returns NULL, not TRUE, so the guard failed open for non-email rows. Fix: replaced trigger body with no-op `RETURN NEW` (email enrichment is obsolete post-PII-encryption).

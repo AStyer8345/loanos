@@ -15,6 +15,7 @@ import ShareEquityChart from './ShareEquityChart'
 import CashToCloseBreakdown from './CashToCloseBreakdown'
 import LOSidebarCard from './LOSidebarCard'
 import ShareVideoEmbed from './ShareVideoEmbed'
+import ScenarioComparisonTable from './ScenarioComparisonTable'
 
 interface SharedScenario {
   scenario_type: string
@@ -162,6 +163,13 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
               />
               <OptionCardsGrid rows={displayData.rows} mode={mode} />
             </section>
+
+            {/* Comparison Table — visible only for multi-scenario, always expanded */}
+            {hasMultipleOptions && (
+              <section>
+                <ScenarioComparisonTable displayData={displayData} />
+              </section>
+            )}
 
             {/* Cash to Close / Fee Breakdown */}
             <section className="no-break">

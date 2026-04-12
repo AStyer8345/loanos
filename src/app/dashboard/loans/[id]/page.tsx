@@ -15,6 +15,9 @@ import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
+import NoteInput, { type NoteRow } from '@/components/notes/NoteInput'
+import NoteCard from '@/components/notes/NoteCard'
+
 
 // No hardcoded fallback — a missing env var must fail closed rather than
 // route every tenant's manual automation triggers through Adam's n8n instance.
@@ -180,9 +183,11 @@ interface ActivityRow {
   created_at: string
   action: string
   type: string | null
+  event_type: string | null
   summary: string | null
   entity_type: string | null
   metadata: Record<string, unknown> | null
+  loan_name?: string | null
 }
 
 interface ContactRow {
@@ -393,7 +398,8 @@ export default function LoanDetailPage() {
     setActiveRecord?: (record: { id: string; type: 'contact' | 'loan'; name: string } | null) => void
   }
   const setActiveRecord = outreachChat.setActiveRecord
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'notes' | 'activity' | 'emails'>('dashboard')
+  const [notes, setNotes] = useState<NoteRow[]>([])
   const [actionsOpen, setActionsOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -418,12 +424,13 @@ export default function LoanDetailPage() {
   const fetchAll = useCallback(async () => {
     if (!organizationId) return
     setLoading(true)
-    const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes] = await Promise.all([
+    const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes, notesRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).eq('organization_id', organizationId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
-      fetch(`/api/activity?loan_id=${loanId}&limit=50&columns=id,created_at,action,type,summary,entity_type,metadata`).then(r => r.ok ? r.json() : []),
+      fetch(`/api/activity?loan_id=${loanId}&limit=50&columns=id,created_at,action,type,event_type,summary,entity_type,metadata`).then(r => r.ok ? r.json() : []),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
       supabase.from('contact_emails').select('id, subject, body_html, body_text, automation_source, sent_at, created_at').eq('loan_id', loanId).order('sent_at', { ascending: false }).limit(100),
+      fetch(`/api/notes?loan_id=${loanId}`).then(r => r.ok ? r.json() : []),
     ])
 
     if (loanRes.data) {
@@ -444,6 +451,7 @@ export default function LoanDetailPage() {
     }
     setDocs(docsRes.data || [])
     setActivity((activityRows || []) as ActivityRow[])
+    setNotes((notesRes || []) as NoteRow[])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
@@ -736,6 +744,7 @@ export default function LoanDetailPage() {
           {([
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
+            { id: 'notes',       label: `Notes (${notes.length})` },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length + inboundEmails.length})` },
           ] as const).map(tab => {
@@ -765,6 +774,17 @@ export default function LoanDetailPage() {
         )}
         {activeTab === 'automations' && (
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
+        )}
+        {activeTab === 'notes' && (
+          <div className="p-6">
+            <LoanNotesTab
+              loanId={loanId}
+              contactId={loan?.contact_id ?? null}
+              notes={notes}
+              setNotes={setNotes}
+              onRefresh={fetchAll}
+            />
+          </div>
         )}
         {activeTab === 'activity' && (
           <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} loanId={loanId} onRefresh={fetchAll} /></div>
@@ -1480,6 +1500,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       created_at: new Date().toISOString(),
       action: `Logged ${activeType}`,
       type: activeType,
+      event_type: null,
       summary: logNotes.trim() || null,
       entity_type: 'loan',
       metadata: { activity_type: activeType },
@@ -1523,6 +1544,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       created_at: e.occurred_at ?? e.created_at,
       action: e.subject ?? 'Inbound email',
       type: 'email_inbound',
+      event_type: null,
       summary: `From: ${e.from_address ?? 'unknown'}\n${e.body_snippet ?? ''}`,
       entity_type: 'email' as string | null,
       metadata: null,
@@ -1532,6 +1554,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       created_at: d.created_at,
       action: d.subject ?? d.automation_name,
       type: 'email_outbound',
+      event_type: null,
       summary: `To: ${d.recipient_name ?? d.recipient_email}\n${d.body_preview ?? ''}`,
       entity_type: 'email' as string | null,
       metadata: null,
@@ -1541,6 +1564,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       created_at: e.sent_at ?? e.created_at,
       action: e.subject ?? 'Sent email',
       type: 'email_outbound',
+      event_type: null,
       summary: e.body_text?.slice(0, 200) ?? '',
       entity_type: 'email' as string | null,
       metadata: null,
@@ -2376,6 +2400,52 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
 // ── Activity tab ──────────────────────────────────────────────────────────────
 
+// ── Loan Notes Tab ──────────────────────────────────────────────────────────
+
+function LoanNotesTab({ loanId, contactId, notes, setNotes, onRefresh }: {
+  loanId: string
+  contactId: string | null
+  notes: NoteRow[]
+  setNotes: (n: NoteRow[]) => void
+  onRefresh: () => void
+}) {
+  return (
+    <div className="max-w-2xl space-y-4">
+      <NoteInput
+        contactId={contactId}
+        loanId={loanId}
+        onNoteCreated={(note) => {
+          setNotes([note, ...notes])
+          onRefresh()
+        }}
+      />
+      {notes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted-foreground font-mono">
+          <StickyNote size={24} />
+          <p className="text-sm">No notes yet</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {notes.map(note => (
+            <NoteCard
+              key={note.id}
+              note={note}
+              onUpdate={(id, content) => {
+                setNotes(notes.map(n => n.id === id ? { ...n, content, updated_at: new Date().toISOString() } : n))
+              }}
+              onDelete={(id) => {
+                setNotes(notes.filter(n => n.id !== id))
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Activity Tab (read-only timeline) ───────────────────────────────────────
+
 function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; loanId: string; onRefresh: () => void }) {
   const supabase = createClient()
   const { userId } = useOrg()
@@ -2410,6 +2480,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
       created_at: new Date().toISOString(),
       action: `Logged ${logModal}`,
       type: logModal,
+      event_type: null,
       summary: logNotes.trim() || null,
       entity_type: 'loan',
       metadata: { activity_type: logModal },

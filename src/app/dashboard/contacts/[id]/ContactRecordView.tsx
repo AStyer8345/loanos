@@ -26,7 +26,8 @@ import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
-
+import NoteInput, { type NoteRow } from '@/components/notes/NoteInput'
+import NoteCard from '@/components/notes/NoteCard'
 export type Contact = {
   id: string
   first_name: string | null
@@ -95,6 +96,7 @@ export type ActivityEntry = {
   // Legacy columns
   action: string
   entity_type: string | null
+  event_type?: string | null
   metadata: Record<string, unknown> | string | null
   // New columns added in migration 008
   type?: string | null
@@ -268,6 +270,9 @@ type Props = {
   dripEnrollments?: DripEnrollment[]
   onToggleDrip?: (enrollmentId: string, newStatus: 'active' | 'paused') => Promise<void>
   onCancelDrip?: (enrollmentId: string) => Promise<void>
+  contactNotes?: NoteRow[]
+  setContactNotes?: (notes: NoteRow[]) => void
+  onRefreshNotes?: () => void
 }
 
 // Typeahead for referred_by — searches existing contacts by name
@@ -901,6 +906,9 @@ export function ContactRecordView(props: Props) {
     setNewNote,
     savingNote,
     onAddNote,
+    contactNotes = [],
+    setContactNotes,
+    onRefreshNotes,
   } = props
 
   // Actions created by updateLastTouch that duplicate contact_activity entries
@@ -923,6 +931,7 @@ export function ContactRecordView(props: Props) {
   }, [contact.id, contact.first_name, contact.last_name, setActiveRecord])
 
   const [leftTab, setLeftTab] = useState<LeftTab>('overview')
+  const [rightTab, setRightTab] = useState<'notes' | 'activity'>('activity')
 
   // Activity form state
   const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
@@ -1826,16 +1835,32 @@ export function ContactRecordView(props: Props) {
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
 
-          {/* Sticky header with count + filter */}
+          {/* Sticky header with Notes | Activity tab switcher */}
           <div style={{
             flexShrink: 0, padding: '12px 20px',
             borderBottom: '1px solid var(--border)', background: 'var(--bg)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ ...labelStyle, marginBottom: 0 }}>
-                ACTIVITY ({unifiedFeed.length})
-              </div>
+            <div style={{ display: 'flex', gap: 0, marginBottom: rightTab === 'activity' ? 8 : 0 }}>
+              {([['notes', `Notes (${contactNotes.length})`], ['activity', `Activity (${unifiedFeed.length})`]] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setRightTab(key as 'notes' | 'activity')}
+                  style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                    letterSpacing: '0.04em', padding: '6px 14px',
+                    cursor: 'pointer',
+                    borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+                    borderBottom: rightTab === key ? '2px solid #c9a84c' : '2px solid transparent',
+                    background: 'transparent',
+                    color: rightTab === key ? '#c9a84c' : 'var(--muted)',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
+            {rightTab === 'activity' && (
             <div style={{ display: 'flex', gap: 4 }}>
               {([['all', 'All'], ['outreach', 'Outreach'], ['system', 'System']] as const).map(([key, label]) => (
                 <button
@@ -1853,8 +1878,47 @@ export function ContactRecordView(props: Props) {
                 </button>
               ))}
             </div>
+            )}
           </div>
 
+          {/* ── Notes tab content ── */}
+          {rightTab === 'notes' && (
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+              <div style={{ marginBottom: 16 }}>
+                <NoteInput
+                  contactId={contact.id}
+                  onNoteCreated={(note) => {
+                    setContactNotes?.([note, ...contactNotes])
+                    onRefreshNotes?.()
+                  }}
+                />
+              </div>
+              {contactNotes.length === 0 ? (
+                <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                  No notes yet — add one above.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {contactNotes.map(note => (
+                    <NoteCard
+                      key={note.id}
+                      note={note}
+                      onUpdate={(id, content) => {
+                        setContactNotes?.(contactNotes.map(n => n.id === id ? { ...n, content, updated_at: new Date().toISOString() } : n))
+                      }}
+                      onDelete={(id) => {
+                        setContactNotes?.(contactNotes.filter(n => n.id !== id))
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Activity tab content ── */}
+          {rightTab === 'activity' && (
+          <>
           {/* Activity action buttons */}
           <div style={{ flexShrink: 0, padding: '10px 16px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -1960,6 +2024,8 @@ export function ContactRecordView(props: Props) {
               )
             })()}
           </div>
+          </>
+          )}
 
         </div>
       </div>

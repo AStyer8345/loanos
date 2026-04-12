@@ -102,6 +102,8 @@ function isLoanRelated(subject: string | null): boolean {
 export default function UnmatchedEmailsPage() {
   const supabase = createClient()
   const [emails, setEmails] = useState<UnmatchedEmail[]>([])
+  const [iMessages, setIMessages] = useState<UnmatchedEmail[]>([])
+  const [messageFilter, setMessageFilter] = useState<'emails' | 'imessages' | 'all'>('all')
   const [loading, setLoading] = useState(true)
   const [linkingId, setLinkingId] = useState<string | null>(null)
   const [linkMode, setLinkMode] = useState<'contact' | 'loan'>('contact')
@@ -116,11 +118,16 @@ export default function UnmatchedEmailsPage() {
   const fetchEmails = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/activity?type=email_inbound&unmatched=true&order=occurred_at&limit=200&columns=id,from_address,subject,body_snippet,occurred_at,created_at,metadata')
-      const rows = res.ok ? ((await res.json()) as UnmatchedEmail[]) : []
-      setEmails(rows)
-      // Run auto-matching in background after load
-      runAutoMatch(rows)
+      const [emailRes, imsgRes] = await Promise.all([
+        fetch('/api/activity?type=email_inbound&unmatched=true&order=occurred_at&limit=200&columns=id,from_address,subject,body_snippet,occurred_at,created_at,metadata'),
+        fetch('/api/activity?action=imessage.received&unmatched=true&order=occurred_at&limit=200&columns=id,from_address,subject,body_snippet,occurred_at,created_at,metadata'),
+      ])
+      const emailRows = emailRes.ok ? ((await emailRes.json()) as UnmatchedEmail[]) : []
+      const imsgRows = imsgRes.ok ? ((await imsgRes.json()) as UnmatchedEmail[]) : []
+      setEmails(emailRows)
+      setIMessages(imsgRows)
+      // Run auto-matching in background after load (emails only — iMessages lack subjects)
+      runAutoMatch(emailRows)
     } catch { /* ignore */ }
     setLoading(false)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -348,6 +355,7 @@ export default function UnmatchedEmailsPage() {
     setSearchResults([])
     setSuggestions(prev => { const m = new Map(prev); m.delete(email.id); return m })
     setEmails(prev => prev.filter(e => e.id !== email.id))
+    setIMessages(prev => prev.filter(e => e.id !== email.id))
   }
 
   const linkToLoan = async (email: UnmatchedEmail, loanId: string) => {
@@ -365,6 +373,7 @@ export default function UnmatchedEmailsPage() {
     setLoanResults([])
     setSuggestions(prev => { const m = new Map(prev); m.delete(email.id); return m })
     setEmails(prev => prev.filter(e => e.id !== email.id))
+    setIMessages(prev => prev.filter(e => e.id !== email.id))
   }
 
   const dismissEmail = async (emailId: string) => {
@@ -379,6 +388,7 @@ export default function UnmatchedEmailsPage() {
     }
     setSuggestions(prev => { const m = new Map(prev); m.delete(emailId); return m })
     setEmails(prev => prev.filter(e => e.id !== emailId))
+    setIMessages(prev => prev.filter(e => e.id !== emailId))
   }
 
   return (
@@ -394,22 +404,40 @@ export default function UnmatchedEmailsPage() {
           fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)',
           marginTop: 4,
         }}>
-          Unmatched emails — auto-matched by address & name where possible. Click Link to confirm or reassign.
+          Unmatched messages — auto-matched by address & name where possible. Click Link to confirm or reassign.
         </p>
+        <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
+          {([['all', `All (${emails.length + iMessages.length})`], ['emails', `Emails (${emails.length})`], ['imessages', `iMessages (${iMessages.length})`]] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setMessageFilter(key)}
+              style={{
+                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                padding: '4px 12px', borderRadius: 4, cursor: 'pointer',
+                border: messageFilter === key ? '1px solid #c9a84c' : '1px solid var(--border)',
+                background: messageFilter === key ? 'rgba(201,168,76,0.15)' : 'transparent',
+                color: messageFilter === key ? '#c9a84c' : 'var(--muted)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', textAlign: 'center', padding: 48 }}>
           Loading...
         </p>
-      ) : emails.length === 0 ? (
+      ) : (messageFilter === 'emails' ? emails : messageFilter === 'imessages' ? iMessages : [...emails, ...iMessages]).length === 0 ? (
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
           padding: '64px 0', color: 'var(--muted)',
         }}>
           <Inbox size={28} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>
-            No unmatched emails to review {'\u2014'} all clear.
+            No unmatched {messageFilter === 'imessages' ? 'iMessages' : messageFilter === 'emails' ? 'emails' : 'messages'} to review {'\u2014'} all clear.
           </span>
         </div>
       ) : (
@@ -433,8 +461,9 @@ export default function UnmatchedEmailsPage() {
           </div>
 
           {/* Rows */}
-          {emails.map(email => {
-            const fromName = (email.metadata?.from_name as string) || null
+          {(messageFilter === 'emails' ? emails : messageFilter === 'imessages' ? iMessages : [...emails, ...iMessages].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())).map(email => {
+            const isIMsg = iMessages.includes(email)
+            const fromName = isIMsg ? ((email.metadata?.sender_phone as string) || 'Unknown') : ((email.metadata?.from_name as string) || null)
             const suggestion = suggestions.get(email.id)
             return (
               <div key={email.id} style={{ position: 'relative' }}>

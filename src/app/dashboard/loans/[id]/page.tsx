@@ -308,6 +308,15 @@ const WORKFLOWS = [
     webhookPath: 'loanos-contract-received',
     icon: '📝',
   },
+  {
+    id: 'review-request',
+    name: 'Review Request Email',
+    description: 'Creates an Outlook draft asking the borrower to leave a Google and Zillow review after closing.',
+    triggerLabel: 'Create Review Draft',
+    triggerType: 'direct' as const,
+    webhookPath: 'loanos-outlook-draft',
+    icon: '⭐',
+  },
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -552,6 +561,7 @@ export default function LoanDetailPage() {
                       { label: 'Website Lead Follow-up', automationId: 'website-lead' },
                       { label: 'New Application Received', automationId: 'new-application' },
                       { label: 'Contract Received', automationId: 'contract-received' },
+                      { label: 'Review Request Email', automationId: 'review-request' },
                     ].map(({ label, automationId }) => (
                       <button
                         key={label}
@@ -2303,7 +2313,23 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         return
       }
       let res: Response
-      if (workflow.triggerType === 'pdf') {
+      if (workflow.triggerType === 'direct') {
+        // Review request: build email HTML and send to generic Outlook draft webhook
+        if (!loan.borrower_email) { setError('No borrower email on this loan.'); setSending(false); return }
+        const firstName = loan.borrower_first_name || displayName.split(' ')[0] || 'there'
+        const googleUrl = 'https://share.google/ddpwv31jI2oqzN5Ia'
+        const zillowUrl = 'https://www.zillow.com/lender-profile/adamstyer/'
+        const emailHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f9f9f9;font-family:Georgia,serif"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;padding:40px 0"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden"><tr><td style="background:#1a1a1a;padding:28px 40px"><p style="margin:0;color:#c9a84c;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">Adam Styer | Mortgage Solutions LP</p></td></tr><tr><td style="padding:40px"><p style="font-size:18px;color:#333;margin:0 0 20px">Hey ${firstName},</p><p style="font-size:16px;line-height:1.7;color:#555;margin:0 0 16px">Congrats again on closing! It was a genuine privilege walking alongside you through one of the biggest moments of your life.</p><p style="font-size:16px;line-height:1.7;color:#555;margin:0 0 24px">If you have two minutes, I\u2019d be so grateful if you left a quick review. It helps other families find trusted mortgage help.</p><table cellpadding="0" cellspacing="0" style="margin:0 0 16px"><tr><td style="background:#c9a84c;border-radius:6px;padding:14px 28px"><a href="${googleUrl}" style="color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">\u2b50 Leave a Google Review</a></td></tr></table><table cellpadding="0" cellspacing="0" style="margin:0 0 32px"><tr><td style="background:#006aff;border-radius:6px;padding:14px 28px"><a href="${zillowUrl}" style="color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">\ud83c\udfe0 Leave a Zillow Review</a></td></tr></table><p style="font-size:15px;line-height:1.7;color:#555;margin:0 0 32px">Two minutes. Your own words. That\u2019s all it takes.</p><p style="font-size:15px;line-height:1.7;color:#555;margin:0 0 32px">Praying for you and your family in the new home.</p><p style="font-size:15px;color:#333;margin:0">\u2014 Adam<br><strong>Adam Styer | Mortgage Solutions LP</strong><br>NMLS #513013</p></td></tr><tr><td style="background:#f4f4f4;padding:20px 40px;border-top:1px solid #eee"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#999">Adam Styer | Mortgage Solutions LP \u00b7 NMLS #513013 \u00b7 Austin, TX</p></td></tr></table></td></tr></table></body></html>`
+        res = await fetch(`${N8N_BASE}/${workflow.webhookPath}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: loan.borrower_email,
+            subject: 'A quick favor \u2014 can you leave a review?',
+            body: emailHtml,
+          }),
+        })
+      } else if (workflow.triggerType === 'pdf') {
         if (!file) { setError('Please select a file.'); setSending(false); return }
         const fd = new FormData()
         fd.append('file', file)
@@ -2353,7 +2379,12 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
                 {loan.property_address && <p><span className="font-medium">Property:</span> {loan.property_address}</p>}
               </div>
 
-              {workflow.triggerType === 'pdf' ? (
+              {workflow.triggerType === 'direct' ? (
+                <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 text-xs font-mono text-amber-200/80">
+                  <p>This will create an Outlook draft to <span className="text-foreground font-medium">{loan.borrower_email || '(no email)'}</span> with Google + Zillow review links.</p>
+                  <p className="mt-1.5 text-muted-foreground">You can edit the draft before sending.</p>
+                </div>
+              ) : workflow.triggerType === 'pdf' ? (
                 <div>
                   <label className="block text-xs font-mono text-muted-foreground mb-1">{workflow.triggerLabel}</label>
                   <div

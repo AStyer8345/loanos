@@ -15,15 +15,32 @@ const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_
 })
 
 async function main() {
-  const { data, error } = await sb
-    .from('activity_log')
-    .select(`
-      id, summary, subject, body_snippet, from_address, raw_payload, metadata,
-      activity_log_pii(pii_ciphertext, pii_iv, pii_tag, key_version)
-    `)
-    .limit(1000)
-  if (error || !data) throw new Error(`read: ${error?.message}`)
-  console.log(`Fetched ${data.length} rows\n`)
+  // Only check rows where at least one inline PII column is non-null.
+  // Post-deploy-#2 rows have inline = NULL by design and there's nothing to
+  // compare against — comparing them would yield spurious mismatches. The
+  // rows we actually care about (the ones migration 083 will destroy) are
+  // exactly the ones with non-null inline values.
+  //
+  // Paginate because PostgREST caps result size at ~1000 rows per request.
+  const PAGE = 1000
+  type Row = Record<string, unknown>
+  const data: Row[] = []
+  for (let offset = 0; ; offset += PAGE) {
+    const { data: page, error } = await sb
+      .from('activity_log')
+      .select(`
+        id, summary, subject, body_snippet, from_address, raw_payload, metadata,
+        activity_log_pii(pii_ciphertext, pii_iv, pii_tag, key_version)
+      `)
+      .or('summary.not.is.null,subject.not.is.null,body_snippet.not.is.null,from_address.not.is.null,raw_payload.not.is.null,metadata.not.is.null')
+      .order('created_at', { ascending: true })
+      .range(offset, offset + PAGE - 1)
+    if (error) throw new Error(`read: ${error.message}`)
+    if (!page || page.length === 0) break
+    data.push(...(page as unknown as Row[]))
+    if (page.length < PAGE) break
+  }
+  console.log(`Fetched ${data.length} rows with inline PII\n`)
 
   const decrypted = decryptActivityPii(data as unknown as Record<string, unknown>[])
 

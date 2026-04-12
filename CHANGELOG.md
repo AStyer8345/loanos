@@ -1,5 +1,30 @@
 # LoanOS Changelog
 
+## 2026-04-11 PM — Social Media: Week 21 Content Build (Posts 117-121)
+
+- **Posts inserted:** 5 drafts in `social_drafts` — LinkedIn (3), Instagram (1), Facebook (1). Avg quality 8.0/10. QA 5/5 PASS.
+- **Pillar rebalancing:** Authority was at ~47% rolling (target 30%). Zero authority posts this week → rolling authority drops to 35% (within ±5%). All four pillars within tolerance after Week 21.
+- **Post 121 (TIMELY):** FOMC reaction template for July 30 CDT. 6 `~[LIVE DATA NEEDED]` placeholders. NMLS #513013 present. Dollar sign fix applied (PATCH 204) — "$450K" confirmed in DB. Refresh agent fills July 30 AM.
+- **Post 119:** Two PATCH updates — contractions first, then structure rewrite from listicle to conversational argument. Score 7→8.
+- **BLOCKER-LOANOS-001:** Still active. LoanOS stream paused (selfies/ empty).
+
+## 2026-04-11 PM — PII Deploy #2.5: middleware matcher fix + LOANOS_AGENT_SECRET env var
+
+- **Outage discovered (during 24h bake check):** Zero `activity_log` writes for ~46h from 2026-04-10 ~13:15 UTC → 2026-04-12 ~02:30 UTC. Root cause was a three-layer silent failure stack introduced by PII Deploy #1 (`b9afb67`):
+  1. `/api/activity` was routed through `updateSession()` in `src/middleware.ts`, which unconditionally 307-redirects unauthenticated requests to `/`. The matcher exemption list was never updated alongside the cutover.
+  2. `LOANOS_AGENT_SECRET` had never been added to Vercel env — every agent-secret endpoint (`/api/activity`, `/api/contacts/web-lead`, `/api/marketing/log`, `/api/agents/daily-briefing`) has been 401-ing all n8n + Zapier traffic since inception, masked by layer #1 for `/api/activity`.
+  3. n8n HTTP Request nodes silently follow 307 and treat the returned login HTML as a `200 OK` success — no error branch ever fired. The "it's working" signal was forged.
+- **Fix shipped:**
+  - `2be3d4c` — `fix(middleware): exempt /api/activity from Supabase session redirect`. Added `api/activity` to the negative-lookahead matcher list in `src/middleware.ts`, mirroring the existing exemptions for `api/agents/.*`, `api/contacts/web-lead`, `api/marketing/log-social-post`, and `api/share/.*`. Deploy `dpl_3GqRSmkwDqgwVwtkwtTAqQhJeKbF` → READY.
+  - `LOANOS_AGENT_SECRET` added to Vercel via REST API (`production` + `preview` + `development`), value confirmed byte-identical to n8n's hardcoded bearer header (verified via `mcp__n8n-mcp__get_workflow_details` on Web Lead Automation `PiuIsQpBuydtFM4m`).
+  - `2a2c481` — `chore: redeploy to pick up LOANOS_AGENT_SECRET env var`. Deploy `dpl_HWVBZ1ynsLEFixRbcHHsx72r62JK` → READY.
+- **End-to-end verification:** Live probe `POST /api/activity?org_slug=adam-styer-mslp` with agent secret → `HTTP 200`, activity `f6399c90-c5f0-4120-8987-94e9730bb5b8`. Confirmed: (a) row present in `activity_log`, (b) companion row in `activity_log_pii` with `key_version=1` and `ct_len=314`, (c) `inline_summary IS NULL` — **first positive production proof that PII Deploy #2's stop-dual-writing works end-to-end.** Zero edge-middleware log entries for the probe, confirming the matcher exemption is hot.
+- **Data loss accepted:** ~46h gap (inbound email via n8n `qgb99Eh2ziy0INMk`, iMessage via `nccX5ml82mMGyE9T`, Arive webhooks, plus any manual dashboard actions) written off. Real loan data lives in Arive + `loans`/`contacts` tables which were unaffected; `activity_log` is audit/UX, not system of record. Pre-launch system, 2 users, not worth delaying migration 083 for replay work.
+- **Follow-up (separate issues, logged):**
+  - `ANTHROPIC_API_KEY` fallback in `user_settings.integrations` contains junk value (`len=11`, prefix `Ruthie0`) — real keys are ~100 chars starting with `sk-ant-api03-`. Breaks chat/outreach/drip paths via `getAnthropicClient()`.
+  - `docs/security/secret-rotation-runbook.md` § 3 assumes `LOANOS_AGENT_SECRET` is stored in an n8n Credential — it isn't. Web Lead Automation workflow `PiuIsQpBuydtFM4m` hardcodes it as a plaintext Authorization header parameter. Rotation playbook needs rewrite.
+  - Every agent-secret endpoint should return a distinctive error shape (`error_code`, not just `error`) so n8n error branches can actually key on auth failures instead of following redirects to HTML.
+
 ## 2026-04-11 AM — Scenarios: Scenario Naming Affordance (Tier 5 item 3)
 
 - **ScenarioCard.tsx (purchase + refi):** Gold pencil icon now appears on hover next to each scenario label — makes the existing click-to-edit affordance discoverable. Clicking opens inline input with placeholder fallback (`Option A`, etc.)

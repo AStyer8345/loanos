@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## 2026-04-12 — PII Phase 3 Complete: plaintext columns dropped + junk API key stripped
+
+- **Migration 083 applied:** `DROP COLUMN IF EXISTS` for `summary`, `subject`, `body_snippet`, `from_address`, `raw_payload`, `metadata` on `activity_log`. DO $$ post-check passed — zero PII columns remain. `activity_log` now contains only public fields; all PII lives exclusively in `activity_log_pii` (AES-256-GCM encrypted).
+- **Pre-conditions met before drop:** 1403/1403 rows had companion rows; `verify-live-decrypt.ts` passed 1402/1402 on every row with non-null inline PII; the one post-deploy-#2 probe row (`f6399c90`) correctly had NULL inline + encrypted companion only.
+- **Junk `anthropic_api_key` stripped:** `user_settings.integrations` for user `b13aa8c6` contained `Ruthie0523!` (11 chars, password pattern — not an API key). Removed via `jsonb - 'anthropic_api_key'`; Mailchimp keys in the same row preserved. `getAnthropicClient()` now correctly throws "not configured" instead of silently passing a junk value to the Anthropic API.
+- **ANTHROPIC_API_KEY still missing from Vercel** — all 13 routes using `getAnthropicClient()` remain broken until a real `sk-ant-api03-...` key is added. This is a separate issue from PII; logged in ADAM-TODO.
+
+## 2026-04-12 AM — Lead Gen: Mailchimp Customer Journey Execution Pack
+
+- **Status verification**: Confirmed Set Rate webhook never called (zero `refi_rate_update` in Supabase `activity_log` — correct column name `action`, not `action_type`). Seq C (Quarterly Rate Review) still INACTIVE via n8n MCP. 2nd consecutive AM session with same Adam-owned blockers.
+- **Pivot**: Per CONTEXT.md guidance, pivoted from Refi Watch (blocked) to Mailchimp Customer Journeys — the largest unbuilt lead gen piece.
+- **Execution pack built**: `tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md` — all 18 emails for 3 journeys pre-written with compliance-checked copy. PA (6 emails/60 days), Rate Watch (4/14), FTB DPA (8/52). Step-by-step guide + compliance checklist included. ~45 min for Adam to execute in Mailchimp UI.
+- **NotebookLM**: Staleness audit — removed stale CONTEXT.md + April 7 PM web research. Added refreshed CONTEXT.md + execution pack. Master log appended and synced to Styer Mortgage Master notebook. 50/50.
+
+## 2026-04-11 PM — Nightly NotebookLM Sync (SEO/SEM + Lead Gen)
+
+- **SEO/SEM notebook**: curated 3 stale sources (2× old audits + old CONTEXT.md); added refreshed CONTEXT.md (all 25 suburb pages ✅), 2026-04-10 on-page research (catch-up), notebooklm-audit-2026-04-11.md. Final: 50/50.
+- **Lead Gen notebook**: curated 3 stale sources (AM push file + old CONTEXT.md + old audit); added refreshed CONTEXT.md (post-migration 083), 2026-04-10-pm-web-research.md (catch-up), notebooklm-audit-2026-04-11.md. Final: 50/50.
+- **Master log**: appended seo-sem-pm + lead-gen-pm entries; Styer_Growth_Log.md re-synced to Styer Mortgage Master notebook.
+- **Digests**: both sent via Zapier (status: success) — SEO/SEM + Lead Gen digests to adam@thestyerteam.com.
+
 ## 2026-04-11 PM — Social Media: Week 21 Content Build (Posts 117-121)
 
 - **Posts inserted:** 5 drafts in `social_drafts` — LinkedIn (3), Instagram (1), Facebook (1). Avg quality 8.0/10. QA 5/5 PASS.
@@ -2612,3 +2633,11 @@ Arive (loan event)
 - Session priorities updated: Week 16 and 17 were already complete — this session correctly identified Week 18 as next build target
 - Posts 29+30 Liberation Day: still sitting past-due — deadline to decide (archive/convert/publish-as-is) is April 28
 - LoanOS pool: 6 entries, 0 ready — stream fully blocked pending selfies + pool replenishment
+
+## 2026-04-12 AM — Social Media: GBP Scan (no new content) + Week 22 Build (Posts 122-126)
+
+- **Step 1B scan:** No new content in rates/, blog/, or realtor-updates/ vs. tracker. GBP distribution skipped.
+- **Week 22 built (Posts 122-126, Aug 5-11):** 2 LI + 1 IG + 2 FB. Avg quality 8.0/10. Reviewer APPROVED, QA 5/5 PASS.
+- **Pillar correction continues:** 0 authority posts — rolling authority drops from 45% toward 30% target.
+- **Post 126 (TIMELY):** July Jobs Report template for Aug 11 publish. 3 ~[LIVE DATA NEEDED] placeholders. Refresh fills Aug 7 AM after BLS release. Adam must approve in dashboard.
+- **Lane 2 CHANGELOG:** Scenario naming feature → PROPOSED-03 written to loanos-pool-proposed.md (needs Adam review).

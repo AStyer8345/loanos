@@ -80,10 +80,12 @@ onboarding of additional LOs.
   - Dashboard page NOT changed (only reads non-PII: action, loan_id, occurred_at)
 - **Phase 3 DONE (2026-04-05):** Backfill script run against production.
   1,094 rows encrypted into `activity_log_pii` companion table (1:1 match verified).
-- **Remaining:**
-  - Phase 4: Migration 080 — DROP plaintext PII columns from activity_log
-    (summary, metadata, subject, body_snippet, from_address, raw_payload)
-- **Effort:** Phase 1-3 complete. Phase 4 is a single migration.
+- **Phase 4 DONE (2026-04-12):** Migration 083 applied — `DROP COLUMN IF EXISTS`
+  for all 6 plaintext PII columns. DO $$ post-check passed (zero PII columns
+  remain in `activity_log`). `activity_log` now contains only public fields;
+  all PII lives exclusively in `activity_log_pii` (AES-256-GCM, key_version=1).
+  Pre-conditions: 1403/1403 companion rows, 1402/1402 verify-live-decrypt match.
+- **Effort:** Complete. All 4 phases shipped. § 3 closed.
 
 ### 4. ~~Admin-route authorization audit~~ ✅ DONE (2026-04-05)
 - Audited all 5 existing `/api/admin/*` routes — every handler calls `requireAdmin()` on line 1. Clean.

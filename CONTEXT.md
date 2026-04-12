@@ -30,7 +30,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 - Security audit: 3 critical + 9 medium gaps identified 2026-04-05
   - Critical #1 Arive webhook multi-tenant — scaffolded (Zapier middleman, shadow mode)
   - Critical #2 Rate limiting — done (web-lead 30/min, share 60/min + 30/token)
-  - Critical #3 PII encryption — Phase 1+2 done (companion table + AES-256-GCM + server read path). Phase 3 (backfill + column drop) pending.
+  - Critical #3 PII encryption — DONE. Companion table + AES-256-GCM + server read path + backfill (1402/1402) + migration 083 column drop. All 6 plaintext columns dropped 2026-04-12.
   - Critical #4 Admin route audit — done (middleware + per-route gates)
   - Medium: CORS/CSP done, idempotency done, secret rotation runbook done, 3 items remaining (#5 field-level encryption, #9 admin action log, #10 sys vs org admin)
 
@@ -38,7 +38,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 1. ~~`extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`~~ — DONE. Function implemented with `loanOfficerEmail` field (confirmed from 2026-04-04 Zapier run on loan 15755447). Verified by daily briefing agent 2026-04-09.
 2. ~~Apply migration 075 (`los_integrations`) to Supabase~~ — done 2026-04-08
-3. Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns
+3. ~~Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns~~ — DONE 2026-04-12
 4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`
 
 ## Recent Fixes (2026-04-09)
@@ -89,21 +89,21 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-11 AM — FHA blog (2026-04-10) distributed: GBP auto-published via Publer, FB/IG/LI drafted to social_drafts. Week 20 built (Posts 112-116, July 22-28): 2 LI + 2 IG + 1 FB, avg quality 7.8/10, all approved, QA 5/5 PASS. Pillar: RT(2)+Personal(2)+Education(1). Post 115 picks up FHA blog Tier 2 carousel (PMI vs MIP). content-repost-queue FHA entry → Completed.
+**Last worked on:** 2026-04-12 AM — Week 22 built (Posts 122-126, Aug 5-11): 2 LI + 1 IG + 2 FB. Avg quality 8.0/10. All APPROVED. QA 5/5 PASS. Zero authority posts — pillar correction continues (authority 45% → ~30% rolling after window shifts). Post 126 TIMELY July Jobs template: 3 placeholders, NMLS #513013 present, Refresh fills Aug 7 AM. BLOCKER-LOANOS-001 still active.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream still paused). Posts 29+30 Liberation Day: decision due April 28 (17 days). Post 39: Adam approve before April 15 (4 days).
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: Adam approve before April 15 (3 days remaining). Post 121 TIMELY: Adam approve after Refresh fills July 30 AM, before 2:00 PM CDT. Post 126 TIMELY: Adam approve after Refresh fills Aug 7 AM, before 2:00 PM CDT Aug 11. Posts 29+30 Liberation Day: decision due April 28 (16 days).
 
-**What's next:** Week 21 build (Posts 117-121, July 29 – Aug 4). Consider 1 TIMELY for Fed decision (July 29-30 FOMC). Adam: upload selfies, approve Post 39, decide Posts 29+30 by April 18.
+**What's next:** Week 23 build (Posts 127-131, Aug 12-18). Authority pillar should be near target by then — check rolling window before planning. BLOCKER-LOANOS-001 gate check each AM session. Post 39 approval: April 15 hard deadline.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-11 AM — Seq D org_id bug fixed (all 3 nodes corrected via REST API). End-to-end verification: Set Rate webhook never called — zero `refi_rate_update` entries in activity_log. Seq A active but idle (no rate to check). Seq C still INACTIVE (Adam hasn't activated yet).
+**Last worked on:** 2026-04-12 AM — Verified Set Rate still never called (zero `refi_rate_update` in activity_log). Seq C still INACTIVE (Adam). Pivoted to Mailchimp Customer Journeys. Built comprehensive Execution Pack: all 18 emails pre-written for 3 journeys (PA, Rate Watch, FTB DPA). Adam needs ~45 min in Mailchimp UI to activate. Build report: `tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md`.
 
-**Active blockers:** Set Rate webhook never called — Seq A won't fire until Adam POSTs current rate (`curl -X POST .../webhook/refi-watch-set-rate -d '{"rate": 6.39}'`). Seq C still INACTIVE — Adam must connect Outlook credential + activate.
+**Active blockers:** (1) Set Rate webhook never called — Seq A idle. (2) Seq C INACTIVE — Adam must connect Outlook + activate. (3) Mailchimp journeys not built — Adam must execute in Mailchimp UI (~45 min, all copy ready in execution pack). (4) DPA Guide PDF not hosted — needed for FTB DPA Journey Email 1.
 
-**What's next:** Confirm Set Rate called next session (check activity_log). Seq C activation check. If Set Rate + Seq C still unresolved after 2 more sessions, consider pivoting to Mailchimp Customer Journeys (largest unbuilt lead gen piece).
+**What's next:** Verify Adam progress on Set Rate + Mailchimp journeys. Build weekly Friday rate email template. Research post-Calendly-booking workflow (confirm/reminder n8n).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
@@ -126,11 +126,11 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-11 — Day 17 standup. Vercel READY (dpl_2BWFuqf8U8u8DD5ooswbhRoNMgHr). PII Deploy #2 shipped: activity_log no longer receives inline PII; verify-live-decrypt helper added; Publer publish backlog closed. n8n: 26/29 active, 3 intentionally inactive. CD & Contract Extractor still INACTIVE (GOALS.md #2 unstarted). PII backfill still not run.
+**Last worked on:** 2026-04-12 — Day 18 standup. Vercel READY (dpl_6UR5Dh4TUNgAcMMZbSGztRpenUoK). PII Phase 3 COMPLETE: backfill ran, verify-live-decrypt 1402/1402 passed, migration 083 deployed, plaintext columns dropped. Critical #3 CLOSED. ANTHROPIC_API_KEY set in Vercel env. Junk API key stripped from user_settings. n8n: 26/29 active, 3 intentionally inactive.
 
-**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, zero progress. PII backfill not run (blocks column drop + Critical #3 close). Set Rate webhook never called (Seq A idle). Adam: Phase 2 confirmation, selfies upload, Seq C activation, Post 39 approval (due April 15).
+**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, 3 weeks zero progress. Set Rate webhook never called (Seq A idle). Adam: Outlook connect → Seq C; Post 39 approval due April 15 (3 days); Phase 2 confirmation (blocks Phase 3+).
 
-**What's next:** PII Phase 3 (run backfill → verify-live-decrypt → migration 083 column drop). Then activate CD & Contract Extractor. Adam must confirm Phase 2 to unblock Renovation Phase 3.
+**What's next:** CD & Contract Extractor activation (GOALS.md #2, blocked on Adam's Outlook). Renovation Phase 3 (Follow-Up List) once Phase 2 confirmed. Marketing demo data cleanup — zero progress, blocks May 1 launch page.
 
 ## Rules For AI Sessions
 

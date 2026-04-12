@@ -26,6 +26,28 @@
 
 ---
 
+## 2026-04-12 — Day 18 of 26 (14 days to launch)
+
+**Days to launch:** 14
+
+**Yesterday shipped:**
+- `pii`: PII Phase 3 COMPLETE — backfill-activity-pii.ts ran, verify-live-decrypt passed 1402/1402 rows, migration 083 deployed. All 6 plaintext PII columns dropped from `activity_log`. Critical #3 CLOSED.
+- `chore`: ANTHROPIC_API_KEY set in Vercel env and redeployed (was never set — PA/CD extraction endpoints were broken at the root).
+- `docs`: Junk anthropic_api_key (Ruthie0523!) stripped from `user_settings` table.
+
+**Blockers:**
+- GOALS.md #2 (email automation) — `HkLjsnnhT5MgrX5H` (CD & Contract Extractor) still INACTIVE. 3 weeks zero progress. Last major automation piece before launch.
+- Set Rate webhook never called — Seq A (Refi Watch) active but idle since inception.
+- Adam: Connect Outlook credential → activate Seq C; Post 39 approval due April 15 (3 days); Phase 2 confirmation (blocks Renovation Phase 3+).
+
+**Today's focus:** Activate CD & Contract Extractor (GOALS.md #2) — blocked on Adam connecting Outlook. In parallel: Renovation Phase 3 (Follow-Up List) if Phase 2 confirmation lands. Marketing demo data cleanup has zero progress — blocks May 1 screenshots.
+
+**Risk watch:** 14 days out. Email automation completely unstarted for 3 weeks. Renovation Phases 3–6 not started. Adam manual queue rotating for 7+ sessions (Set Rate, Outlook/Seq C, Phase 2, selfies, Post 39). Marketing site demo data zero progress (blocks public launch page). Timeline is critical — needs Adam to unblock this weekend.
+
+**Open audit findings:** 6 CRITICAL + 2 HIGH open per SECURITY-AUDIT-2026-04-05.md (T-1 activity_log INSERT, T-2 RLS disabled 6 tables, T-3 USING(true) 3 tables, A-1 legacy webhook scaffolded, A-2 daily-briefing first-org, A-3 web-lead system user; T-4/T-5 HIGH milestone + marketing scoping). Tracker: Critical #3 CLOSED today, #2 and #4 done, #1 scaffolded. Mediums #5/9/10 still open.
+
+---
+
 ## 2026-04-10
 
 **Days to launch:** 16

@@ -233,7 +233,7 @@ export async function processAriveWebhook(
       email: (email as string).toLowerCase().trim(),
       first_name: (n(body.borrowerFirstName) as string) || '',
       last_name: (n(body.borrowerLastName) as string) || '',
-      phone: n(body.borrowerPhone),
+      phone: n(body.borrowerPhone) ?? n(body['loanBorrower1_mobilePhone10digit']),
       group_tag: 'Client',
       stage: 'Lead',
       source: 'arive_webhook',

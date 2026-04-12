@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-12 PM — Fix: Trigger crash + iMessage pipeline silent failure
+
+- **Migration 085 — `enrich_activity_log_contact()` trigger fix:** Migration 083 dropped `from_address`/`to_address` from `activity_log`, but the `enrich_activity_log_contact()` trigger still referenced `NEW.from_address`. Every `/api/activity` POST returned 500 ("record new has no field from_address") since the column drop. Additional bug: NULL logic in the guard clause — `NULL NOT IN (...)` returns NULL, not TRUE, so the guard failed open for non-email rows. Fix: replaced trigger body with no-op `RETURN NEW` (email enrichment is obsolete post-PII-encryption).
+- **n8n iMessage workflow (`nccX5ml82mMGyE9T`) — 2 silent failure fixes:**
+  1. "Find Active Loan" HTTP Request node returned 0 output items when Supabase returned `[]` (contacts without active loans), killing all downstream nodes. Replaced with Code node that always returns 1 item.
+  2. "Log and Update Records" Code node used `this.helpers.httpRequest()` which does NOT throw on non-2xx responses. Added `returnFullResponse: true` + HTTP status checking.
+- **Replayed 2 lost iMessages:** Thomas Brown (re: Jack Harris price range) + Britney Jo Styer. Both now in `activity_log` with `event_type = 'imessage_received'`.
+- **Blast radius investigation:** 1 inbound email today succeeded (02:50 UTC). No lost email writes detected.
+- **Build:** ✅ PASS | Commit: pending | Vercel: pending
+
 ## 2026-04-12 AM — Scenarios: Comparison Table on Share Page (Tier 5 item 2)
 
 - **ScenarioComparisonTable.tsx** (new component): Persistent side-by-side data table rendered below OptionCardsGrid on multi-scenario share pages. Always visible — no accordion tap required. Columns: scenario label, purchase price (conditional), loan amount, rate, APR, monthly payment (P&I breakdown), cash to close, total 5-yr interest. Conditional rows appear only when at least one scenario has a non-zero value (property tax, homeowners insurance, HOA, PMI, monthly savings vs current).

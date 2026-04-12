@@ -41,8 +41,10 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 3. ~~Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns~~ — DONE 2026-04-12
 4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`
 
-## Recent Fixes (2026-04-09)
+## Recent Fixes (2026-04-12)
 
+- **Trigger crash fix** (2026-04-12 PM): Migration 085 — `enrich_activity_log_contact()` referenced dropped columns (`from_address`, `to_address`), breaking ALL `/api/activity` POSTs since migration 083. Replaced with no-op `RETURN NEW`. Also fixed NULL logic bug in guard clause.
+- **iMessage pipeline silent failure** (2026-04-12 PM): n8n workflow `nccX5ml82mMGyE9T` had 2 silent failure modes — "Find Active Loan" HTTP Request returning 0 items (killing downstream), and Code node not checking HTTP status on POST. Both fixed. 2 lost iMessages replayed.
 - **Notes + Activity separation** (2026-04-12): Migration 084 — dedicated `notes` table, `event_type` column on `activity_log`, 19 notes migrated, 1404 event_types backfilled. Loan + contact detail pages now have separate Notes and Activity tabs. Notes: create/edit/soft-delete. Activity: read-only timeline with event-type icons (10 categories). iMessage events render with match_method badges. Unmatched page extended to include iMessages.
 - **iMessage integration** (GOALS.md #4): n8n workflow `nccX5ml82mMGyE9T` updated — writes `contact_id`, `loan_id`, `occurred_at` to columns (was metadata-only). 126 entries backfilled. Blue icon + snippet in UI.
 - **Inbound email rendering**: `email.received` entries show From + Subject with green icon in activity feed.

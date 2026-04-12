@@ -44,6 +44,7 @@ const EVENT_STYLES: Record<string, EventStyle> = {
   document_uploaded:    { icon: FileText,        color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Document' },
   note_added:           { icon: StickyNote,      color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', label: 'Note' },
   imessage_received:    { icon: MessageSquare,   color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', label: 'iMessage' },
+  imessage_sent:        { icon: MessageSquare,   color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  label: 'iMessage Sent' },
   communication_logged: { icon: Phone,           color: '#10b981', bg: 'rgba(16,185,129,0.12)', label: 'Communication' },
   system_error:         { icon: AlertTriangle,   color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  label: 'Error' },
   record_changed:       { icon: RefreshCw,       color: '#64748b', bg: 'rgba(100,116,139,0.12)', label: 'Record Updated' },
@@ -83,6 +84,7 @@ function actionLabel(action: string | null, eventType: string | null): string {
     'document.unmatched': 'Unmatched document',
     'automation_fired': 'Automation fired',
     'imessage.received': 'iMessage received',
+    'imessage.sent': 'iMessage sent',
     'communication.logged': 'Communication logged',
     'loan_created': 'Loan created',
     'contact_updated': 'Contact updated',
@@ -119,7 +121,7 @@ export default function ActivityTimelineItem({ entry, showLoanLabel }: ActivityT
   const style = getStyle(entry.event_type)
   const Icon = style.icon
   const meta = entry.metadata ?? {}
-  const isIMessage = entry.event_type === 'imessage_received' || entry.action === 'imessage.received'
+  const isIMessage = entry.event_type === 'imessage_received' || entry.event_type === 'imessage_sent' || entry.action === 'imessage.received' || entry.action === 'imessage.sent'
 
   return (
     <div className="flex gap-3 py-2 group">

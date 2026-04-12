@@ -61,7 +61,6 @@ def get_new_messages(last_rowid):
         LEFT JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
         LEFT JOIN chat c ON cmj.chat_id = c.ROWID
         WHERE m.ROWID > ?
-          AND m.is_from_me = 0
           AND m.text IS NOT NULL
           AND m.text != ''
         ORDER BY m.ROWID ASC

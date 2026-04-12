@@ -517,3 +517,47 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Scenario naming (Tier 5 item 3) — ✅ COMPLETE this session
 
+---
+
+## AM Session — 2026-04-12 (scenarios-am)
+
+**What was built:**
+- Persistent Scenario Comparison Table (`src/components/share/ScenarioComparisonTable.tsx`, `src/components/share/SharePageLayout.tsx`)
+  - `ScenarioComparisonTable.tsx`: new component — full side-by-side data table rendered directly below OptionCardsGrid. Always visible, no accordion tap required. Rows: purchase price (purchase only), loan amount, rate, APR, monthly payment (bold, gold for Commonly Chosen), P&I, property tax (conditional), insurance (conditional), HOA (conditional), PMI (conditional), cash to close (bold), total interest, monthly savings (conditional, gold).
+  - Commonly Chosen column: gold header + ★ badge + gold column background on bold rows — mirrors OptionCard and PDF treatment exactly.
+  - Horizontal scroll on mobile (`overflow-x-auto`), `minWidth` set to `rows.length * 150 + 160` so table never collapses.
+  - Only renders when `rows.length >= 2` — single-scenario pages unaffected.
+  - `SharePageLayout.tsx`: added `<ScenarioComparisonTable>` import + section between OptionCardsGrid and CashToCloseBreakdown, guarded by `hasMultipleOptions`.
+  - `DetailAccordion` left in place — still shows horizon analysis (5yr/15yr projections). The "Full Scenario Comparison" accordion item is now redundant but not removed (keeping it avoids regressions for any link that expects it).
+
+**Pre-existing TypeScript build fixes (required to unblock build):**
+- `ContactRecordView.tsx` — removed unused `ActivityTimelineItem` + `TimelineActivityRow` import
+- `loans/[id]/page.tsx` — added `event_type: null` to 2 `ActivityRow` object literals + 3 `emailAsActivity` map objects
+- `emails/unmatched/page.tsx` — removed unused `iMessages`/`messageFilter` state vars and `MessageSquare` icon import
+- `notes/route.ts` — replaced `.catch()` on Supabase builder with `try/catch`
+- `ActivityTimelineItem.tsx` — changed `meta.match_method &&` to `!!meta.match_method &&` (unknown not assignable to ReactNode)
+
+**MC gap closed:** Borrowers can now compare all numbers side by side in a single persistent view — no accordion, no hidden tap. Before: full comparison required discovering the "Detailed Comparison" section and expanding "Full Scenario Comparison." After: the table is the first thing borrowers see after the option cards. Matches Mortgage Coach's default presentation layout.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `74c9d52` — pushed to main
+**Vercel:** `dpl_D12nct9Jp3tbJ7jV8NTAoRv2TZLB` — BUILDING at session close
+
+**Files touched:**
+- `src/components/share/ScenarioComparisonTable.tsx` (new)
+- `src/components/share/SharePageLayout.tsx`
+- `src/components/activity/ActivityTimelineItem.tsx` (TypeScript fix)
+- `src/app/dashboard/contacts/[id]/ContactRecordView.tsx` (TypeScript fix)
+- `src/app/dashboard/loans/[id]/page.tsx` (TypeScript fix)
+- `src/app/dashboard/emails/unmatched/page.tsx` (TypeScript fix)
+- `src/app/api/notes/route.ts` (TypeScript fix)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Refi builder: current loan pre-fill (Tier 5 item 4) — auto-populate current rate + remaining balance + months remaining from loan record when entering refi mode via `?loan_id=`. `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` — read `loan.interest_rate`, `loan.original_balance`, `loan.loan_term`, `loan.close_date` from the loan record and pre-fill the refi form inputs.
+2. Social proof block (Tier 5 item 5) — "X borrowers in Austin chose a 30yr fixed this month" — illustrative, compliance-safe, share page only.
+3. DetailAccordion cleanup — consider removing the redundant "Full Scenario Comparison" accordion item now that the persistent table covers it.
+
+**Domain queue updates:**
+- Comparison table on share page (Tier 5 item 2) — ✅ COMPLETE this session
+

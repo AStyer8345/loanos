@@ -43,7 +43,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Recent Fixes (2026-04-09)
 
-- **Activity log + notes** (GOALS.md #1): Fully working. Migration 081 (`contact_activity`) live with RLS. Duplicate entries fixed — `updateLastTouch()` echo actions filtered from system feed.
+- **Notes + Activity separation** (2026-04-12): Migration 084 — dedicated `notes` table, `event_type` column on `activity_log`, 19 notes migrated, 1404 event_types backfilled. Loan + contact detail pages now have separate Notes and Activity tabs. Notes: create/edit/soft-delete. Activity: read-only timeline with event-type icons (10 categories). iMessage events render with match_method badges. Unmatched page extended to include iMessages.
 - **iMessage integration** (GOALS.md #4): n8n workflow `nccX5ml82mMGyE9T` updated — writes `contact_id`, `loan_id`, `occurred_at` to columns (was metadata-only). 126 entries backfilled. Blue icon + snippet in UI.
 - **Inbound email rendering**: `email.received` entries show From + Subject with green icon in activity feed.
 - **Migration 075 (`los_integrations`)**: Applied to live Supabase (2026-04-08).
@@ -66,7 +66,8 @@ See `memory/tools/n8n.md` for full index. Key ones:
 - **Tenant isolation:** `org_id` on every table, RLS policies, `get_my_organization_id()` SECURITY DEFINER helper
 - **Auth:** Supabase Auth (email/password), middleware gates `/dashboard/*`
 - **Webhook security:** 3-layer (slug + hashed secret + payload allowlist), shadow/enforce mode
-- **PII:** Dual-write to `activity_log` (inline) + `activity_log_pii` (AES-256-GCM encrypted companion). Read path decrypts server-side via `GET /api/activity`.
+- **PII:** `activity_log_pii` companion (AES-256-GCM). Read path decrypts server-side via `GET /api/activity`. Plaintext columns dropped (migration 083).
+- **Notes:** Dedicated `notes` table with RLS. API: `/api/notes` (POST/GET), `/api/notes/[id]` (PATCH/DELETE soft-delete). Components: `NoteInput`, `NoteCard`.
 - **Share page:** `src/components/share/` — 12 borrower-facing components. PDF = share page + `@media print` + `?print=1`.
 - **AI chat:** Multi-round tool use (max 4 rounds), tools: lender DB, mortgage knowledge base, contact lookup, loan lookup
 
@@ -117,11 +118,11 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-11 AM — Scenario naming affordance. Both ScenarioCard variants now show a gold pencil icon on hover next to the label. Click opens inline edit input with placeholder fallback. Label saves to `scenarios_data` JSON and renders on share page + PDF column headers (already wired). Tier 5 item 3 COMPLETE. Commit 7648a9a | Vercel dpl_FpVDzNMBG1H9T4hBSsWNurM3s43U → READY.
+**Last worked on:** 2026-04-12 AM — Comparison table on share page (Tier 5 item 2). `ScenarioComparisonTable.tsx` — persistent side-by-side data table below OptionCardsGrid on multi-scenario share pages. Always visible (no accordion tap required). Commonly Chosen column gets gold header treatment. Conditional rows (tax, insurance, HOA, PMI, savings) show only when non-zero. Horizontally scrollable on mobile. Also fixed 4 pre-existing TypeScript/ESLint build errors (unused imports, missing event_type fields, .catch() on Supabase builder, unknown ReactNode). Notes components (NoteCard, NoteInput) committed in follow-up fix commit. Commits 74c9d52 + c0d8b11 | Vercel dpl_H385sDmxk1fdNTZFy84pCPQDHBD3 → READY.
 
 **Active blockers:** None.
 
-**What's next:** Comparison table on share page (Tier 5 item 2) — persistent side-by-side data table below OptionCardsGrid. Refi builder pre-fill (Tier 5 item 4) also queued.
+**What's next:** Refi builder current loan pre-fill (Tier 5 item 4) — auto-populate current rate + remaining balance + months remaining when entering refi mode from a loan record. Social proof block (Tier 5 item 5) also queued.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->

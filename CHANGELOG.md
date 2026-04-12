@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## 2026-04-12 AM — Scenarios: Comparison Table on Share Page (Tier 5 item 2)
+
+- **ScenarioComparisonTable.tsx** (new component): Persistent side-by-side data table rendered below OptionCardsGrid on multi-scenario share pages. Always visible — no accordion tap required. Columns: scenario label, purchase price (conditional), loan amount, rate, APR, monthly payment (P&I breakdown), cash to close, total 5-yr interest. Conditional rows appear only when at least one scenario has a non-zero value (property tax, homeowners insurance, HOA, PMI, monthly savings vs current).
+- **"Commonly Chosen" column treatment:** Matching the OptionCard and PDF badge — gold header label with ★, gold-tinted column background, bold monthly payment row in gold.
+- **Mobile-first:** `overflow-x-auto` container + `minWidth: rows.length * 150 + 160` ensures horizontal scroll at 390px without breaking layout.
+- **SharePageLayout.tsx:** Added `ScenarioComparisonTable` between OptionCardsGrid and CashToCloseBreakdown sections; hidden for single-scenario views.
+- **Pre-existing build error fixes (4):** Removed unused `ActivityTimelineItem` imports (ContactRecordView.tsx, loans/page.tsx); added `event_type: null` to 5 ActivityRow object literals (loans/page.tsx); replaced `.catch()` on Supabase builder with `try/catch` (notes/route.ts); fixed `unknown` ReactNode render with `!!` coercion (ActivityTimelineItem.tsx); removed unused `MessageSquare` icon import (emails/unmatched/page.tsx).
+- **Notes components committed:** `NoteCard.tsx` and `NoteInput.tsx` were locally present but never in git — committed in follow-up `c0d8b11` alongside the migration 084 notes+activity separation work.
+- **Build:** ✅ PASS | Commits: `74c9d52` (comparison table) + `c0d8b11` (notes fix) | Vercel: `dpl_H385sDmxk1fdNTZFy84pCPQDHBD3` → READY
+- **MC gap closed:** Borrowers can now compare all scenario numbers side-by-side in a persistent table — no longer need to tap through the Detail accordion. Matches Mortgage Coach's comparison view.
+
+## 2026-04-12 — Notes + Activity Log Separation (Migration 084)
+
+- **Migration 084 applied:** Created `notes` table (id, organization_id, contact_id, loan_id, content, created_by, timestamps, soft-delete). Added `event_type` column to `activity_log`. Added `migrated` flag to `contact_activity`. Backfilled 1404 event_type values from 30+ action strings into 10 categories. Migrated 19 existing note rows from `contact_activity`. RLS policies: SELECT/INSERT/UPDATE for org members, DELETE for owner/admin only.
+- **API routes:** `POST/GET /api/notes` (create + list by contact/loan), `PATCH/DELETE /api/notes/[id]` (edit + soft-delete). Notes log `note_added` to activity_log via `writeActivityWithPii`. Updated `GET /api/activity` to include `event_type` in default columns.
+- **UI — Loan detail:** New "Notes" tab with NoteInput + NoteCard list. Existing Activity tab preserved.
+- **UI — Contact detail:** Notes/Activity tab switcher in right panel. Activity shows combined events across all loans with loan reference labels. Notes scoped to contact.
+- **UI — Unmatched page:** Extended to include unmatched iMessages alongside unmatched emails. Filter tabs (All/Emails/iMessages) with counts.
+- **Components:** `NoteInput` (textarea + Ctrl/Cmd+Enter), `NoteCard` (inline edit, soft-delete, edited indicator), `ActivityTimelineItem` (10 event-type icons/colors, iMessage match_method badges).
+- **Types:** `event_type` added to `ActivityPublicFields`, `database.types.ts` updated with `notes` table + `event_type` column.
+
 ## 2026-04-12 — PII Phase 3 Complete: plaintext columns dropped + junk API key stripped
 
 - **Migration 083 applied:** `DROP COLUMN IF EXISTS` for `summary`, `subject`, `body_snippet`, `from_address`, `raw_payload`, `metadata` on `activity_log`. DO $$ post-check passed — zero PII columns remain. `activity_log` now contains only public fields; all PII lives exclusively in `activity_log_pii` (AES-256-GCM encrypted).

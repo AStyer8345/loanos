@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 //   include_joins — "contacts,loans" to include FK joins
 
 const MAX_LIMIT = 200
-const DEFAULT_COLUMNS = 'id, created_at, action, entity_type, entity_id, type, occurred_at, contact_id, loan_id, external_id, dismissed'
+const DEFAULT_COLUMNS = 'id, created_at, action, entity_type, entity_id, type, event_type, occurred_at, contact_id, loan_id, external_id, dismissed'
 
 // Field names that live in activity_log_pii (never in activity_log).
 // Callers can still ask for these via `columns=...` — the route strips them

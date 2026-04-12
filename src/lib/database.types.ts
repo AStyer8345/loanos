@@ -23,6 +23,7 @@ export type Database = {
           dismissed: boolean | null
           entity_id: string | null
           entity_type: string | null
+          event_type: string | null
           external_id: string | null
           from_address: string | null
           id: string
@@ -45,6 +46,7 @@ export type Database = {
           dismissed?: boolean | null
           entity_id?: string | null
           entity_type?: string | null
+          event_type?: string | null
           external_id?: string | null
           from_address?: string | null
           id?: string
@@ -67,6 +69,7 @@ export type Database = {
           dismissed?: boolean | null
           entity_id?: string | null
           entity_type?: string | null
+          event_type?: string | null
           external_id?: string | null
           from_address?: string | null
           id?: string
@@ -366,6 +369,7 @@ export type Database = {
           id: string
           loan_id: string | null
           logged_at: string | null
+          migrated: boolean | null
           notes: string | null
           organization_id: string
           user_id: string | null
@@ -377,6 +381,7 @@ export type Database = {
           id?: string
           loan_id?: string | null
           logged_at?: string | null
+          migrated?: boolean | null
           notes?: string | null
           organization_id: string
           user_id?: string | null
@@ -388,6 +393,7 @@ export type Database = {
           id?: string
           loan_id?: string | null
           logged_at?: string | null
+          migrated?: boolean | null
           notes?: string | null
           organization_id?: string
           user_id?: string | null
@@ -2001,6 +2007,64 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: true
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          id: string
+          organization_id: string
+          contact_id: string | null
+          loan_id: string | null
+          content: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          contact_id?: string | null
+          loan_id?: string | null
+          content: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          contact_id?: string | null
+          loan_id?: string | null
+          content?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
             referencedColumns: ["id"]
           },
         ]

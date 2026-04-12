@@ -35,6 +35,7 @@ export interface ActivityPublicFields {
   user_id?: string | null
   organization_id: string
   type?: string | null
+  event_type?: string | null
   occurred_at?: string | null
   external_id?: string | null
   dismissed?: boolean

@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import { useOrg } from '@/components/OrgProvider'
 import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow, type DripEnrollment } from './ContactRecordView'
+import type { NoteRow } from '@/components/notes/NoteInput'
 
 export default function ContactRecordPage() {
   const params = useParams()
@@ -28,6 +29,7 @@ export default function ContactRecordPage() {
   const [referredLoans, setReferredLoans] = useState<ContactLoan[]>([])
   const [coBorrowerLoans, setCoBorrowerLoans] = useState<ContactLoan[]>([])
   const [dripEnrollments, setDripEnrollments] = useState<DripEnrollment[]>([])
+  const [contactNotes, setContactNotes] = useState<NoteRow[]>([])
 
   const supabase = createClient()
 
@@ -120,7 +122,7 @@ export default function ContactRecordPage() {
 
   const fetchActivity = useCallback(async () => {
     // 1. Activity directly linked to this contact (via server-side PII decryption)
-    const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
+    const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,event_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
     const contactRows: ActivityEntry[] = contactRes.ok ? await contactRes.json() : []
 
     const merged: ActivityEntry[] = contactRows
@@ -136,7 +138,7 @@ export default function ContactRecordPage() {
 
     if (linkedLoans && linkedLoans.length > 0) {
       const loanIds = linkedLoans.map((l: { id: string }) => l.id)
-      const loanRes = await fetch(`/api/activity?loan_id=${loanIds.join(',')}&limit=200&columns=id,created_at,action,entity_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
+      const loanRes = await fetch(`/api/activity?loan_id=${loanIds.join(',')}&limit=200&columns=id,created_at,action,entity_type,event_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
       const loanRows: ActivityEntry[] = loanRes.ok ? await loanRes.json() : []
 
       for (const row of loanRows) {
@@ -163,6 +165,14 @@ export default function ContactRecordPage() {
     setContactActivity((data ?? []) as ContactActivityRow[])
   }, [id, supabase])
 
+  const fetchNotes = useCallback(async () => {
+    const res = await fetch(`/api/notes?contact_id=${id}`)
+    if (res.ok) {
+      const data = await res.json()
+      setContactNotes(data as NoteRow[])
+    }
+  }, [id])
+
   const resolveReferrer = useCallback(async (referredBy: string | null) => {
     if (!referredBy?.trim()) { setReferrerContactId(null); return }
     if (!organizationId) return
@@ -187,7 +197,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(), fetchContactActivity(), fetchDripEnrollments()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(), fetchContactActivity(), fetchNotes(), fetchDripEnrollments()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -218,7 +228,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchDripEnrollments, resolveReferrer])
+  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchNotes, fetchDripEnrollments, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -349,6 +359,9 @@ export default function ContactRecordPage() {
       dripEnrollments={dripEnrollments}
       onToggleDrip={handleToggleDrip}
       onCancelDrip={handleCancelDrip}
+      contactNotes={contactNotes}
+      setContactNotes={setContactNotes}
+      onRefreshNotes={fetchNotes}
     />
   )
 }

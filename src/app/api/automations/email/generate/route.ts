@@ -7,7 +7,7 @@ import { logEmailDraft } from '@/lib/supabase/logEmailDraft'
 // No hardcoded fallback — if N8N_WEBHOOK_BASE is missing in env, the request
 // must fail closed rather than silently routing every tenant's automations
 // through Adam's personal n8n instance. Each deployment owns its own base URL.
-const N8N_BASE = process.env.N8N_WEBHOOK_BASE ?? ''
+const N8N_BASE = process.env.N8N_WEBHOOK_BASE || process.env.N8N_WEBHOOK_BASE_URL || ''
 
 export async function POST(req: NextRequest) {
   let userId: string

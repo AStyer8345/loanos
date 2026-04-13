@@ -27,6 +27,7 @@ const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? ''
 
 interface Loan {
   id: string
+  organization_id: string
   // Identity
   loan_name: string | null
   loan_number: string | null
@@ -2299,8 +2300,10 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
     try {
       const loanContext = {
         loan_id: loan.id,
+        organization_id: loan.organization_id,
         loan_name: loan.loan_name,
         borrower_name: displayName,
+        borrower_email: loan.borrower_email,
         loan_amount: loan.loan_amount,
         property_address: [loan.property_address, loan.property_city, loan.property_state].filter(Boolean).join(', '),
         closing_date: loan.closing_date,
@@ -2343,11 +2346,16 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         })
       }
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '')
+        throw new Error(`n8n returned ${res.status}: ${errText.substring(0, 200) || 'no details'}`)
+      }
       setDone(true)
       setTimeout(onSuccess, 1200)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Request failed')
+      const msg = e instanceof Error ? e.message : 'Request failed'
+      console.error('[LoanTriggerModal]', workflow.name, msg)
+      setError(msg === 'Failed to fetch' ? 'Could not reach n8n — check your connection or try again' : msg)
     } finally {
       setSending(false)
     }

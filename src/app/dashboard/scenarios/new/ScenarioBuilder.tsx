@@ -99,6 +99,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
   const [borrowerName, setBorrowerName] = useState(initialState?.borrowerName ?? '')
   const [propertyAddress, setPropertyAddress] = useState(initialState?.propertyAddress ?? '')
   const [propertyValue, setPropertyValue] = useState(initialState?.propertyValue ?? 0)
+  const fromLoanRecord = initialState?.fromLoanRecord ?? false
 
   // Purchase
   const [purchaseScenarios, setPurchaseScenarios] = useState<PurchaseScenarioInput[]>(
@@ -407,6 +408,15 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
               </div>
             ) : (
               <div className="space-y-5">
+                {fromLoanRecord && (
+                  <div className="flex items-start gap-3 px-4 py-3 rounded-[10px] text-xs" style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', color: 'var(--sc-muted)' }}>
+                    <span style={{ color: '#C9A84C', flexShrink: 0 }}>✓</span>
+                    <span>
+                      <span style={{ color: '#C9A84C', fontWeight: 600 }}>Pre-filled from loan record.</span>
+                      {' '}New loan amount and rate carried over. For the <span style={{ color: 'var(--sc-text)' }}>Current Loan</span> section below, enter the borrower&apos;s existing mortgage details — or use <span style={{ color: 'var(--sc-text)' }}>Import Statement</span> to pull from a mortgage statement.
+                    </span>
+                  </div>
+                )}
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-medium" style={{ color: 'var(--sc-muted)' }}>Current Loan</span>

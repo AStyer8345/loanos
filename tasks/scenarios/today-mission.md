@@ -1,35 +1,33 @@
-## Scenarios Mission Brief — 2026-04-12 AM
+## Scenarios Mission Brief — 2026-04-13 AM
 
 ### Focus Area
-Persistent scenario comparison table on share page (Tier 5 item 2)
+Refi builder: current loan pre-fill (Tier 5, item 4)
 
 ### Why This Matters
-MC presentations put all numbers in one scannable view. In LoanOS, the full
-comparison table is buried behind two taps (accordion → expand) under "Detailed
-Comparison." Most borrowers never find it. A borrower who wants to compare all
-numbers in one glance currently can't — without knowing to scroll down and tap
-the accordion open. This closes that gap: the table is always visible, below the
-option cards, no tap required.
+When an LO launches the scenario builder from a refi loan record, the current
+loan section is pre-filled with the NEW loan's rate and payment (Arive's proposed
+terms), not the borrower's existing mortgage. The LO sees wrong numbers and must
+erase and re-enter. The refi scenario's newLoanAmount is also left at 0 despite
+the loan amount being known. This closes the fast-input gap vs Mortgage Coach.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Create `ScenarioComparisonTable.tsx` — persistent side-by-side table below OptionCardsGrid
-2. Render it in SharePageLayout after the "Your Options" section (multi-scenario only)
-3. Mirror "Commonly Chosen" gold column treatment from OptionCard + PDF
-4. Build passes, no TypeScript errors
+1. Fix semantic bug: stop populating current loan with new loan's rate/payment
+2. Pre-fill currentPayoffBalance = loan.loan_amount (correct for refi payoffs)
+3. Pre-fill newLoanAmount + interestRate + loanTerm in the refi scenario card
+4. Pre-fill taxes/insurance/HOA in currentLoan from Arive data where available
+5. Add subtle info banner in refi step when opened from a loan record
 
 ### Files in Scope
-- `src/components/share/ScenarioComparisonTable.tsx` (new)
-- `src/components/share/SharePageLayout.tsx` (add import + render)
-
-Everything else is off limits.
+- src/app/dashboard/scenarios/new/page.tsx
+- src/app/dashboard/scenarios/new/ScenarioBuilder.tsx
+- src/lib/scenarios/types.ts
 
 ### Definition of Done
-- `npm run build` passes, 0 TypeScript errors
-- Table renders below OptionCardsGrid on multi-scenario share pages
-- Table hidden on single-scenario pages
-- Commonly Chosen column has gold header treatment
-- Mobile: horizontally scrollable with overflow-x-auto
+- npm run build passes, 0 TypeScript errors
+- When opening from refi loan_id: payoff balance pre-filled, rate/amount blank for LO to enter
+- Refi scenario: newLoanAmount + rate + term pre-filled from loan record
+- Info banner shows in refi step when loan_id was provided
 - Committed and pushed to main, Vercel READY

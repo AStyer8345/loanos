@@ -213,6 +213,8 @@ export interface ScenarioState {
     horizonYears: number
   }
   reinvestmentResult: ReinvestmentResult | null
+  // Pre-fill source tracking
+  fromLoanRecord?: boolean
 }
 
 // ─── Database Record ────────────────────────────────────────────────

@@ -27,13 +27,6 @@ function mapLoanTerm(months: number | null): LoanTerm {
   return 30
 }
 
-// Format a date string to YYYY-MM for loanStartDate
-function toYYYYMM(dateStr: string | null): string {
-  if (!dateStr) return ''
-  const d = new Date(dateStr + 'T00:00:00')
-  if (isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
 
 export default async function NewScenarioPage({
   searchParams,
@@ -64,6 +57,7 @@ export default async function NewScenarioPage({
         // Purchase mode — pre-fill Option A from loan data
         initialState = {
           mode: 'purchase',
+          fromLoanRecord: true,
           borrowerName,
           propertyAddress: propertyAddr,
           propertyValue,
@@ -119,17 +113,22 @@ export default async function NewScenarioPage({
           ],
         }
       } else {
-        // Refinance mode — pre-fill current loan from loan data
+        // Refinance mode
+        // loan.loan_amount = the new loan being originated (= payoff balance of existing mortgage)
+        // loan.interest_rate = the PROPOSED new rate — NOT the existing mortgage rate
+        // loan.monthly_payment = the proposed new payment — NOT the existing payment
+        // LO must enter: existing rate, original loan amount, loan start date (from borrower's statement)
+        const payoffBalance = loan.loan_amount || 0
         const currentLoan: CurrentLoanInput = {
-          originalLoanAmount: loan.loan_amount || 0,
-          loanStartDate: toYYYYMM(loan.loan_created_date || loan.application_date),
-          originalLoanTerm: loanTerm,
-          interestRate: loan.interest_rate || 0,
-          currentMonthlyPI: loan.monthly_payment || 0,
-          currentPayoffBalance: 0, // auto-calculates from above
-          propertyTaxes: 0,
-          insurance: 0,
-          hoa: 0,
+          originalLoanAmount: 0,      // LO must enter — existing mortgage original amount
+          loanStartDate: '',          // LO must enter — existing mortgage start date
+          originalLoanTerm: 30 as LoanTerm,
+          interestRate: 0,            // LO must enter — existing mortgage rate
+          currentMonthlyPI: 0,        // LO must enter — or auto-calculates from above fields
+          currentPayoffBalance: payoffBalance,    // loan_amount IS the refi payoff balance
+          propertyTaxes: loan.property_taxes_monthly || 0,
+          insurance: loan.hoi_monthly || 0,
+          hoa: loan.hoa_dues || 0,
           pmi: loan.mi_monthly || 0,
           debts: [],
         }
@@ -145,23 +144,24 @@ export default async function NewScenarioPage({
               id: crypto.randomUUID(),
               label: 'New Loan Option',
               loanType,
-              newLoanAmount: 0,
-              interestRate: 0,
-              loanTerm: 30,
+              newLoanAmount: payoffBalance,        // pre-fill: new loan = payoff amount
+              interestRate: loan.interest_rate || 0,  // pre-fill: proposed new rate from Arive
+              loanTerm,
               pointsPercent: 0,
               creditsPercent: 0,
-              points: 0,
+              points: loan.points || 0,
               closingCostBreakdown: { ...DEFAULT_CLOSING_COSTS },
-              closingCosts: sumClosingCosts(DEFAULT_CLOSING_COSTS),
+              closingCosts: loan.total_closing_costs || sumClosingCosts(DEFAULT_CLOSING_COSTS),
               cashOutAmount: 0,
               payOffDebts: false,
-              propertyTaxes: 0,
-              insurance: 0,
-              hoa: 0,
-              pmi: 0,
+              propertyTaxes: loan.property_taxes_monthly || 0,
+              insurance: loan.hoi_monthly || 0,
+              hoa: loan.hoa_dues || 0,
+              pmi: loan.mi_monthly || 0,
               extraMonthlyPayment: 0,
             },
           ],
+          fromLoanRecord: true,
         }
       }
     }

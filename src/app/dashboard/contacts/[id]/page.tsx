@@ -120,7 +120,7 @@ export default function ContactRecordPage() {
     setDripEnrollments(enriched)
   }, [id, supabase, organizationId])
 
-  const fetchActivity = useCallback(async () => {
+  const fetchActivity = useCallback(async (contactEmail?: string | null) => {
     // 1. Activity directly linked to this contact (via server-side PII decryption)
     const contactRes = await fetch(`/api/activity?contact_id=${id}&limit=200&columns=id,created_at,action,entity_type,event_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
     const contactRows: ActivityEntry[] = contactRes.ok ? await contactRes.json() : []
@@ -149,6 +149,22 @@ export default function ContactRecordPage() {
           : 'Linked Loan'
         merged.push({ ...row, _source: label })
         seen.add(row.id)
+      }
+    }
+
+    // 3. Unmatched inbound emails — match by from_address against contact email
+    //    (compensates for n8n not setting contact_id on email.received entries)
+    if (contactEmail?.trim()) {
+      const emailAddr = contactEmail.trim().toLowerCase()
+      const unmatchedRes = await fetch(`/api/activity?type=email_inbound&unmatched=true&limit=200&columns=id,created_at,action,entity_type,event_type,metadata,type,summary,raw_payload,external_id,loan_id,subject,from_address,body_snippet`)
+      const unmatchedRows: ActivityEntry[] = unmatchedRes.ok ? await unmatchedRes.json() : []
+      for (const row of unmatchedRows) {
+        if (seen.has(row.id)) continue
+        const from = (row.from_address ?? '').trim().toLowerCase()
+        if (from === emailAddr || from.includes(`<${emailAddr}>`)) {
+          merged.push(row)
+          seen.add(row.id)
+        }
       }
     }
 
@@ -197,7 +213,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(), fetchContactActivity(), fetchNotes(), fetchDripEnrollments()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(c.email), fetchContactActivity(), fetchNotes(), fetchDripEnrollments()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -245,7 +261,7 @@ export default function ContactRecordPage() {
       await updateLastTouch(supabase, contact.id, 'note_added', 'Added a note')
       setContact(prev => prev ? { ...prev, notes: appended } : null)
       setNewNote('')
-      await fetchActivity()
+      await fetchActivity(contact.email)
     }
     setSavingNote(false)
   }

@@ -726,11 +726,31 @@ function getSystemActivitySnippet(entry: ActivityEntry): string | null {
     const snippet = (meta as Record<string, unknown> | null)?.snippet
     return typeof snippet === 'string' ? snippet : null
   }
-  if (entry.action === 'email.received') {
+  if (entry.action === 'email.received' || entry.action === 'email_received') {
     const subject = entry.subject || ''
     const from = entry.from_address || ''
-    return [from && `From: ${from}`, subject].filter(Boolean).join(' ') || null
+    return [from && `From: ${from}`, subject].filter(Boolean).join(' — ') || null
   }
+  return null
+}
+
+function getSystemActivityFullText(entry: ActivityEntry): string | null {
+  if (entry.action === 'imessage.received') {
+    const meta = typeof entry.metadata === 'string' ? tryParseJson(entry.metadata) : entry.metadata
+    const m = meta as Record<string, unknown> | null
+    // Try full message text first, fall back to snippet
+    const text = m?.message_text ?? m?.text ?? m?.body ?? m?.snippet
+    return typeof text === 'string' ? text : null
+  }
+  if (entry.action === 'email.received' || entry.action === 'email_received') {
+    const parts: string[] = []
+    if (entry.from_address) parts.push(`From: ${entry.from_address}`)
+    if (entry.subject) parts.push(`Subject: ${entry.subject}`)
+    if (entry.body_snippet) parts.push(entry.body_snippet)
+    else if (entry.summary) parts.push(entry.summary)
+    return parts.length > 0 ? parts.join('\n') : null
+  }
+  if (entry.summary) return entry.summary
   return null
 }
 
@@ -740,6 +760,7 @@ function tryParseJson(s: string): Record<string, unknown> | null {
 
 // ── System activity feed item (activity_log entries) ────────────────────────
 function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
+  const [expanded, setExpanded] = useState(false)
   const ts = new Date(entry.created_at)
   const now = new Date()
   const diffDays = Math.floor((now.getTime() - ts.getTime()) / 86400000)
@@ -754,10 +775,15 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
   const description = style.label || entry.summary || entry.action || 'System event'
   const sourceLabel = entry._source ? ` · ${entry._source}` : ''
   const snippet = getSystemActivitySnippet(entry)
+  const fullText = getSystemActivityFullText(entry)
+  const isExpandable = !!fullText
 
   return (
-    <div style={{ borderBottom: '1px solid var(--border)', padding: '8px 0' }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <div
+        onClick={isExpandable ? () => setExpanded(e => !e) : undefined}
+        style={{ display: 'flex', gap: 10, padding: '9px 0', alignItems: 'center', cursor: isExpandable ? 'pointer' : 'default' }}
+      >
         <div style={{
           width: 28, height: 28, borderRadius: '50%',
           background: style.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -769,17 +795,29 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: style.label ? style.color : 'var(--muted)', fontWeight: style.label ? 600 : 400 }}>
               {description}{sourceLabel}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, opacity: 0.6 }}>
-              {timeLabel}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap', opacity: 0.6 }}>
+                {timeLabel}
+              </span>
+              {isExpandable && (
+                <ChevronDown size={11} style={{ color: 'var(--muted)', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }} />
+              )}
+            </div>
           </div>
-          {snippet && (
+          {snippet && !expanded && (
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {snippet}
             </div>
           )}
         </div>
       </div>
+      {expanded && fullText && (
+        <div style={{ padding: '0 0 10px 38px' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {fullText}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -937,7 +975,7 @@ export function ContactRecordView(props: Props) {
   const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
   const [activityNotes, setActivityNotes] = useState('')
   const [activitySaving, setActivitySaving] = useState(false)
-  const [feedFilter, setFeedFilter] = useState<'all' | 'outreach' | 'system'>('all')
+  const [feedFilter, setFeedFilter] = useState<'correspondence' | 'email' | 'text' | 'notes' | 'system' | 'all'>('correspondence')
   const [activityError, setActivityError] = useState<string | null>(null)
 
   // Log prompt after Call/Text/Email click
@@ -1861,14 +1899,14 @@ export function ContactRecordView(props: Props) {
               ))}
             </div>
             {rightTab === 'activity' && (
-            <div style={{ display: 'flex', gap: 4 }}>
-              {([['all', 'All'], ['outreach', 'Outreach'], ['system', 'System']] as const).map(([key, label]) => (
+            <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {([['correspondence', 'Correspondence'], ['email', 'Email'], ['text', 'Text'], ['notes', 'Notes'], ['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setFeedFilter(key)}
                   style={{
                     fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
-                    letterSpacing: '0.06em', padding: '3px 8px', borderRadius: 3,
+                    letterSpacing: '0.06em', padding: '3px 7px', borderRadius: 3,
                     cursor: 'pointer', border: 'none',
                     background: feedFilter === key ? 'rgba(201,168,76,0.15)' : 'transparent',
                     color: feedFilter === key ? '#c9a84c' : 'var(--muted)',
@@ -2005,15 +2043,35 @@ export function ContactRecordView(props: Props) {
           {/* Scrollable unified activity feed */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 40px' }}>
             {(() => {
+              const CORRESPONDENCE_ACTIONS = new Set(['imessage.received', 'imessage.sent', 'email.received', 'email_received'])
               const filtered = unifiedFeed.filter(item => {
-                if (feedFilter === 'outreach') return item.kind === 'user'
-                if (feedFilter === 'system') return item.kind === 'system'
+                if (feedFilter === 'all') return true
+                if (feedFilter === 'correspondence') {
+                  // User-logged emails, texts, notes + system iMessages & emails
+                  if (item.kind === 'user') return ['email', 'text', 'note'].includes(item.item.activity_type)
+                  return CORRESPONDENCE_ACTIONS.has(item.item.action)
+                }
+                if (feedFilter === 'email') {
+                  if (item.kind === 'user') return item.item.activity_type === 'email'
+                  return item.item.action === 'email.received' || item.item.action === 'email_received'
+                }
+                if (feedFilter === 'text') {
+                  if (item.kind === 'user') return item.item.activity_type === 'text'
+                  return item.item.action === 'imessage.received' || item.item.action === 'imessage.sent'
+                }
+                if (feedFilter === 'notes') {
+                  return item.kind === 'user' && item.item.activity_type === 'note'
+                }
+                if (feedFilter === 'system') {
+                  // System items that are NOT correspondence
+                  return item.kind === 'system' && !CORRESPONDENCE_ACTIONS.has(item.item.action)
+                }
                 return true
               })
               if (filtered.length === 0) {
                 return (
                   <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
-                    {feedFilter === 'all' ? 'No activity yet — log a call, text, or email above.' : `No ${feedFilter} activity.`}
+                    {feedFilter === 'correspondence' ? 'No correspondence yet — log a call, text, or email above.' : feedFilter === 'all' ? 'No activity yet.' : `No ${feedFilter} activity.`}
                   </div>
                 )
               }

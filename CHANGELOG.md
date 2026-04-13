@@ -1,5 +1,40 @@
 # LoanOS Changelog
 
+## 2026-04-13 AM — Scenarios: Refi builder pre-fill fix (Tier 5 item 4)
+
+- Fixed semantic bug: refi mode `currentLoan` was pre-filled with the new loan's rate/payment (Arive proposed terms) — not the borrower's existing mortgage
+- `currentPayoffBalance` = `loan.loan_amount` (correct for refi: payoff balance is the new loan amount)
+- Cleared `interestRate`, `originalLoanAmount`, `loanStartDate`, `currentMonthlyPI` from current loan (LO enters from mortgage statement)
+- Refi scenario `newLoanAmount` + `interestRate` + `loanTerm` now pre-filled from loan record (previously all 0)
+- Pre-fill taxes/insurance/HOA from `property_taxes_monthly`, `hoi_monthly`, `hoa_dues`
+- Gold info banner in refi step when opened from a loan record — prompts LO to enter existing mortgage details
+- `ScenarioState.fromLoanRecord?: boolean` added to types.ts
+- Commit 08b4378 | Vercel `dpl_BUbTcnjj4gLDxeHeA8Kgjk6xCNXi` BUILDING
+
+## 2026-04-13 — Day 19 standup
+
+- Vercel READY: latest production deploy `dpl_HawZvbuLAefvw84Gtvy9cu9iCozY` (review request email button, commit 845c422)
+- n8n: 31 total workflows, 26 active — up from 29/26 on Day 18 (Rate Check Form + Post-Calendly Booking added)
+- Review Request polling workflow `AK1fBcaX1cPcdlGx` confirmed deactivated (was burning ~1,440 executions/month)
+- No Vercel errors, no n8n error states, no audit findings
+- `tasks/standup-log.md` created — running log of daily standups
+
+## 2026-04-13 AM — Lead Gen: Rate email template + Calendly workflow
+
+- Built weekly Friday rate email HTML template for Mailchimp (`tasks/lead-gen/build-reports/2026-04-13-rate-email-template.md`) — 30-yr/15-yr/ARM rate cards, APR disclosure, market context block, NMLS #513013 + Equal Housing Lender in header + footer, CAN-SPAM compliant, weekly fill-in table, Mailchimp setup guide
+- Created n8n workflow `LoanOS — Post-Calendly Booking Automation` (ID: `PBu2Zt0YpiLHeqbL`) — 8 nodes: Calendly webhook → parse → confirmation email → Supabase log → 24hr wait → reminder → 60min post-call wait → follow-up. INACTIVE pending Adam's Calendly webhook setup
+- Verified all Adam-owned blockers still unresolved: Set Rate (0 entries), Seq C (INACTIVE), Mailchimp journeys (not built)
+- Added 2 ADAM-TODO items: rate email Mailchimp setup guide + Calendly workflow activation steps
+
+## 2026-04-13 AM — Social Media: Week 24 built (Posts 132-136)
+
+- Built 5 posts for Week 24 (Aug 19-25, 2026): 2 LinkedIn + 1 Instagram Reel + 2 Facebook
+- Authority pillar correction continues: 3/5 posts are authority/real-talk (rolling mix now 35% — on track toward 40% target)
+- Post 136: Jackson Hole TIMELY template with 4 placeholders; NMLS #513013 present; Refresh fills Aug 24 AM
+- All 5 posts inserted into social_drafts as status:draft; QA 5/5 PASS; avg quality 8.0/10
+- Step 1B scan: no new site content; GBP distribution skipped
+- Refresh check: 5 TIMELY posts checked, 0 unfilled placeholders
+
 ## 2026-04-12 PM — Outbound iMessage capture + trigger crash fix
 
 - **Outbound iMessage capture:** Removed `is_from_me = 0` filter from `imessage-sync.py` — script now sends both inbound and outbound messages to n8n. n8n workflow updated: outbound → `action: imessage.sent`, `event_type: imessage_sent`; inbound unchanged. Contact `last_activity_type` distinguishes `imessage_outbound` vs `imessage_inbound`. UI: `imessage_sent` gets cyan icon (vs blue for received). Script deployed to `~/.local/bin/imessage-sync.py`. Cursor at ROWID 109509 — new outbound messages captured going forward.
@@ -2676,3 +2711,20 @@ Arive (loan event)
 - **Pillar correction continues:** 0 authority posts — rolling authority drops from 45% toward 30% target.
 - **Post 126 (TIMELY):** July Jobs Report template for Aug 11 publish. 3 ~[LIVE DATA NEEDED] placeholders. Refresh fills Aug 7 AM after BLS release. Adam must approve in dashboard.
 - **Lane 2 CHANGELOG:** Scenario naming feature → PROPOSED-03 written to loanos-pool-proposed.md (needs Adam review).
+
+## 2026-04-12 PM — Social Media: Week 23 content build (Posts 127-131)
+
+- Built 5 posts for Aug 12-18 window: 2 authority (RT hot take + TIMELY CPI), 2 personal, 1 education
+- Post 127 (LI hot take): "Buyers waiting for 3% will wait forever" — quality rewrite on closer
+- Post 128 (IG Reel): Roman age 2 "like a house store?" — Reel script in agent_notes, Adam films
+- Post 129 (FB personal): Brittany Jo partnership deal instinct story — trimmed for punch
+- Post 130 (LI education): DSCR loans via $180k rental income client scenario — NMLS #513013 ✓
+- Post 131 (FB TIMELY): July CPI reaction template — 4 placeholders, Refresh fills ~Aug 12-14
+- Rolling authority pillar at ~15% (target 40%) — correction direction started, Wks 24-25 need 2+ authority/wk
+
+## 2026-04-12 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed stale CONTEXT.md (Apr 11) + old audit (Apr 11). Added refreshed styermortgage CONTEXT.md (post rate-check expansion commits b519b52 + c208b1d) + notebooklm-audit-2026-04-12.md. Final: 50/50.
+- **Lead Gen notebook**: Removed 6 stale sources (3× CONTEXT.md, duplicate mailchimp-execution-pack, old audit, FRED API docs). Added refreshed loanos CONTEXT.md (noon state, post trigger fix + iMessage commits) + notebooklm-audit-2026-04-12.md. Final: 50/50.
+- **Master log**: Appended 2 entries (seo-sem-pm + lead-gen-pm) to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
+- **Digests sent**: SEO + SEM Daily Digest and Lead Gen Daily Digest both dispatched via Zapier (status: success).

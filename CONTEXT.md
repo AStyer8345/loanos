@@ -92,21 +92,21 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-12 AM — Week 22 built (Posts 122-126, Aug 5-11): 2 LI + 1 IG + 2 FB. Avg quality 8.0/10. All APPROVED. QA 5/5 PASS. Zero authority posts — pillar correction continues (authority 45% → ~30% rolling after window shifts). Post 126 TIMELY July Jobs template: 3 placeholders, NMLS #513013 present, Refresh fills Aug 7 AM. BLOCKER-LOANOS-001 still active.
+**Last worked on:** 2026-04-13 AM — Week 24 built (Posts 132-136, Aug 19-25): 2 LI + 1 IG + 2 FB. 3 authority / 1 personal / 1 education. Avg 8.0/10. All APPROVED. QA 5/5 PASS. Post 136 TIMELY Jackson Hole template: 4 placeholders, NMLS #513013 present, Refresh fills Aug 24 AM. Rolling Wks 21-24: authority 35% / personal 35% / education 30% — all within ±5% tolerance.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: Adam approve before April 15 (3 days remaining). Post 121 TIMELY: Adam approve after Refresh fills July 30 AM, before 2:00 PM CDT. Post 126 TIMELY: Adam approve after Refresh fills Aug 7 AM, before 2:00 PM CDT Aug 11. Posts 29+30 Liberation Day: decision due April 28 (16 days).
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: Adam approve before April 15 (2 days remaining — URGENT). Post 136 TIMELY Jackson Hole: Adam approve after Refresh fills ~Aug 24. Posts 29+30 Liberation Day: decision due April 28 (15 days).
 
-**What's next:** Week 23 build (Posts 127-131, Aug 12-18). Authority pillar should be near target by then — check rolling window before planning. BLOCKER-LOANOS-001 gate check each AM session. Post 39 approval: April 15 hard deadline.
+**What's next:** Week 25 build (Posts 137-141). Authority correction on track — continue 2-3 authority posts/week. BLOCKER-LOANOS-001 gate check each AM session. Post 39 hard deadline April 15.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-12 AM — Verified Set Rate still never called (zero `refi_rate_update` in activity_log). Seq C still INACTIVE (Adam). Pivoted to Mailchimp Customer Journeys. Built comprehensive Execution Pack: all 18 emails pre-written for 3 journeys (PA, Rate Watch, FTB DPA). Adam needs ~45 min in Mailchimp UI to activate. Build report: `tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md`.
+**Last worked on:** 2026-04-13 AM — Built weekly Friday rate email HTML template (Mailchimp-ready, all 3 rate types + APR, CAN-SPAM compliant). Built n8n Post-Calendly Booking Automation (ID: `PBu2Zt0YpiLHeqbL`, INACTIVE): 8-node chain — Calendly webhook → confirmation email → Supabase log → 24hr wait → reminder → post-call follow-up. All 4 Adam-owned blockers still unresolved.
 
-**Active blockers:** (1) Set Rate webhook never called — Seq A idle. (2) Seq C INACTIVE — Adam must connect Outlook + activate. (3) Mailchimp journeys not built — Adam must execute in Mailchimp UI (~45 min, all copy ready in execution pack). (4) DPA Guide PDF not hosted — needed for FTB DPA Journey Email 1.
+**Active blockers:** (1) Set Rate webhook never called — Seq A idle (0 refi_rate_update entries confirmed). (2) Seq C INACTIVE — Outlook cred not connected. (3) Mailchimp journeys not built (execution pack ready, 45 min). (4) DPA Guide PDF not hosted. (5) Calendly workflow INACTIVE — Adam must configure Calendly webhook + activate `PBu2Zt0YpiLHeqbL`.
 
-**What's next:** Verify Adam progress on Set Rate + Mailchimp journeys. Build weekly Friday rate email template. Research post-Calendly-booking workflow (confirm/reminder n8n).
+**What's next:** PM session (NotebookLM PUSH+CURATE + digest). Next AM: verify Adam progress on Set Rate + Mailchimp journeys. Consider homepage form wiring (BLOCKER-001 partial — Quick Quote/Contact forms still Netlify-only).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
@@ -120,20 +120,20 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-12 AM — Comparison table on share page (Tier 5 item 2). `ScenarioComparisonTable.tsx` — persistent side-by-side data table below OptionCardsGrid on multi-scenario share pages. Always visible (no accordion tap required). Commonly Chosen column gets gold header treatment. Conditional rows (tax, insurance, HOA, PMI, savings) show only when non-zero. Horizontally scrollable on mobile. Also fixed 4 pre-existing TypeScript/ESLint build errors (unused imports, missing event_type fields, .catch() on Supabase builder, unknown ReactNode). Notes components (NoteCard, NoteInput) committed in follow-up fix commit. Commits 74c9d52 + c0d8b11 | Vercel dpl_H385sDmxk1fdNTZFy84pCPQDHBD3 → READY.
+**Last worked on:** 2026-04-13 AM — Refi builder pre-fill fix (Tier 5 item 4). Fixed semantic bug: current loan section was pre-filled with new loan's rate/payment (wrong). Now: currentPayoffBalance = loan_amount, rate/amount/startDate blank for LO to enter. Refi scenario pre-fills newLoanAmount + interestRate + loanTerm from Arive. Gold info banner in builder when opened from loan record. Commit 08b4378 | Vercel dpl_BUbTcnjj4gLDxeHeA8Kgjk6xCNXi BUILDING.
 
 **Active blockers:** None.
 
-**What's next:** Refi builder current loan pre-fill (Tier 5 item 4) — auto-populate current rate + remaining balance + months remaining when entering refi mode from a loan record. Social proof block (Tier 5 item 5) also queued.
+**What's next:** Social proof block (Tier 5 item 5) — "X borrowers in Austin chose a 30yr fixed this month" — illustrative, compliance-safe, share page only.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-12 — Day 18 standup. Vercel READY (dpl_6UR5Dh4TUNgAcMMZbSGztRpenUoK). PII Phase 3 COMPLETE: backfill ran, verify-live-decrypt 1402/1402 passed, migration 083 deployed, plaintext columns dropped. Critical #3 CLOSED. ANTHROPIC_API_KEY set in Vercel env. Junk API key stripped from user_settings. n8n: 26/29 active, 3 intentionally inactive.
+**Last worked on:** 2026-04-13 — Day 19 standup. Vercel READY (dpl_HawZvbuLAefvw84Gtvy9cu9iCozY). n8n: 31 total, 26 active. 2 new workflows since Day 18 (Rate Check Form active; Post-Calendly Booking inactive). Review request polling workflow deactivated (was wasting 1,440 exec/month). No audit findings.
 
-**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, 3 weeks zero progress. Set Rate webhook never called (Seq A idle). Adam: Outlook connect → Seq C; Post 39 approval due April 15 (3 days); Phase 2 confirmation (blocks Phase 3+).
+**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, 3+ weeks zero progress. Post 39 approval URGENT — deadline April 15 (2 days). Marketing demo data zero progress — blocks May 1 launch page. 4 Adam-owned blockers unresolved (Set Rate, Mailchimp journeys, DPA Guide PDF, Calendly webhook). Phase 2 confirmation still outstanding.
 
-**What's next:** CD & Contract Extractor activation (GOALS.md #2, blocked on Adam's Outlook). Renovation Phase 3 (Follow-Up List) once Phase 2 confirmed. Marketing demo data cleanup — zero progress, blocks May 1 launch page.
+**What's next:** CD & Contract Extractor activation (blocked on Outlook cred). Renovation Phase 3 once Phase 2 confirmed. Marketing demo data cleanup.
 
 ## Rules For AI Sessions
 

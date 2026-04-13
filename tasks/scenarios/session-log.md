@@ -561,3 +561,41 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Comparison table on share page (Tier 5 item 2) — ✅ COMPLETE this session
 
+---
+
+## AM Session — 2026-04-13 (scenarios-am)
+
+**What was built:**
+- Refi builder pre-fill fix (`src/app/dashboard/scenarios/new/page.tsx`, `ScenarioBuilder.tsx`, `src/lib/scenarios/types.ts`)
+  - **Bug fixed:** `currentLoan` was being populated with the NEW loan's rate/payment (Arive proposed terms), not the borrower's existing mortgage.
+  - `currentLoan.interestRate` → 0 (LO must enter; was incorrectly set to new rate)
+  - `currentLoan.originalLoanAmount` → 0 (LO must enter; was incorrectly set to new loan amount)
+  - `currentLoan.loanStartDate` → '' (LO must enter; was incorrectly set to Arive record creation date)
+  - `currentLoan.currentMonthlyPI` → 0 (LO must enter; was incorrectly set to proposed new payment)
+  - `currentLoan.currentPayoffBalance` → `loan.loan_amount` (correct: refi payoff balance = new loan amount)
+  - `currentLoan.propertyTaxes/insurance/hoa` → pre-filled from `property_taxes_monthly`, `hoi_monthly`, `hoa_dues`
+  - **New: refi scenario pre-fill:** `newLoanAmount` = `loan.loan_amount`, `interestRate` = `loan.interest_rate`, `loanTerm` mapped from Arive, `closingCosts`/`points` from loan record
+  - **New: gold info banner** in refi step when opened from a loan record: "Pre-filled from loan record. Enter your existing mortgage details..." with Import Statement prompt
+  - `ScenarioState.fromLoanRecord?: boolean` added to types.ts
+  - Removed unused `toYYYYMM()` function (ESLint)
+
+**MC gap closed:** Fast input for refi workflow. LO no longer manually types what's already known: payoff balance, new loan amount, new rate, new term. Opens pre-loaded — LO only needs to enter the existing mortgage's rate and start date (from borrower's statement or statement upload).
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `08b4378` — pushed to main
+**Vercel:** `dpl_BUbTcnjj4gLDxeHeA8Kgjk6xCNXi` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/page.tsx`
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx`
+- `src/lib/scenarios/types.ts`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Social proof block (Tier 5 item 5) — "X borrowers in Austin chose a 30yr fixed this month" — illustrative, compliance-safe, share page only.
+2. DetailAccordion cleanup — consider removing redundant "Full Scenario Comparison" accordion item now that the persistent table covers it.
+3. Verify refi pre-fill end-to-end with a real refi loan record once Vercel is READY.
+
+**Domain queue updates:**
+- Refi builder: current loan pre-fill (Tier 5 item 4) — ✅ COMPLETE this session
+

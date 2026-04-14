@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-14 PM — Fix: Refi Watch Set Rate Webhook (lead-gen-set-rate-webhook, 7th session)
+
+- **Root cause of 7-session loop:** both producer (n8n `LoanOS — Refi Watch Set Rate`, ID `3iXImUkjgMitpJKt`) and consumer (`LoanOS — Refi Watch Rate Drop Alert`, ID `iyKFy0ODkyyqQaAS`) reference `activity_log.summary`, but that column never existed in the table. PostgREST silently rejected every insert; webhook returned 200 because n8n's Respond OK node fires before the HTTP error surfaces in workflow execution order. Every prior session's curl ran "successfully" with zero rows written.
+- Migration applied: `ALTER TABLE public.activity_log ADD COLUMN IF NOT EXISTS summary TEXT` (migration `add_summary_to_activity_log`)
+- Reloaded PostgREST schema cache via `NOTIFY pgrst, 'reload schema'`
+- Inserted today's rate directly via SQL (bypassing the still-broken n8n producer body which also sends `from_address` and `subject` — neither column exists): `action='refi_rate_update', summary='6.37', organization_id=<prod org>, to_address='system'` → row id `7c7d9ac8-0191-4fc7-afe7-fea375d31015`
+- Source: Freddie Mac PMMS, 30-yr fixed = **6.37%**, week ending 2026-04-09 (FRED MORTGAGE30US is Freddie-sourced; FRED was 403-blocking WebFetch today)
+- **Important threshold note for Adam:** Parse Rate node in Rate Drop Alert has `THRESHOLD = 6.00` — today's 6.37% is ABOVE threshold, so no alerts will fire until market rate drops below 6.00%. This is policy, not a bug, but confirms that delivery to 644 past clients is gated on rates reaching <6.00 — not just on the rate row existing.
+- **Follow-up still needed** (logged to TODO.md): rewrite the n8n Set Rate Store Rate node body to remove the two non-existent columns (`from_address`, `subject`) so manual webhook calls work without a direct-SQL workaround. Until then, rate updates should be done via SQL INSERT, not curl.
+
 ## 2026-04-14 AM — Scenarios: Social Proof Block on Share Page (Tier 5 item 5)
 
 - Built `SocialProofBlock.tsx` — illustrative market context widget between NarrativeCard and BreakEvenVisual on share page

@@ -15,6 +15,7 @@
 - [ ] Adam: build 3 Mailchimp Customer Journeys (PA Welcome, Rate Watch, DPA Guide)
 - [ ] NMLS# 513013 profile audit on all 4 social platforms
 - [ ] Adam: review/approve Refi Watch email copy (Sequences A + D)
+- [ ] **n8n fix — Set Rate webhook Store Rate node:** workflow `3iXImUkjgMitpJKt`, node `node-store`. Remove `from_address` and `subject` from the JSON body (neither column exists in `activity_log`). Current body writes these + `summary`; only `summary` was fixed today (column added via migration `add_summary_to_activity_log`). Until this is rewritten, manual rate updates must go via SQL INSERT into activity_log, not curl to the webhook. Rate Drop Alert threshold is 6.00% — today's 6.37% won't trigger alerts; alerts only fire when market rate ≤ 6.00%.
 
 ## Next (after Now items clear)
 

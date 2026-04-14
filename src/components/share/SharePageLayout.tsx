@@ -16,6 +16,7 @@ import CashToCloseBreakdown from './CashToCloseBreakdown'
 import LOSidebarCard from './LOSidebarCard'
 import ShareVideoEmbed from './ShareVideoEmbed'
 import ScenarioComparisonTable from './ScenarioComparisonTable'
+import SocialProofBlock from './SocialProofBlock'
 
 interface SharedScenario {
   scenario_type: string
@@ -186,6 +187,11 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
                 <NarrativeCard text={data.narrative!} />
               </section>
             )}
+
+            {/* Social Proof — market context, print:hidden */}
+            <section className="no-break print:hidden">
+              <SocialProofBlock displayData={displayData} />
+            </section>
 
             {/* Break-Even Visual */}
             {hasBreakEven && (

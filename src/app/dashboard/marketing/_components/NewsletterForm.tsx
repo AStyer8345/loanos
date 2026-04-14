@@ -81,23 +81,39 @@ export default function NewsletterForm({ mccState, onSave }: Props) {
     setErrorMsg('')
     setPreview(null)
     setPublishedMsg(null)
-    try {
-      const res = await fetch(NETLIFY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildPayload('preview')),
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.error ?? `HTTP ${res.status}`)
+
+    // Preview retry policy: 2 attempts, flat 2s backoff.
+    // Netlify sync functions cap at 26s; our preview averages ~21s, so normal
+    // variance (cold start, Anthropic latency) can tip it over and surface
+    // as "Failed to fetch" in the browser. One retry catches that.
+    // Publish deliberately does NOT retry — see handlePublish.
+    const MAX_ATTEMPTS = 2
+    const BACKOFF_MS = 2000
+    let lastErr: unknown = null
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(NETLIFY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildPayload('preview')),
+        })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          throw new Error(body.error ?? `HTTP ${res.status}`)
+        }
+        const data = await res.json()
+        setPreview(data.preview)
+        setStatus('done')
+        return
+      } catch (e: unknown) {
+        lastErr = e
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise(r => setTimeout(r, BACKOFF_MS))
+        }
       }
-      const data = await res.json()
-      setPreview(data.preview)
-      setStatus('done')
-    } catch (e: unknown) {
-      setErrorMsg(`Preview error: ${e instanceof Error ? e.message : String(e)}`)
-      setStatus('error')
     }
+    setErrorMsg(`Preview error: ${lastErr instanceof Error ? lastErr.message : String(lastErr)}`)
+    setStatus('error')
   }
 
   const handlePublish = async (scheduledTime?: string) => {

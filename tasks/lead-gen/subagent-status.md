@@ -1,145 +1,132 @@
-## SESSION_END
-- **Datetime**: 2026-04-09 03:45:00
-- **Mode**: AM
-- **Session**: Lead Gen AM — Daily 3:00 AM
-
-```
-SESSION END: 2026-04-09 03:45:00
-Mode: AM
-Focus: Refi Watch Builder — Sequence A (Rate Drop Alert) + Sequence D (Pre-Drop Warm-Up)
-MASTER: Both workflows built. All 4 Refi Watch workflows now exist. Session fully logged.
-```
-
-Build artifacts:
-- Sequence A (Rate Drop Alert): `iyKFy0ODkyyqQaAS` — INACTIVE
-- Sequence D (Pre-Drop Warm-Up): `W0K4YDzkZd0Hzv6g` — INACTIVE
-
-All Refi Watch workflows: Set Rate `3iXImUkjgMitpJKt`, Seq A `iyKFy0ODkyyqQaAS`, Seq B `ZUeGy8u8P4o6DPM3`, Seq D `W0K4YDzkZd0Hzv6g`
-Activation blocked on: Outlook credential connection (Adam)
-SESSION FULLY COMPLETE ✓
-
----
-
 ## SESSION_START
-- **Datetime**: 2026-04-09 03:00:00
+- **Datetime**: 2026-04-14 03:00:00
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM
 
 ```
-SESSION START: 2026-04-09 03:00:00
+SESSION START: 2026-04-14 03:00:00
 Mode: AM
-Focus: Refi Watch Builder — Sequence A (Rate Drop Alert) + Sequence D (Pre-Drop Warm-Up)
+Focus: Verify Adam blocker progress → Homepage form wiring → Calendly cancel branch
 MASTER: Context loaded. Activating NotebookLM pull.
 ```
 
 ---
 
 ## SESSION_END
-- **Datetime**: 2026-04-08 22:15:00
+- **Datetime**: 2026-04-13 22:00:00
 - **Mode**: PM
-- **Session**: Lead Gen PM — Daily 10:00 PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
 
 ```
-SESSION END: 2026-04-08 22:15:00
+SESSION END: 2026-04-13 22:00:00
 Mode: PM
-Focus: PUSH+CURATE — Staleness audit, web research, digest generation
+Focus: PUSH+CURATE — Staleness audit, cleanup duplicates, digest generation
 MASTER: All steps complete. NotebookLM PUSH+CURATE complete.
 ```
 
 NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources added: 4 (PM research file + 2 web sources + CONTEXT.md refresh)
-Stale sources removed: 3 (2 NMN error sources, 1 superseded Apr 5 PM research)
-Web sources added: 2 URLs (MPA equity/servicer retention, Scotsman Guide lock-in 2026)
-Master log synced: YES (Styer Mortgage Master notebook refreshed)
+Sources removed: 5 (2× CONTEXT.md [Apr 12 duplicates], notebooklm-audit-2026-04-12.md, 2026-04-06-pm-web-research.md, 2026-04-07-pm-web-research.md)
+Sources added: 1 (notebooklm-audit-2026-04-13.md) — build reports already added by AM session
+Web sources added: 0 (at 50/50 capacity after cleanup — research saved to research/2026-04-13-pm-web-research.md)
+Final notebook count: 50/50
+Master log: APPENDED + synced to Styer Mortgage Master notebook
 Daily digest: SENT (Zapier status: success)
-Final source count: 57 (7 over 50-source limit — flagged)
-Timestamp: 2026-04-08 22:15:00
+Timestamp: 2026-04-13 22:00:00
 SESSION FULLY COMPLETE ✓
 
 ---
-
 
 ## SESSION_END
-- **Datetime**: 2026-04-08 03:35:00
+- **Datetime**: 2026-04-13 03:45:00
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM
 
 ```
-SESSION END: 2026-04-08 03:35:00
+SESSION END: 2026-04-13 03:45:00
 Mode: AM
-Focus: Refi Watch Builder — Sequence B (Anniversary Check-In) + Set Rate workflow
-MASTER: All steps complete. 2 n8n workflows built. NotebookLM PUSH complete.
+Focus: Weekly Rate Email Template + Post-Calendly Booking Automation
+MASTER: Both builds complete. All 4 Adam-owned blockers still unresolved. 2 new Adam-TODO items added. NotebookLM PUSH complete.
 ```
 
+Build artifacts:
+- Rate email template: `tasks/lead-gen/build-reports/2026-04-13-rate-email-template.md` — Mailchimp-ready HTML, 7 weekly fill-in fields, compliance checklist
+- Calendly workflow: n8n ID `PBu2Zt0YpiLHeqbL` — 8 nodes, INACTIVE (Adam activates)
+
+Refi Watch status: Set Rate ✅ (active, still never called), Seq A ✅ (idle), Seq B ✅, Seq C ⏳ (Adam), Seq D ⏳ (Adam)
+New automation: Calendly post-booking `PBu2Zt0YpiLHeqbL` ⏳ (Adam must configure Calendly webhook + activate)
+
 NOTEBOOKLM (PUSH): COMPLETE
-Notes added to domain notebook: 1 (2026-04-08 AM session note)
-Notes added to master notebook: 1
-Build artifacts: ZUeGy8u8P4o6DPM3 (Anniversary), 3iXImUkjgMitpJKt (Set Rate)
+Sources added: 4 (rate-email-template.md, calendly-workflow-build.md, notebooklm-pull-2026-04-13.md, fresh CONTEXT.md)
+Stale sources removed: 2 (both old CONTEXT.md copies)
+Web sources added: 0 (at/near 50/50 capacity)
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: NOT SENT (AM session — PM session handles digest)
+Timestamp: 2026-04-13 03:45:00
 SESSION FULLY COMPLETE ✓
 
 ---
 
-
 ## SESSION_START
-- **Datetime**: 2026-04-08 03:00:00
+- **Datetime**: 2026-04-13 03:00:00
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM
 
 ```
-SESSION START: 2026-04-08 03:00:00
+SESSION START: 2026-04-13 03:00:00
 Mode: AM
-Focus: Refi Watch Builder — Sequence B (Anniversary Check-In) + Set Rate workflow
+Focus: Verify blocker status → Build weekly rate email template → Post-Calendly workflow
 MASTER: Context loaded. Activating NotebookLM pull.
 ```
 
 ---
 
-
 ## SESSION_END
-- **Datetime**: 2026-04-07 22:15:00
+- **Datetime**: 2026-04-12 22:00:00
 - **Mode**: PM
-- **Session**: Lead Gen PM — Daily 10:00 PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
 
 ```
-SESSION END: 2026-04-07 22:15:00
+SESSION END: 2026-04-12 22:00:00
 Mode: PM
-Focus: PUSH+CURATE — Staleness audit, web research, digest generation
-MASTER: All subagents complete. Session fully logged. NotebookLM PUSH+CURATE complete.
+Focus: PUSH+CURATE — Staleness audit, cleanup duplicates, digest generation
+MASTER: All steps complete. NotebookLM PUSH+CURATE complete.
 ```
 
 NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources added: 5 (CONTEXT.md refresh, FRED API docs, 2 Scotsman Guide refi retention, PM web research)
-Stale sources removed: 9 (Netlify docs ×2, Flip the Script 2018, old CONTEXT.md, PM research Mar 30–Apr 3)
-Web sources added: 3 URLs (FRED API + 2 Scotsman Guide)
-Master log synced: YES (Styer Mortgage Master notebook refreshed)
+Sources removed: 6 (3× CONTEXT.md [stale + duplicates], duplicate mailchimp-execution-pack, notebooklm-audit-2026-04-11.md, FRED API docs [API killed 2026-04-11])
+Sources added: 2 (refreshed CONTEXT.md [post-noon iMessage pipeline commits], notebooklm-audit-2026-04-12.md)
+Web sources added: 0 (at 50/50 capacity after cleanup)
+Final notebook count: 50/50
+Master log: APPENDED + synced to Styer Mortgage Master notebook
 Daily digest: SENT (Zapier status: success)
-Final source count: 57
-Timestamp: 2026-04-07 22:15:00
+Timestamp: 2026-04-12 22:00:00
 SESSION FULLY COMPLETE ✓
 
 ---
 
-
 ## SESSION_END
-- **Datetime**: 2026-04-07 22:00:00
-- **Mode**: PM
-- **Session**: Lead Gen PM — Daily 10:00 PM
-
-```
-SESSION END: 2026-04-07 22:00:00
-Mode: PM
-Focus: PUSH+CURATE — Staleness audit, web research, digest generation
-```
-
----
-
-
-## SESSION_END
-- **Datetime**: 2026-04-07 03:35:00
+- **Datetime**: 2026-04-12 03:45:00
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM
 
 ```
-SESSION END: 2026-04-07 03:35:00
+SESSION END: 2026-04-12 03:45:00
 Mode: AM
-Focus: Refi Watch Unblocking Research
+Focus: Mailchimp Customer Journeys Execution Pack
+MASTER: All steps complete. Set Rate + Seq C still blocked (Adam). Pivoted to Mailchimp journeys. Execution pack built (18 emails, 3 journeys). NotebookLM PUSH complete.
+```
+
+Build artifacts:
+- Execution pack: tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md — 18 emails for 3 Mailchimp Customer Journeys
+
+Refi Watch status: Set Rate ✅ (active, never called), Seq A ✅ (idle — no rate), Seq B ✅, Seq C ⏳ (Adam), Seq D ⏳ (Adam approval)
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 2 (stale CONTEXT.md + 2026-04-07-pm-web-research.md)
+Sources added: 2 (refreshed CONTEXT.md + 2026-04-12-mailchimp-execution-pack.md)
+Web sources added: 0 (at 50/50 capacity)
+Final notebook count: 50/50
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: NOT SENT (AM session — PM session handles digest)
+Timestamp: 2026-04-12 03:45:00
+SESSION FULLY COMPLETE ✓

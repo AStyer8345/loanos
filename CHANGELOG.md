@@ -1,5 +1,29 @@
 # LoanOS Changelog
 
+## 2026-04-14 AM — Lead Gen: Homepage Form Wiring + Calendly Workflow Update
+
+- Wired Quick Quote + Quick Contact homepage forms to subscribe-lead.js (commit `1bb1ef1`, deployed): both now create Mailchimp contacts + LoanOS CRM entries on submit (tags: quick-quote-lead / quick-contact-lead, UTM passthrough, Netlify backup preserved)
+- Updated Calendly n8n workflow `PBu2Zt0YpiLHeqbL` from 8→11 nodes: added event router (invitee.canceled vs invitee.created), cancel branch (logs calendly_canceled to activity_log with cancellation reason), contact lookup (Supabase email → real contact_id on booking log)
+- All 5 Adam-owned blockers still unresolved (6th session on Set Rate); 2 new ADAM-TODO items added
+- NotebookLM: 6 removed, 5 added, 50/50; master log synced to Styer Mortgage Master notebook
+
+## 2026-04-14 AM — Social Media: Week 26 Content Build (Posts 142-146, Sep 2-8)
+
+- Step 1B scan: no new site content detected — GBP distribution skipped
+- Research snapshot: 30-yr PMMS 6.37% (Apr 9, ↓9bps); August NFP Jobs Report (~Sep 4) flagged as Week 26 TIMELY event
+- 5 posts inserted into social_drafts: 2 LI + 1 IG + 2 FB — 1 authority (TIMELY) / 2 personal / 1 real-talk / 1 education
+- Post 143 (Instagram Reel) rewritten during quality pass (closer line 7→8); avg score 8.0/10 (scored posts)
+- Post 145 TIMELY template: 7 placeholders confirmed, NMLS #513013 present; Refresh fills Sep 4 AM after BLS release; Adam approves before Sep 5 2 PM CDT
+- All 5 posts APPROVED, QA 5/5 PASS; BLOCKER-LOANOS-001 still active
+
+## 2026-04-13 PM — Nightly NotebookLM Sync (SEO/SEM + Lead Gen)
+
+- SEO/SEM notebook: removed 3 stale sources (old audit, old CONTEXT.md, superseded SEJ E-E-A-T), added 2 (fresh CONTEXT.md post-competitive-intel + audit-2026-04-13.md); 50/50
+- Lead Gen notebook: removed 5 stale sources (2× CONTEXT.md Apr 12 duplicates, old audit, 2 old PM web research), added 1 (audit-2026-04-13.md); 50/50
+- Master growth log appended (seo-sem-pm + lead-gen-pm entries) + synced to Styer Mortgage Master notebook
+- Both daily digests sent via Zapier (status: success)
+- CONTEXT.md: SEO/SEM + Lead Gen agent status fields updated
+
 ## 2026-04-13 AM — Scenarios: Refi builder pre-fill fix (Tier 5 item 4)
 
 - Fixed semantic bug: refi mode `currentLoan` was pre-filled with the new loan's rate/payment (Arive proposed terms) — not the borrower's existing mortgage
@@ -25,6 +49,14 @@
 - Created n8n workflow `LoanOS — Post-Calendly Booking Automation` (ID: `PBu2Zt0YpiLHeqbL`) — 8 nodes: Calendly webhook → parse → confirmation email → Supabase log → 24hr wait → reminder → 60min post-call wait → follow-up. INACTIVE pending Adam's Calendly webhook setup
 - Verified all Adam-owned blockers still unresolved: Set Rate (0 entries), Seq C (INACTIVE), Mailchimp journeys (not built)
 - Added 2 ADAM-TODO items: rate email Mailchimp setup guide + Calendly workflow activation steps
+
+## 2026-04-13 PM — Social Media: Week 25 built (Posts 137-141)
+
+- Built 5 posts for Week 25 (Aug 26–Sep 1, 2026): 2 LinkedIn + 1 Instagram Reel + 2 Facebook
+- Post 140: PCE TIMELY template (Aug 29), 4 placeholders, NMLS #513013 present; Refresh fills Aug 29 AM after BEA release
+- Rolling Wks 22-25: authority 35% / personal 35% / education 30% — all within ±5% tolerance
+- Pillar mix stable; shifted to 1 authority + 2 personal + 2 edu this week to maintain balance
+- BLOCKER-LOANOS-001 still active (selfies); LoanOS stream remains paused
 
 ## 2026-04-13 AM — Social Media: Week 24 built (Posts 132-136)
 

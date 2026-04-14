@@ -2,6 +2,331 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-14 AM — Lead Generation
+Focus: Builder — Homepage Form Wiring + Calendly Workflow Update
+Type: Execute / Build (Sequence C)
+
+### Completed
+- **Blocker verification (live MCP):** All 5 Adam-owned blockers still unresolved
+  - Set Rate: 0 `refi_rate_update` entries in Supabase (6th consecutive session)
+  - Seq C `LfLSDgqgb6yCe93C`: `active: false` (Outlook cred not connected)
+  - Calendly `PBu2Zt0YpiLHeqbL`: `active: false`, 0 trigger count
+  - Mailchimp journeys: not created in UI (cannot verify directly, no activity)
+  - DPA Guide PDF: not hosted (no change)
+- **NotebookLM PULL:** Ran 4 notebook queries. Confirmed nurture gap #1 blocker; confirmed homepage forms Netlify-only; confirmed Calendly cancel handling and contact lookup were deferred items.
+- **Homepage Form Wiring** — `styerteam-mortgage-site/script.js` modified, deployed (commit `1bb1ef1`):
+  - Quick Quote form (`hero-quick-form`): now calls subscribe-lead.js in parallel with Netlify POST
+    - Tag: `quick-quote-lead`, lead_source: `Quick Quote`, UTM passthrough
+  - Quick Contact form (`quick-contact-form`): now calls subscribe-lead.js in parallel
+    - Tag: `quick-contact-lead`, lead_source: `Quick Contact`, UTM passthrough
+  - Both: Promise.allSettled pattern (same as PA funnel), Netlify backup preserved, graceful error handling
+  - Build report: `tasks/lead-gen/build-reports/2026-04-14-homepage-form-wiring.md`
+  - Quality score: 9/10
+- **Calendly Workflow Update** — `PBu2Zt0YpiLHeqbL` updated from 8 to 11 nodes via n8n REST API:
+  - Added: `Route: Cancel or Booking?` IF node (branches on `event === 'invitee.canceled'`)
+  - Added: `Log Cancellation to Supabase` node — logs `calendly_canceled` + cancellation reason
+  - Added: `Lookup Contact by Email` node — Supabase GET contacts by invitee email, passes contact_id to log node
+  - Updated: `Log Booking to Supabase` — now writes real `contact_id` (or null if no match)
+  - Workflow remains INACTIVE — Adam still must connect Calendly webhook + activate
+  - Build report: `tasks/lead-gen/build-reports/2026-04-14-calendly-workflow-update.md`
+  - Quality score: 9/10
+
+### Deferred
+- **Cancel recovery email** — cancel branch logs only; no outbound email on cancel (requires Adam copy approval)
+- **Cancel-stops-followup** — if booking canceled after booking, existing execution still waits/sends reminders; requires n8n execution correlation (advanced, out of scope)
+- **Set Rate + Seq C + Mailchimp journeys** — all Adam-owned; repeated in ADAM-TODO
+
+### Output Produced
+- Homepage form wiring: `styerteam-mortgage-site/script.js` (deployed to styermortgage.com)
+- Build report: `tasks/lead-gen/build-reports/2026-04-14-homepage-form-wiring.md`
+- Build report: `tasks/lead-gen/build-reports/2026-04-14-calendly-workflow-update.md`
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-04-14.md`
+- Mission brief: `tasks/lead-gen/today-mission.md` updated
+
+### Lead Gen Metrics (updated)
+- Funnels live: 4 (PA, Rate Alert, FTB Guide, FTB DPA) — no change
+- Homepage forms wired to CRM: 2 **NEW** (Quick Quote + Quick Contact — Netlify-only before today)
+- Email sequences active: 0 (Mailchimp journeys still not built in UI)
+- Post-booking automation: 1 (Calendly workflow INACTIVE, now 11 nodes with cancel branch)
+- Weekly rate email: ready to send (template built Apr 13, Adam executes)
+- Estimated leads/month from owned channels: ~5–10 (capture working; nurture still offline)
+
+### Compliance Checks Passed
+- Homepage form wiring: TCPA checkboxes already present on both forms ✅, no SMS ✅, no guaranteed-approval language ✅
+- Calendly cancel branch: email-only ✅, NMLS #513013 in existing emails ✅, no protected class targeting ✅
+- Contact lookup: internal Supabase query only ✅, no PII exposure ✅
+
+### Quality Ratings
+Research: N/A | Strategy: N/A | Execution: 5 (2 artifacts) | Review: N/A | QA: 5
+
+### BLOCKERS (updated — no change from Apr 13)
+- BLOCKER-ADAM-001: Set Rate webhook never called — 6th consecutive session
+- BLOCKER-ADAM-002: Seq C INACTIVE — Outlook credential not connected
+- BLOCKER-ADAM-003: Seq D awaiting copy approval (irreversible, 644 contacts)
+- BLOCKER-ADAM-004: Mailchimp journeys not created — requires Adam in Mailchimp UI (~45 min)
+- BLOCKER-ADAM-005: DPA Guide PDF not hosted — blocks FTB DPA Journey Email 1
+- BLOCKER-ADAM-006: Calendly workflow INACTIVE — Adam must configure Calendly webhook + activate
+
+### Next Session Instructions
+Priority 1: **Verify Adam progress** — check `refi_rate_update` in activity_log (Set Rate), check `PBu2Zt0YpiLHeqbL` active status (Calendly), check Mailchimp for any journeys.
+Priority 2: **Database nurture reactivation** — 644 past clients, 6+ sessions with zero refi outreach. Build a manual override: allow Adam to POST a rate to Set Rate webhook directly (simple curl command). Also prep Seq A test with a single contact.
+Priority 3: **Calendly signing key verification** — add HMAC check node before route node (medium-term security debt).
+Priority 4: **BLOCKER-001 homepage form TCPA** — SMS opt-in language gap on Quick Quote/Quick Contact (Bug-003). Low risk, good hygiene.
+
+Advance queue to next topic: NO — Adam-owned blockers still dominate. Agent-executable queue nearly exhausted; next natural cycle is Seq A test prep.
+
+---
+## Session: 2026-04-13 AM — Lead Generation
+Focus: Builder — Weekly Rate Email Template + Post-Calendly Booking Automation
+Type: Execute / Build (Sequence C)
+
+### Completed
+- **Blocker verification:** All 4 Adam-owned blockers confirmed still unresolved
+  - Set Rate: 0 `refi_rate_update` entries in Supabase activity_log
+  - Seq C (`LfLSDgqgb6yCe93C`): INACTIVE — Outlook credential not connected
+  - Seq D: INACTIVE — copy approval pending
+  - Mailchimp journeys: not created in UI
+- **NotebookLM PULL:** Ran 3 notebook queries. Confirmed nurture gap as #1 blocker; confirmed no existing Calendly workflow; confirmed no rate email template existed.
+- **Weekly Rate Email Template** — built complete Mailchimp-ready HTML template:
+  - File: `tasks/lead-gen/build-reports/2026-04-13-rate-email-template.md`
+  - Dark bg (#0a0a0a) + gold (#C9A84C) + IBM Plex Mono — matches LoanOS brand
+  - Rate cards: 30-yr Fixed / 15-yr Fixed / 5/1 ARM, each with APR field
+  - Market context block (gold left-border callout)
+  - Calendly CTA as primary (not application link — better for cold rate-watch audience)
+  - CAN-SPAM footer: NMLS #513013, Equal Housing Lender, physical address, unsubscribe (*|UNSUB|*)
+  - Reg Z disclaimer: "Not a commitment to lend" language
+  - Weekly fill-in table: 7 fields to update each Friday AM
+  - Mailchimp setup guide: step-by-step for first send
+  - Quality score: 9/10
+- **Post-Calendly Booking Automation** — built n8n workflow via REST API:
+  - Workflow ID: `PBu2Zt0YpiLHeqbL` — Name: "LoanOS — Post-Calendly Booking Automation"
+  - Status: INACTIVE (pending Adam's Calendly webhook setup + activation)
+  - Webhook path: `https://styer.app.n8n.cloud/webhook/calendly-booking`
+  - 8 nodes: Calendly webhook → Extract Data (Code) → Confirmation email (Outlook) → Supabase log → Wait (24hr before) → Reminder email → Wait (60min post-call) → Follow-up email
+  - All 3 emails include NMLS #513013, Equal Housing Lender, physical address
+  - Code node computes reminderTime and followUpTime from Calendly payload startTime/endTime
+  - Activity log: `action: "calendly_booking"`, `event_type: "calendly_booking"`
+  - Quality score: 8/10
+- **ADAM-TODO:** Added 2 new items (rate email first send, Calendly workflow activation steps)
+
+### Deferred
+- **Calendly signing key verification** — webhook accepts all POSTs without HMAC check; low risk now but flag for future hardening
+- **Cancel handling** — no `invitee.canceled` branch; reminder/follow-up will fire on cancelled bookings (edge case, low risk)
+- **Contact matching** — Supabase log writes `contact_id: null`; future improvement would look up invitee email in contacts table
+- **Homepage form wiring** — Quick Quote + Quick Contact forms still Netlify-only (BLOCKER-001)
+- **Set Rate + Seq C + Mailchimp journeys** — all Adam-owned; surfaced again in ADAM-TODO
+
+### Output Produced
+- Rate email template: `tasks/lead-gen/build-reports/2026-04-13-rate-email-template.md`
+- Calendly workflow build report: `tasks/lead-gen/build-reports/2026-04-13-calendly-workflow-build.md`
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-04-13.md`
+- Mission brief: `tasks/lead-gen/today-mission.md` updated
+
+### Lead Gen Metrics (unchanged — no live changes)
+- Funnels live: 4 (PA, Rate Alert, FTB Guide, FTB DPA) — no change
+- Email sequences active: 0 (Mailchimp journeys still not built in UI)
+- Post-booking automation: 1 (Calendly workflow built but INACTIVE)
+- Weekly rate email: ready to send (template built, Adam executes)
+- Estimated leads/month from owned channels: ~5–10 (capture working; nurture still offline)
+
+### Compliance Checks Passed
+- Rate email template: NMLS #513013 ✅, Equal Housing Lender ✅, CAN-SPAM ✅, Reg Z ✅, no guaranteed-approval language ✅
+- Calendly workflow: Email-only (no SMS) ✅, NMLS #513013 in all 3 emails ✅, Equal Housing Lender ✅, physical address ✅, no protected class targeting ✅, no guaranteed-approval language ✅
+
+### Quality Ratings
+Research: N/A | Strategy: 5 | Execution: 5 (2 artifacts built, deployed) | Review: N/A | QA: 5
+
+### BLOCKERS (updated)
+- BLOCKER-ADAM-001: Set Rate webhook never called — Seq A runs daily but idle (0 entries)
+- BLOCKER-ADAM-002: Seq C INACTIVE — Outlook credential not connected
+- BLOCKER-ADAM-003: Seq D awaiting copy approval (irreversible, 644 contacts)
+- BLOCKER-ADAM-004: Mailchimp journeys not created — requires Adam in Mailchimp UI (~45 min)
+- BLOCKER-ADAM-005: DPA Guide PDF not hosted — blocks FTB DPA Journey Email 1
+- BLOCKER-ADAM-006 (NEW): Calendly workflow INACTIVE — Adam must configure Calendly webhook + activate `PBu2Zt0YpiLHeqbL`
+
+### Next Session Instructions
+Priority 1: **Verify Adam progress** — check activity_log for refi_rate_update (Set Rate), check `PBu2Zt0YpiLHeqbL` active status (Calendly), check Mailchimp for any journeys.
+Priority 2: **Homepage form wiring** — Quick Quote + Quick Contact forms on styermortgage.com still route to Netlify only (not subscribe-lead.js). Bundle with BLOCKER-001 fix. This is agent-executable.
+Priority 3: **Calendly invitee.canceled workflow** — build simple cancel-handling branch (log cancellation + optional re-book recovery email). Agent-executable.
+Priority 4: **Contact matching for Calendly log** — add Supabase contact lookup in workflow so booking logs link to real contact_id. Agent-executable.
+
+Advance queue to next topic: NO — Mailchimp journeys still pending Adam action. Focus on agent-executable builds.
+
+---
+## Session: 2026-04-12 AM — Lead Generation
+Focus: Mailchimp Customer Journeys — Nurture Gap Closure
+Type: Strategy + Build (Sequence C)
+
+### Completed
+- Confirmed Set Rate webhook still never called: zero `refi_rate_update` entries in Supabase activity_log (corrected column name from `action_type` → `action`)
+- Confirmed Seq C (Quarterly Rate Review) still INACTIVE via n8n MCP — Adam has not connected Outlook + activated
+- Pivoted to Mailchimp Customer Journeys per CONTEXT.md guidance (2nd consecutive AM session with same Adam-owned blockers)
+- Ran NotebookLM PULL — confirmed "Nurture Gap" is #1 revenue blocker (all 3 journeys unbuilt; leads captured but zero follow-up)
+- Wrote comprehensive Mailchimp Execution Pack: `tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md`
+  - All 3 journeys fully documented with email-ready copy (18 emails total)
+  - Journey 1: Pre-Approval Welcome Series (6 emails, Days 0/3/7/14/30/60)
+  - Journey 2: Rate Watch Welcome Series (4 emails, Days 0/3/7/14)
+  - Journey 3: FTB DPA Guide Welcome Series (8 emails, Days 0/2/5/10/17/25/38/52)
+  - Step-by-step Mailchimp UI guide (~45 min for all 3 journeys)
+  - Compliance checklist: NMLS #513013, Equal Housing Lender, CAN-SPAM footer, no guaranteed-approval language
+  - Standard email footer HTML ready to paste
+
+### Deferred
+- Mailchimp journey CREATION — requires Adam UI access (cannot create journeys via Mailchimp API)
+- Set Rate webhook call — Adam must POST current rate; blocked until then
+- Seq C activation — Adam must connect Outlook credential
+- Seq D warm-up trigger — Adam must approve email copy
+
+### Output Produced
+- Build report: `tasks/lead-gen/build-reports/2026-04-12-mailchimp-execution-pack.md` — 18 emails + setup guide + compliance checklist
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-04-12.md`
+- Mission brief: `tasks/lead-gen/today-mission.md` updated
+
+### Lead Gen Metrics (unchanged — no live changes)
+- Funnels live: 4 (PA, Rate Alert, FTB Guide, FTB DPA) — no change
+- Email sequences active: 0 (Mailchimp journeys still not built in UI)
+- Estimated leads/month from owned channels: ~5–10 (capture working; nurture still offline)
+
+### Compliance Checks Passed
+- Execution Pack: all 18 emails include NMLS #513013, Equal Housing Lender, physical address, no guaranteed-approval language
+- No SMS content (email-only funnels)
+- Tag-based segmentation (no protected class targeting)
+
+### Quality Ratings
+Research: 4 | Strategy: 5 | Execution: 5 (pack complete, ready for Adam) | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- The Mailchimp Customer Journeys API does NOT support journey creation programmatically — only triggering existing journeys. The original spec note "cannot be done via API" remains correct as of 2026-04.
+- Future sessions: once journeys exist in Mailchimp, the n8n Mailchimp node CAN add tags + trigger journeys programmatically. The UI bottleneck is one-time.
+
+### BLOCKERS (unchanged from prior session)
+- BLOCKER-ADAM-001: Set Rate webhook never called — Seq A runs daily but finds no rate
+- BLOCKER-ADAM-002: Seq C INACTIVE — Outlook credential not connected
+- BLOCKER-ADAM-003: Seq D awaiting copy approval (irreversible, 644 contacts)
+- BLOCKER-ADAM-004: Mailchimp journeys not created — requires Adam in Mailchimp UI (~45 min)
+- BLOCKER-ADAM-005: DPA Guide PDF not hosted — blocks FTB DPA Journey Email 1
+
+### Next Session Instructions
+Priority 1: **Verify blockers resolved** — check if any Adam-TODO items are completed (Set Rate, Seq C, Mailchimp journeys)
+Priority 2: **Weekly rate email template** — build a reusable Friday rate email template for Mailchimp (can be done without UI access — draft the template HTML for Adam to paste)
+Priority 3: **Post-Calendly workflow** — research/build n8n workflow for post-booking automation (confirm call, reminder, post-call follow-up)
+Priority 4: **Homepage form wiring** — Quick Quote + Quick Contact forms still Netlify-only (BLOCKER-001 partial fix)
+
+Advance queue to next topic: NO — Mailchimp journeys still pending Adam action. Next session: verify Adam progress + continue on adjacent builder work.
+
+---
+## Session: 2026-04-11 AM — Lead Generation
+Focus: Refi Watch Maintenance — Seq D bug fix + verification
+Type: Execute / Build (Sequence C — maintenance)
+
+### Completed
+- Loaded NotebookLM PULL — confirmed Seq D bug as Priority 1; Set Rate not yet called
+- Fixed Seq D org_id bug (workflow `W0K4YDzkZd0Hzv6g`) via n8n REST API: corrected org_id in 3 nodes:
+  - "Get All Past Clients" — `org_id` query param
+  - "Get Already Touched" — `organization_id` query param
+  - "Log Warm-Up Send" — `organization_id` in POST body
+  - Previous bug: `45a5b7e8-7c4d-4e2a-9f11-123456789abc` → Fixed: `18613f82-fdd9-42dd-a09e-f3c577328258`
+  - Verified: 0 wrong org_id occurrences, 3 correct occurrences after PUT
+- Verified all 5 Refi Watch workflow statuses:
+  - Set Rate (`3iXImUkjgMitpJKt`) ✅ ACTIVE
+  - Seq A (`iyKFy0ODkyyqQaAS`) ✅ ACTIVE — triggerCount: 1
+  - Seq B (`ZUeGy8u8P4o6DPM3`) ✅ ACTIVE — triggerCount: 1
+  - Seq C (`LfLSDgqgb6yCe93C`) ⏳ INACTIVE — waiting for Adam to activate (Outlook credential)
+  - Seq D (`W0K4YDzkZd0Hzv6g`) ⏳ INACTIVE — bug fixed, now safe; waiting for Adam to trigger
+- End-to-end verification: Queried Supabase activity_log
+  - `refi_rate_update` entries: **0** — Set Rate webhook has never been called with a valid rate
+  - `rate_drop_alert` entries: 0 — Seq A ran once (triggerCount:1) but found no rate and stopped
+  - `anniversary_checkin` entries: 0 — expected (Seq B first run May 1)
+  - Confirmed: `contact_id` is nullable in activity_log — Set Rate insert would work if webhook is called
+- Added ADAM-TODO items: (1) Set Rate webhook call with current rate, (2) Seq D ready-to-trigger notice
+- Marked ADAM-TODO Seq D bug item as [x] complete
+
+### Critical Finding — Seq A Is Effectively Idle
+Seq A runs daily at 7am CT but finds no rate in activity_log. The workflow stops at "Get Current Rate" because there are no `refi_rate_update` entries. **No rate drop alerts have been sent to any past client.** The entire Refi Watch alert system is dormant until Adam POSTs a rate.
+
+### Refi Watch Workflow Index (current)
+| Sequence | n8n ID | Status |
+|----------|--------|--------|
+| Set Rate webhook | `3iXImUkjgMitpJKt` | ✅ ACTIVE — not yet called |
+| Sequence A — Rate Drop Alert | `iyKFy0ODkyyqQaAS` | ✅ ACTIVE — idle (no rate set) |
+| Sequence B — Anniversary Check-In | `ZUeGy8u8P4o6DPM3` | ✅ ACTIVE — first run May 1 |
+| Sequence C — Quarterly Rate Review | `LfLSDgqgb6yCe93C` | ⏳ INACTIVE — pending Adam activation |
+| Sequence D — Pre-Drop Warm-Up | `W0K4YDzkZd0Hzv6g` | ⏳ INACTIVE — bug fixed, pending Adam trigger |
+
+### Deferred
+- Mailchimp Customer Journeys: still on Adam (guide in research files, surfaced 6+ sessions)
+- FRED API key: not needed (Option A covers current use case)
+- Seq C activation: Adam must connect Outlook credential + toggle active
+
+### Compliance Checks Passed
+- TCPA: ✅ No SMS — email only
+- CAN-SPAM: ✅ (verified in prior sessions — physical address, reply STOP in all emails)
+- NMLS #513013: ✅ All workflows
+- Equal Housing Lender: ✅ All workflows
+
+### Next Session Instructions
+Priority 1: **Confirm Set Rate has been called** — check activity_log for `refi_rate_update` entries. If still 0, re-surface in ADAM-TODO.
+Priority 2: **Check Seq A execution history** — if Set Rate is now set AND market rate ≤ 6.00% is crossed, verify rate_drop_alert entries in activity_log.
+Priority 3: **Seq C activation status** — check if Adam has activated `LfLSDgqgb6yCe93C`. If active 2+ sessions, move on to next domain queue item.
+Priority 4: **Domain queue next item** — Mailchimp Customer Journeys remain the largest unbuilt piece of the lead gen system. Consider shifting focus to building those (but they require Adam's Mailchimp API access or manual UI build).
+
+---
+## Session: 2026-04-10 AM — Lead Generation
+Focus: Refi Watch Sequence C (Quarterly Rate Review)
+Type: Execute / Build (Sequence C)
+
+### Key Finding — Workflow Activation Status Change
+Adam activated 3 workflows between 2026-04-09 AM and 2026-04-10 AM (verified via n8n MCP):
+- ✅ Set Rate webhook (`3iXImUkjgMitpJKt`) — now ACTIVE (was inactive)
+- ✅ Sequence A — Rate Drop Alert (`iyKFy0ODkyyqQaAS`) — now ACTIVE (was inactive)
+- ✅ Sequence B — Anniversary Check-In (`ZUeGy8u8P4o6DPM3`) — now ACTIVE (was inactive)
+- ⏳ Sequence D — Pre-Drop Warm-Up (`W0K4YDzkZd0Hzv6g`) — still INACTIVE (waiting for Adam)
+
+### Completed
+- Loaded NotebookLM PULL — confirmed Sequences A/B/Set Rate now active; Seq C as next build target
+- Verified n8n workflow statuses via MCP — all 3 previously inactive workflows now active
+- Marked Adam's Outlook/Seq A/Seq B activation items as [x] in ADAM-TODO.md
+- Built n8n workflow: **LoanOS — Refi Watch Quarterly Rate Review** (ID: `LfLSDgqgb6yCe93C`)
+  - 12 nodes: Quarterly CRON (Jan/Apr/Jul/Oct 1 at 8am CT) → Get All Past Clients → Filter (no email_opt_out, no test) → Any Eligible? (IF) → Process Each Client (SplitInBatches) → Check 90-Day Silence (activity_log multi-action dedup) → Not Recently Touched? (IF) → Build Quarterly Review Email (JS: personalized HTML, market snapshot, no savings calc) → Send Quarterly Review (Outlook) → Log Quarterly Review (activity_log, action=quarterly_rate_review) → Wait 2s → (done branch) Notify Adam
+  - 90-day dedup covers ALL refi actions: rate_drop_alert, anniversary_checkin, refi_warmup, quarterly_rate_review
+  - CAN-SPAM: physical address, NMLS #513013, Equal Housing Lender, reply STOP, Reg Z disclaimer
+  - INACTIVE — Outlook credential must be verified on "Send Quarterly Review" node before activation
+- Added 2 ADAM-TODO items: (1) activate Seq C, (2) fix Seq D org_id bug
+- Detected and flagged Sequence D bug: org_id `45a5b7e8-...` in Get All Past Clients node is wrong (should be `18613f82-...`). This would cause Seq D to find 0 clients if triggered. Flagged in ADAM-TODO — NOT fixed this session.
+- Build report: `tasks/lead-gen/build-reports/2026-04-10-seq-c-quarterly-rate-review-build.md`
+
+### Build Note: n8n MCP SDK Broken
+`validate_workflow` and `create_workflow_from_code` tools return "builder.regenerateNodeIds is not a function" on every call — even an empty workflow. Workflow created via n8n REST API directly (`POST /api/v1/workflows`). SDK bug should be reported.
+
+### Refi Watch Workflow Index (complete — all 5)
+| Sequence | n8n ID | Status |
+|----------|--------|--------|
+| Set Rate webhook | `3iXImUkjgMitpJKt` | ✅ ACTIVE |
+| Sequence A — Rate Drop Alert | `iyKFy0ODkyyqQaAS` | ✅ ACTIVE (daily 7am CT) |
+| Sequence B — Anniversary Check-In | `ZUeGy8u8P4o6DPM3` | ✅ ACTIVE (monthly, 1st) |
+| Sequence C — Quarterly Rate Review | `LfLSDgqgb6yCe93C` | ⏳ INACTIVE — verify Outlook |
+| Sequence D — Pre-Drop Warm-Up | `W0K4YDzkZd0Hzv6g` | ⏳ INACTIVE — has org_id bug, needs Adam |
+
+### Deferred
+- Sequence D org_id fix: flagged in ADAM-TODO, no build session needed — Adam can fix in n8n UI or agent fixes next session
+- Mailchimp Customer Journeys: still on Adam (step-by-step guide in research files)
+- LO Waitlist deploy + Seq C activation: both pending Adam actions
+
+### Compliance Checks Passed
+- TCPA: ✅ Email only, no SMS
+- CAN-SPAM: ✅ Physical address + reply STOP in every email
+- NMLS #513013: ✅ In signature
+- Equal Housing Lender: ✅ In footer
+- Reg Z: ✅ "Not an offer to lend, rates approximate"
+- No guaranteed approval language: ✅ Verified
+- No protected class targeting: ✅ Segmentation is date/email-based only
+
+### Next Session Instructions
+Priority 1: **Fix Sequence D org_id bug** (`W0K4YDzkZd0Hzv6g`, node "Get All Past Clients" — change org_id from `45a5b7e8-...` to `18613f82-...` via update_workflow or REST API). Then flag in ADAM-TODO that Seq D is ready to trigger.
+Priority 2: **Verify Seq C Outlook credential** — check if Adam activated Seq C. If yes, mark complete.
+Priority 3: **End-to-end test** — if Set Rate has been called, check activity_log for `refi_rate_update` entries and confirm Seq A execution history shows at least 1 run.
+
+---
 ## Session: 2026-04-09 AM — Lead Generation
 Focus: Refi Watch Builder — Sequence A (Rate Drop Alert) + Sequence D (Pre-Drop Warm-Up)
 Type: Execute / Build

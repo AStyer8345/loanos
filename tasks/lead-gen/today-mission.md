@@ -1,47 +1,45 @@
-## Mission Brief — 2026-04-08 AM
+## Mission Brief — 2026-04-14 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-Refi Watch Builder — Sequence B (Anniversary Check-In) + Set Rate webhook
+Agent-executable builds: Homepage form wiring + Calendly enhancements
 
 ### Session Type
-[ ] Research + Planning (Sequence A)
-[ ] Strategy / Architecture (Sequence B)
-[x] Execute / Build (Sequence C — partial)
-[ ] Full Cycle (Sequence D)
+[x] Execute / Build (Sequence C)
 
-### Why Partial Sequence C (not full)
-Top blockers remain with Adam:
-1. Refi Watch Sequences A and D: FRED API key not registered, email copy not approved
-2. LO Waitlist: copy not reviewed, not deployed, n8n workflow inactive
+### Background
+All 5 Adam-owned blockers confirmed still unresolved (2026-04-14 03:00 AM check):
+- Set Rate: 0 refi_rate_update entries (6th consecutive session)
+- Seq C `LfLSDgqgb6yCe93C`: INACTIVE — Outlook cred not connected
+- Calendly workflow `PBu2Zt0YpiLHeqbL`: INACTIVE — Adam hasn't configured Calendly webhook
+- Mailchimp journeys: not created in UI
+- DPA Guide PDF: not hosted
 
-However, **Sequence B (Anniversary Check-In)** is fully unblocked:
-- No rate source dependency (email is conversational, not rate-specific)
-- Email copy is finalized in spec
-- No irreversible action (workflow built but NOT activated)
-- First run would be May 1, 2026 — building today is timely
-- `Set Rate` webhook workflow is also unblocked (no Adam input needed to build)
+Pivoting to agent-executable builder work per session-log next-session instructions.
 
 ### Objectives
-1. Confirm Supabase `activity_log` schema supports Refi Watch logging fields
-2. Build n8n workflow: `LoanOS — Refi Watch Anniversary Check-In` (INACTIVE — needs Adam approval before first run)
-3. Build n8n workflow: `LoanOS — Refi Watch Set Rate` (webhook to store current 30-yr rate; Adam uses to set rate before Sequence A activates)
+1. Wire styermortgage.com Quick Quote + Quick Contact homepage forms to subscribe-lead.js (CRM + Mailchimp)
+2. Add invitee.canceled branch to Calendly workflow `PBu2Zt0YpiLHeqbL` (cancel log + optional re-book recovery email)
+3. Add Supabase contact lookup to Calendly workflow so booking logs link to real contact_id
 
 ### Definition of Done
-- Supabase schema confirmed: `activity_log` has `loan_id`, `activity_type`, `notes`, `created_at`
-- Anniversary Check-In workflow created in n8n, INACTIVE, with warning note
-- Set Rate webhook workflow created in n8n, INACTIVE
-- ADAM-TODO updated with new action items
-- Session log updated
+- Quick Quote form: submission hits subscribe-lead.js, logs to Mailchimp (tag: quick-quote-lead), logs to LoanOS activity_log
+- Quick Contact form: submission hits subscribe-lead.js, logs to Mailchimp (tag: quick-contact-lead), logs to LoanOS activity_log
+- Calendly workflow `PBu2Zt0YpiLHeqbL`: updated with cancel branch (log cancellation action) and contact lookup node (match on email)
+- Build reports written for each artifact
+- All compliance checks pass (NMLS #513013, Equal Housing Lender, no protected class targeting)
 
 ### Resources / Files in Scope
-- `tasks/lead-gen/specs/2026-04-05-refi-watch-funnel-spec.md` — Refi Watch spec (Sequences A/B/D)
-- Supabase project: uuqedsvjlkeszrbwzizl (MCP)
-- n8n instance: styer.app.n8n.cloud (MCP)
+- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/index.html` — homepage
+- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/script.js` — form handlers
+- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/netlify/functions/subscribe-lead.js` — Netlify function
+- n8n workflow `PBu2Zt0YpiLHeqbL` — Post-Calendly Booking Automation
+- Supabase project `uuqedsvjlkeszrbwzizl` — activity_log + contacts table
 
 ### HIGH RISK Items
-- Do NOT activate either workflow — both must remain INACTIVE until Adam approves
-- Do NOT build Sequence D (Pre-Drop Warm-Up) — requires Adam email copy approval (irreversible blast to 644 clients)
-- Do NOT build Sequence A (Rate Drop Alert) — requires FRED API key in n8n env
+- Homepage form wiring touches live site (styermortgage.com) — must not break existing Netlify form submissions
+- Calendly workflow update is INACTIVE — safe to modify (zero live traffic)
+- No SMS triggers anywhere in scope — TCPA risk = LOW
+- subscribe-lead.js already handles tag-based routing — new tags (quick-quote-lead, quick-contact-lead) won't conflict

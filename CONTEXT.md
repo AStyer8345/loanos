@@ -92,30 +92,30 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-13 AM — Week 24 built (Posts 132-136, Aug 19-25): 2 LI + 1 IG + 2 FB. 3 authority / 1 personal / 1 education. Avg 8.0/10. All APPROVED. QA 5/5 PASS. Post 136 TIMELY Jackson Hole template: 4 placeholders, NMLS #513013 present, Refresh fills Aug 24 AM. Rolling Wks 21-24: authority 35% / personal 35% / education 30% — all within ±5% tolerance.
+**Last worked on:** 2026-04-14 AM — Week 26 built (Posts 142-146, Sep 2-8): 2 LI + 1 IG + 2 FB. 1 authority (TIMELY Jobs) / 2 personal / 1 real-talk / 1 education. Avg 8.0/10 (scored posts). All APPROVED. QA 5/5 PASS. Post 145 TIMELY Jobs Report template: 7 placeholders, NMLS #513013 present, Refresh fills Sep 4 AM. Post 143 Reel: Adam films before Sep 3.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: Adam approve before April 15 (2 days remaining — URGENT). Post 136 TIMELY Jackson Hole: Adam approve after Refresh fills ~Aug 24. Posts 29+30 Liberation Day: decision due April 28 (15 days).
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: deadline April 15 — TODAY (URGENT). Post 145 TIMELY Jobs: Adam approve after Refresh fills ~Sep 4. Post 140 TIMELY PCE: Adam approve ~Aug 29. Post 136 TIMELY Jackson Hole: Adam approve ~Aug 24. Posts 29+30 Liberation Day: decision due April 28 (14 days).
 
-**What's next:** Week 25 build (Posts 137-141). Authority correction on track — continue 2-3 authority posts/week. BLOCKER-LOANOS-001 gate check each AM session. Post 39 hard deadline April 15.
+**What's next:** Week 27 build (Posts 147-151, Sep 9-15). Slight personal over-index in Wk 26 — prioritize education/real-talk. BLOCKER-LOANOS-001 gate check each AM session. Post 39 hard deadline TODAY.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-13 AM — Built weekly Friday rate email HTML template (Mailchimp-ready, all 3 rate types + APR, CAN-SPAM compliant). Built n8n Post-Calendly Booking Automation (ID: `PBu2Zt0YpiLHeqbL`, INACTIVE): 8-node chain — Calendly webhook → confirmation email → Supabase log → 24hr wait → reminder → post-call follow-up. All 4 Adam-owned blockers still unresolved.
+**Last worked on:** 2026-04-14 AM — Homepage Quick Quote + Quick Contact forms wired to subscribe-lead.js (commit `1bb1ef1`, deployed to styermortgage.com). Calendly workflow `PBu2Zt0YpiLHeqbL` updated from 8→11 nodes: cancel branch (log invitee.canceled) + contact lookup (email→contact_id). Notebook: 6 removed (old pull, audit, web research ×2, session-log, CONTEXT), 5 added (new pull, 2 build reports, session-log, CONTEXT). 50/50. Digest: NOT SENT (AM — PM handles).
 
-**Active blockers:** (1) Set Rate webhook never called — Seq A idle (0 refi_rate_update entries confirmed). (2) Seq C INACTIVE — Outlook cred not connected. (3) Mailchimp journeys not built (execution pack ready, 45 min). (4) DPA Guide PDF not hosted. (5) Calendly workflow INACTIVE — Adam must configure Calendly webhook + activate `PBu2Zt0YpiLHeqbL`.
+**Active blockers:** (1) Set Rate webhook never called — 6th session, Seq A idle. (2) Seq C INACTIVE — Outlook cred. (3) Mailchimp journeys not built (18-email pack ready, 45 min). (4) DPA Guide PDF not hosted. (5) Calendly webhook not configured — activate `PBu2Zt0YpiLHeqbL`.
 
-**What's next:** PM session (NotebookLM PUSH+CURATE + digest). Next AM: verify Adam progress on Set Rate + Mailchimp journeys. Consider homepage form wiring (BLOCKER-001 partial — Quick Quote/Contact forms still Netlify-only).
+**What's next:** Verify Adam blocker progress. If Set Rate still unresolved, build Seq A manual test prep (single-contact test). Calendly signing key HMAC verification (medium-term security debt). TCPA SMS language gap on homepage forms (Bug-003, low risk).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-10 PM — NotebookLM PUSH+CURATE. AM session: AEO optimization on doc checklist (answer-first paragraph + 2 H2 rewrites), city enrichment for New Braunfels + Lakeway (15/25 suburb pages complete), FHA Loan Requirements Texas 2026 blog post published (3 social drafts queued), GSC stale indexing flag removed (suburb pages confirmed indexed). Notebook: 2 removed (404 FHA URL added before page was live, superseded Apr 8 audit), 1 added (audit-2026-04-10.md). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-13 PM — NotebookLM PUSH+CURATE. MAJOR: styermortgage.com achieved first top-10 ranking — #3 for "hutto tx mortgage lender" (Competitive Intel Week 6, commit 36a6b28). MortgageAustin.com identified as new rising competitor at #3 for "mortgage broker austin tx" with decision-stage blog content. Notebook: 3 removed (old audit, old CONTEXT.md, superseded SEJ E-E-A-T), 2 added (fresh CONTEXT.md post-competitive-intel, audit-2026-04-13.md). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC 90-day export overdue — keyword prioritization inference-based. FHA blog URL removed from notebook (was 404 at indexing time — re-add once page is confirmed indexed). Liberty Hill + Elgin are 2 remaining suburb pages without at-a-glance enrichment.
+**Active blockers:** GSC sitemap submission for 15 rate-check pages (Adam-owned — needs GSC login). Hutto page needs AEO strengthening + schema update (AggregateRating 91+ reviews). Liberty Hill + Elgin still need enrichment (2 remaining suburb pages).
 
-**What's next:** City enrichment for Liberty Hill + Elgin (2 remaining — completes 25/25). Verify FHA blog deploy on Netlify + re-add to notebook. GSC April 10 window: check "How to Choose a Lender" impressions (published Apr 1). Adam: pull GSC export.
+**What's next:** Strengthen Hutto page with AEO Atomic Paragraph + AggregateRating schema update (91+ reviews). Audit + strengthen /mortgage-broker-vs-bank.html to compete with MortgageAustin.com. Adam: submit GSC sitemap for 15 rate-check pages.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->

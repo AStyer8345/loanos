@@ -6,7 +6,10 @@ import PreviewPanel from './PreviewPanel'
 import { type MCCState, type LogEntry } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
 
-const NETLIFY_URL = 'https://styermortgage.com/.netlify/functions/generate-newsletter'
+// Same-origin proxy — see /api/marketing/newsletter/route.ts. Proxying avoids
+// a cross-origin fetch to styermortgage.com which requires CSP connect-src
+// allowances. Previously this was direct to the Netlify function URL.
+const NETLIFY_URL = '/api/marketing/newsletter'
 const GOLD = 'var(--primary)'
 
 type NLPreview = {

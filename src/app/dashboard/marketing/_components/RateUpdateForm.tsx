@@ -7,7 +7,8 @@ import { aprForProduct, buildRatesString } from '@/lib/marketing/utils'
 import { DEFAULT_RATE_ROWS, type RateRow, type MCCState, type LogEntry } from '@/lib/marketing/types'
 import { TRACKERS } from '@/lib/marketing/schedule'
 
-const NETLIFY_URL = 'https://styermortgage.com/.netlify/functions/generate-rate-update'
+// Same-origin proxy — see /api/marketing/rate-update/route.ts.
+const NETLIFY_URL = '/api/marketing/rate-update'
 const GOLD = 'var(--primary)'
 
 type RatePreview = {

@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-14 AM — Scenarios: Social Proof Block on Share Page (Tier 5 item 5)
+
+- Built `SocialProofBlock.tsx` — illustrative market context widget between NarrativeCard and BreakEvenVisual on share page
+- Stats adapt to purchase vs refi mode and loan term from scenario rows (e.g., "247 Austin buyers chose a 30-year fixed last month")
+- Date-seeded counts (stable per calendar week) — no API call, no DB dependency
+- Compliance: "Illustrative · Based on national market trends" disclaimer; no product recommendation
+- `print:hidden` — not included in PDF output; pure share page feature
+- Build ✅ PASS | Commit: 31cc731 | Vercel: dpl_6YGVKahEwejJNMR1npiK8JE8NxKb → READY
+- Tier 5 COMPLETE — all 5 items done; Scenarios queue now fully exhausted through Tier 5
+
 ## 2026-04-14 AM — Lead Gen: Homepage Form Wiring + Calendly Workflow Update
 
 - Wired Quick Quote + Quick Contact homepage forms to subscribe-lead.js (commit `1bb1ef1`, deployed): both now create Mailchimp contacts + LoanOS CRM entries on submit (tags: quick-quote-lead / quick-contact-lead, UTM passthrough, Netlify backup preserved)

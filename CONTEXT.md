@@ -120,20 +120,20 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-13 AM — Refi builder pre-fill fix (Tier 5 item 4). Fixed semantic bug: current loan section was pre-filled with new loan's rate/payment (wrong). Now: currentPayoffBalance = loan_amount, rate/amount/startDate blank for LO to enter. Refi scenario pre-fills newLoanAmount + interestRate + loanTerm from Arive. Gold info banner in builder when opened from loan record. Commit 08b4378 | Vercel dpl_BUbTcnjj4gLDxeHeA8Kgjk6xCNXi BUILDING.
+**Last worked on:** 2026-04-14 AM — Social proof block (Tier 5 item 5). New SocialProofBlock component on share page — illustrative market context stats, date-seeded, adapts to mode + loan term, print:hidden, compliance disclaimer. Tier 5 COMPLETE (all 5 items done). Commit 31cc731 | Vercel dpl_6YGVKahEwejJNMR1npiK8JE8NxKb READY.
 
 **Active blockers:** None.
 
-**What's next:** Social proof block (Tier 5 item 5) — "X borrowers in Austin chose a 30yr fixed this month" — illustrative, compliance-safe, share page only.
+**What's next:** Tier 5 complete — define Tier 6 or redirect to GOALS.md #1 (email automation). Candidate Tier 6 items: DetailAccordion cleanup (remove redundant "Full Scenario Comparison"), borrower-facing AI chat on share page (biggest remaining MC gap), mobile builder speed.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-13 — Day 19 standup. Vercel READY (dpl_HawZvbuLAefvw84Gtvy9cu9iCozY). n8n: 31 total, 26 active. 2 new workflows since Day 18 (Rate Check Form active; Post-Calendly Booking inactive). Review request polling workflow deactivated (was wasting 1,440 exec/month). No audit findings.
+**Last worked on:** 2026-04-14 — Day 20 standup. Vercel READY (dpl_214r73B16g7JQtx8ZZ64NDQz9jJd). n8n: 31 total, 27 active. FLAG: CD & Contract Extractor `HkLjsnnhT5MgrX5H` now shows active=true — was inactive (3-week blocker). Needs execution test to confirm Outlook cred connected. Post 39 deadline TOMORROW (April 15). Security audit: 3 CRITICAL + 2 HIGH open findings.
 
-**Active blockers:** GOALS.md #2 (email automation) — CD & Contract Extractor `HkLjsnnhT5MgrX5H` inactive, 3+ weeks zero progress. Post 39 approval URGENT — deadline April 15 (2 days). Marketing demo data zero progress — blocks May 1 launch page. 4 Adam-owned blockers unresolved (Set Rate, Mailchimp journeys, DPA Guide PDF, Calendly webhook). Phase 2 confirmation still outstanding.
+**Active blockers:** Phase 2 Adam confirmation still outstanding (blocks Phase 3). Marketing demo data zero progress — 12 days to May 1. Post 39 approval due April 15 (tomorrow). 4 Adam-owned manual items unresolved. Security hardening: 3 items (#5, #9, #10).
 
-**What's next:** CD & Contract Extractor activation (blocked on Outlook cred). Renovation Phase 3 once Phase 2 confirmed. Marketing demo data cleanup.
+**What's next:** Verify CD & Contract Extractor is truly active (test execution). If confirmed: Phase 5 email template wiring. If blocked: Phase 3 Follow-Up List. Marketing demo data cleanup (HIGH URGENCY — 12 days).
 
 ## Rules For AI Sessions
 

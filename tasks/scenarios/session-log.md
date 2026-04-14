@@ -599,3 +599,47 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Refi builder: current loan pre-fill (Tier 5 item 4) — ✅ COMPLETE this session
 
+
+## AM Session — 2026-04-14 (scenarios-am)
+
+**What was built:**
+- Social Proof Block (`src/components/share/SocialProofBlock.tsx`, `SharePageLayout.tsx`)
+  - New `SocialProofBlock` component renders between NarrativeCard and BreakEvenVisual on the share page
+  - Stats adapt to mode (purchase vs refi) and loan term from the first scenario row
+  - Purchase: "X Austin homebuyers chose a [term]yr [type] last month" + lock-within-7-days % + median purchase price
+  - Refi: "X Austin homeowners refinanced to a [term]yr [type] last month" + same-or-shorter-term % + median break-even months
+  - Date-seeded count: `weeklyCount(base, spread)` — uses week-of-year for stable number that rotates weekly, no API
+  - `print:hidden` — doesn't appear in PDF output
+  - Compliance disclaimer: "Illustrative · Based on national market trends and public industry data, not Adam Styer's transaction history"
+  - 3 stat cards: gold value, muted label, subtle gold-tinted background
+
+**MC gap closed:** Share page now has market context around the borrower's numbers. Before: borrower saw their options in isolation with no frame of reference. After: "247 Austin buyers chose a 30-year fixed last month" anchors the choice in a broader market context — the same social proof signal Mortgage Coach uses to guide borrower decisions.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `31cc731` — pushed to main
+**Vercel:** `dpl_6YGVKahEwejJNMR1npiK8JE8NxKb` — ✅ READY
+
+**Files touched:**
+- `src/components/share/SocialProofBlock.tsx` (new)
+- `src/components/share/SharePageLayout.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**TIER 5 COMPLETE** — all 5 items done:
+1. PDF "Commonly Chosen" label ✅
+2. Scenario comparison table on share page ✅
+3. Builder: scenario naming ✅
+4. Refi builder: current loan pre-fill ✅
+5. Share page: social proof block ✅
+
+**Next session priority:**
+1. Define Tier 6 — the queue is now exhausted through Tier 5. Consider:
+   - DetailAccordion cleanup: remove redundant "Full Scenario Comparison" accordion item (comparison table now covers it)
+   - Mobile builder speed: allow quick-input form on mobile so LO can build a scenario at the table with a borrower
+   - Borrower-facing AI chat on share page (single biggest MC gap remaining)
+   - Export share page as a one-page HTML email (currently PDF only)
+2. Alternatively: pause Scenarios improvements and redirect focus to GOALS.md #1 (email automation) now that Tier 5 is done
+
+**Domain queue updates:**
+- Social proof block (Tier 5 item 5) — ✅ COMPLETE this session
+- Tier 5 COMPLETE
+

@@ -1,33 +1,31 @@
-## Scenarios Mission Brief — 2026-04-13 AM
+## Scenarios Mission Brief — 2026-04-14 AM
 
 ### Focus Area
-Refi builder: current loan pre-fill (Tier 5, item 4)
+Social Proof Block — share page market context widget (Tier 5 item 5)
 
 ### Why This Matters
-When an LO launches the scenario builder from a refi loan record, the current
-loan section is pre-filled with the NEW loan's rate and payment (Arive's proposed
-terms), not the borrower's existing mortgage. The LO sees wrong numbers and must
-erase and re-enter. The refi scenario's newLoanAmount is also left at 0 despite
-the loan amount being known. This closes the fast-input gap vs Mortgage Coach.
+Borrowers on the share page see their numbers in isolation. Mortgage Coach adds
+social context ("most borrowers in your situation chose X") which makes the
+option cards feel more like a decision guided by market wisdom, not just math.
+A compliance-safe social proof block closes this emotional gap without implying
+a recommendation.
 
 ### Session Type
 [x] Build
 
 ### Objectives
-1. Fix semantic bug: stop populating current loan with new loan's rate/payment
-2. Pre-fill currentPayoffBalance = loan.loan_amount (correct for refi payoffs)
-3. Pre-fill newLoanAmount + interestRate + loanTerm in the refi scenario card
-4. Pre-fill taxes/insurance/HOA in currentLoan from Arive data where available
-5. Add subtle info banner in refi step when opened from a loan record
+1. Build `SocialProofBlock.tsx` — illustrative market context widget for the share page
+2. Wire into `SharePageLayout.tsx` between the NarrativeCard and BreakEvenVisual sections
+3. Build passes, renders correctly for both purchase and refi modes
 
 ### Files in Scope
-- src/app/dashboard/scenarios/new/page.tsx
-- src/app/dashboard/scenarios/new/ScenarioBuilder.tsx
-- src/lib/scenarios/types.ts
+- `src/components/share/SocialProofBlock.tsx` (new)
+- `src/components/share/SharePageLayout.tsx` (import + render)
 
 ### Definition of Done
-- npm run build passes, 0 TypeScript errors
-- When opening from refi loan_id: payoff balance pre-filled, rate/amount blank for LO to enter
-- Refi scenario: newLoanAmount + rate + term pre-filled from loan record
-- Info banner shows in refi step when loan_id was provided
-- Committed and pushed to main, Vercel READY
+- Component renders with 2–3 illustrative stats that match the scenario's mode and term
+- Stats are date-seeded (stable per week, not per render)
+- Clear "Illustrative" disclaimer present — no data claim, no recommendation
+- `print:hidden` — doesn't appear in PDF
+- `npm run build` passes, 0 TypeScript errors
+- Looks correct at 390px mobile and desktop

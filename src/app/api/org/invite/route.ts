@@ -17,9 +17,13 @@ export async function POST(req: Request) {
 
     const service = createServiceClient()
 
-    // Invite user via Supabase Auth admin (sends magic link email)
+    // Invite user via Supabase Auth admin (sends magic link email).
+    // redirectTo chains through /auth/callback (code exchange) and lands them
+    // on /invite/accept where they set a password.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
     const { data, error } = await service.auth.admin.inviteUserByEmail(email.trim(), {
       data: { organization_id: organizationId, role },
+      redirectTo: appUrl ? `${appUrl}/auth/callback?next=/invite/accept` : undefined,
     })
 
     if (error) throw error

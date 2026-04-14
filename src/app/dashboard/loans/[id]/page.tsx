@@ -1486,6 +1486,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
   const [saving, setSaving] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+  const [panelFilter, setPanelFilter] = useState<'correspondence' | 'email' | 'text' | 'notes' | 'system' | 'all'>('correspondence')
 
   const toggleExpanded = (id: string) => {
     setExpandedIds(prev => {
@@ -1582,12 +1583,32 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
     })),
   ]
   const allItems = [...activity, ...emailAsActivity]
-  const feedItems = allItems
-    .filter(a => {
-      const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
-      return ['call', 'text', 'email', 'note', 'email_inbound', 'email_outbound'].includes(aType ?? '')
-    })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  const CORRESPONDENCE_TYPES = new Set(['call', 'text', 'email', 'note', 'email_inbound', 'email_outbound'])
+  const CORRESPONDENCE_ACTIONS = new Set(['imessage.received', 'imessage.sent', 'email.received', 'email_received'])
+
+  const feedItems = allItems.filter(a => {
+    const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
+    const action = a.action ?? ''
+    if (panelFilter === 'all') return true
+    if (panelFilter === 'correspondence') {
+      return CORRESPONDENCE_TYPES.has(aType ?? '') || CORRESPONDENCE_ACTIONS.has(action)
+    }
+    if (panelFilter === 'email') {
+      return aType === 'email' || aType === 'email_inbound' || aType === 'email_outbound' || action === 'email.received' || action === 'email_received'
+    }
+    if (panelFilter === 'text') {
+      return aType === 'text' || action === 'imessage.received' || action === 'imessage.sent'
+    }
+    if (panelFilter === 'notes') {
+      return aType === 'note'
+    }
+    if (panelFilter === 'system') {
+      return !CORRESPONDENCE_TYPES.has(aType ?? '') && !CORRESPONDENCE_ACTIONS.has(action)
+    }
+    return true
+  })
 
   return (
     <div className="bg-card/80 border border-input rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
@@ -1598,6 +1619,26 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
           <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
             Activity {feedItems.length > 0 && `(${feedItems.length})`}
           </h2>
+        </div>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="px-3 pt-2 pb-1 shrink-0">
+        <div className="flex gap-0.5 flex-wrap">
+          {([['correspondence', 'Correspondence'], ['email', 'Email'], ['text', 'Text'], ['notes', 'Notes'], ['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setPanelFilter(key)}
+              className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold tracking-wide transition-colors"
+              style={{
+                background: panelFilter === key ? 'rgba(201,168,76,0.15)' : 'transparent',
+                color: panelFilter === key ? '#c9a84c' : 'var(--muted)',
+                border: 'none',
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -1662,7 +1703,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       <div className="flex-1 overflow-y-auto">
         {feedItems.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-xs text-muted-foreground font-mono">No activity yet — log a call, text, or note above.</p>
+            <p className="text-xs text-muted-foreground font-mono">{panelFilter === 'correspondence' ? 'No correspondence yet — log a call, text, or note above.' : panelFilter === 'all' ? 'No activity yet.' : `No ${panelFilter} activity.`}</p>
           </div>
         ) : (
           feedItems.map(item => {
@@ -2488,7 +2529,7 @@ function LoanNotesTab({ loanId, contactId, notes, setNotes, onRefresh }: {
 function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; loanId: string; onRefresh: () => void }) {
   const supabase = createClient()
   const { userId } = useOrg()
-  const [filter, setFilter] = useState<'all' | 'system' | 'manual'>('all')
+  const [filter, setFilter] = useState<'correspondence' | 'email' | 'text' | 'notes' | 'system' | 'all'>('correspondence')
   const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
   const [logNotes, setLogNotes] = useState('')
   const [logSaving, setLogSaving] = useState(false)
@@ -2564,15 +2605,23 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     onRefresh()
   }
 
-  const isSystem = (item: ActivityRow) => item.action.includes('.')
+  const CORRESPONDENCE_ACTIONS_AT = new Set(['imessage.received', 'imessage.sent', 'email.received', 'email_received'])
+  const isCorrespondence = (item: ActivityRow) => {
+    const aType = (item.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? item.type
+    return ['call', 'text', 'email', 'note', 'email_inbound', 'email_outbound'].includes(aType ?? '') || CORRESPONDENCE_ACTIONS_AT.has(item.action)
+  }
 
-  const systemCount = activity.filter(isSystem).length
-  const manualCount = activity.filter(i => !isSystem(i)).length
-  const visible = filter === 'all'
-    ? activity
-    : filter === 'system'
-      ? activity.filter(isSystem)
-      : activity.filter(i => !isSystem(i))
+  const visible = activity.filter(item => {
+    const aType = (item.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? item.type
+    const action = item.action ?? ''
+    if (filter === 'all') return true
+    if (filter === 'correspondence') return isCorrespondence(item)
+    if (filter === 'email') return aType === 'email' || aType === 'email_inbound' || aType === 'email_outbound' || action === 'email.received' || action === 'email_received'
+    if (filter === 'text') return aType === 'text' || action === 'imessage.received' || action === 'imessage.sent'
+    if (filter === 'notes') return aType === 'note'
+    if (filter === 'system') return !isCorrespondence(item)
+    return true
+  })
 
   return (
     <div className="max-w-2xl">
@@ -2628,39 +2677,32 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
         </div>
       ) : (
       <>
-      <div className="flex gap-1 mb-4">
-        {(['all', 'system', 'manual'] as const).map(f => {
-          const label = f === 'all'
-            ? `All (${activity.length})`
-            : f === 'system'
-              ? `System (${systemCount})`
-              : `Manual (${manualCount})`
-          return (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                filter === f
-                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
-                  : 'bg-muted text-muted-foreground hover:bg-input border border-input'
-              }`}
-            >
-              {label}
-            </button>
-          )
-        })}
+      <div className="flex gap-1 mb-4 flex-wrap">
+        {([['correspondence', 'Correspondence'], ['email', 'Email'], ['text', 'Text'], ['notes', 'Notes'], ['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+              filter === key
+                ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50'
+                : 'bg-muted text-muted-foreground hover:bg-input border border-input'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted-foreground font-mono">
-          <p className="text-sm">No {filter} activity</p>
+          <p className="text-sm">{filter === 'correspondence' ? 'No correspondence yet' : filter === 'all' ? 'No activity yet' : `No ${filter} activity`}</p>
         </div>
       ) : (
         <div className="space-y-0 border border-input rounded-lg overflow-hidden">
           {visible.map((item) => {
             const typeIcon = item.type === 'call' ? '📞' : item.type === 'email' ? '📧' : item.type === 'text' ? '💬' : item.type === 'note' ? '📝' : null
             const typeLabel = item.type === 'call' ? 'Call' : item.type === 'email' ? 'Email' : item.type === 'text' ? 'Text' : item.type === 'note' ? 'Note' : null
-            const isManual = !isSystem(item)
+            const isManual = !item.action.includes('.')
             const isExpanded = expandedIds.has(item.id)
             const isDeleting = deletingIds.has(item.id)
             const { label, detail } = formatActivityAction(item)

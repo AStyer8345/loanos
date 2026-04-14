@@ -9,8 +9,11 @@
 //   nonce rollout (via middleware) would let us drop both.
 // - connect-src must allow Supabase (https + wss for realtime auth),
 //   Vercel analytics, and Vercel Live overlay for preview deployments.
-//   All other third-party APIs (Anthropic, n8n, Publer) are called
-//   server-side and don't need CSP allowances.
+//   Most third-party APIs (Anthropic, n8n, Publer) are called
+//   server-side and don't need CSP allowances. Exception:
+//   styermortgage.com — NewsletterForm posts directly to its Netlify
+//   function from the client. Long-term this should be proxied through
+//   a LoanOS API route; for now, allow the origin.
 // - frame-src allows Calendly for the share-page embed.
 // - frame-ancestors 'self' blocks clickjacking but still allows our own
 //   share pages to render LO-branded iframes internally if needed.
@@ -20,7 +23,7 @@ const ContentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://vitals.vercel-insights.com https://*.vercel-insights.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live https://vitals.vercel-insights.com https://*.vercel-insights.com https://styermortgage.com",
   "frame-src 'self' https://calendly.com https://*.calendly.com https://vercel.live",
   "frame-ancestors 'self'",
   "base-uri 'self'",

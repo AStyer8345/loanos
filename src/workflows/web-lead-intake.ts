@@ -57,7 +57,7 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
   "use step"
   // Alert Adam (internal notification — uses Resend, same as all other sends)
   await sendViaResend({
-    to: process.env.LOANOS_ADMIN_EMAIL ?? 'adam@styermortgage.com',
+    to: process.env.LOANOS_ADMIN_EMAIL ?? 'adam@thestyerteam.com',
     subject: `New lead: ${contact.first_name} — ${payload.loan_goal ?? 'unknown goal'}`,
     body: `
       <p><strong>New web lead received</strong></p>

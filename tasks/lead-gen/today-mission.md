@@ -1,7 +1,38 @@
-## Mission Brief — 2026-04-14 AM
+## Mission Brief — 2026-04-15 AM
 
 ### Domain
 Lead Generation
+
+### Focus Area
+Blocker Verification + Homepage Form End-to-End Test + Lead Scoring System Design
+
+### Session Type
+[x] Execute / Build (Sequence C — spec + verification)
+
+### Objectives
+1. Verify all Adam-owned blockers via live MCP — surface any changes since last session
+2. Verify homepage form wiring (commit 1bb1ef1) is live and correctly wired end-to-end
+3. Build lead scoring system spec — data model, n8n implementation plan, score tiers
+
+### Definition of Done
+- Blocker status confirmed for all 6 ADAM blockers (live MCP, not from memory)
+- Homepage form code verified via grep + subscribe-lead.js review + Supabase activity_log check
+- Lead scoring spec written: signals, tiers, data model options, n8n build plan, Adam decisions needed
+
+### Blocker Status (verified 2026-04-15 03:00 AM via MCP)
+| Blocker | Status | Change |
+|---------|--------|--------|
+| Set Rate webhook | ✅ RESOLVED | 6.37% called 2026-04-14 18:09 UTC — FIRST EVER |
+| Seq A threshold | ⚠️ MONITORING | 6.37% > 6.00% threshold → exits cleanly, no alerts yet |
+| Seq C `LfLSDgqgb6yCe93C` | ❌ INACTIVE | Outlook cred still not connected |
+| Calendly `PBu2Zt0YpiLHeqbL` | ❌ INACTIVE | triggerCount: 0 |
+| Mailchimp journeys | ❌ NOT BUILT | Pack ready, Adam needs 45 min |
+| Seq D warm-up | ❌ PENDING | Adam copy approval required |
+
+---
+
+<!-- Previous mission archived below -->
+
 
 ### Focus Area
 Agent-executable builds: Homepage form wiring + Calendly enhancements

@@ -1,34 +1,27 @@
-## Mission Brief — 2026-04-08 PM
+## Mission Brief — 2026-04-14 AM
 
 ### Domain
 Social Media
 
 ### Focus Area
-Week 15 Content Build — Posts 87–91 (June 17–23, 2026)
-2 Promo posts MANDATORY — Promo pillar at 0% across Wks 11-14, must correct now.
-FOMC week context (June 17-18) provides natural educational + promo hooks.
+Week 26 Content Build — Posts 142-146 (Sep 2-8, 2026)
 
 ### Session Type
 [x] Full Cycle (Sequence D)
 
 ### Objectives
-1. Write 5 posts (87–91) to social_drafts — 2 Promo, 1 Personal, 1 Real Talk, 1 Education
-2. Achieve Reviewer APPROVED or APPROVED WITH NOTES (zero compliance failures)
-3. Verify all 5 posts in QA pass
+1. Build 5 posts for Week 26 window (Sep 2-8, 2026) — all through QA
+2. 4 EVERGREEN (personal/real-talk/education), 1 TIMELY August Jobs Report template
+3. Maintain rolling 30/30/30/10 pillar balance
 
 ### Definition of Done
-- 5 posts inserted into social_drafts with status: draft
-- Reviewer: 0 compliance rejections
-- QA: 5/5 confirmed in Supabase
-- Rolling pillar mix (Wks 12-15) within 30/30/30/10 ± 5%
+5 posts written to social_drafts, Reviewer approves, QA confirms 5/5 in table
 
 ### Resources / Files in Scope
-- tasks/social-media/research/2026-04-08-pm-daily-rate-snapshot.md
-- tasks/social-media/notebooklm-pull-2026-04-08.md
-- social_drafts table (Supabase)
-- voice_guide in social_settings (Supabase)
+- tasks/social-media/specs/2026-04-14-week26-spec.md
+- tasks/social-media/research/2026-04-14-daily-rate-snapshot.md
+- Supabase social_drafts table (organization_id: 18613f82-fdd9-42dd-a09e-f3c577328258)
 
 ### HIGH RISK Items
-- Post 87 (Promo — FOMC/rates): must include NMLS# 513013. Must not predict specific rate movements.
-- Post 91 (Promo — visual): Equal Housing Lender required on image/in caption.
-- No fabricated economic data. All rate context is educational mechanism, not specific predictions.
+- Post 145 (TIMELY): must NOT contain fabricated NFP data — all job numbers must be ~[LIVE DATA NEEDED]
+- NMLS #513013 required on Post 145 (directional rate language)

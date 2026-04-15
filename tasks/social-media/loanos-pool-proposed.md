@@ -79,3 +79,98 @@ NOTE: Requires selfie_thinking.jpg — blocked until selfies uploaded (BLOCKER-L
 proposed
 
 ---
+
+---
+
+## Proposed Entry PROPOSED-03 — My Phone Shows Me Every Message I've Ever Sent a Borrower
+
+**Source:** CHANGELOG 2026-04-09 PM — iMessage workflow fix + unified contact activity feed
+**Proposed by:** Architect Lane 2 — 2026-04-09
+
+Arc Phase: 1C Automations
+Audience Tag: LO
+Primary Platform: LinkedIn
+Cross-post: Facebook
+Visual Format: selfie_carousel
+CTA: none
+
+### The Hook
+I opened a contact record this morning and saw the last 12 messages we'd ever exchanged. Every text. Every call note. Every email. All there.
+
+### The Vulnerability Angle
+I used to run my borrower relationships out of a combination of my head, my phone's message history, and a spiral notebook. If a past client texted me two years later asking about refinancing, I had no idea what we'd talked about the last time they thought about buying. I just winged it. That's not a trust-building move.
+
+### The Authority Angle
+LoanOS now pulls iMessages, emails, call logs, and notes into a single unified activity feed per contact. Every conversation, every document request, every milestone — one timeline. Before I pick up the phone or reply to a text, I already know the full context of the relationship. The iMessage integration alone pulled in 126 prior conversations. Relationships that used to live in my pocket now live in the system.
+
+### The Beats
+1. I opened a contact record and saw the last 12 messages we'd ever exchanged. Every text. Every call.
+2. I used to run borrower relationships out of my head, my phone, and a spiral notebook.
+3. If a past client texted me about refinancing two years later, I'd have to wing it.
+4. LoanOS now pulls iMessages, emails, calls, and notes into one timeline per contact.
+5. 126 prior conversations synced on the first run. Relationships that lived in my pocket now live in the system.
+
+### Visual Notes
+Slide 1: selfie_neutral.jpg with overlay "My phone shows me every message I've ever sent a borrower." Slides 2-5: beats. Slide 6: "Relationships that lived in my pocket now live in the system."
+NOTE: Requires selfie_neutral.jpg — blocked until selfies uploaded (BLOCKER-LOANOS-001).
+
+### Status
+proposed
+
+---
+
+## Proposed Entry PROPOSED-04 — I'm Watching Rates for 644 People Who Don't Even Know It
+
+**Source:** CHANGELOG 2026-04-09 AM — Refi Watch Sequence A (Rate Drop Alert) built
+**Proposed by:** Architect Lane 2 — 2026-04-09
+
+Arc Phase: 1C Automations
+Audience Tag: LO
+Primary Platform: LinkedIn
+Cross-post: Facebook
+Visual Format: selfie_carousel
+CTA: DM_loanos
+
+### The Hook
+I have 644 past clients. An automation runs every morning checking if their rate is worth refinancing. I wrote zero of those checks.
+
+### The Vulnerability Angle
+After you close a loan, most of your relationship just... fades. You don't know if their rate ever becomes a target again. You don't know if they've moved, if they've bought another property, if they're thinking about refinancing. You move on to the next deal. I don't like that model. But there was no system that watched for me — until I built one.
+
+### The Authority Angle
+LoanOS Refi Watch monitors my past client database daily. Threshold: if current market rates drop below 6% AND a borrower's locked rate was ≥6.75%, the system fires a personalized rate drop alert to that client. With a calculated savings estimate. Automatically. The clients who feel like I disappeared after closing? I didn't disappear. I just automated the watching.
+
+### The Beats
+1. I have 644 past clients. I wrote zero of the daily rate checks happening right now.
+2. After a loan closes, the relationship usually fades. No system was watching for them.
+3. I built one. LoanOS Refi Watch runs every morning. Threshold: current rate < 6%, their rate ≥ 6.75%.
+4. When that combination hits, a personalized savings estimate goes out. Automatically.
+5. My past clients don't know an algorithm is watching for them every morning. But one is.
+6. DM me the word LOANOS and I'll show you how I built it.
+
+### Visual Notes
+Slide 1: selfie_thinking.jpg with overlay "An automation checks rates for 644 people every morning. I wrote none of those checks." Slides 2-5: beats. Slide 6: CTA beat.
+NOTE: Requires selfie_thinking.jpg — blocked until selfies uploaded (BLOCKER-LOANOS-001).
+
+### Status
+proposed
+
+
+---
+## PROPOSED-03 — Scenario Naming (1B In Motion)
+Proposed: 2026-04-12 AM (Lane 2 CHANGELOG detection)
+Source: CHANGELOG.md — "2026-04-11 AM — Scenarios: Scenario Naming Affordance"
+Arc Phase: 1B — In Motion (showing LoanOS working in Adam's hands)
+The Hook: "My clients were getting confused when I showed them three loan options. Same rates, same loan, just presented differently. I fixed it by naming them."
+The Beats:
+  1. Before: Three tabs labeled "Option A, Option B, Option C" — means nothing to a buyer.
+  2. The fix: Adam can now rename each scenario directly in the dashboard. "Conservative 30yr." "Seller Buydown 2-1." "Investment Hold."
+  3. Names carry to the borrower share page and the printed PDF — so they're talking about the same thing I'm talking about.
+  4. Takes 5 seconds. Reduces the confusion call I used to get after every share.
+The Vulnerability Angle: Small feature. Took me two weeks to get it built. Sounds dumb. Changed how every conversation goes.
+The Authority Angle: Tools that match how humans think beat tools that make humans think like tools.
+Visual Format: screenshot_deferred (needs demo environment: READY)
+Visual Notes: Screenshot of the LoanOS scenario panel with 3 named scenarios visible — "Conservative 30yr", "Seller Buydown 2-1", "FHA Low-Down"
+CTA: DM_loanos
+Status: proposed (needs Adam review)
+Pool Entry ID: PROPOSED-03

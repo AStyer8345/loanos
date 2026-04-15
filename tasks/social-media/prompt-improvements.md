@@ -2,6 +2,21 @@
 # Append-only. Specific improvements per subagent, per session.
 
 ---
+## Session: 2026-04-09 PM
+
+### 03a-builder.md — Contraction Preservation in SQL/JSON Payloads
+**Problem:** Builder strips contractions when constructing JSON or SQL string payloads. This session required PATCH updates on Posts 97, 99, and 100 to restore: "You're", "I've", "I'd", "Here's", "It's", "let's". The voice becomes robotic without contractions — Quality subagent flags it every time.
+
+**Fix:** Add to 03a-builder.md under the voice/formatting section:
+> CONTRACTION PRESERVATION RULE: Never expand contractions to avoid JSON/SQL escaping. Instead, escape apostrophes using the SQL standard (double the single quote: `''`). Example: the phrase `I've seen` should appear as `I''ve seen` in a SQL string literal. Test your content before INSERT: if "I've" appears as "I have" or "Here's" appears as "Here is" — fix before submitting.
+
+### 04-reviewer.md — TIMELY Template Contraction Check
+**Problem:** Post 101 was inserted with contractions stripped ("Here is what", "If you are buying", "I will send") — Quality subagent only reviewed 4 evergreen posts in detail. The TIMELY template escaped its contraction review because it had no rewrite.
+
+**Fix:** Add to 04-reviewer.md under Voice Review:
+> TIMELY templates must pass the same contraction/voice check as evergreen posts. Do not skip TIMELY posts on the grounds that "data will be filled later." The voice frame is permanent — only the data fields change.
+
+---
 ## Session: 2026-04-06 AM
 
 ### 03a-builder.md — Hashtag Storage Consistency

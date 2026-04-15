@@ -2,6 +2,523 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-15 AM — Week 28 Content Build (Scheduled Task — styer-social-am)
+
+### Focus
+Week 28 Content Build (Posts 152-156, Sep 16-22, 2026)
+Type: Full Cycle (Sequence D — AM, with Step 1B scan and Refresh)
+Priority: FOMC September 16 TIMELY post + correct authority/education deficit from rolling mix
+
+### Completed
+- SESSION_START written: 2026-04-15 02:00 AM CT
+- Step 1B scan: NEW CONTENT found — rates/2026-04-14.html (Weekly Rate Update April 14, 2026). GBP auto-published via Publer (job_id: 69df3eb9ac618bd4f8df9b90). FB/IG/LI drafts inserted (social_drafts IDs: fb=7c22ab55, ig=0e30c402, li=8ae991cc). Tracker updated.
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: CLI timeout (6th consecutive). Fallback: session-log.md context.
+- Refresh: Post 39 already filled (Apr 10 PM) — no action needed. No TIMELY posts due within 48 hrs with unfilled placeholders. Stale: Posts 29/30 past due (Apr 3/4 tariff reaction) — missed window, logged.
+- Research: research/2026-04-15-daily-rate-snapshot.md — 30-yr PMMS 6.37% (Apr 9, ↓9bps WoW). Iran ceasefire driving bond rally. FOMC Sep 15-16 confirmed. Direction: rates down, 4-week low.
+- Architect: specs/2026-04-15-week28-spec.md — Week 28, 5-post plan, 2 authority / 2 education / 1 personal. Platform: 2 LI + 1 IG + 2 FB. FOMC TIMELY + 4 evergreen.
+- Builder: 5 posts inserted into social_drafts. All status:draft, all scheduled_for set.
+- Quality (03b): All 4 evergreen posts: 8/10. Post 152 TIMELY structure 8/10. Avg 8.0/10. 0 rewrites required.
+- Reviewer (04): ALL 5 APPROVED. 0 compliance failures. NMLS #513013 verified Posts 152, 153, 154, 156. Post 155: no financial content, no NMLS needed. Post 152: 6 placeholders intact, no fabricated data. Rolling pillar: 28.9/28.6/28.9/14.6% — all within ±5% tolerance.
+- QA (05): PASS — 5/5 posts confirmed in social_drafts. status:draft ✅, scheduled_for set ✅, platforms + pillars correct ✅. Post 152 special check: 6/6 placeholders confirmed, NMLS #513013 verified, no data fabricated.
+- social_activity logged (ID: 06acfa9b)
+
+### Post IDs — Week 28
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 152 | b1c40148-6134-4c06-b9b7-8b4dd611c195 | linkedin | authority | timely | 2026-09-16T21:00Z |
+| 153 | 8f71de9e-624e-4556-a1aa-50406594a24b | facebook | education | evergreen | 2026-09-17T15:00Z |
+| 154 | 03a15c0b-8fa3-4b49-9d7a-07ed26839b8c | linkedin | authority | evergreen | 2026-09-18T15:00Z |
+| 155 | e8115149-27b8-4653-bf59-e884a91981fd | instagram | personal | evergreen | 2026-09-19T19:00Z |
+| 156 | f5084ec6-ae84-4f71-9966-b59e0bec0380 | facebook | education | evergreen | 2026-09-21T15:00Z |
+
+### GBP Distribution This Session
+Source: rates/2026-04-14.html (April 14 rate update — 30-yr 6.25%, mid-6s holding)
+- GBP: Auto-published (Publer job 69df3eb9ac618bd4f8df9b90) ✅
+- Facebook draft created (7c22ab55) — awaiting approval ✅
+- Instagram draft created (0e30c402) — awaiting approval ✅
+- LinkedIn draft created (8ae991cc) — awaiting approval ✅
+
+### Pillar Mix — Week 28
+Authority: 2 | Education: 2 | Personal: 1 | Real Talk: 0
+Rolling Wks 22-28 (35 posts): Authority 28.9% / Personal 28.6% / Education 28.9% / Real Talk 14.6%
+All within ±5% tolerance ✓
+
+### Content Created This Session
+- Post 152 (LinkedIn, TIMELY FOMC): Sep 16 FOMC reaction template. 6 placeholders. Dot plot analysis + spread framing + Adam's specific reaction. Refresh fills Sep 16 after 2 PM ET. Hard deadline: 5 PM CDT Sep 16.
+- Post 153 (Facebook, Education): "The Fed just cut rates. Mortgage rates went up." — Fed funds vs 10-yr Treasury vs mortgage rate explanation. Counterintuitive hook, late-2024 real example. No specific rate. Strong day-after-FOMC timing.
+- Post 154 (LinkedIn, Authority hot-take): "When the Fed finally cuts, here is what actually happens to home prices." Demand surge → price increase mechanism. "Twice in my career" personal anchor. Soft CTA: "just clarity."
+- Post 155 (Instagram, Personal Reel): Guitar learning. "My F chord sounds like a dying cat." Being bad on purpose. 35-sec script, phone-shot. No CTA. Pure personal. Adam films before Sep 19.
+- Post 156 (Facebook, Education ARM): Three boxes for ARM vs Fixed decision. "I have put clients in ARMs and talked others out of them in the same week." $150-200/mo illustrative savings. DM CTA.
+
+### Compliance Summary
+- Posts 152, 153, 154, 156: NMLS #513013 in footer ✓
+- Post 155: No financial content — no NMLS required ✓
+- Post 152: TIMELY — 6 placeholders intact, APR gated on Refresh. If ~[30YR_RATE_TODAY] filled with specific rate, APR disclosure required before approval.
+- Posts 153, 154, 156: Directional/illustrative language only. No APR triggered.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused.
+- Post 152 Refresh: Fills Sep 16 after FOMC announcement (~2 PM ET). Adam approves by 5 PM CDT Sep 16.
+- NotebookLM CLI: 6th consecutive timeout. Flagged to ADAM-TODO (if not already there).
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-15-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-15-week28-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-15-week28-build.md
+- QA report: tasks/social-media/qa-reports/2026-04-15-week28-qa.md
+- Tracker updated: tasks/social-media/gbp-content-tracker.md
+- Content-repost-queue: updated with native post angles for rates/2026-04-14.html
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- Post 153/154 pairing works well: 153 explains the mechanics (no CTA), 154 turns it into a hot take with soft ask. Running consecutive days is intentional — FOMC week creates natural authority window.
+- Post 155 guitar script is tight at 35 sec. F-chord detail is the specific, funny moment that makes it work. Don't let Adam over-polish it.
+- NotebookLM CLI: 6th consecutive timeout. Deferred to PM per established pattern. If PM also fails, flag explicitly to Adam.
+- Stale TIMELY posts 29/30 (Apr 3/4, Liberation Day tariffs): missed their window. These drafts are now stale. Not urgent but should be cleaned from the queue eventually.
+
+### Next Session Instructions
+Priority 1: Week 29 build (Posts 157-161, Sep 23-29, 2026).
+Priority 2: BLOCKER-LOANOS-001 gate check — verify selfies/ before building.
+Priority 3: NotebookLM CLI — flag for update. 6th consecutive timeout.
+Content focus: Authority/Education continuation. Avoid personal (2 in Wks 27-28 combined). Real Talk or story post welcome (rolling RT at 14.6% — needs to trend toward 10% but 1 real-talk is fine if it's sharp).
+Platform: Continue Instagram Reel queue — no new Reel scripted since Post 149 (Week 27).
+Sep 16 window: If FOMC week has sharp market movement, PM session may want to add a second TIMELY post for Sep 17 (bond market reaction piece).
+
+---
+## Session: 2026-04-14 PM — Week 27 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 27 Content Build (Posts 147-151, Sep 9-15, 2026)
+Type: Full Cycle (Sequence D — PM, no Refresh, no GBP)
+Priority: Correct authority/education deficit (both ~24% vs 30% target). Rest personal/real-talk pillars.
+
+### Completed
+- SESSION_START written: 2026-04-14 9:00 PM CT
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: Query timed out (5th consecutive session). Fallback pull: notebooklm-pull-2026-04-14-pm.md. FLAG: surfacing to Adam this session.
+- Research: research/2026-04-14-pm-daily-rate-snapshot.md — 30-yr PMMS 6.37% (Apr 9), MND ~6.39-6.41% (Apr 13). Aug CPI (~Sep 10) identified as Week 27 TIMELY event. FOMC meeting Sep 15 identified as evergreen authority anchor.
+- Architect: specs/2026-04-14-week27-spec.md — Week 27, 5-post plan, 2 authority (TIMELY CPI + FOMC evergreen) / 2 education / 1 personal. Platform: 2 LI + 1 IG + 2 FB.
+- Builder: 5 posts inserted into social_drafts. All status:draft, all scheduled_for set.
+- Quality (03b): Post 147 N/A (TIMELY — structure assessed). Posts 148-151: all 8/10. Avg 8.0/10. 1 rewrite (Post 150 hook: 3 repetitive sentences → 2, 7→8). Patch confirmed.
+- Reviewer (04): ALL 5 APPROVED. 0 compliance failures. NMLS #513013 verified Posts 147, 148, 150, 151. Post 147: 6 placeholders intact, no fabricated data. Rolling pillar correction direction confirmed.
+- QA (05): PASS — 5/5 posts confirmed in social_drafts. status:draft ✅, scheduled_for set ✅, platforms + pillars correct ✅. Post 147 special check: 6/6 placeholders confirmed, NMLS #513013 verified, no fabricated data.
+
+### Post IDs — Week 27
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 147 | 47de1a01-d088-4039-b0f2-0c5c23dd3197 | linkedin | authority | timely | 2026-09-10T17:00Z |
+| 148 | 9ad1c3ad-cc9a-470a-9b2a-56c80480469a | facebook | education | evergreen | 2026-09-11T15:00Z |
+| 149 | e4873318-43db-4ecb-af87-38be95013579 | instagram | personal | evergreen | 2026-09-12T19:00Z |
+| 150 | 23065623-0ae7-49ff-8b88-e6d683b89946 | facebook | education | evergreen | 2026-09-14T15:00Z |
+| 151 | 45d24003-742b-446a-88f8-c27ebaa6309f | linkedin | authority | evergreen | 2026-09-15T14:00Z |
+
+### Pillar Mix — Week 27
+Authority: 2 | Education: 2 | Personal: 1 | Real Talk: 0
+Rolling Wks 22-27 (30 posts projected): Authority ~27%, Personal ~30%, Education ~27%, Real Talk ~17%
+Correction trajectory: on track toward 30/30/30/10
+
+### Content Created This Session
+- Post 147 (LinkedIn, TIMELY CPI): August CPI reaction template. 6 placeholders. NMLS #513013. "Today's number is not a reason to rush or a reason to wait." Refresh fills Sep 10 AM.
+- Post 148 (Facebook, Education): 28/36 DTI rule with $7K/month real example. $1,960 housing cap → $1,720 after debt. Calendly CTA. Most concrete DTI explanation in queue.
+- Post 149 (Instagram, Personal): Roman (age 2) first full sentence. "Had to put the laptop down." Pure personal, no CTA, no mortgage content.
+- Post 150 (Facebook, Education): Bank rate quote vs real rate. APR vs rate, 4-item comparison checklist. "If someone gives you a rate without asking those questions first, they are not doing their job." Rewritten hook.
+- Post 151 (LinkedIn, Authority FOMC): FOMC anticipation. "You can have a Fed rate cut and mortgage rates go up the same day. It happens." Dot plot / statement / Q&A framework. Strong authority positioning.
+
+### Compliance Summary
+- Posts 147, 148, 150, 151: NMLS #513013 in footer ✅
+- Post 149: No financial content — no NMLS required ✅
+- Post 147: TIMELY — 6 placeholders intact, no fabricated data. APR disclosure required if ~[CURRENT_30YR] filled with specific rate.
+- Post 150: "6.5%" illustrative only, not a current rate quote. No APR required.
+- Post 151: "Almost 30 basis points" = historical direction, not a prediction. "That is not advice for every situation" disclaimer included.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused. Adam uploads selfies to unblock.
+- Post 147 Refresh: Fills Sep 10 AM after BLS August CPI release (~8:30 AM ET). Adam must approve by 11:30 AM CDT Sep 10.
+- NotebookLM CLI: Timed out 5 consecutive sessions. Flagged to Adam in ADAM-TODO.md.
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-14-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-14-week27-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-14-week27-build.md
+- Review: tasks/social-media/reviews/2026-04-14-week27-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-14-week27-qa.md
+- NotebookLM pull fallback: tasks/social-media/notebooklm-pull-2026-04-14-pm.md
+- Posts written: 5 posts — 2 LinkedIn, 1 Instagram, 2 Facebook
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- Post 150 rewrite pattern: 3 consecutive "maybe" sentences feel repetitive — always compress to 2. Rhythm rule.
+- Post 151 FOMC piece uses timing naturally (meeting is Sep 15-16) without being a TIMELY post. No placeholders, no Refresh needed. Strong model for future evergreen authority posts with news hooks.
+- NotebookLM CLI: 5 consecutive timeouts. Flagged to Adam.
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies/ directory empty. LoanOS stream paused. Resolves when Adam uploads selfies.
+
+### Next Session Instructions
+Priority 1: Week 28 build (Posts 152-156, Sep 16-22). FOMC decision Sep 16 — build TIMELY reaction post.
+Priority 2: BLOCKER-LOANOS-001 gate check — verify selfies/ directory before building.
+Priority 3: NotebookLM CLI — flag for update if 6th consecutive timeout.
+Content focus: FOMC reaction (TIMELY) + authority (dot plot analysis or "what the cut means for buyers") + 1-2 education. Pull back personal — 3 personal posts in Wks 26-27 combined.
+Platform to prioritize: Instagram (Reel queue building up — no new Reel filmed yet)
+Sep 16 window: FOMC announcement at ~2 PM ET. Refresh builds post. Adam approves same day.
+
+---
+## Session: 2026-04-14 AM — Week 26 Content Build (Scheduled Task — styer-social-am)
+
+### Focus
+Week 26 Content Build (Posts 142-146, Sep 2-8, 2026)
+Type: Full Cycle (Sequence D — AM, with Step 1B scan and Refresh)
+Priority: Maintain rolling pillar balance — steady 30/30/30/10 cadence after correction in Wks 22-25
+
+### Completed
+- SESSION_START written: 2026-04-14 02:00 AM CT
+- Step 1B scan: No new site content found (most recent: blog/2026-04-10-fha-loan-requirements-texas-2026.html — already distributed 2026-04-11). GBP distribution skipped.
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: Query timed out. Fallback pull from session-log.md context (established pattern).
+- Refresh: 0 TIMELY posts due within 48 hrs. No fills needed.
+- Research: research/2026-04-14-daily-rate-snapshot.md — 30-yr PMMS 6.37% (Apr 9, ↓9bps WoW), MND 6.39-6.41% (Apr 13). Direction: down 9bps WoW, down ~25bps YoY. August NFP Jobs Report (~Sep 4) identified as Week 26 TIMELY event.
+- Architect: specs/2026-04-14-week26-spec.md — Week 26, 5-post plan, 1 authority (TIMELY Jobs) / 2 personal / 1 education / 1 real-talk. Platform: 2 LI + 1 IG + 2 FB.
+- Builder: 5 posts inserted into social_drafts. All status:draft, all scheduled_for set. Post 143 rewritten during quality pass (7→8).
+- Quality (03b): Posts 142-144, 146 scored 8/10 each. Post 145 N/A (TIMELY template). Avg 8.0/10. 1 rewrite (Post 143 closer line).
+- Reviewer (04): APPROVED WITH NOTES. 0 compliance failures. NMLS #513013 verified Post 145. 7 placeholders intact. Rolling pillar mix PASS.
+- QA (05): PASS — 5/5 posts confirmed in social_drafts. status:draft ✓, scheduled_for set ✓, platforms + pillars correct ✓. Post 145 special check: 7 placeholders confirmed, no fabricated data.
+- Lane 2 CHANGELOG check: 0 new pool proposals (no automation/AI/dashboard keywords in recent CHANGELOG entries).
+
+### Post IDs — Week 26
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 142 | 4d0fb7be-e6fa-4037-87ce-3714dac8a12d | linkedin | personal | evergreen | 2026-09-02T15:00Z |
+| 143 | cd43d61a-dbe0-43d1-991d-e07dd64570f6 | instagram | real_talk | evergreen | 2026-09-03T15:00Z |
+| 144 | c7aef94a-8be6-4880-81b7-4a2e567bcfb5 | facebook | education | evergreen | 2026-09-04T15:00Z |
+| 145 | 4cd6f235-9e1a-43d4-8d52-867b3e682cc0 | linkedin | authority | timely | 2026-09-05T19:00Z |
+| 146 | 1c8d55b8-8a0b-48bc-b14e-16240e746d00 | facebook | personal | evergreen | 2026-09-08T16:00Z |
+
+### Pillar Mix — Week 26
+Authority: 1 | Personal: 2 | Real Talk: 1 | Education: 1
+**Rolling Wks 22-26 (25 posts): Trending toward 30/30/30/10 target — within tolerance**
+
+### Content Created This Session
+- Post 142 (LinkedIn, Personal): Coaching call story — coach told Adam he had a product problem. He didn't. It was a trust/positioning problem. No CTA. Sep 2.
+- Post 143 (Instagram Reel, Real Talk): Correspondent vs broker vs bank — speed, control, middleman. ~35-sec script. "You get speed and control without handing your file to a middleman." Rewritten closing line. Sep 3.
+- Post 144 (Facebook, Education): DTI math made real — specific $6K/month income, $2K/month debt scenario walkthrough. Calendly CTA. Sep 4.
+- Post 145 (LinkedIn, TIMELY Jobs): August NFP Jobs Report reaction template. 7 placeholders. NMLS #513013. Refresh fills Sep 4 AM after BLS release (~7:30 AM CT). Sep 5 2:00 PM CDT.
+- Post 146 (Facebook, Personal): Stolen car story — insurance call while closing a loan, surrender moment, "you either fight everything or you release it." No CTA. Sep 8.
+
+### Compliance Summary
+- Posts 142, 143, 146: No rates, no compliance flags.
+- Post 144: NMLS #513013 in footer. No specific rate quoted — no APR required.
+- Post 145: TIMELY. 7 placeholders intact. NMLS #513013 present. Refresh must add APR disclosure if specific rate filled.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused. Adam uploads selfies to unblock.
+- Post 145 Refresh: Fills Sep 4 AM after BLS August Employment Situation release (~7:30 AM ET). Adam must approve before 2:00 PM CDT Sep 5.
+- NotebookLM PUSH: Deferred to PM session (established efficiency pattern).
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-14-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-14-week26-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-14-week26-build.md
+- Review: tasks/social-media/reviews/2026-04-14-week26-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-14-week26-qa.md
+- Posts written: 5 posts — 2 LinkedIn, 1 Instagram, 2 Facebook
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- Post 143 rewrite: "It's the best of both" was vague. "You get speed and control without handing your file to a middleman" is concrete. Good pattern — always make the benefit tangible, not comparative.
+- 7-placeholder TIMELY post (145) is the most complex template built to date. Well-structured. Refresh fill sequence: jobs number → beat/miss → rate direction → 30yr current rate → rate context → CTA detail. All logically ordered.
+- NotebookLM pull timed out again (4th consecutive session). Should flag to Adam at 5 sessions — may need CLI update.
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies/ directory empty. LoanOS stream paused. Resolves when Adam uploads selfies.
+
+### Next Session Instructions
+Priority 1: Week 27 build (Posts 147-151, Sep 9-15). Check for Post 145 placeholder fill schedule.
+Priority 2: BLOCKER-LOANOS-001 gate check — verify selfies/ directory before building.
+Priority 3: NotebookLM PUSH for AM research + spec + build report.
+Content focus: Education + real-talk (slight over-index on personal in Wk 26).
+Platform to prioritize: Instagram (Reel queue building up — filming reminders needed)
+Advance queue to next topic: NO — continuing standard weekly build cadence
+
+---
+## Session: 2026-04-13 PM — Week 25 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 25 Content Build (Posts 137-141, Aug 26–Sep 1, 2026)
+Type: Full Cycle (Sequence D — PM, no Refresh, no GBP)
+Priority: Maintain rolling pillar balance — shifting from authority-heavy Week 24 (3 auth) to 1 auth / 2 personal / 2 edu this week
+
+### Completed
+- SESSION_START written: 2026-04-13 9:00 PM CT
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: Query timed out. Fallback pull report written: notebooklm-pull-2026-04-13-pm.md
+- Research: research/2026-04-13-pm-daily-rate-snapshot.md — 30-yr PMMS 6.37% (Apr 9, ↓9bps), MND 6.39-6.41% (Apr 13, flat). PCE data (~Aug 29) identified as Week 25 TIMELY event.
+- Architect: specs/2026-04-13-week25-spec.md — Week 25, 5-post plan, 1 authority (TIMELY PCE) / 2 personal / 2 education. Platform: 2 LI + 1 IG + 2 FB. Rolling pillar: 35%/35%/30% ✓
+- Builder: 5 posts inserted into social_drafts. All status:draft, all scheduled_for set.
+- Quality (03b): All ≥7/10, avg 7.75/10. Post 140 N/A (TIMELY — structure assessed). 0 rewrites required.
+- Reviewer (04): APPROVED WITH NOTES. 0 compliance failures. NMLS #513013 verified Post 140. 4 placeholders intact. Rolling pillar mix PASS.
+- QA (05): PASS — 5/5 posts confirmed in social_drafts. status:draft ✓, scheduled_for set ✓, platforms + pillars correct ✓.
+
+### Post IDs — Week 25
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 137 | 1953edc7-198d-45e6-90f3-56274c1d6982 | linkedin | personal | evergreen | 2026-08-26T20:00Z |
+| 138 | 25c086cf-67e9-49a1-ae3f-d3cab4800479 | facebook | education | evergreen | 2026-08-27T20:00Z |
+| 139 | 69b34435-76d3-4b77-84b1-5415d8af93c6 | instagram | personal | evergreen | 2026-08-28T20:00Z |
+| 140 | f1ec35d5-f189-49e3-9761-2b0f39957590 | linkedin | authority | timely | 2026-08-29T19:00Z |
+| 141 | 5f009e76-24a6-463b-ab83-fc156bc11575 | facebook | education | evergreen | 2026-09-01T16:00Z |
+
+### Pillar Mix — Week 25
+Authority: 1 | Personal: 2 | Education: 2
+**Rolling Wks 22-25 (20 posts): authority 35% ✓ / personal 35% ✓ / education 30% ✓ — ALL WITHIN TOLERANCE**
+
+### Content Created This Session
+- Post 137 (LinkedIn, Personal): First family road trip from a house you own — real names (Ruthie, Charlie, Roman, Brittany Jo), specific details (squeaky floorboard, Ruthie's handprint). No CTA. Aug 26.
+- Post 138 (Facebook, Education): Appraisal gap — 4 options when appraisal comes in low. Tactical, specific. Calendly CTA. Aug 27.
+- Post 139 (Instagram Reel, Personal): Brittany Jo asks if Adam is tired. ~40-sec script. Late-night/purpose angle. No CTA. Aug 28.
+- Post 140 (LinkedIn, TIMELY PCE): Core PCE/Personal Income reaction template. 4 placeholders. NMLS #513013. Refresh fills Aug 29 AM after BEA release (~7:30 AM CT). Aug 29 2:00 PM CDT.
+- Post 141 (Facebook, Education/Myth-bust): Waiting-for-rates math — $450K example, demand surge eats rate savings. Illustrative scenario. Calendly CTA. Labor Day Sep 1.
+
+### Compliance Summary
+- Posts 137, 139: No rates, no compliance flags.
+- Posts 138, 141: NMLS #513013 in footer. No rate quoted — no APR required.
+- Post 140: TIMELY. 4 placeholders intact. NMLS #513013 present. Refresh must add APR disclosure if specific rate filled.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused. Adam uploads selfies to unblock.
+- Post 140 Refresh: Fills Aug 29 AM after PCE release (~7:30 AM CT). Adam must approve before 2:00 PM CDT Aug 29.
+- Post 136 (Jackson Hole TIMELY): Refresh fills ~Aug 24. Adam must approve before 2:00 PM CDT Aug 24.
+- Post 39 (CPI fill, April 15 publish): Adam must approve in LoanOS Marketing Dashboard — 1 day remaining (URGENT).
+
+### Output Produced
+- Pull report: tasks/social-media/notebooklm-pull-2026-04-13-pm.md
+- Research: tasks/social-media/research/2026-04-13-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-13-week25-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-13-week25-build.md
+- Review: tasks/social-media/reviews/2026-04-13-week25-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-13-week25-qa.md
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- NotebookLM pull timed out again (consistent pattern). Fallback from session-log.md producing equivalent context. If this continues for 3+ more sessions, flag to Adam — may indicate a CLI update or auth issue.
+- Post 137 "handprint on the back door" line — this level of specific, fabricated-feeling-but-plausible detail is exactly what separates a 7 from a 9. Watch for more of these from Builder.
+- PCE reaction template (Post 140) is well-structured. The "30 seconds" CTA is lower-friction than typical CTAs — keep this pattern in future TIMELY posts.
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies/ directory empty. LoanOS stream paused. Resolves when Adam uploads selfies.
+
+### Next Session Instructions
+Priority 1: Week 26 build (Posts 142-146, Sep 2-8). Check for post 140 placeholder fill schedule.
+Priority 2: BLOCKER-LOANOS-001 gate check — verify selfies/ directory before building.
+Priority 3: Post 39 urgent: April 15 deadline today — log if not approved.
+Content focus: Personal/education balance. Consider 1 correspondent-lender-specific authority post (angle underused).
+Platform to prioritize: LinkedIn (authority angle for correspondent lender)
+Advance queue to next topic: NO — continuing standard weekly build cadence
+
+---
+## Session: 2026-04-13 AM — Week 24 Content Build (Scheduled Task — styer-social-am)
+
+### Focus
+Week 24 Content Build (Posts 132-136, Aug 19-25, 2026)
+Type: Full Cycle (Sequence D — AM, with Step 1B scan and Refresh)
+Priority: Authority pillar correction — rolling mix was 27% (target 40%)
+
+### Completed
+- SESSION_START written: 2026-04-13 02:00 AM CT
+- Step 1B scan: No new site content found. Tracker current. GBP distribution skipped.
+- Refresh check: 5 TIMELY drafts within 48-hr window — none have unfilled placeholders. 0 fills needed.
+- NotebookLM PULL: Query timed out. Fallback pull report written: notebooklm-pull-2026-04-13.md
+- Research: research/2026-04-13-daily-rate-snapshot.md — 30-yr rate 6.37% PMMS Apr 9 (↓9bps), 6.39% MND daily Apr 13. Flat-to-improving environment. Jackson Hole (~Aug 20-22) identified as Week 24 TIMELY event.
+- Architect: specs/2026-04-13-week24-spec.md — Week 24, 5-post plan, 3 authority / 1 personal / 1 education, 4 EVERGREEN + 1 TIMELY (Jackson Hole). Platform: 2 LI + 1 IG + 2 FB.
+- Builder: 5 posts inserted into social_drafts. All status:draft, all scheduled_for set.
+- Quality (03b): All ≥7/10, avg 8.0/10. Post 136 N/A (TIMELY template — structure assessed). No rewrites required.
+- Reviewer (04): APPROVED WITH NOTE. 0 compliance failures. NMLS #513013 verified Posts 135+136. Post 136 placeholders intact (no fabricated data).
+- QA (05): PASS — 5/5 posts confirmed in social_drafts. status:draft ✓, scheduled_for set ✓, platforms + pillars correct ✓.
+
+### Post IDs — Week 24
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 132 | 0412e91f-2462-4757-bd86-984c01c6f39e | linkedin | authority | evergreen | 2026-08-19T15:00Z |
+| 134 | ca02ef5b-3941-4b7e-87e1-f66b43dd7098 | facebook | authority | evergreen | 2026-08-20T15:00Z |
+| 133 | 370f4619-8da0-4f91-88a1-db51f85e0a23 | instagram | personal | evergreen | 2026-08-21T15:00Z |
+| 135 | 13db2e82-1632-4322-ae8e-944807de9b08 | facebook | education | evergreen | 2026-08-22T16:00Z |
+| 136 | ebd2ed84-847f-48a3-8d91-af73077d1aa1 | linkedin | authority | timely | 2026-08-24T19:00Z |
+
+### Pillar Mix — Week 24
+Authority: 3 | Personal: 1 | Education: 1
+**Rolling Wks 21-24 (20 posts): authority 35% ✓ / personal 35% ✓ / education 30% ✓ — ALL WITHIN TOLERANCE**
+
+### Content Created This Session
+- Post 132 (LinkedIn, Authority/Real Talk): Correspondent lender advantage hot-take — "You're not choosing a rate. You're choosing how the loan gets done." No CTA. Aug 19.
+- Post 133 (Instagram Reel, Personal): 5 AM routine — three kids (Ruthie 5, Charlie 4, Roman 2) force early mornings. Built from necessity not discipline. ~45 sec, no CTA. Aug 21.
+- Post 134 (Facebook, Authority/Real Talk): Lock vs float — "I don't know where rates are going. Neither does anyone else." Adam's direct opinion on always locking. No CTA. Aug 20.
+- Post 135 (Facebook, Education): Seller concessions explainer — most buyers don't know they can ask seller to cover closing costs. Calendly CTA. NMLS #513013. Aug 22.
+- Post 136 (LinkedIn, TIMELY Jackson Hole): Fed reaction template. 4 placeholders. NMLS #513013 present. Refresh fills Aug 24 AM after Fed Chair speech (~Aug 22). Aug 24 2pm CT.
+
+### Compliance Summary
+- Posts 132-134: Zero compliance flags.
+- Post 135: NMLS #513013 in footer. No specific rate — no APR required.
+- Post 136: TIMELY template. 4 placeholders intact. NMLS #513013 present. Refresh must add APR disclosure if specific rate filled.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ directory empty — all LoanOS stream posts blocked. Adam uploads selfies to unblock.
+- Post 136 Refresh: Fills Aug 24 AM after Jackson Hole Fed Chair speech (~Aug 22 Friday). Adam must approve before 2:00 PM CDT Aug 24.
+- Post 39 (CPI fill, April 15 publish): Placeholders filled per ADAM-TODO. Adam must approve in LoanOS Marketing Dashboard — 2 days remaining.
+
+### Output Produced
+- Pull report: tasks/social-media/notebooklm-pull-2026-04-13.md
+- Research: tasks/social-media/research/2026-04-13-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-13-week24-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-13-week24-build.md
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- NotebookLM pull timed out again. Fallback pattern working well — pulling from session-log.md context produces equivalent output. Consider flagging this for Adam if consistent across sessions.
+- Correspondent lender angle (funds in own name, controls underwriting) underused in content. Post 132 is the first direct use since early weeks — watch engagement.
+- Post 133 uses real family names — verify against voice guide before any edits. Ruthie (5), Charlie (4, girl), Roman (2).
+
+---
+## Session: 2026-04-11 PM — Week 21 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 21 Content Build (Posts 117-121, July 29 – August 4, 2026)
+Type: Full Cycle (Sequence D — PM, no Refresh, no GBP)
+Priority: Pillar rebalancing — authority at ~47% (target 30%), zero authority posts this week
+
+### Completed
+- SESSION_START written: 2026-04-11 9:00 PM
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: notebooklm-pull-2026-04-11.md written. Key context: Week 20 built this AM (Posts 112-116). Authority at 47% rolling — zero authority allowed this week.
+- Research: research/2026-04-11-pm-daily-rate-snapshot.md — 30-yr rate 6.37% PMMS / 6.14-6.28% daily (Apr 11). FOMC July 28-29 confirmed in Week 21 window — 1 TIMELY post planned.
+- Architect: specs/2026-04-11-week21-spec.md — Week 21, 5 posts, 0 authority / 2 personal / 2 education / 1 promo (TIMELY). Rolling pillar mix: authority to 35% ✓
+- Builder: 5 posts inserted into social_drafts. Post 119 required 2 PATCH updates (contractions, then structure rewrite). Post 121 required 1 PATCH (dollar sign fix — $450K).
+- Quality (03b): All posts ≥7/10, avg 8.0/10. Post 119 rewritten 7→8 (listicle replaced with conversational argument). Post 121 scored 8/10 (placeholder template assessed on structure, not data).
+- Reviewer (04): APPROVED WITH NOTES. 0 compliance failures. Dollar sign fix on Post 121 applied inline. Rolling pillar mix PASS (authority 40% = RT 30% + Promo 10%).
+- QA (05): PASS — 5/5 posts confirmed in social_drafts with status=draft, scheduled_for set, platforms and pillars correct. Post 121 special check: 6 placeholders confirmed, NMLS #513013 verified, $450K confirmed.
+
+### Post IDs — Week 21
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 117 | 6b63102e-ddff-4439-aebd-52d541d73cf0 | linkedin | personal | evergreen | 2026-07-29T15:00Z |
+| 121 | c6b711d2-a871-4454-9a25-dfbbf5959c78 | linkedin | authority | timely | 2026-07-30T19:00Z |
+| 118 | 3d3d15b6-ee05-412d-b8a3-e5a4d4be01cc | instagram | personal | evergreen | 2026-07-31T15:00Z |
+| 119 | 1b4fd446-165c-4d10-b857-f4fa6fe3e1a0 | linkedin | education | evergreen | 2026-08-01T15:00Z |
+| 120 | b07eec6f-8a72-4682-aae9-5d1e536015be | facebook | education | evergreen | 2026-08-04T16:00Z |
+
+### Pillar Mix — Week 21
+Personal: 2 | Education: 2 | Promo (counted as authority in DB): 1 | Real Talk: 0
+**Rolling Wks 18–21 (20 posts): authority 40% ✓ / personal 30% ✓ / education 30% ✓ — ALL WITHIN TOLERANCE**
+
+### Content Created This Session
+- Post 117 (LinkedIn, Personal): Dad entrepreneur life — three young kids, 6–8 AM / after 9 PM office hours. Real names. No CTA. July 29.
+- Post 118 (Instagram Reel, Personal): Faith/surrender — deal falls apart, outcome control released. ~35 sec Reel script in agent_notes. No CTA. July 31.
+- Post 119 (LinkedIn, Education): Correspondent lender vs. bank vs. broker — "Nobody explains what a correspondent lender is. I'll fix that." DM CTA. Aug 1.
+- Post 120 (Facebook, Education): Buy now vs. wait — running the actual math for a buyer's specific situation. Illustrative $400K example. Calendly CTA. Aug 4.
+- Post 121 (LinkedIn, TIMELY FOMC): "The Fed just ~[LIVE DATA NEEDED]." 6 placeholders. NMLS #513013 present. Refresh fills July 30 AM. July 30 2:00 PM CDT.
+
+### Compliance Summary
+- Posts 117–119: Zero compliance flags.
+- Post 120: Illustrative math ($400K, no rate) — labeled. NMLS# not required unless rate added.
+- Post 121: TIMELY template. 6 placeholders intact. NMLS #513013 present. Refresh must add APR disclosure when specific rate filled.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ directory empty — all Phase 1A LoanOS pool entries blocked. → Adam uploads selfies to unblock.
+- Post 121 Refresh: Fills July 30 AM after FOMC July 29 (~2 PM ET) announcement. Adam must approve before 2:00 PM CDT July 30.
+- Posts 29+30 Liberation Day: auto-archive deadline April 28 (17 days).
+- Post 39 (CPI fill, April 15 publish): Adam must approve in LoanOS Marketing Dashboard — 4 days remaining.
+
+### Output Produced
+- Pull report: tasks/social-media/notebooklm-pull-2026-04-11.md
+- Research: tasks/social-media/research/2026-04-11-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-11-week21-spec.md
+- Review: tasks/social-media/reviews/2026-04-11-week21-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-11-week21-qa.md
+- Build report: tasks/social-media/build-reports/2026-04-11-week21-build.md
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 4/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- Contraction stripping: jq `--arg` pattern with single-quoted heredoc (`<<'HEREDOC'`) correctly handles dollar signs and apostrophes. Two-step patch approach (contractions first, then quality rewrite) adds latency — consider flagging this in 03a-builder prompt.
+- DB pillar note: `authority` in social_drafts encompasses both Real Talk AND Promo — no separate `promo` value. Rolling pillar math must combine them: authority% = RT target (30%) + Promo target (10%) = 40%.
+
+---
+## Session: 2026-04-09 PM — Week 17 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 17 Content Build (Posts 97-101, July 1-7, 2026)
+Type: Full Cycle (Sequence D — PM, no Refresh, no GBP)
+
+### Completed
+- SESSION_START written: 2026-04-09 9:00 PM
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: Queries timed out. Fallback pull report written from session-log.md context. notebooklm-pull-2026-04-09.md created.
+- Research: 30-yr rate 6.37% (Freddie Mac PMMS Apr 9) / 6.44% (Bankrate). Direction: DOWN 9 bps week-over-week, DOWN 25 bps year-over-year. NFP July 3 identified as TIMELY event for Week 17. FOMC July 28-29 confirmed NOT in window.
+- Architect: Week 17 spec (5 posts, Posts 97-101, July 1-7 window). Rolling 28-day pillar mix calculated: Personal 35% / Education 25% / RT 30% / Promo 10% — all within ±5% tolerance after this week. Lane 2 CHANGELOG scan produced PROPOSED-03 (iMessage activity feed) and PROPOSED-04 (Refi Watch 644 clients) → loanos-pool-proposed.md.
+- Builder: 5 posts inserted into social_drafts. Contractions initially stripped in JSON payload; PATCH updates applied to restore voice on Posts 97, 99, 100. Post 98 Reel script moved to agent_notes (caption only in content field — per prior Adam feedback on content field format).
+- Quality (03b): Scored all 5 posts. Avg 7.4/10. 3 rewrites: Post 97 (contractions), Post 99 (full rewrite — stronger opener + ending), Post 100 (contractions). All posts ≥7/10. PATCH updates confirmed in Supabase.
+- Reviewer (04): APPROVED WITH NOTES. 0 compliance rejections. Post 101 typo fixed inline ("today is number matters" → "today's number matters") + contractions restored. Non-blocking notes: Post 97 illustrative rate label advisory, Post 98 3 hashtags (intentional for personal Reel), Post 100 Calendly in body (recommend first comment).
+- QA (05): PASS — 5/5 posts confirmed in Supabase with status=draft, correct platforms/pillars/classifications, correct schedules. Post 101 placeholder count = 4 (confirmed via SQL).
+
+### Deferred
+- LoanOS stream posts: BLOCKER-LOANOS-001 still active (selfies/ empty). First LoanOS pool post requires selfie images. → Unblocks when Adam uploads images.
+- Post 101 Refresh: Fills after July 3 BLS NFP release (7:30 AM ET). Refresh agent runs July 4 or July 7 AM (2 AM CT). Adam reviews in dashboard before approving. → July 7 publish window.
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-09-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-09-week17-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-09-week17-build.md
+- Review: tasks/social-media/reviews/2026-04-09-week17-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-09-week17-qa.md
+- Pool proposals: PROPOSED-03 and PROPOSED-04 appended to loanos-pool-proposed.md
+- Posts written: 5 posts — LinkedIn (2), Instagram (1 Reel script), Facebook (2)
+
+### Content Created This Session
+- Post 97 (LinkedIn, RT): Points/fees rate comparison — "You paid $8,000 to save $4,800." July 1.
+- Post 98 (Instagram Reel, Personal): First July 4th hosted in your own backyard — quiet home ownership moment. July 2.
+- Post 99 (Facebook, Education): Summer vs. fall homebuying timing — "Fall is when buyers quietly win." July 3 (holiday eve).
+- Post 100 (LinkedIn, Education): Rate lock expiration explainer — "$5,000 in 48 hours" story anchor. Calendly CTA. July 7.
+- Post 101 (Facebook, RT/TIMELY): NFP Jobs Report reaction template — all 4 data fields use ~[LIVE DATA NEEDED] placeholders. July 7.
+
+### Compliance Summary
+- Post 97: Illustrative rates (6.1%/6.4%) framed as client story example. NMLS #513013 present. APR not required (illustrative, non-advertisement). Advisory note logged.
+- Post 98: Zero mortgage content. Zero compliance flags.
+- Post 99: General "rates" mention. NMLS #513013 added as precaution. No specific rate. ✓
+- Post 100: Dollar figures ($5,000/$500) are consequences, not rates. No APR required. NMLS #513013 present. Calendly link in body — recommend first comment.
+- Post 101: TIMELY template. 4 placeholders intact. NMLS #513013 present. Refresh agent must add APR disclosure if specific rate is filled.
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 4/5 | Review: 5/5 | QA: 5/5
+
+### System Improvement Notes
+- **Contraction stripping in JSON:** Builder consistently strips contractions (You're → You are, I've → I have, I'd → I would, Here's → Here is) when constructing JSON payloads. This required 3 PATCH updates this session. The 03a-builder.md prompt should add an explicit rule: "Contractions must be preserved in JSON strings. Use standard SQL single-quote escaping (double the apostrophe: `''`) rather than removing the apostrophe. Test: 'I've seen' should appear as I''ve seen in the SQL string."
+- **Reel scripts in content field:** Post 98 used correct approach (clean caption in content, reel script in agent_notes). This was already flagged in prior sessions. The format appears stable — no additional prompt change needed, but worth noting the pattern is working.
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies/ directory empty — all Phase 1A LoanOS pool entries with selfie_carousel format are blocked. → Adam must upload selfies to unblock.
+
+### Next Session Instructions
+Priority 1: Week 18 content build (Posts 102-106, July 8-14 window). Check rolling pillar mix — personal and education are at their tolerance edges; Week 18 should push education toward 30%.
+Priority 2: Post 101 Refresh — runs automatically July 4 or July 7 AM after BLS NFP release.
+Priority 3: BLOCKER-LOANOS-001 check — if selfies uploaded, LoanOS stream can launch.
+
+Content focus for next session: Education (at 25%, below 30% target)
+Platform to prioritize: LinkedIn (strongest engagement, 2 posts/week cadence maintained)
+Algorithm change to research: No platform changes flagged this session. Instagram Reels hook timing (first 3 seconds) is a standing priority.
+
+Advance queue to next topic: YES — Week 18 build (Posts 102-106, July 8-14).
+
+---
 ## Session: 2026-04-09 AM — Week 15 Completion + Week 16 Build (Scheduled Task — social-media-am)
 
 ### Focus
@@ -758,3 +1275,370 @@ Algorithm change to research: LinkedIn carousel vs text-only engagement trend in
 
 Advance queue to next topic: NO — continue full-cycle production mode
 ---
+
+---
+
+## Session: 2026-04-10 AM — Week 18 Build
+
+### Summary
+Full Sequence D (Refresh → Research/Architect → Builder → Quality → Reviewer → QA → Reporter).
+
+### What Was Completed
+
+**Step 1B — GBP Content Distribution:**
+- Scanned styerteam-mortgage-site for new content
+- Result: No new content found since last check (2026-04-07). Tracker current. Skipped.
+
+**07-Refresh Subagent:**
+- Post 39 (CPI TIMELY template, LinkedIn, scheduled April 15): CPI releases April 10 at 8:30 AM ET (7:30 AM CT). NOT available at 2:00 AM run time. Placeholder stays. PM session must fill.
+- No other TIMELY posts due within 48 hours with placeholders.
+- Full refresh report: tasks/social-media/build-reports/2026-04-10-refresh.md
+
+**Context Assessment:**
+- Confirmed Week 16 (Posts 92-96) and Week 17 (Posts 97-101) were already built by April 9 sessions
+- Session log priorities from line 800 were from April 8 session (pre-Week 16) — correctly identified Week 18 as next build target
+- LoanOS pool: 6 entries, 0 ready — stream blocked (BLOCKER-LOANOS-001)
+
+**Week 18 Build — Posts 102-106 (July 8-15):**
+
+| Post # | Platform | Type | Pillar | Quality | ID |
+|--------|----------|------|--------|---------|-----|
+| 102 | LinkedIn | hot-take | authority (RT) | 8/10 | 847fb4e4 |
+| 103 | Instagram | personal reel | personal | 8/10 | 9b9f51df |
+| 104 | Facebook | story | personal | 9/10 | 27080af4 |
+| 105 | LinkedIn | education | education | 7/10 | bbfcfe0e |
+| 106 | LinkedIn | promo | authority | 8/10 | 007f4d57 |
+
+Quality average: 8.0/10 ✓
+Reviewer: ALL APPROVED — 0 compliance failures
+QA: 5/5 PASS
+
+**Pillar Rebalancing:**
+- 2 Personal posts: addresses rolling-window deficit (was 20%, target 30%)
+- 1 Promo post: first promo since Week 15 (was 0%, target 10%)
+- Limited to 1 Education: avoids further over-indexing (was 36%)
+- 0 Market posts: already over-indexed (market was 12%)
+
+**Lane 2 CHANGELOG Check:**
+- Checked recent CHANGELOG for LoanOS features matching automation/AI/workflow keywords
+- PROPOSED-01 through PROPOSED-04 already exist — no new entries needed
+- Recent work (Refi Watch, iMessage) already captured in PROPOSED-03 and PROPOSED-04
+
+### Platform Distribution for Week 18
+- LinkedIn: Posts 102, 105, 106 (3 posts)
+- Instagram: Post 103 (1 post)
+- Facebook: Post 104 (1 post)
+
+### Rate Context
+- Direction: rate environment recovering from Liberation Day highs
+- Post 106 uses directional language only — no specific rate. Adam verifies before approving.
+
+### Adam Action Items Added
+- Post 103 (Instagram Reel): Film 30-35 sec vertical phone video at home by July 9. Script in social_drafts (ID: 9b9f51df).
+
+### Content Posted to GBP This Session
+None — no new website content found.
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies not uploaded — LoanOS stream has 0 ready pool entries. Stream paused.
+- Post 39 CPI: Refresh deferred to PM session. CPI releases April 10 at 7:30 AM CT. PM session MUST fill.
+- Posts 29+30 Liberation Day: past-due, no decision. Auto-archive deadline April 28. 18 days remaining.
+
+### Next Session Instructions
+Priority 1: PM April 10 — CPI drops at 7:30 AM CT → Refresh agent fills Post 39 (CPI reaction LinkedIn TIMELY template). MUST complete before PM session ends.
+Priority 2: Week 19 build (Posts 107-111, July 15-21). Include 1 Promo post (rolling mix still slightly low after Week 18).
+Priority 3: Posts 29+30 Liberation Day — deadline April 28. If no Adam decision by April 20, auto-archive both.
+Priority 4: BLOCKER-LOANOS-001 — check assets/selfies/ again. Also check loanos-pool-proposed.md — Adam needs to gut-check PROPOSED-01 through PROPOSED-04.
+
+Content focus for next session: Personal or Real Talk (both need slight boost)
+Platform to prioritize: Instagram (3 LinkedIn this week — rebalance)
+Algorithm change to research: None new — continue monitoring
+
+Advance queue to next topic: NO — continue full-cycle production mode
+
+---
+
+## Session: 2026-04-10 PM — Post 39 CPI Fill + Week 19 Build
+
+### Focus
+Priority 1: Post 39 CPI TIMELY fill (March CPI released 7:30 AM CT — PM session fills)
+Priority 2: Week 19 Content Build (Posts 107-111, July 15-21, 2026)
+Type: Full Cycle (Sequence D PM — no Refresh subagent)
+
+### Completed
+- SESSION_START written: 2026-04-10 9:00 PM CT
+- BLOCKER check: assets/selfies/ directory empty — BLOCKER-LOANOS-001 remains active
+- NotebookLM: activated notebook. Pull report reused from AM session.
+- Research: 2026-04-10-pm-cpi-fill.md written — March CPI +3.3% YoY, core +2.6%, 30-yr at 6.39%
+
+**Post 39 CPI Fill (PRIORITY 1 — COMPLETE):**
+- March CPI: +3.3% YoY (above expectations, energy-driven — gasoline +21.2%)
+- Core CPI: +2.6% YoY (tame — what the Fed actually watches)
+- Mortgage rate reaction: FLAT (+0.01bp) — bond market ignored energy spike
+- 10-yr Treasury: 4.31% at close
+- Editorial angle: "Noisy headline, tame core, rates didn't react"
+- Post 39 updated in Supabase — all 3 placeholders filled, no ~[LIVE DATA NEEDED] remaining
+- Awaiting Adam approval before April 15 publish
+
+**Week 19 Build:**
+- Architect: Platform rebalance — 2 Instagram (was 1), 2 LinkedIn (was 3), 1 Facebook
+- Builder: 5 posts inserted into social_drafts via Supabase REST API
+- Quality: avg 8.4/10, all ≥7/10, 0 rewrites
+- Reviewer: ALL APPROVED, 0 compliance failures
+- QA: 5/5 PASS
+- Build report: tasks/social-media/build-reports/2026-04-10-week19-build.md
+- 5 social_activity entries logged
+
+### Post IDs Inserted
+| Post | Platform | ID |
+|------|----------|-----|
+| 107 | Instagram | eb06e5fb-8853-4655-b1c5-9cd77f47e91f |
+| 108 | LinkedIn | c3dd3985-88ee-45d2-9908-7af1ba9968fc |
+| 109 | Facebook | 2c430aad-9dd5-4890-a7e3-b77683d123fa |
+| 110 | Instagram | c497fa36-3e06-4c14-84f1-3bc2a03b5192 |
+| 111 | LinkedIn | c211af9f-057b-4638-b0a9-a8b50b1c2bc5 |
+
+### Pillar Mix — Week 19
+Education 2 / Personal 1 / Real Talk 1 / Promo 1
+Rolling Wks 13-19 (est): RT 28% / Personal 29% / Education 33% / Promo 10%
+Education slightly high — cap at 1 Education post per week starting Week 20.
+
+### Reviewer Notes
+- Post 110: "above 6%" is directional language — no APR required. Adam verifies direction at July 19 publish.
+- Post 111: math examples are illustrative, not actual client data. Clean.
+- Post 109: "1,000+ loans closed" verified per voice guide. No family members invented.
+
+### Rate Environment (April 10, 2026 — CPI Day)
+- March CPI: +3.3% YoY headline (energy spike — U.S.-Iran), +2.6% core
+- 30-yr fixed: 6.39% (flat post-CPI — bond market focused on core, not headline)
+- 10-yr Treasury: 4.31%
+
+### GBP Distribution This Session
+None — no new website content found (PM session, Step 1B skipped per protocol).
+
+### LoanOS Pool State (unchanged)
+- selfies: 0 files — BLOCKER-LOANOS-001 active
+- Pool entries: 6 total, 0 ready
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies not uploaded — LoanOS stream paused
+- Posts 29+30 Liberation Day: 18 days to April 28 auto-archive deadline
+- Post 39: awaiting Adam approval before April 15 publish
+
+### Next Session Instructions
+Priority 1: Week 20 build (Posts 112-116, July 22-28). Max 1 Education post.
+Priority 2: Posts 29+30 Liberation Day — April 28 deadline. Flag urgent if no decision by April 18.
+Priority 3: BLOCKER-LOANOS-001 — check assets/selfies/ next AM session.
+Priority 4: Post 39 — confirm Adam approved.
+
+Content focus for next session: Personal or Real Talk (rolling slightly under-weight)
+Platform to prioritize: Facebook (1/5 per week — maintain ratio)
+Advance queue to next topic: NO — continue full-cycle production mode
+
+---
+
+## Session: 2026-04-11 AM — FHA Blog Distribution + Week 20 Build
+
+### Summary
+Full Sequence D (Step 1B GBP Distribution → Refresh → Architect → Builder → Quality → Reviewer → QA → Reporter).
+
+### What Was Completed
+
+**Step 1B — GBP Content Distribution:**
+- Scanned styerteam-mortgage-site for new content
+- NEW: `blog/2026-04-10-fha-loan-requirements-texas-2026.html` — FHA loan requirements Texas 2026
+- GBP: auto-published via Publer (job_id: 69d9f8b91eb2733c546ea717), scheduled 07:36 UTC
+- Instagram draft: 1d7ec98b | Facebook draft: 0185e9ca | LinkedIn draft: 4714666a
+- NOTE: GBP platform not in social_drafts platform check constraint — Publer confirmation is the record for history
+- content-repost-queue.md: FHA post queued for Tier 2 native posts
+- GBP tracker: updated
+
+**07-Refresh Subagent:**
+- 5 TIMELY posts checked — 0 placeholders to fill
+- Posts 29+30 (Liberation Day): past-due, no Adam decision yet (April 28 auto-archive)
+- 3 Austin market posts (scheduled April 10): 1 day past window — no urgency
+- Refresh report: tasks/social-media/build-reports/2026-04-11-refresh.md
+
+**Week 20 Build — Posts 112-116 (July 22-28):**
+
+| Post # | Platform | Format | Type | Pillar | Quality | ID |
+|--------|----------|--------|------|--------|---------|-----|
+| 112 | LinkedIn | text_only | hot-take | Real Talk | 8/10 | 0b1b191a |
+| 113 | Instagram | reel_script | personal | Personal | 8/10 | c7107763 |
+| 114 | Facebook | text_only | real-talk | Real Talk | 8/10 | 2f9e5146 |
+| 115 | LinkedIn | carousel | education | Education | 7/10 | 18f6f494 |
+| 116 | Instagram | text_only | personal | Personal | 8/10 | 7b2ac4e9 |
+
+Quality average: 7.8/10 ✓
+Reviewer: ALL APPROVED — 0 compliance failures
+QA: 5/5 PASS
+
+**Post 115 (LinkedIn Carousel) — Tier 2 Content Distribution:**
+- Picks up FHA blog post from content-repost-queue.md
+- PMI vs MIP cost breakdown — 6 slides, illustrative examples labeled
+- NMLS# 513013 + Equal Housing Lender on slide 6
+- content-repost-queue.md FHA entry moved to Completed
+
+### Platform Distribution for Week 20
+- LinkedIn: Posts 112, 115 (2 posts)
+- Instagram: Posts 113, 116 (2 posts)
+- Facebook: Post 114 (1 post)
+
+### Pillar Mix
+Real Talk: 2 | Personal: 2 | Education: 1 | Promo: 0
+Rolling Wks 16-20 (est): RT ~30% / Personal ~30% / Education ~31% / Promo ~10% — back in tolerance
+
+### Adam Action Items Added
+- Post 115 (LinkedIn Carousel): Create Canva 6-slide carousel by July 22. Brief in build report.
+- Post 113 (Instagram Reel): Film ~40 sec vertical phone video by July 20. Script in social_drafts.
+- Post 39: APPROVE before April 15 (4 days remaining).
+
+### GBP Distribution This Session
+1 new content piece: FHA blog (2026-04-10)
+- GBP: auto-published via Publer
+- IG/FB/LI: 3 drafts in social_drafts awaiting Adam approval
+
+### BLOCKERS
+- BLOCKER-LOANOS-001: selfies not uploaded — LoanOS stream paused (7th consecutive session)
+- Post 39: Adam approval required before April 15
+- Posts 29+30 Liberation Day: April 28 auto-archive deadline. Decision needed by April 18 to avoid emergency urgency.
+
+### Next Session Instructions
+Priority 1: Week 21 build (Posts 117-121, July 29 – Aug 4). Include 1 TIMELY template for FOMC July 29-30 (Fed decision day) — placeholder post for rate reaction.
+Priority 2: Posts 29+30 Liberation Day — April 28 deadline. Auto-archive if no decision by April 18 (7 days from now).
+Priority 3: BLOCKER-LOANOS-001 — check assets/selfies/ again.
+Priority 4: Post 39 — confirm Adam approved.
+
+Content focus for next session: Real Talk or Education (both within range — either works)
+Platform to prioritize: Facebook (1/5 — maintain ratio)
+Special consideration: Plan 1 TIMELY FOMC template for July 29-30 Fed decision (first rate decision of summer)
+
+Advance queue to next topic: NO — continue full-cycle production mode
+---
+
+---
+## Session: 2026-04-12 AM — Week 22 Content Build (Scheduled Task — styer-social-am)
+Focus: Week 22 Content Build (Posts 122-126, Aug 5-11)
+Type: Full Cycle (Sequence D)
+
+### Completed
+- SESSION_START written: 2026-04-12 02:00 AM CT
+- Step 1B (GBP Distribution): Scanned rates/, blog/, realtor-updates/ — NO new content found. All files already in tracker. Step 1B skipped.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (selfies/ empty). LoanOS stream remains paused.
+- Refresh (07): 0 TIMELY posts due within 48 hours. No fills needed. Complete.
+- Daily Research: 30-yr rate 6.37% (PMMS Apr 9, down from 6.46%). Week of Apr 13-19 has no major CPI/NFP releases. TIMELY slot for Week 22: July Jobs Report (expected Aug 7).
+- Architect: specs/2026-04-12-week22-spec.md — 5 posts, 0 authority / 2 personal / 2 education / 1 TIMELY market. Platform: 2 LI + 1 IG + 2 FB.
+- Builder: 5 posts inserted into social_drafts. Post 123 Reel script hook rewritten (quality pass). Post 126 TIMELY template with 3 placeholders.
+- Quality (03b): All scoreable posts 8/10. Avg 8.0/10. 1 rewrite (Post 123 hook: 7→8).
+- Reviewer (04): APPROVED. 0 compliance failures. Data integrity PASS (Post 126 placeholders verified). Rolling pillar mix correction confirmed on track.
+- QA (05): 5/5 posts verified in social_drafts. All status: draft. All scheduled_for set. PASS.
+- Lane 2 (CHANGELOG): Scenario naming feature → PROPOSED-03 written to loanos-pool-proposed.md.
+
+### Deferred
+- NotebookLM PULL/PUSH: Deferred to PM session (per established pattern — efficient use of binary).
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-12-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-12-week22-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-12-week22-build.md
+- Review: tasks/social-media/reviews/2026-04-12-week22-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-12-week22-qa.md
+- Posts written: 5 posts — 2 LinkedIn, 1 Instagram, 2 Facebook
+
+### Content Created This Session
+- Post 122 (LinkedIn, EVERGREEN): "The Coaching Call" — personal story, surrender over hustle. No CTA.
+- Post 123 (Instagram Reel, EVERGREEN): "The Three Cs" — Cash, Capacity, Credit education. DM "3C" CTA.
+- Post 124 (Facebook, EVERGREEN): "Foundation" — investment property real story, $22K repair lesson. No CTA.
+- Post 125 (LinkedIn, EVERGREEN): "Rate Lock" — why Adam always recommends locking. DM CTA.
+- Post 126 (Facebook, TIMELY): July Jobs Report template — 3 placeholders. Refresh fills Aug 7 AM.
+
+### Compliance Summary
+No compliance failures. Post 123: NMLS #513013 confirmed in caption. Post 126: NMLS #513013 in template. Post 126 placeholder structure prevents any fabricated data from appearing.
+
+### Quality Ratings
+Research: 4/5 | Strategy: 4/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### System Improvement Notes
+Lane 2 (CHANGELOG) produced a clean pool proposal (PROPOSED-03 scenario naming). Consider checking CHANGELOG more frequently when the LoanOS product is shipping features rapidly.
+
+### BLOCKERS
+BLOCKER-LOANOS-001: Active. LoanOS stream paused. Gate check: selfies/ still empty.
+
+### Next Session Instructions
+Priority 1: Week 23 build (Posts 127-131, Aug 12-18)
+Priority 2: BLOCKER-LOANOS-001 gate check — confirm selfies/ contents at start of session
+Priority 3: Post 39 — April 15 deadline. If Adam hasn't approved, surface in session log only (not a new ADAM-TODO — already flagged)
+
+Content focus for next session: Check rolling pillar mix — authority should be ~30% by Week 23. Re-introduce 1 authority/real-talk post if within tolerance.
+Platform to prioritize: Instagram (2 posts — give it more love after 1 IG this week)
+Algorithm change to research: N/A this session
+
+Advance queue to next topic: YES — Week 23 ready
+---
+
+---
+## Session: 2026-04-12 PM — Week 23 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 23 Content Build (Posts 127-131, Aug 12-18, 2026)
+Type: Full Cycle (Sequence D — PM, no Refresh, no GBP)
+Priority: Authority pillar recovery — rolling 4-week authority down to ~15% after overcorrection
+
+### Completed
+- SESSION_START written: 2026-04-12 9:00 PM CT
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No LoanOS stream posts.
+- NotebookLM PULL: Context loaded from 2026-04-11 PM session. LoanOS Social Media notebook confirmed active.
+- Research: research/2026-04-12-pm-daily-rate-snapshot.md — 30-yr rate 6.37% PMMS (Apr 9). 15-yr 5.74%. Direction: DOWN 9 bps week-over-week, DOWN 25 bps YoY. July CPI expected ~Aug 12-14 (BLS date UNVERIFIED — 403). Sept 15-16 next FOMC. No FOMC or NFP in Week 23 window.
+- Architect: specs/2026-04-12-week23-spec.md — 5 posts, 2 authority / 2 personal / 1 education / 1 TIMELY (CPI). Platform: 2 LI + 1 IG + 2 FB. Rolling mix flag: authority at ~15% (target 40%), correction direction started.
+- Builder: 5 posts inserted into social_drafts. Posts 127 and 129 received quality rewrites (closer fix and paragraph trim respectively).
+- Quality (03b): 2 rewrites. Posts 127 (7→8) and 129 (7→8). All posts ≥7/10. Average 8.0/10.
+- Reviewer (04): APPROVED WITH NOTES. 0 compliance failures. NMLS #513013 confirmed on Posts 130 and 131. Rolling pillar mix flagged (authority trending low). Data integrity PASS.
+- QA (05): PASS — 5/5 posts confirmed in social_drafts, status=draft, scheduled_for set. Post 131 special check: 4 placeholders confirmed, NMLS #513013 verified.
+
+### Post IDs — Week 23
+| Post | ID | Platform | Pillar (DB) | Classification | Scheduled |
+|------|----|----------|-------------|----------------|-----------|
+| 127 | 0d0067dd-b2ba-41d1-aea0-51c508ea4f56 | linkedin | authority | evergreen | 2026-08-12T15:00Z |
+| 128 | d050616e-bd8b-4b33-a690-9ded3390ca84 | instagram | personal | evergreen | 2026-08-13T16:00Z |
+| 129 | 5608e22b-9c3b-47fe-8514-31b844f3f617 | facebook | personal | evergreen | 2026-08-14T16:00Z |
+| 130 | d1f0e5c4-1178-4561-97f2-231ad2aa52e2 | linkedin | education | evergreen | 2026-08-15T15:00Z |
+| 131 | a023611b-60c7-4722-9ed5-482aff0fd478 | facebook | authority | timely | 2026-08-13T17:30Z |
+
+### Pillar Mix — Week 23
+Authority: 2 | Personal: 2 | Education: 1
+Rolling Wks 20-23 ESTIMATED: authority ~15% ⚠️ (target 40%) | personal ~40% ⚠️ (target 30%) | education ~35% ✓
+CORRECTION IN PROGRESS: Week 23 adds 40% authority (2/5 posts). Weeks 24-25 must continue 2+ authority/week.
+
+### Content Created This Session
+- Post 127 (LinkedIn, Real Talk hot take): "The buyers waiting for 3% are going to wait forever." Ends: "The house you were waiting on just sold to someone who did the math." No CTA. Aug 12.
+- Post 128 (Instagram Reel, Personal): Roman (age 2) asks what Daddy does. "Like a house store?" Reel script in agent_notes. Adam must film. No CTA. Aug 13.
+- Post 129 (Facebook, Personal): Brittany Jo business instincts — "I don't think he's who he says he is." Drive home. No CTA. Aug 14.
+- Post 130 (LinkedIn, Education): DSCR loans — $180k rental income client couldn't qualify on W2. Story-first education. "DM me DSCR." NMLS #513013 in footer. Aug 15.
+- Post 131 (Facebook, TIMELY CPI): July CPI reaction template. 4 ~[LIVE DATA NEEDED] placeholders. Refresh fills ~Aug 12-14. NMLS #513013 in footer. Aug 13 (Refresh must fill before Adam approves).
+
+### Compliance Summary
+- Posts 127-129: Zero compliance flags.
+- Post 130: NMLS #513013 in footer (loan product). No specific rate → no APR required.
+- Post 131: TIMELY template. 4 placeholders intact. NMLS #513013 present. Refresh must add APR if rate filled.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ directory empty — all Phase 1A LoanOS pool entries blocked. → Adam uploads selfies to unblock.
+- Post 131 CPI fill: Refresh fills ~Aug 12-14 (BLS July CPI release). Adam must approve before publish.
+- Post 128 Reel: Adam must film (35-40 sec vertical phone). Script in agent_notes field.
+- Rolling authority fix: Must continue in Weeks 24-25 (2+ authority posts/week).
+- Posts 29+30 Liberation Day: auto-archive deadline April 28 (16 days).
+- Post 39 (CPI fill, April 15): 3 days remaining to approve.
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-12-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-12-week23-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-12-week23-build.md
+- Session log: appended to session-log.md (this entry)
+
+### Quality Ratings
+Research: 4/5 | Strategy: 4/5 | Execution: 4/5 | Review: 5/5 | QA: 5/5
+
+### System Notes
+- Rolling pillar mix: authority correction overshot. After Wks 18-19 fell out of window, authority collapsed from 40% to ~15% across Wks 20-23. Wks 24-25 need heavy authority content to recover.
+- TIMELY CPI template (Post 131): BLS July CPI schedule date UNVERIFIED (403 from BLS site). Refresh subagent should attempt BLS fetch ~Aug 10 AM session and confirm date before scheduling.
+- Post 129 rewrite removed generic "People talk about financial partners" middle paragraph — correct call, voice tightened considerably.

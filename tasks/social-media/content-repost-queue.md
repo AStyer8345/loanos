@@ -5,6 +5,8 @@
 
 ## Pending (Architect picks these up next planning session)
 <!-- Agent appends here when new content is detected -->
+2026-04-15 | rate | rates/2026-04-14.html | GBP/FB/IG/LI instant drafts done. Native posts: LinkedIn carousel (rate direction + bond market explainer), Instagram Reel (30-sec "why you're still waiting for a rate that may never come" — Adam on camera), Facebook text (human take on spring market + link)
+<!-- COMPLETED 2026-04-11 AM → Post 115 (LinkedIn carousel — PMI vs MIP cost breakdown, ID: 18f6f494). Instagram + Facebook deferred — Architect can plan in future week if needed. -->
 <!-- COMPLETED 2026-04-07 AM → Post 72 (LinkedIn text education, May 27, ID: 5e0eba03-f89e-499f-809a-8e4f0db4d735). Instagram + Facebook versions deferred — Architect can plan in future week if needed. -->
 <!-- Instagram static COMPLETED → Post 60 (2026-04-05 PM, ID: 50eb9270). LinkedIn + Facebook deferred to Week 10. -->
 <!-- LinkedIn + Facebook rate items cleared in Week 10 (2026-04-06 AM session) -->

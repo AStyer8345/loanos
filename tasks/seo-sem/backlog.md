@@ -92,7 +92,7 @@
 - [LOW_RISK] Mortgage glossary / terms resource page — internal linking opportunity for every loan page
 - [LOW_RISK] Investment property ROI examples + calculator tie-in on DSCR page. Keyword: "investment property loan Austin"
 - [LOW_RISK] Mortgage document checklist blog post + downloadable PDF. High-intent keyword, easy to rank.
-- [LOW_RISK] Add construction loan builder partner content + process walkthrough. Keyword: "construction loan Austin TX"
+- ~~[LOW_RISK] Add construction loan builder partner content + process walkthrough~~ ✅ DONE 2026-04-11 — commit 811028f, AEO paragraph + 6-step build process walkthrough with Austin builder examples, dateModified updated
 
 ### P3 — ONGOING MAINTENANCE (from audit)
 - ~~[LOW_RISK] blog.html noscript links — keep in sync when new posts are added~~ ✅ VERIFIED 2026-04-05 — all 4 new April posts already in noscript block
@@ -117,9 +117,15 @@
 - ~~[LOW_RISK] Mortgage glossary page~~ ✅ DONE 2026-04-07 — mortgage-glossary.html, FAQPage 6 questions, BreadcrumbList, Article schema, added to sitemap
 - ~~[LOW_RISK] Investment property ROI examples on DSCR page~~ ✅ DONE 2026-04-07 — 3 Austin scenarios (core Austin LTR, suburban LTR, STR), honest ROI math
 
+## ADDED 2026-04-14 AM (Tuesday title/meta audit)
+
+- ~~[LOW_RISK] Title tag audit — 6 loan/resource pages missing "Adam Styer" and/or NMLS #513013~~ ✅ DONE 2026-04-14 — fixed: first-time-home-buyer (NMLS added), austin-down-payment-assistance (Adam Styer added), fixed-vs-adjustable (Adam Styer added), how-to-buy-a-house-in-austin-tx (Adam Styer added + meta updated), closing-costs-texas (Adam Styer added), improve-credit-score (NMLS added + format corrected). All now match "[Loan Type] in Austin TX | Adam Styer | NMLS #513013" pattern.
+- ~~[LOW_RISK] mortgage-broker-vs-bank.html Article schema dateModified~~ ✅ DONE 2026-04-14 — updated 2026-02-26 → 2026-04-14 (per TOMORROW_PRIORITY from Monday run)
+- [P4 — GSC BLOCKED] austin-housing-market-2025.html — skipped title fix (page is noindex, optimization waste)
+
 ## ADDED 2026-04-07 AM
 
-- [LOW_RISK] City page enrichment: continue 2-3 cities per session — ~~Bee Cave ✅, Manor ✅, Smithville ✅~~ done 2026-04-08 AM. Remaining: Spicewood, Florence, Jarrell, Marble Falls, Liberty Hill, New Braunfels, Lakeway, Elgin
+- ~~[LOW_RISK] City page enrichment: continue 2-3 cities per session~~ ✅ ALL 25 CITIES COMPLETE — ~~Bee Cave ✅, Manor ✅, Smithville ✅~~ done 2026-04-08 AM. ~~New Braunfels ✅, Lakeway ✅~~ done 2026-04-10. ~~Liberty Hill ✅, Elgin ✅~~ done 2026-04-10b. ~~Florence ✅ (already had at a glance), Marble Falls ✅ (added 2026-04-11, commit fbb0dd6)~~
 - ~~[LOW_RISK] Add mortgage-glossary.html link to Resources nav dropdown (currently not in nav)~~ ✅ DONE 2026-04-08 AM — 64 pages updated, commit e4ee80b
 - ~~[LOW_RISK] Add internal links to mortgage-glossary.html from loan type pages (conventional, FHA, VA, DSCR) for key terms they define~~ ✅ DONE 2026-04-08 AM — all 4 loan pages updated
 

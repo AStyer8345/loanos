@@ -49,3 +49,13 @@
 
 #### Blog Posts
 2026-04-07 | blog | blog/2026-04-06-mortgage-document-checklist-austin-tx.html | posted
+
+### Posted 2026-04-11 AM Session
+
+#### Blog Posts
+2026-04-11 | blog | blog/2026-04-10-fha-loan-requirements-texas-2026.html | gbp:posted (Publer job 69d9f8b91eb2733c546ea717), ig/fb/li:drafted (social_drafts)
+
+### Posted 2026-04-15 AM Session
+
+#### Rate Pages
+2026-04-15 | rate | rates/2026-04-14.html | gbp:posted (Publer job 69df3eb9ac618bd4f8df9b90), ig/fb/li:drafted (social_drafts IDs: fb=7c22ab55, ig=0e30c402, li=8ae991cc)

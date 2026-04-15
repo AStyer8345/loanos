@@ -7,7 +7,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import type { DisplayData, ScenarioDisplayRow, HorizonAnalysis } from '@/lib/scenarios/displayData'
-import { GOLD, TEXT, MUTED, BORDER, fmtCurrency, fmtRate } from './constants'
+import { GOLD, TEXT, MUTED, BORDER, fmtCurrency } from './constants'
 
 interface DetailAccordionProps {
   displayData: DisplayData
@@ -90,52 +90,6 @@ const cellStyle: React.CSSProperties = {
   borderBottom: `1px solid rgba(255,255,255,0.04)`,
 }
 
-// ─── Full Comparison Table ────────────────────────────────────────
-
-function ComparisonDetail({ displayData }: { displayData: DisplayData }) {
-  const { rows, mode } = displayData
-  const labels = rows.map(r => r.label)
-
-  return (
-    <DetailTable>
-      <THead labels={labels} />
-      <tbody>
-        {mode === 'purchase' && (
-          <TRow label="Purchase Price" values={rows.map(r => r.purchasePrice ? fmtCurrency(r.purchasePrice) : '\u2014')} />
-        )}
-        <TRow label="Loan Amount" values={rows.map(r => fmtCurrency(r.loanAmount))} />
-        <TRow label="Interest Rate" values={rows.map(r => fmtRate(r.interestRate))} />
-        <TRow label="APR" values={rows.map(r => fmtRate(r.apr))} />
-        <TRow label="Monthly Payment" values={rows.map(r => fmtCurrency(r.totalMonthlyPayment))} bold />
-        <TRow label="  P&I" values={rows.map(r => fmtCurrency(r.monthlyPI))} />
-        <TRow label="  Property Tax" values={rows.map(r => r.propertyTaxes > 0 ? fmtCurrency(r.propertyTaxes) : '\u2014')} />
-        <TRow label="  Insurance" values={rows.map(r => r.homeownersInsurance > 0 ? fmtCurrency(r.homeownersInsurance) : '\u2014')} />
-        {rows.some(r => r.hoa > 0) && (
-          <TRow label="  HOA" values={rows.map(r => r.hoa > 0 ? fmtCurrency(r.hoa) : '\u2014')} />
-        )}
-        {rows.some(r => r.pmi > 0) && (
-          <TRow label="  PMI" values={rows.map(r => r.pmi > 0 ? fmtCurrency(r.pmi) : '\u2014')} />
-        )}
-        <TRow
-          label={mode === 'purchase' ? 'Cash to Close' : 'Closing Costs'}
-          values={rows.map(r => fmtCurrency(r.cashToClose))}
-          bold
-        />
-        <TRow label="Total Interest" values={rows.map(r => fmtCurrency(r.totalInterest))} />
-        <TRow
-          label="Monthly Savings"
-          values={rows.map(r =>
-            (r.monthlySavingsVsCurrent ?? 0) > 0
-              ? `+${fmtCurrency(r.monthlySavingsVsCurrent!)}/mo`
-              : '\u2014'
-          )}
-          highlight
-        />
-      </tbody>
-    </DetailTable>
-  )
-}
-
 // ─── Horizon Analysis ─────────────────────────────────────────────
 
 function HorizonDetail({ displayData }: { displayData: DisplayData }) {
@@ -196,31 +150,24 @@ function HorizonDetail({ displayData }: { displayData: DisplayData }) {
 export default function DetailAccordion({ displayData }: DetailAccordionProps) {
   const hasHorizon = displayData.rows.some(r => r.horizonAnalysis)
 
+  // "Full Scenario Comparison" removed — ScenarioComparisonTable covers it above.
+  // Only render when there's unique horizon data (5yr / 15yr projections).
+  if (!hasHorizon) return null
+
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(20,20,20,0.5)', border: `1px solid ${BORDER}` }}>
       <p className="text-[10px] font-semibold uppercase tracking-widest px-5 pt-5 pb-2" style={{ color: GOLD }}>
         Detailed Analysis
       </p>
       <Accordion type="multiple" className="px-5 pb-2">
-        <AccordionItem value="comparison" className="border-b-0" style={{ borderColor: BORDER }}>
+        <AccordionItem value="horizon" className="border-b-0" style={{ borderColor: BORDER }}>
           <AccordionTrigger className="text-xs font-medium hover:no-underline" style={{ color: TEXT }}>
-            Full Scenario Comparison
+            5-Year &amp; 15-Year Projections
           </AccordionTrigger>
           <AccordionContent>
-            <ComparisonDetail displayData={displayData} />
+            <HorizonDetail displayData={displayData} />
           </AccordionContent>
         </AccordionItem>
-
-        {hasHorizon && (
-          <AccordionItem value="horizon" className="border-b-0" style={{ borderColor: BORDER }}>
-            <AccordionTrigger className="text-xs font-medium hover:no-underline" style={{ color: TEXT }}>
-              5-Year &amp; 15-Year Projections
-            </AccordionTrigger>
-            <AccordionContent>
-              <HorizonDetail displayData={displayData} />
-            </AccordionContent>
-          </AccordionItem>
-        )}
       </Accordion>
     </div>
   )

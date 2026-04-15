@@ -17,6 +17,8 @@ import LOSidebarCard from './LOSidebarCard'
 import ShareVideoEmbed from './ShareVideoEmbed'
 import ScenarioComparisonTable from './ScenarioComparisonTable'
 import SocialProofBlock from './SocialProofBlock'
+import BorrowerQA from './BorrowerQA'
+import type { BorrowerQAPair } from '@/app/share/[token]/page'
 
 interface SharedScenario {
   scenario_type: string
@@ -24,6 +26,7 @@ interface SharedScenario {
   property_address: string | null
   property_value: number | null
   narrative: string | null
+  borrower_qa: BorrowerQAPair[] | null
   created_at: string
 }
 
@@ -193,6 +196,13 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
               <SocialProofBlock displayData={displayData} />
             </section>
 
+            {/* Borrower Q&A — pre-generated, print:hidden */}
+            {data.borrower_qa && data.borrower_qa.length > 0 && (
+              <section className="no-break print:hidden">
+                <BorrowerQA pairs={data.borrower_qa} />
+              </section>
+            )}
+
             {/* Break-Even Visual */}
             {hasBreakEven && (
               <section className="no-break">
@@ -200,12 +210,8 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
               </section>
             )}
 
-            {/* Collapsible Deep Dive */}
+            {/* Collapsible Deep Dive — only renders when horizon data exists */}
             <section className="print:hidden">
-              <SectionIntro
-                title="Detailed Comparison"
-                subtitle="Expand for full numbers."
-              />
               <DetailAccordion displayData={displayData} />
             </section>
 

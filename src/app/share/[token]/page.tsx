@@ -16,6 +16,11 @@ import type { ShareBranding } from '@/app/api/share/[token]/route'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = Record<string, any>
 
+export interface BorrowerQAPair {
+  q: string
+  a: string
+}
+
 interface SharedScenario {
   scenario_type: string
   borrower_name: string | null
@@ -24,6 +29,7 @@ interface SharedScenario {
   current_loan_data: AnyObj | null
   scenarios_data: AnyObj[]
   narrative: string | null
+  borrower_qa: BorrowerQAPair[] | null
   created_at: string
   branding?: ShareBranding
 }

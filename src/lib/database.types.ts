@@ -2259,6 +2259,7 @@ export type Database = {
       scenarios: {
         Row: {
           borrower_name: string | null
+          borrower_qa: Json | null
           created_at: string | null
           current_loan_data: Json | null
           id: string
@@ -2282,6 +2283,7 @@ export type Database = {
         }
         Insert: {
           borrower_name?: string | null
+          borrower_qa?: Json | null
           created_at?: string | null
           current_loan_data?: Json | null
           id?: string
@@ -2305,6 +2307,7 @@ export type Database = {
         }
         Update: {
           borrower_name?: string | null
+          borrower_qa?: Json | null
           created_at?: string | null
           current_loan_data?: Json | null
           id?: string

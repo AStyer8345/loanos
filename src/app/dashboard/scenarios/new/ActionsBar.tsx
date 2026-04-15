@@ -107,6 +107,15 @@ export default function ActionsBar({
       if (data.id) {
         onSaved(data.id)
         setShareToken(data.share_token)
+
+        // Fire-and-forget: generate borrower Q&A in the background.
+        // No await — this must not delay the LO's workflow.
+        fetch('/api/scenarios/generate-qa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scenarioId: data.id }),
+        }).catch(() => { /* best-effort — silently ignore */ })
+
         return { id: data.id, share_token: data.share_token }
       }
       return null

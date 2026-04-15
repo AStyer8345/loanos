@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
     // otherwise leak out through this public borrower-facing endpoint.
     const { data, error } = await supabase
       .from('scenarios')
-      .select('id, organization_id, user_id, share_token, share_expires_at, view_count, scenario_type, borrower_name, property_address, property_value, current_loan_data, scenarios_data, results_data, narrative, reinvestment_data, created_at')
+      .select('id, organization_id, user_id, share_token, share_expires_at, view_count, scenario_type, borrower_name, property_address, property_value, current_loan_data, scenarios_data, results_data, narrative, reinvestment_data, borrower_qa, created_at')
       .eq('share_token', params.token)
       .single()
 
@@ -109,6 +109,7 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
       results_data: data.results_data,
       narrative: data.narrative,
       reinvestment_data: data.reinvestment_data,
+      borrower_qa: data.borrower_qa ?? null,
       created_at: data.created_at,
       branding,
     })

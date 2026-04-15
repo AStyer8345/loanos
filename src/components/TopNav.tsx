@@ -13,6 +13,7 @@ import {
   Settings,
   Search,
   Menu,
+  Inbox,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -28,7 +29,7 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'marketing' | 'lenders' | 'drip' | 'admin' | 'settings'
+type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'marketing' | 'lenders' | 'drip' | 'drafts' | 'admin' | 'settings'
 
 const NAV_ITEMS: { label: string; section: Section; href: string; icon: React.ReactNode }[] = [
   { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
@@ -38,6 +39,7 @@ const NAV_ITEMS: { label: string; section: Section; href: string; icon: React.Re
   { label: 'Marketing', section: 'marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
   { label: 'Lenders',  section: 'lenders',  href: '/dashboard/lenders', icon: <Building2 className="size-4" /> },
   { label: 'Drip',     section: 'drip',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" /> },
+  { label: 'Drafts',   section: 'drafts',   href: '/dashboard/drafts', icon: <Inbox className="size-4" /> },
   { label: 'Admin',     section: 'admin',     href: '/dashboard/automations', icon: <Shield className="size-4" /> },
 ]
 
@@ -50,6 +52,7 @@ function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/marketing')) return 'marketing'
   if (pathname.startsWith('/dashboard/lenders')) return 'lenders'
   if (pathname.startsWith('/dashboard/drip-campaigns')) return 'drip'
+  if (pathname.startsWith('/dashboard/drafts')) return 'drafts'
   if (pathname.startsWith('/dashboard/automations')) return 'admin'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null

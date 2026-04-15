@@ -362,7 +362,7 @@ export default function GettingStartedWizard({
               </div>
             </div>
 
-            <div className="space-y-2 mb-8">
+            <div className="space-y-2 mb-4">
               {AUTOMATIONS.map(a => (
                 <div key={a.label} className="flex items-start gap-3 p-4 bg-gray-800 rounded-xl">
                   <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 shrink-0" />
@@ -372,6 +372,14 @@ export default function GettingStartedWizard({
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="bg-amber-900/20 border border-amber-700/40 rounded-xl p-4 mb-8">
+              <p className="text-xs font-semibold text-amber-300 mb-1">How emails are sent</p>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Email automations generate <strong className="text-white">drafts</strong> — they don&apos;t send from your inbox automatically.
+                Review each draft in the <strong className="text-white">Drafts</strong> tab, then click <strong className="text-white">Open in Outlook</strong> or <strong className="text-white">Copy HTML</strong> to send from your own email. This keeps every message coming from you.
+              </p>
             </div>
 
             <button

@@ -2216,6 +2216,173 @@ git commit -m "feat(dashboard): Panel 5 — lead origin table with UTM + source 
 
 ---
 
+### Task 18.5: Email Automation summary card on main `/dashboard`
+
+**Files:**
+- Create: `src/components/dashboard/EmailAutomationCard.tsx`
+- Modify: `src/app/dashboard/page.tsx` (add the card to the grid)
+
+`★ Insight ─────────────────────────────────────`
+The full 6-panel view stays at `/admin/email-automation`. This card is a compact summary on the main dashboard — so Adam sees email automation health every morning without navigating. Click-through takes you to the full page.
+`─────────────────────────────────────────────────`
+
+- [ ] **Step 1: Write the summary card component**
+
+```tsx
+// src/components/dashboard/EmailAutomationCard.tsx
+import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { createServiceClient } from '@/lib/supabase/server'
+
+interface Summary {
+  activeDrips: number
+  emailsLast7Days: number
+  bouncesLast7Days: number
+  lastEventAt: string | null
+}
+
+async function fetchEmailAutomationSummary(): Promise<Summary> {
+  const supabase = createServiceClient()
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+  const [{ count: activeDrips }, { count: emailsLast7Days }, { count: bouncesLast7Days }, { data: lastEvent }] =
+    await Promise.all([
+      supabase.from('drip_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase
+        .from('activity_log')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_type', 'email.sent')
+        .gte('created_at', sevenDaysAgo),
+      supabase
+        .from('activity_log')
+        .select('*', { count: 'exact', head: true })
+        .in('event_type', ['email.bounced', 'email.complained'])
+        .gte('created_at', sevenDaysAgo),
+      supabase
+        .from('activity_log')
+        .select('created_at')
+        .like('event_type', 'email.%')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
+
+  return {
+    activeDrips: activeDrips ?? 0,
+    emailsLast7Days: emailsLast7Days ?? 0,
+    bouncesLast7Days: bouncesLast7Days ?? 0,
+    lastEventAt: (lastEvent?.created_at as string | undefined) ?? null,
+  }
+}
+
+export default async function EmailAutomationCard() {
+  const s = await fetchEmailAutomationSummary()
+  const health: 'healthy' | 'warn' | 'unknown' =
+    s.bouncesLast7Days > 5 ? 'warn' : s.emailsLast7Days > 0 ? 'healthy' : 'unknown'
+
+  return (
+    <Link href="/admin/email-automation" className="block">
+      <Card className="hover:border-primary transition-colors">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-base">Email Automation</CardTitle>
+          <Badge variant={health === 'warn' ? 'destructive' : health === 'healthy' ? 'default' : 'secondary'}>
+            {health}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <div className="text-2xl font-semibold">{s.activeDrips}</div>
+              <div className="text-xs text-muted-foreground">Active drips</div>
+            </div>
+            <div>
+              <div className="text-2xl font-semibold">{s.emailsLast7Days}</div>
+              <div className="text-xs text-muted-foreground">Sent (7d)</div>
+            </div>
+            <div>
+              <div className={`text-2xl font-semibold ${s.bouncesLast7Days > 0 ? 'text-destructive' : ''}`}>
+                {s.bouncesLast7Days}
+              </div>
+              <div className="text-xs text-muted-foreground">Bounced (7d)</div>
+            </div>
+          </div>
+          {s.lastEventAt && (
+            <div className="mt-3 text-xs text-muted-foreground">
+              Last event: {new Date(s.lastEventAt).toLocaleString()}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
+  )
+}
+```
+
+- [ ] **Step 2: Add the card to the main dashboard page**
+
+Read `src/app/dashboard/page.tsx` to find the existing grid layout. Then add:
+
+```tsx
+import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
+import { Suspense } from 'react'
+
+// Inside the existing dashboard grid — near the top, next to sparklines/funnel:
+<Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
+  <EmailAutomationCard />
+</Suspense>
+```
+
+Place the card in the existing grid so it sits alongside the current dashboard widgets (sparklines, funnel, leaderboard). Preserve the existing layout — do not rearrange other cards.
+
+- [ ] **Step 3: Gate the card on admin-ness (card hides for future LO #2 until Phase 3)**
+
+Since Phase 1 scopes this feature to Adam only (see spec §2 out-of-scope: "Multi-tenant variant of this dashboard (Phase 3 after LO #2 onboarding)"), the card should not render for non-system-admin users. Wrap the card render:
+
+```tsx
+// In src/app/dashboard/page.tsx, above the grid:
+import { createClient } from '@/lib/supabase/server'
+import { createServiceClient as createServiceClientForAdminCheck } from '@/lib/supabase/server'
+
+// Check system_admins membership
+const authSupabase = createClient()
+const { data: { user } } = await authSupabase.auth.getUser()
+let isSystemAdmin = false
+if (user) {
+  const serviceSupabase = createServiceClientForAdminCheck()
+  const { data: adminRow } = await serviceSupabase
+    .from('system_admins')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  isSystemAdmin = Boolean(adminRow)
+}
+
+// Then in JSX:
+{isSystemAdmin && (
+  <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
+    <EmailAutomationCard />
+  </Suspense>
+)}
+```
+
+- [ ] **Step 4: Run build**
+
+```bash
+cd /Users/adamstyer/Documents/loanos-clone && npm run build
+```
+
+Expected: exits 0.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/dashboard/EmailAutomationCard.tsx src/app/dashboard/page.tsx
+git commit -m "feat(dashboard): Email Automation summary card on main /dashboard"
+```
+
+---
+
 ### Task 19: Push dashboard to Vercel + verify deployment
 
 - [ ] **Step 1: Run final pre-push build**

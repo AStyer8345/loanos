@@ -83,19 +83,16 @@ export async function dpaGuideNurture(contactId: string): Promise<void> {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     "use step"
-    const sendId = await sendViaResend({
+    await sendViaResend({
       to: contact.email,
       subject: subjects[i],
       body: `<p>Hi ${contact.first_name},</p><p>${subjects[i]}</p><p>— Adam, NMLS #513013</p>`,
       tags: { enrollment_id: enrollment.id, step_order: String(i) },
-    })
-
-    await supabase.from('activity_log').insert({
-      organization_id: contact.organization_id,
-      contact_id: contact.id,
-      action: 'email.sent',
-      event_type: 'email.sent',
-      summary: `DPA Guide step ${i + 1}/${schedule.length}: ${subjects[i]} [${sendId}]`,
+      log: {
+        organizationId: contact.organization_id,
+        contactId: contact.id,
+        template: `dpa_guide_step_${i + 1}`,
+      },
     })
 
     const hook = createHook({ token: `drip-${enrollment.id}-step-${i}` })

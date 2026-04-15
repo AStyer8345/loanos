@@ -70,6 +70,7 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
       </ul>
     `,
     tags: { kind: 'lead_alert', source: 'web-lead-intake' },
+    log: { organizationId: payload.org_id, contactId: contact.id, template: 'lead_alert' },
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -86,6 +87,7 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
         <p>— Adam Styer | NMLS #513013</p>
       `,
       tags: { kind: 'lead_confirmation', source: 'web-lead-intake' },
+      log: { organizationId: payload.org_id, contactId: contact.id, template: 'lead_confirmation' },
     })
   }
 

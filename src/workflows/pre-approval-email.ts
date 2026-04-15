@@ -37,16 +37,6 @@ export async function preApprovalEmailWorkflow(payload: PreApprovalPayload): Pro
       <p>— Adam<br>NMLS #513013</p>
     `,
     tags: { kind: 'pre_approval', source: 'pre-approval-email' },
-  })
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  "use step"
-  await supabase.from('activity_log').insert({
-    org_id: payload.org_id,
-    contact_id: contact.id,
-    loan_id: payload.loan_id,
-    action: 'email.sent',
-    event_type: 'email.sent',
-    body: `Pre-approval email sent to ${contact.email}`,
+    log: { organizationId: payload.org_id, contactId: contact.id, template: 'pre_approval' },
   })
 }

@@ -1,5 +1,6 @@
 // src/lib/resend/send.ts
 import { Resend } from 'resend'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // Lazy initialization — avoid throwing at module load when RESEND_API_KEY is absent
 let _resend: Resend | null = null
@@ -8,11 +9,18 @@ function getResendClient(): Resend {
   return _resend
 }
 
+export interface ResendLogContext {
+  organizationId: string
+  contactId?: string | null
+  template: string          // e.g. 'lead_alert', 'lead_confirmation', 'pa_welcome_step_1', 'pre_approval'
+}
+
 export interface ResendSendParams {
   to: string
   subject: string
   body: string          // HTML
   tags?: Record<string, string>
+  log?: ResendLogContext
 }
 
 export async function sendViaResend(params: ResendSendParams): Promise<string> {
@@ -28,5 +36,27 @@ export async function sendViaResend(params: ResendSendParams): Promise<string> {
   })
 
   if (error) throw new Error(`Resend send failed: ${error.message}`)
-  return data?.id ?? ''
+  const resendId = data?.id ?? ''
+
+  // Best-effort send log — a row in activity_log every time we send.
+  // Never throw from logging failures; sending the email is the primary job.
+  if (params.log) {
+    try {
+      const supabase = createServiceClient()
+      await supabase.from('activity_log').insert({
+        organization_id: params.log.organizationId,
+        contact_id: params.log.contactId ?? null,
+        action: 'email.sent',
+        event_type: 'email.sent',
+        type: params.log.template,
+        to_address: params.to,
+        external_id: resendId || null,
+        summary: params.subject,
+      })
+    } catch (logErr) {
+      console.error('sendViaResend: activity_log insert failed', logErr)
+    }
+  }
+
+  return resendId
 }

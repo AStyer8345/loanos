@@ -223,7 +223,7 @@ function LoanStageBadge({ status }: { status: string | null }) {
 function isActiveLoan(status: string | null) {
   if (!status) return false
   const s = status.toLowerCase()
-  return !['closed', 'funded', 'closed/funded', 'denied', 'withdrawn'].some(v => s.includes(v))
+  return !['closed', 'funded', 'closed/funded', 'denied', 'withdrawn', 'cancelled', 'canceled', 'terminated'].some(v => s.includes(v))
 }
 
 const cardStyle: React.CSSProperties = {

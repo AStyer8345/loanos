@@ -91,8 +91,8 @@ export default function ContactRecordPage() {
     if (!organizationId) return
     const { data } = await supabase
       .from('drip_enrollments')
-      .select('id, contact_id, campaign_id, organization_id, status, current_step, next_send_at, enrolled_at, cancelled_at')
-      .eq('organization_id', organizationId)
+      .select('id, contact_id, campaign_id, org_id, status, current_step, next_send_at, enrolled_at, cancelled_at')
+      .eq('org_id', organizationId)
       .eq('contact_id', id)
       .order('enrolled_at', { ascending: false })
     const rows = data ?? []
@@ -237,7 +237,7 @@ export default function ContactRecordPage() {
             .limit(100),
         ])
         setEmailDrafts((drafts ?? []) as EmailDraftRow[])
-        setInboundEmails((inbound ?? []) as InboundEmailRow[])
+        setInboundEmails((inbound ?? []) as unknown as InboundEmailRow[])
         setContactEmails((ceRows ?? []) as ContactEmailRow[])
       }
       setLoading(false)

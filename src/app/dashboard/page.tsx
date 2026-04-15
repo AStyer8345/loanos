@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import DashboardClient from '@/components/dashboard/DashboardClient'
+import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
@@ -21,6 +24,22 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
   const supabase = createClient()
+
+  // ── System admin check (for EmailAutomationCard gate) ──────────────────────
+  let isSystemAdmin = false
+  {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const service = createServiceClient() as any
+      const { data: adminRow } = await service
+        .from('system_admins')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      isSystemAdmin = Boolean(adminRow)
+    }
+  }
 
   // Parallel fetch: org_settings + loans + mcc_state are independent
   const [{ data: orgSettings }, { data: loans = [] }, { data: mccRow }] = await Promise.all([
@@ -492,38 +511,47 @@ export default async function DashboardPage() {
   const marketingLog = rawLog.slice(0, 10) // most recent 10
 
   return (
-    <DashboardClient
-      totalActive={totalActive}
-      totalActiveVolume={totalActiveVolume}
-      totalActiveCommission={totalActiveCommission}
-      pipelineCount={pipelineCount}
-      pipelineVolume={pipelineVolume}
-      pipelineCommission={pipelineCommission}
-      commissionThisMonth={commissionThisMonth}
-      commissionYTD={commissionYTD}
-      projectedCommission={totalActiveCommission}
-      fundedThisMonth={fundedThisMonth}
-      fundedYTD={fundedYTD}
-      volumeThisMonth={volumeThisMonth}
-      volumeYTD={volumeYTD}
-      stageData={stageData}
-      urgentFlags={urgentFlags}
-      staleLoans={staleLoans}
-      chartData={chartData}
-      sparklineMonths={sparklineMonths}
-      scoredLoans={scoredLoans}
-      hotLeads={hotLeads}
-      funnelData={funnelData}
-      showSetupBanner={showSetupBanner}
-      referralData={referralData}
-      rateLockLoans={rateLockLoans}
-      yoyChartData={yoyChartData}
-      forecastData={forecastData}
-      daysToCloseData={daysToCloseData}
-      pipelineLoans={pipelineLoans}
-      newAppsAndPAs={newAppsAndPAs}
-      leadSourceData={leadSourceData}
-      marketingLog={marketingLog}
-    />
+    <>
+      {isSystemAdmin && (
+        <div className="px-4 lg:px-6 pt-4">
+          <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
+            <EmailAutomationCard />
+          </Suspense>
+        </div>
+      )}
+      <DashboardClient
+        totalActive={totalActive}
+        totalActiveVolume={totalActiveVolume}
+        totalActiveCommission={totalActiveCommission}
+        pipelineCount={pipelineCount}
+        pipelineVolume={pipelineVolume}
+        pipelineCommission={pipelineCommission}
+        commissionThisMonth={commissionThisMonth}
+        commissionYTD={commissionYTD}
+        projectedCommission={totalActiveCommission}
+        fundedThisMonth={fundedThisMonth}
+        fundedYTD={fundedYTD}
+        volumeThisMonth={volumeThisMonth}
+        volumeYTD={volumeYTD}
+        stageData={stageData}
+        urgentFlags={urgentFlags}
+        staleLoans={staleLoans}
+        chartData={chartData}
+        sparklineMonths={sparklineMonths}
+        scoredLoans={scoredLoans}
+        hotLeads={hotLeads}
+        funnelData={funnelData}
+        showSetupBanner={showSetupBanner}
+        referralData={referralData}
+        rateLockLoans={rateLockLoans}
+        yoyChartData={yoyChartData}
+        forecastData={forecastData}
+        daysToCloseData={daysToCloseData}
+        pipelineLoans={pipelineLoans}
+        newAppsAndPAs={newAppsAndPAs}
+        leadSourceData={leadSourceData}
+        marketingLog={marketingLog}
+      />
+    </>
   )
 }

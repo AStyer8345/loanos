@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## 2026-04-15 PM — Email Automation Dashboard + n8n → Workflow DevKit (Phase 1 complete through shadow mode)
+
+Feature branch `feat/email-automation-dashboard`. 20+ commits, all builds green on Vercel. Phase 1 of the n8n → Vercel Workflow DevKit migration implemented end-to-end, now waiting on a 7-day shadow-mode parity review before cutover.
+
+- **Foundation** (migration 086): UTM/source_page/form_name/referrer columns on `contacts` with indexes, `resend_webhook_events` table with service-role-only RLS, 721 activity_log rows normalized `email_sent` → `email.sent`
+- **Workflow DevKit infra** (Tasks 2-6): `workflow` + `@workflow/ai` + `@workflow/next` packages, shared types in `src/lib/workflows/types.ts`, `src/lib/resend/verify.ts` (Svix) + `send.ts` (lazy singleton — avoids build-time env throw), `src/lib/outlook/graph.ts` (ClientSecretCredential), `src/lib/workflows/drip-helpers.ts` (classifyLeadFallback, shouldExitDrip, mapResendEventType, buildDripScheduleDays)
+- **4 workflows** (Tasks 7-10): `src/workflows/pre-approval-email.ts` (single-send, manual trigger), `pa-welcome-nurture.ts` (6 emails / 60 days), `dpa-guide-nurture.ts` (8 emails / 52 days), `web-lead-intake.ts` (purchase lead pipeline with UTM persistence + classification + conditional nurture enrollment)
+- **API routes** (Tasks 11-13): `POST /api/resend-webhook` (Svix-verified, idempotent), `POST /api/workflows/pre-approval-email/start` (admin-gated trigger), `/api/contacts/web-lead` extended with UTM persistence + feature-flagged `WORKFLOW_DEVKIT_LEAD_INTAKE=off|shadow|live` branch
+- **Admin dashboard** (Tasks 14-18.5): `/admin/email-automation` RSC page with requireAdmin() gate + 4 Suspense panels: `WorkflowStatusPanel` (n8n + Vercel Workflow health), `EmailSendLog` (Resend last 50 events with bounce flags), `ActiveDripsTable` + `DripDetailDrawer` (shared DripRow type), `LeadOriginTable` (new migration 086 columns). Main `/dashboard` gets a click-through `EmailAutomationCard` summary gated on `system_admins` so it hides for future LO #2.
+- **Deploy** (Task 19): feature branch pushed, Vercel preview READY at SHA `8a0d4a0`
+- **styermortgage.com** (Task 20, separate repo): new unified `netlify/functions/lead-intake.js` (Mailchimp list add + normalized POST to LoanOS with UTM/source_page/referrer), `assets/utm.js` IIFE auto-populates hidden form fields, 5 lead-capture pages updated. Preserved legacy env-var names (`MAILCHIMP_BORROWER_LIST_ID`, `LOANOS_URL`) + datacenter-from-API-key logic + CORS + all payload fields the plan would have silently dropped. `subscribe-lead.js` deliberately kept alongside until Task 23 cutover. Commit `7818d86`.
+- **Shadow mode** (Tasks 21-22): migration 087 `workflow_shadow_log` table (service-role-only, deny-all RLS), web-lead shadow branch now persists classification + would-enroll + campaign_key + payload for parity diffing (was console.log). `tests/workflows/smoke-checklist.md` — 6-section manual checklist covering pre-approval, web-lead, both drip campaigns, Resend webhook idempotency, and 7-day parity comparison with rollback plan. Commit `9583ba3`. Vercel READY.
+- **Task 23 (cutover)** — **blocked on Adam**: (1) set env vars in Vercel (`WORKFLOW_DEVKIT_LEAD_INTAKE=shadow`, `DEFAULT_ORG_ID`, Resend/Graph/admin creds), (2) configure Resend webhook endpoint, (3) register Microsoft Graph app + secret, (4) run 7-day shadow, (5) SQL parity diff `workflow_shadow_log` vs n8n, (6) flip to `live` + archive 4 n8n workflows + record +61d kill date in DECISIONS.md
+
+**Out-of-scope commits caught during session** (flagged here so merge review doesn't miss them): `09816c0` (fix: cancelled loans inactive, also landed on main as `fe1b86a`), `9684d05` (fix: n8n-proxy route, also landed on main as `df1bd17`). Both were self-corrected by the agent that made them and independently shipped to main via separate production deploys — they'll diff to no-op when the feature branch merges.
+
 ## 2026-04-15 AM — Scenarios: Tier 6 — DetailAccordion Cleanup + Borrower Q&A
 
 - DetailAccordion: removed "Full Scenario Comparison" item (ScenarioComparisonTable covers it); auto-hides when no horizon data

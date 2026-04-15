@@ -92,48 +92,48 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-14 AM — Week 26 built (Posts 142-146, Sep 2-8): 2 LI + 1 IG + 2 FB. 1 authority (TIMELY Jobs) / 2 personal / 1 real-talk / 1 education. Avg 8.0/10 (scored posts). All APPROVED. QA 5/5 PASS. Post 145 TIMELY Jobs Report template: 7 placeholders, NMLS #513013 present, Refresh fills Sep 4 AM. Post 143 Reel: Adam films before Sep 3.
+**Last worked on:** 2026-04-15 AM — Step 1B: rates/2026-04-14.html distributed (GBP auto-posted Publer 69df3eb9ac618bd4f8df9b90, FB/IG/LI drafted for approval). Week 28 built (Posts 152-156, Sep 16-22): 2 LI + 1 IG + 2 FB. 2 authority (TIMELY FOMC Sep 16 + hot-take) / 2 education / 1 personal Reel. Avg 8.0/10. All APPROVED. QA 5/5 PASS. Post 152 TIMELY FOMC: 6 placeholders, NMLS #513013, Refresh fills Sep 16 after 2 PM ET, Adam approves by 5 PM CDT. NotebookLM CLI 6th consecutive timeout.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 39: deadline April 15 — TODAY (URGENT). Post 145 TIMELY Jobs: Adam approve after Refresh fills ~Sep 4. Post 140 TIMELY PCE: Adam approve ~Aug 29. Post 136 TIMELY Jackson Hole: Adam approve ~Aug 24. Posts 29+30 Liberation Day: decision due April 28 (14 days).
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 152 TIMELY FOMC: Adam approve ~Sep 16. Post 147 TIMELY CPI: Adam approve ~Sep 10. Post 145 TIMELY Jobs: Adam approve ~Sep 4. Post 140 TIMELY PCE: Adam approve ~Aug 29. Rate update FB/IG/LI drafts (Apr 14 rates): awaiting approval in dashboard.
 
-**What's next:** Week 27 build (Posts 147-151, Sep 9-15). Slight personal over-index in Wk 26 — prioritize education/real-talk. BLOCKER-LOANOS-001 gate check each AM session. Post 39 hard deadline TODAY.
+**What's next:** Week 29 build (Posts 157-161, Sep 23-29). Authority/education emphasis continues. Pull back personal (2 in Wks 27-28). Reel queue — Adam needs to film Post 155 by Sep 19. NotebookLM CLI check — 6th consecutive timeout.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-14 AM — Homepage Quick Quote + Quick Contact forms wired to subscribe-lead.js (commit `1bb1ef1`, deployed to styermortgage.com). Calendly workflow `PBu2Zt0YpiLHeqbL` updated from 8→11 nodes: cancel branch (log invitee.canceled) + contact lookup (email→contact_id). Notebook: 6 removed (old pull, audit, web research ×2, session-log, CONTEXT), 5 added (new pull, 2 build reports, session-log, CONTEXT). 50/50. Digest: NOT SENT (AM — PM handles).
+**Last worked on:** 2026-04-15 AM — Blocker verification + homepage form test + lead scoring spec. Set Rate RESOLVED (6.37%, called 2026-04-14 — first ever). Seq A verified functional (6.37% > 6.00% threshold → exits cleanly). Homepage forms confirmed live (Quick Quote + Quick Contact wired via commit 1bb1ef1). Lead scoring spec complete: `tasks/lead-gen/specs/2026-04-15-lead-scoring-spec.md` — 6 signals, 4 tiers, data model options, n8n build plan, 3 Adam decisions needed. NotebookLM: 2 sources added (65 total — over 50 cap, PM curate needed).
 
-**Active blockers:** (1) Set Rate webhook never called — 6th session, Seq A idle. (2) Seq C INACTIVE — Outlook cred. (3) Mailchimp journeys not built (18-email pack ready, 45 min). (4) DPA Guide PDF not hosted. (5) Calendly webhook not configured — activate `PBu2Zt0YpiLHeqbL`.
+**Active blockers:** (1) Seq C INACTIVE — Outlook cred (7th session). (2) Calendly INACTIVE — webhook not wired. (3) Mailchimp journeys not built (pack ready). (4) Seq D — copy approval required. (5) Calendly HMAC signing key needed for security hardening.
 
-**What's next:** Verify Adam blocker progress. If Set Rate still unresolved, build Seq A manual test prep (single-contact test). Calendly signing key HMAC verification (medium-term security debt). TCPA SMS language gap on homepage forms (Bug-003, low risk).
+**What's next:** Build lead scoring system (spec ready, need Adam decisions on threshold/SMS/data model). Seq A threshold review (6.00% vs 6.25% — adjust if Adam confirms). Calendly HMAC node (needs signing key first).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-13 PM — NotebookLM PUSH+CURATE. MAJOR: styermortgage.com achieved first top-10 ranking — #3 for "hutto tx mortgage lender" (Competitive Intel Week 6, commit 36a6b28). MortgageAustin.com identified as new rising competitor at #3 for "mortgage broker austin tx" with decision-stage blog content. Notebook: 3 removed (old audit, old CONTEXT.md, superseded SEJ E-E-A-T), 2 added (fresh CONTEXT.md post-competitive-intel, audit-2026-04-13.md). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-14 PM — NotebookLM PUSH+CURATE. Daily-opt session committed: 6 title standardizations, WCAG contrast fix + ARIA + WebP (commit 1879e10), PA/DPA webhook triggers, rate page 2026-04-14.html. Notebook: 3 removed (stale CONTEXT.md, Apr13 pull, audit-Apr13), 3 added (fresh CONTEXT.md, audit-Apr14, web.dev/learn/accessibility). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC sitemap submission for 15 rate-check pages (Adam-owned — needs GSC login). Hutto page needs AEO strengthening + schema update (AggregateRating 91+ reviews). Liberty Hill + Elgin still need enrichment (2 remaining suburb pages).
+**Active blockers:** GSC URL Inspection for 5 suburbs (Adam — Dripping Springs, Round Rock, Cedar Park, Leander, Georgetown). Liberty Hill page unique content still unwritten. Temp placeholder blog post still at wrong slug.
 
-**What's next:** Strengthen Hutto page with AEO Atomic Paragraph + AggregateRating schema update (91+ reviews). Audit + strengthen /mortgage-broker-vs-bank.html to compete with MortgageAustin.com. Adam: submit GSC sitemap for 15 rate-check pages.
+**What's next:** Liberty Hill suburb page (MUD districts, Liberty Hill ISD, Orchard Ridge/Santa Rita Ranch). Internal link pass → hutto-mortgage-lender.html from 3-4 related pages. Lighthouse a11y audit post-WCAG/WebP deploy.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-14 AM — Social proof block (Tier 5 item 5). New SocialProofBlock component on share page — illustrative market context stats, date-seeded, adapts to mode + loan term, print:hidden, compliance disclaimer. Tier 5 COMPLETE (all 5 items done). Commit 31cc731 | Vercel dpl_6YGVKahEwejJNMR1npiK8JE8NxKb READY.
+**Last worked on:** 2026-04-15 AM — Tier 6 launch. DetailAccordion cleanup (removed "Full Scenario Comparison" item, auto-hides without horizon data). Pre-generated Borrower Q&A: migration 086 (borrower_qa JSONB), new `/api/scenarios/generate-qa` route (authenticated, idempotent), new `BorrowerQA.tsx` accordion component (print:hidden), fire-and-forget trigger in ActionsBar. Commit 70bd469 | Vercel BUILDING.
 
 **Active blockers:** None.
 
-**What's next:** Tier 5 complete — define Tier 6 or redirect to GOALS.md #1 (email automation). Candidate Tier 6 items: DetailAccordion cleanup (remove redundant "Full Scenario Comparison"), borrower-facing AI chat on share page (biggest remaining MC gap), mobile builder speed.
+**What's next:** Mobile builder quick-input form (LO at the table on phone — rate/term/price/down only). Backfill Q&A for existing scenarios (admin button or script).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-14 — Day 20 standup. Vercel READY (dpl_214r73B16g7JQtx8ZZ64NDQz9jJd). n8n: 31 total, 27 active. FLAG: CD & Contract Extractor `HkLjsnnhT5MgrX5H` now shows active=true — was inactive (3-week blocker). Needs execution test to confirm Outlook cred connected. Post 39 deadline TOMORROW (April 15). Security audit: 3 CRITICAL + 2 HIGH open findings.
+**Last worked on:** 2026-04-15 — Day 21 standup. n8n: 33 total, 29 active (+2: PA Welcome + DPA Guide nurture workflows live). CD & Contract Extractor `HkLjsnnhT5MgrX5H` still active=true but untested — Outlook cred unverified. Vercel unverifiable (OAuth required in automated session); last known READY. Post 39 due TODAY. Security: 0 CRITICAL, 3 MEDIUM open.
 
-**Active blockers:** Phase 2 Adam confirmation still outstanding (blocks Phase 3). Marketing demo data zero progress — 12 days to May 1. Post 39 approval due April 15 (tomorrow). 4 Adam-owned manual items unresolved. Security hardening: 3 items (#5, #9, #10).
+**Active blockers:** Marketing demo data zero progress (11 days to May 1 — HIGHEST RISK). Phase 2 Adam confirmation outstanding 7+ sessions (blocks Phase 3). CD & Contract Extractor needs execution test. Seq C INACTIVE (Outlook cred, 7+ sessions). Post 39 approval due today.
 
-**What's next:** Verify CD & Contract Extractor is truly active (test execution). If confirmed: Phase 5 email template wiring. If blocked: Phase 3 Follow-Up List. Marketing demo data cleanup (HIGH URGENCY — 12 days).
+**What's next:** Marketing demo data cleanup (start this week or May 1 misses). CD & Contract Extractor execution test. Phase 2 Adam confirmation escalation.
 
 ## Rules For AI Sessions
 

@@ -1,5 +1,40 @@
 # LoanOS Changelog
 
+## 2026-04-15 AM — Scenarios: Tier 6 — DetailAccordion Cleanup + Borrower Q&A
+
+- DetailAccordion: removed "Full Scenario Comparison" item (ScenarioComparisonTable covers it); auto-hides when no horizon data
+- Migration 086: `borrower_qa JSONB` column added to `scenarios` table
+- New `POST /api/scenarios/generate-qa`: authenticated, idempotent, generates 5 Q&A pairs via Claude, stores in DB
+- New `BorrowerQA.tsx`: numbered expandable accordion on share page — scenario-specific plain-English answers (print:hidden)
+- ActionsBar: fire-and-forget Q&A generation after every save (no UI delay)
+- Tier 6 Item 1 complete. Commit `70bd469`
+
+## 2026-04-15 AM — Lead Gen: Blocker Verification + Homepage Form Test + Lead Scoring Spec
+
+- Set Rate RESOLVED: Adam called `refi-watch-set-rate` webhook 2026-04-14 at 6.37% (first call ever — 7 sessions pending). Seq A now functional; market rate (6.37%) above 6.00% threshold so no alerts fire yet.
+- Seq A architecture confirmed: threshold 6.00%, candidate segment interest_rate ≥ 6.75%. Will fire when market drops to ≤ 6.00%.
+- Homepage form wiring verified live: Quick Quote + Quick Contact both call subscribe-lead.js; `contact_created` in Supabase today (02:45 UTC) confirms endpoint live.
+- Lead scoring spec complete: `tasks/lead-gen/specs/2026-04-15-lead-scoring-spec.md` — 6 signals (Calendly +20, PA +10, refi watch +8, rate alert +5, quick form +3, cancel -5), 4 tiers (Hot/Warm/Cold/New), Option A data model (contacts.lead_score column), 7-node n8n workflow design.
+- NotebookLM: 2 sources added (spec + pull report). 65 total — PM session curates to 50.
+
+## 2026-04-15 AM — Social: Step 1B Distribution + Week 28 Content Build (Posts 152-156, Sep 16-22)
+
+- Step 1B: rates/2026-04-14.html distributed — GBP auto-published (Publer 69df3eb9ac618bd4f8df9b90); FB/IG/LI platform drafts inserted (7c22ab55, 0e30c402, 8ae991cc) — awaiting Adam approval.
+- 5 posts inserted: 2 LinkedIn, 1 Instagram, 2 Facebook. All status:draft.
+- Post 152 (LinkedIn, TIMELY): FOMC Sep 16 reaction template. 6 placeholders. Refresh fills after 2 PM ET announcement. Adam approves by 5 PM CDT Sep 16.
+- Post 155 (Instagram, Reel): Guitar learning personal story. 35-sec script. Adam films before Sep 19.
+- Quality: avg 8.0/10. 0 rewrites. All APPROVED. QA 5/5 PASS. Rolling pillar: 28.9/28.6/28.9/14.6% — all within tolerance.
+- NotebookLM CLI: 6th consecutive timeout — added to ADAM-TODO.
+
+## 2026-04-14 PM — Social: Week 27 Content Build (Posts 147-151, Sep 9-15)
+
+- 5 posts inserted into social_drafts: 2 LinkedIn, 1 Instagram, 2 Facebook. All status:draft.
+- Pillar mix: 2 authority / 2 education / 1 personal. Correction from Wk 26 personal over-index.
+- Post 147 (LinkedIn, TIMELY): August CPI reaction template. 6 placeholders. Refresh fills Sep 10 AM. Adam approves by 11:30 AM CDT Sep 10.
+- Post 151 (LinkedIn): FOMC anticipation — evergreen authority post with Sep 15 news hook. No placeholders needed.
+- Quality: avg 8.0/10. 1 rewrite (Post 150 hook: 3 repetitive sentences → 2, 7→8). All APPROVED.
+- FLAG: NotebookLM CLI timed out 5 consecutive sessions — added to ADAM-TODO.md.
+
 ## 2026-04-14 PM — Lead Gen: PA Welcome + DPA Guide Nurture Workflows (n8n + Resend)
 
 - **PA Welcome Nurture** (workflow ID `rwi3qEYgJKGGHkHc`): 6 emails over 60 days (Day 0, 3, 7, 14, 30, 60). Webhook path `/webhook/pa-nurture`. Sender: `Adam Styer <adam@mail.thestyerteam.com>`, reply-to `adam@thestyerteam.com`.
@@ -2790,3 +2825,11 @@ Arive (loan event)
 - **Lead Gen notebook**: Removed 6 stale sources (3× CONTEXT.md, duplicate mailchimp-execution-pack, old audit, FRED API docs). Added refreshed loanos CONTEXT.md (noon state, post trigger fix + iMessage commits) + notebooklm-audit-2026-04-12.md. Final: 50/50.
 - **Master log**: Appended 2 entries (seo-sem-pm + lead-gen-pm) to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
 - **Digests sent**: SEO + SEM Daily Digest and Lead Gen Daily Digest both dispatched via Zapier (status: success).
+
+## 2026-04-14 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed 3 stale (CONTEXT.md Apr13, Apr13 AM pull, audit-Apr13). Added 3 fresh (CONTEXT.md Apr14 post daily-opt, audit-Apr14, web.dev/learn/accessibility). Final: 50/50.
+- **Lead Gen notebook**: Removed 2 stale (CONTEXT.md AM version, pull-2026-04-14). Added 2 fresh (CONTEXT.md PM version, audit-Apr14). Final: 50/50.
+- **Web research**: SEO — 1 source added (web.dev/learn/accessibility, WCAG 2.2 + ARIA + CWV). Lead Gen — 0 added (n8n Calendly docs saved locally, not in authorized domains).
+- **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
+- **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).

@@ -643,3 +643,59 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 - Social proof block (Tier 5 item 5) — ✅ COMPLETE this session
 - Tier 5 COMPLETE
 
+
+---
+
+## AM Session — 2026-04-15 (scenarios-am)
+
+**What was built:**
+- DetailAccordion cleanup (`src/components/share/DetailAccordion.tsx`, `SharePageLayout.tsx`)
+  - Removed "Full Scenario Comparison" accordion item — ScenarioComparisonTable already shows this data persistently above it
+  - Removed orphaned `ComparisonDetail` function + unused `fmtRate` import
+  - Component now returns `null` when no horizon data exists — no empty card rendered
+  - SharePageLayout: removed "Detailed Comparison" SectionIntro (accordion is self-contained)
+
+- Pre-generated Borrower Q&A on share page (Tier 6 Item 1)
+  - **Migration 086**: `borrower_qa JSONB DEFAULT NULL` added to `scenarios` table
+  - **`src/app/api/scenarios/generate-qa/route.ts`** (new): authenticated POST route
+    - Reads scenario through RLS (org isolation guaranteed)
+    - Idempotent: skips if borrower_qa already populated
+    - Builds concise data summary (mode-aware: purchase vs refi)
+    - Claude generates 5 Q&A pairs as JSON array — scenario-specific numbers, compliance-safe
+    - Robust parse: extracts `[...]` substring, falls back to no-op on malformed JSON
+    - Returns 200 always — callers are fire-and-forget and must not surface errors
+  - **`src/components/share/BorrowerQA.tsx`** (new): share page accordion
+    - Numbered items (01–05) with gold index, chevron toggle
+    - `print:hidden` — doesn't appear in PDF
+    - Graceful: returns null when pairs array is empty or absent
+  - **`ActionsBar.tsx`**: fire-and-forget fetch after successful save — no await, no UI delay
+  - **Share API + page types**: `borrower_qa` added to select whitelist and response
+
+**MC gap closed:** Borrowers no longer land on a wall of numbers with no interpreter. The "Common Questions" block answers the 5 questions every borrower asks but never says out loud — scenario-specific, plain English, tappable on mobile. Zero cost per view (generated once, stored).
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `70bd469` — pushed to main
+**Vercel:** `loanos-k7wwjexhh-astyer8345s-projects.vercel.app` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/components/share/DetailAccordion.tsx`
+- `src/components/share/SharePageLayout.tsx`
+- `src/components/share/BorrowerQA.tsx` (new)
+- `src/app/api/scenarios/generate-qa/route.ts` (new)
+- `src/app/api/share/[token]/route.ts`
+- `src/app/share/[token]/page.tsx`
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx`
+- `src/lib/database.types.ts`
+- No auth/RLS/multi-tenant changes
+
+**Tier 6 defined:**
+1. Pre-generated Borrower Q&A ✅ COMPLETE this session
+2. Mobile builder quick-input form (LO at the table with borrower)
+3. DetailAccordion → horizon projections only ✅ COMPLETE this session
+
+**Next session priority:**
+1. Mobile builder quick-input form — allow LO to build a scenario on their phone at the table. Currently the full ScenarioBuilder is desktop-only in practice. A collapsed mobile card with just rate/term/price/down is enough to generate a live share link.
+2. Regenerate borrower_qa for existing scenarios — a one-time backfill script or admin button so Adam's current scenarios get Q&A populated without re-saving each one.
+
+**Domain queue updates:**
+- Tier 6 Item 1 (Borrower Q&A) — ✅ COMPLETE this session

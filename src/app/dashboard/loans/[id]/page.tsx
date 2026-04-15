@@ -21,7 +21,6 @@ import NoteCard from '@/components/notes/NoteCard'
 
 // No hardcoded fallback — a missing env var must fail closed rather than
 // route every tenant's manual automation triggers through Adam's n8n instance.
-const N8N_BASE = process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE ?? ''
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -2351,11 +2350,10 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         contact_id: loan.contact_id,
       }
 
-      if (!N8N_BASE) {
-        setError('Automation webhook base URL is not configured for this deployment.')
-        setSending(false)
-        return
-      }
+      // Route through same-origin proxy — avoids CORS/upload-stall failures
+      // that surfaced as "Failed to fetch" when the browser hit n8n directly.
+      const proxyUrl = `/api/automations/n8n-proxy?path=${encodeURIComponent(workflow.webhookPath)}`
+
       let res: Response
       if (workflow.triggerType === 'direct') {
         // Review request: build email HTML and send to generic Outlook draft webhook
@@ -2364,7 +2362,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         const googleUrl = 'https://share.google/ddpwv31jI2oqzN5Ia'
         const zillowUrl = 'https://www.zillow.com/lender-profile/adamstyer/'
         const emailHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f9f9f9;font-family:Georgia,serif"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;padding:40px 0"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden"><tr><td style="background:#1a1a1a;padding:28px 40px"><p style="margin:0;color:#c9a84c;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">Adam Styer | Mortgage Solutions LP</p></td></tr><tr><td style="padding:40px"><p style="font-size:18px;color:#333;margin:0 0 20px">Hey ${firstName},</p><p style="font-size:16px;line-height:1.7;color:#555;margin:0 0 16px">Congrats again on closing! It was a genuine privilege walking alongside you through one of the biggest moments of your life.</p><p style="font-size:16px;line-height:1.7;color:#555;margin:0 0 24px">If you have two minutes, I\u2019d be so grateful if you left a quick review. It helps other families find trusted mortgage help.</p><table cellpadding="0" cellspacing="0" style="margin:0 0 16px"><tr><td style="background:#c9a84c;border-radius:6px;padding:14px 28px"><a href="${googleUrl}" style="color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">\u2b50 Leave a Google Review</a></td></tr></table><table cellpadding="0" cellspacing="0" style="margin:0 0 32px"><tr><td style="background:#006aff;border-radius:6px;padding:14px 28px"><a href="${zillowUrl}" style="color:#fff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">\ud83c\udfe0 Leave a Zillow Review</a></td></tr></table><p style="font-size:15px;line-height:1.7;color:#555;margin:0 0 32px">Two minutes. Your own words. That\u2019s all it takes.</p><p style="font-size:15px;line-height:1.7;color:#555;margin:0 0 32px">Praying for you and your family in the new home.</p><p style="font-size:15px;color:#333;margin:0">\u2014 Adam<br><strong>Adam Styer | Mortgage Solutions LP</strong><br>NMLS #513013</p></td></tr><tr><td style="background:#f4f4f4;padding:20px 40px;border-top:1px solid #eee"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#999">Adam Styer | Mortgage Solutions LP \u00b7 NMLS #513013 \u00b7 Austin, TX</p></td></tr></table></td></tr></table></body></html>`
-        res = await fetch(`${N8N_BASE}/${workflow.webhookPath}`, {
+        res = await fetch(proxyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2378,9 +2376,9 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         const fd = new FormData()
         fd.append('file', file)
         fd.append('loan_context', JSON.stringify(loanContext))
-        res = await fetch(`${N8N_BASE}/${workflow.webhookPath}`, { method: 'POST', body: fd })
+        res = await fetch(proxyUrl, { method: 'POST', body: fd })
       } else {
-        res = await fetch(`${N8N_BASE}/${workflow.webhookPath}`, {
+        res = await fetch(proxyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...loanContext, notes: referralText }),

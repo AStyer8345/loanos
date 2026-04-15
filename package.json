@@ -41,6 +41,7 @@
     "react-dom": "^18",
     "react-markdown": "^10.1.0",
     "recharts": "^3.8.0",
+    "resend": "^6.11.0",
     "svix": "^1.90.0",
     "tailwind-merge": "^3.5.0",
     "workflow": "^4.2.2"

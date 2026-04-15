@@ -2,9 +2,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { preApprovalEmailWorkflow } from '@/workflows/pre-approval-email'
 
-// Mock Outlook send so tests don't hit Microsoft Graph
-vi.mock('@/lib/outlook/graph', () => ({
-  sendOutlookEmail: vi.fn().mockResolvedValue({ messageId: 'mock-msg-1' }),
+// Mock Resend send so tests don't hit the Resend API
+vi.mock('@/lib/resend/send', () => ({
+  sendViaResend: vi.fn().mockResolvedValue('mock-resend-id-1'),
 }))
 
 // Mock Supabase so tests don't need a live DB
@@ -25,14 +25,14 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 describe('preApprovalEmailWorkflow', () => {
-  it('sends one Outlook email and writes email.sent to activity_log', async () => {
-    const { sendOutlookEmail } = await import('@/lib/outlook/graph')
+  it('sends one Resend email and writes email.sent to activity_log', async () => {
+    const { sendViaResend } = await import('@/lib/resend/send')
     const { createClient } = await import('@/lib/supabase/server')
 
     await preApprovalEmailWorkflow({ contact_id: 'contact-123', loan_id: 'loan-456', org_id: 'org-789' })
 
-    expect(sendOutlookEmail).toHaveBeenCalledOnce()
-    expect(sendOutlookEmail).toHaveBeenCalledWith(
+    expect(sendViaResend).toHaveBeenCalledOnce()
+    expect(sendViaResend).toHaveBeenCalledWith(
       expect.objectContaining({ to: 'jane@example.com', subject: expect.stringContaining('Pre-Approval') })
     )
 

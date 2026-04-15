@@ -1,8 +1,8 @@
 // tests/workflows/web-lead-intake.integration.test.ts
 import { describe, it, expect, vi } from 'vitest'
 
-vi.mock('@/lib/outlook/graph', () => ({
-  sendOutlookEmail: vi.fn().mockResolvedValue({ messageId: 'mock-1' }),
+vi.mock('@/lib/resend/send', () => ({
+  sendViaResend: vi.fn().mockResolvedValue('mock-resend-id-1'),
 }))
 
 vi.mock('@/lib/supabase/service', () => ({

@@ -2,7 +2,7 @@
 "use workflow"
 
 import { createServiceClient } from '@/lib/supabase/service'
-import { sendOutlookEmail } from '@/lib/outlook/graph'
+import { sendViaResend } from '@/lib/resend/send'
 import { classifyLeadFallback } from '@/lib/workflows/drip-helpers'
 import { paWelcomeNurture } from './pa-welcome-nurture'
 import { dpaGuideNurture } from './dpa-guide-nurture'
@@ -55,9 +55,9 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"
-  // Alert Adam via Outlook
-  await sendOutlookEmail({
-    to: process.env.OUTLOOK_SENDER_UPN ?? 'adam@styermortgage.com',
+  // Alert Adam (internal notification — uses Resend, same as all other sends)
+  await sendViaResend({
+    to: process.env.LOANOS_ADMIN_EMAIL ?? 'adam@styermortgage.com',
     subject: `New lead: ${contact.first_name} — ${payload.loan_goal ?? 'unknown goal'}`,
     body: `
       <p><strong>New web lead received</strong></p>
@@ -69,14 +69,14 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
         <li>UTM: ${JSON.stringify(payload.utm_params)}</li>
       </ul>
     `,
-    fromUserId: process.env.OUTLOOK_SENDER_UPN ?? 'adam@styermortgage.com',
+    tags: { kind: 'lead_alert', source: 'web-lead-intake' },
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"
   // Send confirmation to lead (if email present)
   if (contact.email) {
-    await sendOutlookEmail({
+    await sendViaResend({
       to: contact.email,
       subject: `Got your message, ${contact.first_name} — here's what happens next`,
       body: `
@@ -85,7 +85,7 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
         <p>In the meantime, you can schedule a quick call here: https://calendly.com/adamstyer/15minutes</p>
         <p>— Adam Styer | NMLS #513013</p>
       `,
-      fromUserId: process.env.OUTLOOK_SENDER_UPN ?? 'adam@styermortgage.com',
+      tags: { kind: 'lead_confirmation', source: 'web-lead-intake' },
     })
   }
 

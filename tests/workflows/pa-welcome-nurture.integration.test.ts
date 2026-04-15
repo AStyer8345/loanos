@@ -11,9 +11,6 @@ vi.mock('resend', () => ({
   })),
 }))
 
-// Mock @microsoft/microsoft-graph-client — not used in this workflow but guard anyway
-vi.mock('@microsoft/microsoft-graph-client', () => ({}))
-
 // Test the exit-rule integration without running the full workflow
 // (full sleep-based tests require @workflow/vitest harness — see smoke-checklist.md)
 describe('PA Welcome nurture exit rules', () => {

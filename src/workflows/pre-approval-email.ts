@@ -2,7 +2,7 @@
 "use workflow"
 
 import { createClient as createServiceClient } from '@/lib/supabase/server'
-import { sendOutlookEmail } from '@/lib/outlook/graph'
+import { sendViaResend } from '@/lib/resend/send'
 
 interface PreApprovalPayload {
   contact_id: string
@@ -27,16 +27,16 @@ export async function preApprovalEmailWorkflow(payload: PreApprovalPayload): Pro
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"
-  await sendOutlookEmail({
+  await sendViaResend({
     to: contact.email,
-    subject: `🎉 Your Pre-Approval is Ready, ${contact.first_name}`,
+    subject: `Your Pre-Approval is Ready, ${contact.first_name}`,
     body: `
       <p>Hi ${contact.first_name},</p>
       <p>Great news — your pre-approval is ready. I've reviewed your file and you're in strong shape.</p>
       <p>Reply to this email or call me directly and we'll walk through next steps together.</p>
       <p>— Adam<br>NMLS #513013</p>
     `,
-    fromUserId: process.env.OUTLOOK_SENDER_UPN ?? 'adam@styermortgage.com',
+    tags: { kind: 'pre_approval', source: 'pre-approval-email' },
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions

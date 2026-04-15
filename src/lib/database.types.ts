@@ -17,7 +17,6 @@ export type Database = {
       activity_log: {
         Row: {
           action: string
-          body_snippet: string | null
           contact_id: string | null
           created_at: string
           dismissed: boolean | null
@@ -25,14 +24,10 @@ export type Database = {
           entity_type: string | null
           event_type: string | null
           external_id: string | null
-          from_address: string | null
           id: string
           loan_id: string | null
-          metadata: Json | null
           occurred_at: string | null
           organization_id: string
-          raw_payload: Json | null
-          subject: string | null
           summary: string | null
           to_address: string | null
           type: string | null
@@ -40,7 +35,6 @@ export type Database = {
         }
         Insert: {
           action: string
-          body_snippet?: string | null
           contact_id?: string | null
           created_at?: string
           dismissed?: boolean | null
@@ -48,14 +42,10 @@ export type Database = {
           entity_type?: string | null
           event_type?: string | null
           external_id?: string | null
-          from_address?: string | null
           id?: string
           loan_id?: string | null
-          metadata?: Json | null
           occurred_at?: string | null
           organization_id?: string
-          raw_payload?: Json | null
-          subject?: string | null
           summary?: string | null
           to_address?: string | null
           type?: string | null
@@ -63,7 +53,6 @@ export type Database = {
         }
         Update: {
           action?: string
-          body_snippet?: string | null
           contact_id?: string | null
           created_at?: string
           dismissed?: boolean | null
@@ -71,14 +60,10 @@ export type Database = {
           entity_type?: string | null
           event_type?: string | null
           external_id?: string | null
-          from_address?: string | null
           id?: string
           loan_id?: string | null
-          metadata?: Json | null
           occurred_at?: string | null
           organization_id?: string
-          raw_payload?: Json | null
-          subject?: string | null
           summary?: string | null
           to_address?: string | null
           type?: string | null
@@ -102,6 +87,276 @@ export type Database = {
           {
             foreignKeyName: "activity_log_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_log_pii: {
+        Row: {
+          activity_id: string
+          created_at: string
+          key_version: number
+          organization_id: string
+          pii_ciphertext: string
+          pii_iv: string
+          pii_tag: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          key_version?: number
+          organization_id: string
+          pii_ciphertext: string
+          pii_iv: string
+          pii_tag: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          key_version?: number
+          organization_id?: string
+          pii_ciphertext?: string
+          pii_iv?: string
+          pii_tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_pii_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: true
+            referencedRelation: "activity_log"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_pii_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_conversations: {
+        Row: {
+          agent_id: string
+          created_at: string | null
+          id: string
+          messages: Json | null
+          metadata: Json | null
+          org_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          metadata?: Json | null
+          org_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string | null
+          id?: string
+          messages?: Json | null
+          metadata?: Json | null
+          org_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_conversations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_conversations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_handoffs: {
+        Row: {
+          completed_at: string | null
+          context: Json | null
+          conversation_id: string | null
+          created_at: string | null
+          from_agent_id: string | null
+          id: string
+          org_id: string
+          result: Json | null
+          status: string | null
+          to_agent_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          from_agent_id?: string | null
+          id?: string
+          org_id: string
+          result?: Json | null
+          status?: string | null
+          to_agent_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          context?: Json | null
+          conversation_id?: string | null
+          created_at?: string | null
+          from_agent_id?: string | null
+          id?: string
+          org_id?: string
+          result?: Json | null
+          status?: string | null
+          to_agent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_handoffs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_handoffs_from_agent_id_fkey"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_handoffs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_handoffs_to_agent_id_fkey"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_tools: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          handler: string
+          id: string
+          input_schema: Json | null
+          is_active: boolean | null
+          org_id: string | null
+          slug: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          handler: string
+          id?: string
+          input_schema?: Json | null
+          is_active?: boolean | null
+          org_id?: string | null
+          slug: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          handler?: string
+          id?: string
+          input_schema?: Json | null
+          is_active?: boolean | null
+          org_id?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_tools_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          max_tokens: number | null
+          model: string | null
+          org_id: string
+          slug: string
+          sort_order: number | null
+          system_prompt: string
+          temperature: number | null
+          tools: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_tokens?: number | null
+          model?: string | null
+          org_id: string
+          slug: string
+          sort_order?: number | null
+          system_prompt: string
+          temperature?: number | null
+          tools?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_tokens?: number | null
+          model?: string | null
+          org_id?: string
+          slug?: string
+          sort_order?: number | null
+          system_prompt?: string
+          temperature?: number | null
+          tools?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -499,6 +754,7 @@ export type Database = {
           email: string | null
           email_opt_out: boolean | null
           first_name: string
+          form_name: string | null
           group_tag: string | null
           home_phone: string | null
           hot_lead_dismissed: boolean
@@ -532,13 +788,16 @@ export type Database = {
           referral_ytd_count: number
           referred_by: string | null
           referred_by_contact_id: string | null
+          referrer: string | null
           salesforce_created_date: string | null
           salesforce_id: string | null
           source: string | null
+          source_page: string | null
           stage: string | null
           title: string | null
           updated_at: string
           user_id: string
+          utm_params: Json | null
         }
         Insert: {
           account_name?: string | null
@@ -562,6 +821,7 @@ export type Database = {
           email?: string | null
           email_opt_out?: boolean | null
           first_name: string
+          form_name?: string | null
           group_tag?: string | null
           home_phone?: string | null
           hot_lead_dismissed?: boolean
@@ -595,13 +855,16 @@ export type Database = {
           referral_ytd_count?: number
           referred_by?: string | null
           referred_by_contact_id?: string | null
+          referrer?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
           source?: string | null
+          source_page?: string | null
           stage?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
+          utm_params?: Json | null
         }
         Update: {
           account_name?: string | null
@@ -625,6 +888,7 @@ export type Database = {
           email?: string | null
           email_opt_out?: boolean | null
           first_name?: string
+          form_name?: string | null
           group_tag?: string | null
           home_phone?: string | null
           hot_lead_dismissed?: boolean
@@ -658,13 +922,16 @@ export type Database = {
           referral_ytd_count?: number
           referred_by?: string | null
           referred_by_contact_id?: string | null
+          referrer?: string | null
           salesforce_created_date?: string | null
           salesforce_id?: string | null
           source?: string | null
+          source_page?: string | null
           stage?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
+          utm_params?: Json | null
         }
         Relationships: [
           {
@@ -752,42 +1019,42 @@ export type Database = {
       }
       drip_campaigns: {
         Row: {
+          audience: Database["public"]["Enums"]["drip_audience"]
           created_at: string
           description: string | null
+          exit_rules: Json
           id: string
-          is_active: boolean
           name: string
-          organization_id: string
-          slug: string
-          total_steps: number
+          org_id: string
+          status: Database["public"]["Enums"]["drip_campaign_status"]
           updated_at: string
         }
         Insert: {
+          audience: Database["public"]["Enums"]["drip_audience"]
           created_at?: string
           description?: string | null
+          exit_rules?: Json
           id?: string
-          is_active?: boolean
           name: string
-          organization_id: string
-          slug: string
-          total_steps?: number
+          org_id: string
+          status?: Database["public"]["Enums"]["drip_campaign_status"]
           updated_at?: string
         }
         Update: {
+          audience?: Database["public"]["Enums"]["drip_audience"]
           created_at?: string
           description?: string | null
+          exit_rules?: Json
           id?: string
-          is_active?: boolean
           name?: string
-          organization_id?: string
-          slug?: string
-          total_steps?: number
+          org_id?: string
+          status?: Database["public"]["Enums"]["drip_campaign_status"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "drip_campaigns_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "drip_campaigns_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -800,39 +1067,54 @@ export type Database = {
           cancelled_at: string | null
           cancelled_reason: string | null
           contact_id: string
+          created_at: string
           current_step: number
           enrolled_at: string
+          enrolled_by: Database["public"]["Enums"]["drip_enrolled_by"]
           id: string
-          last_sent_at: string | null
+          loan_id: string | null
           next_send_at: string | null
-          organization_id: string
-          status: string
+          org_id: string
+          removed_at: string | null
+          removed_reason: string | null
+          status: Database["public"]["Enums"]["drip_enrollment_status"]
+          updated_at: string
         }
         Insert: {
           campaign_id: string
           cancelled_at?: string | null
           cancelled_reason?: string | null
           contact_id: string
+          created_at?: string
           current_step?: number
           enrolled_at?: string
+          enrolled_by?: Database["public"]["Enums"]["drip_enrolled_by"]
           id?: string
-          last_sent_at?: string | null
+          loan_id?: string | null
           next_send_at?: string | null
-          organization_id: string
-          status?: string
+          org_id: string
+          removed_at?: string | null
+          removed_reason?: string | null
+          status?: Database["public"]["Enums"]["drip_enrollment_status"]
+          updated_at?: string
         }
         Update: {
           campaign_id?: string
           cancelled_at?: string | null
           cancelled_reason?: string | null
           contact_id?: string
+          created_at?: string
           current_step?: number
           enrolled_at?: string
+          enrolled_by?: Database["public"]["Enums"]["drip_enrolled_by"]
           id?: string
-          last_sent_at?: string | null
+          loan_id?: string | null
           next_send_at?: string | null
-          organization_id?: string
-          status?: string
+          org_id?: string
+          removed_at?: string | null
+          removed_reason?: string | null
+          status?: Database["public"]["Enums"]["drip_enrollment_status"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -850,41 +1132,147 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "drip_enrollments_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "drip_enrollments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_enrollments_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
       }
-      drip_steps: {
+      drip_sends: {
         Row: {
-          body_html: string
-          campaign_id: string
+          channel: Database["public"]["Enums"]["drip_channel"]
+          contact_id: string
           created_at: string
-          delay_days: number
+          email_draft_id: string | null
+          enrollment_id: string
+          generated_body: string | null
+          generated_subject: string | null
           id: string
-          step_number: number
-          subject: string
+          org_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["drip_send_status"]
+          step_id: string
         }
         Insert: {
-          body_html: string
-          campaign_id: string
+          channel?: Database["public"]["Enums"]["drip_channel"]
+          contact_id: string
           created_at?: string
-          delay_days?: number
+          email_draft_id?: string | null
+          enrollment_id: string
+          generated_body?: string | null
+          generated_subject?: string | null
           id?: string
-          step_number: number
-          subject: string
+          org_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["drip_send_status"]
+          step_id: string
         }
         Update: {
-          body_html?: string
-          campaign_id?: string
+          channel?: Database["public"]["Enums"]["drip_channel"]
+          contact_id?: string
           created_at?: string
-          delay_days?: number
+          email_draft_id?: string | null
+          enrollment_id?: string
+          generated_body?: string | null
+          generated_subject?: string | null
           id?: string
-          step_number?: number
-          subject?: string
+          org_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["drip_send_status"]
+          step_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_sends_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_sends_email_draft_id_fkey"
+            columns: ["email_draft_id"]
+            isOneToOne: false
+            referencedRelation: "email_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_sends_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "drip_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_sends_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_sends_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "drip_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_steps: {
+        Row: {
+          campaign_id: string
+          channel: Database["public"]["Enums"]["drip_channel"]
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          requires_approval: boolean
+          skeleton: string
+          step_order: number
+          tone: Database["public"]["Enums"]["drip_tone"]
+          trigger_config: Json
+          trigger_type: Database["public"]["Enums"]["drip_trigger_type"]
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          channel?: Database["public"]["Enums"]["drip_channel"]
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          requires_approval?: boolean
+          skeleton: string
+          step_order: number
+          tone?: Database["public"]["Enums"]["drip_tone"]
+          trigger_config?: Json
+          trigger_type: Database["public"]["Enums"]["drip_trigger_type"]
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          channel?: Database["public"]["Enums"]["drip_channel"]
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          requires_approval?: boolean
+          skeleton?: string
+          step_order?: number
+          tone?: Database["public"]["Enums"]["drip_tone"]
+          trigger_config?: Json
+          trigger_type?: Database["public"]["Enums"]["drip_trigger_type"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -892,6 +1280,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "drip_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_steps_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1008,6 +1403,56 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      lenders: {
+        Row: {
+          broker_id: string | null
+          channel: string | null
+          contacts: Json
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          specialty_products: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          broker_id?: string | null
+          channel?: string | null
+          contacts?: Json
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          specialty_products?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          broker_id?: string | null
+          channel?: string | null
+          contacts?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          specialty_products?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lenders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loan_milestone_events: {
         Row: {
@@ -1126,6 +1571,7 @@ export type Database = {
           buyer_agent_contact_id: string | null
           buyer_agent_email: string | null
           buyer_agent_name: string | null
+          buyer_agent_phone: string | null
           buyers_agent_email: string | null
           buyers_agent_name: string | null
           buyers_agent_phone: string | null
@@ -1168,6 +1614,7 @@ export type Database = {
           employer_name: string | null
           epo_date: string | null
           escrow_agent: string | null
+          escrow_contact_id: string | null
           escrow_impounds: number | null
           escrow_officer: string | null
           est_closing_date: string | null
@@ -1306,6 +1753,10 @@ export type Database = {
           title_received_date: string | null
           title_status: string | null
           total_closing_costs: number | null
+          transaction_coordinator_contact_id: string | null
+          transaction_coordinator_email: string | null
+          transaction_coordinator_name: string | null
+          transaction_coordinator_phone: string | null
           trid_date: string | null
           underwriter_name: string | null
           updated_at: string
@@ -1350,6 +1801,7 @@ export type Database = {
           buyer_agent_contact_id?: string | null
           buyer_agent_email?: string | null
           buyer_agent_name?: string | null
+          buyer_agent_phone?: string | null
           buyers_agent_email?: string | null
           buyers_agent_name?: string | null
           buyers_agent_phone?: string | null
@@ -1392,6 +1844,7 @@ export type Database = {
           employer_name?: string | null
           epo_date?: string | null
           escrow_agent?: string | null
+          escrow_contact_id?: string | null
           escrow_impounds?: number | null
           escrow_officer?: string | null
           est_closing_date?: string | null
@@ -1530,6 +1983,10 @@ export type Database = {
           title_received_date?: string | null
           title_status?: string | null
           total_closing_costs?: number | null
+          transaction_coordinator_contact_id?: string | null
+          transaction_coordinator_email?: string | null
+          transaction_coordinator_name?: string | null
+          transaction_coordinator_phone?: string | null
           trid_date?: string | null
           underwriter_name?: string | null
           updated_at?: string
@@ -1574,6 +2031,7 @@ export type Database = {
           buyer_agent_contact_id?: string | null
           buyer_agent_email?: string | null
           buyer_agent_name?: string | null
+          buyer_agent_phone?: string | null
           buyers_agent_email?: string | null
           buyers_agent_name?: string | null
           buyers_agent_phone?: string | null
@@ -1616,6 +2074,7 @@ export type Database = {
           employer_name?: string | null
           epo_date?: string | null
           escrow_agent?: string | null
+          escrow_contact_id?: string | null
           escrow_impounds?: number | null
           escrow_officer?: string | null
           est_closing_date?: string | null
@@ -1754,6 +2213,10 @@ export type Database = {
           title_received_date?: string | null
           title_status?: string | null
           total_closing_costs?: number | null
+          transaction_coordinator_contact_id?: string | null
+          transaction_coordinator_email?: string | null
+          transaction_coordinator_name?: string | null
+          transaction_coordinator_phone?: string | null
           trid_date?: string | null
           underwriter_name?: string | null
           updated_at?: string
@@ -1777,6 +2240,13 @@ export type Database = {
           {
             foreignKeyName: "loans_contact_id_fkey"
             columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_escrow_contact_id_fkey"
+            columns: ["escrow_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
@@ -1807,6 +2277,66 @@ export type Database = {
             columns: ["title_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loans_transaction_coordinator_contact_id_fkey"
+            columns: ["transaction_coordinator_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      los_integrations: {
+        Row: {
+          active: boolean
+          created_at: string
+          external_user_email: string | null
+          external_user_id: string | null
+          id: string
+          label: string | null
+          organization_id: string
+          provider: string
+          secret_hash: string
+          secret_last_rotated: string
+          secret_salt: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          external_user_email?: string | null
+          external_user_id?: string | null
+          id?: string
+          label?: string | null
+          organization_id: string
+          provider: string
+          secret_hash: string
+          secret_last_rotated?: string
+          secret_salt: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          external_user_email?: string | null
+          external_user_id?: string | null
+          id?: string
+          label?: string | null
+          organization_id?: string
+          provider?: string
+          secret_hash?: string
+          secret_last_rotated?: string
+          secret_salt?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "los_integrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1925,6 +2455,91 @@ export type Database = {
           },
         ]
       }
+      n8n_run_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          level: string
+          message: string
+          workflow: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          level?: string
+          message: string
+          workflow: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          workflow?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          contact_id: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          loan_id: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_id?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          loan_id?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          loan_id?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oauth_state: {
         Row: {
           created_at: string
@@ -1952,6 +2567,7 @@ export type Database = {
           custom_email_reply_to: string | null
           id: string
           los_type: string | null
+          los_verification_mode: string
           mailchimp_list_ids: Json | null
           n8n_webhook_url: string | null
           onboarding_completed: boolean
@@ -1971,6 +2587,7 @@ export type Database = {
           custom_email_reply_to?: string | null
           id?: string
           los_type?: string | null
+          los_verification_mode?: string
           mailchimp_list_ids?: Json | null
           n8n_webhook_url?: string | null
           onboarding_completed?: boolean
@@ -1990,6 +2607,7 @@ export type Database = {
           custom_email_reply_to?: string | null
           id?: string
           los_type?: string | null
+          los_verification_mode?: string
           mailchimp_list_ids?: Json | null
           n8n_webhook_url?: string | null
           onboarding_completed?: boolean
@@ -2007,64 +2625,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: true
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notes: {
-        Row: {
-          id: string
-          organization_id: string
-          contact_id: string | null
-          loan_id: string | null
-          content: string
-          created_by: string | null
-          created_at: string
-          updated_at: string
-          deleted_at: string | null
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          contact_id?: string | null
-          loan_id?: string | null
-          content: string
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          contact_id?: string | null
-          loan_id?: string | null
-          content?: string
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notes_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notes_loan_id_fkey"
-            columns: ["loan_id"]
-            isOneToOne: false
-            referencedRelation: "loans"
             referencedColumns: ["id"]
           },
         ]
@@ -2207,6 +2767,189 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rancho_events: {
+        Row: {
+          artwork_storage_path: string | null
+          artwork_url: string | null
+          created_at: string
+          description: string
+          end_date: string | null
+          end_time: string | null
+          event_date: string
+          event_time: string | null
+          gbp_post_error: string | null
+          gbp_posted: boolean
+          gbp_posted_at: string | null
+          id: string
+          is_active: boolean
+          price: string | null
+          publer_post_id: string | null
+          sort_order: number
+          start_time: string | null
+          ticket_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          artwork_storage_path?: string | null
+          artwork_url?: string | null
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          end_time?: string | null
+          event_date: string
+          event_time?: string | null
+          gbp_post_error?: string | null
+          gbp_posted?: boolean
+          gbp_posted_at?: string | null
+          id?: string
+          is_active?: boolean
+          price?: string | null
+          publer_post_id?: string | null
+          sort_order?: number
+          start_time?: string | null
+          ticket_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          artwork_storage_path?: string | null
+          artwork_url?: string | null
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          end_time?: string | null
+          event_date?: string
+          event_time?: string | null
+          gbp_post_error?: string | null
+          gbp_posted?: boolean
+          gbp_posted_at?: string | null
+          id?: string
+          is_active?: boolean
+          price?: string | null
+          publer_post_id?: string | null
+          sort_order?: number
+          start_time?: string | null
+          ticket_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rancho_photos: {
+        Row: {
+          alt_text: string
+          created_at: string
+          id: string
+          is_active: boolean
+          public_url: string
+          section: string
+          sort_order: number
+          storage_path: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          public_url: string
+          section: string
+          sort_order?: number
+          storage_path: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          public_url?: string
+          section?: string
+          sort_order?: number
+          storage_path?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rancho_testimonials: {
+        Row: {
+          attribution: string
+          created_at: string
+          id: string
+          is_active: boolean
+          quote: string
+          sort_order: number
+          stars: number
+          updated_at: string
+        }
+        Insert: {
+          attribution?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          quote: string
+          sort_order?: number
+          stars?: number
+          updated_at?: string
+        }
+        Update: {
+          attribution?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          quote?: string
+          sort_order?: number
+          stars?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resend_webhook_events: {
+        Row: {
+          contact_id: string | null
+          enrollment_id: string | null
+          event_id: string
+          event_type: string
+          payload: Json
+          received_at: string
+        }
+        Insert: {
+          contact_id?: string | null
+          enrollment_id?: string | null
+          event_id: string
+          event_type: string
+          payload: Json
+          received_at?: string
+        }
+        Update: {
+          contact_id?: string | null
+          enrollment_id?: string | null
+          event_id?: string
+          event_type?: string
+          payload?: Json
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resend_webhook_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resend_webhook_events_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "drip_enrollments"
             referencedColumns: ["id"]
           },
         ]
@@ -2413,6 +3156,7 @@ export type Database = {
       social_drafts: {
         Row: {
           agent_notes: string | null
+          classification: string | null
           content: string
           created_at: string
           created_by: string
@@ -2424,6 +3168,7 @@ export type Database = {
           pillar: string | null
           platform: string
           publer_post_id: string | null
+          rejection_reason: string | null
           scheduled_for: string | null
           status: string
           title: string
@@ -2431,6 +3176,7 @@ export type Database = {
         }
         Insert: {
           agent_notes?: string | null
+          classification?: string | null
           content: string
           created_at?: string
           created_by?: string
@@ -2442,6 +3188,7 @@ export type Database = {
           pillar?: string | null
           platform: string
           publer_post_id?: string | null
+          rejection_reason?: string | null
           scheduled_for?: string | null
           status?: string
           title: string
@@ -2449,6 +3196,7 @@ export type Database = {
         }
         Update: {
           agent_notes?: string | null
+          classification?: string | null
           content?: string
           created_at?: string
           created_by?: string
@@ -2460,6 +3208,7 @@ export type Database = {
           pillar?: string | null
           platform?: string
           publer_post_id?: string | null
+          rejection_reason?: string | null
           scheduled_for?: string | null
           status?: string
           title?: string
@@ -2481,6 +3230,7 @@ export type Database = {
           key: string
           organization_id: string
           updated_at: string
+          updated_by: string | null
           value: string
         }
         Insert: {
@@ -2488,6 +3238,7 @@ export type Database = {
           key: string
           organization_id: string
           updated_at?: string
+          updated_by?: string | null
           value: string
         }
         Update: {
@@ -2495,6 +3246,7 @@ export type Database = {
           key?: string
           organization_id?: string
           updated_at?: string
+          updated_by?: string | null
           value?: string
         }
         Relationships: [
@@ -2689,6 +3441,57 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_deliveries: {
+        Row: {
+          error: string | null
+          id: string
+          idempotency_key: string
+          loan_id: string | null
+          organization_id: string
+          processed_at: string | null
+          received_at: string
+          source: string
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          id?: string
+          idempotency_key: string
+          loan_id?: string | null
+          organization_id: string
+          processed_at?: string | null
+          received_at?: string
+          source: string
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          id?: string
+          idempotency_key?: string
+          loan_id?: string | null
+          organization_id?: string
+          processed_at?: string | null
+          received_at?: string
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2729,30 +3532,66 @@ export type Database = {
           status: string
         }[]
       }
-      get_due_drip_emails: {
+      get_due_drip_enrollments: {
         Args: never
         Returns: {
+          campaign_audience: string
           campaign_id: string
           campaign_name: string
+          channel: string
+          closing_date: string
+          contact_email: string
+          contact_first_name: string
           contact_id: string
+          contact_last_name: string
+          contact_status: string
           current_step: number
-          email: string
           enrolled_at: string
           enrollment_id: string
-          first_name: string
-          last_name: string
-          next_step_delay_days: number
-          step_body_html: string
-          step_number: number
-          step_subject: string
-          total_steps: number
+          enrollment_status: string
+          exit_rules: Json
+          last_drip_send_at: string
+          loan_amount: number
+          loan_id: string
+          loan_rate: number
+          loan_status: string
+          loan_type: string
+          org_id: string
+          property_address: string
+          requires_approval: boolean
+          skeleton: string
+          step_id: string
+          step_name: string
+          step_order: number
+          tone: string
+          trigger_config: Json
+          trigger_type: string
         }[]
       }
       get_my_organization_id: { Args: never; Returns: string }
       get_my_role: { Args: never; Returns: string }
+      increment_scenario_view_count: {
+        Args: { p_share_token: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      drip_audience: "past_client" | "lead" | "realtor"
+      drip_campaign_status: "active" | "paused" | "archived"
+      drip_channel: "email" | "handwritten_card" | "both"
+      drip_enrolled_by: "auto" | "manual"
+      drip_enrollment_status:
+        | "active"
+        | "paused"
+        | "completed"
+        | "removed"
+        | "cancelled"
+      drip_send_status: "queued" | "approved" | "sent" | "skipped" | "cancelled"
+      drip_tone:
+        | "straight_shooter"
+        | "knowledgeable_friend"
+        | "quiet_confidence"
+      drip_trigger_type: "relative_days" | "annual_date" | "condition"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2879,6 +3718,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      drip_audience: ["past_client", "lead", "realtor"],
+      drip_campaign_status: ["active", "paused", "archived"],
+      drip_channel: ["email", "handwritten_card", "both"],
+      drip_enrolled_by: ["auto", "manual"],
+      drip_enrollment_status: [
+        "active",
+        "paused",
+        "completed",
+        "removed",
+        "cancelled",
+      ],
+      drip_send_status: ["queued", "approved", "sent", "skipped", "cancelled"],
+      drip_tone: [
+        "straight_shooter",
+        "knowledgeable_friend",
+        "quiet_confidence",
+      ],
+      drip_trigger_type: ["relative_days", "annual_date", "condition"],
+    },
   },
 } as const

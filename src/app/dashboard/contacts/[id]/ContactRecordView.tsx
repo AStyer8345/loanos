@@ -137,7 +137,7 @@ export type DripEnrollment = {
   id: string
   contact_id: string
   campaign_id: string
-  organization_id: string
+  org_id: string
   status: 'active' | 'paused' | 'completed' | 'cancelled'
   current_step: number
   next_send_at: string | null

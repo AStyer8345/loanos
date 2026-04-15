@@ -38,6 +38,22 @@ export function mapResendEventType(resendType: string): string | null {
   return ALLOWED_EMAIL_EVENT_TYPES.has(resendType) ? resendType : null
 }
 
+export interface LeadClassificationInput {
+  loan_goal: string | null
+  situation: string | null
+}
+
+/**
+ * Fallback classification without AI — uses explicit loan_goal mapping.
+ * Mirror of n8n Parse Form Data campaignMap logic.
+ */
+export function classifyLeadFallback(input: LeadClassificationInput): 'pa' | 'dpa' | 'generic' {
+  const goal = (input.loan_goal ?? '').toLowerCase()
+  if (['purchase', 'buy', 'first-time buyer', 'ftb'].includes(goal)) return 'pa'
+  if (['dpa', 'down payment assistance', 'tsahc', 'tdhca'].includes(goal)) return 'dpa'
+  return 'generic'
+}
+
 /**
  * Returns the day-offset schedule for a named drip campaign.
  * Day 0 = send immediately on enrollment.

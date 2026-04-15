@@ -12,7 +12,7 @@
 - [x] ~~Adam: verify Microsoft Outlook credential in n8n UI~~ — DONE 2026-04-10 AM. Sequence A + Anniversary Check-In both ACTIVE (verified via MCP).
 - [ ] Adam: upload selfies → unblocks LoanOS social content stream
 - [ ] Social posts: through Week 20 (Posts 112-116, July 22-28 built). Post 39 CPI filled ✅ — Adam: APPROVE before April 15 publish (4 days!). Film Reels: Post 98 (by July 2), Post 103 (by July 9). Approve Post 101 after NFP Refresh (July 4/7). **Posts 29+30 Liberation Day: decision required by April 28 — decision needed by April 18 to avoid emergency.** Canva backlog: Posts 43, 44, 47, 51, 52, 55, 60, 81, 115. New Adam items: Post 113 Reel (guitar, film by July 20), Post 115 Carousel (create Canva by July 22). Week 21 next (Posts 117-121, consider 1 TIMELY for FOMC July 29-30).
-- [ ] Adam: build 3 Mailchimp Customer Journeys (PA Welcome, Rate Watch, DPA Guide)
+- [x] ~~Adam: build 3 Mailchimp Customer Journeys~~ — SUPERSEDED 2026-04-14. PA Welcome (6 emails) + DPA Guide (8 emails) moved to n8n+Resend workflows (`rwi3qEYgJKGGHkHc`, `0M8Vnf6MhB1xtaIg`), triggered from subscribe-lead.js. Mailchimp only handles list/tags. "Rate Watch" sequence not built — decide scope separately (name was ambiguous: market rate drops vs. quoted-rate watch for specific borrower).
 - [ ] NMLS# 513013 profile audit on all 4 social platforms
 - [ ] Adam: review/approve Refi Watch email copy (Sequences A + D)
 - [ ] **n8n fix — Set Rate webhook Store Rate node:** workflow `3iXImUkjgMitpJKt`, node `node-store`. Remove `from_address` and `subject` from the JSON body (neither column exists in `activity_log`). Current body writes these + `summary`; only `summary` was fixed today (column added via migration `add_summary_to_activity_log`). Until this is rewritten, manual rate updates must go via SQL INSERT into activity_log, not curl to the webhook. Rate Drop Alert threshold is 6.00% — today's 6.37% won't trigger alerts; alerts only fire when market rate ≤ 6.00%.
@@ -25,6 +25,7 @@
 - [ ] Marketing site: demo user with synthetic data (blocks May 1 launch screenshots)
 - [ ] Activate LO Waitlist n8n workflow after copy review
 - [ ] Create Mailchimp audience "LoanOS Waitlist"
+- [ ] **Convert Publish to Netlify background function** — rename `generate-newsletter.js` → `generate-newsletter-background.js` (and same for `generate-rate-update`). Background functions return 202 in <1s and run up to 15 min, eliminating the Vercel 60s timeout risk on publish. Preview stays synchronous. Client needs to poll/webhook for completion — decide pattern during implementation. Context: done via proxy 2026-04-14 (commit 0759bea), but 40-60s publish workload is one bad Anthropic latency spike away from timing out.
 
 ## Backlog (someday/maybe)
 

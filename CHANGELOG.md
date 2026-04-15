@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-14 PM — Lead Gen: PA Welcome + DPA Guide Nurture Workflows (n8n + Resend)
+
+- **PA Welcome Nurture** (workflow ID `rwi3qEYgJKGGHkHc`): 6 emails over 60 days (Day 0, 3, 7, 14, 30, 60). Webhook path `/webhook/pa-nurture`. Sender: `Adam Styer <adam@mail.thestyerteam.com>`, reply-to `adam@thestyerteam.com`.
+- **DPA Guide Nurture** (workflow ID `0M8Vnf6MhB1xtaIg`): 8 emails over 52 days (Day 0, 2, 5, 10, 17, 25, 38, 52). Webhook path `/webhook/dpa-nurture`. Email 1 links to `https://styermortgage.com/austin-dpa-guide.pdf` (Gamma-generated PDF, committed to styerteam-mortgage-site root).
+- Email bodies written in Adam's voice (see `tasks/lead-gen/drafts/pa-welcome-email-bodies.md`). Workflow source: `tasks/lead-gen/drafts/{pa-welcome,dpa-guide}-workflow.ts`.
+- **styerteam-mortgage-site subscribe-lead.js** (commit on that repo): fires POST to `pa-nurture` when `lead_source === "Pre-Approval Funnel"`, and `dpa-nurture` when `tag === "ftb-dpa-guide"` or `lead_source === "FTB DPA Guide"`. Fire-and-forget pattern.
+- **Gotcha fixed:** n8n expression engine parser collision — email bodies originally contained literal `{{RESEND_UNSUBSCRIBE_URL}}`, which n8n interpreted as nested expressions and threw "invalid syntax" on execute. Patched all 14 HTTP node bodies (6 PA + 8 DPA) via REST API PUT, replacing with `mailto:adam@thestyerteam.com?subject=Unsubscribe`. If we later want a managed unsubscribe link, switch to Resend's `{{unsubscribe_url}}` merge tag OR inject via n8n Set node before the HTTP request.
+- **Open issue:** after patch, webhook POSTs return 200 "Workflow was started" but no executions get recorded in the n8n executions log. Other n8n workflows fire normally — isolated to these two IDs. Suspected n8n Cloud webhook binding cache; REST API deactivate/reactivate cycle did not clear it. Manual workaround: open each workflow in the UI → click "Execute workflow" once → external POSTs typically start registering after that.
+- TODO.md: collapsed 3-Mailchimp-Journey item — only "Rate Watch" remains and name is ambiguous (market-rate drops vs. borrower-specific quote watch); scope decision needed before build.
+
 ## 2026-04-14 PM — Fix: Refi Watch Set Rate Webhook (lead-gen-set-rate-webhook, 7th session)
 
 - **Root cause of 7-session loop:** both producer (n8n `LoanOS — Refi Watch Set Rate`, ID `3iXImUkjgMitpJKt`) and consumer (`LoanOS — Refi Watch Rate Drop Alert`, ID `iyKFy0ODkyyqQaAS`) reference `activity_log.summary`, but that column never existed in the table. PostgREST silently rejected every insert; webhook returned 200 because n8n's Respond OK node fires before the HTTP error surfaces in workflow execution order. Every prior session's curl ran "successfully" with zero rows written.

@@ -4,6 +4,9 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { writeActivityWithPii } from '@/lib/activity/pii'
 import type { Database } from '@/lib/database.types'
+import { start } from 'workflow/api'
+import { webLeadIntakeWorkflow } from '@/workflows/web-lead-intake'
+import type { WebLeadPayload } from '@/lib/workflows/types'
 
 /**
  * Best-effort client IP extraction. On Vercel `x-forwarded-for` is the public
@@ -72,6 +75,13 @@ export async function POST(req: NextRequest) {
     goals,
     situation,
     campaign,
+    // UTM / origin fields (migration 086)
+    source_page,
+    form_name,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    referrer,
   } = body as {
     org_slug?: string
     first_name?: string
@@ -94,6 +104,20 @@ export async function POST(req: NextRequest) {
     goals?: string[]
     situation?: string
     campaign?: string
+    // UTM / origin fields
+    source_page?: string
+    form_name?: string
+    utm_source?: string
+    utm_medium?: string
+    utm_campaign?: string
+    referrer?: string
+    // Netlify form aliases
+    'first-name'?: string
+    'last-name'?: string
+    'form-name'?: string
+    page_url?: string
+    loan_goal?: string
+    credit_score?: string
   }
 
   if (!org_slug) {
@@ -209,6 +233,13 @@ export async function POST(req: NextRequest) {
     referral_type: referral_type || 'web_lead',
     notes:        constructedNotes || null,
     company_name: company_name || null,
+    // UTM / origin fields from migration 086
+    source_page:  source_page ?? (body as Record<string, unknown>)['page_url'] as string ?? null,
+    form_name:    form_name ?? (body as Record<string, unknown>)['form-name'] as string ?? null,
+    utm_params:   utm_source
+      ? { source: utm_source, medium: utm_medium ?? null, campaign: utm_campaign ?? null }
+      : null,
+    referrer:     referrer ?? null,
     created_at:   now,
     last_touch_at: now,
   }
@@ -276,7 +307,41 @@ export async function POST(req: NextRequest) {
       })
   }
 
-  // ── 9. Return ─────────────────────────────────────────────────────────────────
+  // ── 9. Workflow DevKit trigger (feature-flagged) ──────────────────────────────
+  // WORKFLOW_DEVKIT_LEAD_INTAKE: 'off' | 'shadow' | 'live'
+  // 'off'    — n8n continues to handle all lead intake (default)
+  // 'shadow' — log what WOULD have happened, do not actually trigger
+  // 'live'   — trigger Workflow DevKit, n8n webhook no longer needed
+  const WORKFLOW_DEVKIT_LEAD_INTAKE = process.env.WORKFLOW_DEVKIT_LEAD_INTAKE ?? 'off'
+
+  if (WORKFLOW_DEVKIT_LEAD_INTAKE === 'live') {
+    const wfPayload: WebLeadPayload = {
+      first_name: first_name ?? '',
+      last_name:  last_name ?? '',
+      email:      email ?? null,
+      phone:      phone ?? null,
+      loan_goal:  loan_type ?? null,
+      purchase_price: purchase_price ? Number(purchase_price) : null,
+      credit_score:   credit_score_range ?? null,
+      situation:      situation ?? null,
+      source_page:    source_page ?? null,
+      form_name:      form_name ?? null,
+      utm_params:     utm_source
+        ? { source: utm_source, medium: utm_medium ?? '', campaign: utm_campaign ?? '' }
+        : null,
+      referrer:       referrer ?? null,
+      org_id:         process.env.DEFAULT_ORG_ID ?? '',
+      contact_id:     newContact.id,
+    }
+    await start(webLeadIntakeWorkflow, [wfPayload])
+  } else if (WORKFLOW_DEVKIT_LEAD_INTAKE === 'shadow') {
+    // Shadow mode: log what WOULD have happened, do not actually send
+    console.log('[shadow] webLeadIntakeWorkflow would have started with', JSON.stringify({ contact_id: newContact.id }))
+    // TODO Phase G: write to shadow_log table for parity comparison
+  }
+  // 'off': n8n continues to handle — no action here
+
+  // ── 10. Return ────────────────────────────────────────────────────────────────
   const fullName = [first_name, last_name].filter(Boolean).join(' ')
   return NextResponse.json({
     contact:   newContact,

@@ -789,22 +789,30 @@ export default function SettingsPage() {
         {inviteSuccess && <p className="text-[#4ADE80] text-xs font-mono mt-2">Invite sent successfully.</p>}
       </div>
 
-      {/* ── EMAIL SYNC ── */}
+      {/* ── EMAIL DRAFTS ── */}
       <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
             <Mail size={17} className="text-amber-400" />
           </div>
           <div>
-            <h2 className="text-sm font-mono font-semibold text-foreground">Email Sync</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Inbound emails are automatically logged to contact activity timelines.</p>
+            <h2 className="text-sm font-mono font-semibold text-foreground">Email Drafts</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Automations (contract received, pre-approval, final CD, etc.) generate drafts here — not sent automatically.
+              Review in the Drafts inbox, then open in Outlook or copy the HTML and send from your own inbox.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] border border-[#4ADE80]/40">
             <CheckCircle size={11} /> Active
           </span>
-          <span className="text-xs text-muted-foreground font-mono">Managed by n8n — polls Outlook every 5 minutes</span>
+          <a
+            href="/dashboard/drafts"
+            className="text-xs text-amber-400 hover:text-amber-300 font-mono underline underline-offset-2"
+          >
+            Open Drafts inbox →
+          </a>
         </div>
       </div>
     </div>

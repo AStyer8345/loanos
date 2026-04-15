@@ -7,6 +7,8 @@ import type { Database } from '@/lib/database.types'
 import { start } from 'workflow/api'
 import { webLeadIntakeWorkflow } from '@/workflows/web-lead-intake'
 import type { WebLeadPayload } from '@/lib/workflows/types'
+import { classifyLeadFallback } from '@/lib/workflows/drip-helpers'
+import type { Json } from '@/lib/database.types'
 
 /**
  * Best-effort client IP extraction. On Vercel `x-forwarded-for` is the public
@@ -335,9 +337,28 @@ export async function POST(req: NextRequest) {
     }
     await start(webLeadIntakeWorkflow, [wfPayload])
   } else if (WORKFLOW_DEVKIT_LEAD_INTAKE === 'shadow') {
-    // Shadow mode: log what WOULD have happened, do not actually send
-    console.log('[shadow] webLeadIntakeWorkflow would have started with', JSON.stringify({ contact_id: newContact.id }))
-    // TODO Phase G: write to shadow_log table for parity comparison
+    // Shadow mode: record classification + enrollment decision to
+    // workflow_shadow_log so we can diff against the n8n baseline.
+    // Deliberately synchronous so the log row is flushed before we respond —
+    // helps parity review (we never want to miss a row because of a cold-Lambda race).
+    const classification = classifyLeadFallback({
+      loan_goal: loan_type ?? null,
+      situation: situation ?? null,
+    })
+    try {
+      await supabase.from('workflow_shadow_log').insert({
+        contact_id: newContact.id,
+        trigger_source: 'web-lead',
+        classification,
+        would_enroll: classification !== 'generic',
+        campaign_key:
+          classification === 'pa' ? 'pa-welcome' : classification === 'dpa' ? 'dpa-guide' : null,
+        payload: body as unknown as Json,
+      })
+    } catch (err) {
+      // Shadow logging must never break the real request path — log and swallow.
+      console.error('[web-lead] shadow_log insert failed (non-fatal):', err)
+    }
   }
   // 'off': n8n continues to handle — no action here
 

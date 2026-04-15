@@ -3492,6 +3492,50 @@ export type Database = {
           },
         ]
       }
+      workflow_shadow_log: {
+        Row: {
+          campaign_key: string | null
+          classification: string | null
+          contact_id: string | null
+          exit_rule_triggered: boolean
+          id: string
+          logged_at: string
+          payload: Json
+          trigger_source: string
+          would_enroll: boolean
+        }
+        Insert: {
+          campaign_key?: string | null
+          classification?: string | null
+          contact_id?: string | null
+          exit_rule_triggered?: boolean
+          id?: string
+          logged_at?: string
+          payload?: Json
+          trigger_source: string
+          would_enroll?: boolean
+        }
+        Update: {
+          campaign_key?: string | null
+          classification?: string | null
+          contact_id?: string | null
+          exit_rule_triggered?: boolean
+          id?: string
+          logged_at?: string
+          payload?: Json
+          trigger_source?: string
+          would_enroll?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_shadow_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

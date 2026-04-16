@@ -5,12 +5,12 @@
  * - AEO: recommended by an AI assistant (ChatGPT, Claude, Perplexity, etc.)
  * - Realtor Referral: manually tagged as a realtor referral
  * - Web Lead: came through a form on styermortgage.com
- * - Organic Search: non-AI search engine
+ * - SEO: non-AI search engine (Google, Bing, DuckDuckGo, etc.)
  * - Social: Instagram, Facebook, LinkedIn, etc.
  * - Direct: no referrer, no utm — typed URL or saved bookmark
  * - Other: everything uncategorized
  *
- * Precedence matters — AEO wins over Organic Search even when a user lands
+ * Precedence matters — AEO wins over SEO even when a user lands
  * via a Google AI Overview link that still carries google.com as referrer.
  */
 
@@ -18,10 +18,27 @@ export type LeadSourceCategory =
   | 'AEO'
   | 'Realtor Referral'
   | 'Web Lead'
-  | 'Organic Search'
+  | 'SEO'
   | 'Social'
   | 'Direct'
   | 'Other'
+
+/** URL-safe slug for use in routes like /dashboard/contacts/by-source/[slug]. */
+export const CATEGORY_SLUGS: Record<LeadSourceCategory, string> = {
+  'AEO':              'aeo',
+  'Realtor Referral': 'realtor-referral',
+  'Web Lead':         'web-lead',
+  'SEO':              'seo',
+  'Social':           'social',
+  'Direct':           'direct',
+  'Other':            'other',
+}
+
+/** Inverse lookup — slug back to category label. Returns null for unknown slug. */
+export function categoryFromSlug(slug: string): LeadSourceCategory | null {
+  const entry = Object.entries(CATEGORY_SLUGS).find(([, s]) => s === slug)
+  return entry ? (entry[0] as LeadSourceCategory) : null
+}
 
 const AEO_HOSTS = [
   'chatgpt.com',
@@ -115,7 +132,7 @@ export function classifyLeadSource(c: ContactSourceFields): LeadSourceCategory {
   }
 
   if (host && SOCIAL_HOSTS.includes(host)) return 'Social'
-  if (host && SEARCH_HOSTS.includes(host)) return 'Organic Search'
+  if (host && SEARCH_HOSTS.includes(host)) return 'SEO'
 
   // lead_source may hold a manually-entered value (e.g. "Past Client", "Friend")
   if (c.lead_source && c.lead_source.trim()) {

@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { Card } from '@/components/ui/card'
-import type { LeadSourceCategory } from '@/lib/leadSources'
+import { CATEGORY_SLUGS, type LeadSourceCategory } from '@/lib/leadSources'
 
 interface NewLeadsChartProps {
   data: Array<{ source: LeadSourceCategory; count: number }>
@@ -13,7 +14,7 @@ const COLORS: Record<LeadSourceCategory, string> = {
   'AEO':              '#8b5cf6', // purple — the newcomer, most interesting
   'Realtor Referral': '#C9A84C', // gold (brand)
   'Web Lead':         '#3b82f6', // blue
-  'Organic Search':   '#10b981', // green
+  'SEO':              '#10b981', // green
   'Social':           '#ec4899', // pink
   'Direct':           '#64748b', // slate
   'Other':            '#94a3b8', // lighter slate
@@ -43,7 +44,12 @@ export default function NewLeadsChart({ data, windowDays }: NewLeadsChartProps) 
             const pct = (row.count / max) * 100
             const color = COLORS[row.source]
             return (
-              <div key={row.source} className="flex items-center gap-3">
+              <Link
+                key={row.source}
+                href={`/dashboard/contacts/by-source/${CATEGORY_SLUGS[row.source]}?days=${windowDays}`}
+                className="flex items-center gap-3 rounded hover:bg-muted/30 -mx-2 px-2 py-0.5 transition-colors cursor-pointer"
+                title={`View ${row.count} ${row.source} ${row.count === 1 ? 'lead' : 'leads'}`}
+              >
                 <div className="w-32 text-[11px] font-mono text-muted-foreground text-right flex-shrink-0 truncate">
                   {row.source}
                 </div>
@@ -59,7 +65,7 @@ export default function NewLeadsChart({ data, windowDays }: NewLeadsChartProps) 
                 <span className="text-[10px] font-mono text-muted-foreground w-12 flex-shrink-0 text-right">
                   {total > 0 ? `${Math.round((row.count / total) * 100)}%` : '0%'}
                 </span>
-              </div>
+              </Link>
             )
           })}
         </div>

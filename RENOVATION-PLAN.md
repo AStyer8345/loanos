@@ -85,12 +85,18 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 ### Phase 3: Follow-Up List
 **Goal:** Never miss a lead or stale borrower
 **Session:** After Phase 2 confirmed working
+**Design decision (2026-04-16):** Follow-Up lives inside Contacts (per three-pillar rule), NOT as a new top-level tab or Dashboard widget. Surfaced as three smart-list segments in the existing Contacts sidebar, under a new "FOLLOW-UP" section.
 **Tasks:**
-- [ ] Dedicated follow-up view (could be a tab within Pipeline or its own section)
-- [ ] Segments: New leads (no contract), Stale contacts (7+ days no activity), Pre-approved still shopping
-- [ ] Each row: last contact date, source, referral info, one-click text/email/call
-- [ ] Smart sort: most urgent first
-- [ ] Deploy and verify
+- [x] Decide placement: Contacts sidebar sub-view (2026-04-16)
+- [x] Segments: New Leads (30d), Going Quiet (7–30d), Pre-Approved Still Shopping — shipped in SMART_LISTS (2026-04-16)
+  - New Leads: borrower, created ≤30d ago, stage null|Lead|Pre-App|Application
+  - Going Quiet: last_activity_date between 7 and 30 days ago; upper cap prevents graveyard
+  - Pre-Approved Shopping: stage=Pre-Approved, activity in last 90d
+- [x] Dashboard cleanup: removed needs-attention badge + urgent flags section (2026-04-16) — urgency stays in Pipeline row colors from Phase 2
+- [x] Lead source visibility on Dashboard: new "New Leads by Source (30d)" chart with AEO detection (ChatGPT/Claude/Perplexity/Copilot/Gemini/you.com/phind/kagi). Existing chart renamed "Closed Business by Source". (2026-04-16)
+- [x] Deploy and verify — `dpl_Azdb1VkJH1V9xdXkkKgGkD4C1o3P` READY 2026-04-16
+- [ ] Row-level enhancements: when a follow-up segment is active, surface last_activity_date + referred_by prominently + one-click call/text/email (deferred — row already has call/text/email from Phase 2; extra columns can wait until feedback)
+- [ ] Smart sort: most urgent first when segment active (deferred — existing user-controlled sort works fine for now)
 - [ ] Adam reviews and confirms
 
 ### Phase 4: Contacts That Work

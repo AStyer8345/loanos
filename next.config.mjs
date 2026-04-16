@@ -43,12 +43,13 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-  // Ensure the /admin/ops route ships its raw HTML content file (read via
-  // fs.readFileSync at module load) with the serverless function bundle.
-  // Without this, Vercel's file tracer wouldn't pick it up.
-  outputFileTracingIncludes: {
-    '/admin/ops': ['./src/app/admin/ops/ops-content.html'],
-  },
+  // Note: /admin/ops reads ops-content.html via fs.readFileSync at module
+  // load. A previous `outputFileTracingIncludes` config was present here
+  // but was unrecognized by Next.js 14 at the top level (emitted warnings)
+  // and broke local `next build` with ENOENT. Next's default file tracer
+  // detects the readFileSync on a static path and bundles the HTML anyway —
+  // Vercel has been shipping /admin/ops correctly without the explicit
+  // override. Kept out to let local and Vercel builds agree.
   async headers() {
     return [
       {

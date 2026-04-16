@@ -1,5 +1,46 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM (late-3) — automation_registry: +subject_template column, +Contract Received Party Reply row; Set Rate webhook fully repaired
+
+Follow-up on the seed pass from (late-2). Three low-risk cleanups that unblock downstream work without touching the runtime wiring.
+
+**Schema additions:**
+
+- Migration `add_subject_template_to_automation_registry`: new `TEXT` column on `automation_registry` for subject-line templates. Uses `{{var}}` same as `email_template`. NULL for non-email automations. Populated on all 8 existing rows (see below).
+- Migration `automation_registry_unique_by_source_node`: widened `(org_id, source_id)` unique index to `(org_id, source_id, source_node_id) NULLS NOT DISTINCT`. Required for multi-email workflows like Contract Received where one n8n workflow produces two registry-worthy emails.
+
+**New row — Contract Received — Party Reply** (id `68dc830e-3eec-44f4-ab24-05c71174964e`, source `UfNcdpoVKQZqy0fj`, source_node_id `build-party-email`): 2419-char template, 17 vars, subject `Under Contract — {{property_address}} | {{buyer_names}}`. Reply-all email to transaction parties (buyer/listing agents, title) confirming lender-side deal terms and "next steps from lending" list. Existing `Contract Received` row renamed to `Contract Received — Borrower Welcome` with `source_node_id='build-borrower-email'` to keep the pair distinct.
+
+**Subject templates populated on all 8 rows:**
+
+| Row | Subject template |
+|-----|------------------|
+| Referral Intro Email | `Connecting with You — {{lo_full_name}} \| {{company_name}}` |
+| Review Request Email | `A quick favor — can you leave a review?` |
+| Final CD Email | `Your Final Closing Numbers — Action Required Before {{closing_date}}` |
+| Pre-Approval Email | `🎉 You're Pre-Approved, {{first_name}}! Here's What Happens Next` |
+| Contract Received — Borrower Welcome | `Welcome — Your Loan for {{property_address}} \| Adam Styer` |
+| Contract Received — Party Reply | `Under Contract — {{property_address}} \| {{buyer_names}}` |
+| New Application Received | `Got Your Application — Adam Styer \| Mortgage Solutions LP` |
+| Refi Intake Email | `Your Refinance is Underway — {{lo_name}} \| {{company_name}}` |
+
+Each subject was extracted verbatim from its source n8n "Build Email" code node and converted `${var}` → `{{var}}`. Hardcoded-LO rows (New Application, Contract Received Borrower) keep "Adam Styer" / "Mortgage Solutions LP" as literals matching n8n reality.
+
+**Set Rate webhook (`3iXImUkjgMitpJKt`) — fully repaired end-to-end:**
+
+The TODO item was narrow — "remove `from_address` + `subject` from Store Rate body JSON". During live-test after publish, a second pre-existing bug surfaced: the **Validate Rate** Code node (`runOnceForEachItem` mode) was returning `[{ json: {...} }]` — an array of one — which that mode rejects with `"A 'json' property isn't an object [item 0]"`. This explains why every curl attempt since 2026-04-14 returned 200 but wrote zero rows (webhook trigger responded immediately with `Workflow was started`, then the Code node failed silently and the rest of the pipeline never ran). Fixed in the same update: `return [{ json: {...} }]` → `return { json: {...} }`.
+
+- Pre-fix: `curl .../webhook/refi-watch-set-rate -d '{"rate":6.37}'` returned 200 with empty body, no execution logged, no activity_log row.
+- Post-fix: MCP `execute_workflow` returned `executionId: 5175, status: success`. New `activity_log` row `9b3a765d-d02d-4b04-997d-3a8e9bd23c2c` written with `action=refi_rate_update`, `summary=6.37`, `to_address=system`, `organization_id=18613f82-...`. No `from_address`/`subject` errors.
+- Published via MCP `publish_workflow` (not REST `/activate` — per 2026-04-14 PM root-cause lesson: REST updates only touch DRAFT, webhooks fire PUBLISHED).
+- Manual rate updates can now go back to `curl` — the SQL-INSERT workaround from 2026-04-14 is no longer needed.
+
+**Scope NOT done (still flagged in TODO):**
+
+- **Runtime wiring** — the 6 extractor workflows (Pre-Approval, Final CD, Contract Received, New App, Refi Intake, Referral Intro) still use their own hardcoded HTML + subjects in JS code nodes. Registry is now fully populated (templates + subjects + vars) so the wiring step has everything it needs, but the actual n8n rewrite is deferred pending a decision on whether these workflows should migrate to Workflow DevKit entirely (like web-lead-intake and the nurture sequences) rather than be rewired inside n8n. Runtime cutover blast radius is real — these 6 workflows are production-active.
+- **Contract Received n8n workflow** is unchanged — it still produces both Borrower Welcome and Party Reply from the same workflow. The registry now has both rows; the runtime wiring step will decide whether to split the workflow or keep it as-is with two registry lookups.
+- **LO identity per-org** in the PA and Refi templates — captured as `{{lo_name}}`, `{{lo_phone}}`, etc., with the existing n8n profile/organizations/org_settings lookup code responsible for passing them in. That pattern is unchanged.
+
 ## 2026-04-16 PM (late-2) — Seed: remaining 5 transactional templates into automation_registry (registry now 7/7)
 
 Continuing the data-seed pass from the earlier entry today. Copied hardcoded HTML out of five n8n "Build *** Email" code nodes into `automation_registry.email_template` with `{{var}}` merge syntax. No n8n workflow changes, no runtime changes — editor at `/dashboard/automations` now renders real content for all seven transactional rows. `email_mode` flipped from `hybrid` → `fixed_template` on all five (was aspirational; none actually AI-generate).

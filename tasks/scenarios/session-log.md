@@ -699,3 +699,37 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Tier 6 Item 1 (Borrower Q&A) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-16 (scenarios-am)
+
+**What was built:**
+- Backfill Q&A for existing scenarios
+  - **`src/lib/scenarios/generateQAPairs.ts`** (new shared utility): extracted Claude call + prompt + parse logic from generate-qa route — no behavior change, zero duplication going forward
+  - **`generate-qa/route.ts`** refactored to import `generateQAPairs`; now ~40 lines instead of ~140
+  - **`POST /api/scenarios/backfill-qa`** (new): fetches all org scenarios where `borrower_qa IS NULL`, processes in parallel chunks of 3, returns `{ processed, skipped, errors }`
+  - **`scenarios/page.tsx`**: adds parallel count query for `borrower_qa IS NULL` — runs alongside the scenario list fetch with `Promise.all`, no serial latency
+  - **`ScenarioList.tsx`**: gold-tinted banner above the search box shows "N scenarios missing Q&A" + "Generate Q&A (N)" button; dismisses automatically on success; shows error count if any failed
+- Fixed pre-existing build blocker: 6 empty ghost `@types` directories (`chai 2`, `deep-eql 2`, etc.) left by npm dedup were causing `Cannot find type definition file` TS errors on clean builds — removed them
+
+**MC gap closed:** Adam's full scenario history now gets Q&A populated in one click. Before: every scenario created before Apr 15 had a blank "Common Questions" accordion on the share page. After: one button press from the scenarios list regenerates Q&A for all of them. New saves already get Q&A automatically — this closes the historical gap.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `44591dc` — pushed to main
+**Vercel:** `dpl_AcAJa7aKTQgd8UxLRrYTRdqBpWCY` — ✅ READY
+
+**Files touched:**
+- `src/lib/scenarios/generateQAPairs.ts` (new)
+- `src/app/api/scenarios/generate-qa/route.ts` (refactored)
+- `src/app/api/scenarios/backfill-qa/route.ts` (new)
+- `src/app/dashboard/scenarios/page.tsx`
+- `src/app/dashboard/scenarios/ScenarioList.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Mobile builder quick-input form — allow LO to build a scenario on phone at the table. Collapsed card with rate/term/price/down only. Enough to generate share link without full ScenarioBuilder.
+2. Define Tier 7 — Tier 6 nearly complete; brainstorm next MC gap to close.
+
+**Domain queue updates:**
+- Backfill Q&A (Tier 6 Item 4) — ✅ COMPLETE this session

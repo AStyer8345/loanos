@@ -1,5 +1,22 @@
 # LoanOS Changelog
 
+## 2026-04-16 AM — Scenarios: Tier 6 — Backfill Q&A for existing scenarios
+
+- Extracted Q&A generation logic from generate-qa route into `src/lib/scenarios/generateQAPairs.ts` (shared utility; no behavior change to existing route)
+- New `POST /api/scenarios/backfill-qa` — queries all org scenarios with `borrower_qa IS NULL`, processes in parallel chunks of 3, returns `{ processed, skipped, errors }`
+- `scenarios/page.tsx` runs parallel count query for scenarios missing Q&A, passes `qaNeededCount` to `ScenarioList`
+- `ScenarioList.tsx`: gold banner shows "N scenarios missing Q&A" + "Generate Q&A (N)" button; hides when all scenarios have Q&A; shows per-run result on completion
+- Also fixed pre-existing build blocker: removed 6 empty ghost `@types` directories (`chai 2`, `deep-eql 2`, `dom-speech-recognition 2`, `json5 2`, `prop-types 2`, `react 2`, `react-dom 2`) left by npm deduplication — were causing `Cannot find type definition file` errors on clean builds
+- BUILD: ✅ PASS | Commit: `44591dc` | Vercel: `dpl_AcAJa7aKTQgd8UxLRrYTRdqBpWCY` → READY ✅
+
+## 2026-04-16 — Daily Standup (Day 22)
+
+- Vercel production confirmed READY: `dpl_CWxQo5KnaCfsW93QFyBYZrvjW3D8` (SHA `80fb0ee`) — first automated session with MCP OAuth access
+- Confirmed 4 commits shipped since Day 21: admin/email-automation page.tsx (404 fix), email-log activity_log integration, per-LO drafts UI, admin email fallback fix
+- n8n: 33 workflows, 29 active — no errors, no new inactive; count unchanged from Day 21
+- Top risk: marketing demo data at 0% progress, 10 days to May 1 launch — escalated in standup log
+- 0 CRITICAL security findings; 3 MEDIUM (#5, #9, #10) remain open pre-launch
+
 ## 2026-04-15 PM — Email Automation Dashboard + n8n → Workflow DevKit (Phase 1 complete through shadow mode)
 
 Feature branch `feat/email-automation-dashboard`. 20+ commits, all builds green on Vercel. Phase 1 of the n8n → Vercel Workflow DevKit migration implemented end-to-end, now waiting on a 7-day shadow-mode parity review before cutover.
@@ -2849,4 +2866,11 @@ Arive (loan event)
 - **Lead Gen notebook**: Removed 2 stale (CONTEXT.md AM version, pull-2026-04-14). Added 2 fresh (CONTEXT.md PM version, audit-Apr14). Final: 50/50.
 - **Web research**: SEO — 1 source added (web.dev/learn/accessibility, WCAG 2.2 + ARIA + CWV). Lead Gen — 0 added (n8n Calendly docs saved locally, not in authorized domains).
 - **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
+- **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).
+
+## 2026-04-15 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed 3 stale (audit-Apr14, CONTEXT.md Apr14, 2026-03-28-schema-eeat-web.md [superseded by newer AEO sources]). Added 3 fresh (CONTEXT.md Apr15 post Leander+Cedar Park AEO + unified lead-intake, audit-Apr15, 2026-04-14-accessibility-cwv-web.md catch-up). Final: 50/50.
+- **Lead Gen notebook**: AM session miscount corrected (reported 65, actual was 50). Removed 3 stale (audit-Apr14, CONTEXT.md Apr14 LoanOS, session-log.md Apr14). Added 3 fresh (CONTEXT.md Apr15 LoanOS post email-automation Resend swap, audit-Apr15, lead-scoring-spec.md catch-up). Final: 50/50.
+- **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook twice (once per agent).
 - **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).

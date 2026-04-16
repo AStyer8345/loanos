@@ -43,10 +43,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Blockers for LO #2 Onboarding
 
-1. ~~`extractPayloadIdentity()` in `src/lib/los/verifyLosPayload.ts`~~ — DONE. Function implemented with `loanOfficerEmail` field (confirmed from 2026-04-04 Zapier run on loan 15755447). Verified by daily briefing agent 2026-04-09.
-2. ~~Apply migration 075 (`los_integrations`) to Supabase~~ — done 2026-04-08
-3. ~~Run PII backfill script (`scripts/backfill-activity-pii.ts`) → then drop plaintext columns~~ — DONE 2026-04-12
-4. Security findings #5, #9, #10 from `tasks/security-hardening-critical-gaps.md`
+- Security findings #5, #9, #10 — see `tasks/security-hardening-critical-gaps.md` (all prior items DONE)
 
 ## NEEDS ADAM — Email Automation Cutover (Task 23)
 
@@ -64,26 +61,13 @@ Before flipping `WORKFLOW_DEVKIT_LEAD_INTAKE=live`:
 
 See `tests/workflows/smoke-checklist.md` for full manual smoke plan.
 
-## Recent Fixes (2026-04-12)
+## Recent Fixes
 
-- **Trigger crash fix** (2026-04-12 PM): Migration 085 — `enrich_activity_log_contact()` referenced dropped columns (`from_address`, `to_address`), breaking ALL `/api/activity` POSTs since migration 083. Replaced with no-op `RETURN NEW`. Also fixed NULL logic bug in guard clause.
-- **iMessage pipeline silent failure** (2026-04-12 PM): n8n workflow `nccX5ml82mMGyE9T` had 2 silent failure modes — "Find Active Loan" HTTP Request returning 0 items (killing downstream), and Code node not checking HTTP status on POST. Both fixed. 2 lost iMessages replayed.
-- **Notes + Activity separation** (2026-04-12): Migration 084 — dedicated `notes` table, `event_type` column on `activity_log`, 19 notes migrated, 1404 event_types backfilled. Loan + contact detail pages now have separate Notes and Activity tabs. Notes: create/edit/soft-delete. Activity: read-only timeline with event-type icons (10 categories). iMessage events render with match_method badges. Unmatched page extended to include iMessages.
-- **iMessage integration** (GOALS.md #4): n8n workflow `nccX5ml82mMGyE9T` captures both inbound AND outbound iMessages. Outbound: `imessage.sent` action, `imessage_sent` event_type, cyan icon in UI. `imessage-sync.py` runs every 5 min via launchd, deployed at `~/.local/bin/`. 137+ entries captured.
-- **Inbound email rendering**: `email.received` entries show From + Subject with green icon in activity feed.
-- **Migration 075 (`los_integrations`)**: Applied to live Supabase (2026-04-08).
-- **Social drafts**: Weeks 1-3 (Posts 1-21) rebuilt from build reports and inserted into `social_drafts`.
-- **Suburb quick-form tracking**: Fixed `generate_lead` + `thank_you_page_view` gap on styermortgage.com suburb pages.
-- **Blog slug rename**: temp-placeholder posts converted to meta-refresh redirects to canonical URLs.
-- **Contact schema research**: Q2-Q8 answered in `tasks/crm/research/2026-03-25-contact-data-architecture.md`.
+See CHANGELOG.md for full fix history. Key recent: migration 085 (trigger crash), notes/activity separation (migration 084), iMessage pipeline (silent failures fixed), PII encryption complete (migration 083 column drop).
 
 ## Active n8n Workflows
 
-See `memory/tools/n8n.md` for full index. Key ones:
-- WF1 `1tagvoU0UXtdDiMY` — Arive New Loan → Supabase (active)
-- WF2 `9JyzzwKac8v3uQ7d` — Arive Status Update → Supabase (active)
-- Drip Scheduler `LqBb3YDLjS2eUrDE` — daily 7am CT, 16 nodes (active)
-- Lender Ingest `hHXpKUirhnBCnQTO` — daily 8am CT, Outlook → Claude → Supabase (active)
+See `memory/tools/n8n.md` for full index. Core active: Arive→Supabase (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Drip Scheduler (`LqBb3YDLjS2eUrDE` daily 7am), Lender Ingest (`hHXpKUirhnBCnQTO` daily 8am).
 
 ## Key Architecture
 
@@ -92,25 +76,13 @@ See `memory/tools/n8n.md` for full index. Key ones:
 - **Auth:** Supabase Auth (email/password), middleware gates `/dashboard/*`
 - **Webhook security:** 3-layer (slug + hashed secret + payload allowlist), shadow/enforce mode
 - **PII:** `activity_log_pii` companion (AES-256-GCM). Read path decrypts server-side via `GET /api/activity`. Plaintext columns dropped (migration 083).
-- **Notes:** Dedicated `notes` table with RLS. API: `/api/notes` (POST/GET), `/api/notes/[id]` (PATCH/DELETE soft-delete). Components: `NoteInput`, `NoteCard`.
-- **Share page:** `src/components/share/` — 12 borrower-facing components. PDF = share page + `@media print` + `?print=1`.
-- **AI chat:** Multi-round tool use (max 4 rounds), tools: lender DB, mortgage knowledge base, contact lookup, loan lookup
+- **Notes:** `notes` table + RLS. API `/api/notes`. Components: `NoteInput`, `NoteCard`.
+- **Share page:** `src/components/share/` — 12 components. PDF via `@media print` + `?print=1`.
+- **AI chat:** Multi-round tool use (max 4 rounds), tools: lender DB, knowledge base, contact, loan lookup
 
 ## Key Files & Docs
 
-| File | Purpose |
-|------|---------|
-| `CHANGELOG.md` | Session-by-session changes (the detailed history that used to live here) |
-| `DECISIONS.md` | Architecture decisions with reasoning and alternatives |
-| `TODO.md` | Prioritized open work |
-| `tasks/ADAM-TODO.md` | Granular action items requiring Adam |
-| `tasks/security-hardening-critical-gaps.md` | Security tracker (pre-LO #2) |
-| `audits/SECURITY-AUDIT-2026-04-05.md` | Full audit findings (A-1 through A-12, S-1 through S-4, M-1, F-1) |
-| `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` | Product truth — features, schema, security posture |
-| `RENOVATION-PLAN.md` | Master renovation plan (hide-don't-delete philosophy) |
-| `docs/THEME.md` | UI theme spec — colors, components, borders |
-| `docs/security/secret-rotation-runbook.md` | Rotation procedures for every secret |
-| `/skills/user/` | 10+ user-defined Claude skills |
+Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work), `tasks/ADAM-TODO.md` (Adam queue), `tasks/security-hardening-critical-gaps.md` (security tracker), `LOANOS_SYSTEM_KNOWLEDGE_BASE.md` (product truth), `docs/THEME.md` (UI spec)
 
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
@@ -125,38 +97,38 @@ See `memory/tools/n8n.md` for full index. Key ones:
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 AM — Blocker verification + homepage form test + lead scoring spec. Set Rate RESOLVED (6.37%, called 2026-04-14 — first ever). Seq A verified functional (6.37% > 6.00% threshold → exits cleanly). Homepage forms confirmed live (Quick Quote + Quick Contact wired via commit 1bb1ef1). Lead scoring spec complete: `tasks/lead-gen/specs/2026-04-15-lead-scoring-spec.md` — 6 signals, 4 tiers, data model options, n8n build plan, 3 Adam decisions needed. NotebookLM: 2 sources added (65 total — over 50 cap, PM curate needed).
+**Last worked on:** 2026-04-15 PM — Nightly NotebookLM PUSH+CURATE. AM miscount corrected (was 50, not 65). Notebook: 3 removed (audit-Apr14, CONTEXT.md Apr14 LoanOS, session-log.md Apr14), 3 added (fresh CONTEXT.md Apr15 LoanOS, audit-Apr15, lead-scoring-spec.md [catch-up]). 50/50. Digest SENT (Zapier success). Lead scoring spec confirmed pushed to notebook.
 
-**Active blockers:** (1) Seq C INACTIVE — Outlook cred (7th session). (2) Calendly INACTIVE — webhook not wired. (3) Mailchimp journeys not built (pack ready). (4) Seq D — copy approval required. (5) Calendly HMAC signing key needed for security hardening.
+**Active blockers:** (1) Seq C INACTIVE — Outlook cred (7+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built (Execution Pack delivered, 45 min Adam). (4) Seq D — copy approval + manual trigger. (5) Lead scoring threshold decision: 6.00% vs 6.25% (Adam).
 
-**What's next:** Build lead scoring system (spec ready, need Adam decisions on threshold/SMS/data model). Seq A threshold review (6.00% vs 6.25% — adjust if Adam confirms). Calendly HMAC node (needs signing key first).
+**What's next:** Build lead scoring system (spec ready — DB migration + n8n Lead Score Updater workflow + intake wiring). Calendly webhook activation + HMAC code node. Mailchimp 3 Customer Journeys (Adam-owned, ~45 min).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-14 PM — NotebookLM PUSH+CURATE. Daily-opt session committed: 6 title standardizations, WCAG contrast fix + ARIA + WebP (commit 1879e10), PA/DPA webhook triggers, rate page 2026-04-14.html. Notebook: 3 removed (stale CONTEXT.md, Apr13 pull, audit-Apr13), 3 added (fresh CONTEXT.md, audit-Apr14, web.dev/learn/accessibility). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-15 PM — Nightly NotebookLM PUSH+CURATE. Cedar Park + Leander AEO H2 question format + unified lead-intake.js + UTM fields committed today. Notebook: 3 removed (audit-Apr14, CONTEXT.md Apr14, 2026-03-28-schema-eeat-web.md [superseded]), 3 added (fresh CONTEXT.md Apr15, audit-Apr15, 2026-04-14-accessibility-cwv-web.md [catch-up]). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC URL Inspection for 5 suburbs (Adam — Dripping Springs, Round Rock, Cedar Park, Leander, Georgetown). Liberty Hill page unique content still unwritten. Temp placeholder blog post still at wrong slug.
+**Active blockers:** GSC URL Inspection for Cedar Park + Leander + Round Rock (Adam-owned). Liberty Hill unique content still unwritten. Pre-publish lint command for blog title brand drift needed.
 
-**What's next:** Liberty Hill suburb page (MUD districts, Liberty Hill ISD, Orchard Ridge/Santa Rita Ranch). Internal link pass → hutto-mortgage-lender.html from 3-4 related pages. Lighthouse a11y audit post-WCAG/WebP deploy.
+**What's next:** Georgetown suburb H2 AEO audit + county context. Liberty Hill content enrichment (Liberty Hill ISD + Williamson County tax + Orchard Ridge/Santa Rita Ranch). Pre-publish lint command (Claude-executable).
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 AM — Tier 6 launch. DetailAccordion cleanup (removed "Full Scenario Comparison" item, auto-hides without horizon data). Pre-generated Borrower Q&A: migration 086 (borrower_qa JSONB), new `/api/scenarios/generate-qa` route (authenticated, idempotent), new `BorrowerQA.tsx` accordion component (print:hidden), fire-and-forget trigger in ActionsBar. Commit 70bd469 | Vercel BUILDING.
+**Last worked on:** 2026-04-16 AM — Backfill Q&A. Extracted `generateQAPairs.ts` shared utility, refactored generate-qa route, new `POST /api/scenarios/backfill-qa` batch route (parallel chunks of 3), `ScenarioList.tsx` gold banner + "Generate Q&A (N)" button. Also fixed pre-existing ghost `@types` build blocker. Commit 44591dc | Vercel dpl_AcAJa7aKTQgd8UxLRrYTRdqBpWCY → READY ✅
 
 **Active blockers:** None.
 
-**What's next:** Mobile builder quick-input form (LO at the table on phone — rate/term/price/down only). Backfill Q&A for existing scenarios (admin button or script).
+**What's next:** Mobile builder quick-input form (LO at the table on phone — rate/term/price/down only, generates share link).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 — Day 21 standup. n8n: 33 total, 29 active (+2: PA Welcome + DPA Guide nurture workflows live). CD & Contract Extractor `HkLjsnnhT5MgrX5H` still active=true but untested — Outlook cred unverified. Vercel unverifiable (OAuth required in automated session); last known READY. Post 39 due TODAY. Security: 0 CRITICAL, 3 MEDIUM open.
+**Last worked on:** 2026-04-16 — Day 22 standup. Vercel CONFIRMED READY (`dpl_CWxQo5KnaCfsW93QFyBYZrvjW3D8`, SHA `80fb0ee`). n8n: 33 total, 29 active — no errors. 4 commits confirmed shipped (admin page fix, email log, per-LO drafts UI, email fallback fix). Security: 0 CRITICAL, 3 MEDIUM open.
 
-**Active blockers:** Marketing demo data zero progress (11 days to May 1 — HIGHEST RISK). Phase 2 Adam confirmation outstanding 7+ sessions (blocks Phase 3). CD & Contract Extractor needs execution test. Seq C INACTIVE (Outlook cred, 7+ sessions). Post 39 approval due today.
+**Active blockers:** Marketing demo data zero progress (10 days to May 1 — HIGHEST RISK). Phase 2 Adam confirmation outstanding 8+ sessions (blocks Phase 3). Workflow DevKit cutover (Task 23) blocked on Adam env vars + Resend webhook config. Seq C INACTIVE (Outlook cred, 7+ sessions).
 
-**What's next:** Marketing demo data cleanup (start this week or May 1 misses). CD & Contract Extractor execution test. Phase 2 Adam confirmation escalation.
+**What's next:** Marketing demo data cleanup (must start this week — May 1 at risk). CD & Contract Extractor execution test. Phase 2 Adam confirmation escalation.
 
 ## Rules For AI Sessions
 

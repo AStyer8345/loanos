@@ -8,6 +8,9 @@ import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
+import { aggregateBySource, type ContactSourceFields } from '@/lib/leadSources'
+
+const NEW_LEADS_WINDOW_DAYS = 30
 
 export const dynamic = 'force-dynamic'
 
@@ -41,8 +44,17 @@ export default async function DashboardPage() {
     }
   }
 
-  // Parallel fetch: org_settings + loans + mcc_state are independent
-  const [{ data: orgSettings }, { data: loans = [] }, { data: mccRow }] = await Promise.all([
+  const newLeadsWindowStart = new Date(
+    Date.now() - NEW_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString()
+
+  // Parallel fetch: org_settings + loans + mcc_state + recent contacts (for lead-source chart)
+  const [
+    { data: orgSettings },
+    { data: loans = [] },
+    { data: mccRow },
+    { data: recentContacts = [] },
+  ] = await Promise.all([
     supabase
       .from('org_settings')
       .select('onboarding_completed')
@@ -59,6 +71,11 @@ export default async function DashboardPage() {
       .eq('user_id', userId)
       .eq('key', 'mcc')
       .single(),
+    supabase
+      .from('contacts')
+      .select('lead_source, referrer, source_page, utm_params')
+      .eq('organization_id', organizationId)
+      .gte('created_at', newLeadsWindowStart),
   ])
   const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
 
@@ -72,8 +89,6 @@ export default async function DashboardPage() {
   let commissionThisMonth = 0, commissionYTD = 0
   let fundedThisMonth = 0, fundedYTD = 0
   let volumeThisMonth = 0, volumeYTD = 0
-  const urgentFlags: Array<{ id: string; name: string; flag: string; date: string }> = []
-  const staleLoans: Array<{ id: string; name: string; daysSinceActivity: number; status: string | null; estimated_closing_date: string | null; loan_amount: number | null }> = []
 
   for (const loan of loans ?? []) {
     const rawStatus = (loan.status ?? 'unknown').toLowerCase()
@@ -115,32 +130,7 @@ export default async function DashboardPage() {
       }
     }
 
-    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
-      || loan.loan_name || 'Unknown'
-
-    if (loan.pre_approval_expiry_date) {
-      const exp = new Date(loan.pre_approval_expiry_date)
-      const next7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      if (exp >= now && exp <= next7) {
-        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Pre-approval expiring', date: loan.pre_approval_expiry_date })
-      }
-    }
-    if (loan.estimated_closing_date && isActive) {
-      if (new Date(loan.estimated_closing_date) < now) {
-        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Past est. closing date', date: loan.estimated_closing_date })
-      }
-    }
-    if (loan.rate_lock_expiration && isActive) {
-      const lockExp = new Date(loan.rate_lock_expiration + 'T00:00:00')
-      const next7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      if (lockExp < now) {
-        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Rate lock EXPIRED', date: loan.rate_lock_expiration })
-      } else if (lockExp <= next7) {
-        urgentFlags.push({ id: loan.id, name: borrowerName, flag: 'Rate lock expiring', date: loan.rate_lock_expiration })
-      }
-    }
   }
-  // staleLoans computed after lastActivityMap is built below
 
   const stageData = DASHBOARD_STAGES.map(stage => ({
     stage,
@@ -215,28 +205,6 @@ export default async function DashboardPage() {
   for (const row of activityRows) {
     if (row.loan_id && row.occurred_at && !lastActivityMap.has(row.loan_id)) {
       lastActivityMap.set(row.loan_id, row.occurred_at)
-    }
-  }
-
-  // Build staleLoans using real human activity timestamps
-  for (const loan of activeLoans) {
-    const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
-      || loan.loan_name || 'Unknown'
-    const lastHumanTouch = lastActivityMap.get(loan.id)
-    // Use created_at as fallback (not updated_at) — Arive syncs touch updated_at constantly
-    const compareDate = lastHumanTouch ?? loan.created_at
-    if (compareDate) {
-      const daysSince = Math.floor((now.getTime() - new Date(compareDate).getTime()) / (1000 * 60 * 60 * 24))
-      if (daysSince >= 7) {
-        staleLoans.push({
-          id: loan.id,
-          name: borrowerName,
-          daysSinceActivity: daysSince,
-          status: loan.status,
-          estimated_closing_date: loan.estimated_closing_date,
-          loan_amount: loan.loan_amount,
-        })
-      }
     }
   }
 
@@ -504,6 +472,12 @@ export default async function DashboardPage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 15)
 
+  // ── New Leads by Source (30d contacts-based, AEO-aware) ─────────────────
+  // Supabase returns utm_params as Json — safe-cast into our narrowed shape.
+  const newLeadSourceData = aggregateBySource(
+    ((recentContacts ?? []) as unknown as ContactSourceFields[])
+  )
+
   // ── Marketing activity log (from mcc_state JSON blob) ───────────────────
   interface MarketingLogEntry { id: string; date: string; activity: string; channel: string; notes?: string }
   const mccValue = mccRow?.value as Record<string, unknown> | null
@@ -534,8 +508,6 @@ export default async function DashboardPage() {
         volumeThisMonth={volumeThisMonth}
         volumeYTD={volumeYTD}
         stageData={stageData}
-        urgentFlags={urgentFlags}
-        staleLoans={staleLoans}
         chartData={chartData}
         sparklineMonths={sparklineMonths}
         scoredLoans={scoredLoans}
@@ -550,6 +522,8 @@ export default async function DashboardPage() {
         pipelineLoans={pipelineLoans}
         newAppsAndPAs={newAppsAndPAs}
         leadSourceData={leadSourceData}
+        newLeadSourceData={newLeadSourceData}
+        newLeadsWindowDays={NEW_LEADS_WINDOW_DAYS}
         marketingLog={marketingLog}
       />
     </>

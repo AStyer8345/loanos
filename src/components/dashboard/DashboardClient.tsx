@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  AlertTriangle, Brain, ListChecks, ArrowRight,
+  Brain, ListChecks, ArrowRight,
 } from 'lucide-react'
 import SmartActionQueue from '@/components/SmartActionQueue'
 import type { ScoredLoan } from '@/lib/scoreLoans'
@@ -25,14 +25,13 @@ import YoYVolumeChart from './charts/YoYVolumeChart'
 import CommissionForecast from './charts/CommissionForecast'
 import DaysToCloseGauge from './charts/DaysToCloseGauge'
 import LeadSourceChart from './charts/LeadSourceChart'
+import NewLeadsChart from './charts/NewLeadsChart'
+import type { LeadSourceCategory } from '@/lib/leadSources'
 import MarketingActivity from './charts/MarketingActivity'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
-interface UrgentFlag { id: string; name: string; flag: string; date: string }
-interface StaleLoan { id: string; name: string; daysSinceActivity: number; status: string | null; estimated_closing_date: string | null; loan_amount: number | null }
 interface ChartPoint { month: string; loans: number; volume: number; commission: number }
 
 interface DashboardClientProps {
@@ -42,7 +41,6 @@ interface DashboardClientProps {
   fundedThisMonth: number; fundedYTD: number
   volumeThisMonth: number; volumeYTD: number
   stageData: StageData[]
-  urgentFlags: UrgentFlag[]; staleLoans: StaleLoan[]
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
   hotLeads: HotLead[]
@@ -57,6 +55,8 @@ interface DashboardClientProps {
   pipelineLoans: Array<{ id: string; name: string; amount: number; status: string | null; closingDate: string | null; rate: number | null; commission: number; rateLockExp: string | null; lender: string | null }>
   newAppsAndPAs: Array<{ id: string; name: string; amount: number; status: string | null; stage: string; createdAt: string | null; loanType: string | null; referralSource: string | null }>
   leadSourceData: Array<{ source: string; count: number; volume: number }>
+  newLeadSourceData: Array<{ source: LeadSourceCategory; count: number }>
+  newLeadsWindowDays: number
   marketingLog: Array<{ id: string; date: string; activity: string; channel: string; notes?: string }>
 }
 
@@ -89,8 +89,6 @@ export default function DashboardClient(props: DashboardClientProps) {
   const [tab, setTab] = useState<'pipeline' | 'performance' | 'briefing' | 'queue'>('pipeline')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
-  const needsAttentionCount = props.urgentFlags.length
-
   return (
     <div className="min-h-screen bg-[var(--bg)] p-4 lg:p-6 space-y-4">
 
@@ -120,12 +118,6 @@ export default function DashboardClient(props: DashboardClientProps) {
           <p className="text-xs font-mono text-muted-foreground mt-0.5">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
-          {needsAttentionCount > 0 && (
-            <Badge variant="warning" className="gap-1.5 px-3 py-1.5 rounded-lg">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span className="font-mono">{needsAttentionCount} need attention</span>
-            </Badge>
-          )}
           <div className="flex bg-card border border-input rounded-lg p-1 gap-0.5">
             <button
               onClick={() => setTab('pipeline')}
@@ -229,43 +221,20 @@ export default function DashboardClient(props: DashboardClientProps) {
             </Card>
           )}
 
-          {/* ── Action Required (compact urgent flags only) ── */}
-          {props.urgentFlags.length > 0 && (
-            <Card className="p-4 border-amber-800/50 bg-amber-950/10">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle size={12} className="text-amber-400" />
-                <span className="text-xs font-mono font-semibold text-amber-400 uppercase tracking-widest">Action Required</span>
-                <span className="text-[11px] font-mono text-muted-foreground">{props.urgentFlags.length}</span>
-              </div>
-              <div className="space-y-1">
-                {props.urgentFlags.map(f => (
-                  <Link
-                    key={f.id + f.flag}
-                    href={`/dashboard/loans/${f.id}`}
-                    className="flex items-center justify-between text-xs font-mono hover:bg-amber-900/20 rounded px-2 py-1.5 -mx-1 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                      <span className="text-foreground">{f.name}</span>
-                    </div>
-                    <span className="text-amber-400 text-[11px]">{f.flag}</span>
-                  </Link>
-                ))}
-              </div>
-            </Card>
-          )}
-
           {/* ── Two-column: Hot Leads (compact) + Rate Lock (compact) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <HotLeadsWidget hotLeads={props.hotLeads.slice(0, 5)} />
             <RateLockCountdown locks={props.rateLockLoans.slice(0, 5)} />
           </div>
 
-          {/* ── Two-column: Lead Sources + Pipeline Snapshot ── */}
+          {/* ── Two-column: New Leads by Source (30d) + Closed Business by Source ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <NewLeadsChart data={props.newLeadSourceData} windowDays={props.newLeadsWindowDays} />
             <LeadSourceChart data={props.leadSourceData} />
-            <ConversionFunnel data={props.funnelData} />
           </div>
+
+          {/* ── Conversion Funnel ── */}
+          <ConversionFunnel data={props.funnelData} />
 
           {/* ── Top Realtors ── */}
           <ReferralLeaderboard data={props.referralData} />

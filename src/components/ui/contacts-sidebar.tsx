@@ -19,10 +19,16 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Sparkles,
+  AlertCircle,
+  ShoppingBag,
 } from 'lucide-react'
 
 // ── Section icons mapped by smart list ID ──
 const LIST_ICONS: Record<string, ReactNode> = {
+  'followup-new-leads':    <Sparkles className="size-3.5 text-violet-400" />,
+  'followup-stale':        <AlertCircle className="size-3.5 text-amber-500" />,
+  'followup-pa-shopping':  <ShoppingBag className="size-3.5 text-emerald-400" />,
   active:               <Flame className="size-3.5 text-amber-500" />,
   all:                  <Users className="size-3.5" />,
   'all-borrowers':      <UserPlus className="size-3.5" />,

@@ -15,7 +15,7 @@ export default function LeadSourceChart({ data }: LeadSourceChartProps) {
   return (
     <Card className="p-4">
       <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
-        Lead Sources
+        Closed Business by Source
       </h3>
       <div className="space-y-2">
         {rows.map((row) => {

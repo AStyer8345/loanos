@@ -177,6 +177,9 @@ function stageToList(stage: string | null, contactType: string | null): string {
 
 // ── Smart Lists ───────────────────────────────────────────────────────────────
 const SMART_LISTS: SmartListDef[] = [
+  { id: 'followup-new-leads',    label: 'New Leads (30d)',              section: 'FOLLOW-UP' },
+  { id: 'followup-stale',        label: 'Going Quiet (7\u201330d)' },
+  { id: 'followup-pa-shopping',  label: 'Pre-Approved \u2014 Still Shopping' },
   { id: 'active',         label: 'Hot List / Pre-Approved' },
   { id: 'all',            label: 'All Contacts' },
   { id: 'all-borrowers',  label: 'All Borrowers',          section: 'BORROWERS' },
@@ -321,6 +324,35 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
 // ── applySmartList ─────────────────────────────────────────────────────────────
 function applySmartList(query: any, listId: string): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   switch (listId) {
+    // ── FOLLOW-UP segments (Phase 3) ─────────────────────────────────────
+    case 'followup-new-leads': {
+      // Borrower contacts created in last 30d, not yet pre-approved or further.
+      // Excludes "graveyard leads" that never converted after 30+ days.
+      const cutoff30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      return query
+        .eq('contact_type', 'borrower')
+        .gte('created_at', cutoff30)
+        .or('stage.is.null,stage.in.(Lead,Pre-App,Application)')
+    }
+    case 'followup-stale': {
+      // Salvageable leads: last activity between 30d and 7d ago.
+      // Newer = still warm (don't pester). Older = dead (not your job).
+      const cutoff30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      const cutoff7  = new Date(Date.now() - 7  * 24 * 60 * 60 * 1000).toISOString()
+      return query
+        .eq('contact_type', 'borrower')
+        .gte('last_activity_date', cutoff30)
+        .lte('last_activity_date', cutoff7)
+        .not('stage', 'in', '(Closed,Dead,Withdrawn,Cancelled)')
+    }
+    case 'followup-pa-shopping': {
+      // Pre-approved in last 90d, no contract yet. Window keeps list actionable.
+      const cutoff90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+      return query
+        .eq('contact_type', 'borrower')
+        .eq('stage', 'Pre-Approved')
+        .or(`last_activity_date.gte.${cutoff90},created_at.gte.${cutoff90}`)
+    }
     case 'new-apps':
       return query.eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application'])
     case 'active':
@@ -699,8 +731,12 @@ export default function ContactsPage() {
       supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').gte('referral_ytd_count', 2),
       (() => { const c = new Date(Date.now() - 60*24*60*60*1000).toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${c}`) })(),
       (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); const s = d.toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${s}`) })(),
+      // Follow-Up segments (Phase 3) — must stay in sync with applySmartList above
+      (() => { const c30 = new Date(Date.now() - 30*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').gte('created_at', c30).or('stage.is.null,stage.in.(Lead,Pre-App,Application)') })(),
+      (() => { const c30 = new Date(Date.now() - 30*24*60*60*1000).toISOString(); const c7 = new Date(Date.now() - 7*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').gte('last_activity_date', c30).lte('last_activity_date', c7).not('stage', 'in', '(Closed,Dead,Withdrawn,Cancelled)') })(),
+      (() => { const c90 = new Date(Date.now() - 90*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').eq('stage', 'Pre-Approved').or(`last_activity_date.gte.${c90},created_at.gte.${c90}`) })(),
     ]
-    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned', 'active_deal_partners', 'top_producers', 'due_for_outreach', 'tier_a_not_this_month']
+    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned', 'active_deal_partners', 'top_producers', 'due_for_outreach', 'tier_a_not_this_month', 'followup-new-leads', 'followup-stale', 'followup-pa-shopping']
     const results = await Promise.all(base)
     const next: Record<string, number> = {}
     builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })

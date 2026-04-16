@@ -1,5 +1,24 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM (late) — Seed: 2 transactional templates into automation_registry (2b''' follow-up)
+
+Low-risk seed pass — copied hardcoded HTML out of n8n JS code nodes and into `automation_registry.email_template` with `{{var}}` merge syntax. No n8n workflow changes, no runtime changes. Editor at `/dashboard/automations` now shows real content instead of empty boxes for these two rows.
+
+- `Referral Intro Email` (id `daf5605a-26ad-4395-ba29-904c3fe686a7`, source `YbgDnTpPdefcazKy`): 1124-char template, 13 variables, `email_mode` flipped `ai_generated` → `fixed_template` (matches reality — no AI actually runs on this workflow)
+- `Review Request Email` (id `017b4007-ae9d-4dc1-b41d-30d5b0b9075f`, source `AK1fBcaX1cPcdlGx`): 2441-char template, 1 variable, same `email_mode` correction. Google + Zillow review URLs kept as literals inside the template (per-org rows can override if needed)
+
+**Audit findings — material to the email-automation roadmap:**
+
+- `email_mode` metadata across `automation_registry` is aspirational, not descriptive. 3/3 workflows I opened (Final CD, Referral Intro, Review Request) are field-substitution on hardcoded HTML; none call Claude for body composition. Rows marked `ai_generated` or `hybrid` likely don't actually AI-generate.
+- All 3 use Microsoft Outlook draft nodes, which are dead after the Graph removal on 2026-04-15. Referral Intro is technically still active in n8n but its send step 500s; Review Request is already `active: false`.
+- The editor (`EmailDetailPanel`) already has all the UI surfaces for `email_template`, `email_mode`, `email_variables`, tone, length, always/never-include chips, send-test, run-now, status toggle. Missing per-spec: explicit subject field and an email_variables chips display (everything else is wired).
+
+**Scope NOT done this session (flagged in TODO):**
+
+- Audit + seed the remaining 5 transactional templates (Pre-Approval, Final CD, Contract Received, Refi Intake, New Application Received)
+- Actually wire n8n code nodes to fetch `automation_registry.email_template` at runtime instead of using their own hardcoded copy — until that ships, editor edits are read-only previews
+- Swap the dead Outlook draft nodes for Resend (separate-but-related)
+
 ## 2026-04-16 PM — Nurture content: 14 real bodies land in Workflow DevKit files (replacing stubs)
 
 Session premise in the brief asked to migrate PA Welcome + DPA Guide content out of n8n code nodes into Supabase `drip_steps`. That was based on the pre-2026-04-15 architecture. As of 2026-04-15 PM the nurture engine is **Workflow DevKit** (`src/workflows/pa-welcome-nurture.ts`, `dpa-guide-nurture.ts`), not `drip_steps`, so the migration target changed.

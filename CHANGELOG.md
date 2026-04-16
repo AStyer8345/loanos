@@ -1,5 +1,46 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM (late-4) — UI consolidation: 9 nav tabs → 4 + More + ⚙; drip scheduler archived
+
+Triggered by Adam's "I've lost control of this" — too many tabs, dashboard widgets feeling like junk, his non-technical uncle about to onboard. Audit-first session that produced one consolidating commit (`f4e14fe`) plus an n8n archive operation. Live in production at `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` (READY in 75s).
+
+**TopNav consolidation** ([TopNav.tsx](src/components/TopNav.tsx) full rewrite):
+
+- Primary nav: Dashboard / Pipeline / Contacts / Email + ChevronDown "More" dropdown + ⚙ Settings gear. Down from 9 visible tabs (Dashboard, Pipeline, Contacts, Scenarios, Marketing, Lenders, Drip, Drafts, Admin).
+- "Email" replaces "Drip" and is the consolidation pillar — `/dashboard/drip-campaigns` is the landing route, but the Email section also highlights for `/dashboard/drafts` and `/dashboard/automations`. The three outbound-email surfaces share one nav slot.
+- "More" dropdown holds Scenarios, Lenders, Marketing, Drafts, Templates (renamed from "Admin" — that page was a template editor, not org admin). Click-outside via `mousedown` listener; the More button itself highlights when any sub-page is active.
+- Mobile sheet preserves everything: primary nav, then a labeled "More" group, then Settings, then user/sign-out.
+- Voice Guide stays buried inside Marketing per Adam's call (RENOVATION-PLAN.md:24 originally said keep it accessible as its own item — superseded).
+
+**Drip scheduler archived** (option (a) of TODO #18):
+
+- n8n workflow `LqBb3YDLjS2eUrDE` (LoanOS — Drip Email Scheduler) archived via MCP `archive_workflow`. State now `active: false`, `isArchived: true`. Daily 7am cron stops, dead "Send via Outlook" node never fires again.
+- Picked option (a) over (b) Resend retarget (12 throwaway n8n nodes during a WDK cutover) and (c) immediate WDK migration (would scope-creep into Task 23). Sequence: (a) now → finish Task 23 → (c) the 6 campaigns (Ghost Referral, Incomplete App, Went Quiet, Long-Term Nurture, Past Client Retention, Realtor Relationships) as a dedicated phase.
+- Banner added on `/dashboard/drip-campaigns` ("Paused — Email Platform Migration") so the UI stops pretending campaigns can fire. Existing data untouched.
+- TODO #18 closed with the decision recorded; reversal path documented (un-archive via MCP).
+
+**Dashboard cleanup** ([DashboardClient.tsx:195](src/components/dashboard/DashboardClient.tsx:195)):
+
+- Removed Mini Pipeline Table — duplicated the Pipeline tab one click away. Adam confirmed by name as the "junk" widget.
+- "Action Required" widget kept — concept is correct but data hygiene is poor (stale Arive `estimated_closing_date` on closed loans pollutes the urgency flags). Wants its own pass once cleanup approach is decided (filter at query time vs. nulling the column on status flip).
+- Other widgets (Pipeline sparkline cards, Active Pipeline by Stage chart, Lead Sources, Conversion Funnel, Hot Leads, Rate Lock Countdown) left intact.
+
+**Build/deploy:**
+
+- Local `npm run build` hit a known Node 24 + Next 14.2.35 race in the page-data-collection phase (`Cannot find module ... pages-manifest.json`, with a different missing manifest each run). Compile + types + lint all passed. Pre-push hook blocked the push; pushed with `--no-verify` per Adam's option-1 authorization.
+- Vercel built cleanly: `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` READY in 75s. Local Node downgrade to 20.x flagged for next session to stop the hook from biting.
+
+**Memory:**
+
+- New feedback memory: `feedback_loanos_three_pillars.md` — for LoanOS work, only Contacts / Pipeline / Drip Campaigns are first-class; everything else must justify itself against the "would my non-technical uncle ever click this in week one" test.
+
+**Still open (next session):**
+
+- Action Required filter fix — Arive `estimated_closing_date` hygiene on closed loans
+- 6 drip campaigns → Workflow DevKit (after Task 23 cutover lands live)
+- automation_registry runtime wiring (TODO #20, unchanged from prior session)
+- Local Node version downgrade to 20.x to unblock the pre-push hook
+
 ## 2026-04-16 PM (late-3) — automation_registry: +subject_template column, +Contract Received Party Reply row; Set Rate webhook fully repaired
 
 Follow-up on the seed pass from (late-2). Three low-risk cleanups that unblock downstream work without touching the runtime wiring.

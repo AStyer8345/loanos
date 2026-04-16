@@ -181,6 +181,34 @@ const REFERRAL_TYPE_LABELS: Record<string, string> = {
   other:                       'Other',
 }
 
+// Structured lead_source options — values match the classifier in
+// src/lib/leadSources.ts so the Dashboard "New Leads by Source" chart
+// respects manual tagging. Sub-options (AEO: ChatGPT, SEO: Google, etc.)
+// are also recognized by the classifier's prefix matching.
+const LEAD_SOURCE_OPTIONS: Array<{ group: string; options: string[] }> = [
+  { group: 'AEO (AI Answer Engine)', options: [
+      'AEO',
+      'AEO: ChatGPT', 'AEO: Claude', 'AEO: Perplexity',
+      'AEO: Copilot', 'AEO: Gemini',
+  ]},
+  { group: 'SEO (Search Engine)', options: [
+      'SEO',
+      'SEO: Google', 'SEO: Bing', 'SEO: DuckDuckGo',
+  ]},
+  { group: 'Social', options: [
+      'Social',
+      'Social: Instagram', 'Social: Facebook', 'Social: LinkedIn', 'Social: YouTube',
+  ]},
+  { group: 'Referral', options: [
+      'Realtor Referral',
+      'Past Client', 'Client Referral', 'Friend / Family',
+      'Financial Advisor', 'Builder Referral',
+  ]},
+  { group: 'Other', options: [
+      'Web Lead', 'Open House', 'Direct', 'Other',
+  ]},
+]
+
 // Stage badge for contacts (uses contact stage labels)
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   const map: Record<string, string> = {
@@ -545,6 +573,124 @@ function ReferralTypeSelect({ value, onSave }: {
         minWidth: 80,
       }}>
         {saved ? '✓ Saved' : (value ? (REFERRAL_TYPE_LABELS[value] ?? value) : '—')}
+      </div>
+    </div>
+  )
+}
+
+// Lead Source dropdown — grouped options drive the Dashboard "New Leads by Source"
+// chart. Free-form typing preserved via the "Custom…" escape hatch.
+function LeadSourceSelect({ value, onSave }: {
+  value: string | null
+  onSave: (field: keyof Contact, value: string | null) => Promise<void>
+}) {
+  const [editing, setEditing] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [customMode, setCustomMode] = useState(false)
+  const [customText, setCustomText] = useState(value ?? '')
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+
+  const isInPresetList = (v: string | null): boolean => {
+    if (!v) return true
+    return LEAD_SOURCE_OPTIONS.some(g => g.options.includes(v))
+  }
+
+  async function commit(next: string | null) {
+    setEditing(false)
+    setCustomMode(false)
+    await onSave('lead_source', next && next.trim() ? next.trim() : null)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function handleSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value
+    if (next === '__custom__') {
+      setCustomMode(true)
+      setCustomText(value && !isInPresetList(value) ? value : '')
+      return
+    }
+    await commit(next || null)
+  }
+
+  if (editing && customMode) {
+    return (
+      <div>
+        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>LEAD SOURCE (CUSTOM)</div>
+        <input
+          autoFocus
+          value={customText}
+          onChange={(e) => setCustomText(e.target.value)}
+          onBlur={() => commit(customText)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit(customText)
+            if (e.key === 'Escape') { setEditing(false); setCustomMode(false) }
+          }}
+          style={{
+            ...baseStyle,
+            color: 'var(--fg)',
+            background: 'var(--bg)',
+            border: '1px solid rgba(201,168,76,0.6)',
+            borderRadius: 3,
+            padding: '3px 8px',
+            width: '100%',
+            outline: 'none',
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (editing) {
+    // If the current value is a custom string not in the preset list, preserve it
+    // as an extra option so the dropdown reflects actual state.
+    const currentIsCustom = value && !isInPresetList(value)
+    return (
+      <div>
+        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>LEAD SOURCE</div>
+        <select
+          autoFocus
+          defaultValue={value ?? ''}
+          onChange={handleSelectChange}
+          onBlur={() => setEditing(false)}
+          style={{
+            ...baseStyle,
+            color: 'var(--fg)',
+            background: 'var(--bg)',
+            border: '1px solid rgba(201,168,76,0.6)',
+            borderRadius: 3,
+            padding: '3px 8px',
+            width: '100%',
+            outline: 'none',
+          }}
+        >
+          <option value="">— none —</option>
+          {currentIsCustom && <option value={value ?? ''}>{value} (current)</option>}
+          {LEAD_SOURCE_OPTIONS.map(group => (
+            <optgroup key={group.group} label={group.group}>
+              {group.options.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </optgroup>
+          ))}
+          <option value="__custom__">Custom…</option>
+        </select>
+      </div>
+    )
+  }
+
+  return (
+    <div onClick={() => setEditing(true)} title="Click to change lead source" style={{ cursor: 'pointer' }}>
+      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>LEAD SOURCE</div>
+      <div style={{
+        ...baseStyle,
+        color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
+        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        paddingBottom: 1,
+        display: 'inline-block',
+        minWidth: 80,
+      }}>
+        {saved ? '✓ Saved' : (value || '—')}
       </div>
     </div>
   )
@@ -1552,7 +1698,7 @@ export function ContactRecordView(props: Props) {
                         <ContactTypeSelect value={contact.contact_type} onSave={onSaveField} />
                         <ReferredByTypeahead value={contact.referred_by} onSave={onSaveField} />
                         <ReferralTypeSelect value={contact.referral_type ?? null} onSave={onSaveField} />
-                        <EditableContactField label="Lead Source"   value={contact.lead_source ?? null}    field="lead_source"    onSave={onSaveField} />
+                        <LeadSourceSelect value={contact.lead_source ?? null} onSave={onSaveField} />
                         {contact.contact_type === 'realtor' && (
                           <>
                             <EditableContactField label="Tier (A/B/C)"  value={contact.production_tier ?? null} field="production_tier" onSave={onSaveField} />

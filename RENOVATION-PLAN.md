@@ -80,7 +80,7 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
   - Agent contacts: buyer's agent and listing agent auto-upserted as realtor contacts with contact_id linked to loan
   - 9 new Supabase columns added via migrations (borrower_birthdate, co_borrower_*, position_description, self_employed, gross/net_loan_revenue)
 - [x] Deploy and verify — deployed, READY
-- [ ] Adam reviews and confirms
+- [x] Adam reviews and confirms (2026-04-16)
 
 ### Phase 3: Follow-Up List
 **Goal:** Never miss a lead or stale borrower

@@ -31,7 +31,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 - Migration 086 (UTM cols + resend_webhook_events) + 087 (workflow_shadow_log) applied to prod Supabase
 
 - Phase 1 (strip UI to 7 tabs) — done 2026-03-30
-- Phase 2 (pipeline bulletproof + Arive sync overhaul) — done 2026-04-02
+- Phase 2 (pipeline bulletproof + Arive sync overhaul) — done 2026-04-02, Adam-confirmed 2026-04-16
 - Multi-tenancy (org-based RLS, NOT NULL hardening, org_id on all tables) — done 2026-03-25
 - UI renovation (shadcn/ui, light/dark mode, 300+ color replacements) — done 2026-04-01
 - Drip campaigns v1 (4 tables, 7 API routes, 3-level UI, n8n scheduler) — done 2026-04-02

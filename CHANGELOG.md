@@ -1,5 +1,27 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM (late-2) — Seed: remaining 5 transactional templates into automation_registry (registry now 7/7)
+
+Continuing the data-seed pass from the earlier entry today. Copied hardcoded HTML out of five n8n "Build *** Email" code nodes into `automation_registry.email_template` with `{{var}}` merge syntax. No n8n workflow changes, no runtime changes — editor at `/dashboard/automations` now renders real content for all seven transactional rows. `email_mode` flipped from `hybrid` → `fixed_template` on all five (was aspirational; none actually AI-generate).
+
+- **Final CD Email** (id `d5f67feb-19d5-4ae9-abde-08c1babe1ad9`, source `SkzrWeR0bHZs8kWX`): 4039-char template, 10 vars. **TRID 3-day framing and wire-fraud warning preserved verbatim** — no text rewriting, only `${f.xxx}` → `{{xxx}}` conversions. Currency vars render with literal `$` prefix in template (`${{cash_to_close}}`) so the dollar sign isn't lost. Signature + Google/Zillow review URLs kept as literals (matches Review Request precedent).
+- **Pre-Approval Email** (id `63f93386-878d-4a58-980d-61113d25c870`, source `utMvZpkdRwIRZ51u`): 4833-char template, 15 vars. This workflow's JS already does a live multi-tenant LO lookup (`profiles` + `organizations` + `org_settings`) with Adam as fallback — converted `{{lo_name}}`, `{{lo_phone}}`, `{{nmls}}`, `{{company_name}}`, `{{calendly_link}}`, `{{brand_header}}`, `{{lo_initials}}`, `{{lo_phone_digits}}`, `{{lo_email}}` to merge tags so runtime substitution continues the same per-org behavior.
+- **Contract Received** (id `e6fe357d-d1a0-4d00-9007-418832723cef`, source `UfNcdpoVKQZqy0fj`): 3436-char template, 5 vars. Seeded the **Borrower Welcome** email (consumer-facing, includes loan portal CTA + "Protect Your Approval" list). Hardcoded Adam signature kept as literals (workflow has no LO lookup). See Scope-Not-Done below for the Party Reply email.
+- **New Application Received** (id `3e0a9bf0-2c34-4ec2-957e-cd75c1a2e331`, source `cWESnXXy9UOLB13q`): 1065-char template, 6 vars. Hardcoded Adam signature + Calendly link kept as literals (matches n8n reality — no LO lookup in this workflow).
+- **Refi Intake Email** (id `8dc2bc70-bfa1-4a23-8b8e-5f630aef2df8`, source `yCTydQ7RfZK4DyUg`): 2301-char template, 17 vars. Multi-tenant LO lookup promoted to merge tags same as Pre-Approval. Two conditional behaviors in the JS (cash_to_close sign → `{{cash_label}}` + `{{cash_amt}}`; escrow mode → `{{escrow_row_html}}`) were factored out as pre-resolved variables documented in `email_variables` — the runtime-wiring step will compute these caller-side because `{{var}}` substitution has no conditional support. `{{processor_note}}` similarly: Adam's org gets "Janie, our processor, will reach out…"; other orgs get the generic processing-team note.
+
+**Verification:**
+
+- All 7 rows: `email_mode='fixed_template'`, non-null `email_template`, populated `email_variables` (counts: Referral Intro 13, Review Request 1, Final CD 10, Pre-Approval 15, Contract Received 5, New Application 6, Refi Intake 17).
+- Regex scan for JS interpolation leaks — `\$\{[^{]` (true interpolation, excluding the legit `${{cash_to_close}}` pattern on Final CD) returns zero hits on all 7 rows.
+- Final CD compliance spot-checks: `WIRE FRAUD WARNING` block present, ⚠️ emoji present, "before your closing on {{closing_date}}" TRID-framing present, "call the title company directly" wire-verify language present, ❌ do-not-list items all four present, NMLS# 513013 present, `45–60 minutes` en-dash preserved.
+
+**Scope NOT done this session (flagged):**
+
+- **Contract Received Party Reply email** (n8n node `Build Party Email`): the workflow produces 2 emails — the borrower welcome (seeded above) and a reply-all to transaction parties (buyer's agent, listing agent, title). `automation_registry` has a single `email_template` slot per row, so the Party Reply isn't representable today. Options for follow-up: (a) extend schema to allow `email_template_secondary` / `email_template_party_reply`, (b) create a second registry row like `Contract Received — Party Reply`, (c) leave the Party Reply as an inline-in-n8n string since the runtime-wiring task may decide whether to migrate it at all. Flagged in TODO.
+- **Subject-line storage**: templates include `{{vars}}` for body content but there's no `subject` column. Earlier audit already flagged this (2026-04-16 PM late); all 5 subjects still live in JS code nodes (e.g. Final CD: `Your Final Closing Numbers – Action Required Before ${closing_date}`). Runtime wiring will need a subject column or a `config.subject` JSONB field before it can send without touching n8n.
+- **Runtime wiring** still not done — editor edits remain read-only previews until n8n code nodes are rewritten to `HTTP GET automation_registry?name=eq.X` and substitute `{{var}}` tags. (Separate TODO, unchanged.)
+
 ## 2026-04-16 PM (late) — Seed: 2 transactional templates into automation_registry (2b''' follow-up)
 
 Low-risk seed pass — copied hardcoded HTML out of n8n JS code nodes and into `automation_registry.email_template` with `{{var}}` merge syntax. No n8n workflow changes, no runtime changes. Editor at `/dashboard/automations` now shows real content instead of empty boxes for these two rows.

@@ -106,43 +106,68 @@ export interface ContactSourceFields {
 /**
  * Classify a contact based on its source-tracking fields.
  * Returns the single best-fit category.
+ *
+ * Precedence:
+ * 1. Manual lead_source tag (Adam typed it, so it's authoritative)
+ * 2. AEO via referrer host or utm_source (AI tool signals)
+ * 3. Realtor tag in lead_source
+ * 4. Web Lead via source_page / utm_source=website
+ * 5. Social / SEO via referrer host
+ * 6. Fuzzy lead_source matching
+ * 7. Direct if no signal at all
  */
 export function classifyLeadSource(c: ContactSourceFields): LeadSourceCategory {
   const host = hostnameOf(c.referrer)
   const utmSource = (c.utm_params?.source ?? '').toLowerCase().trim()
+  const ls = (c.lead_source ?? '').toLowerCase().trim()
 
-  // AEO check runs FIRST — AI tools sometimes preserve the origin domain
-  // (e.g., a Google AI Overview links with google.com as referrer) but the
-  // utm_source tells the truth. Check both dimensions.
+  // 1. Manual tag wins — Adam (or the team) explicitly labeled this contact.
+  //    Matches exact values AND common prefixes like "AEO: ChatGPT" / "SEO: Google".
+  if (ls) {
+    if (ls === 'aeo' || ls.startsWith('aeo:') || ls.startsWith('aeo ')) return 'AEO'
+    if (ls === 'seo' || ls.startsWith('seo:') || ls.startsWith('seo ')) return 'SEO'
+    if (ls === 'social' || ls.startsWith('social:') || ls.startsWith('social ')) return 'Social'
+    if (ls === 'direct' || ls === 'bookmark' || ls === 'typed url') return 'Direct'
+    if (ls === 'web lead' || ls === 'website' || ls === 'web') return 'Web Lead'
+    // Realtor tag — also checked below as a fallback on non-exact matches
+    if (ls === 'realtor referral' || ls === 'realtor' || ls === 'agent referral') return 'Realtor Referral'
+  }
+
+  // 2. AEO check — AI tools sometimes preserve the origin domain (a Google AI
+  //    Overview link carries google.com as referrer) but utm_source tells the
+  //    truth. Check both dimensions.
   if (host && AEO_HOSTS.includes(host)) return 'AEO'
   if (utmSource && AEO_HOSTS.some(h => utmSource.includes(h.replace('www.', '')))) return 'AEO'
   if (utmSource === 'chatgpt' || utmSource === 'claude' || utmSource === 'perplexity' || utmSource === 'ai') {
     return 'AEO'
   }
 
-  // Manual realtor tag wins over channel inference
-  if (c.lead_source) {
-    const ls = c.lead_source.toLowerCase()
-    if (ls.includes('realtor') || ls.includes('agent')) return 'Realtor Referral'
-  }
+  // 3. Realtor tag via fuzzy lead_source match (e.g. "Realtor - Smith Team")
+  if (ls && (ls.includes('realtor') || ls.includes('agent'))) return 'Realtor Referral'
 
-  // Website form submissions — has a source_page or utm_source=website/site
+  // 4. Website form submissions — has a source_page or utm_source=website/site
   if (c.source_page || utmSource === 'website' || utmSource === 'site' || utmSource === 'styermortgage.com') {
     return 'Web Lead'
   }
 
+  // 5. Auto-detect from referrer host
   if (host && SOCIAL_HOSTS.includes(host)) return 'Social'
   if (host && SEARCH_HOSTS.includes(host)) return 'SEO'
 
-  // lead_source may hold a manually-entered value (e.g. "Past Client", "Friend")
-  if (c.lead_source && c.lead_source.trim()) {
-    const ls = c.lead_source.toLowerCase()
+  // 6. Fuzzy lead_source fallback (e.g. "Past Client", "Friend", "Instagram DM")
+  if (ls) {
     if (ls.includes('web') || ls.includes('website')) return 'Web Lead'
-    if (ls.includes('social') || ls.includes('instagram') || ls.includes('facebook')) return 'Social'
+    if (ls.includes('social') || ls.includes('instagram') || ls.includes('facebook') || ls.includes('linkedin')) {
+      return 'Social'
+    }
+    if (ls.includes('google') || ls.includes('bing') || ls.includes('search')) return 'SEO'
+    if (ls.includes('chatgpt') || ls.includes('claude') || ls.includes('perplexity') || ls.includes('copilot') || ls.includes('gemini')) {
+      return 'AEO'
+    }
     return 'Other'
   }
 
-  // No signal at all = typed URL or bookmark
+  // 7. No signal at all = typed URL or bookmark
   if (!host && !c.source_page && !utmSource) return 'Direct'
 
   return 'Other'

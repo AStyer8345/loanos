@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Home, RefreshCw, Copy, Trash2, Eye, Search } from 'lucide-react'
+import { Home, RefreshCw, Copy, Trash2, Eye, Search, MessageSquare } from 'lucide-react'
 
 interface ScenarioRow {
   id: string
@@ -15,10 +15,28 @@ interface ScenarioRow {
   share_token: string | null
 }
 
-export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }) {
+export default function ScenarioList({ scenarios, qaNeededCount }: { scenarios: ScenarioRow[]; qaNeededCount: number }) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [backfilling, setBackfilling] = useState(false)
+  const [backfillResult, setBackfillResult] = useState<{ processed: number; errors: number } | null>(null)
+  const [qaNeeded, setQaNeeded] = useState(qaNeededCount)
+
+  const handleBackfillQA = async () => {
+    setBackfilling(true)
+    setBackfillResult(null)
+    try {
+      const res = await fetch('/api/scenarios/backfill-qa', { method: 'POST' })
+      const data = await res.json() as { processed: number; errors: number }
+      setBackfillResult(data)
+      setQaNeeded(data.errors > 0 ? data.errors : 0)
+    } catch {
+      setBackfillResult({ processed: 0, errors: -1 })
+    } finally {
+      setBackfilling(false)
+    }
+  }
 
   const filtered = scenarios.filter(s => {
     if (!search) return true
@@ -52,6 +70,39 @@ export default function ScenarioList({ scenarios }: { scenarios: ScenarioRow[] }
 
   return (
     <div>
+      {/* Q&A Backfill Banner — only visible when scenarios are missing Q&A */}
+      {(qaNeeded > 0 || backfillResult) && (
+        <div
+          className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg mb-4"
+          style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)' }}
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquare size={14} style={{ color: '#C9A84C' }} />
+            {backfillResult ? (
+              <span className="text-xs" style={{ color: backfillResult.errors === -1 ? '#f87171' : '#C9A84C', fontFamily: "'IBM Plex Mono', monospace" }}>
+                {backfillResult.errors === -1
+                  ? 'Backfill failed — try again'
+                  : `Q&A generated for ${backfillResult.processed} scenario${backfillResult.processed !== 1 ? 's' : ''}${backfillResult.errors > 0 ? ` (${backfillResult.errors} failed)` : ' ✓'}`}
+              </span>
+            ) : (
+              <span className="text-xs" style={{ color: '#C9A84C', fontFamily: "'IBM Plex Mono', monospace" }}>
+                {qaNeeded} scenario{qaNeeded !== 1 ? 's' : ''} missing Q&A for the share page
+              </span>
+            )}
+          </div>
+          {!backfillResult && (
+            <button
+              onClick={handleBackfillQA}
+              disabled={backfilling}
+              className="px-3 py-1.5 rounded-md text-xs font-semibold transition-all disabled:opacity-50"
+              style={{ background: '#C9A84C', color: '#0a0a0a' }}
+            >
+              {backfilling ? 'Generating...' : `Generate Q&A (${qaNeeded})`}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Search */}
       <div className="relative mb-4">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--sc-muted)' }} />

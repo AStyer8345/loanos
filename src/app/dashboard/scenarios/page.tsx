@@ -16,11 +16,18 @@ export default async function ScenariosPage() {
   }
   const supabase = createClient()
 
-  const { data: scenarios } = await supabase
-    .from('scenarios')
-    .select('id, scenario_type, borrower_name, property_address, created_at, updated_at, view_count, share_token')
-    .eq('organization_id', organizationId)
-    .order('created_at', { ascending: false })
+  const [{ data: scenarios }, { count: qaNeededCount }] = await Promise.all([
+    supabase
+      .from('scenarios')
+      .select('id, scenario_type, borrower_name, property_address, created_at, updated_at, view_count, share_token')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('scenarios')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('borrower_qa', null),
+  ])
 
   return (
     <div className="min-h-screen font-sans" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Sans', sans-serif" }}>
@@ -41,7 +48,7 @@ export default async function ScenariosPage() {
           </Link>
         </div>
 
-        <ScenarioList scenarios={scenarios ?? []} />
+        <ScenarioList scenarios={scenarios ?? []} qaNeededCount={qaNeededCount ?? 0} />
       </div>
     </div>
   )

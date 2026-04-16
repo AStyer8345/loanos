@@ -1,5 +1,26 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM — Nurture content: 14 real bodies land in Workflow DevKit files (replacing stubs)
+
+Session premise in the brief asked to migrate PA Welcome + DPA Guide content out of n8n code nodes into Supabase `drip_steps`. That was based on the pre-2026-04-15 architecture. As of 2026-04-15 PM the nurture engine is **Workflow DevKit** (`src/workflows/pa-welcome-nurture.ts`, `dpa-guide-nurture.ts`), not `drip_steps`, so the migration target changed.
+
+What actually shipped this session:
+
+- **New helper** `src/lib/workflows/drip-render.ts` — `renderDripHtml(plain, vars)` merges `{{first_name}}`-style tags, escapes HTML, wraps paragraphs in `<p>`, single newlines → `<br>`, bare URLs → `<a>`. Keeps bodies authored as plain text in-file.
+- **`pa-welcome-nurture.ts`** — replaced the `<p>${subjects[i]}</p>` stub body with an `EMAILS: Array<{ subject, plain }>` of 6 authored entries. Subjects swapped to the more specific variants from the brief. Schedule unchanged: `[0, 3, 7, 14, 30, 60]` (matches brief exactly).
+- **`dpa-guide-nurture.ts`** — same pattern, 8 entries. Schedule kept at shipped `[0, 2, 5, 10, 17, 25, 38, 52]`; brief proposed day 7 at index 2 (instead of day 5), but moving the schedule would reschedule in-flight enrollments, so left alone. Noted inline.
+- BUILD: ✅ PASS locally.
+
+What the brief asked for but we did NOT do, and why:
+
+- **Did not seed PA/DPA into `drip_campaigns`/`drip_steps`.** Those tables hold 6 different campaigns (Ghost Referral, Incomplete App, Went Quiet, Long-Term Nurture, Past Client Retention, Realtor Relationships). Duplicating PA/DPA into them would cause double sends.
+- **Did not add `drip_steps.subject` column.** Not needed — the 6 campaigns still generate subjects via Claude from skeleton; PA/DPA live in Workflow DevKit with subjects in-code.
+- **Did not add `org_settings.resend_from_email`/`resend_reply_to`.** Single-org today; FROM is `RESEND_FROM_ADDRESS` env var in `sendViaResend`. Revisit when LO #2 onboards.
+- **Did not wire a second PA email → enrollment path.** `pre-approval-email.ts` Workflow DevKit already triggers `paWelcomeNurture`. Adding an n8n-side `INSERT INTO drip_enrollments` on the old flow would double-enroll.
+- **Did not deactivate `rwi3qEYgJKGGHkHc` + `0M8Vnf6MhB1xtaIg`.** CONTEXT.md cutover plan deactivates these *after* 7-day shadow-mode parity review. `WORKFLOW_DEVKIT_LEAD_INTAKE` is still `off` (needs flip to `shadow` by Adam first).
+- **Did not populate transactional templates into `automation_registry`.** Columns exist (`email_template`, `email_mode`, `email_variables`), but `/dashboard/automations` currently reads `email_mode` only for a handful (Pre-Approval, Final CD, Contract Received, New Application Received, Refi Intake all marked `hybrid`; Referral Intro + Review Request marked `ai_generated`). Populating template content requires confirming what the dashboard does with it and whether Workflow DevKit will read from there or stay inline — not scoped this session. Flagged in TODO.
+- **Did not retarget n8n Drip Scheduler `LqBb3YDLjS2eUrDE` to Resend.** Outlook node is effectively dead (Graph removed), but `drip_enrollments` is empty and `drip_sends` had 0 rows in the last 30 days — zero active traffic. A 12-node SDK rewrite via n8n MCP is real risk for zero current value. Flagged in TODO for when enrollment is turned on.
+
 ## 2026-04-16 AM — Scenarios: Tier 6 — Backfill Q&A for existing scenarios
 
 - Extracted Q&A generation logic from generate-qa route into `src/lib/scenarios/generateQAPairs.ts` (shared utility; no behavior change to existing route)

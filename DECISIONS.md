@@ -1,5 +1,15 @@
 # LoanOS — Architecture Decisions
 
+## [2026-04-16] — Nurture Content: In-File in Workflow DevKit, Not drip_steps
+
+**Chose:** PA Welcome + DPA Guide bodies + subjects live as literal arrays inside `src/workflows/pa-welcome-nurture.ts` and `dpa-guide-nurture.ts`. A small helper (`renderDripHtml`) converts plain text + `{{var}}` tags to HTML at send time.
+
+**Over:** Migrating content into Supabase `drip_steps` rows with a scheduler that reads them at runtime (the pre-2026-04-15 architecture, and what an incoming session brief on 2026-04-16 proposed).
+
+**Why:** PA + DPA moved off `drip_steps` on 2026-04-15 PM when the Workflow DevKit cut-over landed. Moving them back into `drip_steps` would (a) duplicate content against live Workflow DevKit workflows and risk double-sends, (b) require building a new scheduler around `drip_steps` for just these two flows while the existing scheduler serves 6 unrelated campaigns, and (c) undo 24 hours of shipped work whose main value is step-level durability (`"use step"` checkpoints, `createHook` for webhook-driven resumes, exit-rule re-evaluation on every wake). Plain-text in-file authoring preserves that durability while giving Adam full editability via the normal code path.
+
+**Trade-off accepted:** Non-developer LOs in Phase 4 can't edit body copy without opening TypeScript. Acceptable because (a) only Adam is in production through May 1, and (b) the `/dashboard/automations` editor (reads `automation_registry`) remains the long-term surface for Phase 4 — we'll route Workflow DevKit through it then, not now.
+
 ## [2026-04-05] — Arive Integration: Zapier Middleman
 
 **Chose:** Each LO runs their own Zapier ($20/mo) that enriches Arive's thin webhook ping and POSTs to LoanOS with a per-org shared secret.

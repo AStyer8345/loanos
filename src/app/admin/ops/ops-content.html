@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoanOS Ops</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+  :root {
+    --bg:#0d0f14;--surface:#13161e;--surface2:#1a1e28;--border:#252a38;--border2:#2e3448;
+    --text:#e2e8f4;--muted:#6b7594;--dim:#3d4560;
+    --green:#3dffa0;--green-bg:#0a2018;--green-bd:#1a4d35;
+    --blue:#5ca8ff;--blue-bg:#0a1828;--blue-bd:#1a3a5c;
+    --purple:#b48eff;--purple-bg:#150f28;--purple-bd:#3a2a5c;
+    --orange:#ff9a3d;--orange-bg:#1a0e00;--orange-bd:#4d2a00;
+    --cyan:#3ddfff;--cyan-bg:#001a1f;--cyan-bd:#004d5c;
+    --red:#ff5c5c;--red-bg:#1a0a0a;--red-bd:#4d1a1a;
+    --yellow:#ffd93d;--yellow-bg:#1a1400;--yellow-bd:#4d3d00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.6;padding-bottom:60px;max-width:100%;overflow-x:hidden}
+
+  /* ── TOP NAV ── */
+  nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;display:flex;align-items:stretch}
+  .nav-title{padding:0 14px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);flex-shrink:0}
+  .nav-title-text{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--text)}
+  .nav-title-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim)}
+  .nav-tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1}
+  .nav-tab{padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;transition:color .15s,border-color .15s}
+  .nav-tab.active{color:var(--text);border-bottom-color:var(--green)}
+  .nav-tab:hover:not(.active){color:var(--text)}
+
+  /* ── PAGES ── */
+  .page{display:none;padding:14px}
+  .page.active{display:block}
+
+  /* ── SHARED COMPONENTS ── */
+  .page-header{margin-bottom:14px}
+  .page-title{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--text)}
+  .page-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px}
+
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 0 8px;border-top:1px solid var(--border);margin-top:4px}
+  .section-label:first-of-type{border-top:none;padding-top:0}
+
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;white-space:nowrap}
+  .badge-on{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .badge-off{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+
+  .note{display:flex;gap:8px;padding:8px 10px;border-radius:4px;margin-bottom:8px;align-items:flex-start}
+  .note-y{background:var(--yellow-bg);border:1px solid var(--yellow-bd)}
+  .note-r{background:var(--red-bg);border:1px solid var(--red-bd)}
+  .note-b{background:var(--blue-bg);border:1px solid var(--blue-bd)}
+  .note-icon{font-size:11px;flex-shrink:0;margin-top:1px}
+  .note-text{font-size:11px;line-height:1.5}
+  .note-y .note-text{color:#a89030}.note-y .note-text strong{color:var(--yellow)}
+  .note-r .note-text{color:#a04040}.note-r .note-text strong{color:var(--red)}
+  .note-b .note-text{color:#4080a0}.note-b .note-text strong{color:var(--blue)}
+
+  /* ── MAP CARDS ── */
+  .map-card{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px}
+  .map-head{padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+  .map-stripe{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:16px}
+  .map-head-info{flex:1;min-width:0}
+  .map-name{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;line-height:1.3;color:var(--text);margin-bottom:2px}
+  .map-meta{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.4}
+  .map-body{background:#111420;padding:8px 12px}
+  .map-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #1a1e28;align-items:flex-start}
+  .map-row:last-child{border-bottom:none}
+  .map-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);width:16px;flex-shrink:0;padding-top:1px}
+  .map-txt{font-size:12px;color:#b0bcd4;flex:1;min-width:0;word-break:break-word}
+  .map-txt code{font-family:'IBM Plex Mono',monospace;font-size:10px;background:#1e2330;padding:1px 4px;border-radius:3px;color:var(--cyan)}
+  .map-warn{display:flex;gap:8px;padding:6px 8px;margin-top:6px;border-radius:4px;align-items:flex-start}
+  .mw-y{background:var(--yellow-bg);border:1px solid var(--yellow-bd)}
+  .mw-r{background:var(--red-bg);border:1px solid var(--red-bd)}
+  .mw-icon{font-size:11px;flex-shrink:0;margin-top:1px}
+  .mw-text{font-size:11px;line-height:1.5}
+  .mw-y .mw-text{color:#a89030}.mw-y .mw-text strong{color:var(--yellow)}
+  .mw-r .mw-text{color:#a04040}.mw-r .mw-text strong{color:var(--red)}
+
+  /* ── EMAIL CARDS ── */
+  .email-card{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px}
+  .email-head{padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;cursor:pointer;user-select:none}
+  .email-head:active{background:var(--surface2)}
+  .day-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;flex-shrink:0;margin-top:1px;white-space:nowrap}
+  .email-info{flex:1;min-width:0}
+  .email-subject{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px;word-break:break-word}
+  .email-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+  .toggle{color:var(--dim);font-size:11px;flex-shrink:0;margin-top:3px;transition:transform .2s}
+  .email-card.open .toggle{transform:rotate(180deg)}
+  .email-body{display:none;padding:12px;background:#0f1118}
+  .email-card.open .email-body{display:block}
+  .meta-row{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  .email-text{font-size:12px;color:#c0cce0;line-height:1.8;white-space:pre-wrap;font-family:'IBM Plex Sans',sans-serif;border-left:2px solid var(--border);padding-left:12px;word-break:break-word}
+
+  /* ── SEQ HEADER ── */
+  .seq-hdr{margin-bottom:12px;padding:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface)}
+  .seq-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .seq-meta{font-size:11px;color:var(--muted);line-height:1.6}
+  .seq-tl{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .tl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .tl-step{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:4px}
+  .tl-arr{color:var(--dim);font-size:9px}
+
+  /* ── ACTION ITEMS ── */
+  .action-block{border-radius:6px;padding:12px 14px;border:1px solid var(--yellow-bd);background:var(--yellow-bg);margin-bottom:8px}
+  .action-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--yellow);letter-spacing:.08em;margin-bottom:8px}
+  .action-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #2a2200;align-items:flex-start}
+  .action-row:last-child{border-bottom:none}
+  .action-num{color:var(--yellow);font-size:11px;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-weight:600}
+  .action-txt{font-size:12px;color:#8a7820;line-height:1.5}
+  .action-txt strong{color:var(--yellow)}
+
+  footer{margin:24px 14px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.06em;padding-top:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-title">
+    <div>
+      <div class="nav-title-text">LOANOS OPS</div>
+      <div class="nav-title-sub">2026-04-16</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('map', this)">SYSTEM MAP</div>
+    <div class="nav-tab" onclick="showPage('web', this)">WEBSITE EMAILS</div>
+    <div class="nav-tab" onclick="showPage('pa', this)">PA NURTURE</div>
+    <div class="nav-tab" onclick="showPage('dpa', this)">DPA NURTURE</div>
+    <div class="nav-tab" onclick="showPage('actions', this)">⚠ ACTION ITEMS</div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE: SYSTEM MAP -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page active" id="page-map">
+  <div class="page-header">
+    <div class="page-title">System Map — Every Entry Point → What Fires Downstream</div>
+    <div class="page-sub">33 n8n workflows (29 active, 4 inactive) // 54 Supabase tables // LoanOS v8.1.9</div>
+  </div>
+
+  <div class="note note-b" style="margin-bottom:14px">
+    <div class="note-icon">ℹ</div>
+    <div class="note-text"><strong>Re-audited 2026-04-16 PM.</strong> Counts verified via live n8n + Supabase. Since original doc: Set Rate webhook (3iXImUkjgMitpJKt) was fully repaired today (from_address/subject removed, Validate Rate return-format bug fixed — curl-to-webhook writes clean rows again). automation_registry seeded to 8/8 with subject_template column + new Contract Received — Party Reply row. DPA PDF verified present. 4 active workflows not shown below: Generic Outlook Draft (eb9UsV5Z6odh7Yex), Lender Email Ingest (hHXpKUirhnBCnQTO), LO Waitlist Intake (Rn6rtlKeoQ0CrUkb), Rancho Stuck Events Audit (kCS88EjWlP7R6yXm).</div>
+  </div>
+
+  <div class="section-label">Website Entry Points</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--green)"></div>
+      <div class="map-head-info"><div class="map-name">Website Contact Form</div><div class="map-meta">styermortgage.com → Netlify → POST /webhook/web-lead</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Parse name, phone, email, loan_goal, credit score, price, down payment</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Alert email → <code>adam@thestyerteam.com</code> via Outlook (plain text, instantly)</div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Confirmation email → borrower via Outlook (if email provided, instantly)</div></div>
+      <div class="map-row"><div class="map-num">4</div><div class="map-txt">Create contact in LoanOS via <code>/api/contacts/web-lead</code> — stage: Lead, source: Website</div></div>
+      <div class="map-row"><div class="map-num">✗</div><div class="map-txt" style="color:var(--muted)">No nurture sequence fires. Lead goes cold after 2 emails unless you manually follow up.</div></div>
+      <div class="map-warn mw-y"><div class="mw-icon">⚠</div><div class="mw-text"><strong>Two systems live simultaneously.</strong> n8n is firing. LoanOS shadow-mode logs only. n8n is system of record right now.</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--green)"></div>
+      <div class="map-head-info"><div class="map-name">FTB Guide Download</div><div class="map-meta">styermortgage.com → n8n: yTkiV6pf2eZaJw82</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Welcome email → subscriber via Outlook</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Mailchimp tags: <code>web-lead</code> + loan type</div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Notify Adam via email</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--green)"></div>
+      <div class="map-head-info"><div class="map-name">Pre-Approval Funnel Form</div><div class="map-meta">Landing page → n8n: J9Pe24vUi6fpZtdZ</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Mailchimp tags: <code>web-lead</code> + loan type</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Email notification → Adam</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--green)"></div>
+      <div class="map-head-info"><div class="map-name">Rate Check Form</div><div class="map-meta">styermortgage.com → n8n: Pf1zWuKAnD4SznSR (built Apr 12)</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">—</div><div class="map-txt">No description set. Outputs unknown. Needs review.</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Arive LOS Webhooks</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--blue)"></div>
+      <div class="map-head-info"><div class="map-name">New Loan Created in Arive</div><div class="map-meta">Arive → n8n: 1tagvoU0UXtdDiMY</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Upsert borrower, buyer agent, listing agent → Supabase <code>contacts</code></div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Create/update loan record → Supabase <code>loans</code></div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Log → <code>activity_log</code></div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--blue)"></div>
+      <div class="map-head-info"><div class="map-name">Arive Status Update</div><div class="map-meta">Arive → n8n: 9JyzzwKac8v3uQ7d</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Update loan status + upsert agents → Supabase</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">If funded → sync contact record</div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Log → <code>activity_log</code></div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Manual Triggers</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"New App" / Application Received</div><div class="map-meta">Manual → n8n: cWESnXXy9UOLB13q</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Log borrower info → Supabase</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Notify Adam via Outlook + initiate intake</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"Contract Received"</div><div class="map-meta">PDF upload → n8n: UfNcdpoVKQZqy0fj</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Extract fields from PDF → log to Supabase</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Reply-all email → agents, title, TCs via Outlook</div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Borrower welcome email + Arive data entry checklist</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"PA Email" → triggers PA Welcome Nurture</div><div class="map-meta">PA letter PDF → n8n: utMvZpkdRwIRZ51u → fires rwi3qEYgJKGGHkHc</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Extract fields, populate template → Outlook draft</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Triggers PA Welcome Nurture → 6 emails over 60 days via Resend</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"Referral Intro Email"</div><div class="map-meta">Manual → n8n: YbgDnTpPdefcazKy</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Check <code>email_opt_out</code> — stop if opted out</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Populate referral intro template → Outlook draft</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"CD Email" / Final Closing Disclosure</div><div class="map-meta">CD PDF → n8n: SkzrWeR0bHZs8kWX</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Extract 10 fields from CD PDF → populate template → Outlook draft + pre-send checklist</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">"Refi Intake Email"</div><div class="map-meta">IFW PDF → n8n: yCTydQ7RfZK4DyUg</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Extract IFW fields → multi-tenant email with LO identity lookup → Outlook draft + log Supabase</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--red)"></div>
+      <div class="map-head-info"><div class="map-name">"Send Review Email" — Post-Closing</div><div class="map-meta">n8n: AK1fBcaX1cPcdlGx</div></div>
+      <div class="badge badge-off">INACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-warn mw-r"><div class="mw-icon">✕</div><div class="mw-text"><strong>Off and shouldn't be.</strong> Google + Zillow review request post-closing. Turn it on.</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--red)"></div>
+      <div class="map-head-info"><div class="map-name">Post-Calendly Booking Automation</div><div class="map-meta">n8n: PBu2Zt0YpiLHeqbL — built Apr 13, 0 executions</div></div>
+      <div class="badge badge-off">INACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-warn mw-r"><div class="mw-icon">✕</div><div class="mw-text"><strong>Built, never activated, not in MCP.</strong> Turn on or delete.</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Scheduled / Polling</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--cyan)"></div>
+      <div class="map-head-info"><div class="map-name">Inbound Email → Supabase Log</div><div class="map-meta">Polls Outlook every 5 min → n8n: qgb99Eh2ziy0INMk</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Match email → contact + loan (4 fallback strategies) → log <code>activity_log</code></div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--cyan)"></div>
+      <div class="map-head-info"><div class="map-name">Outlook CD &amp; Contract Extractor</div><div class="map-meta">Scheduled → n8n: HkLjsnnhT5MgrX5H</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Search Outlook for CDs + contracts → match to loan → upload Supabase Storage</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--orange)"></div>
+      <div class="map-head-info"><div class="map-name">Drip Email Scheduler</div><div class="map-meta">Runs hourly → n8n: LqBb3YDLjS2eUrDE</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Query <code>drip_enrollments</code> for due sends → send via Outlook → update status</div></div>
+      <div class="map-warn mw-y"><div class="mw-icon">⚠</div><div class="mw-text"><strong>drip_enrollments: 0 rows.</strong> Scheduler runs hourly but nobody is enrolled. Silent failure.</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--orange)"></div>
+      <div class="map-head-info"><div class="map-name">iMessage → Supabase Log</div><div class="map-meta">Local Mac script → webhook → n8n: nccX5ml82mMGyE9T</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Match sender phone → contacts/loans → log <code>activity_log</code></div></div>
+      <div class="map-warn mw-y"><div class="mw-icon">⚠</div><div class="mw-text"><strong>Requires local Mac script to be running.</strong> Fails silently if Mac sleeps or script dies.</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Refi Watch Suite</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--purple)"></div>
+      <div class="map-head-info"><div class="map-name">Set Rate (manual) → Rate Drop Alert + Anniversary Check-In (scheduled)</div><div class="map-meta">n8n: 3iXImUkjgMitpJKt / iyKFy0ODkyyqQaAS / ZUeGy8u8P4o6DPM3</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Set watch rate threshold for past borrower in Supabase</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Scheduled check compares current rates → alert email when below threshold</div></div>
+      <div class="map-row"><div class="map-num">3</div><div class="map-txt">Annual anniversary check-in email on loan anniversary</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--red)"></div>
+      <div class="map-head-info"><div class="map-name">Pre-Drop Warm-Up + Quarterly Review</div><div class="map-meta">n8n: W0K4YDzkZd0Hzv6g / LfLSDgqgb6yCe93C — 0 executions each</div></div>
+      <div class="badge badge-off">INACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-warn mw-r"><div class="mw-icon">✕</div><div class="mw-text">Both inactive, never run. Intentional or forgotten?</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Social / Rancho Moonrise</div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--orange)"></div>
+      <div class="map-head-info"><div class="map-name">Weekly GBP + Social Post / Weekly Testimonial</div><div class="map-meta">n8n: V6RhmJpOb7pOzMte / eJG4wckrj6SmSpm1</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Generate weekly GBP post + social content → publish via Publer</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Generate client testimonial post via Gemini → publish via Publer</div></div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-head">
+      <div class="map-stripe" style="background:var(--orange)"></div>
+      <div class="map-head-info"><div class="map-name">Rancho Moonrise — Blog → GBP / GBP Event Sync</div><div class="map-meta">n8n: s5JWQMZgKWOsyqZ7 / QYxXYLx5WgKI9393</div></div>
+      <div class="badge badge-on">ACTIVE</div>
+    </div>
+    <div class="map-body">
+      <div class="map-row"><div class="map-num">1</div><div class="map-txt">Blog post → Rancho Moonrise GBP (scheduled)</div></div>
+      <div class="map-row"><div class="map-num">2</div><div class="map-txt">Sync events from <code>rancho_events</code> (13 rows) → GBP</div></div>
+    </div>
+  </div>
+
+</div><!-- end map page -->
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE: WEBSITE EMAILS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-web">
+  <div class="page-header">
+    <div class="page-title">Website Form Emails — Immediate Sends</div>
+    <div class="page-sub">Fires when someone submits the contact form on styermortgage.com // via Outlook</div>
+  </div>
+
+  <div class="seq-hdr">
+    <div class="seq-title">LoanOS — Web Lead Automation (n8n: PiuIsQpBuydtFM4m)</div>
+    <div class="seq-meta">
+      Trigger: POST to /webhook/web-lead from Netlify form<br>
+      Fires: 2 emails instantly + creates LoanOS contact<br>
+      Gap: No nurture sequence fires after this. Lead goes cold.
+    </div>
+    <div class="seq-tl">
+      <div class="tl-step"><div class="tl-dot" style="background:var(--cyan)"></div>Form submitted</div>
+      <div class="tl-arr">→ instantly →</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--orange)"></div>Alert to Adam</div>
+      <div class="tl-arr">+</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--blue)"></div>Confirmation to lead</div>
+      <div class="tl-arr">+</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Contact in LoanOS</div>
+    </div>
+  </div>
+
+  <div class="note note-y">
+    <div class="note-icon">⚠</div>
+    <div class="note-text"><strong>After these two emails, nothing else fires automatically.</strong> Website leads with loan_goal = purchase or first-time-buyer could roll into a nurture sequence but that connection hasn't been built yet.</div>
+  </div>
+
+  <div class="email-card" id="web-1">
+    <div class="email-head" onclick="toggle('web-1')">
+      <div class="day-badge" style="background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd)">INSTANT</div>
+      <div class="email-info">
+        <div class="email-subject">New Lead — [Full Name] ([Loan Type])</div>
+        <div class="email-label">Alert to Adam → adam@thestyerteam.com</div>
+      </div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row">
+        <div class="chip">To: adam@thestyerteam.com</div>
+        <div class="chip">Format: plain text</div>
+        <div class="chip">Via: Outlook</div>
+      </div>
+      <div class="note note-b" style="margin-bottom:10px">
+        <div class="note-icon">ℹ</div>
+        <div class="note-text">Dynamically built — only populated fields appear. purchase_price, down_payment, home_value, goals, situation only show if the person filled them in.</div>
+      </div>
+      <div class="email-text">Subject: New Lead — [Full Name] ([loan_type])
+
+New Lead — styermortgage.com
+
+Name:    [First Last]
+Phone:   [phone]
+Email:   [email]
+Type:    [loan_type]
+Credit:  [credit_score_range]
+
+[Only if filled in:]
+Price:       [purchase_price]
+Down:        [down_payment]
+Balance:     [current_balance]
+Home Value:  [home_value]
+Goals:       [goals]
+Notes:       [situation]
+
+Submitted: [date/time, Chicago timezone]</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="web-2">
+    <div class="email-head" onclick="toggle('web-2')">
+      <div class="day-badge" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)">INSTANT</div>
+      <div class="email-info">
+        <div class="email-subject">Got your info — Adam Styer Mortgage</div>
+        <div class="email-label">Confirmation to lead → borrower's email (only if email provided)</div>
+      </div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row">
+        <div class="chip">To: borrower email</div>
+        <div class="chip">Format: HTML</div>
+        <div class="chip">Via: Outlook</div>
+        <div class="chip">Only fires if email was provided</div>
+      </div>
+      <div class="email-text">Subject: Got your info — Adam Styer Mortgage
+
+Hey [first_name],
+
+Got your inquiry — I'm reviewing your information personally and will be in touch shortly to walk through your options.
+
+In a hurry? Call or text me directly:
+(512) 956-6010
+
+Or pick a time on my calendar:
+Schedule a 15-Min Call → calendly.com/adamstyer/15minutes
+
+Talk soon,
+Adam Styer
+Mortgage Solutions LP | NMLS #513013
+(512) 956-6010 | adam@thestyerteam.com
+
+———
+Mortgage Solutions LP | NMLS #2526130 | Licensed Mortgage Broker in Texas
+5718 Sam Houston Circle, Austin TX 78731</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE: PA NURTURE -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-pa">
+  <div class="page-header">
+    <div class="page-title">PA Welcome Nurture — 6 Emails / 60 Days</div>
+    <div class="page-sub">Triggered when PA Email workflow fires // Sends via Resend</div>
+  </div>
+
+  <div class="seq-hdr">
+    <div class="seq-title">LoanOS — PA Welcome Nurture (n8n: rwi3qEYgJKGGHkHc)</div>
+    <div class="seq-meta">
+      Trigger: PA Email workflow fires (borrower just got pre-approved)<br>
+      From: adam@mail.thestyerteam.com / Reply-to: adam@thestyerteam.com
+    </div>
+    <div class="seq-tl">
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 0</div>
+      <div class="tl-arr">→3d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 3</div>
+      <div class="tl-arr">→4d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 7</div>
+      <div class="tl-arr">→7d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 14</div>
+      <div class="tl-arr">→16d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 30</div>
+      <div class="tl-arr">→30d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--green)"></div>Day 60</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-1">
+    <div class="email-head" onclick="toggle('pa-1')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 0</div>
+      <div class="email-info"><div class="email-subject">Your pre-approval request is in — here's what happens next</div><div class="email-label">Email 1 — Welcome</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Got it. Your request is in front of me right now.
+
+I'll personally review your info today — no call center, no handoff. If everything looks good, you'll have a pre-approval letter in 24-48 hours.
+
+A few things worth knowing:
+
+I work for you, not a bank. I'm an independent broker with access to 40+ wholesale lenders — I shop your loan across all of them.
+
+Your credit isn't getting hammered. Multiple mortgage inquiries inside a 45-day window count as one hit.
+
+Reply to this email or book 15 minutes: https://calendly.com/adamstyer/15minutes
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-2">
+    <div class="email-head" onclick="toggle('pa-2')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 3</div>
+      <div class="email-info"><div class="email-subject">What "pre-approved" actually means (most buyers get this wrong)</div><div class="email-label">Email 2 — Education</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Quick thing worth understanding before you start making offers.
+
+Pre-qualification is a guess. You tell a lender what you make. No documents verified. Worth almost nothing to a seller.
+
+Pre-approval is a commitment. I've verified your income, confirmed your assets, pulled credit, run it through real underwriting. In Austin's market, that difference decides who wins the house.
+
+If you haven't finished your application, now's the time: https://mslp.my1003app.com/513013/register
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-3">
+    <div class="email-head" onclick="toggle('pa-3')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 7</div>
+      <div class="email-info"><div class="email-subject">The 3 things that kill a mortgage approval</div><div class="email-label">Email 3 — Deal Killers</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Every deal I've ever lost came from one of these three things.
+
+1. Credit score drops mid-process. Don't open new credit cards. Don't finance furniture. Don't close old accounts.
+
+2. New debt before closing. Financing a car or using a new card heavily changes your DTI. Your loan is priced around your DTI at application.
+
+3. Job changes. Even a promotion can trigger re-verification. If a job change is coming, tell me now.
+
+Pay bills on time. Keep accounts open. Keep employment steady. Send documents fast.
+
+Questions? https://calendly.com/adamstyer/15minutes
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-4">
+    <div class="email-head" onclick="toggle('pa-4')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 14</div>
+      <div class="email-info"><div class="email-subject">Austin market update: what rates look like right now</div><div class="email-label">Email 4 — Rate Update</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+The question I get constantly: should I lock now or wait?
+
+Three questions I ask every client:
+
+1. How close is your closing date? Within 30 days — lock.
+2. Can you absorb a quarter-point move up? If not, lock early.
+3. What's your "good enough" rate? If today's payment works, that's the rate.
+
+Most loan programs offer float-down options if rates drop significantly after your lock.
+
+Want today's actual rates for your scenario? Just reply.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-5">
+    <div class="email-head" onclick="toggle('pa-5')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 30</div>
+      <div class="email-info"><div class="email-subject">A buyer just like you closed last month</div><div class="email-label">Email 5 — Client Story</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Want to tell you about a client who closed last month.
+
+First-time buyers. Couple in early 30s. $165K combined income. Credit in the 720s. Got pre-approved on Tuesday. Wednesday they put an offer on a house in Pflugerville against 3 other buyers.
+
+Why they won: real pre-approval letter the listing agent recognized. 21-day fast close. Pre-planned appraisal gap strategy so no panic when it came in $8K short.
+
+Got keys 21 days after that Tuesday pre-approval.
+
+The playbook is repeatable: real pre-approval, clean offer, fast close, no surprises.
+
+Ready to finish your application? https://mslp.my1003app.com/513013/register
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="pa-6">
+    <div class="email-head" onclick="toggle('pa-6')">
+      <div class="day-badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">DAY 60</div>
+      <div class="email-info"><div class="email-subject">Still thinking about it? Here's what's changed</div><div class="email-label">Email 6 — Re-Engagement</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+It's been two months. No judgment — life happens.
+
+Quick reset on what's changed:
+
+Rates have moved. What your payment looked like two months ago may not match today.
+
+First-time buyer programs (TSAHC, TDHCA, Travis County) refund on a rolling basis. What wasn't available then may be now.
+
+Austin has more inventory than last year. Sellers are negotiating more.
+
+If buying isn't in the cards anymore, reply and tell me to quit bothering you.
+
+If you're on the fence, 15 minutes re-baselines everything: https://calendly.com/adamstyer/15minutes
+
+Adam</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE: DPA NURTURE -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-dpa">
+  <div class="page-header">
+    <div class="page-title">DPA Guide Nurture — 8 Emails / 52 Days</div>
+    <div class="page-sub">Triggered when someone downloads the DPA guide // Sends via Resend</div>
+  </div>
+
+  <div class="seq-hdr">
+    <div class="seq-title">LoanOS — DPA Guide Nurture (n8n: 0M8Vnf6MhB1xtaIg)</div>
+    <div class="seq-meta">
+      Trigger: DPA guide download form on styermortgage.com<br>
+      From: adam@mail.thestyerteam.com / Reply-to: adam@thestyerteam.com
+    </div>
+    <div class="seq-tl">
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 0</div>
+      <div class="tl-arr">→2d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 2</div>
+      <div class="tl-arr">→3d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 5</div>
+      <div class="tl-arr">→5d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 10</div>
+      <div class="tl-arr">→7d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 17</div>
+      <div class="tl-arr">→8d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 25</div>
+      <div class="tl-arr">→13d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 38</div>
+      <div class="tl-arr">→14d→</div>
+      <div class="tl-step"><div class="tl-dot" style="background:var(--purple)"></div>Day 52</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-1">
+    <div class="email-head" onclick="toggle('dpa-1')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 0</div>
+      <div class="email-info"><div class="email-subject">Your Austin DPA guide is here (read this first)</div><div class="email-label">Email 1 — Guide Delivery</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="note note-y" style="margin-bottom:10px"><div class="note-icon">⚠</div><div class="note-text"><strong>Links to:</strong> styermortgage.com/austin-dpa-guide.pdf — verify this PDF exists on your site.</div></div>
+      <div class="email-text">Hi [first_name],
+
+Your guide: https://styermortgage.com/austin-dpa-guide.pdf
+
+Read page 1 before anything else — it covers the 3 mistakes most buyers make with DPA programs.
+
+Quick context: Austin has more down payment assistance programs than almost any Texas city. Most buyers miss them because their loan officer doesn't know the programs or won't take the time to layer them.
+
+I've been doing DPA loans in Austin since 2017. I know which programs actually work, which ones are paperwork for nothing, and how to stack them for max benefit.
+
+Questions as you read? Reply to this email — goes straight to me.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-2">
+    <div class="email-head" onclick="toggle('dpa-2')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 2</div>
+      <div class="email-info"><div class="email-subject">The 4 Austin DPA programs you should actually care about</div><div class="email-label">Email 2 — Program Breakdown</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Quick breakdown of what's worth your time:
+
+1. TSAHC (Texas State Affordable Housing Corp) — grants 3-5% of loan amount, no repayment required. Best for buyers at or below 80% AMI.
+
+2. TDHCA My First Texas Home — 5% second lien, forgivable after 3 years. Pairs well with TSAHC for maximum assistance.
+
+3. Travis County HOME Program — up to $40K for Travis County homes, forgivable after 10 years. Income caps apply.
+
+4. City of Austin SMART Housing — waives fees and offers DPA for homes in approved developments.
+
+These stack. I've closed buyers who got $55K in combined assistance. Not hypothetical — actual closings.
+
+Want to know which you qualify for? Reply with your income range and target area.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-3">
+    <div class="email-head" onclick="toggle('dpa-3')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 5</div>
+      <div class="email-info"><div class="email-subject">"But won't DPA hurt my offer?" (the short answer: no, if done right)</div><div class="email-label">Email 3 — DPA Myth</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Biggest myth about DPA: that it makes your offer weaker.
+
+Here's the truth. Listing agents don't care where your down payment comes from — they care whether you'll close on time.
+
+The problems happen when:
+- The buyer's lender doesn't know the DPA program mechanics
+- DPA funds take 30+ days to approve, missing the close date
+- The second-lien structure trips up title
+
+I've closed 100+ DPA loans. I know the timelines for each program, which title companies handle the second liens cleanly, and how to structure offers so the seller doesn't flinch.
+
+If your offer is clean and the close date is realistic, DPA is invisible to the seller.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-4">
+    <div class="email-head" onclick="toggle('dpa-4')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 10</div>
+      <div class="email-info"><div class="email-subject">A real DPA buyer story (name changed, numbers real)</div><div class="email-label">Email 4 — Client Story</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Meet "Jessica." Single mom, RN, target price $320K in Manor.
+
+She thought she needed 3-5% down — roughly $10-16K saved. She had $4K.
+
+We stacked TSAHC (4% grant = $12,800) with TDHCA second lien (5% = $16,000 forgivable). Total assistance: $28,800.
+
+She closed in 28 days. Out-of-pocket costs: $3,200 — earnest money + inspections.
+
+Her monthly payment: $2,340 all-in (principal, interest, taxes, insurance, PMI). She was paying $2,100 rent.
+
+$240/month more gets her a house she owns, building equity, with a fixed payment she can control.
+
+This is what DPA done right looks like.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-5">
+    <div class="email-head" onclick="toggle('dpa-5')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 17</div>
+      <div class="email-info"><div class="email-subject">Income limits: here's the Austin DPA math</div><div class="email-label">Email 5 — Income Limits</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Most DPA programs have income caps. In Austin, the 2026 numbers:
+
+TSAHC (Home Sweet Texas): household income up to 115% of Travis County AMI = $112K single-earner, $128K two-earner (rough).
+
+TDHCA My First Texas Home: same structure, 115% AMI.
+
+Travis County HOME: 80% AMI — stricter. Roughly $78K single.
+
+City of Austin programs: vary by program.
+
+If you're over these numbers, the conventional layered options (HomeReady, Home Possible) may still work with smaller DPA amounts.
+
+Not sure where you fall? Send me a rough income and I'll tell you which programs are open to you.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-6">
+    <div class="email-head" onclick="toggle('dpa-6')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 25</div>
+      <div class="email-info"><div class="email-subject">The application order matters (most loan officers get this wrong)</div><div class="email-label">Email 6 — Process Order</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Here's a mistake I see constantly: DPA applied LAST, after the mortgage is locked.
+
+Doesn't work. Most DPA programs need to be factored into the loan structure upfront — they affect debt-to-income calculations, second-lien positioning, and sometimes the loan program itself.
+
+Correct order:
+1. Pre-qualify with full income/credit data
+2. Identify DPA programs you qualify for
+3. Structure loan with DPA factored in (affects DTI, CLTV, program)
+4. Get pre-approval letter showing DPA layered
+5. Shop for homes within that pre-approval
+
+If you've been pre-approved without DPA factored in, it may need to be re-underwritten. Worth the hassle.
+
+Reply if you've already been pre-approved elsewhere — I can review whether DPA would improve your position.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-7">
+    <div class="email-head" onclick="toggle('dpa-7')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 38</div>
+      <div class="email-info"><div class="email-subject">One thing that disqualifies most DPA applicants (and how to avoid it)</div><div class="email-label">Email 7 — Large Deposits Warning</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+The silent DPA killer: recent large deposits.
+
+Most DPA programs require source documentation for every deposit over $1,000 in the last 60 days. Gifts. Sold car. Tax refund. Paycheck from a side gig.
+
+If you can't source it with a paper trail, underwriters treat it as unauthorized funds and it can disqualify you from the DPA entirely.
+
+What to do RIGHT NOW if you're considering DPA:
+- Start a separate savings account for down payment funds
+- Document every deposit with a clear source (screenshot, letter, receipt)
+- Avoid moving money between accounts without explanation
+- If receiving a gift, get a gift letter BEFORE the funds hit your account
+
+This is one of the most fixable problems if you know about it early. Most buyers learn about it during underwriting when it's too late.
+
+Adam</div>
+    </div>
+  </div>
+
+  <div class="email-card" id="dpa-8">
+    <div class="email-head" onclick="toggle('dpa-8')">
+      <div class="day-badge" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">DAY 52</div>
+      <div class="email-info"><div class="email-subject">Last note: should you do DPA or skip it?</div><div class="email-label">Email 8 — Final Push / Honest Close</div></div>
+      <div class="toggle">▼</div>
+    </div>
+    <div class="email-body">
+      <div class="meta-row"><div class="chip">From: adam@mail.thestyerteam.com</div><div class="chip">Reply-to: adam@thestyerteam.com</div><div class="chip">Plain text</div></div>
+      <div class="email-text">Hi [first_name],
+
+Honest answer: not everyone should do DPA.
+
+DPA makes sense when:
+- Down payment is your ONLY barrier to buying
+- You can afford the monthly payment comfortably
+- You'll stay in the home long enough to hit the forgiveness horizon (usually 3-10 years)
+- The paperwork delay fits your timeline
+
+DPA does NOT make sense when:
+- You have the savings and just want to preserve them (conventional with low down may be better)
+- Your timeline is urgent (<30 days)
+- You're buying with plans to move within 2-3 years (you'll hit the non-forgiveness window)
+- The income limits force you into a lower price bracket than you need
+
+If you've read all 8 of these and you're still not sure if DPA is your path, 15 minutes tells us: https://calendly.com/adamstyer/15minutes
+
+Either way — your guide is yours to keep. Share with friends who might need it.
+
+Adam</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PAGE: ACTION ITEMS -->
+<!-- ════════════════════════════════════════════ -->
+<div class="page" id="page-actions">
+  <div class="page-header">
+    <div class="page-title">Action Items — Priority Order</div>
+    <div class="page-sub">Things that are broken, inactive, or missing // as of 2026-04-16</div>
+  </div>
+
+  <div class="action-block">
+    <div class="action-title">🔴 BROKEN — SILENT FAILURES</div>
+    <div class="action-row">
+      <div class="action-num">1</div>
+      <div class="action-txt"><strong>drip_enrollments: 0 rows.</strong> You have 6 campaigns, 23 steps, hourly scheduler running. Nobody is enrolled. The enrollment trigger is broken or was never connected. Nothing errors. Nothing sends. Completely silent.</div>
+    </div>
+    <div class="action-row">
+      <div class="action-num">2</div>
+      <div class="action-txt"><strong>resend_webhook_events: 0 rows.</strong> PA Welcome and DPA Guide sequences are sending emails but bounce/open/delivered events aren't coming back. The Resend → LoanOS webhook is likely not configured.</div>
+    </div>
+    <div class="action-row">
+      <div class="action-num">3</div>
+      <div class="action-txt"><strong>iMessage script requires Mac to be awake.</strong> If your Mac sleeps or the script stops, the iMessage → Supabase pipeline fails silently. No alerts, no logs.</div>
+    </div>
+  </div>
+
+  <div class="action-block" style="border-color:var(--orange-bd);background:var(--orange-bg)">
+    <div class="action-title" style="color:var(--orange)">🟠 INACTIVE — SHOULD BE ON</div>
+    <div class="action-row" style="border-color:#2a1400">
+      <div class="action-num" style="color:var(--orange)">4</div>
+      <div class="action-txt" style="color:#8a5020"><strong>Review Request Email is inactive (AK1fBcaX1cPcdlGx).</strong> Post-closing Google + Zillow review ask. One of the highest-ROI automations you have. Turn it on.</div>
+    </div>
+    <div class="action-row" style="border-color:#2a1400">
+      <div class="action-num" style="color:var(--orange)">5</div>
+      <div class="action-txt" style="color:#8a5020"><strong>Post-Calendly Booking is inactive (PBu2Zt0YpiLHeqbL).</strong> Built April 13, never activated. Decide: turn on or delete it.</div>
+    </div>
+    <div class="action-row" style="border-color:#2a1400;border-bottom:none">
+      <div class="action-num" style="color:var(--orange)">6</div>
+      <div class="action-txt" style="color:#8a5020"><strong>Refi Watch Pre-Drop Warm-Up + Quarterly Review inactive.</strong> Zero executions each. Intentional or forgotten?</div>
+    </div>
+  </div>
+
+  <div class="action-block" style="border-color:var(--blue-bd);background:var(--blue-bg)">
+    <div class="action-title" style="color:var(--blue)">🔵 GAPS — MISSING CONNECTIONS</div>
+    <div class="action-row" style="border-color:#0a1f30">
+      <div class="action-num" style="color:var(--blue)">7</div>
+      <div class="action-txt" style="color:#3a6a90"><strong>Website contact form leads get 2 emails then nothing.</strong> Purchase / first-time-buyer leads from the contact form could roll into the PA Welcome nurture automatically. Connection doesn't exist yet.</div>
+    </div>
+    <div class="action-row" style="border-color:#0a1f30">
+      <div class="action-num" style="color:var(--blue)">8</div>
+      <div class="action-txt" style="color:#3a6a90"><strong>DPA guide PDF verified present</strong> at styerteam-mortgage-site/austin-dpa-guide.pdf (audit 2026-04-16 PM). Day 0 of the DPA nurture resolves. Also present: Austin-FTB-DPA-Guide-2026.pdf. Keep both in sync with any content updates so the "read page 1 first" framing in Day 0 still matches.</div>
+    </div>
+    <div class="action-row" style="border-color:#0a1f30;border-bottom:none">
+      <div class="action-num" style="color:var(--blue)">9</div>
+      <div class="action-txt" style="color:#3a6a90"><strong>Rate Check Form + Lender Email Ingest have no descriptions.</strong> You won't know what they do in 3 months. Add descriptions in n8n.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>33 N8N WORKFLOWS (29 ACTIVE // 4 INACTIVE) // 54 SUPABASE TABLES // AUTOMATION_REGISTRY 38 ROWS (8 EMAIL TEMPLATES) // LOANOS v8.1.9 // PULLED LIVE 2026-04-16 // RE-AUDITED 2026-04-16 PM</footer>
+
+<script>
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+}
+function toggle(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -16,6 +16,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin" className="font-mono text-sm font-semibold text-amber-500 tracking-wide">
               LOANOS ADMIN
             </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/admin" className="font-mono text-xs text-muted-foreground hover:text-foreground/90 transition-colors">
+                TENANTS
+              </Link>
+              <Link href="/admin/ops" className="font-mono text-xs text-muted-foreground hover:text-foreground/90 transition-colors">
+                OPS
+              </Link>
+              <Link href="/admin/email-automation" className="font-mono text-xs text-muted-foreground hover:text-foreground/90 transition-colors">
+                EMAIL AUTOMATION
+              </Link>
+            </div>
             <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground/80 transition-colors">
               ← Back to Dashboard
             </Link>

@@ -43,6 +43,12 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  // Ensure the /admin/ops route ships its raw HTML content file (read via
+  // fs.readFileSync at module load) with the serverless function bundle.
+  // Without this, Vercel's file tracer wouldn't pick it up.
+  outputFileTracingIncludes: {
+    '/admin/ops': ['./src/app/admin/ops/ops-content.html'],
+  },
   async headers() {
     return [
       {

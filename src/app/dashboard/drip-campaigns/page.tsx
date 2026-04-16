@@ -36,6 +36,17 @@ export default function DripCampaignsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* Migration banner — drip scheduler archived 2026-04-16 pending WDK migration */}
+      <div className="bg-surface border border-loanborder rounded-lg p-4 mb-6 border-l-[3px] border-l-[#e67e22]">
+        <div className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#e67e22] mb-1">
+          Paused — Email Platform Migration
+        </div>
+        <div className="text-sm text-foreground">
+          Drip campaigns are paused while we migrate to the new email platform.
+          New enrollments will not send. Existing data is untouched.
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-[28px] tracking-wide">DRIP CAMPAIGNS</h1>

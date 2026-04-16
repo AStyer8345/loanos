@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -9,11 +10,12 @@ import {
   Megaphone,
   Building2,
   Mail,
-  Shield,
+  Inbox,
+  FileCode,
   Settings,
   Search,
   Menu,
-  Inbox,
+  ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -29,18 +31,37 @@ import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
 
-type Section = 'dashboard' | 'pipeline' | 'contacts' | 'scenarios' | 'marketing' | 'lenders' | 'drip' | 'drafts' | 'admin' | 'settings'
+type Section =
+  | 'dashboard'
+  | 'pipeline'
+  | 'contacts'
+  | 'email'
+  | 'more'
+  | 'settings'
 
-const NAV_ITEMS: { label: string; section: Section; href: string; icon: React.ReactNode }[] = [
+type NavItem = {
+  label: string
+  section: Section
+  href: string
+  icon: React.ReactNode
+}
+
+// Primary nav — the four pillars a non-technical LO needs day one.
+const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
   { label: 'Pipeline',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
   { label: 'Contacts',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
-  { label: 'Scenarios', section: 'scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" /> },
-  { label: 'Marketing', section: 'marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
-  { label: 'Lenders',  section: 'lenders',  href: '/dashboard/lenders', icon: <Building2 className="size-4" /> },
-  { label: 'Drip',     section: 'drip',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" /> },
-  { label: 'Drafts',   section: 'drafts',   href: '/dashboard/drafts', icon: <Inbox className="size-4" /> },
-  { label: 'Admin',     section: 'admin',     href: '/dashboard/automations', icon: <Shield className="size-4" /> },
+  { label: 'Email',     section: 'email',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" /> },
+]
+
+// Secondary nav — power-user surfaces tucked behind a More dropdown.
+// All map to section 'more' so the More button highlights when any are active.
+const MORE_ITEMS: { label: string; href: string; icon: React.ReactNode }[] = [
+  { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" /> },
+  { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" /> },
+  { label: 'Marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
+  { label: 'Drafts',    href: '/dashboard/drafts',    icon: <Inbox className="size-4" /> },
+  { label: 'Templates', href: '/dashboard/automations', icon: <FileCode className="size-4" /> },
 ]
 
 function sectionFromPath(pathname: string): Section | null {
@@ -48,12 +69,14 @@ function sectionFromPath(pathname: string): Section | null {
   if (pathname.startsWith('/dashboard/briefing')) return 'dashboard'
   if (pathname.startsWith('/dashboard/loans')) return 'pipeline'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
-  if (pathname.startsWith('/dashboard/scenarios')) return 'scenarios'
-  if (pathname.startsWith('/dashboard/marketing')) return 'marketing'
-  if (pathname.startsWith('/dashboard/lenders')) return 'lenders'
-  if (pathname.startsWith('/dashboard/drip-campaigns')) return 'drip'
-  if (pathname.startsWith('/dashboard/drafts')) return 'drafts'
-  if (pathname.startsWith('/dashboard/automations')) return 'admin'
+  // Email pillar consolidates the three outbound-email surfaces
+  if (pathname.startsWith('/dashboard/drip-campaigns')) return 'email'
+  if (pathname.startsWith('/dashboard/drafts')) return 'email'
+  if (pathname.startsWith('/dashboard/automations')) return 'email'
+  // Power-user surfaces hidden under More
+  if (pathname.startsWith('/dashboard/scenarios')) return 'more'
+  if (pathname.startsWith('/dashboard/lenders')) return 'more'
+  if (pathname.startsWith('/dashboard/marketing')) return 'more'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null
 }
@@ -62,6 +85,20 @@ export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
   const currentSection = sectionFromPath(pathname || '')
+
+  // More dropdown state + click-outside handler
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!moreOpen) return
+    function onDocClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [moreOpen])
 
   return (
     <>
@@ -103,6 +140,55 @@ export default function TopNav() {
                   </button>
                 )
               })}
+
+              {/* More dropdown */}
+              <div ref={moreRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(o => !o)}
+                  aria-haspopup="menu"
+                  aria-expanded={moreOpen}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    currentSection === 'more'
+                      ? 'bg-primary/15 text-primary'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                >
+                  More
+                  <ChevronDown className={cn('size-3.5 transition-transform', moreOpen && 'rotate-180')} />
+                </button>
+                {moreOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-1 w-48 rounded-md border border-input bg-[var(--bg)] shadow-lg shadow-black/40 py-1 z-40"
+                  >
+                    {MORE_ITEMS.map(item => {
+                      const isActive = pathname?.startsWith(item.href) ?? false
+                      return (
+                        <button
+                          key={item.href}
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            router.push(item.href)
+                            setMoreOpen(false)
+                          }}
+                          className={cn(
+                            'flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-left transition-colors',
+                            isActive
+                              ? 'bg-primary/15 text-primary'
+                              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                          )}
+                        >
+                          {item.icon}
+                          {item.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </nav>
           </div>
 
@@ -184,6 +270,30 @@ export default function TopNav() {
                       return (
                         <button
                           key={item.section}
+                          type="button"
+                          onClick={() => router.push(item.href)}
+                          className={cn(
+                            'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors w-full text-left',
+                            isActive
+                              ? 'bg-primary/15 text-primary'
+                              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                          )}
+                        >
+                          {item.icon}
+                          {item.label}
+                        </button>
+                      )
+                    })}
+
+                    <div className="my-3 border-t border-input" />
+                    <div className="px-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      More
+                    </div>
+                    {MORE_ITEMS.map(item => {
+                      const isActive = pathname?.startsWith(item.href) ?? false
+                      return (
+                        <button
+                          key={item.href}
                           type="button"
                           onClick={() => router.push(item.href)}
                           className={cn(

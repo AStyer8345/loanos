@@ -192,43 +192,7 @@ export default function DashboardClient(props: DashboardClientProps) {
             />
           </div>
 
-          {/* ── Mini Pipeline Table ── */}
-          {props.pipelineLoans.length > 0 && (
-            <Card className="overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-input">
-                <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Active Pipeline</span>
-                <Link href="/dashboard/loans" className="flex items-center gap-1 text-[11px] font-mono text-[#C9A84C] hover:text-[#d4b860]">
-                  Full pipeline <ArrowRight size={9} />
-                </Link>
-              </div>
-              <div className="max-h-[360px] overflow-y-auto">
-                <Table className="font-mono text-xs">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-left">Borrower</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Closing</TableHead>
-                      <TableHead className="text-right">Rate</TableHead>
-                      <TableHead className="text-right">Commission</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {props.pipelineLoans.map(l => (
-                      <TableRow key={l.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => window.location.href = `/dashboard/loans/${l.id}`}>
-                        <TableCell className="font-medium text-foreground">{l.name}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{fmtK(l.amount)}</TableCell>
-                        <TableCell>{l.status && <StageBadge status={l.status} />}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{fmtDateShort(l.closingDate)}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{l.rate ? `${l.rate}%` : '—'}</TableCell>
-                        <TableCell className="text-right text-primary">{fmt(l.commission)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          )}
+          {/* Mini Pipeline Table removed 2026-04-16 — duplicated the Pipeline tab one click away */}
 
           {/* ── New Applications & Pre-Approvals ── */}
           {props.newAppsAndPAs.length > 0 && (

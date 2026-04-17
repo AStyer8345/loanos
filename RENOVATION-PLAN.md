@@ -95,6 +95,11 @@ LoanOS grew too wide. 39 tables, 51 API routes, 153-column loans table, social d
 - [x] Dashboard cleanup: removed needs-attention badge + urgent flags section (2026-04-16) — urgency stays in Pipeline row colors from Phase 2
 - [x] Lead source visibility on Dashboard: new "New Leads by Source (30d)" chart with AEO detection (ChatGPT/Claude/Perplexity/Copilot/Gemini/you.com/phind/kagi). Existing chart renamed "Closed Business by Source". (2026-04-16)
 - [x] Deploy and verify — `dpl_Azdb1VkJH1V9xdXkkKgGkD4C1o3P` READY 2026-04-16
+- [x] Clickable lead-source chart — bars link to `/dashboard/contacts/by-source/[slug]`, filtered drill-down page (2026-04-16)
+- [x] Rename "Organic Search" → "SEO" to match Adam's vocabulary (2026-04-16)
+- [x] Manual `lead_source` tag wins over auto-detection — unblocks manually-added contacts (2026-04-16)
+- [x] `LeadSourceSelect` dropdown on contact detail page — grouped AEO/SEO/Social/Referral/Other options + Custom… escape hatch (2026-04-16)
+- [x] Config fix: removed broken `outputFileTracingIncludes` from `next.config.mjs` (was breaking local builds for ~6h) (2026-04-16)
 - [ ] Row-level enhancements: when a follow-up segment is active, surface last_activity_date + referred_by prominently + one-click call/text/email (deferred — row already has call/text/email from Phase 2; extra columns can wait until feedback)
 - [ ] Smart sort: most urgent first when segment active (deferred — existing user-controlled sort works fine for now)
 - [ ] Adam reviews and confirms

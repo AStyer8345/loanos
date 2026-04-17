@@ -36,7 +36,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 - Phase 1 (strip UI to 7 tabs) — done 2026-03-30
 - Phase 2 (pipeline bulletproof + Arive sync overhaul) — done 2026-04-02, Adam-confirmed 2026-04-16
-- Phase 3 (Follow-Up segments in Contacts + Dashboard lead-source overhaul with AEO detection) — shipped 2026-04-16 (`dpl_Azdb1VkJH1V9xdXkkKgGkD4C1o3P`), awaiting Adam review
+- Phase 3 (Follow-Up segments in Contacts + Dashboard lead-source overhaul with AEO detection + clickable drill-down + LeadSourceSelect dropdown) — shipped 2026-04-16 (final deploy `dpl_AKhAtzUsqeQNyG3MME1dYrTuFdJv`), awaiting Adam review. Also fixed stale `outputFileTracingIncludes` config that broke local builds for ~6 hours.
 - Multi-tenancy (org-based RLS, NOT NULL hardening, org_id on all tables) — done 2026-03-25
 - UI renovation (shadcn/ui, light/dark mode, 300+ color replacements) — done 2026-04-01
 - Drip campaigns v1 (4 tables, 7 API routes, 3-level UI, n8n scheduler) — done 2026-04-02

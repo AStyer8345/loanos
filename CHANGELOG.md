@@ -1,5 +1,50 @@
 # LoanOS Changelog
 
+## 2026-04-16 PM (Adam session) — Phase 3 kickoff: Follow-Up segments + Dashboard lead-source overhaul + config fix
+
+Session with Adam. Phase 2 Adam-confirmed (8+ sessions overdue). Phase 3 core work shipped. Five commits, all READY on Vercel.
+
+**Phase 2 confirmed:**
+- Pipeline bulletproof + Arive sync overhaul done 2026-04-02, confirmed working 2026-04-16. Unblocks Phase 3.
+- `dpl_FKr9aZEkWVYLuMueTYdE2ENdBbpw` SHA `c7bb97c` — plan + CONTEXT updates only.
+
+**Phase 3 core (commit `2bc7e8d`, `dpl_Azdb1VkJH1V9xdXkkKgGkD4C1o3P` READY):**
+- **Dashboard cleanup:** removed "N need attention" badge + urgent flags section. Urgency lives in Pipeline row colors from Phase 2 — don't need it twice.
+- **New `NewLeadsChart`** on Dashboard — contacts-based, last 30 days, AEO-aware. Shows distinct buckets so Adam can see AI-origin leads vs paid/organic.
+- **`classifyLeadSource()`** (new `src/lib/leadSources.ts`) — AEO hosts (ChatGPT, Claude, Perplexity, Copilot, Gemini, you.com, phind, kagi) + Realtor Referral + Web Lead + SEO + Social + Direct + Other. Precedence handles Google-AI-Overview edge case where `referrer=google.com` but `utm_source` reveals AI.
+- **Old `LeadSourceChart` renamed** "Closed Business by Source" — still reads `loans.referral_source`, still useful for attribution after funding.
+- **Contacts Follow-Up segments** (new section atop sidebar): New Leads (30d) · Going Quiet (7–30d) · Pre-Approved Still Shopping (90d). Upper-cap "stale" window prevents graveyard pollution.
+
+**Clickable drill-down (commit `784a338`, `dpl_7GcnGX5oymGUhNRgnZvEGVJRMuhP` READY):**
+- Renamed "Organic Search" → "SEO" (matches Adam's vocabulary).
+- `CATEGORY_SLUGS` + `categoryFromSlug()` for URL routing.
+- Bars in `NewLeadsChart` now clickable Links.
+- New page `/dashboard/contacts/by-source/[category]?days=30` — fetches borrower contacts in window, runs classifier client-side, renders filtered table. Client-side classification chosen because classifier inspects substrings + utm_source variants that don't map cleanly to SQL; <100 rows per org per window keeps this cheap.
+
+**Manual tag precedence (commit `3f4e471`):**
+- `classifyLeadSource()` now checks `lead_source` FIRST. Exact and colon-prefixed forms recognized: `AEO`, `AEO: ChatGPT`, `SEO: Google`, `Social: Instagram`, etc. Adam's manual tagging beats auto-detection — unblocks contacts added by hand with no referrer/utm.
+
+**LeadSourceSelect dropdown (commit `f3938bd`):**
+- Contact detail page: `lead_source` is now a grouped dropdown instead of free-form text. Groups: AEO / SEO / Social / Referral / Other. "Custom…" escape hatch preserves free-form entry. Existing non-preset values shown as "X (current)" so nothing gets orphaned.
+- Values match `classifyLeadSource()` precedence — Dashboard chart respects what Adam types without backfill.
+- REFERRAL TYPE already had a dropdown (`ReferralTypeSelect`) — unchanged.
+
+**Config fix (commit `c754191`, `dpl_AKhAtzUsqeQNyG3MME1dYrTuFdJv` READY):**
+- Removed `outputFileTracingIncludes` from `next.config.mjs` top level. Added 2026-04-16 AM in commit `1efd450` (admin/ops) but Next.js 14 doesn't recognize the key at that location — emitted a warning AND broke local `next build` with ENOENT on `pages-manifest.json` for ~6 hours. Vercel tolerated the warning which is why deploys kept succeeding.
+- Tried relocating under `experimental{}` — different trace error. Removed entirely: Next's default file tracer detects `fs.readFileSync` on a static path and bundles `ops-content.html` automatically (Vercel confirmed shipping /admin/ops fine throughout).
+
+**Files touched:**
+- NEW: `src/lib/leadSources.ts`, `src/components/dashboard/charts/NewLeadsChart.tsx`, `src/app/dashboard/contacts/by-source/[category]/page.tsx`
+- MODIFIED: `src/app/dashboard/page.tsx`, `src/components/dashboard/DashboardClient.tsx`, `src/components/dashboard/charts/LeadSourceChart.tsx`, `src/components/ui/contacts-sidebar.tsx`, `src/app/dashboard/contacts/page.tsx`, `src/app/dashboard/contacts/[id]/ContactRecordView.tsx`, `next.config.mjs`
+
+**Phase 3 deferred (pending Adam feedback in practice):**
+- Row-level auto-surface of `last_activity_date` + `referred_by` when a Follow-Up segment is active.
+- Smart sort (oldest-last-activity first) when segment active.
+
+**Test plan for Adam:** drop a test form submission on styermortgage.com with `?utm_source=chatgpt` → should populate AEO bar and be clickable.
+
+---
+
 ## 2026-04-16 (autonomous) — Security #9 + #10 shipped; `admin_audit_log` + `requireOrgAdmin()`
 
 Autonomous session. Phase: Email Automation Cutover + Security Findings. Shipped 2 items. Deployment `dpl_2SERCMokPK4QHEDG32NeVkzdftgr` (READY), SHA `1bdb8c5`.

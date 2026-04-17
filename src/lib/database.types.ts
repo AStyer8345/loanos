@@ -138,6 +138,39 @@ export type Database = {
           },
         ]
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string
+          created_at: string
+          details: Json
+          id: string
+          resource_id: string | null
+          resource_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          resource_id?: string | null
+          resource_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          resource_id?: string | null
+          resource_type?: string | null
+        }
+        Relationships: []
+      }
       agent_conversations: {
         Row: {
           agent_id: string
@@ -418,6 +451,7 @@ export type Database = {
           source_id: string
           source_node_id: string | null
           status: string
+          subject_template: string | null
           trigger_type: string
           updated_at: string
         }
@@ -442,6 +476,7 @@ export type Database = {
           source_id: string
           source_node_id?: string | null
           status?: string
+          subject_template?: string | null
           trigger_type: string
           updated_at?: string
         }
@@ -466,6 +501,7 @@ export type Database = {
           source_id?: string
           source_node_id?: string | null
           status?: string
+          subject_template?: string | null
           trigger_type?: string
           updated_at?: string
         }

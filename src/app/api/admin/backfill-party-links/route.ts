@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { requireAdmin } from '@/lib/admin/auth'
+import { logAdminAction } from '@/lib/admin/audit'
 
 // POST /api/admin/backfill-party-links
 // One-time (re-runnable) backfill: matches agent name strings on loans
@@ -118,6 +119,18 @@ export async function POST() {
         co_borrower: log.filter(l => l.party === 'co_borrower').length,
       },
     }
+
+    await logAdminAction({
+      actorId: adminCheck.user!.id,
+      actorEmail: adminCheck.user!.email,
+      action: 'backfill_party_links',
+      resourceType: 'organization',
+      resourceId: organizationId,
+      details: {
+        loans_scanned: summary.total_loans_scanned,
+        links_created: summary.total_links_created,
+      },
+    })
 
     return NextResponse.json({ summary, log })
   } catch (err) {

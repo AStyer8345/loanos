@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { requireAdmin } from '@/lib/admin/auth'
+import { logAdminAction } from '@/lib/admin/audit'
 import type { TablesInsert } from '@/lib/database.types'
 
 interface SalesforceRecord {
@@ -151,6 +152,20 @@ export async function POST(req: NextRequest) {
       referred_by_unmatched: log.filter(l => l.referred_by && !l.referred_by_matched).length,
       unique_referrers_unmatched: [...new Set(log.filter(l => l.referred_by && !l.referred_by_matched).map(l => l.referred_by))],
     }
+
+    await logAdminAction({
+      actorId: adminCheck.user!.id,
+      actorEmail: adminCheck.user!.email,
+      action: 'salesforce_import',
+      resourceType: 'organization',
+      resourceId: organizationId,
+      details: {
+        total_processed: summary.total_processed,
+        created: summary.created,
+        updated: summary.updated,
+        errors: summary.errors,
+      },
+    })
 
     return NextResponse.json({ summary, log })
   } catch (err) {

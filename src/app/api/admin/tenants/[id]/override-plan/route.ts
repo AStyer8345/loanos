@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin/auth'
 import { writeActivityWithPii } from '@/lib/activity/pii'
+import { logAdminAction } from '@/lib/admin/audit'
 
 export async function POST(
   req: Request,
@@ -40,7 +41,7 @@ export async function POST(
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Log the override with encrypted PII companion
+  // Log the override with encrypted PII companion (org-scoped)
   await writeActivityWithPii(
     serviceClient!,
     {
@@ -54,6 +55,16 @@ export async function POST(
       metadata: { previous_plan: previousPlan, new_plan: plan, overridden_by: user!.id },
     },
   )
+
+  // Immutable cross-tenant audit trail (Security Finding #9)
+  await logAdminAction({
+    actorId: user!.id,
+    actorEmail: user!.email,
+    action: 'plan_override',
+    resourceType: 'organization',
+    resourceId: orgId,
+    details: { previous_plan: previousPlan, new_plan: plan },
+  })
 
   return NextResponse.json({ success: true, previous_plan: previousPlan, new_plan: plan })
 }

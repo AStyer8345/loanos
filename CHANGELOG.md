@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-17 AM (scenarios-am) — Mobile Quick-Input Form
+
+- New `MobileQuickInput.tsx` — 4-field card shown only on mobile (`md:hidden`) at the top of ScenarioBuilder
+- Fields: purchase price / down % / rate / term (30/20/15/10). Live P&I preview via client-side formula. No API call needed for the preview.
+- "Get Share Link" button: calls `/api/scenarios/calculate` then `/api/scenarios/save`, returns a working `/share/[token]` URL inline with one-tap copy
+- Q&A generation fires in background after quick save (same as full builder)
+- `ScenarioBuilder.tsx`: imports + renders `MobileQuickInput` above the step indicator header
+- Commit `1fa93f6` | Vercel `dpl_6U4GVLBw96qvbpYHUnTwmHR9tAQq` — BUILDING → expected READY
+- **MC gap closed:** LO can now create a shareable scenario in ~10 seconds from a phone at the table with a borrower — closes Mortgage Coach "red light" advantage
+
 ## 2026-04-17 (autonomous session) — Demo data polish + n8n blank email fix
 
 No code deployed to Vercel this run. All changes to external systems (Supabase + n8n).

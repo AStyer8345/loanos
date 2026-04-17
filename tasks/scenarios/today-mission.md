@@ -1,38 +1,36 @@
-## Scenarios Mission Brief — 2026-04-16 AM
+## Scenarios Mission Brief — 2026-04-17 AM
 
 ### Focus Area
-Backfill Borrower Q&A for existing scenarios — one-click admin button to generate Q&A
-for all saved scenarios that predate the Q&A feature (shipped Apr 15).
+Mobile Builder Quick-Input Form (Tier 6 Item 3)
 
 ### Why This Matters
-Pre-generated Q&A only fires on new saves. Adam's entire scenario history returns a blank
-Q&A accordion on the share page. Old share links show the accordion shell with no content.
-This fixes that in one click from the scenarios list page.
+Mortgage Coach's "red light" feature: LO can create a share link in under 60 seconds on
+their phone while sitting at a table with a borrower. The full ScenarioBuilder wizard
+(3 steps, 20+ fields) is desktop-centric in practice. This closes that gap with a 4-field
+mobile-only card that produces a real share link in one tap.
 
 ### Session Type
-[x] Build
+[x] Full cycle (Build + Test)
 
 ### Objectives
-1. Shared utility: extract Q&A generation logic from generate-qa into generateQAPairs.ts
-2. Batch backfill route: POST /api/scenarios/backfill-qa (all Q&A-null scenarios, parallel chunks of 3)
-3. Scenarios page: show qaNeededCount to ScenarioList
-4. ScenarioList: "Generate Q&A (N)" button with progress and success feedback
-5. npm run build passes, Vercel deploys READY
+1. New MobileQuickInput component — shown md:hidden at top of ScenarioBuilder
+2. 4 fields: purchase price, down payment %, rate, loan term
+3. Live P&I preview updates as user types
+4. "Get Share Link" calls calculate API + save API, returns working /share/[token] URL
+5. Share link inline with one-tap copy. Build passes, Vercel READY.
 
 ### Files in Scope
-- src/lib/scenarios/generateQAPairs.ts (new)
-- src/app/api/scenarios/generate-qa/route.ts (refactored)
-- src/app/api/scenarios/backfill-qa/route.ts (new)
-- src/app/dashboard/scenarios/page.tsx
-- src/app/dashboard/scenarios/ScenarioList.tsx
+- src/app/dashboard/scenarios/new/MobileQuickInput.tsx (new)
+- src/app/dashboard/scenarios/new/ScenarioBuilder.tsx (import + render)
 
 ### Definition of Done
-- Scenarios list shows "Generate Q&A (N)" button when N > 0 scenarios lack Q&A
-- Button hidden when all scenarios already have Q&A
-- Backfill processes all missing scenarios, returns { processed, skipped, errors }
-- Build passes with 0 TypeScript errors
+- npm run build passes, 0 TypeScript errors
+- Component visible on mobile (< md), hidden on desktop
+- 4 fields compute live P&I via client-side formula
+- "Get Share Link" produces a real /share/[token] URL in one tap
+- Share link copyable with a single tap
 
 ### Subagents to Activate
-[x] Builder (direct)
+[x] Builder (direct build)
 [x] QA (npm run build)
-[x] Reporter
+[x] Reporter (if QA passes)

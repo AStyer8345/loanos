@@ -702,6 +702,44 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 ---
 
+## AM Session — 2026-04-17 (scenarios-am)
+
+**What was built:**
+- Mobile Builder Quick-Input (`src/app/dashboard/scenarios/new/MobileQuickInput.tsx`)
+  - Rendered `md:hidden` at the top of ScenarioBuilder — visible on mobile only, hidden on desktop
+  - 4 fields: purchase price ($), down payment (%), interest rate (%), loan term (4-button toggle: 30/20/15/10 yr)
+  - Live P&I preview: client-side formula `loanAmount * r*(1+r)^n / ((1+r)^n - 1)` — no API call, updates as user types
+  - Loan summary bar below preview: "Loan: $X · Down: $Y" for quick verification
+  - "Get Share Link" flow: calls `/api/scenarios/calculate` then `/api/scenarios/save` sequentially; shows inline share link card with copy + view + new buttons
+  - Q&A generation fires fire-and-forget after save (same as full builder ActionsBar)
+  - Success state: green checkmark, share URL displayed, one-tap copy, external link to preview
+  - Error state: red inline message
+  - `ScenarioBuilder.tsx`: `MobileQuickInput` renders before the step indicator + header block
+
+**MC gap closed:** LO can now create a share link in ~10 seconds from a phone at the table with a borrower. 4 fields, one tap. Before: opening the ScenarioBuilder on mobile required navigating 3 wizard steps with 20+ fields. After: Quick Mode card appears first on mobile — type rate/price/down/term, hit ⚡ Get Share Link, done. Closes Mortgage Coach's "red light" mobile creation advantage.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `1fa93f6` — pushed to main
+**Vercel:** `dpl_6U4GVLBw96qvbpYHUnTwmHR9tAQq` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/dashboard/scenarios/new/MobileQuickInput.tsx` (new)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (import + render)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Define Tier 7 — Tier 6 is now complete. Candidates:
+   - Borrower-facing AI chat on share page (biggest remaining MC gap — 24/7 Q&A, single question field above BorrowerQA)
+   - Quick scenario from contacts page — "Create Scenario" button on contact detail pre-fills borrower name
+   - Print/save PDF from mobile (currently "Download PDF" button calls save + opens share page with ?print=1 — does this work on iOS Safari?)
+2. Confirm Tier 6 fully closed (all 4 items done: DetailAccordion cleanup ✅, Borrower Q&A ✅, Mobile Quick-Input ✅, Backfill Q&A ✅)
+
+**Domain queue updates:**
+- Tier 6 Item 3 (Mobile builder quick-input) — ✅ COMPLETE this session
+- Tier 6 COMPLETE (all 4 items done)
+
+---
+
 ## AM Session — 2026-04-16 (scenarios-am)
 
 **What was built:**

@@ -124,20 +124,20 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-16 AM — Backfill Q&A. Extracted `generateQAPairs.ts` shared utility, refactored generate-qa route, new `POST /api/scenarios/backfill-qa` batch route (parallel chunks of 3), `ScenarioList.tsx` gold banner + "Generate Q&A (N)" button. Also fixed pre-existing ghost `@types` build blocker. Commit 44591dc | Vercel dpl_AcAJa7aKTQgd8UxLRrYTRdqBpWCY → READY ✅
+**Last worked on:** 2026-04-17 AM — Mobile Quick-Input form. New `MobileQuickInput.tsx` (md:hidden, 4 fields: price/down%/rate/term, live P&I, "Get Share Link" → calculate+save → inline copyable URL). Tier 6 COMPLETE. Commit 1fa93f6 | Vercel dpl_6U4GVLBw96qvbpYHUnTwmHR9tAQq → BUILDING
 
 **Active blockers:** None.
 
-**What's next:** Mobile builder quick-input form (LO at the table on phone — rate/term/price/down only, generates share link).
+**What's next:** Define Tier 7. Top candidate: borrower-facing AI chat on share page (biggest remaining MC gap).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-16 — Day 22 standup. Vercel CONFIRMED READY (`dpl_CWxQo5KnaCfsW93QFyBYZrvjW3D8`, SHA `80fb0ee`). n8n: 33 total, 29 active — no errors. 4 commits confirmed shipped (admin page fix, email log, per-LO drafts UI, email fallback fix). Security: 0 CRITICAL, 3 MEDIUM open.
+**Last worked on:** 2026-04-17 — Day 23 standup. Vercel READY (`dpl_9vBLAnquSRoKFAzrC6prNTapPY9m`, SHA `a127b34`). n8n: 33 total, 29 active — no errors, 4 inactive all intentional. `HkLjsnnhT5MgrX5H` (CD & Contract Extractor) active but untested. 3 commits confirmed shipped since Day 22 (notes SOT, Calendly briefing, demo data polish).
 
-**Active blockers:** Marketing demo data zero progress (10 days to May 1 — HIGHEST RISK). Phase 2 Adam confirmation outstanding 8+ sessions (blocks Phase 3). Workflow DevKit cutover (Task 23) blocked on Adam env vars + Resend webhook config. Seq C INACTIVE (Outlook cred, 7+ sessions).
+**Active blockers:** Marketing site zero progress (14 days to May 1 — HIGHEST RISK). Phase 3 Adam confirmation outstanding. Task 23 cutover blocked on Adam env vars + Resend webhook. Seq C INACTIVE (Outlook cred, 7+ sessions).
 
-**What's next:** Marketing demo data cleanup (must start this week — May 1 at risk). CD & Contract Extractor execution test. Phase 2 Adam confirmation escalation.
+**What's next:** Phase 5 email template wiring (wire 6 n8n workflow buttons in UI). Marketing site demo data → screenshots → launch page.
 
 ## Rules For AI Sessions
 

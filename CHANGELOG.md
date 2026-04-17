@@ -1,5 +1,39 @@
 # LoanOS Changelog
 
+## 2026-04-17 (autonomous session) — Demo data polish + n8n blank email fix
+
+No code deployed to Vercel this run. All changes to external systems (Supabase + n8n).
+
+**Demo data — LoanOS Demo Account (`eeeeeeee-...`) — screenshot-ready:**
+- Added property addresses to 9 active pipeline loans that were missing them (all pre_approved/application loans now have realistic Austin-area addresses)
+- Fixed stale `est_closing_date` on all active pipeline loans — everything now dated 2026-04-25 through 2026-05-16; CTC loans show April 25 (closing soon urgency)
+- Added `loan_number` (`LN-2026-001` through `LN-2026-024`) to all 24 active pipeline loans
+- Updated demo profile: `Jordan Reid`, NMLS `1042876`, phone `(512) 555-0182`, licensed TX+CO
+- Updated org NMLS + org_settings (application_link, calendly_link, custom_email_reply_to)
+- Final state: 12 loans funded in April 2026 ($5.4M volume), 24 active pipeline loans, 155 contacts, 59 total loans. All pipeline rows have complete address + date + loan_number. Ready for marketing screenshots.
+- Auth user `test@loanos.dev` (last signed in Apr 14) — login is live
+
+**n8n — Inbound Email → Supabase Log (qgb99Eh2ziy0INMk) — blank email fix:**
+- Root cause: Microsoft Outlook Trigger v1 returns `from` as either a string OR an object `{ emailAddress: { name, address } }` depending on message type. Set node expression `($json.from || '').toLowerCase()` silently produced empty output for the object shape.
+- Fix: updated Extract Fields Set node `from_address` and `from_name` expressions to handle both string and object shapes via `typeof $json.from === 'string' ? ... : $json.from?.emailAddress?.address`
+- Also added HTML-strip fallback on `body_snippet` for messages where `bodyPreview` is empty
+- PUT via n8n REST API → published via MCP `publish_workflow`, active version `7e320220`
+- No backfill run on the ~50% existing blank rows — those are historical; fix applies to all future inbounds
+
+**Autonomous buckets — this run:**
+- Shipped: 2 items (demo data polish, n8n fix)
+- Queued for Adam: 0 new items
+- Adam-blocked: Task 23 env vars, Security #5 GLBA, n8n template wiring decision (blast radius), Seq C Outlook cred
+- Destructive ops: none
+
+## 2026-04-16 10:00 PM (nightly scheduled sync) — NotebookLM PUSH+CURATE
+
+- SEO/SEM notebook: CONTEXT.md refreshed (GTM Version 5 + Kyle/Buda AEO + homepage CTA fix), audit-2026-04-16 added, stale Apr 15 pair removed, 50/50 maintained
+- Lead Gen notebook: CONTEXT.md refreshed (Phase 3 shipped + UI consolidation + automation_registry 8/8 + Set Rate repaired), audit-2026-04-16 added, 50/50 maintained
+- Master Growth Log: both entries appended (seo-sem-pm + lead-gen-pm), synced to Styer Mortgage Master notebook
+- Daily digests: both sent to adam@thestyerteam.com (Zapier status: success)
+- Web research saved locally (at capacity): research/2026-04-16-local-linkbuilding-web.md + research/2026-04-16-lead-scoring-web.md
+
 ## 2026-04-16 evening (Adam session) — Notes/activity UX: contact owns correspondence, loan page shows system events only
 
 Adam flagged duplicate Notes + Activity panels across contact and loan records — the same human correspondence was surfacing in two places. Chose "contact is source of truth" over mirroring because contacts are durable (one person, many loans over time) while loans are transactions. Also diagnosed blank email entries in the Activity feed.

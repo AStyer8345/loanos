@@ -28,6 +28,7 @@ import RefiTimingSection from './RefiTimingSection'
 import ActionsBar from './ActionsBar'
 import MISMOUpload from './MISMOUpload'
 import StatementUpload from './StatementUpload'
+import MobileQuickInput from './MobileQuickInput'
 import { InputField, CurrencyField, PercentField, SelectField } from './FormFields'
 
 export { DEFAULT_CLOSING_COSTS, ensureClosingCosts, sumClosingCosts }
@@ -259,6 +260,9 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
   return (
     <div className="min-h-screen" style={{ background: 'var(--sc-bg)', color: 'var(--sc-text)', fontFamily: "'IBM Plex Mono', monospace" }}>
       <div className="w-full px-5 md:px-8 py-8">
+
+        {/* ─── Mobile Quick Input (mobile only) ──────────────────── */}
+        <MobileQuickInput />
 
         {/* ─── Header ────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">

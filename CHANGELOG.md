@@ -1,5 +1,54 @@
 # LoanOS Changelog
 
+## 2026-04-16 evening (Adam session) — Notes/activity UX: contact owns correspondence, loan page shows system events only
+
+Adam flagged duplicate Notes + Activity panels across contact and loan records — the same human correspondence was surfacing in two places. Chose "contact is source of truth" over mirroring because contacts are durable (one person, many loans over time) while loans are transactions. Also diagnosed blank email entries in the Activity feed.
+
+**Schema — Migration 089:** `activity_log.contact_id` backfilled from `loans.contact_id`. 101 of 102 orphan "loan-only" rows got their contact link filled (one loan has no linked contact). Write-path fine — just closing the historical gap so the contact-level activity view shows everything the person was ever involved in, even if the original write only set `loan_id`.
+
+**UI — loan detail page (`src/app/dashboard/loans/[id]/page.tsx`):**
+- Removed top-level "Notes" tab + `LoanNotesTab` component. Notes live on the contact record only; NoteInput/NoteCard imports dropped.
+- Removed Call / Text / Email / Note manual-log buttons from both Activity surfaces (Dashboard's `LoanActivityPanel` + the top-level `ActivityTab`). Manual correspondence logging happens on the contact record.
+- Filter tabs slimmed: was `correspondence | email | text | notes | system | all` → now `system | all`. Default is `system` so the loan page shows status changes, automation fires, document uploads, and Arive syncs — not the email firehose that duplicates the contact view.
+- Added a "View on contact →" link/banner that deep-links from the loan page to the full correspondence history on the person's record.
+- Dropped the email-merge logic that stitched `emailDrafts`, `contactEmails`, and `inboundEmails` into the loan feed (those are already on the contact). `DashboardTab` props slimmed accordingly.
+- Net: -357 lines / +164 lines in the loan detail page. Bundle: 22.4 kB (similar; the savings are mostly duplicated panels, not rendered asset size).
+
+**Blank emails — diagnosis only (no fix yet):** ~50% of inbound `email.received` rows render as bare "Inbound" in the contact Activity feed. Traced the read path: PII encryption/decryption works correctly, `activity_log_pii` companion rows exist with ciphertext for all 760 recent email.received rows. The payload inside the ciphertext is empty (empty `subject` / `from_address` / `body_snippet`) for the blank rows. Upstream in n8n workflow `qgb99Eh2ziy0INMk` "Inbound Email → Supabase Log", the **Extract Fields** set-node reads `$json.from`, `$json.subject`, `$json.bodyPreview` — those fields come through empty for certain Outlook message shapes (autoreplies, calendar, replies where `from` isn't a plain string). Logged as follow-up for a dedicated n8n fix.
+
+**Why this, 20 days before beta:** Adam explicitly overrode the GOALS.md "no new features" guard — this is fixing existing duplication, not adding a surface. Minimal scope, schema unchanged except for the 101-row backfill.
+
+**Files touched:** `supabase/migrations/089_backfill_activity_log_contact_id.sql`, `src/app/dashboard/loans/[id]/page.tsx`.
+
+## 2026-04-16 late PM (Adam session) — Arive contact-field flow: DB trigger + backfill + n8n cleanup
+
+Adam noticed Jung Lee's contact card was missing phone + DOB even though the Arive new-app webhook had fired. Root-caused two bugs in the Arive → Supabase pipeline; fixed both at the database layer instead of touching n8n workflow logic.
+
+**Bugs found:**
+- **New Loan workflow `1tagvoU0UXtdDiMY` — Upsert Contact** sent `phone: null` / `birthdate: null` when Arive omitted them, which the Supabase upsert (`Prefer: resolution=merge-duplicates`) treats as "blank the column". Existing Web Lead phones got wiped on next Arive push.
+- **Status Update workflow `9JyzzwKac8v3uQ7d` — Sync Contact Rate+Balance** also sent `birthdate: null` and `co_borrower_birthdate: null` at funding — same overwrite-with-null problem.
+- Status Update workflow had **no** path that wrote phone/birthdate to the contact during normal status changes; only at funding (and that path could blank them).
+
+**Fix — DB trigger as single source of truth (migration `add_loans_fill_contact_blanks_trigger`):**
+- New trigger `trg_loans_fill_contact_blanks` AFTER INSERT OR UPDATE on `public.loans`.
+- COALESCE-only: fills `phone`, `home_phone`, `birthdate`, `co_borrower_first/last/email/mobile/birthdate` on the linked contact ONLY when currently null.
+- Manual edits in the contact form always win — Arive can never overwrite a hand-typed phone or DOB.
+- Regex-guarded `text → date` cast on birthdate so a malformed Arive value can't blow up the webhook.
+- `split_part` splits combined `co_borrower_name` into first/last for contact's separate columns.
+- Verified end-to-end: cleared Jung's phone/home/DOB → bumped his loan → trigger refilled all three. Then set phone to a manual value → bumped loan → manual value preserved.
+
+**Helper — `public.fill_contact_blanks(uuid, text, ...)` RPC** (migration `add_fill_contact_blanks_rpc`): callable for manual backfills from scripts or n8n if ever needed.
+
+**Backfill:** 13 contacts had loan-side data the contact form never received. All filled in one CTE statement, including Jung Lee (907-744-8127, home 949-490-9343, DOB 10/19), Susan Barkley, Mary Cairnie, Drew Benac, Preston Couch, Kevin Mayo, Derek Cho, Doug Cunningham, Vijayta Szpitalak, Dhaval Poladia, Vijay Siripuram, Roger Lawag, Chelsea Wise.
+
+**n8n cleanup — Status Update workflow `9JyzzwKac8v3uQ7d`:**
+- Stripped `birthdate` + `co_borrower_birthdate` from the Sync Contact Rate+Balance node body. Funding-day node can no longer null-out a DOB (would otherwise race the trigger on next status webhook to refill).
+- PUT via REST API → MCP `publish_workflow` to promote draft → production. Verified live: `contains_birthdate: false`. Active version `67866530-724e-408e-b19f-a04dc9883612`.
+
+**Why DB trigger over n8n surgery:** Both Arive workflows have 17+ nodes with custom Code/HTTP expressions. Regenerating the full SDK code via n8n MCP would risk regressions on unrelated logic. A single DB trigger catches both webhooks (insert = new app, update = status), is atomic with the loan write, and any future workflow that writes `loans.contact_id` also fills the contact for free.
+
+**Files touched:** none in repo. Two Supabase migrations + one n8n workflow update via REST.
+
 ## 2026-04-16 PM (Adam session) — Phase 3 kickoff: Follow-Up segments + Dashboard lead-source overhaul + config fix
 
 Session with Adam. Phase 2 Adam-confirmed (8+ sessions overdue). Phase 3 core work shipped. Five commits, all READY on Vercel.

@@ -15,10 +15,6 @@ import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
-import NoteInput, { type NoteRow } from '@/components/notes/NoteInput'
-import NoteCard from '@/components/notes/NoteCard'
-
-
 // No hardcoded fallback — a missing env var must fail closed rather than
 // route every tenant's manual automation triggers through Adam's n8n instance.
 
@@ -407,8 +403,7 @@ export default function LoanDetailPage() {
     setActiveRecord?: (record: { id: string; type: 'contact' | 'loan'; name: string } | null) => void
   }
   const setActiveRecord = outreachChat.setActiveRecord
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'notes' | 'activity' | 'emails'>('dashboard')
-  const [notes, setNotes] = useState<NoteRow[]>([])
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'automations' | 'activity' | 'emails'>('dashboard')
   const [actionsOpen, setActionsOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -433,13 +428,12 @@ export default function LoanDetailPage() {
   const fetchAll = useCallback(async () => {
     if (!organizationId) return
     setLoading(true)
-    const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes, notesRes] = await Promise.all([
+    const [loanRes, docsRes, activityRows, draftsRes, contactEmailsRes] = await Promise.all([
       supabase.from('loans').select('*').eq('id', loanId).eq('organization_id', organizationId).single(),
       supabase.from('documents').select('id, file_name, file_path, file_size, doc_type, created_at, uploaded_by').eq('loan_id', loanId).order('created_at', { ascending: false }),
       fetch(`/api/activity?loan_id=${loanId}&limit=50&columns=id,created_at,action,type,event_type,summary,entity_type,metadata`).then(r => r.ok ? r.json() : []),
       supabase.from('email_drafts').select('id, automation_name, recipient_name, recipient_email, subject, body_html, body_preview, status, created_at').eq('loan_id', loanId).order('created_at', { ascending: false }).limit(100),
       supabase.from('contact_emails').select('id, subject, body_html, body_text, automation_source, sent_at, created_at').eq('loan_id', loanId).order('sent_at', { ascending: false }).limit(100),
-      fetch(`/api/notes?loan_id=${loanId}`).then(r => r.ok ? r.json() : []),
     ])
 
     if (loanRes.data) {
@@ -460,7 +454,6 @@ export default function LoanDetailPage() {
     }
     setDocs(docsRes.data || [])
     setActivity((activityRows || []) as ActivityRow[])
-    setNotes((notesRes || []) as NoteRow[])
     setEmailDrafts((draftsRes.data || []) as EmailDraftRow[])
     setContactEmails((contactEmailsRes.data || []) as ContactEmailRow[])
     setLoading(false)
@@ -754,7 +747,6 @@ export default function LoanDetailPage() {
           {([
             { id: 'dashboard',   label: 'Dashboard' },
             { id: 'automations', label: 'Automations' },
-            { id: 'notes',       label: `Notes (${notes.length})` },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length + inboundEmails.length})` },
           ] as const).map(tab => {
@@ -780,24 +772,13 @@ export default function LoanDetailPage() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'dashboard' && (
-          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={fetchAll} />
+          <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} onRefresh={fetchAll} />
         )}
         {activeTab === 'automations' && (
           <div className="p-6"><AutomationsTab loan={loan} onActivityCreated={fetchAll} highlightId={selectedAutomationId} onClearHighlight={() => setSelectedAutomationId(null)} /></div>
         )}
-        {activeTab === 'notes' && (
-          <div className="p-6">
-            <LoanNotesTab
-              loanId={loanId}
-              contactId={loan?.contact_id ?? null}
-              notes={notes}
-              setNotes={setNotes}
-              onRefresh={fetchAll}
-            />
-          </div>
-        )}
         {activeTab === 'activity' && (
-          <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} loanId={loanId} onRefresh={fetchAll} /></div>
+          <div className="p-6"><ActivityTab activity={activity} setActivity={setActivity} contactId={loan?.contact_id ?? null} /></div>
         )}
         {activeTab === 'emails' && (
           <div className="p-6"><EmailHistoryTab drafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={fetchAll} /></div>
@@ -915,7 +896,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
 
 // ── Dashboard tab ─────────────────────────────────────────────────────────────
 
-function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, emailDrafts, contactEmails, inboundEmails, onRefresh }: {
+function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, contact, onRefresh }: {
   loan: Loan
   setLoan: (l: Loan) => void
   loanId: string
@@ -923,9 +904,6 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   activity: ActivityRow[]
   setActivity: (a: ActivityRow[]) => void
   contact: ContactRow | null
-  emailDrafts: EmailDraftRow[]
-  contactEmails: ContactEmailRow[]
-  inboundEmails: InboundEmailRow[]
   onRefresh: () => void
 }) {
   const supabase = createClient()
@@ -963,7 +941,7 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
         <KeyDatesGrid loan={loan} onSave={handleSaveField} />
         <div className="flex flex-col gap-6">
           <DocumentsSidebarPanel loanId={loanId} docs={docs} onRefresh={onRefresh} />
-          <LoanActivityPanel loanId={loanId} activity={activity} setActivity={setActivity} emailDrafts={emailDrafts} contactEmails={contactEmails} inboundEmails={inboundEmails} onRefresh={onRefresh} />
+          <LoanActivityPanel activity={activity} setActivity={setActivity} contactId={loan.contact_id ?? null} />
         </div>
       </div>
 
@@ -1469,23 +1447,15 @@ const LOAN_ACTIVITY_CONFIG: Record<string, { icon: typeof Phone; color: string; 
   note:           { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
 }
 
-function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contactEmails, inboundEmails, onRefresh }: {
-  loanId: string
+function LoanActivityPanel({ activity, setActivity, contactId }: {
   activity: ActivityRow[]
   setActivity: (a: ActivityRow[]) => void
-  emailDrafts: EmailDraftRow[]
-  contactEmails: ContactEmailRow[]
-  inboundEmails: InboundEmailRow[]
-  onRefresh: () => void
+  contactId: string | null
 }) {
   const supabase = createClient()
-  const { userId } = useOrg()
-  const [activeType, setActiveType] = useState<'call' | 'text' | 'email' | 'note' | null>(null)
-  const [logNotes, setLogNotes] = useState('')
-  const [saving, setSaving] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
-  const [panelFilter, setPanelFilter] = useState<'correspondence' | 'email' | 'text' | 'notes' | 'system' | 'all'>('correspondence')
+  const [panelFilter, setPanelFilter] = useState<'system' | 'all'>('system')
 
   const toggleExpanded = (id: string) => {
     setExpandedIds(prev => {
@@ -1502,112 +1472,22 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
     setDeletingIds(prev => { const next = new Set(prev); next.delete(id); return next })
   }
 
-  const handleLog = async () => {
-    if (!activeType) return
-    setSaving(true)
-
-    const newRow: ActivityRow = {
-      id: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-      action: `Logged ${activeType}`,
-      type: activeType,
-      event_type: null,
-      summary: logNotes.trim() || null,
-      entity_type: 'loan',
-      metadata: { activity_type: activeType },
-    }
-
-    // Optimistic update
-    setActivity([newRow, ...activity])
-    setActiveType(null)
-    setLogNotes('')
-
-    const res = await fetch('/api/activity', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        publicFields: {
-          loan_id: loanId,
-          action: `Logged ${activeType}`,
-          type: activeType,
-          entity_type: 'loan',
-          user_id: userId ?? null,
-        },
-        pii: {
-          summary: logNotes.trim() || null,
-          metadata: { activity_type: activeType },
-        },
-      }),
-    }).catch(err => {
-      console.error('[loan.activityLog] write failed:', err)
-      return { ok: false } as Response
-    })
-
-    setSaving(false)
-    if (!res.ok) { setActivity(activity); return }
-    onRefresh()
-  }
-
-  // Merge manual activity + email sources into one chronological feed
-  const emailAsActivity: ActivityRow[] = [
-    ...inboundEmails.map(e => ({
-      id: `inbound-${e.id}`,
-      created_at: e.occurred_at ?? e.created_at,
-      action: e.subject ?? 'Inbound email',
-      type: 'email_inbound',
-      event_type: null,
-      summary: `From: ${e.from_address ?? 'unknown'}\n${e.body_snippet ?? ''}`,
-      entity_type: 'email' as string | null,
-      metadata: null,
-    })),
-    ...emailDrafts.filter(d => d.status === 'sent').map(d => ({
-      id: `draft-${d.id}`,
-      created_at: d.created_at,
-      action: d.subject ?? d.automation_name,
-      type: 'email_outbound',
-      event_type: null,
-      summary: `To: ${d.recipient_name ?? d.recipient_email}\n${d.body_preview ?? ''}`,
-      entity_type: 'email' as string | null,
-      metadata: null,
-    })),
-    ...contactEmails.map(e => ({
-      id: `sent-${e.id}`,
-      created_at: e.sent_at ?? e.created_at,
-      action: e.subject ?? 'Sent email',
-      type: 'email_outbound',
-      event_type: null,
-      summary: e.body_text?.slice(0, 200) ?? '',
-      entity_type: 'email' as string | null,
-      metadata: null,
-    })),
-  ]
-  const allItems = [...activity, ...emailAsActivity]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-
+  // Loan activity feed = system events only. Correspondence (emails, calls,
+  // texts, notes) lives on the contact record — see the "View on contact" link
+  // at the bottom of the panel.
   const CORRESPONDENCE_TYPES = new Set(['call', 'text', 'email', 'note', 'email_inbound', 'email_outbound'])
   const CORRESPONDENCE_ACTIONS = new Set(['imessage.received', 'imessage.sent', 'email.received', 'email_received'])
 
-  const feedItems = allItems.filter(a => {
-    const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
-    const action = a.action ?? ''
-    if (panelFilter === 'all') return true
-    if (panelFilter === 'correspondence') {
-      return CORRESPONDENCE_TYPES.has(aType ?? '') || CORRESPONDENCE_ACTIONS.has(action)
-    }
-    if (panelFilter === 'email') {
-      return aType === 'email' || aType === 'email_inbound' || aType === 'email_outbound' || action === 'email.received' || action === 'email_received'
-    }
-    if (panelFilter === 'text') {
-      return aType === 'text' || action === 'imessage.received' || action === 'imessage.sent'
-    }
-    if (panelFilter === 'notes') {
-      return aType === 'note'
-    }
-    if (panelFilter === 'system') {
+  const feedItems = activity
+    .slice()
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .filter(a => {
+      if (panelFilter === 'all') return true
+      const aType = (a.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? a.type
+      const action = a.action ?? ''
+      // 'system' filter — exclude correspondence
       return !CORRESPONDENCE_TYPES.has(aType ?? '') && !CORRESPONDENCE_ACTIONS.has(action)
-    }
-    return true
-  })
+    })
 
   return (
     <div className="bg-card/80 border border-input rounded-lg overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
@@ -1621,10 +1501,10 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div className="px-3 pt-2 pb-1 shrink-0">
+      {/* Filter tabs + contact link */}
+      <div className="px-3 pt-2 pb-2 shrink-0 flex items-center justify-between gap-2 border-b border-input/60">
         <div className="flex gap-0.5 flex-wrap">
-          {([['correspondence', 'Correspondence'], ['email', 'Email'], ['text', 'Text'], ['notes', 'Notes'], ['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
+          {([['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setPanelFilter(key)}
@@ -1639,62 +1519,13 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="px-3 py-2.5 border-b border-input/60 shrink-0">
-        <div className="flex gap-1.5">
-          {(['call', 'text', 'email', 'note'] as const).map(type => {
-            const cfg = LOAN_ACTIVITY_CONFIG[type]
-            const Icon = cfg.icon
-            const isActive = activeType === type
-            return (
-              <button
-                key={type}
-                onClick={() => {
-                  if (isActive) { setActiveType(null); setLogNotes('') }
-                  else { setActiveType(type); setLogNotes('') }
-                }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all"
-                style={{
-                  background: isActive ? cfg.bg : 'transparent',
-                  color: isActive ? cfg.color : 'var(--muted)',
-                  border: isActive ? `1px solid ${cfg.color}` : '1px solid #3f3f46',
-                }}
-              >
-                <Icon size={10} /> {cfg.label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Inline form */}
-        {activeType && (
-          <div className="mt-2.5">
-            <textarea
-              autoFocus
-              value={logNotes}
-              onChange={e => setLogNotes(e.target.value)}
-              placeholder={`Notes about this ${activeType}…`}
-              rows={2}
-              className="w-full bg-card border border-input rounded px-3 py-2 text-xs font-mono text-foreground placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-none"
-            />
-            <div className="flex gap-2 mt-1.5">
-              <button
-                onClick={handleLog}
-                disabled={saving}
-                className="px-3 py-1 rounded text-[11px] font-mono font-semibold bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
-              >
-                {saving ? 'Saving…' : 'Save'}
-              </button>
-              <button
-                onClick={() => { setActiveType(null); setLogNotes('') }}
-                className="px-2.5 py-1 rounded text-[11px] font-mono text-muted-foreground hover:text-foreground/80 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+        {contactId && (
+          <Link
+            href={`/dashboard/contacts/${contactId}`}
+            className="text-[10px] font-mono text-muted-foreground hover:text-[#c9a84c] transition-colors shrink-0"
+          >
+            Log calls, texts, notes on contact →
+          </Link>
         )}
       </div>
 
@@ -1702,7 +1533,7 @@ function LoanActivityPanel({ loanId, activity, setActivity, emailDrafts, contact
       <div className="flex-1 overflow-y-auto">
         {feedItems.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-xs text-muted-foreground font-mono">{panelFilter === 'correspondence' ? 'No correspondence yet — log a call, text, or note above.' : panelFilter === 'all' ? 'No activity yet.' : `No ${panelFilter} activity.`}</p>
+            <p className="text-xs text-muted-foreground font-mono">{panelFilter === 'all' ? 'No activity yet.' : 'No system activity yet.'}</p>
           </div>
         ) : (
           feedItems.map(item => {
@@ -2478,59 +2309,12 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
 
 // ── Activity tab ──────────────────────────────────────────────────────────────
 
-// ── Loan Notes Tab ──────────────────────────────────────────────────────────
-
-function LoanNotesTab({ loanId, contactId, notes, setNotes, onRefresh }: {
-  loanId: string
-  contactId: string | null
-  notes: NoteRow[]
-  setNotes: (n: NoteRow[]) => void
-  onRefresh: () => void
-}) {
-  return (
-    <div className="max-w-2xl space-y-4">
-      <NoteInput
-        contactId={contactId}
-        loanId={loanId}
-        onNoteCreated={(note) => {
-          setNotes([note, ...notes])
-          onRefresh()
-        }}
-      />
-      {notes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted-foreground font-mono">
-          <StickyNote size={24} />
-          <p className="text-sm">No notes yet</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {notes.map(note => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onUpdate={(id, content) => {
-                setNotes(notes.map(n => n.id === id ? { ...n, content, updated_at: new Date().toISOString() } : n))
-              }}
-              onDelete={(id) => {
-                setNotes(notes.filter(n => n.id !== id))
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ── Activity Tab (read-only timeline) ───────────────────────────────────────
 
-function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; loanId: string; onRefresh: () => void }) {
+function ActivityTab({ activity, setActivity, contactId }: { activity: ActivityRow[]; setActivity: (a: ActivityRow[]) => void; contactId: string | null }) {
   const supabase = createClient()
-  const { userId } = useOrg()
-  const [filter, setFilter] = useState<'correspondence' | 'email' | 'text' | 'notes' | 'system' | 'all'>('correspondence')
-  const [logModal, setLogModal] = useState<'call' | 'email' | 'text' | null>(null)
-  const [logNotes, setLogNotes] = useState('')
-  const [logSaving, setLogSaving] = useState(false)
+  const [filter, setFilter] = useState<'system' | 'all'>('system')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
 
@@ -2549,60 +2333,6 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
     setDeletingIds(prev => { const next = new Set(prev); next.delete(id); return next })
   }
 
-  const handleLogActivity = async () => {
-    if (!logModal) return
-    setLogSaving(true)
-
-    const newRow: ActivityRow = {
-      id: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-      action: `Logged ${logModal}`,
-      type: logModal,
-      event_type: null,
-      summary: logNotes.trim() || null,
-      entity_type: 'loan',
-      metadata: { activity_type: logModal },
-    }
-
-    // Optimistic update — prepend to feed immediately
-    setActivity([newRow, ...activity])
-    setLogModal(null)
-    setLogNotes('')
-
-    // Persist via /api/activity (handles PII encryption server-side)
-    const res = await fetch('/api/activity', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        publicFields: {
-          loan_id: loanId,
-          action: `Logged ${logModal}`,
-          type: logModal,
-          entity_type: 'loan',
-          user_id: userId ?? null,
-        },
-        pii: {
-          summary: logNotes.trim() || null,
-          metadata: { activity_type: logModal },
-        },
-      }),
-    }).catch(err => {
-      console.error('[loan.logModal] write failed:', err)
-      return { ok: false } as Response
-    })
-
-    setLogSaving(false)
-
-    if (!res.ok) {
-      // Rollback optimistic update on failure
-      setActivity(activity)
-      return
-    }
-
-    // Background re-fetch to get server-generated id
-    onRefresh()
-  }
-
   const CORRESPONDENCE_ACTIONS_AT = new Set(['imessage.received', 'imessage.sent', 'email.received', 'email_received'])
   const isCorrespondence = (item: ActivityRow) => {
     const aType = (item.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? item.type
@@ -2610,61 +2340,22 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
   }
 
   const visible = activity.filter(item => {
-    const aType = (item.metadata as Record<string, unknown> | null)?.activity_type as string | undefined ?? item.type
-    const action = item.action ?? ''
     if (filter === 'all') return true
-    if (filter === 'correspondence') return isCorrespondence(item)
-    if (filter === 'email') return aType === 'email' || aType === 'email_inbound' || aType === 'email_outbound' || action === 'email.received' || action === 'email_received'
-    if (filter === 'text') return aType === 'text' || action === 'imessage.received' || action === 'imessage.sent'
-    if (filter === 'notes') return aType === 'note'
-    if (filter === 'system') return !isCorrespondence(item)
-    return true
+    // 'system' filter — exclude correspondence (lives on contact record)
+    return !isCorrespondence(item)
   })
 
   return (
     <div className="max-w-2xl">
-      {/* Log activity buttons */}
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setLogModal('call')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-muted text-foreground/80 border border-input hover:border-amber-500/50 hover:text-amber-400 transition-colors">
-          <span className="text-sm">📞</span> Log Call
-        </button>
-        <button onClick={() => setLogModal('email')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-blue-900/30 text-blue-400 border border-blue-800 hover:bg-blue-900/50 transition-colors">
-          <span className="text-sm">📧</span> Log Email
-        </button>
-        <button onClick={() => setLogModal('text')} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-violet-900/30 text-violet-400 border border-violet-800 hover:bg-violet-900/50 transition-colors">
-          <span className="text-sm">💬</span> Log Text
-        </button>
-      </div>
-
-      {/* Log modal */}
-      {logModal && (
-        <div className="mb-4 bg-muted/80 border border-input rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-mono font-semibold text-foreground">Log {logModal}</h3>
-            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="text-muted-foreground hover:text-foreground/80"><X size={16} /></button>
-          </div>
-          <div className="mb-2">
-            <p className="text-[11px] font-mono text-muted-foreground mb-1">Date/Time: {new Date().toLocaleString()}</p>
-          </div>
-          <textarea
-            value={logNotes}
-            onChange={e => setLogNotes(e.target.value)}
-            placeholder={`Notes about this ${logModal}...`}
-            rows={3}
-            className="w-full bg-card border border-input rounded px-3 py-2 text-xs font-mono text-foreground placeholder-zinc-600 focus:outline-none focus:border-[#C9A84C] resize-y"
-          />
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={handleLogActivity}
-              disabled={logSaving || !logNotes.trim()}
-              className="px-4 py-1.5 rounded text-xs font-mono font-medium bg-[#C9A84C] text-black hover:bg-[#d4b860] disabled:opacity-50 transition-colors"
-            >
-              {logSaving ? 'Saving...' : 'Save'}
-            </button>
-            <button onClick={() => { setLogModal(null); setLogNotes('') }} className="px-3 py-1.5 rounded text-xs font-mono text-muted-foreground hover:text-foreground">
-              Cancel
-            </button>
-          </div>
+      {contactId && (
+        <div className="mb-4 flex items-center justify-between gap-3 px-3 py-2 bg-muted/40 border border-input/60 rounded text-[11px] font-mono text-muted-foreground">
+          <span>Calls, texts, emails, and notes live on the contact record.</span>
+          <Link
+            href={`/dashboard/contacts/${contactId}`}
+            className="shrink-0 text-[#c9a84c] hover:underline"
+          >
+            View on contact →
+          </Link>
         </div>
       )}
 
@@ -2676,7 +2367,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
       ) : (
       <>
       <div className="flex gap-1 mb-4 flex-wrap">
-        {([['correspondence', 'Correspondence'], ['email', 'Email'], ['text', 'Text'], ['notes', 'Notes'], ['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
+        {([['system', 'System'], ['all', 'All']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -2693,7 +2384,7 @@ function ActivityTab({ activity, setActivity, loanId, onRefresh }: { activity: A
 
       {visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2 text-muted-foreground font-mono">
-          <p className="text-sm">{filter === 'correspondence' ? 'No correspondence yet' : filter === 'all' ? 'No activity yet' : `No ${filter} activity`}</p>
+          <p className="text-sm">{filter === 'all' ? 'No activity yet' : 'No system activity yet'}</p>
         </div>
       ) : (
         <div className="space-y-0 border border-input rounded-lg overflow-hidden">

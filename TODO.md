@@ -23,7 +23,9 @@
 
 ## Next (after Now items clear)
 
-- [ ] Security findings #5 (field-level encryption), #9 (admin action log), #10 (sys vs org admin)
+- [ ] Security finding #5 (field-level encryption) — ADAM-BLOCKED (GLBA attorney consultation required)
+- [x] ~~Security finding #9 (admin action log)~~ — DONE 2026-04-16. Migration 088 + `logAdminAction()` + 3 routes wired.
+- [x] ~~Security finding #10 (sys vs org admin)~~ — DONE 2026-04-16. `requireOrgAdmin()` added to `src/lib/admin/auth.ts`.
 - [x] ~~PII Phase 4: drop plaintext columns from `activity_log`~~ — DONE 2026-04-12. Migration 083 applied, post-check passed.
 - [ ] Renovation Phase 3: Contacts — merged timeline, referral tracking, realtor performance
 - [ ] Marketing site: demo user with synthetic data (blocks May 1 launch screenshots)

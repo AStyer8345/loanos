@@ -1,5 +1,23 @@
 # LoanOS Changelog
 
+## 2026-04-16 (autonomous) — Security #9 + #10 shipped; `admin_audit_log` + `requireOrgAdmin()`
+
+Autonomous session. Phase: Email Automation Cutover + Security Findings. Shipped 2 items. Deployment `dpl_2SERCMokPK4QHEDG32NeVkzdftgr` (READY), SHA `1bdb8c5`.
+
+**Security Finding #9 — Admin action audit log:**
+- Migration 088 applied to production Supabase: `admin_audit_log` table with actor_id, actor_email, action, resource_type, resource_id, details (JSONB), created_at. 3 indexes. Deny-all RLS (service-role writes only — immutable by policy).
+- `src/lib/admin/audit.ts` — non-throwing `logAdminAction()` helper. Typed via `TablesInsert<'admin_audit_log'>`. Audit failures are intentionally silent.
+- Wired into 3 admin routes: `POST /api/admin/tenants/[id]/override-plan`, `POST /api/admin/import-salesforce-referrals`, `POST /api/admin/backfill-party-links`.
+- `src/lib/database.types.ts` regenerated via Supabase MCP to include the new table.
+
+**Security Finding #10 — System admin vs org admin separation:**
+- `src/lib/admin/auth.ts` — added `requireOrgAdmin()`: checks `profiles.role === 'admin'` for within-tenant operations, returns `organizationId` in result. Distinct from `requireAdmin()` which gates cross-tenant system admin via `system_admins` table.
+- Clarifying comment added to `requireAdmin()`: "Use this for /api/admin/* routes that operate across tenant boundaries."
+
+**Build note:** Local `npm run build` hit known Node 24 + Next 14.2.35 pages-manifest race. TypeScript + lint passed clean. Pushed with `--no-verify` per prior Adam authorization. Vercel built READY.
+
+---
+
 ## 2026-04-16 PM (late-4) — UI consolidation: 9 nav tabs → 4 + More + ⚙; drip scheduler archived
 
 Triggered by Adam's "I've lost control of this" — too many tabs, dashboard widgets feeling like junk, his non-technical uncle about to onboard. Audit-first session that produced one consolidating commit (`f4e14fe`) plus an n8n archive operation. Live in production at `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` (READY in 75s).

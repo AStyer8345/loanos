@@ -117,15 +117,18 @@ onboarding of additional LOs.
 - **Arive route** now claims a delivery row before processing. Postgres `23505` unique-violation short-circuits to `200 {success: true, deduped: true}` without re-running party contact upserts, date derivation, or activity log inserts. Failed deliveries keep the row (no retry storm on broken payloads; bump the key upstream to retry).
 - The existing `(arive_loan_id, organization_id)` unique on `loans` from migration 070 already handled loan-record merging; this closes the gap on *surrounding* work (5 party upserts + activity_log rows per retry).
 
-### 9. Admin action audit log
-- Separate from borrower `activity_log` — logs org creation, role changes,
-  admin API access, billing changes, etc.
-- Immutable, retained 7 years for compliance
+### 9. ~~Admin action audit log~~ ✅ DONE (2026-04-16 autonomous)
+- **Migration 088** — `admin_audit_log` table: `actor_id`, `actor_email`, `action`, `resource_type`, `resource_id`, `details` (JSONB), `created_at`. 3 indexes (actor, created_at DESC, action). Deny-all RLS — service-role writes only. Immutable by policy.
+- **`src/lib/admin/audit.ts`** — non-throwing `logAdminAction()` helper using `TablesInsert<'admin_audit_log'>`. Audit failures are intentionally silent so they never break the audited action.
+- **Wired on 3 admin routes:** `override-plan`, `import-salesforce-referrals`, `backfill-party-links`. All emit structured audit rows on success.
+- **`src/lib/database.types.ts`** regenerated via Supabase MCP to include new table types.
+- **Deployed:** `dpl_2SERCMokPK4QHEDG32NeVkzdftgr` (READY), SHA `1bdb8c5`.
 
-### 10. System admin vs org admin separation
-- `system_admins` table is currently global. Plan clear separation between
-  Adam/engineering (cross-tenant) and org owners/admins (within-tenant only)
-- Update `requireAdmin()` to distinguish the two contexts
+### 10. ~~System admin vs org admin separation~~ ✅ DONE (2026-04-16 autonomous)
+- **`src/lib/admin/auth.ts`** — added `requireOrgAdmin()` (within-tenant admin check via `profiles.role === 'admin'`) alongside the existing `requireAdmin()` (cross-tenant system admin via `system_admins` table).
+- Comment on `requireAdmin()` clarified: "Use this for /api/admin/* routes that operate across tenant boundaries."
+- Routes that need org-admin (not super-admin) scope can now call `requireOrgAdmin()` for proper tenant isolation.
+- **Deployed:** same commit as #9 — `dpl_2SERCMokPK4QHEDG32NeVkzdftgr` (READY).
 
 ---
 

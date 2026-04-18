@@ -111,5 +111,5 @@ export default function SharePage({ params }: { params: { token: string } }) {
 
   const displayData = buildDisplayData(data)
 
-  return <SharePageLayout data={data} displayData={displayData} branding={data.branding} />
+  return <SharePageLayout data={data} displayData={displayData} branding={data.branding} token={params.token} />
 }

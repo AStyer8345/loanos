@@ -18,6 +18,7 @@ import ShareVideoEmbed from './ShareVideoEmbed'
 import ScenarioComparisonTable from './ScenarioComparisonTable'
 import SocialProofBlock from './SocialProofBlock'
 import BorrowerQA from './BorrowerQA'
+import BorrowerChat from './BorrowerChat'
 import type { BorrowerQAPair } from '@/app/share/[token]/page'
 
 interface SharedScenario {
@@ -34,6 +35,7 @@ interface SharePageLayoutProps {
   data: SharedScenario
   displayData: DisplayData
   branding?: ShareBranding
+  token: string
 }
 
 // Neutral fallback used ONLY if the API route somehow returns no branding block.
@@ -102,7 +104,7 @@ function SectionIntro({ title, subtitle }: { title: string; subtitle?: string })
   )
 }
 
-export default function SharePageLayout({ data, displayData, branding }: SharePageLayoutProps) {
+export default function SharePageLayout({ data, displayData, branding, token }: SharePageLayoutProps) {
   const b = branding || DEFAULT_BRANDING
   const mode = displayData.mode
   const heroStat = getHeroStat(displayData)
@@ -202,6 +204,11 @@ export default function SharePageLayout({ data, displayData, branding }: SharePa
                 <BorrowerQA pairs={data.borrower_qa} />
               </section>
             )}
+
+            {/* Borrower AI Chat — live Q&A, print:hidden */}
+            <section className="no-break print:hidden">
+              <BorrowerChat token={token} />
+            </section>
 
             {/* Break-Even Visual */}
             {hasBreakEven && (

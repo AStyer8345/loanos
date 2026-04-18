@@ -132,3 +132,14 @@ Daily digest: PENDING (AM session — PM session will send)
 Timestamp: Thu Apr 16 07:41:00 CDT 2026
 SESSION FULLY COMPLETE ✓
 SESSION_START — Fri Apr 17 07:30:17 CDT 2026
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources added: 1 (LoanOS_System_Log.md refreshed in Enterprise notebook)
+Stale removed: 1 (old LoanOS_System_Log source)
+Session note: YES (appended to master log)
+Master notebook: PUSHED (284383e3, source 169a9caa)
+Daily digest: PENDING (PM session will send)
+Timestamp: Fri Apr 17 07:39:29 CDT 2026
+SESSION FULLY COMPLETE ✓
+SESSION_START — Sat Apr 18 08:01:20 CDT 2026
+NOTEBOOKLM (PULL): SKIPPED — 7th consecutive CLI timeout (known issue)

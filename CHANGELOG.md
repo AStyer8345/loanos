@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-04-18 AM (scenarios-am) — Borrower AI Chat on Share Page
+
+- New `BorrowerChat.tsx` — "Ask a Question" card below BorrowerQA; message thread with gold user bubbles + assistant icon; animated 3-dot loading dots; max 3 turns client-side; `print:hidden`
+- New `POST /api/share/[token]/chat` — public endpoint, service client, rate-limited (20/min IP + 10/min token), fetches scenario by token, builds data context, calls Claude with compliance-safe system prompt
+- `SharePageLayout`: new `token` prop + `BorrowerChat` rendered below `BorrowerQA`; `share/[token]/page.tsx` passes token through
+- MC gap closed: borrowers now get 24/7 scenario-specific answers without calling Adam
+- Build: ✅ | Commit: `223630c` | Vercel: `dpl_A4JCF99yisz7GAKiM6SBrWmLWQ3g`
+
 ## 2026-04-17 AM (scenarios-am) — Mobile Quick-Input Form
 
 - New `MobileQuickInput.tsx` — 4-field card shown only on mobile (`md:hidden`) at the top of ScenarioBuilder

@@ -771,3 +771,35 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Backfill Q&A (Tier 6 Item 4) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-18 (scenarios-am)
+
+**What was built:**
+- Borrower-facing AI Chat on share page
+  - **`src/app/api/share/[token]/chat/route.ts`** (new): public POST endpoint — no auth, fetches scenario by share token using service client, checks expiry, builds scenario data context (same pattern as generateQAPairs), calls Claude with compliant system prompt (no product recommendations, no protected classes, scenario-specific numbers only), returns `{ answer: string }`; rate-limited: 20/min per IP + 10/min per token
+  - **`src/components/share/BorrowerChat.tsx`** (new): "Ask a Question" card — input field, animated 3-dot loading indicator, message thread (user bubbles right-aligned gold-tinted, assistant left-aligned with MessageSquare icon), max 3 turns enforced client-side, "Contact your loan officer for more questions" when limit reached, optimistic UI (user message appears immediately, rolled back on error), print:hidden
+  - **`src/components/share/SharePageLayout.tsx`**: new `token` prop threaded through; `BorrowerChat` rendered below `BorrowerQA` section
+  - **`src/app/share/[token]/page.tsx`**: passes `params.token` to `SharePageLayout`
+
+**MC gap closed:** Share page now has 24/7 live Q&A. Before: borrowers landing at 9pm with questions had to call Adam, wait, or go to Google. After: they type a question, get a scenario-specific answer in seconds, up to 3 turns. Mortgage Coach charges extra for interactive borrower chat. LoanOS does it for free via the existing Anthropic client.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `223630c` — pushed to main
+**Vercel:** `dpl_A4JCF99yisz7GAKiM6SBrWmLWQ3g` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/app/api/share/[token]/chat/route.ts` (new)
+- `src/components/share/BorrowerChat.tsx` (new)
+- `src/components/share/SharePageLayout.tsx`
+- `src/app/share/[token]/page.tsx`
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Quick scenario from contacts page (Tier 7 Item 2) — "Create Scenario" button on contact detail pre-fills borrower name + address into ScenarioBuilder via URL params; zero typing for common LO workflow
+2. PDF from mobile verification (Tier 7 Item 3) — verify Download PDF (opens share?print=1) works on iOS Safari; if not, build a direct puppeteer PDF endpoint
+3. Confirm Tier 7 Item 1 working end-to-end with a real share link (Vercel READY)
+
+**Domain queue updates:**
+- Tier 7 Item 1 (Borrower-facing AI chat) — ✅ COMPLETE this session

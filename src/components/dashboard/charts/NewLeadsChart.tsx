@@ -13,6 +13,7 @@ interface NewLeadsChartProps {
 const COLORS: Record<LeadSourceCategory, string> = {
   'AEO':              '#8b5cf6', // purple — the newcomer, most interesting
   'Realtor Referral': '#C9A84C', // gold (brand)
+  'Past Client':      '#f59e0b', // amber — repeat business signal
   'Web Lead':         '#3b82f6', // blue
   'SEO':              '#10b981', // green
   'Social':           '#ec4899', // pink

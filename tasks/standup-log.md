@@ -2,6 +2,88 @@
 
 ---
 
+## 2026-04-18 — Day 24 (Launch: April 26)
+
+**Days to launch:** 8
+
+**Yesterday shipped:**
+- `feat(scenarios)`: mobile quick-input form — 4-field card on ScenarioBuilder, live P&I preview, one-tap share link in ~10s (`1fa93f6`)
+- `docs(scenarios)`: AM session log — Tier 6 complete, domain-queue.md + master notebook synced (`291bfbe`)
+- `docs(autonomous)`: demo data polish + n8n blank email fix — pipeline addresses/dates/loan numbers screenshot-ready; Inbound Email blank-from bug patched (`a127b34`)
+
+**Vercel status:** READY — `dpl_HrEW3D315oPrR87SQxTjYcyTW6TV` (SHA `291bfbe`, as of standup check). All recent deployments READY. No errors. (Note: scenarios-am shipped `dpl_A4JCF99yisz7GAKiM6SBrWmLWQ3g` after standup ran — Borrower AI Chat on share page.)
+
+**n8n workflow health:** 33 total, 29 active. No error states.
+- 4 inactive (all expected): `W0K4YDzkZd0Hzv6g` (Pre-Drop Warm-Up), `LfLSDgqgb6yCe93C` (Quarterly Rate Review), `PBu2Zt0YpiLHeqbL` (Post-Calendly — needs Resend cred), `AK1fBcaX1cPcdlGx` (Review Request — intentional)
+- `HkLjsnnhT5MgrX5H` (CD & Contract Extractor): active=true per MCP — execution test still needed
+
+**Blockers:**
+- Marketing demo data: screenshots + launch page copy not done — 13 days to May 1 with zero marketing site progress (HIGHEST RISK)
+- Phase 3 Adam confirmation still outstanding — blocks formal Phase 4 start
+- Workflow DevKit cutover (Task 23): blocked on Adam env vars + Resend webhook config
+- Seq C INACTIVE — Outlook credential unconnected (8+ sessions)
+
+**Today's focus:** Phase 5 email template wiring — wire UI buttons to 6 n8n email workflows (PA, CD, referral intro, refi intake, review request, web lead). Renovation phases 1-4 are shipped; Phase 5 is next executable work.
+
+**Risk watch:** 8 days to launch. Marketing site (loanos-marketing) at zero progress — 13 days to May 1 hard deadline. Demo data ready but screenshots/copy are Adam-owned. Scenarios Tier 7 work happening in parallel but not on the May 1 critical path — Phase 5 email wiring is.
+
+**Open audit findings:** 0 CRITICAL, 0 HIGH (no files in audits/)
+
+---
+
+## 2026-04-17 — Day 23 (Launch: April 26)
+
+**Days to launch:** 9
+
+**Yesterday shipped:**
+- `feat(loans)`: single source of truth for notes + correspondence on contact record (`d2e4440`)
+- `briefing`: mark Calendly webhook + Week 4 schedule done (`967c818`)
+- `docs(autonomous)`: 2026-04-17 demo data polish + n8n blank email fix — pipeline addresses, closing dates, loan numbers all screenshot-ready; Inbound Email blank-from bug patched (`a127b34`)
+
+**Blockers:**
+- Marketing demo data: demo records polished (autonomous session) but screenshots + launch page copy still not done — May 1 deadline in 14 days with zero marketing site progress
+- Phase 3 Adam confirmation still outstanding — blocks formal Phase 4 start
+- Workflow DevKit cutover (Task 23): blocked on Adam env vars + Resend webhook config
+- Seq C INACTIVE — Outlook credential unconnected (7+ sessions)
+
+**Today's focus:** Phase 5 email template wiring — wire UI buttons to the 6 n8n email workflows (PA, CD, referral intro, refi intake, review request, web lead). Phase 4 Contacts mostly done; Phase 5 is the next executable phase.
+
+**Risk watch:** 9 days to launch. Marketing site (loanos-marketing) at zero progress — launch page screenshots blocked. Demo data polished today but no agent can write the marketing copy or take screenshots. This is the single highest timeline risk.
+
+**Open audit findings:** 0 CRITICAL, 0 HIGH (no files in audits/)
+
+---
+
+## 2026-04-16 — Day 22 (Launch: April 26)
+
+**Days to launch:** 10
+
+**Yesterday shipped:**
+- `fix(admin)`: add missing /admin/email-automation page.tsx — 404 resolved, all 4 admin panels now accessible
+- `feat(email-log)`: Resend sends logged to activity_log in real time; EmailSendLog panel now reads live data (#3)
+- `feat(drafts)`: per-LO drafts review UI for multi-tenant beta — LOs review AI drafts + send from their own inbox (#2)
+- `fix(workflows)`: corrected admin email fallback from adam@styermortgage.com → adam@thestyerteam.com
+
+**Vercel status:** READY — `dpl_CWxQo5KnaCfsW93QFyBYZrvjW3D8` (SHA `80fb0ee`, commit: fix(admin) add missing /admin/email-automation page.tsx). All 20 recent deployments READY. No errors.
+
+**n8n workflow health:** 33 total, 29 active. No error states detected.
+- 4 inactive (all expected): `W0K4YDzkZd0Hzv6g` (Pre-Drop Warm-Up), `LfLSDgqgb6yCe93C` (Quarterly Rate Review), `PBu2Zt0YpiLHeqbL` (Post-Calendly Booking), `AK1fBcaX1cPcdlGx` (Review Request — intentional)
+- `HkLjsnnhT5MgrX5H` (CD & Contract Extractor): active=true. Execution test still needed to confirm Outlook credential is wired.
+
+**Blockers:**
+- Marketing demo data: zero progress, 10 days to May 1 — HIGHEST RISK. Blocks screenshots + public launch page.
+- Phase 2 Adam confirmation outstanding 8+ consecutive sessions — blocks Phase 3 (Follow-Up List)
+- Workflow DevKit cutover (Task 23): blocked on Adam setting env vars + Resend webhook + starting 7-day shadow
+- Seq C INACTIVE — Outlook credential unconnected (7+ sessions)
+
+**Today's focus:** Marketing demo data cleanup (must start this week — May 1 launch page at risk). CD & Contract Extractor execution test.
+
+**Risk watch:** Marketing demo data is sole item at timeline risk — 10 days, zero progress, no agent can unblock it. Phase 2 confirmation also slipping (8+ sessions) but not launch-blocking until Phase 3 is scheduled.
+
+**Open audit findings:** 0 CRITICAL, 3 MEDIUM open (#5 field-level encryption, #9 admin action log, #10 sys vs org admin separation).
+
+---
+
 ## 2026-04-15 — Day 21 (Launch: April 26)
 
 **Days to launch:** 11

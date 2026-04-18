@@ -1,4 +1,64 @@
 ## SESSION_END
+- **Datetime**: 2026-04-17 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
+
+```
+SESSION END: 2026-04-17 22:00:00
+Mode: PM
+Focus: PUSH+CURATE — Staleness audit, CONTEXT.md refresh, digest generation
+MASTER: In progress.
+```
+
+## SESSION_END
+- **Datetime**: 2026-04-16 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
+
+```
+SESSION END: 2026-04-16 22:00:00
+Mode: PM
+Focus: PUSH+CURATE — Staleness audit, CONTEXT.md refresh (Phase 3 state), digest generation
+MASTER: All steps complete. NotebookLM PUSH+CURATE complete.
+```
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 2 (notebooklm-audit-2026-04-15.md, CONTEXT.md [Apr 15 LoanOS stale])
+Sources added: 2 (refreshed CONTEXT.md Apr 16 [Phase 3 shipped + UI consolidation], notebooklm-audit-2026-04-16.md)
+Web sources added: 0 (at 50/50 capacity — research saved to research/2026-04-16-lead-scoring-web.md)
+Final notebook count: 50/50
+Foundational docs refreshed: CONTEXT.md (Phase 2 Adam-confirmed + Phase 3 kicked off: Follow-Up segments + lead-source + automation_registry 8/8 + Set Rate repaired)
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: SENT (Zapier status: success)
+Timestamp: 2026-04-16 22:00:00
+SESSION FULLY COMPLETE ✓
+
+## SESSION_END
+- **Datetime**: 2026-04-15 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
+
+```
+SESSION END: 2026-04-15 22:00:00
+Mode: PM
+Focus: PUSH+CURATE — Staleness audit, cleanup (AM miscount corrected: actual was 50/50), digest generation
+MASTER: All steps complete. NotebookLM PUSH+CURATE complete.
+```
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 3 (notebooklm-audit-2026-04-14.md, CONTEXT.md [Apr 14 LoanOS], session-log.md [Apr 14])
+Sources added: 3 (refreshed CONTEXT.md Apr 15 LoanOS, notebooklm-audit-2026-04-15.md, 2026-04-15-lead-scoring-spec.md [catch-up from AM])
+Web sources added: 0 (at 50/50 capacity)
+Final notebook count: 50/50
+AM session count discrepancy: AM reported 65, actual was 50 — corrected
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: SENT (Zapier status: success)
+Timestamp: 2026-04-15 22:00:00
+SESSION FULLY COMPLETE ✓
+
+---
+
+## SESSION_END
 - **Datetime**: 2026-04-15 03:45:00
 - **Mode**: AM
 - **Session**: Lead Gen AM — Daily 3:00 AM

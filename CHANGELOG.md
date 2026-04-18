@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-04-18 (standup) — Day 24 standup
+
+- Vercel READY: `dpl_HrEW3D315oPrR87SQxTjYcyTW6TV` (SHA `291bfbe`) — all 20 recent deploys READY, no errors
+- n8n: 33 workflows, 29 active — no error states; 4 inactive all intentional
+- `HkLjsnnhT5MgrX5H` (CD & Contract Extractor) active=true via MCP — execution test still needed to confirm Outlook cred wired
+- Scenarios Tier 6 confirmed complete; Tier 7 (Borrower AI Chat) already shipped this AM by scenarios-am
+- Standup log appended to `tasks/standup-log.md`, CONTEXT.md Standup Agent Status updated
+
 ## 2026-04-18 AM (scenarios-am) — Borrower AI Chat on Share Page
 
 - New `BorrowerChat.tsx` — "Ask a Question" card below BorrowerQA; message thread with gold user bubbles + assistant icon; animated 3-dot loading dots; max 3 turns client-side; `print:hidden`

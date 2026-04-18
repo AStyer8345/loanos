@@ -1,5 +1,22 @@
 # LoanOS — Architecture Decisions
 
+## [2026-04-16] — Arive Contact-Field Sync: DB Trigger, Not n8n Workflow Edits
+
+**Chose:** A Postgres `AFTER INSERT OR UPDATE` trigger on `public.loans` that COALESCEs phone/birthdate/co-borrower fields onto the linked contact. Contact value always wins; trigger only writes when the contact column is null.
+
+**Over:** Editing the Arive New Loan + Arive Status Update n8n workflows to (a) skip null fields in the upsert body and (b) add a "fill blanks" PATCH step.
+
+**Why:**
+- Both n8n workflows have 17+ nodes with custom Code expressions and HTTP raw-JSON bodies. n8n MCP `update_workflow` requires regenerating the full SDK code — high blast radius, easy to regress unrelated logic in nodes the change shouldn't touch.
+- A trigger catches BOTH webhook paths automatically (insert = new app, update = status update) — one mechanism instead of two duplicate edits.
+- Atomic with the loan write: no race window where the loan has data but the contact patch hasn't run yet.
+- Future-proof: any other workflow or admin tool that writes `loans.contact_id` gets the contact fill for free.
+- Source of truth is the contact form (where Adam hand-edits). Trigger NEVER overwrites a non-null value, so manual edits survive every Arive webhook forever.
+
+**Trade-off accepted:** Contact-fill logic now lives in the database, not the workflow. Less visible to a non-DBA reading n8n. Mitigated by the function comment + this DECISIONS entry + the migration name `add_loans_fill_contact_blanks_trigger`.
+
+**Context:** Surfaced 2026-04-16 when Jung Lee's contact card was missing phone + DOB despite his Arive new-app webhook firing. Arive's webhook had sent both fields, but the n8n upsert wrote `null` for any field Arive omitted, blanking earlier Web Lead data. 13 contacts retroactively backfilled in the same session. Sync Contact Rate+Balance node in Status Update workflow `9JyzzwKac8v3uQ7d` cleaned up to remove `birthdate`/`co_borrower_birthdate` from its PATCH body so the funding-day node can never null-out a DOB the trigger would otherwise have to refill on the next status webhook.
+
 ## [2026-04-16] — Nurture Content: In-File in Workflow DevKit, Not drip_steps
 
 **Chose:** PA Welcome + DPA Guide bodies + subjects live as literal arrays inside `src/workflows/pa-welcome-nurture.ts` and `dpa-guide-nurture.ts`. A small helper (`renderDripHtml`) converts plain text + `{{var}}` tags to HTML at send time.

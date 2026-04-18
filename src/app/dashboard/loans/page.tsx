@@ -573,8 +573,10 @@ export default function LoansPage() {
     } else {
       fetchLoans('inprocess')
     }
+  // Re-runs when organizationId transitions from null → real value after /api/me resolves.
+  // Inner fetchCounts/fetchLoans guard on !organizationId, so the null pass is a no-op.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [organizationId])
 
   const handleListChange = (listId: string) => {
     setActiveList(listId)

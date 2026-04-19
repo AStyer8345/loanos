@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## 2026-04-19 (autonomous) — loans page bug fix + tracker cleanup
+
+- **Bug fixed:** `loans/page.tsx` `useEffect` had empty `[]` dep array — if `organizationId` resolved async after mount, `fetchLoans`/`fetchCounts` never re-ran and page showed empty data until hard refresh. Fixed to `[organizationId]`; inner guard on `!organizationId` makes null pass a no-op. Commit `a8759a0`, included in production `dpl_GFuawC8qahu21WdTBr8RqjDuPFeM` — READY.
+- **Hook fix:** pre-push hook `nvm use >/dev/null` would exit 11 due to `.npmrc` prefix setting, blocking all pushes. Changed to `|| true` so nvm failure is non-fatal (build step is still enforced). Local `.git/hooks/pre-push` only.
+- **Trackers committed:** CHANGELOG standup entry, DECISIONS (Arive trigger), subagent status markers, accumulated digest/research/audit files from Apr 15-17 — all in `a8759a0`.
+- **Bucket B (Adam-blocked):** Task 23 cutover (all 6 env/webhook/merge items), Security #5 (GLBA attorney), n8n template wiring decision (blast radius: 6 prod workflows — needs Adam's decision on WDK vs in-n8n), Seq C Outlook cred.
+- **Circuit breaker:** CLEAN. 21 Vercel deploys checked — all READY.
+- **Destructive ops:** none.
+
 ## 2026-04-18 PM — Analytics Dashboard (`/dashboard/analytics`)
 
 - New page at `/dashboard/analytics` (server component, `force-dynamic`) — pipeline health, conversion by source, realtor scoreboard, AEO vs SEO
@@ -3200,4 +3209,12 @@ Arive (loan event)
 - **SEO/SEM notebook**: Removed 3 stale (audit-Apr14, CONTEXT.md Apr14, 2026-03-28-schema-eeat-web.md [superseded by newer AEO sources]). Added 3 fresh (CONTEXT.md Apr15 post Leander+Cedar Park AEO + unified lead-intake, audit-Apr15, 2026-04-14-accessibility-cwv-web.md catch-up). Final: 50/50.
 - **Lead Gen notebook**: AM session miscount corrected (reported 65, actual was 50). Removed 3 stale (audit-Apr14, CONTEXT.md Apr14 LoanOS, session-log.md Apr14). Added 3 fresh (CONTEXT.md Apr15 LoanOS post email-automation Resend swap, audit-Apr15, lead-scoring-spec.md catch-up). Final: 50/50.
 - **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook twice (once per agent).
+- **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).
+
+## 2026-04-18 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed 3 stale (notebooklm-audit-2026-04-17.md, 2026-04-01-blog-content-tcpa-web.md [oldest/cap], CONTEXT.md Apr 18 00:18). Added 3 fresh (2026-04-17-refi-content-seo-web.md catch-up, refreshed CONTEXT.md Apr 18 10:27, notebooklm-audit-2026-04-18.md). Final: 50/50.
+- **Lead Gen notebook**: Apr 17 session was incomplete — no missed build artifacts. Removed 2 stale (notebooklm-audit-2026-04-16.md, CONTEXT.md Apr 16). Added 2 fresh (refreshed CONTEXT.md Apr 18 20:55 capturing analytics dashboard + AI chat, notebooklm-audit-2026-04-18.md). Final: 50/50.
+- **Web research**: 0 added to either notebook (both at 50/50 cap). 2026-04-16-lead-scoring-web.md saved locally; add when capacity opens.
+- **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
 - **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).

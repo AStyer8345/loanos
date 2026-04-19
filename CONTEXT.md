@@ -21,7 +21,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Current Status
 
-**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, Vercel `dpl_E4g57GkXnqQfYUrz2hWWnhyh42Tq` READY.**
+**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, analytics consolidated into Dashboard Performance tab `32b9e5b`. 2026-04-19 autonomous: loans page `useEffect` organizationId dep fix (commit `a8759a0`, live in prod `32b9e5b`); pre-push hook nvm tolerance fixed locally.**
 
 - 2026-04-16 PM (late-4): UI consolidation — TopNav 9 tabs → 4 + More + ⚙ (Email pillar consolidates drip-campaigns/drafts/automations under one tab). Drip scheduler n8n `LqBb3YDLjS2eUrDE` archived (option (a) of TODO #18); banner added on `/dashboard/drip-campaigns`. Mini Pipeline Table cut from dashboard (duplicate of Pipeline tab). Live in `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` (READY 75s). New three-pillar rule in memory: Contacts / Pipeline / Drip = the only first-class surfaces.
 - Feature branch `feat/email-automation-dashboard` — 20+ commits, all Vercel builds READY through SHA `9583ba3`
@@ -106,20 +106,20 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 PM — Nightly NotebookLM PUSH+CURATE. AM miscount corrected (was 50, not 65). Notebook: 3 removed (audit-Apr14, CONTEXT.md Apr14 LoanOS, session-log.md Apr14), 3 added (fresh CONTEXT.md Apr15 LoanOS, audit-Apr15, lead-scoring-spec.md [catch-up]). 50/50. Digest SENT (Zapier success). Lead scoring spec confirmed pushed to notebook.
+**Last worked on:** 2026-04-18 PM — Nightly NotebookLM PUSH+CURATE. Apr 17 session was incomplete — no missed artifacts. Notebook: 2 removed (notebooklm-audit-2026-04-16.md, CONTEXT.md Apr16 stale), 2 added (refreshed CONTEXT.md Apr18 20:55 [analytics dashboard + AI chat], audit-Apr18). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** (1) Seq C INACTIVE — Outlook cred (7+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built (Execution Pack delivered, 45 min Adam). (4) Seq D — copy approval + manual trigger. (5) Lead scoring threshold decision: 6.00% vs 6.25% (Adam).
+**Active blockers:** (1) Seq C INACTIVE — Outlook cred (8+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built (Execution Pack delivered, 45 min Adam). (4) Seq D — copy approval + manual trigger. (5) Lead scoring threshold decision: 6.00% vs 6.25% (Adam).
 
 **What's next:** Build lead scoring system (spec ready — DB migration + n8n Lead Score Updater workflow + intake wiring). Calendly webhook activation + HMAC code node. Mailchimp 3 Customer Journeys (Adam-owned, ~45 min).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 PM — Nightly NotebookLM PUSH+CURATE. Cedar Park + Leander AEO H2 question format + unified lead-intake.js + UTM fields committed today. Notebook: 3 removed (audit-Apr14, CONTEXT.md Apr14, 2026-03-28-schema-eeat-web.md [superseded]), 3 added (fresh CONTEXT.md Apr15, audit-Apr15, 2026-04-14-accessibility-cwv-web.md [catch-up]). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-18 PM — Nightly NotebookLM PUSH+CURATE. Caught up 2026-04-17-refi-content-seo-web.md (YMYL E-E-A-T + break-even calculator research). Notebook: 3 removed (audit-Apr17, tcpa-web Apr1 [oldest/cap], CONTEXT.md Apr18 00:18), 3 added (refi research catch-up, refreshed CONTEXT.md Apr18 10:27, audit-Apr18). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC URL Inspection for Cedar Park + Leander + Round Rock (Adam-owned). Liberty Hill unique content still unwritten. Pre-publish lint command for blog title brand drift needed.
+**Active blockers:** GSC URL Inspection for Dripping Springs, Westlake, Hutto, Liberty Hill, Manor (Adam-owned). PageSpeed manual check for /get-preapproved + /refinance-quote (quota exhausted). Break-even calculator page decision needed (Week 8 or post-program?).
 
-**What's next:** Georgetown suburb H2 AEO audit + county context. Liberty Hill content enrichment (Liberty Hill ISD + Williamson County tax + Orchard Ridge/Santa Rita Ranch). Pre-publish lint command (Claude-executable).
+**What's next:** Continue AEO sweep on remaining suburb + loan product pages. Link building outreach prep (Week 7 core — 20 link opportunities). Author bio audit (ensure /about-adam-styer.html links from every blog post).
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->

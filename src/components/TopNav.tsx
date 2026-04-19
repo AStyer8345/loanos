@@ -16,7 +16,6 @@ import {
   Search,
   Menu,
   ChevronDown,
-  BarChart3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -60,7 +59,6 @@ const NAV_ITEMS: NavItem[] = [
 const MORE_ITEMS: { label: string; href: string; icon: React.ReactNode }[] = [
   { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" /> },
   { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" /> },
-  { label: 'Analytics', href: '/dashboard/analytics', icon: <BarChart3 className="size-4" /> },
   { label: 'Marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
   { label: 'Drafts',    href: '/dashboard/drafts',    icon: <Inbox className="size-4" /> },
   { label: 'Templates', href: '/dashboard/automations', icon: <FileCode className="size-4" /> },
@@ -78,7 +76,6 @@ function sectionFromPath(pathname: string): Section | null {
   // Power-user surfaces hidden under More
   if (pathname.startsWith('/dashboard/scenarios')) return 'more'
   if (pathname.startsWith('/dashboard/lenders')) return 'more'
-  if (pathname.startsWith('/dashboard/analytics')) return 'more'
   if (pathname.startsWith('/dashboard/marketing')) return 'more'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null

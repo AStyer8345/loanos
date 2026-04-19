@@ -367,6 +367,9 @@ var DECISIONS = [
   {date:"Mar 2026",title:"Jungo replaced by LoanOS CRM",color:"#c9884c",
    body:"Jungo currently used for database tracking, closed loans, pipeline dashboard, and refi opportunity lookup. All rebuilt inside LoanOS CRM on Supabase. Jungo CSV export will seed initial contact and closed loan data.",
    tags:[{label:"Replaced: Jungo",type:"replaced"},{label:"Migration: Jungo CSV export",type:"planned"}]},
+  {date:"Apr 2026",title:"Analytics Dashboard shipped",color:"#4cc98a",
+   body:"New /dashboard/analytics page (server component, force-dynamic) — pipeline health (stage aging via SECURITY INVOKER RPC), conversion by lead source (with 7th category Past Client added — auto-detected via referred_by_contact_id pointing at a funded borrower), realtor performance scoreboard, and AEO vs SEO side-by-side. Supporting components: KpiCard, StageAgingTable, SourceConversionTable, RealtorPerformanceTable, AeoVsSeoCard. Migration 090 added pipeline_stage_aging() RPC. Commit 56db9d4 on feat/analytics-dashboard, Vercel dpl_E4g57GkXnqQfYUrz2hWWnhyh42Tq READY.",
+   tags:[{label:"Added: /dashboard/analytics",type:"added"},{label:"Added: Past Client lead source",type:"added"},{label:"Added: pipeline_stage_aging RPC",type:"added"}]},
 ];
 var PRICING = [
   {name:"Starter",price:"$97",desc:"Solo LO getting organized",hl:false,

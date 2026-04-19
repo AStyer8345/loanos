@@ -1,5 +1,16 @@
 # LoanOS Changelog
 
+## 2026-04-18 PM — Analytics Dashboard (`/dashboard/analytics`)
+
+- New page at `/dashboard/analytics` (server component, `force-dynamic`) — pipeline health, conversion by source, realtor scoreboard, AEO vs SEO
+- New components: `KpiCard`, `StageAgingTable`, `SourceConversionTable`, `RealtorPerformanceTable`, `AeoVsSeoCard`
+- Lead-source classifier extended with **Past Client** (manual tag + auto-detect via `referred_by_contact_id` pointing at a funded borrower); `NewLeadsChart` color map updated (amber)
+- Postgres RPC `pipeline_stage_aging()` (SECURITY INVOKER, RLS-respecting) added in migration 090 — returns days-in-current-stage from `loan_status_history` with fallback to `loans.updated_at`
+- `TopNav`: Analytics entry added to More dropdown with `BarChart3` icon; section matcher recognises `/dashboard/analytics`
+- Build: ✅ (after clearing stale `.next` cache) | Commit: `56db9d4` on `feat/analytics-dashboard` | Vercel: `dpl_E4g57GkXnqQfYUrz2hWWnhyh42Tq` **READY**
+- TypeScript note: `supabase.rpc('pipeline_stage_aging')` cast via `(supabase.rpc as any)` with eslint-disable until `database.types.ts` is regenerated — RPC exists and works at runtime
+- Git `pack-objects` SIGBUS workaround on push: `-c pack.threads=1 -c pack.windowMemory=50m -c pack.deltaCacheSize=1m -c core.packedGitWindowSize=32m -c core.packedGitLimit=128m`
+
 ## 2026-04-18 (standup) — Day 24 standup
 
 - Vercel READY: `dpl_HrEW3D315oPrR87SQxTjYcyTW6TV` (SHA `291bfbe`) — all 20 recent deploys READY, no errors

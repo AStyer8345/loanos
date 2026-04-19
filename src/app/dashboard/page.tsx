@@ -8,7 +8,14 @@ import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
-import { aggregateBySource, type ContactSourceFields } from '@/lib/leadSources'
+import {
+  aggregateBySource,
+  classifyLeadSource,
+  type ContactSourceFields,
+  type LeadSourceCategory,
+} from '@/lib/leadSources'
+import { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
+import { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
 
 const NEW_LEADS_WINDOW_DAYS = 30
 
@@ -48,12 +55,13 @@ export default async function DashboardPage() {
     Date.now() - NEW_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
   ).toISOString()
 
-  // Parallel fetch: org_settings + loans + mcc_state + recent contacts (for lead-source chart)
+  // Parallel fetch: org_settings + loans + mcc_state + recent contacts + all contacts (for analytics)
   const [
     { data: orgSettings },
     { data: loans = [] },
     { data: mccRow },
     { data: recentContacts = [] },
+    { data: allContacts = [] },
   ] = await Promise.all([
     supabase
       .from('org_settings')
@@ -62,7 +70,7 @@ export default async function DashboardPage() {
       .single(),
     supabase
       .from('loans')
-      .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days')
+      .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days, referring_agent_email, referring_agent_name, application_date')
       .eq('organization_id', organizationId)
       .order('estimated_closing_date', { ascending: true }),
     supabase
@@ -76,6 +84,10 @@ export default async function DashboardPage() {
       .select('lead_source, referrer, source_page, utm_params')
       .eq('organization_id', organizationId)
       .gte('created_at', newLeadsWindowStart),
+    supabase
+      .from('contacts')
+      .select('id, lead_source, referrer, source_page, utm_params, referred_by_contact_id')
+      .eq('organization_id', organizationId),
   ])
   const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
 
@@ -484,6 +496,65 @@ export default async function DashboardPage() {
   const rawLog = (mccValue?.log ?? []) as MarketingLogEntry[]
   const marketingLog = rawLog.slice(0, 10) // most recent 10
 
+  // ── Analytics: Source conversion, AEO vs SEO, Realtor performance ───────
+  // Past-client referrer set — any contact whose loan is funded. Contacts
+  // referred by them get auto-tagged as Past Client.
+  const fundedBorrowerContactIds = new Set<string>()
+  for (const l of loans ?? []) {
+    const rs = (l.status ?? '').toLowerCase()
+    if (l.contact_id && (rs.includes('closed') || rs.includes('funded'))) {
+      fundedBorrowerContactIds.add(l.contact_id)
+    }
+  }
+
+  // Per-contact funded tally (count + volume) for source conversion table
+  const fundedByContact = new Map<string, { count: number; volume: number }>()
+  for (const l of loans ?? []) {
+    const rs = (l.status ?? '').toLowerCase()
+    if (!l.contact_id) continue
+    if (!(rs.includes('closed') || rs.includes('funded'))) continue
+    const cur = fundedByContact.get(l.contact_id) ?? { count: 0, volume: 0 }
+    cur.count += 1
+    cur.volume += l.loan_amount ?? 0
+    fundedByContact.set(l.contact_id, cur)
+  }
+
+  // Classify every contact, aggregate into source conversion rows
+  const sourceConversionMap = new Map<LeadSourceCategory, SourceConversionRow>()
+  for (const c of (allContacts ?? []) as unknown as Array<ContactSourceFields & { id: string }>) {
+    const cat = classifyLeadSource(c, fundedBorrowerContactIds)
+    const cur = sourceConversionMap.get(cat) ?? { source: cat, leads: 0, funded: 0, volume: 0 }
+    cur.leads += 1
+    const f = fundedByContact.get(c.id)
+    if (f) {
+      cur.funded += f.count
+      cur.volume += f.volume
+    }
+    sourceConversionMap.set(cat, cur)
+  }
+  const sourceConversionRows: SourceConversionRow[] = [...sourceConversionMap.values()]
+  const aeoBucket = sourceConversionMap.get('AEO') ?? { source: 'AEO' as const, leads: 0, funded: 0, volume: 0 }
+  const seoBucket = sourceConversionMap.get('SEO') ?? { source: 'SEO' as const, leads: 0, funded: 0, volume: 0 }
+
+  // Realtor performance — group loans by referring_agent_email||name, top 10 by funded volume
+  const realtorMap = new Map<string, RealtorPerformanceRow>()
+  for (const l of loans ?? []) {
+    const key = (l.referring_agent_email || l.referring_agent_name || '').trim().toLowerCase()
+    if (!key) continue
+    const display = l.referring_agent_name || l.referring_agent_email || 'Unknown'
+    const cur = realtorMap.get(key) ?? { realtor: display, loans: 0, funded: 0, volume: 0 }
+    cur.loans += 1
+    const rs = (l.status ?? '').toLowerCase()
+    if (rs.includes('closed') || rs.includes('funded')) {
+      cur.funded += 1
+      cur.volume += l.loan_amount ?? 0
+    }
+    realtorMap.set(key, cur)
+  }
+  const realtorPerformanceRows: RealtorPerformanceRow[] = [...realtorMap.values()]
+    .sort((a, b) => b.volume - a.volume || b.funded - a.funded || b.loans - a.loans)
+    .slice(0, 10)
+
   return (
     <>
       {isSystemAdmin && (
@@ -525,6 +596,10 @@ export default async function DashboardPage() {
         newLeadSourceData={newLeadSourceData}
         newLeadsWindowDays={NEW_LEADS_WINDOW_DAYS}
         marketingLog={marketingLog}
+        sourceConversionRows={sourceConversionRows}
+        aeoBucket={aeoBucket}
+        seoBucket={seoBucket}
+        realtorPerformanceRows={realtorPerformanceRows}
       />
     </>
   )

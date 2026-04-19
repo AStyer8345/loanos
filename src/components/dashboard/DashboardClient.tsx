@@ -28,6 +28,9 @@ import LeadSourceChart from './charts/LeadSourceChart'
 import NewLeadsChart from './charts/NewLeadsChart'
 import type { LeadSourceCategory } from '@/lib/leadSources'
 import MarketingActivity from './charts/MarketingActivity'
+import AeoVsSeoCard from '@/components/dashboard/analytics/AeoVsSeoCard'
+import SourceConversionTable, { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
+import RealtorPerformanceTable, { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -58,6 +61,10 @@ interface DashboardClientProps {
   newLeadSourceData: Array<{ source: LeadSourceCategory; count: number }>
   newLeadsWindowDays: number
   marketingLog: Array<{ id: string; date: string; activity: string; channel: string; notes?: string }>
+  sourceConversionRows: SourceConversionRow[]
+  aeoBucket: { leads: number; funded: number; volume: number }
+  seoBucket: { leads: number; funded: number; volume: number }
+  realtorPerformanceRows: RealtorPerformanceRow[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -271,6 +278,15 @@ export default function DashboardClient(props: DashboardClientProps) {
             <YoYVolumeChart data={props.yoyChartData} currentYear={new Date().getFullYear()} />
             <CommissionForecast data={props.forecastData} />
           </div>
+
+          {/* AEO vs SEO */}
+          <AeoVsSeoCard aeo={props.aeoBucket} seo={props.seoBucket} />
+
+          {/* Source conversion table */}
+          <SourceConversionTable rows={props.sourceConversionRows} />
+
+          {/* Realtor performance — top 10 */}
+          <RealtorPerformanceTable rows={props.realtorPerformanceRows} />
 
           {/* Loans by stage chart */}
           <Card className="p-4">

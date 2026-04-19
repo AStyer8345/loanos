@@ -1,3 +1,60 @@
+## Mission Brief — 2026-04-19 AM
+
+### Domain
+Lead Generation
+
+### Focus Area
+Lead Scoring System — Full Build (DB migration + n8n workflow + API wiring + UI)
+
+### Session Type
+[x] Execute / Build (Sequence C)
+
+### Context
+Last substantive session: 2026-04-15 AM (lead scoring spec completed).
+No Adam decisions received since then (3 items still [ ] in ADAM-TODO).
+Per session-log 2026-04-15 instruction: proceed with Option A + 6.00% threshold assumption.
+
+### Objectives
+1. Apply Supabase migration: `lead_score INTEGER DEFAULT 0` + `lead_tier TEXT GENERATED ALWAYS AS (...) STORED` columns on `contacts`
+2. Build n8n "LoanOS — Lead Score Updater" webhook workflow (7 nodes)
+3. Wire webhook call into `/api/contacts/web-lead/route.ts` (fire-and-forget after contact created)
+4. Add Lead Score column to pipeline table + score badge to contact detail header
+5. Backfill all existing contacts from activity_log
+
+### Definition of Done
+- Migration applied to prod Supabase (verified via `list_tables` or `execute_sql` check)
+- n8n Lead Score Updater: ACTIVE, webhook URL confirmed
+- `/api/contacts/web-lead` fires score update webhook after contact create
+- Pipeline table shows `Lead Score` column, sortable
+- Contact detail page shows `lead_tier` badge (Hot/Warm/Cold/New)
+- Backfill complete: all contacts have computed scores
+- Build report written
+- Session log updated
+
+### Resources / Files in Scope
+- Supabase project `uuqedsvjlkeszrbwzizl` — `contacts` table
+- n8n instance: `styer.app.n8n.cloud`
+- `src/app/api/contacts/web-lead/route.ts`
+- `src/app/dashboard/pipeline/page.tsx` (or similar pipeline component)
+- `src/app/dashboard/contacts/[id]/page.tsx` (or similar contact detail)
+- Spec: `tasks/lead-gen/specs/2026-04-15-lead-scoring-spec.md`
+
+### Assumptions (no Adam input received)
+- Data model: Option A (persisted column, updated by n8n webhook)
+- Seq A threshold: unchanged at 6.00%
+- Hot lead notification: email to Adam via Resend (not SMS)
+- Score update: webhook fired after web-lead contact creation only (other triggers added later)
+
+### HIGH RISK Items
+- Supabase migration is IRREVERSIBLE — migration must be additive only (no column drops)
+- GENERATED ALWAYS column syntax for Supabase (Postgres 15) — verify before applying
+- n8n workflow fires no outbound emails to leads — score computation only
+- No TCPA/CAN-SPAM risk (no customer-facing communications)
+
+---
+
+<!-- Previous mission archived below -->
+
 ## Mission Brief — 2026-04-15 AM
 
 ### Domain
@@ -28,49 +85,3 @@ Blocker Verification + Homepage Form End-to-End Test + Lead Scoring System Desig
 | Calendly `PBu2Zt0YpiLHeqbL` | ❌ INACTIVE | triggerCount: 0 |
 | Mailchimp journeys | ❌ NOT BUILT | Pack ready, Adam needs 45 min |
 | Seq D warm-up | ❌ PENDING | Adam copy approval required |
-
----
-
-<!-- Previous mission archived below -->
-
-
-### Focus Area
-Agent-executable builds: Homepage form wiring + Calendly enhancements
-
-### Session Type
-[x] Execute / Build (Sequence C)
-
-### Background
-All 5 Adam-owned blockers confirmed still unresolved (2026-04-14 03:00 AM check):
-- Set Rate: 0 refi_rate_update entries (6th consecutive session)
-- Seq C `LfLSDgqgb6yCe93C`: INACTIVE — Outlook cred not connected
-- Calendly workflow `PBu2Zt0YpiLHeqbL`: INACTIVE — Adam hasn't configured Calendly webhook
-- Mailchimp journeys: not created in UI
-- DPA Guide PDF: not hosted
-
-Pivoting to agent-executable builder work per session-log next-session instructions.
-
-### Objectives
-1. Wire styermortgage.com Quick Quote + Quick Contact homepage forms to subscribe-lead.js (CRM + Mailchimp)
-2. Add invitee.canceled branch to Calendly workflow `PBu2Zt0YpiLHeqbL` (cancel log + optional re-book recovery email)
-3. Add Supabase contact lookup to Calendly workflow so booking logs link to real contact_id
-
-### Definition of Done
-- Quick Quote form: submission hits subscribe-lead.js, logs to Mailchimp (tag: quick-quote-lead), logs to LoanOS activity_log
-- Quick Contact form: submission hits subscribe-lead.js, logs to Mailchimp (tag: quick-contact-lead), logs to LoanOS activity_log
-- Calendly workflow `PBu2Zt0YpiLHeqbL`: updated with cancel branch (log cancellation action) and contact lookup node (match on email)
-- Build reports written for each artifact
-- All compliance checks pass (NMLS #513013, Equal Housing Lender, no protected class targeting)
-
-### Resources / Files in Scope
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/index.html` — homepage
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/script.js` — form handlers
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/netlify/functions/subscribe-lead.js` — Netlify function
-- n8n workflow `PBu2Zt0YpiLHeqbL` — Post-Calendly Booking Automation
-- Supabase project `uuqedsvjlkeszrbwzizl` — activity_log + contacts table
-
-### HIGH RISK Items
-- Homepage form wiring touches live site (styermortgage.com) — must not break existing Netlify form submissions
-- Calendly workflow update is INACTIVE — safe to modify (zero live traffic)
-- No SMS triggers anywhere in scope — TCPA risk = LOW
-- subscribe-lead.js already handles tag-based routing — new tags (quick-quote-lead, quick-contact-lead) won't conflict

@@ -309,7 +309,16 @@ export async function POST(req: NextRequest) {
       })
   }
 
-  // ── 9. Workflow DevKit trigger (feature-flagged) ──────────────────────────────
+  // ── 9. Lead score update (fire-and-forget) ───────────────────────────────────
+  fetch('https://styer.app.n8n.cloud/webhook/lead-score-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contact_id: newContact.id }),
+  }).catch((err) => {
+    console.error('[web-lead] lead score webhook error (non-fatal):', err)
+  })
+
+  // ── 10. Workflow DevKit trigger (feature-flagged) ─────────────────────────────
   // WORKFLOW_DEVKIT_LEAD_INTAKE: 'off' | 'shadow' | 'live'
   // 'off'    — n8n continues to handle all lead intake (default)
   // 'shadow' — log what WOULD have happened, do not actually trigger
@@ -362,7 +371,7 @@ export async function POST(req: NextRequest) {
   }
   // 'off': n8n continues to handle — no action here
 
-  // ── 10. Return ────────────────────────────────────────────────────────────────
+  // ── 11. Return ────────────────────────────────────────────────────────────────
   const fullName = [first_name, last_name].filter(Boolean).join(' ')
   return NextResponse.json({
     contact:   newContact,

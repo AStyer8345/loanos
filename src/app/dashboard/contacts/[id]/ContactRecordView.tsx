@@ -66,6 +66,8 @@ export type Contact = {
   realtor_stage?: string | null
   current_rate?: number | null
   current_loan_balance?: number | null
+  lead_score?: number | null
+  lead_tier?: string | null
 }
 
 export type ContactLoan = {
@@ -1286,6 +1288,19 @@ export function ContactRecordView(props: Props) {
                   ) : contact.referred_by}
                 </span>
               )}
+              {contact.lead_tier && contact.lead_tier !== 'new' && (() => {
+                const tierStyles: Record<string, { bg: string; color: string }> = {
+                  hot:  { bg: 'rgba(239,68,68,0.15)',   color: '#f87171' },
+                  warm: { bg: 'rgba(234,179,8,0.15)',   color: '#facc15' },
+                  cold: { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
+                }
+                const s = tierStyles[contact.lead_tier] ?? tierStyles.cold
+                return (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: s.bg, color: s.color, fontWeight: 600 }}>
+                    {contact.lead_tier.charAt(0).toUpperCase() + contact.lead_tier.slice(1)} {contact.lead_score ?? 0}
+                  </span>
+                )
+              })()}
             </div>
           </div>
         </div>

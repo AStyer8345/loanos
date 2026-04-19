@@ -68,6 +68,8 @@ type Contact = {
   last_deal_closed_date: string | null
   last_outreach_date: string | null
   referral_source_notes: string | null
+  lead_score: number | null
+  lead_tier: string | null
 }
 
 type SmartListDef = { id: string; label: string; section?: string }
@@ -293,6 +295,21 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'referral_lifetime', label: 'Referrals',      minWidth: 90,  render: c => c.referral_lifetime_count ? String(c.referral_lifetime_count) : null },
   { id: 'last_referral',   label: 'Last Referral',    minWidth: 120, render: c => c.last_referral_date ? fmtDate(c.last_referral_date) : null },
   { id: 'last_deal',       label: 'Last Deal',        minWidth: 120, render: c => c.last_deal_closed_date ? fmtDate(c.last_deal_closed_date) : null },
+  { id: 'lead_score', label: 'Lead Score', minWidth: 110, render: c => {
+      const tier = c.lead_tier
+      if (!tier || tier === 'new') return <span style={{ color: 'var(--muted)' }}>—</span>
+      const styles: Record<string, { bg: string; color: string }> = {
+        hot:  { bg: 'rgba(239,68,68,0.15)',  color: '#f87171' },
+        warm: { bg: 'rgba(234,179,8,0.15)',  color: '#facc15' },
+        cold: { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
+      }
+      const s = styles[tier] ?? styles.cold
+      return (
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: s.bg, color: s.color, fontWeight: 600, whiteSpace: 'nowrap' }}>
+          {tier.charAt(0).toUpperCase() + tier.slice(1)} {c.lead_score ?? 0}
+        </span>
+      )
+    } },
   { id: 'created',         label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
 ]
 

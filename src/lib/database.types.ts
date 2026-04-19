@@ -396,6 +396,60 @@ export type Database = {
           },
         ]
       }
+      ai_node_logs: {
+        Row: {
+          cost_usd: number | null
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          input_preview: string | null
+          input_tokens: number | null
+          model: string
+          node_name: string
+          output: Json | null
+          output_tokens: number | null
+          parsed_successfully: boolean
+          raw_output: string | null
+          workflow_id: string
+          workflow_name: string | null
+        }
+        Insert: {
+          cost_usd?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_preview?: string | null
+          input_tokens?: number | null
+          model: string
+          node_name: string
+          output?: Json | null
+          output_tokens?: number | null
+          parsed_successfully?: boolean
+          raw_output?: string | null
+          workflow_id: string
+          workflow_name?: string | null
+        }
+        Update: {
+          cost_usd?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_preview?: string | null
+          input_tokens?: number | null
+          model?: string
+          node_name?: string
+          output?: Json | null
+          output_tokens?: number | null
+          parsed_successfully?: boolean
+          raw_output?: string | null
+          workflow_id?: string
+          workflow_name?: string | null
+        }
+        Relationships: []
+      }
       automation_logs: {
         Row: {
           created_at: string | null
@@ -804,7 +858,9 @@ export type Database = {
           last_referral_date: string | null
           last_touch: string | null
           last_touch_at: string | null
+          lead_score: number
           lead_source: string | null
+          lead_tier: string | null
           mailing_city: string | null
           mailing_country: string | null
           mailing_state: string | null
@@ -871,7 +927,9 @@ export type Database = {
           last_referral_date?: string | null
           last_touch?: string | null
           last_touch_at?: string | null
+          lead_score?: number
           lead_source?: string | null
+          lead_tier?: string | null
           mailing_city?: string | null
           mailing_country?: string | null
           mailing_state?: string | null
@@ -938,7 +996,9 @@ export type Database = {
           last_referral_date?: string | null
           last_touch?: string | null
           last_touch_at?: string | null
+          lead_score?: number
           lead_source?: string | null
+          lead_tier?: string | null
           mailing_city?: string | null
           mailing_country?: string | null
           mailing_state?: string | null
@@ -3577,6 +3637,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fill_contact_blanks: {
+        Args: {
+          p_birthdate?: string
+          p_co_borrower_birthdate?: string
+          p_co_borrower_email?: string
+          p_co_borrower_first?: string
+          p_co_borrower_last?: string
+          p_co_borrower_mobile?: string
+          p_contact_id: string
+          p_home_phone?: string
+          p_phone?: string
+        }
+        Returns: undefined
+      }
       find_contact_by_email: {
         Args: { lookup_email: string }
         Returns: {
@@ -3653,6 +3727,18 @@ export type Database = {
       increment_scenario_view_count: {
         Args: { p_share_token: string }
         Returns: undefined
+      }
+      pipeline_stage_aging: {
+        Args: never
+        Returns: {
+          borrower_name: string
+          days_in_stage: number
+          last_changed_at: string
+          loan_amount: number
+          loan_id: string
+          loan_name: string
+          status: string
+        }[]
       }
     }
     Enums: {

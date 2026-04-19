@@ -1,5 +1,28 @@
 # LoanOS Changelog
 
+## 2026-04-19 PM (autonomous) — Scenarios Tier 7 Item 2 + marketing site copy pass
+
+### Scenarios Tier 7 Item 2 — Create Scenario from contact record
+
+- `ContactRecordView.tsx`: Added "Create Scenario" `Link` button to action strip (Call / Text / Email / Merge row). Gold bordered, `BarChart2` icon. Routes to `/dashboard/scenarios/new?contact_id=<id>`.
+- `scenarios/new/page.tsx`: Added `contact_id` branch to `searchParams`. Queries `contacts` table for `first_name, last_name, mailing_*` fields. Pre-fills `initialState.borrowerName` and `initialState.propertyAddress` — no financial data, LO fills the rest fresh.
+- Build green, commit `0cd93dc`, Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o`.
+
+### loanos-marketing copy accuracy pass
+
+- `src/app/page.tsx`: Removed false "blast a rate drop to every realtor" — KB marks mass comms via chat as NOT BUILT.
+- `src/components/BriefingShowcase.tsx`: Removed "delivered to your inbox every morning" — no automated daily briefing email in n8n.
+- `LOANOS_SYSTEM_KNOWLEDGE_BASE.md`: CSP + HSTS marked as added (2026-04-05); Drip Campaigns updated to note UI tab + Coming Soon banner.
+- Marketing commit `998eb26`, Vercel `dpl_2mVEsEy5c6oFET9urx8uRGEe72jM` → READY.
+
+## 2026-04-19 (standup) — Day 25 standup check
+
+- Vercel READY: `dpl_5T9sZqP5vUNRXYr3isESsBTSsm3g` (SHA `4a9c1c1`) — all 20 recent deploys READY
+- n8n: 33 total, 29 active, 4 inactive (all intentional) — no error states
+- `HkLjsnnhT5MgrX5H` (CD & Contract Extractor) ACTIVE, execution-untested
+- 7 days to launch — marketing site still at zero progress (HIGHEST RISK)
+- Standup log written to `tasks/standup-log.md`
+
 ## 2026-04-19 (autonomous) — loans page bug fix + tracker cleanup
 
 - **Bug fixed:** `loans/page.tsx` `useEffect` had empty `[]` dep array — if `organizationId` resolved async after mount, `fetchLoans`/`fetchCounts` never re-ran and page showed empty data until hard refresh. Fixed to `[organizationId]`; inner guard on `!organizationId` makes null pass a no-op. Commit `a8759a0`, included in production `dpl_GFuawC8qahu21WdTBr8RqjDuPFeM` — READY.

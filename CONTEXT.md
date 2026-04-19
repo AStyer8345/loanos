@@ -21,7 +21,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Current Status
 
-**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, analytics consolidated into Dashboard Performance tab `32b9e5b`. 2026-04-19 autonomous: loans page `useEffect` organizationId dep fix (commit `a8759a0`, live in prod `32b9e5b`); pre-push hook nvm tolerance fixed locally.**
+**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, analytics consolidated into Dashboard Performance tab `32b9e5b`. 2026-04-19 autonomous: loans page `useEffect` organizationId dep fix (commit `a8759a0`, live in prod `32b9e5b`); pre-push hook nvm tolerance fixed locally. 2026-04-19 autonomous (PM): Scenarios Tier 7 Item 2 — "Create Scenario" button on contact detail page, pre-fills borrowerName + propertyAddress from contact record via `?contact_id=` param. Marketing site copy pass: 2 false claims removed, KB updated. Commit `0cd93dc`, Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o` → READY.**
 
 - 2026-04-16 PM (late-4): UI consolidation — TopNav 9 tabs → 4 + More + ⚙ (Email pillar consolidates drip-campaigns/drafts/automations under one tab). Drip scheduler n8n `LqBb3YDLjS2eUrDE` archived (option (a) of TODO #18); banner added on `/dashboard/drip-campaigns`. Mini Pipeline Table cut from dashboard (duplicate of Pipeline tab). Live in `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` (READY 75s). New three-pillar rule in memory: Contacts / Pipeline / Drip = the only first-class surfaces.
 - Feature branch `feat/email-automation-dashboard` — 20+ commits, all Vercel builds READY through SHA `9583ba3`
@@ -124,18 +124,18 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-18 AM — Borrower AI chat on share page. New `BorrowerChat.tsx` (print:hidden, max 3 turns, optimistic UI, animated dots) + `POST /api/share/[token]/chat` (public, rate-limited, service client, Claude with scenario context). Tier 7 Item 1 COMPLETE. Commit 223630c | Vercel dpl_A4JCF99yisz7GAKiM6SBrWmLWQ3g → BUILDING
+**Last worked on:** 2026-04-19 autonomous (PM) — Scenarios Tier 7 Item 2. "Create Scenario" button added to contact detail action strip (`ContactRecordView.tsx`). Navigates to `/dashboard/scenarios/new?contact_id=<id>`. New scenario page (`/dashboard/scenarios/new/page.tsx`) handles `contact_id` param — queries contacts table for name + mailing address, pre-fills `borrowerName` and `propertyAddress` in `ScenarioBuilder`. No financial data pre-populated. Commit `0cd93dc` | Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o`.
 
 **Active blockers:** None.
 
-**What's next:** Tier 7 Item 2 — Quick scenario from contacts page ("Create Scenario" button pre-fills borrower name + address).
+**What's next:** Tier 7 Item 3 — TBD (check domain-queue.md).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-18 — Day 24 standup. Vercel READY (`dpl_HrEW3D315oPrR87SQxTjYcyTW6TV`, SHA `291bfbe`). n8n: 33 total, 29 active — no errors, 4 inactive all intentional. Scenarios Tier 6 complete (MobileQuickInput shipped). `HkLjsnnhT5MgrX5H` active but execution-untested.
+**Last worked on:** 2026-04-19 — Day 25 standup. Vercel READY (`dpl_5T9sZqP5vUNRXYr3isESsBTSsm3g`, SHA `4a9c1c1`). n8n: 33 total, 29 active — no errors, 4 inactive all intentional. `HkLjsnnhT5MgrX5H` active but execution-untested. Analytics dashboard shipped (`56db9d4`), loans useEffect dep fixed (`a8759a0`).
 
-**Active blockers:** Marketing site zero progress (13 days to May 1 — HIGHEST RISK). Phase 3 Adam confirmation outstanding. Task 23 cutover blocked on Adam env vars + Resend webhook. Seq C INACTIVE (Outlook cred, 8+ sessions).
+**Active blockers:** Marketing site zero progress (7 days to May 1 — HIGHEST RISK). Phase 3 Adam confirmation outstanding. Task 23 cutover blocked on Adam env vars + Resend webhook (6 items). Seq C INACTIVE (Outlook cred, 8+ sessions).
 
 **What's next:** Phase 5 email template wiring (wire 6 n8n workflow buttons in UI). Marketing site demo data → screenshots → launch page.
 

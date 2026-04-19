@@ -19,6 +19,7 @@ import ScenarioComparisonTable from './ScenarioComparisonTable'
 import SocialProofBlock from './SocialProofBlock'
 import BorrowerQA from './BorrowerQA'
 import BorrowerChat from './BorrowerChat'
+import ShareSavePDFButton from './ShareSavePDFButton'
 import type { BorrowerQAPair } from '@/app/share/[token]/page'
 
 interface SharedScenario {
@@ -238,6 +239,7 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
                 calendlyUrl={b.calendlyUrl}
                 applicationUrl={b.applicationUrl}
               />
+              <ShareSavePDFButton />
             </div>
 
             {/* Payment Comparison Chart */}
@@ -269,6 +271,9 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
               company={b.company}
               nmls={b.nmls}
             />
+            <div className="mt-3">
+              <ShareSavePDFButton />
+            </div>
           </section>
 
           {/* Footer */}

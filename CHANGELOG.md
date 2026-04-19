@@ -1,5 +1,11 @@
 # LoanOS Changelog
 
+## 2026-04-19 AM (scenarios-am) — Scenarios Tier 7 Item 3: Save as PDF button on share page
+
+- `ShareSavePDFButton.tsx` (new): `'use client'` component — Printer icon + "Save as PDF" label, calls `window.print()`, styled to match LoanOS dark theme (transparent bg, muted border, gold icon), `print:hidden`
+- `SharePageLayout.tsx`: imports + renders button below `LOSidebarCard` on desktop sidebar and below `ShareCTA` (in `mt-3` wrapper) on mobile — both locations `print:hidden`
+- Build green, commit `83ba043`, Vercel `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` — BUILDING → expected READY
+
 ## 2026-04-19 PM (autonomous) — Scenarios Tier 7 Item 2 + marketing site copy pass
 
 ### Scenarios Tier 7 Item 2 — Create Scenario from contact record

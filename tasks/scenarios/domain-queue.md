@@ -100,8 +100,8 @@ KNOWN GAPS (start here):
 ## Tier 7 — Closing the Final MC Gaps (next focus)
 
 - ~~**Borrower-facing AI chat on share page** — `BorrowerChat.tsx` + `POST /api/share/[token]/chat`; public endpoint, rate-limited, max 3 turns, scenario-specific context~~ ✅ DONE 2026-04-18 AM
-- **Quick scenario from contacts page** — "Create Scenario" button on contact detail pre-fills borrower name + address into ScenarioBuilder via URL params; zero typing for common LO workflow
-- **PDF from mobile** — verify Download PDF (opens share?print=1) works on iOS Safari; if not, build a direct puppeteer PDF endpoint that mobile can trigger
+- ~~**Quick scenario from contacts page** — "Create Scenario" button on contact detail pre-fills borrower name + address into ScenarioBuilder via URL params; zero typing for common LO workflow~~ ✅ DONE 2026-04-19 PM
+- ~~**PDF from mobile** — "Save as PDF" button added to share page (desktop sidebar + mobile CTA area); calls window.print(), reuses existing @media print styles~~ ✅ DONE 2026-04-19 AM
 
 ---
 

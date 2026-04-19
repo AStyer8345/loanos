@@ -124,11 +124,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-19 autonomous (PM) — Scenarios Tier 7 Item 2. "Create Scenario" button added to contact detail action strip (`ContactRecordView.tsx`). Navigates to `/dashboard/scenarios/new?contact_id=<id>`. New scenario page (`/dashboard/scenarios/new/page.tsx`) handles `contact_id` param — queries contacts table for name + mailing address, pre-fills `borrowerName` and `propertyAddress` in `ScenarioBuilder`. No financial data pre-populated. Commit `0cd93dc` | Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o`.
+**Last worked on:** 2026-04-19 AM — Scenarios Tier 7 Item 3. "Save as PDF" button added to share page (`ShareSavePDFButton.tsx`). Calls `window.print()`, reuses existing @media print styles. Desktop sidebar + mobile CTA both updated. Tier 7 COMPLETE. Commit `83ba043` | Vercel `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` — BUILDING.
 
 **Active blockers:** None.
 
-**What's next:** Tier 7 Item 3 — TBD (check domain-queue.md).
+**What's next:** Tier 8 definition — or redirect to marketing site demo data (GOALS.md highest risk: 7 days to May 1, zero progress).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->

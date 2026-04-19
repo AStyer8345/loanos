@@ -803,3 +803,41 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 
 **Domain queue updates:**
 - Tier 7 Item 1 (Borrower-facing AI chat) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-19 (scenarios-am)
+
+**What was built:**
+- Save as PDF button on share page (`src/components/share/ShareSavePDFButton.tsx`, `SharePageLayout.tsx`)
+  - `ShareSavePDFButton.tsx` (new client component): Printer icon + "Save as PDF" label; calls `window.print()`; LoanOS dark theme (transparent bg, muted border, gold icon); `print:hidden` so it never appears in the PDF output
+  - `SharePageLayout.tsx`: imports + renders button below `LOSidebarCard` on desktop (sidebar) and below `ShareCTA` on mobile — both wrapped in `print:hidden` containers
+  - No new dependencies — reuses existing `@media print` styles that already produce clean white print layout, SVG charts, force single-column grid
+  - Works across platforms: desktop → browser print dialog → "Save as PDF"; iOS Safari → AirPrint sheet → Share → Save to Files; Android Chrome → print dialog → "Save as PDF"
+
+**Investigation finding (no code needed):**
+- No puppeteer in package.json — existing `generate-pdf` route returns HTML, not a binary PDF. Both builder and share page use browser print. Adding a server-side binary PDF would require `@sparticuz/chromium` + significant Vercel config. The browser print approach is simpler, more maintainable, and produces identical output.
+
+**MC gap closed:** Borrowers can now save their analysis. Before: the share page had zero affordance for saving — no download button, no print trigger, nothing. After: a prominent "Save as PDF" button appears in the sidebar (desktop) and below the CTA (mobile). Matches Mortgage Coach's "Download" action.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `83ba043` — pushed to main
+**Vercel:** `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/components/share/ShareSavePDFButton.tsx` (new)
+- `src/components/share/SharePageLayout.tsx`
+- No auth/RLS/multi-tenant changes
+
+**TIER 7 COMPLETE** — all 3 items done:
+1. Borrower-facing AI chat ✅
+2. Quick scenario from contacts page ✅
+3. Save as PDF on share page ✅
+
+**Next session priority:**
+1. Define Tier 8 — consider: PDF share link (send borrower a direct download link vs. share page URL), share page expiry notice, "Print this page" as explicit button on mobile in the hero area (more discoverable), or shift focus to GOALS.md priorities (marketing site demo data, email automation cutover)
+2. Alternatively: pause Scenarios agent and redirect to marketing site demo data (7 days to May 1, zero progress — HIGHEST RISK per standup)
+
+**Domain queue updates:**
+- PDF from mobile (Tier 7 Item 3) — ✅ COMPLETE this session
+- Tier 7 COMPLETE

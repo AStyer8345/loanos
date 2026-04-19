@@ -31,11 +31,25 @@ function mapLoanTerm(months: number | null): LoanTerm {
 export default async function NewScenarioPage({
   searchParams,
 }: {
-  searchParams: { loan_id?: string }
+  searchParams: { loan_id?: string; contact_id?: string }
 }) {
   let initialState: Partial<ScenarioState> | undefined
 
-  if (searchParams.loan_id) {
+  if (searchParams.contact_id) {
+    const supabase = createClient()
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('first_name, last_name, mailing_street, mailing_city, mailing_state, mailing_zip')
+      .eq('id', searchParams.contact_id)
+      .single()
+
+    if (contact) {
+      const borrowerName = [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+      const propertyAddress = [contact.mailing_street, contact.mailing_city, contact.mailing_state, contact.mailing_zip]
+        .filter(Boolean).join(', ')
+      initialState = { borrowerName, propertyAddress }
+    }
+  } else if (searchParams.loan_id) {
     const supabase = createClient()
     const { data: loan } = await supabase
       .from('loans')

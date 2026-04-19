@@ -21,6 +21,7 @@ import {
   Trash2,
   GitMerge,
   Search,
+  BarChart2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import AutomationPanel from '@/components/automations/AutomationPanel'
@@ -1329,6 +1330,14 @@ export function ContactRecordView(props: Props) {
             <GitMerge size={13} />
             Merge
           </button>
+          <Link
+            href={`/dashboard/scenarios/new?contact_id=${contact.id}`}
+            style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)', textDecoration: 'none' }}
+            title="Create scenario pre-filled with this contact"
+          >
+            <BarChart2 size={13} />
+            Create Scenario
+          </Link>
         </div>
 
         {/* Log prompt after Call/Text/Email */}

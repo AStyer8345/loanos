@@ -96,21 +96,21 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-15 AM — Step 1B: rates/2026-04-14.html distributed (GBP auto-posted Publer 69df3eb9ac618bd4f8df9b90, FB/IG/LI drafted for approval). Week 28 built (Posts 152-156, Sep 16-22): 2 LI + 1 IG + 2 FB. 2 authority (TIMELY FOMC Sep 16 + hot-take) / 2 education / 1 personal Reel. Avg 8.0/10. All APPROVED. QA 5/5 PASS. Post 152 TIMELY FOMC: 6 placeholders, NMLS #513013, Refresh fills Sep 16 after 2 PM ET, Adam approves by 5 PM CDT. NotebookLM CLI 6th consecutive timeout.
+**Last worked on:** 2026-04-19 PM — First PM session under new 9/10 quality policy (1-2 posts/week, throttled from 5). Week 29 (Sep 23-29): Post 157 LinkedIn authority — "The 1% Refinance Rule Is Wrong" (evergreen, 9/10, ID: 94e1d9a7, Sep 24 10 AM CT) + Post 158 Facebook personal — "Fiction at Night, Nonfiction in the Morning" (evergreen, 9/10, ID: 94c1dc00, Sep 25 11 AM CT). Both APPROVED, QA PASS. blog/2026-04-17 marked COMPLETED in content-repost-queue. rates/2026-04-14.html carousel/Reel deferred. NotebookLM CLI: 7th consecutive timeout.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). Post 152 TIMELY FOMC: Adam approve ~Sep 16. Post 147 TIMELY CPI: Adam approve ~Sep 10. Post 145 TIMELY Jobs: Adam approve ~Sep 4. Post 140 TIMELY PCE: Adam approve ~Aug 29. Rate update FB/IG/LI drafts (Apr 14 rates): awaiting approval in dashboard.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 7 consecutive sessions — FLAG TO ADAM. Post 157 needs blog link in first comment before Sep 24 publish. rates/2026-04-14.html LinkedIn carousel + Instagram Reel pending (higher production effort — deferred).
 
-**What's next:** Week 29 build (Posts 157-161, Sep 23-29). Authority/education emphasis continues. Pull back personal (2 in Wks 27-28). Reel queue — Adam needs to film Post 155 by Sep 19. NotebookLM CLI check — 6th consecutive timeout.
+**What's next:** Week 30: 1 education post (Education pillar at 27.3% — below 30% target) + 1 Instagram post (no Instagram in Week 29). Avoid Real Talk (13.8%, above 10% target). rates/2026-04-14.html carousel build when capacity allows.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-18 PM — Nightly NotebookLM PUSH+CURATE. Apr 17 session was incomplete — no missed artifacts. Notebook: 2 removed (notebooklm-audit-2026-04-16.md, CONTEXT.md Apr16 stale), 2 added (refreshed CONTEXT.md Apr18 20:55 [analytics dashboard + AI chat], audit-Apr18). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-19 AM — Lead Scoring System COMPLETE. Migration 090 (lead_score + lead_tier columns), migration 091 (backfill: 3 cold, 2,934 new), n8n "Lead Score Updater" (nOCDV73m4M0jyL1B) ACTIVE on webhook `lead-score-update`. web-lead route fires score webhook fire-and-forget. Contacts list: Lead Score badge column. Contact detail: lead_tier badge in header. Commit `b10ed40`, Vercel `dpl_AUkKNuDi7iWkbsamDRBjqTR1MBnH` → deploying.
 
-**Active blockers:** (1) Seq C INACTIVE — Outlook cred (8+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built (Execution Pack delivered, 45 min Adam). (4) Seq D — copy approval + manual trigger. (5) Lead scoring threshold decision: 6.00% vs 6.25% (Adam).
+**Active blockers:** (1) Seq C INACTIVE — Outlook cred (9+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built. (4) Seq D — copy approval.
 
-**What's next:** Build lead scoring system (spec ready — DB migration + n8n Lead Score Updater workflow + intake wiring). Calendly webhook activation + HMAC code node. Mailchimp 3 Customer Journeys (Adam-owned, ~45 min).
+**What's next:** Calendly webhook activation (needs Calendly UI access). Mailchimp 3 Customer Journeys (~45 min Adam). Lead score signals will accumulate as new web leads arrive.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->

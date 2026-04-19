@@ -1,5 +1,31 @@
 # LoanOS Changelog
 
+## 2026-04-19 AM — Lead Scoring System (Lead Gen)
+
+- **Migration 090**: `lead_score INTEGER NOT NULL DEFAULT 0` + `lead_tier TEXT GENERATED ALWAYS AS (...) STORED` added to `contacts`. Tiers: hot ≥20, warm ≥10, cold ≥3, new 0–2. Indexes on org+score and org+tier.
+- **Migration 091 (backfill)**: 2,937 contacts scored from `activity_log`. Result: 3 cold (score=3), 2,934 new (score=0). Scores accumulate going forward.
+- **n8n "LoanOS — Lead Score Updater"** (ID: `nOCDV73m4M0jyL1B`, path: `lead-score-update`): ACTIVE. 7 nodes: Webhook → Extract contact_id → GET activity_log scored actions → Compute score (0–100 clamp) → PATCH contacts.lead_score → IF ≥20 → PATCH hot_lead_dismissed=false.
+- **web-lead route**: Fire-and-forget score webhook fires after every new web lead created.
+- **Contacts list**: `Lead Score` column — hot/warm/cold badge (hidden for new tier).
+- **Contact detail header**: `lead_tier` badge in header.
+- **database.types.ts**: Regenerated with new columns. Commit `b10ed40` | Vercel `dpl_AUkKNuDi7iWkbsamDRBjqTR1MBnH`
+
+## 2026-04-19 PM (styer-social-pm) — Week 29 Content Build (First 9/10 Policy Session)
+
+- AM session's Week 29 posts (IDs 32803838, 58757106) confirmed missing from Supabase as drafts — PM session rebuilt from scratch.
+- Post 157 (LinkedIn, authority, Sep 24 10 AM CT): "The 1% Refinance Rule Is Wrong" — break-even math, 31-month vs 24-month selling horizon, illustrative rates. 9/10 first pass. NMLS #513013. ID: 94e1d9a7.
+- Post 158 (Facebook, personal, Sep 25 11 AM CT): "Fiction at Night, Nonfiction in the Morning" — Brittany Jo named, reading routine verified personal fact, zero financial content. 9/10 first pass. ID: 94c1dc00.
+- content-repost-queue: blog/2026-04-17 marked COMPLETED (LinkedIn native as Post 157). rates/2026-04-14.html carousel/Reel deferred.
+- NotebookLM CLI: 7th consecutive timeout — flagged as persistent infrastructure issue needing Adam attention.
+
+## 2026-04-19 AM (styer-social-am) — Week 29 Content Build + Blog GBP Distribution
+
+- Step 1B: blog/2026-04-17-should-i-refinance-austin-tx-2026.html detected as new. GBP auto-published via Publer (job 69e5407c9b0ea3b3576ef7f6). IG/FB/LI queued to content-repost-queue.md for Architect (new 2026-04-19 policy — GBP-only in Step 1B).
+- NEW PRIMARY GOAL applied: 1-2 posts/week at 9/10 quality bar (throttled from 5/week per 2026-04-19 policy change after 176 sub-9 drafts accumulated).
+- Post 157 (LinkedIn, authority, Sep 23): Break-even math hot take — "one number that matters," debunks 1% rule, real example of client listing 90 days after refi. 9/10. NMLS #513013. ID: 32803838.
+- Post 158 (Instagram, personal, Sep 26): Reading routine — fiction at night, nonfiction in morning. "My wife thinks I'm insane." Verified personal fact, zero fabrication. 9/10. No CTA. ID: 58757106.
+- QA: 2/2 PASS. Rolling pillar: 37 posts, Authority 30.0% / Personal 29.8% / Education 27.3% / Real Talk 13.8%.
+
 ## 2026-04-19 AM (scenarios-am) — Scenarios Tier 7 Item 3: Save as PDF button on share page
 
 - `ShareSavePDFButton.tsx` (new): `'use client'` component — Printer icon + "Save as PDF" label, calls `window.print()`, styled to match LoanOS dark theme (transparent bg, muted border, gold icon), `print:hidden`

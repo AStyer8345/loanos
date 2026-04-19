@@ -2,6 +2,43 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-19 AM — Lead Generation
+Focus: Lead Scoring System — Full Build
+Type: Execute / Build (Sequence C)
+
+### Completed
+
+- **Supabase migration 090**: `lead_score INTEGER NOT NULL DEFAULT 0` + `lead_tier TEXT GENERATED ALWAYS AS (CASE WHEN lead_score >= 20 THEN 'hot' WHEN lead_score >= 10 THEN 'warm' WHEN lead_score >= 3 THEN 'cold' ELSE 'new' END) STORED` added to `contacts` table. Index on `(organization_id, lead_score DESC)` and `(organization_id, lead_tier)`. Applied to prod via Supabase MCP.
+- **Backfill migration 091**: Scored all 2,937 contacts from `activity_log`. Result: 3 cold (score=3, from `contact_created` action), 2,934 new (score=0 — predate activity log). Expected: scores will accumulate as new signals fire.
+- **n8n workflow "LoanOS — Lead Score Updater"** (ID: `nOCDV73m4M0jyL1B`): ACTIVE. Webhook path: `lead-score-update`. 7-node chain: Webhook → Extract contact_id → GET activity_log scored actions from Supabase REST → Compute score (POINTS map + 0–100 clamp) → PATCH contacts.lead_score → IF score ≥ 20 → PATCH contacts.hot_lead_dismissed=false. Created via SDK + REST API PUT (n8n SDK `.connect()` method has an unresolved runtime bug — worked around by creating workflow via SDK and patching connections via REST `PUT /api/v1/workflows/{id}`). Published via `publish_workflow` MCP, activated via REST `/activate`.
+- **web-lead route wiring** (`src/app/api/contacts/web-lead/route.ts`): Fire-and-forget `fetch()` to `https://styer.app.n8n.cloud/webhook/lead-score-update` fires after every new web lead contact creation. Non-blocking; errors logged but swallowed.
+- **Contacts list UI** (`src/app/dashboard/contacts/page.tsx`): `Lead Score` column added to `ALL_COLUMNS` with color-coded badge (red hot / yellow warm / gray cold). Hidden for `new` tier. `lead_score` and `lead_tier` added to `Contact` type.
+- **Contact detail header** (`src/app/dashboard/contacts/[id]/ContactRecordView.tsx`): `lead_tier` badge rendered inline with stage/type/group/referral badges. `lead_score` and `lead_tier` added to `Contact` type.
+- **database.types.ts**: Regenerated from live Supabase schema via MCP. New columns: `lead_score: number` (Row/Insert/Update), `lead_tier: string | null` (Row/Insert/Update).
+- **Commit**: `b10ed40` | Vercel `dpl_AUkKNuDi7iWkbsamDRBjqTR1MBnH` → deploying.
+
+### Deferred / Not Built
+
+- Seq C activation (Outlook cred not connected — Adam-owned, 9+ sessions)
+- Calendly webhook HMAC code node (needs Calendly UI + Adam access)
+- Mailchimp 3 journeys (Adam-owned, ~45 min)
+- Seq D copy approval (Adam-owned)
+- n8n SDK `.connect()` method bug: runtime error `Cannot read properties of undefined (reading 'name')` with all tested argument forms (string pairs, object references, object args). Workaround: REST API PUT. Known SDK bug — not a blocker.
+
+### Notes / Decisions Made
+
+- **Hot lead routing**: Set `hot_lead_dismissed = false` (not email to Adam) — Outlook was removed 2026-04-15 AM. This surfaces hot leads in the existing Hot Leads UI panel automatically.
+- **Data model**: Option A confirmed (persisted columns). Option B (computed on read) not needed — scores available for pipeline sorting/filtering.
+- **Seq A threshold**: 6.00% unchanged — no Adam decision received. Assumed per 2026-04-15 session log instruction.
+- **Score webhook trigger**: Only fires from `web-lead` route for now. Other triggers (Calendly booking, PA form, etc.) deferred — they don't yet hit activity_log.
+
+### Next Session Priority
+
+1. Verify Vercel deployment READY for `b10ed40`
+2. Adam blockers: Seq C Outlook cred, Calendly webhook, Mailchimp journeys (all unchanged 9+ sessions)
+3. If new web leads arrive, verify score webhook fires and activity_log `contact_created` scores to `cold` (3 pts)
+
+---
 ## Session: 2026-04-15 AM — Lead Generation
 Focus: Blocker Verification + Homepage Form End-to-End Test + Lead Scoring Design
 Type: Execute / Build (Sequence C — spec + verification)

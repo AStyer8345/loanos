@@ -10,6 +10,14 @@
 - **Contact detail header**: `lead_tier` badge in header.
 - **database.types.ts**: Regenerated with new columns. Commit `b10ed40` | Vercel `dpl_AUkKNuDi7iWkbsamDRBjqTR1MBnH`
 
+## 2026-04-19 PM (styer-social-pm re-run) — Week 30 Content Build
+
+- Post 159 (LinkedIn, education, Sep 30 10 AM CT): "DTI kills more deals than bad credit" — 3 Cs framework, DTI formula, 45% threshold, illustrative 760-score buyer example. 9/10. NMLS #513013. ID: f3cb80af.
+- Post 160 (Facebook, personal, Oct 2 12 PM CT): "My kids don't know what I do" — names Ruthie (5), raw reflection, zero mortgage content, no CTA. 9/10. ID: 0a31a394.
+- Education pillar recovering: 27.3% → 28.5%. All pillars within ±5% tolerance (Auth 28.5% / Personal 30.8% / Education 28.5% / Real Talk 13.1%).
+- NotebookLM CLI: 8th+ consecutive timeout — skipped push. NEEDS ADAM.
+- DUPLICATE ALERT flagged: Week 29 built twice today (AM + PM run 1 both built Posts 157-158 with different IDs).
+
 ## 2026-04-19 PM (styer-social-pm) — Week 29 Content Build (First 9/10 Policy Session)
 
 - AM session's Week 29 posts (IDs 32803838, 58757106) confirmed missing from Supabase as drafts — PM session rebuilt from scratch.
@@ -3271,5 +3279,13 @@ Arive (loan event)
 - **SEO/SEM notebook**: Removed 3 stale (notebooklm-audit-2026-04-17.md, 2026-04-01-blog-content-tcpa-web.md [oldest/cap], CONTEXT.md Apr 18 00:18). Added 3 fresh (2026-04-17-refi-content-seo-web.md catch-up, refreshed CONTEXT.md Apr 18 10:27, notebooklm-audit-2026-04-18.md). Final: 50/50.
 - **Lead Gen notebook**: Apr 17 session was incomplete — no missed build artifacts. Removed 2 stale (notebooklm-audit-2026-04-16.md, CONTEXT.md Apr 16). Added 2 fresh (refreshed CONTEXT.md Apr 18 20:55 capturing analytics dashboard + AI chat, notebooklm-audit-2026-04-18.md). Final: 50/50.
 - **Web research**: 0 added to either notebook (both at 50/50 cap). 2026-04-16-lead-scoring-web.md saved locally; add when capacity opens.
+- **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
+- **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).
+
+## 2026-04-19 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed 3 stale (notebooklm-audit-2026-04-18.md [superseded], CONTEXT.md Apr 18 [stale by 21hrs], 2026-04-02-self-employed-pillar-web.md [oldest research, not active sprint]). Added 3 fresh (refreshed CONTEXT.md Apr 19 09:19 — H2 AEO + Round Rock deepening, notebooklm-audit-2026-04-19.md, SEL AEO article [how to produce content that naturally builds AEO clout]). Final: 50/50.
+- **Lead Gen notebook**: Lead Scoring System shipped in AM session (commit b10ed40 — migration 090/091, n8n nOCDV73m4M0jyL1B ACTIVE, UI deployed). Removed 2 stale (notebooklm-audit-2026-04-18.md, CONTEXT.md Apr 18 [pre-lead-scoring]). Added 2 fresh (refreshed CONTEXT.md Apr 19 05:00, notebooklm-audit-2026-04-19.md). Final: 50/50.
+- **Web research**: SEO — 1 source added (searchengineland.com/produce-content-build-aeo-clout-473487 — AEO content production best practices, directly validates today's H2 question-format work). Lead Gen — 0 added (2-for-2 swap, no capacity).
 - **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
 - **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).

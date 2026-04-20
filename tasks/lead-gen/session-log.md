@@ -2,6 +2,69 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-20 AM — Lead Generation
+Focus: Hot Lead Notification Gap + Realtor Referral System Research
+Type: Strategy / Architecture (Sequence B)
+Week in Queue: Week 9 (post-program — infrastructure expansion)
+
+### Completed
+- **MCP audit of Lead Score Updater (nOCDV73m4M0jyL1B)**: Confirmed ACTIVE, triggerCount=1 (1 web lead since deploy — expected). Workflow is correct; scoring chain functional.
+- **Supabase schema audit**: Confirmed `lead_tier` is a GENERATED ALWAYS column (auto-computed from `lead_score`). No manual tier update needed by n8n. Correct by design.
+- **Score distribution check**: 3 cold (score=3), 2,934 new (score=0). No hot or warm — expected for a freshly launched system with no high-value actions yet.
+- **Critical gap identified**: `Surface Hot Lead` node only sets `hot_lead_dismissed=false` — no email/SMS to Adam. 5-minute response window is completely broken for hot leads.
+- **web-lead route confirmed**: Lines 313-319 fire score webhook fire-and-forget correctly. Not a bug.
+- **Research written**: `tasks/lead-gen/research/2026-04-20-hot-lead-notification-gap.md` — gap analysis, options A/B/C compared, recommendation: LoanOS API endpoint (Option A).
+- **Research written**: `tasks/lead-gen/research/2026-04-20-realtor-referral-system-research.md` — more schema exists than expected (YTD counters, production_tier, referral detail page), 3 actual gaps identified.
+- **Spec written**: `tasks/lead-gen/specs/2026-04-20-hot-lead-notification-spec.md` — self-contained build spec for `POST /api/notify/hot-lead` route + 2 new n8n nodes (uses existing `sendViaResend()`, dedup via `activity_log`, `LOANOS_AGENT_SECRET` via `$env.VAR_NAME`). Estimated effort: ~45 min.
+- **Spec written**: `tasks/lead-gen/specs/2026-04-20-realtor-referral-spec.md` — 3 sub-specs: Priority 1 (realtor acknowledgment email, 2-3 hrs), Priority 2 (realtor roster view at `/dashboard/contacts/realtors`, 2-4 hrs), Priority 3 (monthly value report, 4-6 hrs — deferred).
+
+### Deferred
+- Hot lead notification BUILD: deferred to next Builder session — spec complete, ready to execute
+- Realtor Referral System BUILD: deferred — spec complete. Priority 1 (acknowledgment email) is first.
+- All persistent blockers unchanged: Seq C (Outlook cred), Calendly (webhook), Mailchimp journeys (Adam), Seq D (copy approval)
+- NotebookLM pull/push: SKIPPED — CLI unavailable 9th+ consecutive session
+
+### Output Produced
+- Research: `tasks/lead-gen/research/2026-04-20-hot-lead-notification-gap.md`
+- Research: `tasks/lead-gen/research/2026-04-20-realtor-referral-system-research.md`
+- Spec: `tasks/lead-gen/specs/2026-04-20-hot-lead-notification-spec.md`
+- Spec: `tasks/lead-gen/specs/2026-04-20-realtor-referral-spec.md`
+- Build: None
+- Review: N/A
+- QA: N/A
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged — FTB Guide, Pre-Approval, Rate Alert)
+- Email sequences active: Seq A (Rate Drop Alert), Seq B, Seq C (INACTIVE — Outlook), Anniversary Check-In — unchanged
+- Estimated leads/month from owned channels: ~5-10 (unchanged — system infrastructure solid, Mailchimp journeys missing)
+- Lead scoring: 0 hot, 0 warm, 3 cold, 2,934 new — scoring live and accumulating
+
+### Compliance Checks Passed
+- N/A this session (research/strategy only — no new code written)
+- Hot lead notification spec: internal ops email only — no TCPA/CAN-SPAM concerns
+
+### Quality Ratings (1-5)
+Research: 5 | Strategy: 5 | Execution: N/A | Review: N/A | QA: N/A
+
+### System Improvement Notes
+- master-agent.md Step 6 should note: after any "Build" session, the next AM session should verify the workflow's `triggerCount` to confirm real leads are flowing — catching the "fired once = not really wired" pattern earlier.
+- 02-architect.md should require: for any n8n workflow that changes a DB flag without notifying a human, add a "notification completeness check" step before marking the spec complete.
+
+### BLOCKERS
+- **BLOCKER-HOT-LEAD-001 (NEW)**: Lead Score Updater has no Adam notification for hot leads. Spec ready at `tasks/lead-gen/specs/2026-04-20-hot-lead-notification-spec.md`. Builder session can execute without Adam input.
+- BLOCKER-001: TCPA on homepage forms — LOW (no SMS live)
+- Seq C INACTIVE — Outlook cred (9+ sessions, Adam-owned)
+- Calendly INACTIVE — webhook not wired in Calendly UI (Adam-owned)
+- Mailchimp 3 journeys not built (Adam-owned, ~45 min)
+- Seq D — copy approval pending (Adam-owned)
+
+### Next Session Instructions
+Priority 1: **BUILD — Hot Lead Notification**. Spec at `tasks/lead-gen/specs/2026-04-20-hot-lead-notification-spec.md`. Implement `POST /api/notify/hot-lead` route + 2 new n8n nodes. ~45 min. Before starting, verify `LOANOS_AGENT_SECRET` is accessible in n8n via `$env.LOANOS_AGENT_SECRET` or as an n8n credential.
+Priority 2: **BUILD — Realtor Roster View** (Priority 2 of realtor spec). New page at `/dashboard/contacts/realtors`. 2-4 hrs. No migrations needed.
+Priority 3: **Adam action** — all 4 persistent blockers (Seq C, Calendly, Mailchimp journeys, Seq D) require Adam's time. Flag in standup.
+
+Advance queue to next topic: YES — Realtor Referral System is now the active build queue item.
+---
 ## Session: 2026-04-19 AM — Lead Generation
 Focus: Lead Scoring System — Full Build
 Type: Execute / Build (Sequence C)

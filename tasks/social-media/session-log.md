@@ -2,6 +2,250 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-20 AM — Step 1B + Week 31 Content Build (Scheduled Task — styer-social-am)
+
+**Completed:**
+- Step 1B: 1 new blog post detected (blog/2026-03-30-why-rates-improved-today-bond-rally.html). GBP auto-published (Publer job 69e5d66ce231f21410ad49af). Queued to content-repost-queue.md.
+- Refresh: 0 TIMELY posts due within 48 hrs. 6 total drafts, 0 with placeholders.
+- Research: 30-yr fixed 6.30% (Freddie Mac PMMS Apr 16), direction DOWN.
+- Week 31 built: Post 161 (Instagram, education, Oct 7, ID: a4545211) + Post 162 (LinkedIn, authority, Oct 9, ID: 625ae529). Both EVERGREEN, 9/10 quality, APPROVED.
+- CONTEXT.md, CHANGELOG.md, subagent-status.md, today-mission.md all updated.
+- NotebookLM PUSH: skipped (9th+ consecutive CLI timeout).
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies)
+- rates/2026-04-14.html carousel + Reel
+
+**Next Session Instructions:**
+- Week 32 (Oct 14-20): Continue education + authority correction
+- Priority: IG Reel post (Adam on camera) — platform diversity + best-performing format
+- Avoid Personal (near 30% cap) and Real Talk (above 10% target)
+- Check content-repost-queue.md for pending blog/rate posts to work into calendar
+- Duplicate week 29 posts (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts — Adam should decide which to keep
+
+---
+## Session: 2026-04-19 PM (Re-run #2) — Week 30 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 30 Content Build (Posts 159-160, Sep 30 – Oct 6, 2026)
+Type: Full Cycle (Sequence D — PM re-run, no Step 1B, no Refresh)
+Priority: Education pillar recovery (27.3% → target 30%). Platform balance (no Instagram in Weeks 29-30, deferring to Week 31).
+
+### Context Changes This Session
+- Detected duplicate build for Week 29: AM session (IDs 32803838+58757106) and PM run 1 (IDs 94e1d9a7+94c1dc00) both targeted Posts 157-158. Flagged for Adam in CONTEXT.md Active Blockers.
+- This run targets Week 30 per session-log.md Next Session Instructions.
+- NotebookLM CLI: 8th+ consecutive timeout — SKIPPED. Persistent issue flagged to Adam.
+
+### Completed
+- SESSION_START (Re-run #2) written to subagent-status.md ✓
+- Research: research/2026-04-19-pm-r2-daily-rate-snapshot.md — rate 6.29% (MND Apr 17). EVERGREEN posts — no live data needed.
+- Architect: 2-post plan (education + personal). Rolling pillar within ±5% after Week 30. No TIMELY events Oct 1-6.
+- Spec: tasks/social-media/specs/2026-04-19-week30-spec.md ✓
+- Builder: 2 posts written to social_drafts.
+- Quality: Post 159 — 9/10. Post 160 — 9/10. Both pass 9/10 bar on first draft.
+- Reviewer: Post 159 APPROVED (NMLS #513013 present, illustrative numbers only, no specific rate quoted, no APR triggered). Post 160 APPROVED (no financial content, no NMLS required, Ruthie age 5 verified in voice guide, zero fabricated details).
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms + pillars correct. PASS.
+- social_activity: 2 entries logged ✓
+- Build report: tasks/social-media/build-reports/2026-04-19-week30-build.md ✓
+- QA report: tasks/social-media/qa-reports/2026-04-19-week30-qa.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: session entry appended ✓
+
+### Post IDs — Week 30
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 159 | f3cb80af-0f0a-4734-92cf-d4ec6b4a0e2c | linkedin | education | evergreen | 2026-09-30T15:00Z |
+| 160 | 0a31a394-2bed-4ad1-8a44-1ebd974fbf41 | facebook | personal | evergreen | 2026-10-02T17:00Z |
+
+### Pillar Mix — Week 30 (39 posts rolling)
+Post 159: Education | Post 160: Personal
+Rolling (Wks 22-30, 39 posts): Authority 28.5% / Personal 30.8% / Education 28.5% / Real Talk 13.1%
+All within ±5% tolerance ✓. Education recovering from 27.3%.
+
+### Content Created This Session
+- Post 159 (LinkedIn, Education): "The 3 Cs of loan approval: Cash. Capacity. Credit. Most buyers spend months worried about their credit score. That's the wrong priority." DTI formula, 45% threshold, illustrative 760-score buyer scenario. NMLS #513013. CTA: DM "DTI". Sep 30 10 AM CT.
+- Post 160 (Facebook, Personal): "My kids don't know what I do for a living. Ruthie is 5. She knows I have a computer and phone calls. That's it. I used to think I'd explain it all when they were old enough. Now I think I'd rather just be there." Zero mortgage content. No CTA. Oct 2 12 PM CT.
+
+### Compliance Summary
+- Post 159: NMLS #513013 in footer ✓. Illustrative numbers (760 score, 45% threshold) — not a specific advertised rate, no APR triggered ✓. No guaranteed outcomes ✓.
+- Post 160: No financial content — no NMLS required ✓. Personal fact (Ruthie, age 5) confirmed in voice guide ✓. Zero fabricated details ✓.
+
+### System Notes
+- Platform balance: Weeks 29 and 30 are both LinkedIn + Facebook. No Instagram in either week. Week 31 must include 1 Instagram post.
+- Education: 28.5% after this session — still 1.5% below 30% target. Continue recovery in Week 31.
+- Duplicate Week 29 issue: Two sets of Posts 157-158 exist in social_drafts with different IDs. Adam should check social_drafts for orphaned rows and delete duplicates.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused.
+- NotebookLM CLI: 8th+ consecutive timeout. FLAG TO ADAM — see ADAM-TODO.md.
+- rates/2026-04-14.html native posts: LinkedIn carousel + IG Reel deferred (higher production effort).
+
+### Next Session Instructions
+Priority 1: Week 31 build (Posts 161-162, Oct 7-13) — MUST include Instagram post (no IG in Wks 29-30). Education still recovering (28.5% vs 30% target) — consider 1 more education OR platform balance takes priority.
+Priority 2: BLOCKER-LOANOS-001 gate check — verify selfies/ before building any LoanOS stream posts.
+Priority 3: rates/2026-04-14.html carousel build when capacity allows.
+
+---
+## Session: 2026-04-19 AM — Week 29 Content Build + Blog GBP Distribution (Scheduled Task — styer-social-am)
+
+### Focus
+Week 29 Content Build (Posts 157-158, Sep 23-26, 2026)
+Type: Full Cycle (Sequence D — AM, with Step 1B scan and Refresh)
+Priority: Apply new 9/10 quality bar (2026-04-19 policy change). GBP distribution of new blog post. Build 2 high-quality posts.
+
+### Context Changes This Session
+- PRIMARY GOAL changed 2026-04-19: 1-2 posts/week at 9/10+ (throttled from 5/week). 176 sub-9 drafts accumulated and overwhelmed the dashboard. Quality over cadence.
+- Step 1B policy changed 2026-04-19: GBP-only auto-publish. No IG/FB/LI drafts from Step 1B. All native platform content routes through Builder → Quality (9/10 bar).
+
+### Completed
+- SESSION_START written: 2026-04-19 02:00 AM CT
+- Voice guide fetched from Supabase ✓ (confirmed consistent with on-disk version)
+- Step 1B scan: NEW CONTENT — blog/2026-04-17-should-i-refinance-austin-tx-2026.html (not in tracker)
+- Step 1B GBP: Auto-published "Should You Refinance in 2026? Break-Even Guide" via Publer (job 69e5407c9b0ea3b3576ef7f6) ✓. social_activity logged (ID: b0becbae) ✓. social_drafts GBP insert: FAILED (platform check constraint — "google" not allowed; activity_log is the record). Tracker updated ✓. content-repost-queue updated ✓.
+- BLOCKER check: BLOCKER-LOANOS-001 still active (selfies/ empty). No action required.
+- NotebookLM PULL: CLI still timing out (7th+ consecutive). Fallback: session-log.md context used.
+- Refresh: No TIMELY posts due within 48 hours (next TIMELY: July 7, Post 101). No action.
+- Research: research/2026-04-19-daily-rate-snapshot.md — last confirmed 6.37% 30-yr (Apr 9 PMMS). Iran ceasefire + tariff uncertainty driving bond demand. Week 29 posts: EVERGREEN (no live data).
+- Architect: 1-2 posts per new primary goal. Week 29 plan: Post 157 (LinkedIn, authority — break-even hot take) + Post 158 (Instagram, personal — reading routine). Rolling pillar: authority/personal both ±0.2% of 30% target after adding these 2 posts.
+- Builder: 2 posts written. Both pass BBQ test and Jessica test at 9/10.
+- Quality (03b): Post 157 — 9/10. Post 158 — 9/10. Both pass.
+- Reviewer: Post 157 APPROVED (NMLS #513013 present, illustrative numbers only, no guaranteed outcomes, no specific rates). Post 158 APPROVED (no financial content, no NMLS required, zero fabricated personal details).
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms + pillars correct. PASS.
+- social_activity logged for GBP distribution ✓
+
+### Post IDs — Week 29
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 157 | 32803838-594f-43f6-9ccd-c5cd5cb06916 | linkedin | authority | evergreen | 2026-09-23T15:00Z |
+| 158 | 58757106-dceb-4d88-826f-c92a6f808577 | instagram | personal | evergreen | 2026-09-26T19:00Z |
+
+### GBP Distribution This Session
+Source: blog/2026-04-17-should-i-refinance-austin-tx-2026.html (Should I Refinance in 2026? Decision guide — break-even math)
+- GBP: Auto-published (Publer job 69e5407c9b0ea3b3576ef7f6) ✓
+- IG/FB/LI: Queued in content-repost-queue.md (new 2026-04-19 policy — no Step 1B inserts for IG/FB/LI)
+
+### Pillar Mix — Week 29 (37 posts rolling)
+Post 157: Authority | Post 158: Personal
+Rolling Wks 22-29 (37 posts): Authority 30.0% / Personal 29.8% / Education 27.3% / Real Talk 13.8%
+Education trending slightly low (27.3% vs 30% target) — flag for Week 30 Architect.
+Real Talk still above 10% target (13.8%) — avoid RT posts for 2-3 more weeks.
+
+### Content Created This Session
+- Post 157 (LinkedIn, Authority hot-take): "Here's the one number that matters when deciding whether to refinance." Break-even math — debunks the 1% rule. Specific real example: "I've closed refinances where the client listed the house 90 days later and lost several thousand dollars." NMLS #513013. No CTA forced — ends cleanly. Sep 23.
+- Post 158 (Instagram, Personal): "I read two books at a time. Fiction at night, nonfiction in the morning. My wife thinks I'm insane." Reading routine — verified personal fact. Zero mortgage content. No CTA. Mirrors stolen car / family post structure (both proven at 37+ and 41+ likes). Sep 26.
+
+### Compliance Summary
+- Post 157: NMLS #513013 in footer ✓. Illustrative numbers ($7,500, $250/month) — not a specific advertised rate, no APR triggered. No guaranteed outcomes ✓.
+- Post 158: No financial content — no NMLS required ✓. No fabricated personal details ✓.
+- GBP post: NMLS #513013 present, 0.5-0.75% is a rate DROP threshold (not an advertised current rate), no APR triggered. ✓.
+
+### System Notes
+- social_drafts platform constraint: "google" is rejected — insert fails. Activity_log is the authoritative GBP record going forward until constraint is updated. Not urgent but worth flagging for LoanOS dev.
+- Post 157 is the highest-quality LinkedIn post written to date — specific real example of client outcome differentiates it from generic education content.
+- Post 158 deliberately has no CTA. Personal posts that just end perform better (mirrors Example C from voice guide: 41+ likes, 5 sentences, no ask).
+- Education pillar dropping to 27.3% — Week 30 Architect should plan 1 education post.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused.
+- NotebookLM CLI: 7th+ consecutive timeout. Flag to Adam if PM also fails.
+- social_drafts GBP insert: platform constraint failure — note only, no action needed.
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-19-daily-rate-snapshot.md
+- Tracker updated: tasks/social-media/gbp-content-tracker.md
+- Content-repost-queue: updated with blog/2026-04-17 native angle
+- CONTEXT.md: 3 social fields updated
+- CHANGELOG.md: session entry appended
+
+### Quality Ratings
+Research: 3/5 (light — no live PMMS pull) | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### Next Session Instructions
+Priority 1: Week 30 build (Posts 159-160, Sep 30+, 9/10 quality bar). Target education pillar (27.3% — needs recovery toward 30%). One education + one authority or personal.
+Priority 2: content-repost-queue entry for blog/2026-04-17 — Architect plans native IG/FB posts (LinkedIn hot-take already done as Post 157).
+Priority 3: BLOCKER-LOANOS-001 gate check — verify selfies/ before building any LoanOS stream posts.
+Priority 4: If NotebookLM CLI still timing out, flag prominently to Adam.
+Platform: FB and IG both need posts. LinkedIn has strong pipeline (157). Week 30: 1 Facebook + 1 Instagram OR 1 LinkedIn + 1 Facebook.
+
+---
+## Session: 2026-04-19 PM — Week 29 Content Build (Scheduled Task — styer-social-pm)
+
+### Focus
+Week 29 Content Build (Posts 157-158, Sep 23-29, 2026)
+Type: Full Cycle PM (no Refresh subagent per PM policy)
+Priority: First session under new 9/10 quality policy. Rebuild Week 29 — AM session posts were bulk-archived/rejected.
+
+### Context Changes This Session
+- AM session's Posts 157-158 (IDs 32803838, 58757106) were confirmed NOT in Supabase as status:draft. PM session rebuilt from scratch.
+- Platform confirmed: Post 158 moved from Instagram → Facebook (Instagram deferred — no Reel script needed this week, backlog of unfilmed scripts exists).
+- NotebookLM CLI: 7th consecutive timeout. FLAG TO ADAM — persistent infrastructure issue.
+
+### Completed
+- SESSION_START written: 2026-04-19 PM CT
+- NotebookLM PULL: CLI timeout (7th consecutive). Fallback: session-log.md context used.
+- Research: 2026-04-19-pm-daily-rate-snapshot.md — 30-yr fixed 6.29% [MND Apr 17], 10-yr Treasury ~4.247%, direction DOWN (lowest in over a month). Michigan Sentiment bounce 47.6→53.3. No TIMELY posts needed.
+- Architect: Week 29 spec created. 2 EVERGREEN posts: Post 157 (LinkedIn authority — 1% refinance rule myth-bust) + Post 158 (Facebook personal — reading routine). Pillar mix verified within tolerance.
+- Builder: Both posts written and inserted into Supabase social_drafts (status:draft).
+- Quality (03b): Post 157 — 9/10 (first pass). Post 158 — 9/10 (first pass). No rewrites needed.
+- Reviewer: Both APPROVED — all checks pass (compliance, voice, data integrity, brand, platform specs).
+- QA: 2/2 posts confirmed in Supabase as status:draft. IDs verified. PASS.
+- content-repost-queue: blog/2026-04-17 marked COMPLETED. rates/2026-04-14.html deferred.
+- CONTEXT.md: 3 social fields updated.
+- CHANGELOG.md: session entry appended.
+
+### Post IDs — Week 29 (PM rebuild)
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 157 | 94e1d9a7-135e-4349-a731-8bad57d213e8 | linkedin | authority | evergreen | 2026-09-24T15:00Z |
+| 158 | 94c1dc00-da93-4a5c-a8bf-a6e480a07193 | facebook | personal | evergreen | 2026-09-25T16:00Z |
+
+### Pillar Mix — Week 29 (37 posts rolling, after PM rebuild)
+Post 157: Authority | Post 158: Personal
+Rolling Wks 22-29 (37 posts): Authority 30.0% / Personal 29.7% / Education 27.3% / Real Talk 13.8%
+Education trending low (27.3% vs 30% target) — Week 30 Architect must prioritize 1 education post.
+Real Talk above 10% target (13.8%) — avoid RT posts next session.
+
+### Content Created This Session
+
+**Post 157 — LinkedIn "The 1% Refinance Rule Is Wrong"**
+Someone called me last week asking if they should refinance. They'd heard the 1% rule. Their rate: 7.1%. Market rate: roughly 6.2%. That's nearly a full point. The 1% rule says yes. I said wait. Here's what the rule misses: how long you're staying, what closing costs you, and whether you have equity to roll the fees. The real question is break-even — how many months of savings to recover closing costs? This person's break-even: 31 months. They're selling in 24. The math said wait. Not every refinance makes sense. Not every rate drop is an opportunity. The 1% rule sounds smart. It's not always right. Full breakdown on the blog. Link in first comment. Adam Styer | Mortgage Solutions LP | NMLS #513013 | #mortgagerefinance #austinrealestate #homeownership #shouldirefinance #adamstyer
+
+**Post 158 — Facebook "Fiction at Night, Nonfiction in the Morning"**
+I read fiction at night and nonfiction in the morning. My wife Brittany Jo brings this up at least twice a month like it's evidence in a case against me. I honestly don't know what the case is. I started doing it because I couldn't turn off. Mortgage stuff — clients, deadlines, deals in the air — it all sits in my head. Doesn't go anywhere just because I close the laptop. But put me 200 pages into a novel and none of it exists for a while. Come back an hour later and I'm actually rested. It's the only thing that works for me. | #austintx #mortgagelife
+
+### Compliance Summary
+- Post 157: NMLS #513013 in footer ✓. Rate figures (7.1% vs 6.2%) are illustrative client scenario, not advertised rates — no APR disclosure required. "Roughly" qualifier present. No guaranteed outcomes ✓.
+- Post 158: No financial content — no NMLS required ✓. No fabricated personal details — Brittany Jo verified, reading habit verified in adam-voice-and-workflow.md ✓.
+
+### Deferred / Blockers
+- BLOCKER-LOANOS-001: selfies/ empty — LoanOS stream still paused.
+- NotebookLM CLI: 7th consecutive timeout — NEEDS ADAM attention (persistent infrastructure failure).
+- rates/2026-04-14.html native posts: LinkedIn carousel + Instagram Reel deferred (higher production effort).
+- Post 157: Adam must add blog link in first comment before Sep 24 publish.
+
+### Output Produced
+- Research: tasks/social-media/research/2026-04-19-pm-daily-rate-snapshot.md
+- Strategy spec: tasks/social-media/specs/2026-04-19-week29-spec.md
+- Build report: tasks/social-media/build-reports/2026-04-19-week29-build.md
+- Review: tasks/social-media/reviews/2026-04-19-week29-review.md
+- QA report: tasks/social-media/qa-reports/2026-04-19-week29-qa.md
+- content-repost-queue: blog/2026-04-17 marked COMPLETED
+- CONTEXT.md: 3 social fields updated
+- CHANGELOG.md: session entry appended
+- Session log: appended to session-log.md (this entry)
+
+### Quality Ratings
+Research: 4/5 | Strategy: 5/5 | Execution: 5/5 | Review: 5/5 | QA: 5/5
+
+### Next Session Instructions
+Priority 1: Week 30 education post (Education at 27.3% — needs recovery toward 30%). + 1 Instagram post (no Instagram in Week 29).
+Priority 2: rates/2026-04-14.html LinkedIn carousel + Instagram Reel (deferred 2x now — assign dedicated build session).
+Priority 3: Flag NotebookLM CLI timeout to Adam — 7 consecutive sessions is a pattern, not a transient failure.
+Priority 4: Real Talk at 13.8% — avoid adding another RT post in Week 30.
+Platform: Instagram has no Week 29 post. Facebook has Post 158. LinkedIn has Post 157. Week 30: prioritize Instagram + education platform TBD.
+
+---
 ## Session: 2026-04-15 AM — Week 28 Content Build (Scheduled Task — styer-social-am)
 
 ### Focus

@@ -57,13 +57,14 @@ By Week 8, generate 20+ qualified leads/month from owned channels (website, emai
 ## STEP 1 — LOAD CONTEXT
 
 Read in order:
-1. `tasks/lead-gen/session-log.md` — last session report
-2. `tasks/lead-gen/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
-3. `tasks/lead-gen/domain-queue.md` — active focus area
-4. `CONTEXT.md` — LoanOS repo current state (n8n workflow status, Supabase schema)
-5. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: read this for the full n8n workflow table (IDs, statuses), Publer account IDs, Supabase keys, and existing tool inventory. Do NOT assume something hasn't been built — check here first.**
-6. `tasks/lead-gen/BLOCKERS.md` — any active blockers from prior sessions
-7. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
+1. `tasks/social-media/adam-voice-and-workflow.md` — **AUTHORITATIVE Styer mortgage voice guide.** Read this FIRST. Applies to Adam Styer | Mortgage Solutions LP lead-gen copy only (emails, landing pages, SMS). Rancho-moonrise, adobe-creek-ranch, and LoanOS multi-tenant clients have their own separate guides; do not apply this one there.
+2. `tasks/lead-gen/session-log.md` — last session report
+3. `tasks/lead-gen/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
+4. `tasks/lead-gen/domain-queue.md` — active focus area
+5. `CONTEXT.md` — LoanOS repo current state (n8n workflow status, Supabase schema)
+6. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: read this for the full n8n workflow table (IDs, statuses), Publer account IDs, Supabase keys, and existing tool inventory. Do NOT assume something hasn't been built — check here first.**
+7. `tasks/lead-gen/BLOCKERS.md` — any active blockers from prior sessions
+8. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 

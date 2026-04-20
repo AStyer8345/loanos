@@ -38,7 +38,7 @@ LoanOS is a mortgage intelligence platform built by Adam Styer (Senior LO, Austi
 | Auth | Supabase email/password | SSR-aware via `@supabase/ssr` |
 | File Storage | Supabase Storage | `documents` bucket (private), `social-assets` (public) |
 | Automation | n8n | Instance: styer.app.n8n.cloud |
-| AI | Claude API (Anthropic) | claude-sonnet-4-5, no date suffix |
+| AI | Claude API (Anthropic) | claude-sonnet-4-6, no date suffix |
 | Email | Outlook via n8n + Zapier | Zapier hook for draft creation |
 | Marketing Email | Mailchimp | List IDs in Netlify env vars |
 | LOS | Arive | Webhook + CSV import |
@@ -125,7 +125,7 @@ All 15 data tables are org-scoped with `organization_id` (or `org_id`) + RLS pol
 
 ### n8n Code Patterns (ALWAYS use these)
 - Webhook body in downstream nodes: `$('Webhook').first().json` (NOT `.json.body`)
-- Claude model: `claude-sonnet-4-5` — NO date suffix ever
+- Claude model: `claude-sonnet-4-6` — NO date suffix ever
 - Claude response: `$json.content[0].text`
 - Supabase headers: both `apikey` AND `Authorization: Bearer <service_role_key>` required
 - HTTP body for JSON POST/PATCH: use `contentType: "raw"` + `rawContentType: "application/json"` + `JSON.stringify(...)` in body

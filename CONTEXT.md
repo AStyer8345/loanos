@@ -96,21 +96,21 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-19 PM — First PM session under new 9/10 quality policy (1-2 posts/week, throttled from 5). Week 29 (Sep 23-29): Post 157 LinkedIn authority — "The 1% Refinance Rule Is Wrong" (evergreen, 9/10, ID: 94e1d9a7, Sep 24 10 AM CT) + Post 158 Facebook personal — "Fiction at Night, Nonfiction in the Morning" (evergreen, 9/10, ID: 94c1dc00, Sep 25 11 AM CT). Both APPROVED, QA PASS. blog/2026-04-17 marked COMPLETED in content-repost-queue. rates/2026-04-14.html carousel/Reel deferred. NotebookLM CLI: 7th consecutive timeout.
+**Last worked on:** 2026-04-20 AM — Step 1B: 1 new blog post detected (blog/2026-03-30-why-rates-improved-today-bond-rally.html), GBP auto-published (Publer job 69e5d66ce231f21410ad49af), queued to content-repost-queue.md. Week 31 (Oct 7-13): Post 161 Instagram education — "Got a rate quote? That's not your rate yet." (evergreen, 9/10 after rewrite, ID: a4545211, Oct 7 10AM CT) + Post 162 LinkedIn authority — "Rates dropped. The market didn't open." (evergreen, 9/10, ID: 625ae529, Oct 9 9AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29% / Personal ~30% / Education ~29% / Real Talk ~12.5% — all within ±5% tolerance. NotebookLM CLI: 9th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 7 consecutive sessions — FLAG TO ADAM. Post 157 needs blog link in first comment before Sep 24 publish. rates/2026-04-14.html LinkedIn carousel + Instagram Reel pending (higher production effort — deferred).
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 9+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 30: 1 education post (Education pillar at 27.3% — below 30% target) + 1 Instagram post (no Instagram in Week 29). Avoid Real Talk (13.8%, above 10% target). rates/2026-04-14.html carousel build when capacity allows.
+**What's next:** Week 32 (Oct 14-20): Continue education + authority correction. Avoid Personal (near cap) and Real Talk (above 10% target). Consider Instagram Reel (Adam on camera) for Week 32 to close platform gap. rates/2026-04-14.html carousel build when capacity allows.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-19 AM — Lead Scoring System COMPLETE. Migration 090 (lead_score + lead_tier columns), migration 091 (backfill: 3 cold, 2,934 new), n8n "Lead Score Updater" (nOCDV73m4M0jyL1B) ACTIVE on webhook `lead-score-update`. web-lead route fires score webhook fire-and-forget. Contacts list: Lead Score badge column. Contact detail: lead_tier badge in header. Commit `b10ed40`, Vercel `dpl_AUkKNuDi7iWkbsamDRBjqTR1MBnH` → deploying.
+**Last worked on:** 2026-04-20 AM — Strategy session. MCP audit confirmed: lead scoring workflow correct (lead_tier is generated column, triggerCount=1 as expected). CRITICAL GAP found: `Surface Hot Lead` node sets DB flag only — no email to Adam. Hot lead notification spec written (`specs/2026-04-20-hot-lead-notification-spec.md`, ~45 min build, Option A: LoanOS API endpoint + 2 new n8n nodes). Realtor Referral System research complete — 3 gaps: acknowledgment email to realtor, roster view, monthly report. Both build specs ready.
 
-**Active blockers:** (1) Seq C INACTIVE — Outlook cred (9+ sessions). (2) Calendly INACTIVE — webhook not wired in Calendly UI. (3) Mailchimp 3 journeys not built. (4) Seq D — copy approval.
+**Active blockers:** (1) BLOCKER-HOT-LEAD-001 — hot lead notification missing, spec ready to build. (2) Seq C INACTIVE — Outlook cred (9+ sessions). (3) Calendly INACTIVE — webhook not wired in Calendly UI. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
 
-**What's next:** Calendly webhook activation (needs Calendly UI access). Mailchimp 3 Customer Journeys (~45 min Adam). Lead score signals will accumulate as new web leads arrive.
+**What's next:** BUILD — Hot lead notification (`specs/2026-04-20-hot-lead-notification-spec.md`). Then Realtor Roster View (no migrations needed). All 4 Adam-owned blockers unchanged.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->

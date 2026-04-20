@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-04-20 AM — Social Media Week 31 Build + GBP Distribution
+
+- **Step 1B**: Detected 1 untracked blog post (`blog/2026-03-30-why-rates-improved-today-bond-rally.html`). GBP auto-published via Publer (job `69e5d66ce231f21410ad49af`). Queued to content-repost-queue.md for Architect.
+- **Post 161** (Instagram, education, Oct 7): "Got a rate quote? That's not your rate yet." — rate lock explainer. 9/10 quality (rewrite from 7). ID: `a4545211`.
+- **Post 162** (LinkedIn, authority, Oct 9): "Rates dropped. The market didn't open." — structural rate lock-in effect analysis. 9/10 quality. ID: `625ae529`.
+- **Rolling pillar**: Auth ~29% / Personal ~30% / Education ~29% / Real Talk ~12.5% — all within ±5% tolerance.
+- **NotebookLM PUSH**: skipped (9th+ consecutive CLI timeout).
+
 ## 2026-04-19 AM — Lead Scoring System (Lead Gen)
 
 - **Migration 090**: `lead_score INTEGER NOT NULL DEFAULT 0` + `lead_tier TEXT GENERATED ALWAYS AS (...) STORED` added to `contacts`. Tiers: hot ≥20, warm ≥10, cold ≥3, new 0–2. Indexes on org+score and org+tier.

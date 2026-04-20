@@ -24,7 +24,7 @@ Goal: consistent, high-quality content published 5x/week without Adam touching i
 
 ## PRIMARY GOAL
 
-By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with zero manual input from Adam.
+Publish 1-2 posts/week across LinkedIn, Instagram, and Facebook that clear Adam's 9/10 quality bar. Quality over cadence — zero published beats any published post below 9/10. Throttled from 5/week on 2026-04-19 after 176 sub-9 drafts overwhelmed the dashboard.
 
 ---
 
@@ -63,12 +63,13 @@ By Week 8, publish 5 posts/week across LinkedIn, Instagram, and Facebook with ze
 ## STEP 1 — LOAD CONTEXT
 
 Read in order:
-1. `tasks/social-media/session-log.md` — last session report
-2. `tasks/social-media/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
-3. `tasks/social-media/domain-queue.md` — active focus area
-4. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: n8n workflow table, existing tool inventory, Supabase project details. Do NOT assume something hasn't been set up — check here first.**
-5. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
-6. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
+1. `tasks/social-media/adam-voice-and-workflow.md` — **AUTHORITATIVE Styer mortgage voice guide.** Read this FIRST. Applies to Adam Styer | Mortgage Solutions LP only — rancho-moonrise, adobe-creek-ranch, and LoanOS multi-tenant clients have their own separate voice guides; do not apply this one there. Subagents re-read it independently, but orchestrator decisions (focus, sequencing, what to queue) also depend on it.
+2. `tasks/social-media/session-log.md` — last session report
+3. `tasks/social-media/notebooklm-pull-[TODAY].md` — prior notebook context (if exists)
+4. `tasks/social-media/domain-queue.md` — active focus area
+5. `/Users/adamstyer/Documents/CLAUDE.md` — **CRITICAL: n8n workflow table, existing tool inventory, Supabase project details. Do NOT assume something hasn't been set up — check here first.**
+6. `tasks/social-media/BLOCKERS.md` — any active blockers from prior sessions
+7. `tasks/ADAM-TODO.md` — review pending Adam action items — only act on [ ] items, ignore [x] (completed) items. Read-only — Reporter appends here at session end
 
 If BLOCKERS.md contains active blockers → resolve them before any new work.
 
@@ -78,10 +79,10 @@ If BLOCKERS.md contains active blockers → resolve them before any new work.
 
 **Purpose:** Detect new website content (rate updates, blog posts, newsletter landing pages) published since last check, and distribute them across platforms.
 
-**TWO-TIER PUBLISHING POLICY:**
+**PUBLISHING POLICY (REVISED 2026-04-19 — GBP-only for content distribution):**
 - **Google Business Profile (GBP):** Auto-publish. Post directly to Publer targeting ONLY the GBP account (`69c3e3f548d8e4e643d45438`). No approval needed.
-- **Instagram, Facebook, LinkedIn:** Approval required. Insert as `status: draft` into `social_drafts` table. Adam reviews and approves in the Marketing Dashboard before anything goes live on these platforms.
-- **NEVER use the n8n `/gbp-social-post` webhook** — it posts to ALL 4 platforms at once and would bypass approval for IG/FB/LI.
+- **Instagram, Facebook, LinkedIn:** **DO NOT write drafts in Step 1B.** Native IG/FB/LI content is governed by the Architect → Builder → Quality (9/10 bar) pipeline that runs later in this session. Step 1B used to insert IG/FB/LI drafts per website content piece; that flooded the dashboard with 176 sub-9 drafts (archived 2026-04-19). Distribution of website content to IG/FB/LI is now queued via `content-repost-queue.md` for the Architect to pick up at quality.
+- **NEVER use the n8n `/gbp-social-post` webhook** — it posts to ALL 4 platforms at once and would bypass the quality gate.
 
 ### 0. Fetch Voice Guide + Feedback (MANDATORY)
 
@@ -194,29 +195,13 @@ curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
   }'
 ```
 
-#### 3B. Instagram, Facebook, LinkedIn — DRAFT FOR APPROVAL
+#### 3B. Instagram, Facebook, LinkedIn — QUEUE ONLY (REVISED 2026-04-19)
 
-Insert each as a draft into `social_drafts`. Adam reviews and approves in the Marketing Dashboard.
+**DO NOT insert IG/FB/LI drafts into `social_drafts` from Step 1B.** This step is GBP-only.
 
-```bash
-curl -X POST "https://uuqedsvjlkeszrbwzizl.supabase.co/rest/v1/social_drafts" \
-  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cWVkc3ZqbGtlc3pyYnd6aXpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk4NzAyNiwiZXhwIjoyMDg4NTYzMDI2fQ.8ybNi6Qay3WgwTlUHorSjh66C4vQMJURCiSVzVD4HmQ" \
-  -H "Content-Type: application/json" \
-  -H "Prefer: return=representation" \
-  -d '{
-    "organization_id": "18613f82-fdd9-42dd-a09e-f3c577328258",
-    "platform": "<facebook|instagram|linkedin>",
-    "format": "text_only",
-    "pillar": "<education|authority|market>",
-    "title": "<short title>",
-    "content": "<PLATFORM-ADAPTED POST COPY>",
-    "hashtags": "<platform-appropriate hashtags or empty>",
-    "status": "draft",
-    "created_by": "agent",
-    "agent_notes": "Auto-generated from new site content: [filename]. Awaiting Adam's approval."
-  }'
-```
+Instead, append the new content piece to `tasks/social-media/content-repost-queue.md` with a suggested native angle per platform. The Architect reads this queue during the main planning session and routes entries through Builder → Quality (9/10 bar) → insert-as-draft. That keeps all dashboard drafts behind the quality gate.
+
+Skip the per-content-piece IG/FB/LI insert block entirely. If you find yourself writing the Supabase POST for an IG/FB/LI draft in Step 1B, stop — that's the old behavior.
 
 **Log activity after each insert (GBP and IG/FB/LI):**
 ```bash
@@ -235,9 +220,9 @@ Adapt each post for its platform's audience — GBP gets plain text, Facebook ge
 
 ### 4. Update the tracker
 
-After each successful post/insert, append to `tasks/social-media/gbp-content-tracker.md`:
+After each successful GBP post, append to `tasks/social-media/gbp-content-tracker.md`:
 ```
-YYYY-MM-DD | [rate/blog/newsletter] | [filename] | gbp:posted, ig/fb/li:drafted
+YYYY-MM-DD | [rate/blog/newsletter] | [filename] | gbp:posted, ig/fb/li:queued-for-architect
 ```
 
 ### 5. Log it
@@ -245,7 +230,7 @@ YYYY-MM-DD | [rate/blog/newsletter] | [filename] | gbp:posted, ig/fb/li:drafted
 Include in the session log under a "GBP Distribution" heading:
 - How many new content pieces detected
 - GBP: which ones were auto-published
-- IG/FB/LI: which ones were queued as drafts for Adam's approval
+- IG/FB/LI: which ones were queued in `content-repost-queue.md` for the Architect (no drafts written)
 - Any failures
 
 ### 6. Queue platform-native posts for the Builder

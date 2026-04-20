@@ -2,6 +2,35 @@
 
 ---
 
+## 2026-04-19 — Day 25 (Launch: April 26)
+
+**Days to launch:** 7
+
+**Yesterday shipped:**
+- `feat(analytics)`: `/dashboard/analytics` — pipeline health, source conversion, realtor scoreboard, AEO vs SEO; new RPC `pipeline_stage_aging()` (migration 090) (`56db9d4`)
+- `refactor(analytics)`: consolidated AEO vs SEO, source conversion, realtor top-10 into Dashboard Performance tab — main dashboard cleaner (`32b9e5b`)
+- `fix(loans)`: `useEffect` organizationId dep fix — loans page showed empty data until hard refresh when org resolved async (`a8759a0`)
+
+**Vercel status:** READY — `dpl_5T9sZqP5vUNRXYr3isESsBTSsm3g` (SHA `4a9c1c1`, prod). All recent deployments READY. No errors.
+
+**n8n workflow health:** 33 total, 29 active. No error states.
+- 4 inactive (all expected): Pre-Drop Warm-Up, Quarterly Rate Review, Post-Calendly (needs cred), Review Request (intentional)
+- `HkLjsnnhT5MgrX5H` (CD & Contract Extractor): ACTIVE — execution test still needed
+
+**Blockers:**
+- Marketing site (loanos-marketing): zero progress — 7 days to May 1, HIGHEST RISK
+- Phase 3 Adam confirmation still outstanding
+- Task 23 cutover: blocked on Adam env vars + Resend webhook config (6 items)
+- Seq C INACTIVE — Outlook credential unconnected (8+ sessions)
+
+**Today's focus:** Phase 5 email template wiring — wire UI buttons to 6 n8n email workflows (PA, CD, referral intro, refi intake, review request, web lead). Renovation phases 1-4 shipped; Phase 5 is next executable work.
+
+**Risk watch:** 7 days to launch. Marketing site at zero progress — only 7 days to May 1 hard deadline. Demo data ready but screenshots/copy are Adam-owned. Phase 5 email wiring is the next on-critical-path item.
+
+**Open audit findings:** 0 CRITICAL, 0 HIGH (no files in audits/)
+
+---
+
 ## 2026-04-18 — Day 24 (Launch: April 26)
 
 **Days to launch:** 8

@@ -5,6 +5,8 @@
 
 ## Pending (Architect picks these up next planning session)
 <!-- Agent appends here when new content is detected -->
+2026-04-20 | blog | blog/2026-03-30-why-rates-improved-today-bond-rally.html | GBP auto-published (job 69e5d66ce231f21410ad49af). Native posts: LinkedIn text (technical vs. fundamental rate moves — "not every rate drop is a signal"), Instagram Reel (30-sec "Wall Street managing its books, not the economy sending a signal"), Facebook conversational (why waiting for the perfect rate is the wrong move)
+<!-- COMPLETED 2026-04-19 PM → Post 157 (LinkedIn myth-bust — "The 1% Refinance Rule Is Wrong", ID: 94e1d9a7, Sep 24). Instagram Reel + Facebook text deferred — Architect can pick up in future session if needed. -->
 2026-04-15 | rate | rates/2026-04-14.html | GBP/FB/IG/LI instant drafts done. Native posts: LinkedIn carousel (rate direction + bond market explainer), Instagram Reel (30-sec "why you're still waiting for a rate that may never come" — Adam on camera), Facebook text (human take on spring market + link)
 <!-- COMPLETED 2026-04-11 AM → Post 115 (LinkedIn carousel — PMI vs MIP cost breakdown, ID: 18f6f494). Instagram + Facebook deferred — Architect can plan in future week if needed. -->
 <!-- COMPLETED 2026-04-07 AM → Post 72 (LinkedIn text education, May 27, ID: 5e0eba03-f89e-499f-809a-8e4f0db4d735). Instagram + Facebook versions deferred — Architect can plan in future week if needed. -->

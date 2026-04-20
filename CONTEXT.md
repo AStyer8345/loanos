@@ -21,7 +21,7 @@ Replaces: Jungo CRM, Mortgage Coach, scattered Claude workflows.
 
 ## Current Status
 
-**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, analytics consolidated into Dashboard Performance tab `32b9e5b`. 2026-04-19 autonomous: loans page `useEffect` organizationId dep fix (commit `a8759a0`, live in prod `32b9e5b`); pre-push hook nvm tolerance fixed locally. 2026-04-19 autonomous (PM): Scenarios Tier 7 Item 2 — "Create Scenario" button on contact detail page, pre-fills borrowerName + propertyAddress from contact record via `?contact_id=` param. Marketing site copy pass: 2 false claims removed, KB updated. Commit `0cd93dc`, Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o` → READY.**
+**Email Automation Dashboard + n8n → Workflow DevKit Phase 1: shipped through shadow mode (2026-04-15 PM). Renovation Phase 2 complete. UI consolidated for LO #2 onboarding (2026-04-16 PM late-4). Security hardening complete (#9 + #10 shipped 2026-04-16 autonomous). Security findings #5 remains (ADAM-BLOCKED — GLBA attorney). 2026-04-17 autonomous: demo data polished (screenshot-ready), n8n blank email fix deployed. 2026-04-18 PM: Analytics dashboard (`/dashboard/analytics`) shipped — pipeline health, source conversion, realtor scoreboard, AEO vs SEO, Past Client lead source; commit `56db9d4`, analytics consolidated into Dashboard Performance tab `32b9e5b`. 2026-04-19 autonomous: loans page `useEffect` organizationId dep fix (commit `a8759a0`, live in prod `32b9e5b`); pre-push hook nvm tolerance fixed locally. 2026-04-19 autonomous (PM): Scenarios Tier 7 Item 2 — "Create Scenario" button on contact detail page, pre-fills borrowerName + propertyAddress from contact record via `?contact_id=` param. Marketing site copy pass: 2 false claims removed, KB updated. Commit `0cd93dc`, Vercel `dpl_6PvCut3fRyfo3HFo59jBTCWxoL5o` → READY. 2026-04-20 autonomous: BLOCKER-HOT-LEAD-001 closed — `POST /api/notify/hot-lead` route shipped (Resend email + daily dedup via activity_log). n8n workflow `nOCDV73m4M0jyL1B` updated to 8 nodes — "Notify Adam" httpRequest node now calls endpoint after every hot lead surface. Commit `358d3f5`. ADAM-BLOCKED: set `LOANOS_AGENT_SECRET` in n8n Settings → Environment Variables so node can authenticate.**
 
 - 2026-04-16 PM (late-4): UI consolidation — TopNav 9 tabs → 4 + More + ⚙ (Email pillar consolidates drip-campaigns/drafts/automations under one tab). Drip scheduler n8n `LqBb3YDLjS2eUrDE` archived (option (a) of TODO #18); banner added on `/dashboard/drip-campaigns`. Mini Pipeline Table cut from dashboard (duplicate of Pipeline tab). Live in `dpl_BdBkGhQjmFf4itLRiZpXb3EN2tMP` (READY 75s). New three-pillar rule in memory: Contacts / Pipeline / Drip = the only first-class surfaces.
 - Feature branch `feat/email-automation-dashboard` — 20+ commits, all Vercel builds READY through SHA `9583ba3`
@@ -106,11 +106,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 AM — Strategy session. MCP audit confirmed: lead scoring workflow correct (lead_tier is generated column, triggerCount=1 as expected). CRITICAL GAP found: `Surface Hot Lead` node sets DB flag only — no email to Adam. Hot lead notification spec written (`specs/2026-04-20-hot-lead-notification-spec.md`, ~45 min build, Option A: LoanOS API endpoint + 2 new n8n nodes). Realtor Referral System research complete — 3 gaps: acknowledgment email to realtor, roster view, monthly report. Both build specs ready.
+**Last worked on:** 2026-04-20 (autonomous) — BLOCKER-HOT-LEAD-001 CLOSED. Built `POST /api/notify/hot-lead` route: agent-secret auth, Resend HTML email, daily dedup via activity_log sentinel. n8n workflow `nOCDV73m4M0jyL1B` updated to 8 nodes — "Notify Adam" httpRequest node now fires after every hot lead surface event. Commit `358d3f5`. ADAM-BLOCKED remaining: set `LOANOS_AGENT_SECRET` in n8n env vars to activate the node.
 
-**Active blockers:** (1) BLOCKER-HOT-LEAD-001 — hot lead notification missing, spec ready to build. (2) Seq C INACTIVE — Outlook cred (9+ sessions). (3) Calendly INACTIVE — webhook not wired in Calendly UI. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
+**Active blockers:** (1) BLOCKER-HOT-LEAD-001 CLOSED — ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars to wire it live. (2) Seq C INACTIVE — Outlook cred (9+ sessions). (3) Calendly INACTIVE — webhook not wired in Calendly UI. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
 
-**What's next:** BUILD — Hot lead notification (`specs/2026-04-20-hot-lead-notification-spec.md`). Then Realtor Roster View (no migrations needed). All 4 Adam-owned blockers unchanged.
+**What's next:** Realtor Roster View (no migrations needed — UI-only). Then Realtor acknowledgment email spec. All 4 Adam-owned blockers unchanged.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
@@ -124,18 +124,18 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-19 AM — Scenarios Tier 7 Item 3. "Save as PDF" button added to share page (`ShareSavePDFButton.tsx`). Calls `window.print()`, reuses existing @media print styles. Desktop sidebar + mobile CTA both updated. Tier 7 COMPLETE. Commit `83ba043` | Vercel `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` — BUILDING.
+**Last worked on:** 2026-04-20 AM — Research session. Verified `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` READY (Save as PDF live). Defined Tier 8 in domain-queue.md (5 items: borrower intent capture, rate freshness banner, LO note field, SMS share, mobile swipe cards). GOALS.md blocks build: "no new features." NEEDS ADAM logged in TODO.md.
 
-**Active blockers:** None.
+**Active blockers:** GOALS.md hold on new features. NEEDS ADAM: pause agent, continue research-only, or lift hold for Tier 8?
 
-**What's next:** Tier 8 definition — or redirect to marketing site demo data (GOALS.md highest risk: 7 days to May 1, zero progress).
+**What's next:** Adam decides agent direction. If hold lifts → Tier 8 Item 1 (borrower intent capture, ~1hr). If hold stays → research-only sessions until May 1.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-19 — Day 25 standup. Vercel READY (`dpl_5T9sZqP5vUNRXYr3isESsBTSsm3g`, SHA `4a9c1c1`). n8n: 33 total, 29 active — no errors, 4 inactive all intentional. `HkLjsnnhT5MgrX5H` active but execution-untested. Analytics dashboard shipped (`56db9d4`), loans useEffect dep fixed (`a8759a0`).
+**Last worked on:** 2026-04-20 — Day 26 standup. Vercel READY (`dpl_75ek4TkYUCDUmAKhLy18HKtBHjk3`, SHA `198670d`). Lead scoring system + hot lead notification shipped (`b10ed40`, `358d3f5`). n8n Lead Score Updater ACTIVE (8 nodes). ADAM-BLOCKED: `LOANOS_AGENT_SECRET` not in n8n env vars — hot lead emails won't authenticate without it.
 
-**Active blockers:** Marketing site zero progress (7 days to May 1 — HIGHEST RISK). Phase 3 Adam confirmation outstanding. Task 23 cutover blocked on Adam env vars + Resend webhook (6 items). Seq C INACTIVE (Outlook cred, 8+ sessions).
+**Active blockers:** Marketing site zero progress (6 days to May 1 — HIGHEST RISK). `LOANOS_AGENT_SECRET` missing from n8n (30-second Adam fix). Task 23 cutover: 6 items ADAM-BLOCKED. Phase 3 Adam confirmation outstanding.
 
 **What's next:** Phase 5 email template wiring (wire 6 n8n workflow buttons in UI). Marketing site demo data → screenshots → launch page.
 

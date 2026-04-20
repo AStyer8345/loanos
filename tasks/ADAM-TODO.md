@@ -9,6 +9,8 @@
 
 <!-- Agents append new items below this line -->
 
+- [ ] [LEAD-GEN] 2026-04-20 🔑 5 MIN — SET `LOANOS_AGENT_SECRET` IN N8N — Hot lead notification route is live at `POST /api/notify/hot-lead` and the n8n "Notify Adam" node (workflow `nOCDV73m4M0jyL1B`) is wired. But the node authenticates with `$env.LOANOS_AGENT_SECRET` — if that env var isn't set in n8n, every hot lead fires a 401 and the email is silently skipped. Fix: Go to https://styer.app.n8n.cloud → Settings → Environment Variables → Add variable `LOANOS_AGENT_SECRET` = (value from Vercel project → Settings → Environment Variables → `LOANOS_AGENT_SECRET`). Save. No workflow restart needed.
+
 - [ ] [SOCIAL] 2026-04-19 🔗 BEFORE SEP 24 — Post 157 (LinkedIn "The 1% Refinance Rule Is Wrong", Sep 24 10 AM CT, ID: 94e1d9a7): Add blog link to the FIRST COMMENT before scheduling. Post copy ends "Full breakdown on the blog. Link in first comment." — link must be there or the CTA lands on nothing. Blog post: blog/2026-04-17-should-i-refinance-austin-tx-2026.html.
 - [ ] [SYSTEM] 2026-04-19 🔧 NOTEBOOKLM CLI — NOW 7 CONSECUTIVE SESSION TIMEOUTS (supersedes 2026-04-14 item). All sessions from 04-12 through 04-19 PM have failed. Binary: `/Users/adamstyer/.local/bin/notebooklm`. Social + SEO + Lead-Gen agents are all falling back to session-log.md — knowledge accumulation is stalled. Please: (1) run `notebooklm --version` in Terminal, (2) check for updates, (3) try a manual `notebooklm pull` to see if it throws a useful error. If broken, the n8n-based fallback or a manual weekly sync should be considered.
 

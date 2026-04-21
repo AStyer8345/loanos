@@ -112,3 +112,26 @@ Master log: APPENDED + synced to Styer Mortgage Master notebook
 Daily digest: SENT (Zapier status: success)
 Timestamp: 2026-04-19 22:00:00
 SESSION FULLY COMPLETE ✓
+
+## SESSION_END
+- **Datetime**: 2026-04-20 22:00:00
+- **Mode**: PM
+- **Session**: Lead Gen PM — Nightly NotebookLM Sync (Scheduled Task)
+
+```
+SESSION END: 2026-04-20 22:00:00
+Mode: PM
+Focus: PUSH+CURATE — NotebookLM staleness audit, CONTEXT.md refresh (hot-lead notification shipped), push AM session files, digest generation
+MASTER: All steps complete. NotebookLM PUSH+CURATE complete.
+```
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 6 (notebooklm-audit-2026-04-19.md, CONTEXT.md Apr 19, 2026-04-07-refi-watch-unblocking.md, 2026-04-04-refi-watch-research.md, 2026-04-03-ftb-dpa-funnel-build.md, 2026-04-11-seq-d-bug-fix-verification.md)
+Sources added: 6 (CONTEXT.md Apr 20 refresh, notebooklm-audit-2026-04-20.md, 2 research files, 2 spec files)
+Web sources added: 0 (at 50/50 capacity — AM session files took priority)
+Final notebook count: 50/50
+Foundational docs refreshed: CONTEXT.md (commits 68f677a + 358d3f5 — hot-lead notification API live)
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: SENT (Zapier status: success)
+Timestamp: 2026-04-20 22:00:00
+SESSION FULLY COMPLETE ✓

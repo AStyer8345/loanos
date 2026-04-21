@@ -1,5 +1,29 @@
 # LoanOS Changelog
 
+## 2026-04-20 PM (styer-social-pm) — Week 32 Content Build
+
+- **Post 163** (Instagram Reel, personal, Oct 14 10AM CT): "Coaching call story" — Adam tells his coach he doesn't know if he wants to do this anymore; she shares 2008 story. No CTA. 9/10. ID: `6383e2f5`.
+- **Post 164** (LinkedIn, education, Oct 16 10AM CT): "Lock or float — my honest answer" — directional opinion, no specific rate quoted, NMLS #513013 present. 9/10. ID: `8a185566`.
+- **Rolling pillar**: Auth ~29% / Personal ~30.5% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance.
+- **Instagram Reel requirement met**: 2-week Reel window satisfied (Post 163).
+- **NotebookLM PUSH**: skipped (10th+ consecutive CLI timeout — NEEDS ADAM).
+
+## 2026-04-20 AM (scenarios-am) — Tier 8 Definition + Deployment Verification
+
+- **Deployment verified**: `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` (Save as PDF — Tier 7 Item 3) confirmed READY via Vercel MCP. Tier 7 fully live in production.
+- **Tier 8 defined**: 5 improvement candidates added to `tasks/scenarios/domain-queue.md` — borrower intent capture, rate freshness banner, LO personal note, SMS share, mobile swipe cards.
+- **NEEDS ADAM logged**: `TODO.md` — agent direction decision required (GOALS.md blocks builds; Adam to decide pause vs research-only vs lift hold).
+- **No code changes**: session blocked from building by GOALS.md "no new LoanOS features" directive.
+- **NotebookLM PULL**: skipped — 9th+ consecutive CLI timeout (known issue, NEEDS ADAM).
+
+## 2026-04-20 (autonomous) — Hot Lead Notification: API route + n8n wiring
+
+- **POST /api/notify/hot-lead** (new): agent-secret-gated route. Fetches contact, deduplicates via `activity_log` (one email per contact per UTC calendar day), sends HTML alert email via Resend, writes dedup sentinel. Closes BLOCKER-HOT-LEAD-001.
+- **Email template**: score color-coded (green ≥20, amber ≥30, red ≥50). CTA deep-links to `/dashboard/contacts/:id`.
+- **n8n workflow `nOCDV73m4M0jyL1B`**: updated to 8 nodes — "Notify Adam" httpRequest node added after "Surface Hot Lead". Uses `$env.LOANOS_AGENT_SECRET` for auth. `neverError: true` — email failure doesn't roll back the `hot_lead_dismissed` patch.
+- **Commit**: `358d3f5`. **Vercel**: deploying (pre-push hook build passed). **Circuit breaker**: clean.
+- **ADAM-BLOCKED**: Set `LOANOS_AGENT_SECRET` in n8n instance environment variables (Settings → Environment Variables) so the Notify Adam node can authenticate. Without this, the node fires but gets a 401 and the email is silently skipped.
+
 ## 2026-04-20 AM — Social Media Week 31 Build + GBP Distribution
 
 - **Step 1B**: Detected 1 untracked blog post (`blog/2026-03-30-why-rates-improved-today-bond-rally.html`). GBP auto-published via Publer (job `69e5d66ce231f21410ad49af`). Queued to content-repost-queue.md for Architect.
@@ -3296,4 +3320,12 @@ Arive (loan event)
 - **Lead Gen notebook**: Lead Scoring System shipped in AM session (commit b10ed40 — migration 090/091, n8n nOCDV73m4M0jyL1B ACTIVE, UI deployed). Removed 2 stale (notebooklm-audit-2026-04-18.md, CONTEXT.md Apr 18 [pre-lead-scoring]). Added 2 fresh (refreshed CONTEXT.md Apr 19 05:00, notebooklm-audit-2026-04-19.md). Final: 50/50.
 - **Web research**: SEO — 1 source added (searchengineland.com/produce-content-build-aeo-clout-473487 — AEO content production best practices, directly validates today's H2 question-format work). Lead Gen — 0 added (2-for-2 swap, no capacity).
 - **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook.
+- **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).
+
+## 2026-04-20 PM (Nightly Sync) — NotebookLM PUSH+CURATE for SEO/SEM + Lead Gen
+
+- **SEO/SEM notebook**: Removed 4 stale (2026-04-20.md run log [non-core], CONTEXT.md Apr 19 [stale by 3 commits], notebooklm-audit-2026-04-19.md [superseded], 2026-04-03-aeo-entity-signals-web.md [superseded by Apr 19 AEO source]). Added 3 fresh (CONTEXT.md Apr 20 — Lakeway/Bee Cave/Bastrop/New Braunfels AEO + Georgetown deepening, notebooklm-audit-2026-04-20.md, backlinko.com/google-ctr-stats). Final: 50/50.
+- **Lead Gen notebook**: Hot Lead Notification API shipped in AM (commit 358d3f5 — `POST /api/notify/hot-lead`, 24hr dedup, n8n 8-node update). Realtor Referral System researched + specced. Removed 6 stale (audit-Apr19, CONTEXT.md Apr19, 3 historical build/research docs). Added 6 fresh (CONTEXT.md Apr20, audit, 2 research files, 2 spec files). Final: 50/50.
+- **Web research**: SEO — 1 source added (backlinko.com/google-ctr-stats — 4M search CTR analysis, validates CTR-hook approach for suburb pages). Lead Gen — 0 added (at capacity, AM session files took priority).
+- **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook (twice — once per agent).
 - **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).

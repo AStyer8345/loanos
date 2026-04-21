@@ -96,11 +96,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 AM — Step 1B: 1 new blog post detected (blog/2026-03-30-why-rates-improved-today-bond-rally.html), GBP auto-published (Publer job 69e5d66ce231f21410ad49af), queued to content-repost-queue.md. Week 31 (Oct 7-13): Post 161 Instagram education — "Got a rate quote? That's not your rate yet." (evergreen, 9/10 after rewrite, ID: a4545211, Oct 7 10AM CT) + Post 162 LinkedIn authority — "Rates dropped. The market didn't open." (evergreen, 9/10, ID: 625ae529, Oct 9 9AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29% / Personal ~30% / Education ~29% / Real Talk ~12.5% — all within ±5% tolerance. NotebookLM CLI: 9th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-20 PM — Week 32 (Oct 12-18): Post 163 Instagram Reel script — "Coaching call story" (personal, evergreen, 9/10, ID: 6383e2f5, Oct 14 10AM CT) + Post 164 LinkedIn text-only — "Lock or float — my honest answer" (education, evergreen, 9/10, ID: 8a185566, Oct 16 10AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29% / Personal ~30.5% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance. Instagram Reel requirement met (2-week window). NotebookLM CLI: 10th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 9+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 10+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 32 (Oct 14-20): Continue education + authority correction. Avoid Personal (near cap) and Real Talk (above 10% target). Consider Instagram Reel (Adam on camera) for Week 32 to close platform gap. rates/2026-04-14.html carousel build when capacity allows.
+**What's next:** Week 33 (Oct 19-25): Rolling pillar slightly under authority (~29%) and real-talk (~12% vs 10% target is fine). Priority: 1 authority + 1 personal or real-talk. rates/2026-04-14.html native carousel (LI/IG/FB) still in content-repost-queue — pick up when Architect has capacity.
 
 
 ## Lead Gen Agent Status
@@ -115,11 +115,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-18 PM — Nightly NotebookLM PUSH+CURATE. Caught up 2026-04-17-refi-content-seo-web.md (YMYL E-E-A-T + break-even calculator research). Notebook: 3 removed (audit-Apr17, tcpa-web Apr1 [oldest/cap], CONTEXT.md Apr18 00:18), 3 added (refi research catch-up, refreshed CONTEXT.md Apr18 10:27, audit-Apr18). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-20 PM — Nightly NotebookLM PUSH+CURATE. 4 suburb pages AEO + CTR optimized (Lakeway jumbo/luxury, Bee Cave luxury/jumbo, Bastrop acreage, New Braunfels H2s). Georgetown deepened with first-party data. Competitive intel: Hutto #1, Round Rock #2. 11/24 suburb pages CTR-optimized. Notebook: 4 removed (run log, CONTEXT.md Apr19, audit-Apr19, 2026-04-03-aeo-entity-signals [superseded]), 3 added (CONTEXT.md Apr20, audit-Apr20, backlinko.com/google-ctr-stats). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** GSC URL Inspection for Dripping Springs, Westlake, Hutto, Liberty Hill, Manor (Adam-owned). PageSpeed manual check for /get-preapproved + /refinance-quote (quota exhausted). Break-even calculator page decision needed (Week 8 or post-program?).
+**Active blockers:** Buda USDA compliance error (page claims USDA — must remove from meta/schema/FAQ, HIGH). GTM suburb conversion gap (quick-form not counting as Google Ads conversions, $500/mo ad ROI unmeasured, HIGH). GSC URL Inspection for Taylor, Smithville, Elgin, Florence, Jarrell (LOW).
 
-**What's next:** Continue AEO sweep on remaining suburb + loan product pages. Link building outreach prep (Week 7 core — 20 link opportunities). Author bio audit (ensure /about-adam-styer.html links from every blog post).
+**What's next:** Round Rock #1 push (Teravista/Forest Creek/Old Town + Round Rock ISD + "beat builder rates"). Buda USDA fix. CTR titles for 13 remaining suburb pages (Round Rock, Cedar Park, Georgetown, Buda, Westlake, Manor, Marble Falls, Spicewood, Smithville, Elgin, Florence, Jarrell, Taylor).
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->

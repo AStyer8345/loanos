@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Download, Link2, Save, Mail, CheckCircle, X, Eye } from 'lucide-react'
+import { Download, Link2, Save, Mail, CheckCircle, X, Eye, MessageSquare } from 'lucide-react'
 import type {
   ScenarioMode, PurchaseScenarioInput,
   RefiScenarioInput, CurrentLoanInput, ReinvestmentResult,
@@ -177,6 +177,19 @@ export default function ActionsBar({
     }
   }
 
+  const sendSMS = async () => {
+    let token = shareToken
+    if (!token) {
+      const saved = await save()
+      if (!saved) return
+      token = saved.share_token
+    }
+    const url = `${window.location.origin}/share/${token}`
+    const firstName = borrowerName.split(' ')[0] || 'your borrower'
+    const body = encodeURIComponent(`Here are your loan options, ${firstName}: ${url}`)
+    window.location.href = `sms:?body=${body}`
+  }
+
   const copyShareLink = async () => {
     let token = shareToken
     if (!token) {
@@ -210,6 +223,15 @@ export default function ActionsBar({
         >
           {emailSent ? <CheckCircle size={16} /> : <Mail size={16} />}
           {emailSent ? 'Draft Created!' : 'Email Borrower'}
+        </button>
+
+        <button
+          onClick={sendSMS}
+          className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-medium transition-all"
+          style={{ border: '1px solid var(--sc-border)', color: 'var(--sc-text)' }}
+        >
+          <MessageSquare size={16} />
+          Text Borrower
         </button>
 
         <button

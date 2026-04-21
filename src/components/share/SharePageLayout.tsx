@@ -20,6 +20,7 @@ import SocialProofBlock from './SocialProofBlock'
 import BorrowerQA from './BorrowerQA'
 import BorrowerChat from './BorrowerChat'
 import ShareSavePDFButton from './ShareSavePDFButton'
+import RateFreshnessBanner from './RateFreshnessBanner'
 import type { BorrowerQAPair } from '@/app/share/[token]/page'
 
 interface SharedScenario {
@@ -154,6 +155,9 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
 
           {/* ═══ LEFT COLUMN: Main content ═══ */}
           <div className="space-y-8 min-w-0">
+
+            {/* Rate freshness warning — shown when analysis is >3 days old */}
+            <RateFreshnessBanner createdAt={data.created_at} />
 
             {/* Video Walkthrough — renders only when LO has set scenario_video_url */}
             {b.videoUrl && <ShareVideoEmbed videoUrl={b.videoUrl} />}

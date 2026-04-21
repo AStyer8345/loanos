@@ -1,6 +1,8 @@
 'use client'
 
 import { type ReactNode } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   ChevronLeft,
@@ -152,6 +154,9 @@ export default function ContactsSidebar({
   onEditList,
   onDeleteList,
 }: ContactsSidebarProps) {
+  const pathname = usePathname()
+  const realtorsActive = pathname === '/dashboard/contacts/realtors'
+
   return (
     <aside
       className={cn(
@@ -177,6 +182,26 @@ export default function ContactsSidebar({
         >
           {collapsed ? <ChevronRight className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
         </button>
+      </div>
+
+      {/* Views */}
+      <div className="px-1.5 pb-1 pt-1 border-b border-input">
+        <Link
+          href="/dashboard/contacts/realtors"
+          title={collapsed ? 'Realtor Roster' : undefined}
+          className={cn(
+            'flex items-center gap-2.5 w-full rounded-md text-[12px] font-medium transition-colors min-w-0',
+            collapsed ? 'justify-center px-2 py-1.5' : 'px-2.5 py-1.5',
+            realtorsActive
+              ? 'bg-primary/12 text-primary border border-primary/20'
+              : 'text-foreground/80 hover:bg-accent hover:text-accent-foreground border border-transparent',
+          )}
+        >
+          <span className={cn('flex-shrink-0', realtorsActive ? 'text-primary' : 'text-muted-foreground')}>
+            <Handshake className="size-3.5" />
+          </span>
+          {!collapsed && <span className="truncate flex-1 text-left">Realtor Roster</span>}
+        </Link>
       </div>
 
       {/* Smart Lists */}

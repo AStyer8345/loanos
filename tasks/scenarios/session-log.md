@@ -841,3 +841,83 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - PDF from mobile (Tier 7 Item 3) — ✅ COMPLETE this session
 - Tier 7 COMPLETE
+
+---
+
+## AM Session — 2026-04-20 (scenarios-am)
+
+**Context check:**
+- Last deployment `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` (Save as PDF) — ✅ READY confirmed via Vercel MCP
+- Tier 7: COMPLETE (AI chat ✅, quick scenario from contacts ✅, Save as PDF ✅)
+- GOALS.md (week Apr 18): "No new LoanOS features — fix only" — conflicts with Tier 8 build
+
+**Session type:** Research + Design only (GOALS.md conflict blocks build)
+
+**What was done:**
+- Verified last Vercel deployment READY — Tier 7 Item 3 confirmed live in production
+- Defined Tier 8 in `tasks/scenarios/domain-queue.md` — 5 items ranked by impact:
+  1. Borrower intent capture (~1hr, highest ROI — who's leaning toward which option)
+  2. Rate freshness banner (~30min, compliance value)
+  3. LO personal note field (~45min, humanizes the presentation)
+  4. SMS share from ActionsBar (~30min, workflow gap vs email-only)
+  5. Mobile swipe cards for comparison table (~1.5hr, nice-to-have)
+- Wrote today-mission.md (research session brief)
+- Logged NEEDS ADAM in TODO.md — agent direction decision required (pause vs research-only vs lift hold)
+
+**NotebookLM PULL:** SKIPPED — 9th+ consecutive CLI timeout (known issue)
+
+**No code changes this session** — build not run, no git push.
+
+**Next session priority:**
+1. Adam decides on agent direction (TODO.md NEEDS ADAM). If hold lifted → build Tier 8 Item 1 (borrower intent capture): `scenarios.borrower_intent` write via service client, n8n notify node.
+2. If hold stays → next session is research-only: review whether any existing scenarios feature has a bug worth fixing per "fix only" mandate.
+
+**Domain queue updates:**
+- Tier 8 defined — 5 items, ready to build when GOALS.md hold lifts
+
+---
+
+## AM Session — 2026-04-21 (scenarios-am)
+
+**Context check:**
+- GOALS.md week of Apr 20: no "no new features" restriction in Paused Workstreams (empty). Previous session's hold was from a prior GOALS.md version. Clear to build.
+- Tier 8 defined (5 items). NEEDS ADAM item from Apr 20 resolved: GOALS.md does not block build.
+
+**What was built:**
+- Rate Freshness Banner (`src/components/share/RateFreshnessBanner.tsx`)
+  - Amber compliance banner on share page when `created_at` is >3 days old
+  - Pure client-side: `(Date.now() - new Date(createdAt).getTime()) / (1000*60*60*24)`
+  - Shows formatted date: "Rates may have changed since this analysis was created on [date]..."
+  - Returns null when <3 days — no empty space
+  - `print:hidden` — doesn't appear in PDF output
+  - Wired into SharePageLayout above Option Cards section
+
+- SMS Share button (`src/app/dashboard/scenarios/new/ActionsBar.tsx`)
+  - "Text Borrower" button added alongside Email Borrower and Copy Share Link
+  - Saves scenario if not yet saved to get share token, then opens `sms:?body=...` URL scheme
+  - Pre-fills: "Here are your loan options, [FirstName]: https://loanos.vercel.app/share/[token]"
+  - Pure client-side — zero backend needed, zero new dependencies
+  - Native SMS composer opens on iOS and Android automatically
+
+**MC gap closed:**
+- Rate Freshness: borrowers landing on stale links now see a compliance nudge before acting — Scott's beta will use real share links for the first time.
+- SMS Share: LOs who text borrowers (which is most of them) can now send the share link in one tap vs. manually copying. MC's "share via text" workflow matched.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `10cafc6` — pushed to main
+**Vercel:** `dpl_66Ejduj48wgCa6HByLrTRTrJWSu5` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/components/share/RateFreshnessBanner.tsx` (new)
+- `src/components/share/SharePageLayout.tsx` (import + render)
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx` (sendSMS + Text Borrower button)
+- No auth/RLS/multi-tenant changes
+
+**Next session priority:**
+1. Borrower intent capture (Tier 8 Item 1) — "Which option interests you most?" 3-button tap on share page. Writes to `scenarios.borrower_intent` JSONB, notifies Adam via n8n within 60 seconds. ~1hr build, needs migration.
+2. LO personal note field (Tier 8 Item 3) — per-scenario note (max 250 chars) in builder, renders gold-bordered card on share page above BorrowerChat. No migration (stores in scenarios_data JSONB key). ~45min build.
+
+**Domain queue updates:**
+- Tier 8 Item 2 (Rate freshness banner) — ✅ COMPLETE this session
+- Tier 8 Item 4 (SMS share from ActionsBar) — ✅ COMPLETE this session
+

@@ -106,11 +106,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 AM — Realtor Roster View shipped. `/dashboard/contacts/realtors` — sortable table of referral partners (Referrals YTD, Deals YTD, Last Referral, Tier badge). ContactsSidebar "Realtor Roster" link with active-state highlighting. Commit `292acc2`, Vercel `dpl_DAXwEARwkFNvfx6owvUh8Fdig25S` → READY. Hot lead system confirmed fully live (route + n8n 8-node wiring verified via MCP).
+**Last worked on:** 2026-04-21 (autonomous) — Realtor Acknowledgment Email shipped. n8n workflow `H5doQYLLIAg0zMug` (8 nodes, webhook: `realtor-referral-ack`) ACTIVE. Supabase migration 091 applied — pg_net trigger fires on contacts INSERT where `referral_type='realtor_referral'`. Sends realtor a short "I got your referral — [Name] is in." email via Resend, logs `referral_ack.sent` to activity_log. No-realtor-found path logs `referral_ack.warning` gracefully.
 
 **Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (10+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
 
-**What's next:** Realtor Acknowledgment Email — n8n workflow fires when `referral_ytd_count` increments. Spec: `tasks/lead-gen/specs/2026-04-20-realtor-referral-spec.md` Priority 1. ~2-3 hrs.
+**What's next:** FNM 3.4 import for Scott — upload UI + parser + contact/loan import flow. GOALS.md #1 Scott blocker.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
@@ -124,20 +124,20 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 AM — Research session. Verified `dpl_96LnN6wcr8T3e2PLDdqdrTTB4CGf` READY (Save as PDF live). Defined Tier 8 in domain-queue.md (5 items: borrower intent capture, rate freshness banner, LO note field, SMS share, mobile swipe cards). GOALS.md blocks build: "no new features." NEEDS ADAM logged in TODO.md.
+**Last worked on:** 2026-04-21 AM — Tier 8 Items 2 + 4 shipped. RateFreshnessBanner.tsx (amber compliance banner on share pages >3 days old, print:hidden). ActionsBar "Text Borrower" SMS button (opens native SMS composer with share link pre-filled, sms: URL scheme). Commit `10cafc6`, Vercel `dpl_66Ejduj48wgCa6HByLrTRTrJWSu5` BUILDING (expected READY).
 
-**Active blockers:** GOALS.md hold on new features. NEEDS ADAM: pause agent, continue research-only, or lift hold for Tier 8?
+**Active blockers:** None.
 
-**What's next:** Adam decides agent direction. If hold lifts → Tier 8 Item 1 (borrower intent capture, ~1hr). If hold stays → research-only sessions until May 1.
+**What's next:** Tier 8 Item 1 (borrower intent capture — "Which option interests you most?" tap on share page, writes to scenarios.borrower_intent JSONB, n8n notify ~1hr). Tier 8 Item 3 (LO personal note, ~45min, no migration).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 — Day 26 standup. Vercel READY (`dpl_75ek4TkYUCDUmAKhLy18HKtBHjk3`, SHA `198670d`). Lead scoring system + hot lead notification shipped (`b10ed40`, `358d3f5`). n8n Lead Score Updater ACTIVE (8 nodes). ADAM-BLOCKED: `LOANOS_AGENT_SECRET` not in n8n env vars — hot lead emails won't authenticate without it.
+**Last worked on:** 2026-04-21 — Day 27 standup. Vercel READY (`dpl_36MgTUAtrmSw6nk8SeYvU61HSp8m`, SHA `2e0ed67`). Realtor Roster view shipped (`292acc2`). n8n `H5doQYLLIAg0zMug` (Realtor Referral Acknowledgment) ACTIVE. 5 days to launch. Corrected stale "no files in audits/" — audit files confirmed present; T-1/T-2/T-3 open CRITICAL findings from security audit flagged for Scott pilot prerequisite.
 
-**Active blockers:** Marketing site zero progress (6 days to May 1 — HIGHEST RISK). `LOANOS_AGENT_SECRET` missing from n8n (30-second Adam fix). Task 23 cutover: 6 items ADAM-BLOCKED. Phase 3 Adam confirmation outstanding.
+**Active blockers:** Marketing site zero progress (5 days to April 26 — HIGHEST RISK, Adam-owned). `LOANOS_AGENT_SECRET` missing from n8n (30-second fix). FNM 3.4 import not started (Scott blocker). Drip campaigns not fixed. Task 23: 6 items ADAM-BLOCKED.
 
-**What's next:** Phase 5 email template wiring (wire 6 n8n workflow buttons in UI). Marketing site demo data → screenshots → launch page.
+**What's next:** FNM 3.4 import build (GOALS.md #1 Scott blocker). Phase 5 email template wiring. Marketing site — Adam-owned.
 
 ## Rules For AI Sessions
 

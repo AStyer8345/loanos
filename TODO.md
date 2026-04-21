@@ -21,6 +21,8 @@
 - [x] ~~**`automation_registry` schema gap — Contract Received Party Reply email.**~~ DONE 2026-04-16 PM (late-3). Picked option (b): separate registry row `Contract Received — Party Reply` (id `68dc830e-3eec-44f4-ab24-05c71174964e`, source_node_id `build-party-email`). Unique index `(org_id, source_id, source_node_id) NULLS NOT DISTINCT` widened to support multi-email workflows. Existing row renamed `Contract Received — Borrower Welcome` (source_node_id `build-borrower-email`).
 - [x] ~~**n8n fix — Set Rate webhook Store Rate node:**~~ DONE 2026-04-16 PM (late-3). Workflow `3iXImUkjgMitpJKt` repaired end-to-end: (1) removed `from_address` + `subject` from Store Rate body JSON (neither column exists); (2) fixed pre-existing Validate Rate bug — `return [{json}]` → `return {json}` for `runOnceForEachItem` mode. Verified via MCP `execute_workflow` (execution 5175 success) + new `activity_log` row `9b3a765d-d02d-4b04-997d-3a8e9bd23c2c` written clean. Manual rate updates can use `curl .../webhook/refi-watch-set-rate -d '{"rate":X}'` again. Rate Drop Alert threshold still 6.00%; today's 6.37% won't trigger alerts.
 
+---
+
 ## Scott's Pilot — Multi-Tenant MVP (goal: first real second tenant)
 
 > Uncle Scott Sears (org `40377391-6b4c-4d1a-81d2-ffd743876f0b`) — family pilot. Scott has no Arive (no LOS integration needed). Basic CRM only. When this ships cleanly, LoanOS has its first external tenant proof point.

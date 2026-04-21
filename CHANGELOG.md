@@ -1,5 +1,11 @@
 # LoanOS Changelog
 
+## 2026-04-21 (loanos-autonomous) — Realtor Acknowledgment Email
+
+- **n8n workflow `H5doQYLLIAg0zMug`** ("LoanOS — Realtor Referral Acknowledgment") created via REST API + published + activated. Webhook path: `realtor-referral-ack`. 8 nodes: Webhook → Parse Contact → Lookup Realtor (Code, ILIKE name match) → IF Realtor Found? → [TRUE] Prepare Email (Code) → Send via Resend (credential `iZLYewwb3yl9DYVj`) → Log activity_log (`referral_ack.sent`); [FALSE] Log warning (`referral_ack.warning`). Email subject: "I got your referral — [FirstName] is in."
+- **Migration 091** (`091_realtor_ack_trigger.sql`): pg_net trigger `on_realtor_referral_contact_inserted` on `contacts` table. Fires AFTER INSERT where `referral_type = 'realtor_referral' AND referred_by IS NOT NULL`. POSTs `{contact_id, first_name, last_name, organization_id, referred_by}` to n8n webhook. Applied to Supabase prod.
+- **n8n.md** updated with new workflow entry.
+
 ## 2026-04-21 AM (styer-lead-gen-am) — Realtor Roster View
 
 - **Realtor Roster page** (`/dashboard/contacts/realtors`): new page showing ranked list of referral partners with columns: Name, Referrals YTD, Deals Closed YTD, Last Referral, Tier badge (A=emerald, B=amber, C=zinc). Client-side sort on all columns, default `referral_ytd_count` DESC. Queries contacts where `referral_ytd_count > 0 OR deals_ytd_count > 0` scoped to org.
@@ -3345,3 +3351,10 @@ Arive (loan event)
 - **Web research**: SEO — 1 source added (backlinko.com/google-ctr-stats — 4M search CTR analysis, validates CTR-hook approach for suburb pages). Lead Gen — 0 added (at capacity, AM session files took priority).
 - **Master log**: Appended seo-sem-pm + lead-gen-pm entries to Styer_Growth_Log.md; synced to Styer Mortgage Master notebook (twice — once per agent).
 - **Digests sent**: SEO + SEM Daily Digest + Lead Gen Daily Digest — both dispatched via Zapier (status: success).
+
+## 2026-04-21 — Scenarios AM — Tier 8 Items 2 + 4
+
+- RateFreshnessBanner.tsx: amber compliance warning on share pages >3 days old (pure client-side, print:hidden)
+- SharePageLayout: banner renders above Option Cards section
+- ActionsBar: "Text Borrower" SMS button — opens native SMS composer with pre-filled share link (sms: URL scheme, zero backend)
+- Build: ✅ 0 TypeScript errors · Commit: 10cafc6 · Vercel: dpl_66Ejduj48wgCa6HByLrTRTrJWSu5 BUILDING

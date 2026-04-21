@@ -2,6 +2,47 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-21 AM — Lead Generation
+Focus: BUILD — Hot Lead Notification + Realtor Roster View
+Type: Builder (Sequence A)
+Week in Queue: Week 10
+
+### Completed
+- **Priority 1 audit**: `POST /api/notify/hot-lead` verified already live (commit `358d3f5`, PM session 2026-04-20). n8n workflow `nOCDV73m4M0jyL1B` has 8 nodes; "Notify Adam" httpRequest node confirmed wired via MCP `get_workflow_details`. BLOCKER-HOT-LEAD-001 closed prior session — no action needed.
+- **Realtor Roster View** (`/dashboard/contacts/realtors`): Full sortable table of referral partners. Queries contacts where `referral_ytd_count > 0 OR deals_ytd_count > 0` filtered by org. Columns: Name (links to `/dashboard/referral/`), Referrals YTD, Deals Closed YTD, Last Referral date, Tier badge. Client-side sort on all 5 columns; default sort `referral_ytd_count` DESC. Loading skeleton, empty state, partner count.
+- **ContactsSidebar updated**: Added "Realtor Roster" link above Smart Lists section. Uses `usePathname()` for active-state highlighting (`bg-primary/12 border border-primary/20`). Collapsed state shows Handshake icon only.
+- **Build**: Passed `npm run build` cleanly. `/dashboard/contacts/realtors` compiled at 4.5 kB. No TypeScript or ESLint errors.
+- **Commit**: `292acc2` — `feat(lead-gen): Realtor Roster view at /dashboard/contacts/realtors`
+- **Vercel**: `dpl_DAXwEARwkFNvfx6owvUh8Fdig25S` → READY (confirmed via MCP)
+
+### Deferred
+- Priority 1 (spec order): Realtor Acknowledgment Email — n8n workflow fires when `referral_ytd_count` increments on a contact. ~2-3 hrs. Spec: `tasks/lead-gen/specs/2026-04-20-realtor-referral-spec.md` sub-spec "Priority 1".
+- All persistent blockers unchanged: Seq C (Outlook cred), Calendly (webhook), Mailchimp journeys (Adam), Seq D (copy approval)
+- LOANOS_AGENT_SECRET still not set in n8n env vars (Adam-owned, 30-second fix)
+- NotebookLM pull/push: SKIPPED — CLI unavailable 10th+ consecutive session
+
+### Output Produced
+- Build: `src/app/dashboard/contacts/realtors/page.tsx` (new)
+- Modification: `src/components/ui/contacts-sidebar.tsx` (Realtor Roster link + active-state)
+- Commit: `292acc2` | Vercel: READY
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged)
+- Email sequences active: Seq A, Seq B, Anniversary Check-In (Seq C INACTIVE — Outlook)
+- Hot lead pipeline: WIRED end-to-end — score → tier → surface → notify. Pending: LOANOS_AGENT_SECRET in n8n env vars
+- Realtor tools live: Roster view (ranked table). Next: acknowledgment email workflow.
+
+### Compliance Checks Passed
+- Realtor Roster page: internal ops UI, no PII exposure beyond what is already in the contacts table, org-scoped by `organization_id` filter. No TCPA/CAN-SPAM concerns.
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- Hot lead notify route was already live when this session started. The session-start "Focus: BUILD — Hot Lead Notification" was stale from the prior session's handoff. master-agent.md should cross-check the commit log before declaring a build target still open — `git log --oneline -10` would have caught this in 2 seconds.
+- Realtor Roster pattern (client-side sort via useMemo + useState) is reusable for any ranked list. Consider adding it to the design system notes.
+
+---
 ## Session: 2026-04-20 AM — Lead Generation
 Focus: Hot Lead Notification Gap + Realtor Referral System Research
 Type: Strategy / Architecture (Sequence B)

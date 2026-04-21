@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## 2026-04-21 AM (styer-lead-gen-am) — Realtor Roster View
+
+- **Realtor Roster page** (`/dashboard/contacts/realtors`): new page showing ranked list of referral partners with columns: Name, Referrals YTD, Deals Closed YTD, Last Referral, Tier badge (A=emerald, B=amber, C=zinc). Client-side sort on all columns, default `referral_ytd_count` DESC. Queries contacts where `referral_ytd_count > 0 OR deals_ytd_count > 0` scoped to org.
+- **ContactsSidebar** (`contacts-sidebar.tsx`): added "Realtor Roster" nav link above Smart Lists section. Uses `usePathname()` for active-state highlighting; collapsed state shows Handshake icon only.
+- **Hot lead system audit**: verified `POST /api/notify/hot-lead` (commit `358d3f5`) + n8n `nOCDV73m4M0jyL1B` "Notify Adam" node fully wired. BLOCKER-HOT-LEAD-001 confirmed closed.
+- **Commit**: `292acc2` | **Vercel**: `dpl_DAXwEARwkFNvfx6owvUh8Fdig25S` → READY
+
+## 2026-04-21 AM (styer-social-am) — Week 33 Content Build
+
+- **Step 1B**: No new website content found (all content through blog/2026-04-17 + rates/2026-04-14 already tracked). GBP distribution skipped.
+- **Refresh**: 0 TIMELY drafts in Supabase. Completed instantly.
+- **Post 165** (LinkedIn, authority, Oct 21 10AM CT): "A Low Appraisal Is Good News" — counterintuitive take; frames low appraisal as buyer leverage, specific playbook (call agent first). 9/10. ID: `e7f5dab0`. NMLS #513013 present.
+- **Post 166** (Facebook, personal, Oct 23 10AM CT): "Three Kids Under Six" — Ruthie/Charlie/Roman named with verified ages, "the look" exchange with Brittany Jo. 9/10. ID: `08769da3`. No financial content.
+- **Rolling pillar**: Auth ~29.5% / Personal ~31% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance.
+- **NotebookLM PUSH**: skipped (11th+ consecutive CLI timeout — NEEDS ADAM).
+
 ## 2026-04-20 PM (styer-social-pm) — Week 32 Content Build
 
 - **Post 163** (Instagram Reel, personal, Oct 14 10AM CT): "Coaching call story" — Adam tells his coach he doesn't know if he wants to do this anymore; she shares 2008 story. No CTA. 9/10. ID: `6383e2f5`.

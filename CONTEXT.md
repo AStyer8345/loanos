@@ -96,21 +96,21 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 PM — Week 32 (Oct 12-18): Post 163 Instagram Reel script — "Coaching call story" (personal, evergreen, 9/10, ID: 6383e2f5, Oct 14 10AM CT) + Post 164 LinkedIn text-only — "Lock or float — my honest answer" (education, evergreen, 9/10, ID: 8a185566, Oct 16 10AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29% / Personal ~30.5% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance. Instagram Reel requirement met (2-week window). NotebookLM CLI: 10th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-21 AM — Week 33 (Oct 19-25): Post 165 LinkedIn authority — "A Low Appraisal Is Good News" (evergreen, 9/10, ID: e7f5dab0, Oct 21 10AM CT) + Post 166 Facebook personal — "Three Kids Under Six" (evergreen, 9/10, ID: 08769da3, Oct 23 10AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29.5% / Personal ~31% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance. NotebookLM CLI: 11th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 10+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 11+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 33 (Oct 19-25): Rolling pillar slightly under authority (~29%) and real-talk (~12% vs 10% target is fine). Priority: 1 authority + 1 personal or real-talk. rates/2026-04-14.html native carousel (LI/IG/FB) still in content-repost-queue — pick up when Architect has capacity.
+**What's next:** Week 34 (Oct 26 – Nov 1): Education (~29.5%) slightly under target. Real Talk (~12%) slightly above 10% floor but no correction needed. Priority: 1 education + 1 real-talk or authority. LinkedIn education + Instagram or Facebook real-talk/hot-take. Check content-repost-queue for pending rate/blog native posts.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 (autonomous) — BLOCKER-HOT-LEAD-001 CLOSED. Built `POST /api/notify/hot-lead` route: agent-secret auth, Resend HTML email, daily dedup via activity_log sentinel. n8n workflow `nOCDV73m4M0jyL1B` updated to 8 nodes — "Notify Adam" httpRequest node now fires after every hot lead surface event. Commit `358d3f5`. ADAM-BLOCKED remaining: set `LOANOS_AGENT_SECRET` in n8n env vars to activate the node.
+**Last worked on:** 2026-04-21 AM — Realtor Roster View shipped. `/dashboard/contacts/realtors` — sortable table of referral partners (Referrals YTD, Deals YTD, Last Referral, Tier badge). ContactsSidebar "Realtor Roster" link with active-state highlighting. Commit `292acc2`, Vercel `dpl_DAXwEARwkFNvfx6owvUh8Fdig25S` → READY. Hot lead system confirmed fully live (route + n8n 8-node wiring verified via MCP).
 
-**Active blockers:** (1) BLOCKER-HOT-LEAD-001 CLOSED — ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars to wire it live. (2) Seq C INACTIVE — Outlook cred (9+ sessions). (3) Calendly INACTIVE — webhook not wired in Calendly UI. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
+**Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (10+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
 
-**What's next:** Realtor Roster View (no migrations needed — UI-only). Then Realtor acknowledgment email spec. All 4 Adam-owned blockers unchanged.
+**What's next:** Realtor Acknowledgment Email — n8n workflow fires when `referral_ytd_count` increments. Spec: `tasks/lead-gen/specs/2026-04-20-realtor-referral-spec.md` Priority 1. ~2-3 hrs.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->

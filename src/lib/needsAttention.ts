@@ -21,6 +21,7 @@ export interface NeedsAttentionItem {
   ai_suggested_action: string | null
   ai_confidence: number | null
   ai_reasoning: string | null
+  is_new_lead: boolean
   score: number
   daysAgo: number
 }
@@ -59,23 +60,33 @@ export function needsAttentionScore(row: {
   ai_sentiment: string | null
   ai_suggested_action: string | null
   ai_confidence: number | null
+  is_new_lead: boolean
   daysAgo: number
 }): number {
-  // TODO — Adam: replace this placeholder with your real scoring logic.
-  // This default exists so the widget doesn't render empty on day one,
-  // but it's intentionally naive. Tune it.
-
   const action = row.ai_suggested_action
-  if (action === 'log_only' || action === 'route_to_janie') return 0
+
+  // Exclusions — these never show up
+  if (action === 'log_only' && !row.is_new_lead) return 0
+  if (action === 'route_to_janie') return 0
   if (row.ai_intent === 'thanks') return 0
 
   let score = 0
+
+  // New lead boost — unknown sender asking to engage is always top-priority
+  // (Kelli Kuenn case: referred buyer emailing directly with questions)
+  const engagementIntent = ['question', 'status_request', 'scheduling', 'complaint', 'urgent'].includes(row.ai_intent ?? '')
+  if (row.is_new_lead && engagementIntent && (row.ai_confidence ?? 0) >= 0.7) {
+    score += 80
+  }
+
+  // Known-contact urgency signals
   if (action === 'escalate') score += 100
   if (action === 'respond_today') score += 70
   if (row.ai_urgency === 'high') score += 40
   if (row.ai_sentiment === 'frustrated') score += 30
+
+  // Confidence weighting + age decay
   score *= (row.ai_confidence ?? 0.5)
-  // Decay by age: subtract 5 per day old
   score -= row.daysAgo * 5
 
   return Math.max(0, score)
@@ -152,12 +163,16 @@ export async function getNeedsAttention(
       const contactName = contact
         ? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
         : null
+      // "New lead" = inbound email from a sender NOT in our contacts table.
+      // The Inbound Email workflow leaves contact_id NULL when no match was found.
+      const isNewLead = r.contact_id === null
       const score = needsAttentionScore({
         ai_intent: r.ai_intent,
         ai_urgency: r.ai_urgency,
         ai_sentiment: r.ai_sentiment,
         ai_suggested_action: r.ai_suggested_action,
         ai_confidence: r.ai_confidence,
+        is_new_lead: isNewLead,
         daysAgo,
       })
       return {
@@ -172,6 +187,7 @@ export async function getNeedsAttention(
         ai_suggested_action: r.ai_suggested_action,
         ai_confidence: r.ai_confidence,
         ai_reasoning: r.ai_reasoning,
+        is_new_lead: isNewLead,
         score,
         daysAgo,
       }

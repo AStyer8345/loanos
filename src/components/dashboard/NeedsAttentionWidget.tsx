@@ -78,6 +78,11 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    {item.is_new_lead && (
+                      <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                        🆕 NEW LEAD
+                      </span>
+                    )}
                     <span className="text-[10px] font-mono font-semibold text-foreground uppercase tracking-wider">
                       {actionLabel}
                     </span>
@@ -95,7 +100,7 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
                     </span>
                   </div>
                   <div className="text-sm font-semibold text-foreground mb-0.5 truncate">
-                    {item.contact_name ?? 'Unknown sender'}
+                    {item.contact_name ?? (item.is_new_lead ? 'Unknown sender (not in contacts)' : 'Unknown sender')}
                     {item.ai_intent && (
                       <span className="ml-2 text-xs font-mono text-muted-foreground">
                         [{item.ai_intent}]

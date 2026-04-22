@@ -8,6 +8,7 @@ import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
+import { getNeedsAttention } from '@/lib/needsAttention'
 import {
   aggregateBySource,
   classifyLeadSource,
@@ -266,6 +267,10 @@ export default async function DashboardPage() {
     daysAgo: Math.floor((now.getTime() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)),
     score: 0,
   }))
+
+  // "Needs Your Attention" — AI-classified inbound emails from the last 7 days.
+  // Server-side fetch because the scoring logic is shared with automations.
+  const needsAttention = await getNeedsAttention(supabase, organizationId)
 
   // newLeads, recentApplications, activityEntries removed — dashboard redesign
 
@@ -583,6 +588,7 @@ export default async function DashboardPage() {
         sparklineMonths={sparklineMonths}
         scoredLoans={scoredLoans}
         hotLeads={hotLeads}
+        needsAttention={needsAttention}
         funnelData={funnelData}
         showSetupBanner={showSetupBanner}
         referralData={referralData}

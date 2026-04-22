@@ -117,6 +117,14 @@
 - ~~[LOW_RISK] Mortgage glossary page~~ ✅ DONE 2026-04-07 — mortgage-glossary.html, FAQPage 6 questions, BreadcrumbList, Article schema, added to sitemap
 - ~~[LOW_RISK] Investment property ROI examples on DSCR page~~ ✅ DONE 2026-04-07 — 3 Austin scenarios (core Austin LTR, suburban LTR, STR), honest ROI math
 
+## ADDED 2026-04-21b (Tuesday title/meta audit — second run)
+
+- ~~[ZERO_RISK] Remove duplicate mortgage-pre-approval-austin.html entry from sitemap.xml~~ ✅ DONE 2026-04-21b — removed priority 0.8 duplicate at line 95; kept priority 0.9 at line 49
+- ~~[LOW_RISK] Trim DSCR title (68 chars) — remove redundant "| Investor Mortgage"~~ ✅ DONE 2026-04-21b — now 48 chars: "DSCR Loans Austin TX | Adam Styer | NMLS #513013"
+- ~~[LOW_RISK] Trim Refinance title (67 chars) — reorder to lead with product keyword~~ ✅ DONE 2026-04-21b — now 56 chars: "Cash-Out Refinance Austin TX | Adam Styer | NMLS #513013"
+- [LOW_RISK] FHA title missing NMLS ("Austin FHA Loans: Broker, Not a Call Center | Adam Styer" — 56 chars). Adding NMLS would push over 65 chars. Keep current hook; NMLS is in meta + body. Adam awareness only.
+- [LOW_RISK] Jumbo title missing NMLS ("Jumbo Loan Austin: 10% Down to $1.5M | Adam Styer" — 49 chars). Same situation. Keep hook; NMLS in meta + body.
+
 ## ADDED 2026-04-14 AM (Tuesday title/meta audit)
 
 - ~~[LOW_RISK] Title tag audit — 6 loan/resource pages missing "Adam Styer" and/or NMLS #513013~~ ✅ DONE 2026-04-14 — fixed: first-time-home-buyer (NMLS added), austin-down-payment-assistance (Adam Styer added), fixed-vs-adjustable (Adam Styer added), how-to-buy-a-house-in-austin-tx (Adam Styer added + meta updated), closing-costs-texas (Adam Styer added), improve-credit-score (NMLS added + format corrected). All now match "[Loan Type] in Austin TX | Adam Styer | NMLS #513013" pattern.

@@ -96,30 +96,30 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 AM — Week 33 (Oct 19-25): Post 165 LinkedIn authority — "A Low Appraisal Is Good News" (evergreen, 9/10, ID: e7f5dab0, Oct 21 10AM CT) + Post 166 Facebook personal — "Three Kids Under Six" (evergreen, 9/10, ID: 08769da3, Oct 23 10AM CT). Both APPROVED, QA PASS. Rolling pillar: Auth ~29.5% / Personal ~31% / Education ~29.5% / Real Talk ~12% — all within ±5% tolerance. NotebookLM CLI: 11th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-21 PM — Supplemental Week 32 build (Facebook gap from Wk 31): "The $29 tent" (Facebook personal, ID: f7418322, Oct 14 10AM CST) + "DTI kills deals (not the rate)" (LinkedIn education, ID: ed6068e0, Oct 16 9AM CST). Both APPROVED, QA PASS, 9/10. NOTE: AM session had already advanced to Week 33 — this PM session backfilled Week 32 Facebook gap. Rolling pillar at build time: Auth ~28.7% / Personal ~30.5% / Education ~29.3% / Real Talk ~12.2%. NotebookLM: 10th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 11+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 10+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 34 (Oct 26 – Nov 1): Education (~29.5%) slightly under target. Real Talk (~12%) slightly above 10% floor but no correction needed. Priority: 1 education + 1 real-talk or authority. LinkedIn education + Instagram or Facebook real-talk/hot-take. Check content-repost-queue for pending rate/blog native posts.
+**What's next:** Week 34 (Oct 26 – Nov 1): Education (~29.5% at close of Week 33) slightly under target. Real Talk (~12%) near floor but within tolerance. Priority: 1 education + 1 real-talk or authority. LinkedIn education + Instagram or Facebook. Check content-repost-queue for pending rate/blog native posts.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 (autonomous) — Realtor Acknowledgment Email shipped. n8n workflow `H5doQYLLIAg0zMug` (8 nodes, webhook: `realtor-referral-ack`) ACTIVE. Supabase migration 091 applied — pg_net trigger fires on contacts INSERT where `referral_type='realtor_referral'`. Sends realtor a short "I got your referral — [Name] is in." email via Resend, logs `referral_ack.sent` to activity_log. No-realtor-found path logs `referral_ack.warning` gracefully.
+**Last worked on:** 2026-04-21 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (notebooklm-audit-2026-04-20.md, CONTEXT.md Apr 20, calendly-workflow-build Apr 13 [superseded by Apr 14 update]). Added 3 (CONTEXT.md Apr 21 refresh [hot lead + Realtor Roster + referral ack shipped], scotsmanguide.com/supercharge-your-realtor-referral-business, notebooklm-audit-2026-04-21.md). 50/50. Digest SENT (Zapier success).
 
 **Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (10+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
 
-**What's next:** FNM 3.4 import for Scott — upload UI + parser + contact/loan import flow. GOALS.md #1 Scott blocker.
+**What's next:** FNM 3.4 import for Scott — upload UI + parser + contact/loan import flow (GOALS.md #1 Scott blocker). Realtor referral drip sequence (day 3/10/30 post-referral cadence spec + build).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-20 PM — Nightly NotebookLM PUSH+CURATE. 4 suburb pages AEO + CTR optimized (Lakeway jumbo/luxury, Bee Cave luxury/jumbo, Bastrop acreage, New Braunfels H2s). Georgetown deepened with first-party data. Competitive intel: Hutto #1, Round Rock #2. 11/24 suburb pages CTR-optimized. Notebook: 4 removed (run log, CONTEXT.md Apr19, audit-Apr19, 2026-04-03-aeo-entity-signals [superseded]), 3 added (CONTEXT.md Apr20, audit-Apr20, backlinko.com/google-ctr-stats). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-21 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (404 SEL location-pages URL, notebooklm-audit-2026-04-20.md, CONTEXT.md Apr 20 stale). Added 3 (CONTEXT.md Apr 21 refresh [Cedar Park done, AEO pre-approval + refi FAQ, CTR titles all 24 suburbs ✅, Leander next], searchengineland.com/guide/service-area-pages, notebooklm-audit-2026-04-21.md). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** Buda USDA compliance error (page claims USDA — must remove from meta/schema/FAQ, HIGH). GTM suburb conversion gap (quick-form not counting as Google Ads conversions, $500/mo ad ROI unmeasured, HIGH). GSC URL Inspection for Taylor, Smithville, Elgin, Florence, Jarrell (LOW).
+**Active blockers:** USDA compliance: Buda/Smithville/Elgin/Florence/Jarrell pages claim USDA availability (Adam does not offer — HIGH compliance risk, remove from body/meta/schema). GTM suburb conversion gap (quick-form not counting as Google Ads conversions, $500/mo ad budget unattributed — HIGH). Brand drift: pre-publish lint for "Adam Styer" in blog title tags not deployed.
 
-**What's next:** Round Rock #1 push (Teravista/Forest Creek/Old Town + Round Rock ISD + "beat builder rates"). Buda USDA fix. CTR titles for 13 remaining suburb pages (Round Rock, Cedar Park, Georgetown, Buda, Westlake, Manor, Marble Falls, Spicewood, Smithville, Elgin, Florence, Jarrell, Taylor).
+**What's next:** USDA compliance cleanup (Buda/Smithville/Elgin/Florence/Jarrell — HIGH priority). Round Rock deepening (#2 → #1 push: Teravista/Forest Creek/Old Town + RRISD markers). Leander deepening (Cedar Park pattern). Broker vs. bank comparison page + FAQPage schema.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->

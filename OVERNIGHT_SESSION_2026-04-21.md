@@ -67,12 +67,18 @@ Result: same safety outcome, zero regression risk, and Scott is unblocked today 
 
 ```
 feat/tenant-scoping-hardening
+├── 1bb5004  docs: overnight session summary (this file)
 ├── 311e8a6  audit: Phase 3 live probe + final report
+├── 3ea8789  feat(dashboard): Needs Your Attention widget           ← see note
 ├── 1dec3e9  audit+db: Phase 1 report + migration 092
-├── a71c1a1  plan: tenant scoping hardening implementation plan
-├── 5475df3  docs: tenant scoping audit + hardening spec; n8n freeze
-└── (main)
+│ (feat branch created here)
+├── a71c1a1  plan: tenant scoping hardening implementation plan     ← already on main
+└── 5475df3  docs: tenant scoping audit + hardening spec; n8n freeze ← already on main
 ```
+
+**Note on `3ea8789`** — this commit wasn't mine. It landed on the branch at 9:28 PM CT while I was mid-session, authored under your git identity. Almost certainly an automated agent (scheduled task, hook, or cowork session) committed it to main, and since my branch was a live working tree on that checkout, the commit ended up in my history too.
+
+It's a real, useful commit (dashboard "Needs Your Attention" widget). I left it alone rather than risk rebasing it off blindly. When you merge `feat/tenant-scoping-hardening`, that widget work lands with my audit work. If you'd prefer to separate them, cherry-pick `3ea8789` to main first, then rebase my branch.
 
 ## If you want to roll anything back
 

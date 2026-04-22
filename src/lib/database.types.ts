@@ -3097,9 +3097,11 @@ export type Database = {
       }
       scenarios: {
         Row: {
+          borrower_intent: Json | null
           borrower_name: string | null
           borrower_qa: Json | null
           created_at: string | null
+          lo_note: string | null
           current_loan_data: Json | null
           id: string
           mismo_file_url: string | null
@@ -3121,9 +3123,11 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          borrower_intent?: Json | null
           borrower_name?: string | null
           borrower_qa?: Json | null
           created_at?: string | null
+          lo_note?: string | null
           current_loan_data?: Json | null
           id?: string
           mismo_file_url?: string | null
@@ -3145,9 +3149,11 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          borrower_intent?: Json | null
           borrower_name?: string | null
           borrower_qa?: Json | null
           created_at?: string | null
+          lo_note?: string | null
           current_loan_data?: Json | null
           id?: string
           mismo_file_url?: string | null

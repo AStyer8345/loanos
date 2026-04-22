@@ -30,6 +30,7 @@ interface SharedScenario {
   scenarios_data: AnyObj[]
   narrative: string | null
   borrower_qa: BorrowerQAPair[] | null
+  lo_note: string | null
   created_at: string
   branding?: ShareBranding
 }

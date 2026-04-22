@@ -36,6 +36,8 @@ export default async function ViewScenarioPage({ params }: { params: { id: strin
       propertyValue: scenario.property_value || 0,
       narrative: scenario.narrative || '',
       narrativeEdited: scenario.narrative_edited || false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      loNote: (scenario as any).lo_note || '',
     }
 
     if (scenario.scenario_type === 'purchase') {

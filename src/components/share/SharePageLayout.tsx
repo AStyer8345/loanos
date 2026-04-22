@@ -21,6 +21,8 @@ import BorrowerQA from './BorrowerQA'
 import BorrowerChat from './BorrowerChat'
 import ShareSavePDFButton from './ShareSavePDFButton'
 import RateFreshnessBanner from './RateFreshnessBanner'
+import BorrowerIntentCapture from './BorrowerIntentCapture'
+import LONoteCard from './LONoteCard'
 import type { BorrowerQAPair } from '@/app/share/[token]/page'
 
 interface SharedScenario {
@@ -30,6 +32,7 @@ interface SharedScenario {
   property_value: number | null
   narrative: string | null
   borrower_qa: BorrowerQAPair[] | null
+  lo_note: string | null
   created_at: string
 }
 
@@ -182,6 +185,11 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
               </section>
             )}
 
+            {/* Borrower Intent Capture — tap to signal which option they like, print:hidden */}
+            {hasMultipleOptions && (
+              <BorrowerIntentCapture token={token} rows={displayData.rows} />
+            )}
+
             {/* Cash to Close / Fee Breakdown */}
             <section className="no-break">
               <SectionIntro
@@ -208,6 +216,11 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
               <section className="no-break print:hidden">
                 <BorrowerQA pairs={data.borrower_qa} />
               </section>
+            )}
+
+            {/* LO Personal Note — gold-bordered card, shown when lo_note is set */}
+            {data.lo_note && (
+              <LONoteCard note={data.lo_note} loName={b.loName} />
             )}
 
             {/* Borrower AI Chat — live Q&A, print:hidden */}

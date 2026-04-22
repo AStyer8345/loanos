@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Download, Link2, Save, Mail, CheckCircle, X, Eye, MessageSquare } from 'lucide-react'
+import { Download, Link2, Save, Mail, CheckCircle, X, Eye, MessageSquare, FileText } from 'lucide-react'
 import type {
   ScenarioMode, PurchaseScenarioInput,
   RefiScenarioInput, CurrentLoanInput, ReinvestmentResult,
@@ -12,7 +12,7 @@ export default function ActionsBar({
   mode, borrowerName, propertyAddress, propertyValue,
   purchaseScenarios, purchaseResults, refiScenarios, refiResults,
   currentLoan, narrative, narrativeEdited, reinvestmentResult,
-  scenarioId, onSaved,
+  scenarioId, onSaved, loNote, onLoNoteChange,
 }: {
   mode: ScenarioMode
   borrowerName: string
@@ -28,6 +28,8 @@ export default function ActionsBar({
   reinvestmentResult: ReinvestmentResult | null
   scenarioId: string | null
   onSaved: (id: string) => void
+  loNote: string
+  onLoNoteChange: (note: string) => void
 }) {
   const [saving, setSaving] = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
@@ -38,6 +40,7 @@ export default function ActionsBar({
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [showNotePanel, setShowNotePanel] = useState(false)
   const [viewCount, setViewCount] = useState<number | null>(null)
   const [viewCountJustIncreased, setViewCountJustIncreased] = useState(false)
   const prevViewCount = useRef<number | null>(null)
@@ -101,6 +104,7 @@ export default function ActionsBar({
           narrative,
           narrative_edited: narrativeEdited,
           reinvestment_data: reinvestmentResult ? { returnRate: 7, horizonYears: 10, result: reinvestmentResult } : null,
+          lo_note: loNote || null,
         }),
       })
       const data = await res.json()
@@ -217,6 +221,18 @@ export default function ActionsBar({
         </button>
 
         <button
+          onClick={() => setShowNotePanel(p => !p)}
+          className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-medium transition-all"
+          style={{
+            border: '1px solid var(--sc-border)',
+            color: loNote ? '#C9A84C' : 'var(--sc-text)',
+          }}
+        >
+          <FileText size={16} />
+          {loNote ? 'Edit Note' : 'Add Note'}
+        </button>
+
+        <button
           onClick={() => { setShowEmailPanel(p => !p); setEmailError(null) }}
           className="flex items-center gap-2 px-6 py-3 rounded-[14px] text-sm font-medium transition-all"
           style={{ border: '1px solid var(--sc-border)', color: emailSent ? '#4ade80' : 'var(--sc-text)' }}
@@ -253,6 +269,37 @@ export default function ActionsBar({
           {saving ? 'Saving...' : scenarioId ? 'Update Scenario' : 'Save Scenario'}
         </button>
       </div>
+
+      {showNotePanel && (
+        <div
+          className="w-full max-w-md rounded-[14px] p-4"
+          style={{ background: 'var(--sc-surface)', border: '1px solid #C9A84C40' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold" style={{ color: '#C9A84C' }}>
+              Personal Note for Borrower
+            </p>
+            <button onClick={() => setShowNotePanel(false)}>
+              <X size={14} style={{ color: 'var(--sc-muted)' }} />
+            </button>
+          </div>
+          <textarea
+            value={loNote}
+            onChange={e => onLoNoteChange(e.target.value.slice(0, 250))}
+            placeholder="Add a personal note that will appear on the share page…"
+            rows={3}
+            className="w-full px-3 py-2 rounded-[10px] text-sm outline-none resize-none"
+            style={{
+              background: 'var(--sc-bg)',
+              border: '1px solid var(--sc-border)',
+              color: 'var(--sc-text)',
+            }}
+          />
+          <p className="mt-1 text-[10px] text-right" style={{ color: 'var(--sc-muted)' }}>
+            {loNote.length}/250 · Shown on share page above the Q&A section
+          </p>
+        </div>
+      )}
 
       {showEmailPanel && (
         <div

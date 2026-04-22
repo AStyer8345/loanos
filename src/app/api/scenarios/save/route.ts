@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const {
       id, scenario_type, borrower_name, property_address, property_value,
       current_loan_data, scenarios_data, results_data, narrative, narrative_edited,
-      reinvestment_data, source,
+      reinvestment_data, source, lo_note,
     } = body
 
     const record = {
@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       narrative: narrative || null,
       narrative_edited: narrative_edited || false,
       reinvestment_data: reinvestment_data || null,
+      lo_note: lo_note || null,
       source: source || 'manual',
       updated_at: new Date().toISOString(),
     }

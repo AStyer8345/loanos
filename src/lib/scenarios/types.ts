@@ -215,6 +215,8 @@ export interface ScenarioState {
   reinvestmentResult: ReinvestmentResult | null
   // Pre-fill source tracking
   fromLoanRecord?: boolean
+  // LO personal note — per-scenario, shown on share page above BorrowerChat
+  loNote?: string
 }
 
 // ─── Database Record ────────────────────────────────────────────────

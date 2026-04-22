@@ -121,6 +121,7 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
   // Shared
   const [narrative, setNarrative] = useState(initialState?.narrative ?? '')
   const [narrativeEdited, setNarrativeEdited] = useState(false)
+  const [loNote, setLoNote] = useState(initialState?.loNote ?? '')
   const [reinvestmentSettings, setReinvestmentSettings] = useState({ returnRate: 7, horizonYears: 10 })
   const [reinvestmentResult, setReinvestmentResult] = useState<ReinvestmentResult | null>(null)
   const [calculating, setCalculating] = useState(false)
@@ -636,6 +637,8 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                       reinvestmentResult={reinvestmentResult}
                       scenarioId={scenarioId}
                       onSaved={setScenarioId}
+                      loNote={loNote}
+                      onLoNoteChange={setLoNote}
                     />
                   </div>
                 )

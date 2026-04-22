@@ -1,5 +1,20 @@
 # LoanOS Changelog
 
+## 2026-04-22 AM (styer-lead-gen-am) — Realtor Referral Ack Webhook Wired
+
+- **`quick-add/route.ts`**: Fires POST to `n8n/webhook/realtor-referral-ack` fire-and-forget when a contact is created with `referred_by` set and `lead_source = 'Realtor Referral'`
+- **`web-lead/route.ts`**: Same webhook fires when `referral_type = 'realtor_referral'` and `referred_by` set — inserted as step 10 after existing lead-score-update call
+- **Vercel**: commit `2fe1f90`, `dpl_4Ae8dr2gj647iDoxpBP7jSmUfzPG` → READY
+- **n8n workflow**: `H5doQYLLIAg0zMug` (LoanOS — Realtor Referral Acknowledgment) was already ACTIVE — this session wired the LoanOS trigger
+
+## 2026-04-22 AM (styer-social-am) — Week 34 Content Build
+
+- **Post 167** (Instagram, education, Oct 27 10AM CT): "Post 167 — The three things that actually decide your loan" — myth-bust on credit scores, explains Cash/Capacity/Credit (the 3 Cs) with specific examples (640 score closes vs 780 denied due to DTI). NMLS #513013 present. 9/10. ID: `580c2de8`.
+- **Post 168** (Facebook, real-talk, Oct 29 3PM CT): "Post 168 — When rates are going back down" — hot-take on rate-waiting strategy, historical context (>7% in 2023 → sixes → fives), 3% pandemic anomaly framing. NMLS #513013 present. 9/10. ID: `5299bd96`.
+- **Step 1B**: No new content detected. GBP tracker backfilled with Apr 17 blog + Mar 30 bond rally blog (both already distributed in prior sessions — tracker was missing entries).
+- **Refresh**: No TIMELY posts due within 48 hours — no fills needed.
+- **NotebookLM PUSH**: skipped (11th+ consecutive CLI timeout — NEEDS ADAM).
+
 ## 2026-04-21 PM (styer-notebooklm-nightly) — SEO/SEM + Lead Gen NotebookLM Sync
 
 - **SEO/SEM notebook**: removed 3 stale sources (404 SEL URL, old audit, stale CONTEXT.md Apr 20); added 3 (refreshed CONTEXT.md Apr 21, SEL service area pages guide, today's audit). Notebook at 50/50.

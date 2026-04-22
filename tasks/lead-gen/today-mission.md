@@ -1,3 +1,39 @@
+## Mission Brief — 2026-04-22 AM
+
+### Domain
+Lead Generation
+
+### Focus Area
+Realtor Referral System — wire acknowledgment webhook into LoanOS contact creation
+
+### Session Type
+[x] Execute / Build (Sequence C)
+
+### Context
+n8n workflow `H5doQYLLIAg0zMug` (LoanOS — Realtor Referral Acknowledgment) is ACTIVE, 8 nodes, triggerCount=1.
+Webhook: POST https://styer.app.n8n.cloud/webhook/realtor-referral-ack
+Gap: No LoanOS code calls this webhook. Realtors never get notified when their referral lands.
+
+### Objectives
+1. Wire webhook into `quick-add/route.ts` — fires when `referred_by` set and `lead_source = 'Realtor Referral'`
+2. Wire webhook into `web-lead/route.ts` — fires when `referral_type = 'realtor_referral'` and `referred_by` set
+3. `npm run build` clean, commit, push, Vercel READY
+
+### Definition of Done
+Both routes fire the ack webhook fire-and-forget on qualifying inserts. Vercel READY.
+
+### Resources / Files in Scope
+- `src/app/api/contacts/quick-add/route.ts`
+- `src/app/api/contacts/web-lead/route.ts`
+
+### HIGH RISK Items
+- Fire-and-forget only — webhook failure must never block the contact insert response
+- Guard with `referred_by` check — only fire for actual realtor referrals
+
+---
+
+<!-- Previous mission archived below -->
+
 ## Mission Brief — 2026-04-20 AM
 
 ### Domain

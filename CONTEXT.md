@@ -96,21 +96,21 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 PM — Supplemental Week 32 build (Facebook gap from Wk 31): "The $29 tent" (Facebook personal, ID: f7418322, Oct 14 10AM CST) + "DTI kills deals (not the rate)" (LinkedIn education, ID: ed6068e0, Oct 16 9AM CST). Both APPROVED, QA PASS, 9/10. NOTE: AM session had already advanced to Week 33 — this PM session backfilled Week 32 Facebook gap. Rolling pillar at build time: Auth ~28.7% / Personal ~30.5% / Education ~29.3% / Real Talk ~12.2%. NotebookLM: 10th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-22 AM — Week 34 build (Oct 26–Nov 1): "Post 167 — The three things that actually decide your loan" (Instagram education, ID: 580c2de8, Oct 27 10AM CT) + "Post 168 — When rates are going back down" (Facebook real-talk hot-take, ID: 5299bd96, Oct 29 3PM CT). Both APPROVED, QA PASS, 9/10. Step 1B: no new content detected. GBP tracker backfilled (Apr 17 blog + Mar 30 bond rally blog were already distributed in prior sessions). Rolling pillar estimated: Auth ~29.5% / Personal ~30.5% / Education ~29.5% / RT ~12% — within ±5% tolerance. NotebookLM: 11th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 10+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 11+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 34 (Oct 26 – Nov 1): Education (~29.5% at close of Week 33) slightly under target. Real Talk (~12%) near floor but within tolerance. Priority: 1 education + 1 real-talk or authority. LinkedIn education + Instagram or Facebook. Check content-repost-queue for pending rate/blog native posts.
+**What's next:** Week 35 (Nov 2–8): Real Talk still below 15% target (hovering ~12%). Priority: 1 real-talk/hot-take + 1 education or authority. Platform: LinkedIn underrepresented in recent Wk 34 — consider LI for Week 35. Check content-repost-queue for pending rates/2026-04-14 native carousel.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (notebooklm-audit-2026-04-20.md, CONTEXT.md Apr 20, calendly-workflow-build Apr 13 [superseded by Apr 14 update]). Added 3 (CONTEXT.md Apr 21 refresh [hot lead + Realtor Roster + referral ack shipped], scotsmanguide.com/supercharge-your-realtor-referral-business, notebooklm-audit-2026-04-21.md). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-22 AM — Wired realtor referral ack webhook into LoanOS contact creation. Both `quick-add/route.ts` and `web-lead/route.ts` now fire POST to n8n `H5doQYLLIAg0zMug` (`/webhook/realtor-referral-ack`) fire-and-forget when `referred_by` set + referral type matches. Commit `2fe1f90`, Vercel `dpl_4Ae8dr2gj647iDoxpBP7jSmUfzPG` → READY.
 
-**Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (10+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval.
+**Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (11+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval. (6) NotebookLM CLI timeout 11th+ consecutive session.
 
-**What's next:** FNM 3.4 import for Scott — upload UI + parser + contact/loan import flow (GOALS.md #1 Scott blocker). Realtor referral drip sequence (day 3/10/30 post-referral cadence spec + build).
+**What's next:** Realtor referral drip sequence (day 3/10/30 post-referral cadence — spec + build). FNM 3.4 import for Scott (GOALS.md #1 Scott blocker — LoanOS product task).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->

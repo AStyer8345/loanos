@@ -228,6 +228,23 @@ export async function POST(req: NextRequest) {
       if (error) console.error('[quick-add] activity log error:', error)
     })
 
+    // ── Realtor Acknowledgment (fire-and-forget) ──────────────────────────────
+    if (referredByResolved && cleanData.lead_source === 'Realtor Referral') {
+      fetch('https://styer.app.n8n.cloud/webhook/realtor-referral-ack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact_id: newContact.id,
+          first_name: newContact.first_name,
+          last_name: newContact.last_name ?? '',
+          organization_id: organizationId,
+          referred_by: referredByResolved,
+        }),
+      }).catch((err) => {
+        console.error('[quick-add] realtor-ack webhook error (non-fatal):', err)
+      })
+    }
+
     return NextResponse.json({
       contact: newContact,
       extracted,

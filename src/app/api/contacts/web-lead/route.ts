@@ -318,7 +318,24 @@ export async function POST(req: NextRequest) {
     console.error('[web-lead] lead score webhook error (non-fatal):', err)
   })
 
-  // ── 10. Workflow DevKit trigger (feature-flagged) ─────────────────────────────
+  // ── 10. Realtor Acknowledgment (fire-and-forget) ─────────────────────────────
+  if (referral_type === 'realtor_referral' && referred_by) {
+    fetch('https://styer.app.n8n.cloud/webhook/realtor-referral-ack', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contact_id: newContact.id,
+        first_name: newContact.first_name,
+        last_name: newContact.last_name ?? '',
+        organization_id,
+        referred_by,
+      }),
+    }).catch((err) => {
+      console.error('[web-lead] realtor-ack webhook error (non-fatal):', err)
+    })
+  }
+
+  // ── 11. Workflow DevKit trigger (feature-flagged) ─────────────────────────────
   // WORKFLOW_DEVKIT_LEAD_INTAKE: 'off' | 'shadow' | 'live'
   // 'off'    — n8n continues to handle all lead intake (default)
   // 'shadow' — log what WOULD have happened, do not actually trigger

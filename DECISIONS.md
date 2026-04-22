@@ -1,5 +1,22 @@
 # LoanOS — Architecture Decisions
 
+## [2026-04-21] — n8n Freeze: New Work Ships in Next.js
+
+**Chose:** Freeze n8n at its current 17-workflow footprint. All new features ship as Next.js routes or Vercel Workflow DevKit workflows. Scott Sears's tenant (and every future tenant) runs with zero n8n surface area — any feature that currently depends on an n8n workflow is feature-flagged off in his org.
+
+**Over:** (a) Continuing to extend n8n for new automations, (b) a big-bang migration of all 17 existing n8n workflows into Next.js in one cycle, (c) building a tenant-aware n8n layer (per-org API keys, per-org webhook URLs, org-scoped execution quotas).
+
+**Why:**
+- **Tenant isolation**: n8n hits Supabase via service role on every node. Every workflow manually passes `org_id` in queries — one typo = cross-tenant read. No RLS safety net. Next.js routes can use `createUserScopedClient()` and let RLS enforce the boundary automatically.
+- **Auth model**: n8n webhooks use shared HMAC secrets, not per-org tokens. Scaling to a second tenant would require forking each webhook URL.
+- **Execution cap**: already hit on current plan (one tenant). A second tenant makes capacity planning worse, not better.
+- **Reliability**: 2026-04-16 Arive contact-field sync, Set Rate webhook bugs, repeated credential re-auth — each incident reinforces that n8n is the wrong layer for features borrowers touch.
+- **Opportunistic migration**: when an n8n workflow breaks or needs a change, that's the trigger to port it to Next.js. No dedicated migration sprint needed.
+
+**Trade-off accepted:** Adam's tenant continues to carry some n8n surface (iMessage capture, Arive webhook, social scheduling, Hot Lead notify, etc.) until those workflows hit a natural reason to be replaced. Operational variance between Adam's tenant and Scott's tenant in the short term, but all user-facing features converge on the same Next.js code path.
+
+**Context:** Surfaced 2026-04-21 while scoping the tenant-scoping audit spec. Adam: "n8n is giving me all kinds of trouble and I'm not sure it's the right way with multi-tenancy." Freeze codified before Scott's pilot launches so the second tenant never acquires n8n baggage.
+
 ## [2026-04-16] — Arive Contact-Field Sync: DB Trigger, Not n8n Workflow Edits
 
 **Chose:** A Postgres `AFTER INSERT OR UPDATE` trigger on `public.loans` that COALESCEs phone/birthdate/co-borrower fields onto the linked contact. Contact value always wins; trigger only writes when the contact column is null.

@@ -43,6 +43,16 @@ export interface ActivityPublicFields {
   record_id?: string | null
   record_type?: string | null
   details?: string | null
+  // AI classifier outputs (n8n Inbound Email classifier). These are labels
+  // ABOUT the message, not the content — stored on the public table so
+  // widgets and automations can query without decryption.
+  ai_intent?: string | null
+  ai_urgency?: string | null
+  ai_sentiment?: string | null
+  ai_suggested_action?: string | null
+  ai_confidence?: number | null
+  ai_reasoning?: string | null
+  ai_classified_at?: string | null
 }
 
 interface EncryptedBlob {

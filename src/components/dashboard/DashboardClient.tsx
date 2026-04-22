@@ -16,6 +16,8 @@ import DailyScheduleWidget from './DailyScheduleWidget'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
+import NeedsAttentionWidget from '@/components/dashboard/NeedsAttentionWidget'
+import type { NeedsAttentionItem } from '@/lib/needsAttention'
 import { Card } from '@/components/ui/card'
 import SparklineCard from './charts/SparklineCard'
 import ConversionFunnel from './charts/ConversionFunnel'
@@ -47,6 +49,7 @@ interface DashboardClientProps {
   chartData: ChartPoint[]
   scoredLoans: ScoredLoan[]
   hotLeads: HotLead[]
+  needsAttention: NeedsAttentionItem[]
   funnelData: Array<{ stage: string; count: number }>
   showSetupBanner?: boolean
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
@@ -226,6 +229,11 @@ export default function DashboardClient(props: DashboardClientProps) {
                 </Table>
               </div>
             </Card>
+          )}
+
+          {/* ── Needs Your Attention (AI-classified inbound emails) ── */}
+          {props.needsAttention.length > 0 && (
+            <NeedsAttentionWidget items={props.needsAttention} />
           )}
 
           {/* ── Two-column: Hot Leads (compact) + Rate Lock (compact) ── */}

@@ -32,7 +32,7 @@
 - [ ] **Tenant scoping audit.** Walk every page/API route/server query — confirm `organization_id` / `org_id` filter applied. No exceptions. Required BEFORE Scott logs in. (Start here. Everything else depends on proving Scott's data can't leak into Adam's and vice versa.)
 - [ ] **RLS coverage verification.** `get_advisors` security pass + manual audit of every table. Log every policy; flag any table where a wrong-org user could read/write.
 - [ ] **Feature flags per-org.** Hide Drip, Pipeline sync, Email Intelligence, Rate Watch behind org-scoped flags. Scott's org gets only: Contacts, manual Pipeline, templated email send.
-- [ ] **Manual Enrollment UI.** Contact detail page → "Enroll in Campaign" dropdown → API route `/api/drip/enroll` that inserts into `drip_enrollments` + POSTs to n8n webhook with lead data. ~1 day.
+- [x] ~~**Manual Enrollment UI.**~~ Contact detail DRIP CAMPAIGNS card always renders; `+ ENROLL` button opens inline campaign picker → POST `/api/drip/campaigns/[id]/enrollments`. DONE 2026-04-22 (commit `b3752fb`, Vercel READY).
 - [ ] **Hold List UI.** Settings page → CRUD against `drip_suppressions` table. Add email, scope (global or per-campaign), reason. Unsubscribe links on drip emails auto-insert global rows. ~1 day.
 - [ ] **Drip Dashboard widgets.** Active enrollments per campaign, recent sends timeline, completion rate. Reads from `drip_enrollments` + `drip_sends` joined with contacts. ~1 day.
 - [ ] **Basic templated email send.** One-off send from contact detail → pick template from `automation_registry` → substitute vars → send via Resend → log to `activity_log`. Not drip, just one-shot. ~1 day.

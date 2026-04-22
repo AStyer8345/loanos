@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## 2026-04-22 (loanos-autonomous) — Manual Enrollment UI + Drip Root Cause
+
+- **Root cause found**: Zero drip enrollments existed because (a) n8n drip scheduler was archived 2026-04-16 (no auto-enrollment), and (b) the DRIP CAMPAIGNS card on contact detail was hidden when `dripEnrollments.length === 0` — no UI entry point to manually enroll.
+- **Manual Enrollment UI shipped** (`src/app/dashboard/contacts/[id]/ContactRecordView.tsx` + `page.tsx`): DRIP CAMPAIGNS card now always renders. `+ ENROLL` button opens inline campaign picker → select campaign → CONFIRM → POST `/api/drip/campaigns/[id]/enrollments`. Error shown inline on failure (e.g. already enrolled). Enrollment list refreshes on success.
+- **No new API routes**: Enrollment API already existed at the correct path. Only UI plumbing was missing.
+- **Commit**: `b3752fb` | **Vercel**: `dpl_7Q3E2XuP49Wbj9eN9wpzfZCUCyjw` → READY
+- **PR #4 (`feat/tenant-scoping-hardening`)**: Queued for Adam review/merge. Tenant scoping audit complete — 37 tables probed, 0 cross-tenant leaks, migration 092 applied. Scott Sears cleared for login.
+- **Adam queue**: Merge PR #4 + provide FNM 3.4 import spec before build can start.
+
 ## 2026-04-22 AM (styer-lead-gen-am) — Realtor Referral Ack Webhook Wired
 
 - **`quick-add/route.ts`**: Fires POST to `n8n/webhook/realtor-referral-ack` fire-and-forget when a contact is created with `referred_by` set and `lead_source = 'Realtor Referral'`

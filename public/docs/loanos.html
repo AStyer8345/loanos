@@ -373,6 +373,9 @@ var DECISIONS = [
   {date:"Apr 2026",title:"Hot Lead Notification closed BLOCKER-HOT-LEAD-001",color:"#4cc98a",
    body:"New POST /api/notify/hot-lead route — agent-secret-gated, fetches contact, sends Resend HTML email to admin, deduplicates via activity_log (action='hot_lead_notification', UTC calendar-day window). n8n workflow nOCDV73m4M0jyL1B updated to 8 nodes — 'Notify Adam' httpRequest node fires after every hot lead surface event. ADAM-BLOCKED: set LOANOS_AGENT_SECRET in n8n Settings → Environment Variables to activate. Commit 358d3f5.",
    tags:[{label:"Added: /api/notify/hot-lead",type:"added"},{label:"Added: n8n Notify Adam node",type:"added"},{label:"Closed: BLOCKER-HOT-LEAD-001",type:"confirmed"}]},
+  {date:"Apr 2026",title:"Manual Enrollment UI + Drip Root Cause + Tenant Scoping PR",color:"#4cc98a",
+   body:"Root cause of drip campaigns not working: n8n scheduler archived 2026-04-16 (no auto-enrollment) + contact detail DRIP CAMPAIGNS card hidden when enrollments empty. Fix: card always renders; + ENROLL button opens inline campaign picker → POST /api/drip/campaigns/[id]/enrollments. No new API routes — enrollment endpoint already existed. Commit b3752fb, Vercel READY. Also: tenant scoping audit complete (PR #4 feat/tenant-scoping-hardening) — 37 tables probed, 0 cross-tenant leaks, migration 092 applied (RLS for drip_suppressions + user_settings). Scott Sears cleared for login pending PR merge.",
+   tags:[{label:"Added: Manual Enrollment UI",type:"added"},{label:"Fixed: Drip Root Cause",type:"confirmed"},{label:"PR #4: Tenant Scoping Ready",type:"planned"}]},
 ];
 var PRICING = [
   {name:"Starter",price:"$97",desc:"Solo LO getting organized",hl:false,

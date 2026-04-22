@@ -9,6 +9,10 @@
 
 <!-- Agents append new items below this line -->
 
+- [ ] [LOANOS] 2026-04-22 🔀 10 MIN — REVIEW AND MERGE PR #4 (`feat/tenant-scoping-hardening`) — Tenant scoping audit complete. 37 tables probed, 0 cross-tenant leaks. Migration 092 applied (RLS policies for `drip_suppressions` + `user_settings`). PR is open on GitHub: `AStyer8345/loanos` → PR #4. Review diff → merge to main. Scott Sears is cleared for login once this lands.
+
+- [ ] [LOANOS] 2026-04-22 📋 SPEC NEEDED — FNM 3.4 IMPORT BEFORE BUILD — GOALS.md #1 Scott blocker. Cannot build without a spec. Need: (1) Which MISMO 3.4 XML fields map to which LoanOS contacts/loans columns? (2) Import flow: file picker UI, API endpoint, or admin-only? (3) What columns does Scott need populated? Drop notes in TODO.md Scott's Pilot section or reply to digest.
+
 - [ ] [LEAD-GEN] 2026-04-20 🔑 5 MIN — SET `LOANOS_AGENT_SECRET` IN N8N — Hot lead notification route is live at `POST /api/notify/hot-lead` and the n8n "Notify Adam" node (workflow `nOCDV73m4M0jyL1B`) is wired. But the node authenticates with `$env.LOANOS_AGENT_SECRET` — if that env var isn't set in n8n, every hot lead fires a 401 and the email is silently skipped. Fix: Go to https://styer.app.n8n.cloud → Settings → Environment Variables → Add variable `LOANOS_AGENT_SECRET` = (value from Vercel project → Settings → Environment Variables → `LOANOS_AGENT_SECRET`). Save. No workflow restart needed.
 
 - [ ] [SOCIAL] 2026-04-19 🔗 BEFORE SEP 24 — Post 157 (LinkedIn "The 1% Refinance Rule Is Wrong", Sep 24 10 AM CT, ID: 94e1d9a7): Add blog link to the FIRST COMMENT before scheduling. Post copy ends "Full breakdown on the blog. Link in first comment." — link must be there or the CTA lands on nothing. Blog post: blog/2026-04-17-should-i-refinance-austin-tx-2026.html.

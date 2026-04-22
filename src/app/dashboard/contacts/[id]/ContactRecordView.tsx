@@ -301,6 +301,8 @@ type Props = {
   dripEnrollments?: DripEnrollment[]
   onToggleDrip?: (enrollmentId: string, newStatus: 'active' | 'paused') => Promise<void>
   onCancelDrip?: (enrollmentId: string) => Promise<void>
+  campaigns?: Array<{ id: string; name: string }>
+  onEnrollInCampaign?: (campaignId: string) => Promise<void>
   contactNotes?: NoteRow[]
   setContactNotes?: (notes: NoteRow[]) => void
   onRefreshNotes?: () => void
@@ -1089,6 +1091,8 @@ export function ContactRecordView(props: Props) {
     dripEnrollments = [],
     onToggleDrip,
     onCancelDrip,
+    campaigns = [],
+    onEnrollInCampaign,
     newNote,
     setNewNote,
     savingNote,
@@ -1110,6 +1114,10 @@ export function ContactRecordView(props: Props) {
   ].sort((a, b) => getUnifiedTime(b) - getUnifiedTime(a))
 
   const { setActiveRecord } = useOutreachChat()
+  const [enrollPickerOpen, setEnrollPickerOpen] = useState(false)
+  const [enrollCampaignId, setEnrollCampaignId] = useState('')
+  const [enrolling, setEnrolling] = useState(false)
+  const [enrollError, setEnrollError] = useState<string | null>(null)
 
   useEffect(() => {
     const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || 'Contact'
@@ -1911,9 +1919,93 @@ export function ContactRecordView(props: Props) {
                 </div>
 
                 {/* Drip Campaigns */}
-                {dripEnrollments.length > 0 && (
-                  <div style={cardStyle}>
+                <div style={cardStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: dripEnrollments.length > 0 ? 12 : 0 }}>
                     <div style={labelStyle}>DRIP CAMPAIGNS</div>
+                    {onEnrollInCampaign && campaigns.length > 0 && !enrollPickerOpen && (
+                      <button
+                        type="button"
+                        onClick={() => { setEnrollPickerOpen(true); setEnrollCampaignId(campaigns[0]?.id ?? ''); setEnrollError(null) }}
+                        style={{
+                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                          padding: '3px 8px', borderRadius: 3, cursor: 'pointer',
+                          background: 'transparent', color: '#c9a84c',
+                          border: '1px solid #c9a84c66', letterSpacing: '0.04em',
+                        }}
+                      >
+                        + ENROLL
+                      </button>
+                    )}
+                  </div>
+
+                  {enrollPickerOpen && onEnrollInCampaign && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: dripEnrollments.length > 0 ? 12 : 0, padding: '10px 12px', borderRadius: 4, background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                      <select
+                        value={enrollCampaignId}
+                        onChange={e => setEnrollCampaignId(e.target.value)}
+                        style={{
+                          fontFamily: 'var(--font-mono)', fontSize: 11, padding: '5px 8px',
+                          borderRadius: 3, border: '1px solid var(--border)',
+                          background: 'var(--bg)', color: 'var(--fg)', cursor: 'pointer',
+                        }}
+                      >
+                        {campaigns.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                      {enrollError && (
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#ef4444' }}>{enrollError}</span>
+                      )}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          type="button"
+                          disabled={enrolling}
+                          onClick={async () => {
+                            if (!enrollCampaignId) return
+                            setEnrolling(true)
+                            setEnrollError(null)
+                            try {
+                              await onEnrollInCampaign(enrollCampaignId)
+                              setEnrollPickerOpen(false)
+                            } catch (err) {
+                              setEnrollError(err instanceof Error ? err.message : 'Enrollment failed')
+                            } finally {
+                              setEnrolling(false)
+                            }
+                          }}
+                          style={{
+                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                            padding: '4px 12px', borderRadius: 3, cursor: enrolling ? 'default' : 'pointer',
+                            background: '#10b98122', color: '#10b981',
+                            border: '1px solid #10b981', letterSpacing: '0.04em',
+                            opacity: enrolling ? 0.6 : 1,
+                          }}
+                        >
+                          {enrolling ? 'ENROLLING…' : 'CONFIRM'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEnrollPickerOpen(false)}
+                          style={{
+                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                            padding: '4px 12px', borderRadius: 3, cursor: 'pointer',
+                            background: 'transparent', color: 'var(--muted)',
+                            border: '1px solid var(--border)', letterSpacing: '0.04em',
+                          }}
+                        >
+                          CANCEL
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {dripEnrollments.length === 0 && !enrollPickerOpen && (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', paddingTop: 4 }}>
+                      Not enrolled in any campaigns.
+                    </div>
+                  )}
+
+                  {dripEnrollments.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {dripEnrollments.map(enrollment => {
                         const isActive = enrollment.status === 'active'
@@ -1939,10 +2031,7 @@ export function ContactRecordView(props: Props) {
                               </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <div style={{
-                                flex: 1, height: 4, borderRadius: 2,
-                                background: 'var(--border)',
-                              }}>
+                              <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'var(--border)' }}>
                                 <div style={{
                                   width: `${Math.round(((isCompleted ? enrollment.total_steps : enrollment.current_step + 1) / enrollment.total_steps) * 100)}%`,
                                   height: '100%', borderRadius: 2, background: statusColor,
@@ -2001,8 +2090,8 @@ export function ContactRecordView(props: Props) {
                         )
                       })}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {/* ── Email Automations ── */}
                 <div style={cardStyle}>

@@ -29,6 +29,7 @@ export default function ContactRecordPage() {
   const [referredLoans, setReferredLoans] = useState<ContactLoan[]>([])
   const [coBorrowerLoans, setCoBorrowerLoans] = useState<ContactLoan[]>([])
   const [dripEnrollments, setDripEnrollments] = useState<DripEnrollment[]>([])
+  const [campaigns, setCampaigns] = useState<Array<{ id: string; name: string }>>([])
   const [contactNotes, setContactNotes] = useState<NoteRow[]>([])
 
   const supabase = createClient()
@@ -86,6 +87,14 @@ export default function ContactRecordPage() {
     const unique = (data ?? []).filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
     setReferredLoans(unique as unknown as ContactLoan[])
   }, [id, supabase, organizationId])
+
+  const fetchCampaigns = useCallback(async () => {
+    const res = await fetch('/api/drip/campaigns')
+    if (res.ok) {
+      const data = await res.json() as { campaigns: Array<{ id: string; name: string }> }
+      setCampaigns((data.campaigns ?? []).map(c => ({ id: c.id, name: c.name })))
+    }
+  }, [])
 
   const fetchDripEnrollments = useCallback(async () => {
     if (!organizationId) return
@@ -213,7 +222,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(c.email), fetchContactActivity(), fetchNotes(), fetchDripEnrollments()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(c.email), fetchContactActivity(), fetchNotes(), fetchDripEnrollments(), fetchCampaigns()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -244,7 +253,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchNotes, fetchDripEnrollments, resolveReferrer])
+  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchNotes, fetchDripEnrollments, fetchCampaigns, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -319,6 +328,17 @@ export default function ContactRecordPage() {
     }
   }
 
+  const handleEnrollInCampaign = async (campaignId: string) => {
+    const res = await fetch(`/api/drip/campaigns/${campaignId}/enrollments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contact_id: id }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Enrollment failed')
+    await fetchDripEnrollments()
+  }
+
   const handleCancelDrip = async (enrollmentId: string) => {
     const { error } = await supabase
       .from('drip_enrollments')
@@ -375,6 +395,8 @@ export default function ContactRecordPage() {
       dripEnrollments={dripEnrollments}
       onToggleDrip={handleToggleDrip}
       onCancelDrip={handleCancelDrip}
+      campaigns={campaigns}
+      onEnrollInCampaign={handleEnrollInCampaign}
       contactNotes={contactNotes}
       setContactNotes={setContactNotes}
       onRefreshNotes={fetchNotes}

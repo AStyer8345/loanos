@@ -2,6 +2,46 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-22 AM — Lead Generation
+Focus: BUILD — Wire Realtor Referral Ack webhook into LoanOS contact creation
+Type: Execute (Sequence C)
+Week in Queue: Week 11
+
+### Completed
+- **Gap verified**: n8n workflow `H5doQYLLIAg0zMug` (LoanOS — Realtor Referral Acknowledgment) is ACTIVE, 8 nodes, triggerCount=1. Webhook: POST `/webhook/realtor-referral-ack`.
+- **LoanOS audit**: Neither `quick-add/route.ts` nor `web-lead/route.ts` called the webhook. The standup agent's CONTEXT.md note "referral ack workflow shipped" referred only to the n8n build — the LoanOS trigger was missing.
+- **`quick-add/route.ts` wired**: After insert, if `referredByResolved` set AND `lead_source === 'Realtor Referral'`, fires webhook fire-and-forget (+17 lines).
+- **`web-lead/route.ts` wired**: New step 10 — fires webhook when `referral_type === 'realtor_referral'` AND `referred_by` set. Inserted after existing lead-score step (+19 lines).
+- **Build**: Cleared stale `.next` cache, full build clean. TypeScript + ESLint pass.
+- **Commit**: `2fe1f90` — `feat(lead-gen): wire realtor referral ack webhook into contact creation`
+- **Vercel**: `dpl_4Ae8dr2gj647iDoxpBP7jSmUfzPG` → READY (confirmed)
+
+### Deferred
+- Realtor Referral drip sequence (day 3/10/30 post-referral cadence) — next lead gen build target
+- All persistent blockers unchanged: Seq C (Outlook cred), Calendly (webhook), Mailchimp journeys, Seq D (copy approval)
+- LOANOS_AGENT_SECRET still not set in n8n (Adam-owned, 30-second fix)
+- NotebookLM: SKIPPED — CLI unavailable 11th+ consecutive session
+
+### Output Produced
+- Modified: `src/app/api/contacts/quick-add/route.ts` (+17 lines)
+- Modified: `src/app/api/contacts/web-lead/route.ts` (+19 lines)
+- Commit: `2fe1f90` | Branch: `feat/tenant-scoping-hardening`
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged)
+- Realtor tools live: Roster view (`/dashboard/contacts/realtors`) + Ack webhook now wired into LoanOS contact creation (both quick-add + web-lead paths)
+- Hot lead pipeline: pending LOANOS_AGENT_SECRET in n8n
+
+### Compliance Checks Passed
+- Realtor ack: internal courtesy notification only — no CAN-SPAM, no TCPA concerns. Sends to existing realtor partner, not to the lead. RESPA: no compensation/thing of value.
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- Standup agent shipped the n8n workflow but didn't wire the LoanOS trigger. For any n8n workflow requiring a LoanOS-side call, the building agent must verify the LoanOS codebase has the matching fire-and-forget before marking "shipped."
+
+---
 ## Session: 2026-04-21 AM — Lead Generation
 Focus: BUILD — Hot Lead Notification + Realtor Roster View
 Type: Builder (Sequence A)

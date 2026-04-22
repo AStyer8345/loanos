@@ -1,5 +1,21 @@
 # LoanOS Changelog
 
+## 2026-04-21 PM (styer-notebooklm-nightly) — SEO/SEM + Lead Gen NotebookLM Sync
+
+- **SEO/SEM notebook**: removed 3 stale sources (404 SEL URL, old audit, stale CONTEXT.md Apr 20); added 3 (refreshed CONTEXT.md Apr 21, SEL service area pages guide, today's audit). Notebook at 50/50.
+- **Lead Gen notebook**: removed 3 stale sources (old audit, stale CONTEXT.md Apr 20, superseded calendly-build Apr 13); added 3 (refreshed CONTEXT.md Apr 21, Scotsman Guide realtor referral article, today's audit). Notebook at 50/50.
+- **Master growth log**: appended seo-sem-pm + lead-gen-pm entries; synced to Styer Mortgage Master notebook.
+- **Both digests**: SENT via Zapier (status: success) — SEO + SEM Daily Digest + Lead Gen Daily Digest.
+- **Status files**: SESSION_END + completion signals written to both subagent-status.md files.
+
+## 2026-04-21 PM (styer-social-pm) — Supplemental Week 32 Content Build
+
+- **Post 163** (Facebook, personal, Oct 14 10AM CST): "The $29 tent" — kids backyard camping moment, universal homeownership truth, no CTA, no financial content. 9/10. ID: `f7418322`. Backfills Facebook gap from Week 31.
+- **Post 164** (LinkedIn, education, Oct 16 9AM CST): "DTI kills deals (not the rate)" — specific DTI math ($60k salary, $800/mo debt, 42-43% before mortgage), $80k buying power example, NMLS #513013 present. 9/10. ID: `ed6068e0`.
+- **Rolling pillar at build time**: Auth ~28.7% / Personal ~30.5% / Education ~29.3% / Real Talk ~12.2% — all within ±5% tolerance.
+- **NOTE**: AM session had already advanced to Week 33 — this PM session backfilled Week 32 Facebook gap.
+- **NotebookLM PUSH**: skipped (10th+ consecutive CLI timeout — NEEDS ADAM).
+
 ## 2026-04-21 (loanos-autonomous) — Realtor Acknowledgment Email
 
 - **n8n workflow `H5doQYLLIAg0zMug`** ("LoanOS — Realtor Referral Acknowledgment") created via REST API + published + activated. Webhook path: `realtor-referral-ack`. 8 nodes: Webhook → Parse Contact → Lookup Realtor (Code, ILIKE name match) → IF Realtor Found? → [TRUE] Prepare Email (Code) → Send via Resend (credential `iZLYewwb3yl9DYVj`) → Log activity_log (`referral_ack.sent`); [FALSE] Log warning (`referral_ack.warning`). Email subject: "I got your referral — [FirstName] is in."

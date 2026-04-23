@@ -2,6 +2,169 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-23 AM — Week 36 Content Build (Scheduled Task — styer-social-am)
+
+**Focus**: Week 36 (Nov 9–15) — Real Talk priority (RT at ~12.6%, below 15% target) + Facebook (skipped Wk 35). Both posts EVERGREEN.
+
+**Completed:**
+- Step 1B: No new site content detected. All rate pages + blog posts already in GBP tracker. GBP published: 0. Tracker unchanged.
+- Refresh: No TIMELY posts due within 48 hours. Next TIMELY: FOMC Apr 29, PCE Apr 30 — both >48 hrs out.
+- Research: 30-yr fixed ~6.32% (MND Apr 22). Freddie Mac PMMS Apr 16: 6.30%. Stable/holding pattern. No TIMELY events needed. Output: research/2026-04-23-daily-rate-snapshot.md ✓
+- Architect: Week 36, 2-post plan. Facebook real-talk (rate-waiting hot take) + Instagram education (underwriting factors). Both EVERGREEN. Spec: specs/2026-04-23-week36-spec.md ✓
+- Builder: 2 posts written to social_drafts via Python insert (apostrophes + em-dashes preserved). NOTE: `real_talk` is not a valid DB pillar value — pillar check constraint allows only: authority, education, market, personal, story. Real Talk posts mapped to `authority` in DB; editorial pillar documented in agent_notes and build report.
+- Quality: Post 171 — 9/10 (first draft, no rewrite). Post 172 — 9/10 (first draft, no rewrite). Both pass 9/10 bar.
+- Reviewer: Both APPROVED. Compliance clean. NMLS #513013 verified on both posts. Post 171: "6%, 6.5%, 3%" is general market description — not a specific product rate quote, APR not triggered. No fabricated data (50-yr avg ~7.7% per Freddie Mac historical; $40K illustration is narrative, not a market claim). Post 172: no specific rates, no guaranteed outcomes. Rolling pillar PASS.
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms correct, NMLS present, apostrophes/em-dashes preserved, no placeholders. PASS.
+- social_activity: 2 entries logged ✓
+- Build report: build-reports/2026-04-23-week36-build.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: session entry prepended ✓
+- NotebookLM PUSH: skipped (13th+ consecutive CLI timeout — NEEDS ADAM).
+
+**Post IDs — Week 36**
+| Post | ID | Platform | Pillar (Editorial) | DB Pillar | Classification | Scheduled |
+|------|----|----------|--------------------|-----------|----------------|-----------|
+| 171 | c37c0ac3-82ee-416b-b9de-4cc9b089850e | facebook | Real Talk | authority | evergreen | 2026-11-11T20:00Z |
+| 172 | bd67761b-1c4e-473a-8b05-f91f66dbd34e | instagram | Education | education | evergreen | 2026-11-13T15:00Z |
+
+**Rolling Pillar (estimated after Week 36)**: Auth ~30.1% / Personal ~30.2% / Education ~29.7% / RT ~12.8% — all within ±5% tolerance. RT below 15% target but improving.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 13th+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- Instagram Reel (no camera session available)
+- Content repost queue: rates/2026-04-14 native carousel still pending
+
+**Next Session Instructions:**
+- Week 37 (Nov 16–22): RT at ~12.8% (still under 15% target). Priority: 1 real-talk/hot-take + 1 education.
+- Platform: LinkedIn skipped in Wk 36 — use LinkedIn for one of the Week 37 posts. Facebook can cycle back in Wk 38.
+- NotebookLM CLI still broken — skip PULL/PUSH, use session-log.md fallback.
+- DB note: `real_talk` is NOT a valid pillar value. Map Real Talk posts to `authority` in social_drafts, note in agent_notes.
+- Check content-repost-queue.md for pending rates/2026-04-14 native carousel.
+
+---
+## Session: 2026-04-22 PM — Week 35 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Week 35 (Nov 2–8) — Real Talk priority (RT at ~12%, below 15% target) + LinkedIn (underrepresented in Wk 34). Both posts EVERGREEN.
+
+**Completed:**
+- Research: 30-yr fixed 6.32% (MND Apr 22). Direction: DOWN from April highs. No TIMELY events this week. EVERGREEN posts only. Output: research/2026-04-22-pm-daily-rate-snapshot.md ✓
+- Architect: Week 35, 2-post plan. LinkedIn real-talk (preferred lender trap) + Instagram authority (correspondent lender model). Both EVERGREEN. Spec: specs/2026-04-22-week35-spec.md ✓
+- Builder: 2 posts written to social_drafts via Python insert (apostrophes preserved). NOTE: `real_talk` is not a valid DB pillar value — pillar check constraint allows only: authority, education, market, personal, story. Real Talk posts mapped to `authority` in DB; editorial pillar documented in agent_notes and build report.
+- Quality: Post 169 — 9/10 (first draft, no rewrite). Post 170 — 9/10 (first draft, no rewrite). Both pass 9/10 bar.
+- Reviewer: Both APPROVED. Compliance clean. NMLS #513013 verified on both posts (mortgage content). No specific rates quoted — APR disclosure not triggered. No fabricated data. No guaranteed outcomes. Rolling pillar PASS.
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms correct, apostrophes present, no placeholders. PASS.
+- social_activity: 2 entries logged ✓
+- Build report: build-reports/2026-04-22-week35-build.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: session entry prepended ✓
+- NotebookLM PUSH: skipped (12th+ consecutive CLI timeout — NEEDS ADAM).
+
+**Post IDs — Week 35**
+| Post | ID | Platform | Pillar (Editorial) | DB Pillar | Classification | Scheduled |
+|------|----|----------|--------------------|-----------|----------------|-----------|
+| 169 | 38c7577c-a822-4d3c-a994-6166500010ea | linkedin | Real Talk | authority | evergreen | 2026-11-03T15:00Z |
+| 170 | 43318a94-d4bd-4120-a331-d4490e395329 | instagram | Authority | authority | evergreen | 2026-11-06T15:00Z |
+
+**Rolling Pillar (estimated after Week 35)**: Auth ~30.1% / Personal ~30.5% / Education ~29.5% / RT ~12.6% — all within ±5% tolerance. RT below 15% target but improving.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 12th+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- Instagram Reel (no camera session available)
+- Content repost queue: rates/2026-04-14 native carousel still pending
+
+**Next Session Instructions:**
+- Week 36 (Nov 9–15): Real Talk still hovering ~12.6% (under 15% target). Priority: 1 real-talk/hot-take + 1 personal or education.
+- Platform: Facebook skipped Wk 35 — consider FB for one of the Week 36 posts. LinkedIn can cycle back in Wk 37.
+- NotebookLM CLI still broken — skip PULL/PUSH, use session-log.md fallback
+- Check content-repost-queue.md for pending rates/2026-04-14 native carousel
+- DB note: `real_talk` is NOT a valid pillar value. Map Real Talk posts to `authority` in social_drafts, note in agent_notes.
+
+---
+## Session: 2026-04-22 AM — Week 34 Content Build (Scheduled Task — styer-social-am)
+
+**Focus**: Week 34 (Oct 26–Nov 1) — education + real-talk priority (RT at ~12%, under 15% target). Instagram underrepresented in recent weeks. No TIMELY events this week.
+
+**Completed:**
+- Step 1B: No new content detected. GBP tracker backfilled — Apr 17 blog (already GBP-posted 2026-04-19 AM) and Mar 30 bond rally blog (already GBP-posted 2026-04-20 AM) added to tracker retroactively. No new GBP publishing needed.
+- Refresh: No TIMELY posts due within 48 hours (next TIMELY: April 29 FOMC, April 30 PCE). Refresh is a no-op.
+- Research: 30-yr fixed ~6.33% (MND Apr 21), 6.30% (Freddie Mac PMMS Apr 16). Direction: DOWN from 2-month highs. No TIMELY events this week. Output: research/2026-04-22-daily-rate-snapshot.md ✓
+- Architect: Week 34, 2-post plan. Instagram education (myth-bust: 3 Cs of loan approval) + Facebook real-talk (hot-take: rate-waiting strategy). Both EVERGREEN. Spec: specs/2026-04-22-week34-spec.md ✓
+- Builder: 2 posts written to social_drafts. Python insert used to preserve apostrophes (no stripping).
+- Quality: Post 167 — 9/10 (first draft, no rewrite). Post 168 — 9/10 (first draft, no rewrite). Both pass 9/10 bar.
+- Reviewer: Both APPROVED. Compliance clean. NMLS #513013 verified on both (mortgage content discussed). No specific current rates quoted — APR disclosure not triggered. No fabricated data (">7% in 2023" historically accurate, Oct 2023 peak ~7.8%). No guaranteed approval language.
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms correct, apostrophes present, no placeholders. PASS.
+- social_activity: 2 entries logged ✓
+- Build report: build-reports/2026-04-22-week34-build.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: session entry prepended ✓
+- NotebookLM PUSH: skipped (11th+ consecutive CLI timeout — NEEDS ADAM).
+
+**Post IDs — Week 34**
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 167 | 580c2de8-9054-4d9a-8504-30627429c0cf | instagram | education | evergreen | 2026-10-27T15:00Z |
+| 168 | 5299bd96-5b0a-4123-8bc8-c7e9fb45c0de | facebook | authority | evergreen | 2026-10-29T20:00Z |
+
+**Rolling Pillar (estimated after Week 34)**: Auth ~29.5% / Personal ~30.5% / Education ~29.5% / RT ~12% — all within ±5% tolerance. RT still below 15% target but within ±5%.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 11th+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- Instagram Reel (no camera session available)
+- Content repost queue: rates/2026-04-14 native carousel still pending
+- rates/2026-04-14 IG/FB/LI drafts (IDs: fb=7c22ab55, ig=0e30c402, li=8ae991cc) still await Adam approval
+
+**Next Session Instructions:**
+- Week 35 (Nov 2–8): Real Talk still hovering at ~12% (under 15% target). Priority: 1 real-talk/hot-take + 1 education or authority.
+- Platform: Instagram and LinkedIn (Facebook used twice in Wks 33-34; LinkedIn underrepresented in Wk 34)
+- NotebookLM CLI still broken — skip PULL/PUSH, use session-log.md fallback
+- Check content-repost-queue.md for pending rates/2026-04-14 native carousel
+
+---
+## Session: 2026-04-21 PM — Supplemental Week 32 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Week 32 (Oct 14-20) — backfill Facebook gap from Week 31. Both posts EVERGREEN.
+
+**Completed:**
+- Research: 30-yr fixed 6.33% (MND Apr 21, up 3bps). Direction: DOWN trend from April highs. No TIMELY events. Both posts EVERGREEN — no live data needed.
+- Architect: 2-post plan (Facebook personal + LinkedIn education). Rolling pillar all within ±5% tolerance.
+- Spec: tasks/social-media/specs/2026-04-21-week32-spec.md ✓
+- Builder: 2 posts written to social_drafts. PATCH applied to both (contraction restoration after JSON insert stripped apostrophes).
+- Quality: Post 163 — 8→9/10 (rewrite: contractions restored). Post 164 — 8→9/10 (rewrite: contractions + math symbols restored). Both pass 9/10 bar.
+- Reviewer: Both APPROVED. Compliance clean. NMLS #513013 verified Post 164. No fabricated data.
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms correct, no placeholders, contractions present. PASS.
+- social_activity: 2 entries logged ✓
+- Build report: tasks/social-media/build-reports/2026-04-21-week32-build.md ✓
+- Review: tasks/social-media/reviews/2026-04-21-week32-review.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: session entry prepended ✓
+- NotebookLM PUSH: skipped (10th+ consecutive CLI timeout — NEEDS ADAM).
+
+**NOTE**: AM session (styer-social-am) had already advanced to Week 33 before this PM session ran. This PM session backfilled Week 32 Facebook content (Facebook was absent from Week 31). No conflict — different scheduled_for dates (Oct 14/16 vs Oct 21/23).
+
+**Post IDs — Week 32 (Supplemental)**
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 163 | f7418322-1a6b-48d2-9538-12da8bf61d30 | facebook | personal | evergreen | 2026-10-14T16:00Z |
+| 164 | ed6068e0-6584-45f0-9219-31e32a2ae7e3 | linkedin | education | evergreen | 2026-10-16T15:00Z |
+
+**Rolling Pillar at Build Time**: Auth ~28.7% / Personal ~30.5% / Education ~29.3% / Real Talk ~12.2% — all within ±5% tolerance.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 10th+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- Instagram Reel (no camera session available)
+- Content repost queue items (blog/2026-03-30 + rates/2026-04-14 — still pending native IG/FB/LI versions)
+
+**Next Session Instructions:**
+- Week 34 (Oct 26 – Nov 1): Education (~29.5% at Week 33 close) slightly under target. Priority: 1 education + 1 real-talk or authority.
+- Platform priority: Instagram or LinkedIn education + Facebook real-talk/hot-take
+- NotebookLM CLI still broken — skip PULL/PUSH, use session-log.md fallback
+- Check content-repost-queue.md for pending rate/blog native posts
+
+---
 ## Session: 2026-04-20 AM — Step 1B + Week 31 Content Build (Scheduled Task — styer-social-am)
 
 **Completed:**

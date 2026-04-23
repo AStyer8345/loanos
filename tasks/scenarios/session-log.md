@@ -921,3 +921,49 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 - Tier 8 Item 2 (Rate freshness banner) — ✅ COMPLETE this session
 - Tier 8 Item 4 (SMS share from ActionsBar) — ✅ COMPLETE this session
 
+
+
+---
+
+## AM Session — 2026-04-22 (scenarios-am)
+
+**What was built:**
+- Migration 093: `borrower_intent JSONB` + `lo_note TEXT` columns added to `scenarios` table
+- `BorrowerIntentCapture.tsx` (new): "Which option interests you most?" 3-tap button row on share page, below comparison table. `POST /api/share/[token]/intent` writes `{option_index, option_label, selected_at}` to `scenarios.borrower_intent`. Idempotent (first tap wins, 409 on repeat). Best-effort Resend notification to Adam. `print:hidden`.
+- `LONoteCard.tsx` (new): Gold-bordered card on share page above BorrowerChat. Renders only when `lo_note` is set. Italicized note in quotes + "A Note from [LO Name]" header in gold.
+- ActionsBar: "Add Note" toggle button (gold-tinted when note set). Expandable gold-bordered panel with 250-char textarea + `X/250` counter.
+- ScenarioBuilder: `loNote` state (`useState`) wired from `initialState.loNote`, passed to ActionsBar as `loNote` + `onLoNoteChange`.
+- `database.types.ts`: `borrower_intent` + `lo_note` manually added to `scenarios` Row/Insert/Update blocks (Supabase TypeScript client needs these for strict-mode compile).
+- `save/route.ts`: `lo_note` included in upsert payload.
+- `share/[token]/route.ts`: `lo_note` added to SELECT whitelist + response body.
+- `share/[token]/page.tsx`: `lo_note` added to `SharedScenario` interface.
+- `SharePageLayout.tsx`: `BorrowerIntentCapture` rendered below comparison table (multi-option guard), `LONoteCard` rendered above BorrowerChat.
+
+**MC gap closed:** Adam now receives a notification (within seconds) showing which option a borrower is leaning toward before they call. Mortgage Coach charges extra for this signal. LoanOS now has it free.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `ccaced0` — pushed to main
+**Vercel:** `dpl_G1SRXiQgn3WPr4GiuRg6GANj4vGE` — ✅ READY
+
+**Files touched:**
+- `supabase/migrations/093_scenario_intent_and_note.sql` (new)
+- `src/app/api/share/[token]/intent/route.ts` (new)
+- `src/components/share/BorrowerIntentCapture.tsx` (new)
+- `src/components/share/LONoteCard.tsx` (new)
+- `src/components/share/SharePageLayout.tsx` (modified)
+- `src/app/dashboard/scenarios/new/ActionsBar.tsx` (modified)
+- `src/app/dashboard/scenarios/new/ScenarioBuilder.tsx` (modified)
+- `src/app/dashboard/scenarios/[id]/page.tsx` (modified)
+- `src/app/api/scenarios/save/route.ts` (modified)
+- `src/app/api/share/[token]/route.ts` (modified)
+- `src/app/share/[token]/page.tsx` (modified)
+- `src/lib/scenarios/types.ts` (modified)
+- `src/lib/database.types.ts` (modified)
+
+**Next session priority:**
+1. Tier 8 Item 5 (mobile swipe cards) — ScenarioComparisonTable on mobile, `md:hidden` swipeable card version. ~1.5hr. Last remaining Tier 8 item.
+2. Or: declare Scenarios program complete — Tiers 1–8 all done. No more MC gaps.
+
+**Domain queue updates:**
+- Tier 8 Item 1 (Borrower intent capture) — ✅ COMPLETE this session
+- Tier 8 Item 3 (LO personal note) — ✅ COMPLETE this session

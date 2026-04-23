@@ -2,6 +2,36 @@
 
 ---
 
+## 2026-04-22 — Day 28 (Launch: April 26)
+
+**Days to launch:** 4
+
+**Yesterday shipped:**
+- `feat(drip)`: Manual Enrollment UI on contact detail page — DRIP CAMPAIGNS card always renders; `+ ENROLL` opens inline campaign picker → POST `/api/drip/campaigns/[id]/enrollments` (`b3752fb`, Vercel READY)
+- `feat(lead-gen)`: Realtor referral ack webhook wired into quick-add + web-lead routes — fire-and-forget POST to `H5doQYLLIAg0zMug` when `referred_by` set (`a8390c6`, Vercel READY)
+- `plan(tenant-scoping)`: PR #4 (`feat/tenant-scoping-hardening`) — 3-phase tenant hardening plan, Phase 1 static audit (87 routes, 37 tables probed, 0 leaks), migration 092 applied (org-scoped RLS for drip_suppressions + user_settings), Scott cleared for login per CONTEXT.md
+
+**Vercel status:** READY — `dpl_5ciKw4PB7AibBfVkkLj1uNx2ozn9` (SHA `548e82f`, prod). All 20 recent deployments READY. PR #4 preview also READY.
+
+**n8n workflow health:** 36 workflows, 31 active. No error states.
+- 5 inactive (all expected): Pre-Drop Warm-Up, Quarterly Rate Review, Review Request (intentional), Morning Briefing Team (not yet activated), Contract Received v3 (draft/superseded)
+- All core workflows ACTIVE: Arive sync, email pipelines, drip, lead scoring, web lead, inbound email, iMessage log
+
+**Blockers:**
+- **PR #4 unmerged** — tenant scoping hardening not in prod; Scott cannot safely log in until merged
+- **`LOANOS_AGENT_SECRET` missing from n8n env vars** — hot lead emails can't authenticate (30-second fix, NEEDS ADAM)
+- **FNM 3.4 import not started** — Scott's #1 blocker; can't use the product without it
+- **Drip campaigns broken** — root cause fixed (archived scheduler + UI hidden), Manual Enrollment UI shipped, but campaigns still not running end-to-end
+- **Marketing site: zero progress** — 4 days to April 26, Adam-owned
+
+**Today's focus:** FNM 3.4 file import (Scott's #1 blocker per GOALS.md); drip campaign end-to-end fix; PR #4 review + merge. Phase 5 email template wiring follows.
+
+**Risk watch:** 4 days to launch. Three Scott blockers unresolved: PR #4 unmerged, FNM 3.4 not started, drip not end-to-end. Marketing site is Adam-owned with no path to completion visible at 4 days out — HIGHEST RISK. If April 26 slips, it slips on marketing, not product.
+
+**Open audit findings:** 0 CRITICAL per CONTEXT.md tracker (original 3 critical all resolved/scaffolded). Security audit file (2026-04-05) lists additional HIGH items: activity_log INSERT policy gap, storage documents policy gap, user-scoped milestone event tables. PR #4 migration 092 addresses some RLS gaps — these HIGH items unresolved until PR #4 merges + Phase 2/3 of hardening plan executes.
+
+---
+
 ## 2026-04-19 — Day 25 (Launch: April 26)
 
 **Days to launch:** 7

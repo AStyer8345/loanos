@@ -110,22 +110,22 @@ KNOWN GAPS (start here):
 Tiers 1–7 complete. These items close the remaining gap vs Mortgage Coach and add
 borrower engagement signals Adam currently has no visibility into.
 
-- **Borrower intent capture** — "Which option interests you most?" 3-button tap (Option A / B / C)
+- ~~**Borrower intent capture** — "Which option interests you most?" 3-button tap (Option A / B / C)
   on the share page below the comparison table. Tap records to `scenarios.borrower_intent` JSONB
   via service client (no auth). n8n `notify-intent` HTTP node emails Adam within 60 seconds.
   This is the single highest-ROI item: Adam learns which option the borrower is leaning toward
-  before they call. MC charges for this signal. ~1hr build. Zero new dependencies.
+  before they call. MC charges for this signal. ~1hr build. Zero new dependencies.~~ ✅ DONE 2026-04-22 AM
 
 - ~~**Rate freshness banner** — when share page is >3 days old, show amber inline banner:~~
   "Rates may have changed since this analysis was created. Contact Adam for an update."
   Pure client-side: compute `Date.now() - scenario.created_at`, no API call. 30-min build.
   Prevents borrowers from acting on stale numbers without surfacing the risk. ✅ DONE 2026-04-21 AM
 
-- **LO personal note field** — per-scenario text note (max 250 chars) Adam types in the
+- ~~**LO personal note field** — per-scenario text note (max 250 chars) Adam types in the
   builder. Stored in `scenarios.lo_note` (JSONB key in existing `scenarios_data`, no migration).
   Renders as a gold-bordered card above the BorrowerChat section on the share page.
   Humanizes the presentation — makes it feel like Adam wrote to this specific borrower.
-  ~45 min build.
+  ~45 min build.~~ ✅ DONE 2026-04-22 AM
 
 - ~~**SMS share from ActionsBar** — "Text Borrower" button alongside "Email Borrower" in~~
   ActionsBar. Tapping opens the native SMS composer (iOS/Android) with the share link

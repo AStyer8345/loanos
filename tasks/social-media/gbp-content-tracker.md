@@ -59,3 +59,17 @@
 
 #### Rate Pages
 2026-04-15 | rate | rates/2026-04-14.html | gbp:posted (Publer job 69df3eb9ac618bd4f8df9b90), ig/fb/li:drafted (social_drafts IDs: fb=7c22ab55, ig=0e30c402, li=8ae991cc)
+
+### Posted 2026-04-19 AM Session (backfilled tracker 2026-04-22)
+
+#### Blog Posts
+2026-04-19 | blog | blog/2026-04-17-should-i-refinance-austin-tx-2026.html | gbp:posted (Publer job 69e5407c9b0ea3b3576ef7f6), ig/fb/li:queued-for-architect (content-repost-queue.md — COMPLETED 2026-04-19 PM → Post 157)
+
+### Posted 2026-04-20 AM Session (backfilled tracker 2026-04-22)
+
+#### Blog Posts
+2026-04-20 | blog | blog/2026-03-30-why-rates-improved-today-bond-rally.html | gbp:posted (Publer job 69e5d66ce231f21410ad49af), ig/fb/li:queued-for-architect (content-repost-queue.md — pending native posts)
+
+### Scanned 2026-04-22 AM Session
+
+No new content found. All visible rate pages and blog posts already tracked.

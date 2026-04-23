@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
-import { getEnrollments, enrollContact, getCampaignById } from '@/lib/drip/queries'
+import { getEnrollments, enrollContact, getCampaignById, getSteps } from '@/lib/drip/queries'
 
 export async function GET(
   req: NextRequest,
@@ -37,13 +37,25 @@ export async function POST(
     if (!body.contact_id) {
       return NextResponse.json({ error: 'contact_id is required' }, { status: 400 })
     }
+
+    // Compute next_send_at from step 1's trigger_config.days if caller didn't provide it
+    let nextSendAt = body.next_send_at ?? null
+    if (!nextSendAt) {
+      const steps = await getSteps(organizationId, params.id)
+      const step1 = steps.find((s) => s.step_order === 1)
+      if (step1?.trigger_config?.days != null) {
+        const days = step1.trigger_config.days
+        nextSendAt = new Date(Date.now() + days * 86400000).toISOString()
+      }
+    }
+
     const enrollment = await enrollContact(
       organizationId,
       params.id,
       body.contact_id,
       body.loan_id ?? null,
       'manual',
-      body.next_send_at ?? null
+      nextSendAt
     )
     return NextResponse.json(enrollment, { status: 201 })
   } catch (err) {

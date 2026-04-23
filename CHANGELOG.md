@@ -1,5 +1,42 @@
 # LoanOS Changelog
 
+## 2026-04-23 AM (styer-lead-gen-am) — Drip Campaign End-to-End Fix
+
+- **`src/lib/drip/authored-emails.ts`** (new): Authored email registry for 5 relative_days campaigns — 25 total emails. PA Welcome (6), DPA Guide (8), Ghost Referral (4), Incomplete App (3), Went Quiet (4). All authored in Adam's voice. CampaignID constants, `hasAuthoredEmail()` / `getAuthoredEmail()` helpers.
+- **`src/app/api/drip/run/route.ts`** (new): Vercel Cron handler — auth via `CRON_SECRET`, calls `get_due_drip_enrollments()` RPC, checks exit rules (email_opt_out + bounce/complaint), renders HTML via `renderDripHtml()`, sends via Resend, writes `drip_sends`, advances `current_step` + computes `next_send_at`. CAN-SPAM footer on every email. Idempotency: enrollment advanced before send.
+- **`vercel.json`** (new): `"crons": [{"path": "/api/drip/run", "schedule": "0 * * * *"}]` — hourly execution.
+- **`src/app/api/drip/campaigns/[id]/enrollments/route.ts`** (updated): POST now computes `next_send_at = now + step1.trigger_config.days` when caller doesn't supply it. Fixes zero-send root cause (enrollments were stored with `next_send_at: null`).
+- **Root cause fixed:** 3 gaps closed — (1) scheduler now exists (Vercel Cron), (2) enrollments now get `next_send_at` set at enrollment time, (3) authored email content in-code for all 5 campaigns.
+- **ADAM action required:** Set `CRON_SECRET` env var in Vercel dashboard (prod + preview) — cron will 401 until this is done.
+- **Build**: green | **Commit**: TBD
+
+## 2026-04-23 AM (styer-social-am) — Week 36 Content Build
+
+- **Post 171** (Facebook, real-talk/authority, Nov 11 2PM CST): "Stop Waiting for 2021 to Come Back" — hot take challenging buyer anchoring to 2021 rates. 50-yr avg ~7.7%; 2021 at 3% was emergency anomaly. Buy now, refi later. NMLS #513013 present. 9/10. ID: `c37c0ac3`.
+- **Post 172** (Instagram, education, Nov 13 9AM CST): "What Underwriters Actually Look For" — myth-busts credit score as the decider. 4 factors: income stability, DTI, property, reserves. Personal question framing. NMLS #513013 present. 9/10. ID: `bd67761b`.
+- **Step 1B**: No new site content detected. GBP tracker already up to date.
+- **Rolling pillar**: Auth ~30.1% / Personal ~30.2% / Education ~29.7% / RT ~12.8% — all within ±5% tolerance. RT still below 15% target.
+- **NotebookLM PUSH**: skipped (13th+ consecutive CLI timeout — NEEDS ADAM).
+
+## 2026-04-22 PM (styer-social-pm) — Week 35 Content Build
+
+- **Post 169** (LinkedIn, real-talk/authority, Nov 3 9AM CT): "The Preferred Lender Trap" — hot take on preferred lender incentive structure. Hook: "Your realtor's preferred lender already knows you're not going to walk." Practical fix: get pre-approved before shopping. NMLS #513013 present. 9/10. ID: `38c7577c`.
+- **Post 170** (Instagram, authority, Nov 6 9AM CT): "Correspondent Lender" — explains Adam's correspondent model vs broker vs bank. Hook: "Most mortgage lenders don't actually control your loan." Consumer-facing benefit framing. NMLS #513013 present. 9/10. ID: `43318a94`.
+- **Rolling pillar**: Auth ~30.1% / Personal ~30.5% / Education ~29.5% / RT ~12.6% — all within ±5% tolerance. RT improving (was 12%).
+- **Platform gap note**: `real_talk` is not a valid DB pillar value — mapped to `authority` (documented in agent_notes and build report).
+- **NotebookLM PUSH**: skipped (12th+ consecutive CLI timeout — NEEDS ADAM).
+
+## 2026-04-22 AM (loanos-scenarios-am) — Scenarios Tier 8: Borrower Intent Capture + LO Personal Note
+
+- **Migration 093**: Added `borrower_intent JSONB` + `lo_note TEXT` to `scenarios` table
+- **BorrowerIntentCapture.tsx** (new): "Which option interests you most?" 3-tap button row on share page below comparison table. Writes `{option_index, option_label, selected_at}` to `scenarios.borrower_intent` via `POST /api/share/[token]/intent`. Idempotent (first tap wins). Sends Resend notification to Adam. `print:hidden`.
+- **LONoteCard.tsx** (new): Gold-bordered card on share page above BorrowerChat. Renders when `lo_note` is set. Italic quoted note + "A Note from [LO Name]" header.
+- **ActionsBar**: "Add Note" toggle button (gold when note set). Gold-bordered panel with 250-char textarea + character counter.
+- **ScenarioBuilder**: `loNote` state wired from `initialState.loNote`; threaded to ActionsBar + save payload.
+- **database.types.ts**: `borrower_intent` + `lo_note` added to `scenarios` Row/Insert/Update.
+- **MC gap closed**: Borrower option interest signal — Adam now gets notified which option a borrower is leaning toward before they call. MC charges extra for this signal.
+- **Commit**: `ccaced0` | **Vercel**: `dpl_G1SRXiQgn3WPr4GiuRg6GANj4vGE` → READY
+
 ## 2026-04-22 (loanos-autonomous) — Manual Enrollment UI + Drip Root Cause
 
 - **Root cause found**: Zero drip enrollments existed because (a) n8n drip scheduler was archived 2026-04-16 (no auto-enrollment), and (b) the DRIP CAMPAIGNS card on contact detail was hidden when `dripEnrollments.length === 0` — no UI entry point to manually enroll.
@@ -3398,3 +3435,22 @@ Arive (loan event)
 - SharePageLayout: banner renders above Option Cards section
 - ActionsBar: "Text Borrower" SMS button — opens native SMS composer with pre-filled share link (sms: URL scheme, zero backend)
 - Build: ✅ 0 TypeScript errors · Commit: 10cafc6 · Vercel: dpl_66Ejduj48wgCa6HByLrTRTrJWSu5 BUILDING
+
+## 2026-04-22 — Nightly NotebookLM Sync (PM Scheduled Task)
+
+### SEO/SEM NotebookLM PUSH+CURATE
+- Removed 3 stale sources: audit-2026-04-21.md, CONTEXT.md (Apr 21 stale), 2026-04-05-gsc-monitoring-web.md (GSC covered by 2 other sources)
+- Added 3 new sources: refreshed CONTEXT.md (Apr 22 — Bee Cave AEO + Leander deepening + broker-vs-bank), notebooklm-audit-2026-04-22.md, ahrefs.com/blog/local-link-building/ (Week 7 prep)
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Lead Gen NotebookLM PUSH+CURATE
+- Removed 3 stale sources: audit-2026-04-21.md, CONTEXT.md (Apr 21 stale), Scotsman Guide refi surge news (15 days old)
+- Added 3 new sources: refreshed CONTEXT.md (Apr 22 21:30 — new-lead widget + n8n creds), notebooklm-audit-2026-04-22.md, scotsmanguide.com "7 Tips to Build Realtor Relationships"
+- Week 6 (Realtor Referral System) declared COMPLETE
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Master Growth Log
+- Appended seo-sem-pm + lead-gen-pm entries
+- Re-synced to Styer Mortgage Master notebook (source refreshed)

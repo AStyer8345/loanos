@@ -1,34 +1,52 @@
-## Mission Brief — 2026-04-22 AM
+## Mission Brief — 2026-04-23 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-Realtor Referral System — wire acknowledgment webhook into LoanOS contact creation
+Drip Campaign Execution — build missing scheduler so enrolled contacts actually receive emails
 
 ### Session Type
 [x] Execute / Build (Sequence C)
 
-### Context
-n8n workflow `H5doQYLLIAg0zMug` (LoanOS — Realtor Referral Acknowledgment) is ACTIVE, 8 nodes, triggerCount=1.
-Webhook: POST https://styer.app.n8n.cloud/webhook/realtor-referral-ack
-Gap: No LoanOS code calls this webhook. Realtors never get notified when their referral lands.
+### Root Cause (Diagnosed This Session)
+8 campaigns exist with steps and authored content. 0 enrollments ever processed. Three gaps:
+1. No scheduler (archived n8n `LqBb3YDLjS2eUrDE`, WDK not activated, no Vercel cron)
+2. Enrollment route sets `next_send_at: null` → no signal for when to fire
+3. PA/DPA email content lives in WDK `.ts` files (can't run without WDK); other 6 campaigns have only skeleton briefs
 
 ### Objectives
-1. Wire webhook into `quick-add/route.ts` — fires when `referred_by` set and `lead_source = 'Realtor Referral'`
-2. Wire webhook into `web-lead/route.ts` — fires when `referral_type = 'realtor_referral'` and `referred_by` set
-3. `npm run build` clean, commit, push, Vercel READY
+1. Build `src/lib/drip/authored-emails.ts` — authored email registry for 5 relative_days campaigns
+2. Build `src/app/api/drip/run/route.ts` — Vercel cron that finds due enrollments, sends via Resend, records drip_sends, advances enrollment
+3. Update enrollment POST route to set `next_send_at` from first step's trigger_config.days
+4. Create `vercel.json` with hourly cron config
 
 ### Definition of Done
-Both routes fire the ack webhook fire-and-forget on qualifying inserts. Vercel READY.
+- `npm run build` passes
+- Vercel READY
+- Enrollment in any of the 5 targeted campaigns → `next_send_at` set on enrollment record → cron picks it up → email sends → drip_sends record created → current_step advances
+
+### Campaigns in Scope (relative_days trigger only)
+| Campaign | ID | Steps | Schedule |
+|---|---|---|---|
+| PA Welcome Nurture | 8b540726 | 6 | days 0,3,7,14,30,60 |
+| DPA Guide Nurture | 46ea4f7b | 8 | days 0,2,5,10,17,25,38,52 |
+| Lead — Ghost Referral | dc370748 | 4 | days 3,7,21,45 |
+| Lead — Incomplete App | cd488533 | 3 | days 2,5,14 |
+| Lead — Went Quiet | 2c0382a5 | 4 | days 30,60,90,180 |
+
+Deferred (complex triggers): Long-Term Nurture, Past Client Retention, Realtor Relationships
 
 ### Resources / Files in Scope
-- `src/app/api/contacts/quick-add/route.ts`
-- `src/app/api/contacts/web-lead/route.ts`
+- `src/lib/drip/authored-emails.ts` (NEW)
+- `src/app/api/drip/run/route.ts` (NEW)
+- `src/app/api/drip/campaigns/[id]/enrollments/route.ts` (MODIFY)
+- `vercel.json` (NEW)
 
 ### HIGH RISK Items
-- Fire-and-forget only — webhook failure must never block the contact insert response
-- Guard with `referred_by` check — only fire for actual realtor referrals
+- CAN-SPAM: every email must include physical address + NMLS #513013 + unsubscribe mechanism
+- Fire at most once per step — cron must be idempotent; advance current_step atomically
+- CRON_SECRET must be set in Vercel before cron activates — ADAM action item
 
 ---
 

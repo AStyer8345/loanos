@@ -96,48 +96,48 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-22 AM — Week 34 build (Oct 26–Nov 1): "Post 167 — The three things that actually decide your loan" (Instagram education, ID: 580c2de8, Oct 27 10AM CT) + "Post 168 — When rates are going back down" (Facebook real-talk hot-take, ID: 5299bd96, Oct 29 3PM CT). Both APPROVED, QA PASS, 9/10. Step 1B: no new content detected. GBP tracker backfilled (Apr 17 blog + Mar 30 bond rally blog were already distributed in prior sessions). Rolling pillar estimated: Auth ~29.5% / Personal ~30.5% / Education ~29.5% / RT ~12% — within ±5% tolerance. NotebookLM: 11th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-23 AM — Week 36 build (Nov 9–15): "Post 171 — Stop Waiting for 2021 to Come Back" (Facebook real-talk, ID: c37c0ac3, Nov 11 2PM CST) + "Post 172 — What Underwriters Actually Look For" (Instagram education, ID: bd67761b, Nov 13 9AM CST). Both APPROVED, QA PASS, 9/10. Step 1B: no new site content. Rolling pillar: Auth ~30.1% / Personal ~30.2% / Education ~29.7% / RT ~12.8%. NotebookLM: 13th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 11+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 was built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 13+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 built twice — orphaned duplicates (32803838, 94e1d9a7, 94c1dc00, 58757106) still in social_drafts.
 
-**What's next:** Week 35 (Nov 2–8): Real Talk still below 15% target (hovering ~12%). Priority: 1 real-talk/hot-take + 1 education or authority. Platform: LinkedIn underrepresented in recent Wk 34 — consider LI for Week 35. Check content-repost-queue for pending rates/2026-04-14 native carousel.
+**What's next:** Week 37 (Nov 16–22): RT still below 15% target (~12.8%). Priority: 1 real-talk + 1 education. Platform: LinkedIn (skipped Wk 36) for one post. Content-repost-queue: rates/2026-04-14 native carousel still pending.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-22 AM — Wired realtor referral ack webhook into LoanOS contact creation. Both `quick-add/route.ts` and `web-lead/route.ts` now fire POST to n8n `H5doQYLLIAg0zMug` (`/webhook/realtor-referral-ack`) fire-and-forget when `referred_by` set + referral type matches. Commit `2fe1f90`, Vercel `dpl_4Ae8dr2gj647iDoxpBP7jSmUfzPG` → READY.
+**Last worked on:** 2026-04-23 AM — Drip campaign end-to-end fix shipped. 3 new files: `src/lib/drip/authored-emails.ts` (25 authored emails across 5 campaigns), `src/app/api/drip/run/route.ts` (Vercel Cron, hourly), `vercel.json` (cron schedule). Enrollment POST updated to compute `next_send_at` from step 1's `trigger_config.days`. Build green. ADAM action: set `CRON_SECRET` in Vercel env vars (prod + preview) to activate cron.
 
-**Active blockers:** (1) ADAM must set `LOANOS_AGENT_SECRET` in n8n Settings → Env Vars (hot lead emails won't authenticate). (2) Seq C INACTIVE — Outlook cred (11+ sessions). (3) Calendly INACTIVE — webhook not wired. (4) Mailchimp 3 journeys not built. (5) Seq D — copy approval. (6) NotebookLM CLI timeout 11th+ consecutive session.
+**Active blockers:** (1) ADAM must set `CRON_SECRET` in Vercel dashboard (cron won't fire without it — 2-min fix). (2) ADAM must set `LOANOS_AGENT_SECRET` in n8n env vars (hot lead auth). (3) FNM 3.4 import not started. (4) NotebookLM CLI timeout 13+ sessions.
 
-**What's next:** Realtor referral drip sequence (day 3/10/30 post-referral cadence — spec + build). FNM 3.4 import for Scott (GOALS.md #1 Scott blocker — LoanOS product task).
+**What's next:** Verify first drip send fires after CRON_SECRET is set. FNM 3.4 file import for Scott. Week 7 (LO Waitlist / multi-tenant).
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (404 SEL location-pages URL, notebooklm-audit-2026-04-20.md, CONTEXT.md Apr 20 stale). Added 3 (CONTEXT.md Apr 21 refresh [Cedar Park done, AEO pre-approval + refi FAQ, CTR titles all 24 suburbs ✅, Leander next], searchengineland.com/guide/service-area-pages, notebooklm-audit-2026-04-21.md). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-22 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (audit-2026-04-21, CONTEXT.md Apr 21 stale, gsc-monitoring-web Apr 5 [covered by 2 other GSC sources]). Added 3 (CONTEXT.md Apr 22 [Bee Cave AEO + Leander deepening + broker-vs-bank AEO H2], audit-2026-04-22, ahrefs local link building [Week 7 prep]). 50/50. Digest SENT (Zapier success).
 
-**Active blockers:** USDA compliance: Buda/Smithville/Elgin/Florence/Jarrell pages claim USDA availability (Adam does not offer — HIGH compliance risk, remove from body/meta/schema). GTM suburb conversion gap (quick-form not counting as Google Ads conversions, $500/mo ad budget unattributed — HIGH). Brand drift: pre-publish lint for "Adam Styer" in blog title tags not deployed.
+**Active blockers:** USDA compliance: Buda/Smithville/Elgin/Florence/Jarrell pages claim USDA (Adam does not offer — HIGH). GTM suburb quick-form not counting as Google Ads conversions ($500/mo unattributed — HIGH). Blog next due April 24.
 
-**What's next:** USDA compliance cleanup (Buda/Smithville/Elgin/Florence/Jarrell — HIGH priority). Round Rock deepening (#2 → #1 push: Teravista/Forest Creek/Old Town + RRISD markers). Leander deepening (Cedar Park pattern). Broker vs. bank comparison page + FAQPage schema.
+**What's next:** Blog post "How to Buy a House in Austin TX 2026" (April 24 target — pillar, 3k+ words). Liberty Hill unique content. GSC Request Indexing — Taylor/Smithville/Elgin/Florence/Jarrell. USDA cleanup pending Adam confirmation.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 AM — Tier 8 Items 2 + 4 shipped. RateFreshnessBanner.tsx (amber compliance banner on share pages >3 days old, print:hidden). ActionsBar "Text Borrower" SMS button (opens native SMS composer with share link pre-filled, sms: URL scheme). Commit `10cafc6`, Vercel `dpl_66Ejduj48wgCa6HByLrTRTrJWSu5` BUILDING (expected READY).
+**Last worked on:** 2026-04-22 AM — Tier 8 Items 1 + 3 shipped. BorrowerIntentCapture.tsx ("Which option interests you most?" 3-tap buttons, writes to scenarios.borrower_intent JSONB via POST /api/share/[token]/intent, Resend notification to Adam, idempotent). LONoteCard.tsx (gold-bordered card on share page above BorrowerChat, 250-char textarea in ActionsBar). Migration 093 applied (borrower_intent + lo_note). MC gap closed: borrower option interest signal. Commit `ccaced0`, Vercel `dpl_G1SRXiQgn3WPr4GiuRg6GANj4vGE` → READY.
 
 **Active blockers:** None.
 
-**What's next:** Tier 8 Item 1 (borrower intent capture — "Which option interests you most?" tap on share page, writes to scenarios.borrower_intent JSONB, n8n notify ~1hr). Tier 8 Item 3 (LO personal note, ~45min, no migration).
+**What's next:** Tier 8 Item 5 (mobile swipe cards, ~1.5hr) — only remaining Tier 8 item. Alternatively declare Scenarios program complete.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-21 — Day 27 standup. Vercel READY (`dpl_36MgTUAtrmSw6nk8SeYvU61HSp8m`, SHA `2e0ed67`). Realtor Roster view shipped (`292acc2`). n8n `H5doQYLLIAg0zMug` (Realtor Referral Acknowledgment) ACTIVE. 5 days to launch. Corrected stale "no files in audits/" — audit files confirmed present; T-1/T-2/T-3 open CRITICAL findings from security audit flagged for Scott pilot prerequisite.
+**Last worked on:** 2026-04-22 — Day 28 standup. Vercel READY (`dpl_5ciKw4PB7AibBfVkkLj1uNx2ozn9`, SHA `548e82f`). PR #4 (`feat/tenant-scoping-hardening`) queued — 37 tables probed, 0 leaks, migration 092 applied, Scott cleared for login pending merge. 4 days to launch.
 
-**Active blockers:** Marketing site zero progress (5 days to April 26 — HIGHEST RISK, Adam-owned). `LOANOS_AGENT_SECRET` missing from n8n (30-second fix). FNM 3.4 import not started (Scott blocker). Drip campaigns not fixed. Task 23: 6 items ADAM-BLOCKED.
+**Active blockers:** PR #4 unmerged (Scott cannot safely log in). `LOANOS_AGENT_SECRET` missing from n8n (hot lead auth broken — 30s fix). FNM 3.4 import not started (Scott's #1 blocker). Marketing site zero progress (4 days to April 26 — HIGHEST RISK, Adam-owned).
 
-**What's next:** FNM 3.4 import build (GOALS.md #1 Scott blocker). Phase 5 email template wiring. Marketing site — Adam-owned.
+**What's next:** FNM 3.4 file import (Scott blocker). PR #4 merge (NEEDS ADAM). Drip end-to-end fix. Phase 5 email template wiring.
 
 ## Rules For AI Sessions
 

@@ -34,6 +34,7 @@
 - [ ] **RLS coverage verification.** `get_advisors` security pass + manual audit of every table. Log every policy; flag any table where a wrong-org user could read/write.
 - [ ] **Feature flags per-org.** Hide Drip, Pipeline sync, Email Intelligence, Rate Watch behind org-scoped flags. Scott's org gets only: Contacts, manual Pipeline, templated email send.
 - [x] ~~**Manual Enrollment UI.**~~ Contact detail DRIP CAMPAIGNS card always renders; `+ ENROLL` button opens inline campaign picker → POST `/api/drip/campaigns/[id]/enrollments`. DONE 2026-04-22 (commit `b3752fb`, Vercel READY).
+- [x] ~~**Drip end-to-end execution gap.**~~ DONE 2026-04-23 AM. `authored-emails.ts` (25 emails), `/api/drip/run` (Vercel Cron hourly), `vercel.json` (cron config), enrollment POST updated. ADAM: set `CRON_SECRET` in Vercel env vars to activate.
 - [ ] **Hold List UI.** Settings page → CRUD against `drip_suppressions` table. Add email, scope (global or per-campaign), reason. Unsubscribe links on drip emails auto-insert global rows. ~1 day.
 - [ ] **Drip Dashboard widgets.** Active enrollments per campaign, recent sends timeline, completion rate. Reads from `drip_enrollments` + `drip_sends` joined with contacts. ~1 day.
 - [ ] **Basic templated email send.** One-off send from contact detail → pick template from `automation_registry` → substitute vars → send via Resend → log to `activity_log`. Not drip, just one-shot. ~1 day.

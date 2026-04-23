@@ -9,6 +9,8 @@
 
 <!-- Agents append new items below this line -->
 
+- [ ] [LEAD-GEN] 2026-04-23 🔑 2 MIN — SET `CRON_SECRET` IN VERCEL — Drip cron won't fire until this is set. Vercel dashboard → loanos project → Settings → Environment Variables → Add: Name: `CRON_SECRET`, Value: any long random string (e.g. `openssl rand -hex 32` in Terminal), Environment: Production + Preview. Once set, `/api/drip/run` will authenticate hourly Vercel cron calls and begin sending drip emails.
+
 - [ ] [LOANOS] 2026-04-22 🔀 10 MIN — REVIEW AND MERGE PR #4 (`feat/tenant-scoping-hardening`) — Tenant scoping audit complete. 37 tables probed, 0 cross-tenant leaks. Migration 092 applied (RLS policies for `drip_suppressions` + `user_settings`). PR is open on GitHub: `AStyer8345/loanos` → PR #4. Review diff → merge to main. Scott Sears is cleared for login once this lands.
 
 - [ ] [LOANOS] 2026-04-22 📋 SPEC NEEDED — FNM 3.4 IMPORT BEFORE BUILD — GOALS.md #1 Scott blocker. Cannot build without a spec. Need: (1) Which MISMO 3.4 XML fields map to which LoanOS contacts/loans columns? (2) Import flow: file picker UI, API endpoint, or admin-only? (3) What columns does Scott need populated? Drop notes in TODO.md Scott's Pilot section or reply to digest.

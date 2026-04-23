@@ -2,6 +2,28 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-23 AM — Lead Generation
+Focus: BUILD — Drip Campaign End-to-End Execution Fix
+Type: Execute (Sequence C)
+Week in Queue: Week 12
+
+### Root Cause Confirmed
+Three gaps diagnosed: (1) n8n drip scheduler `LqBb3YDLjS2eUrDE` archived 2026-04-16 with no replacement, (2) enrollment POST sets `next_send_at: null` → cron's `WHERE next_send_at <= NOW()` never matches, (3) authored email content only in WDK `.ts` files (not runnable without WDK runtime).
+
+### Completed
+- **`src/lib/drip/authored-emails.ts`** (NEW): Authored email registry for 5 relative_days campaigns. 25 total emails: PA Welcome (6), DPA Guide (8), Ghost Referral (4), Incomplete App (3), Went Quiet (4). Content mirrors WDK workflow files for PA/DPA; written from scratch for the 3 lead campaigns. Exports `DRIP_CAMPAIGN_IDS`, `AUTHORED_EMAILS`, `hasAuthoredEmail()`, `getAuthoredEmail()`.
+- **`src/app/api/drip/run/route.ts`** (NEW): Vercel Cron handler at `/api/drip/run`. Auth via `Authorization: Bearer CRON_SECRET`. Uses `get_due_drip_enrollments()` Postgres RPC (already joins enrollments → next step → contact → campaign). For each due enrollment: checks email_opt_out + recent bounce/complaint, checks authored email registry, renders HTML via `renderDripHtml()`, wraps with CAN-SPAM footer (address + NMLS #513013 + unsubscribe link), advances enrollment BEFORE sending (idempotency), sends via Resend, writes `drip_sends` record with status=sent.
+- **`vercel.json`** (NEW): `{"crons": [{"path": "/api/drip/run", "schedule": "0 * * * *"}]}` — hourly.
+- **`src/app/api/drip/campaigns/[id]/enrollments/route.ts`** (UPDATED): POST now computes `next_send_at = now + step1.days` using `getSteps()` when caller doesn't supply it. Closes enrollment signal gap.
+- **Build**: `npm run build` green on first attempt after fixing `authored.body` → `authored.plain` field name.
+- **ADAM action added**: Set `CRON_SECRET` in Vercel env vars (prod + preview) to activate hourly cron.
+
+### Deferred
+- `referred_by` merge tag for Ghost Referral emails — currently resolves to empty string; fix requires pulling referral source from contact record or enrollment metadata
+- Long-Term Nurture, Past Client Retention, Realtor Relationships — `date_field` + `condition` triggers require separate scheduler logic (not relative_days)
+- Unsubscribe endpoint `/unsubscribe?c={contact_id}` — footer links point to it but it doesn't exist yet; sets `email_opt_out=true` on contact
+
+---
 ## Session: 2026-04-22 AM — Lead Generation
 Focus: BUILD — Wire Realtor Referral Ack webhook into LoanOS contact creation
 Type: Execute (Sequence C)

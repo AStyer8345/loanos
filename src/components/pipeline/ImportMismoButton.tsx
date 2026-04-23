@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileText, X } from 'lucide-react'
 
@@ -11,12 +11,23 @@ export default function ImportMismoButton() {
   const [error, setError] = useState<string | null>(null)
   const [duplicateMsg, setDuplicateMsg] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const resetState = () => {
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
+    }
+  }, [])
+
+  const resetForRetry = () => {
     setImporting(false)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const resetAll = () => {
+    resetForRetry()
     setError(null)
     setDuplicateMsg(null)
-    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleFile = async (file: File) => {
@@ -38,6 +49,13 @@ export default function ImportMismoButton() {
         body: formData,
       })
 
+      const contentType = res.headers.get('content-type') ?? ''
+      if (!contentType.includes('application/json')) {
+        setError(`Server returned ${res.status}. Try again or contact support.`)
+        resetForRetry()
+        return
+      }
+
       const data = (await res.json()) as {
         loan_id?: string
         contact_id?: string
@@ -47,21 +65,22 @@ export default function ImportMismoButton() {
 
       if (!res.ok) {
         setError(data.error ?? 'Import failed')
-        setImporting(false)
-        if (fileRef.current) fileRef.current.value = ''
+        resetForRetry()
         return
       }
 
       if (data.duplicate) {
         setDuplicateMsg('Loan already exists — opening it')
-        setTimeout(() => router.push(`/dashboard/loans/${data.loan_id}`), 800)
+        redirectTimerRef.current = setTimeout(
+          () => router.push(`/dashboard/loans/${data.loan_id}`),
+          800,
+        )
       } else {
         router.push(`/dashboard/loans/${data.loan_id}`)
       }
     } catch (e) {
       setError('Upload failed. Check your connection and try again.')
-      setImporting(false)
-      if (fileRef.current) fileRef.current.value = ''
+      resetForRetry()
       console.error(e)
     }
   }
@@ -74,13 +93,28 @@ export default function ImportMismoButton() {
   }
 
   const closeModal = () => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current)
+      redirectTimerRef.current = null
+    }
     setShowModal(false)
-    resetState()
+    resetAll()
   }
+
+  useEffect(() => {
+    if (!showModal) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !importing) closeModal()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showModal, importing])
 
   return (
     <>
       <button
+        type="button"
         onClick={() => setShowModal(true)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
         style={{ border: '1px solid var(--sc-border)', color: 'var(--sc-muted)' }}
@@ -90,19 +124,32 @@ export default function ImportMismoButton() {
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => { if (!importing) closeModal() }}
+        >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="import-mismo-title"
             className="rounded-lg p-6 w-full max-w-md"
             style={{ background: 'var(--sc-card)', border: '1px solid var(--sc-border)' }}
+            onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
               <h3
+                id="import-mismo-title"
                 className="text-sm font-semibold"
                 style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}
               >
                 Import MISMO 3.4 File
               </h3>
-              <button onClick={closeModal} style={{ color: 'var(--sc-muted)' }}>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={closeModal}
+                style={{ color: 'var(--sc-muted)' }}
+              >
                 <X size={16} />
               </button>
             </div>

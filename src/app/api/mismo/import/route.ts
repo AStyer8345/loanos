@@ -46,13 +46,16 @@ export async function POST(req: NextRequest) {
     //    Match by email (case-insensitive), else by (last_name, first_name).
     let contactId: string | null = null
     if (parsed.borrower.email) {
-      const { data: match, error: matchErr } = await supabase
+      const { data: matches, error: matchErr } = await supabase
         .from('contacts')
         .select('id')
         .eq('organization_id', organizationId)
         .ilike('email', parsed.borrower.email)
-        .maybeSingle()
-      if (!matchErr && match) contactId = match.id
+        .limit(2)
+      if (matchErr) {
+        return NextResponse.json({ error: `Contact email lookup failed: ${matchErr.message}` }, { status: 500 })
+      }
+      if (matches && matches.length === 1) contactId = matches[0].id
     }
     if (!contactId && parsed.borrower.first_name && parsed.borrower.last_name) {
       const { data: match, error: matchErr } = await supabase
@@ -62,7 +65,10 @@ export async function POST(req: NextRequest) {
         .eq('last_name', parsed.borrower.last_name)
         .eq('first_name', parsed.borrower.first_name)
         .limit(2)
-      if (!matchErr && match && match.length === 1) {
+      if (matchErr) {
+        return NextResponse.json({ error: `Contact name lookup failed: ${matchErr.message}` }, { status: 500 })
+      }
+      if (match && match.length === 1) {
         contactId = match[0].id
       }
     }

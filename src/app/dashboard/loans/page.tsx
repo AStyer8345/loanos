@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, AlertCircle, Trash2, X, Phone, Mail, MessageSquare, GripVertical } from 'lucide-react'
 import PipelineSidebar from '@/components/ui/pipeline-sidebar'
+import ImportMismoButton from '@/components/pipeline/ImportMismoButton'
 import {
   DndContext,
   closestCenter,
@@ -971,16 +972,19 @@ export default function LoansPage() {
               {search && ` matching "${search}"`}
             </p>
           </div>
-          {/* Search */}
-          <div className="relative w-64">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search loans…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[var(--input)] rounded-lg bg-[var(--card)] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+          <div className="flex items-center gap-3">
+            <ImportMismoButton />
+            {/* Search */}
+            <div className="relative w-64">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search loans…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[var(--input)] rounded-lg bg-[var(--card)] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
           </div>
         </div>
 

@@ -9,6 +9,8 @@
 
 <!-- Agents append new items below this line -->
 
+- [ ] [LEAD-GEN] 2026-04-24 📱 SENDBLUE SPEED-TO-LEAD — 2 prerequisites before agent builds iMessage automation. (1) Add TCPA consent language to all web forms (get-preapproved.html, rate-alert.html, homepage quick-quote/quick-contact): "By submitting this form, you consent to receive calls and text messages at the number provided from Adam Styer | Mortgage Solutions LP (NMLS #513013). Consent is not required to obtain a loan." (2) Sign up at sendblue.co, get API key, share with agent. Once both done, agent wires one HTTP Request node into Web Lead n8n workflow — fires iMessage within 5 min of any form submit. Research + spec at: `tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md`.
+
 - [ ] [LEAD-GEN] 2026-04-23 🔑 2 MIN — SET `CRON_SECRET` IN VERCEL — Drip cron won't fire until this is set. Vercel dashboard → loanos project → Settings → Environment Variables → Add: Name: `CRON_SECRET`, Value: any long random string (e.g. `openssl rand -hex 32` in Terminal), Environment: Production + Preview. Once set, `/api/drip/run` will authenticate hourly Vercel cron calls and begin sending drip emails.
 
 - [ ] [LOANOS] 2026-04-22 🔀 10 MIN — REVIEW AND MERGE PR #4 (`feat/tenant-scoping-hardening`) — Tenant scoping audit complete. 37 tables probed, 0 cross-tenant leaks. Migration 092 applied (RLS policies for `drip_suppressions` + `user_settings`). PR is open on GitHub: `AStyer8345/loanos` → PR #4. Review diff → merge to main. Scott Sears is cleared for login once this lands.

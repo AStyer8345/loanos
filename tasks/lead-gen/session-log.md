@@ -2,6 +2,40 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-24 AM — Lead Generation
+Focus: CAN-SPAM Compliance Fix + iMessage Speed-to-Lead Research
+Type: Execute + Research (Sequence C + A)
+Week in Queue: Week 13
+
+### Context From Previous Session
+Previous AM (2026-04-23): drip cron infrastructure shipped (authored-emails.ts, /api/drip/run, vercel.json, enrollment next_send_at fix). Three items deferred: (1) unsubscribe endpoint missing, (2) referred_by merge tag empty, (3) date-field triggers need separate scheduler. ADAM blocker: set CRON_SECRET.
+
+### Completed
+- **`src/app/unsubscribe/page.tsx`** (NEW): Server component at `/unsubscribe?c={contactId}`. Sets `email_opt_out=true` on contact record using service client (bypasses RLS — appropriate for public unsubscribe). Three states: success (confirmation copy), invalid (no/bad UUID), error (DB failure). CAN-SPAM footer on all states (NMLS #513013, physical address, Equal Housing Lender). Closes compliance gap — drip cron emails linked to this page; it now exists.
+- **iMessage research** (`tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md`): Evaluated Sendblue, BlueBubbles, AppleScript, Twilio, Apple Messages for Business. Recommendation: **Sendblue** (cloud API, iMessage + SMS fallback, ~$0.01/msg, HTTP Request node in n8n, 1-day setup). Twilio as optional fallback. BlueBubbles/AppleScript rejected (too fragile for unattended automation).
+- **Build**: `npm run build` green. `/unsubscribe` appears in route table at 161B.
+- **Commit**: `4a152cc` — `feat(lead-gen): unsubscribe page + iMessage speed-to-lead research`
+- **Vercel**: `dpl_4Wek8FJbUzbYc1Px6aQs4Gydkunx` — deploying
+
+### Deferred
+- `referred_by` merge tag for Ghost Referral emails — still resolves to empty string; fix requires pulling referral source from enrollment metadata
+- Long-Term Nurture / Past Client Retention — date-field triggers need separate scheduler logic
+- Realtor Relationship drip sequence (day 3/10/30) — next lead gen build target after iMessage
+- NotebookLM: SKIPPED — CLI unavailable 16th+ consecutive session
+
+### ADAM Action Items Added
+1. **TCPA form language** — required on all web forms before Sendblue activates. Text: "By submitting this form, you consent to receive calls and text messages at the number provided from Adam Styer | Mortgage Solutions LP (NMLS #513013). Consent is not required to obtain a loan."
+2. **Sendblue signup** — sendblue.co, get API key, share with agent for n8n wiring
+
+### Compliance Checks Passed
+- Unsubscribe page: one-click opt-out, no authentication required, CAN-SPAM compliant
+- iMessage research: TCPA gate identified before any text-send build proceeds
+- No SMS or email sent to any lead this session
+
+### Quality Ratings (1-5)
+Research: 5 | Execution: 5 | Review: 5 | QA: 5
+
+---
 ## Session: 2026-04-23 AM — Lead Generation
 Focus: BUILD — Drip Campaign End-to-End Execution Fix
 Type: Execute (Sequence C)

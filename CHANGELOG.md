@@ -1,5 +1,29 @@
 # LoanOS Changelog
 
+## 2026-04-24 AM (styer-lead-gen-am) — Unsubscribe Page + iMessage Research
+
+- **`/unsubscribe` page** (NEW): Server component at `src/app/unsubscribe/page.tsx`. Sets `email_opt_out=true` on contact by UUID from `?c=` query param. Handles valid/invalid/error states with CAN-SPAM footer. Closes compliance gap in drip cron emails (deferred from Apr 23 drip build). Build green, Vercel deploying.
+- **iMessage research** complete: Sendblue recommended as speed-to-lead solution (~$0.01/msg, cloud API, n8n HTTP Request node, 1-day setup). Research at `tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md`. ADAM actions required before build: TCPA consent language on all forms + Sendblue signup.
+- **Commit**: `4a152cc` — `feat(lead-gen): unsubscribe page + iMessage speed-to-lead research`
+- **ADAM action added**: TCPA form language + Sendblue API key (blocks iMessage build)
+
+## 2026-04-24 AM (styer-social-am) — Week 38 Social Content Build
+
+- **Post 175** (Facebook): "The Truth About Floating Your Rate" — real-talk, ID `9457adb6`, scheduled Nov 23. Authority pillar (real_talk intent). No specific rates quoted. NMLS #513013. 9/10.
+- **Post 176** (LinkedIn): "DTI Explained: What Realtors Need to Know" — education/realtor-facing, ID `3682e64b`, scheduled Nov 25. Education pillar. NMLS #513013. 9/10.
+- **Research**: PMMS Apr 24 = 6.23% (Thursday release), direction declining. All posts EVERGREEN.
+- **GBP Distribution**: 0 new content pieces found (all 28 tracked files already distributed).
+- **Rolling pillar**: Auth ~30.0% / Personal ~29.9% / Education ~30.1% / RT ~13.6% — all within ±5%. RT improving.
+- **NotebookLM PUSH**: skipped (15th+ consecutive CLI timeout — NEEDS ADAM).
+
+## 2026-04-23 PM (styer-social-pm) — Week 37 Social Content Build
+
+- **Post 173** (LinkedIn): "Why I Stopped Predicting Rates" — hot-take real-talk, ID `81833085`, scheduled Nov 18. RT/authority pillar. No CTA (correct for hot-take). NMLS #513013. 9/10.
+- **Post 174** (Instagram): "Credit Score Is a Pricing Lever" — education, ID `c8fb922b`, scheduled Nov 20. Education pillar. DM CTA. NMLS #513013. 9/10.
+- **Research**: PMMS Apr 23 = 6.23% (down from 6.30%; lowest in 3 spring seasons per Freddie Mac/Sam Khater).
+- **Rolling pillar**: Auth ~30.1% / Personal ~30.2% / Education ~29.9% / RT ~13.2% — all within ±5%. RT improving.
+- **NotebookLM PUSH**: skipped (14th+ consecutive CLI timeout — NEEDS ADAM).
+
 ## 2026-04-23 AM (styer-lead-gen-am) — Drip Campaign End-to-End Fix
 
 - **`src/lib/drip/authored-emails.ts`** (new): Authored email registry for 5 relative_days campaigns — 25 total emails. PA Welcome (6), DPA Guide (8), Ghost Referral (4), Incomplete App (3), Went Quiet (4). All authored in Adam's voice. CampaignID constants, `hasAuthoredEmail()` / `getAuthoredEmail()` helpers.
@@ -3448,6 +3472,27 @@ Arive (loan event)
 - Removed 3 stale sources: audit-2026-04-21.md, CONTEXT.md (Apr 21 stale), Scotsman Guide refi surge news (15 days old)
 - Added 3 new sources: refreshed CONTEXT.md (Apr 22 21:30 — new-lead widget + n8n creds), notebooklm-audit-2026-04-22.md, scotsmanguide.com "7 Tips to Build Realtor Relationships"
 - Week 6 (Realtor Referral System) declared COMPLETE
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Master Growth Log
+- Appended seo-sem-pm + lead-gen-pm entries
+- Re-synced to Styer Mortgage Master notebook (source refreshed)
+
+## 2026-04-23 — Nightly NotebookLM Sync (PM Scheduled Task)
+
+### SEO/SEM NotebookLM PUSH+CURATE
+- Removed 4 stale/redundant sources: audit-2026-04-22 (superseded), CONTEXT.md Apr 22 (stale), SEJ Enterprise SEO Trends (4 more specific AI/SEO sources cover it), GSC Impressions article (covered by GSC Setup guide)
+- Added 4 new sources: CONTEXT.md Apr 23, notebooklm-audit-2026-04-23, pillar page research file, SEL topic clusters guide (searchengineland.com/guide/topic-clusters)
+- Web research: pillar page & topic cluster architecture — timed for Apr 24 "How to Buy a House in Austin TX 2026" pillar post
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Lead Gen NotebookLM PUSH+CURATE
+- AM drip fix shipped (authored-emails.ts × 25 emails, /api/drip/run Vercel Cron, vercel.json, enrollment next_send_at fix) — commit dcbbe25, Vercel READY
+- Removed 4 stale/redundant sources: audit-2026-04-22 (superseded), CONTEXT.md Apr 22 (stale), Refi Boom servicer article (not broker lead gen relevant), AI 2024 stat (superseded by Apr 6 article)
+- Added 4 new sources: CONTEXT.md Apr 23, notebooklm-audit-2026-04-23, drip automation research, MPA drip campaigns guide
+- Web research: mortgage drip email automation best practices — validates LoanOS drip architecture
 - Digest sent via Zapier: success
 - Notebook: 50/50
 

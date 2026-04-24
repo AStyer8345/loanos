@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import {
   Mail, CheckCircle, Loader2,
   Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send, Megaphone,
+  Ban, Trash2, Plus,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -210,6 +211,54 @@ export default function SettingsPage() {
   // ── Outreach prompt state ──
   const [outreachPrompt, setOutreachPrompt] = useState('')
   const [outreachIsCustom, setOutreachIsCustom] = useState(false)
+
+  // ── Hold List (drip suppressions) ──
+  interface Suppression { id: string; email: string; scope: string; reason: string | null; added_at: string }
+  const [suppressions, setSuppressions] = useState<Suppression[]>([])
+  const [suppressionsLoading, setSuppressionsLoading] = useState(true)
+  const [newHoldEmail, setNewHoldEmail] = useState('')
+  const [newHoldReason, setNewHoldReason] = useState('')
+  const [holdAdding, setHoldAdding] = useState(false)
+  const [holdError, setHoldError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/drip/suppressions')
+      .then(r => r.ok ? r.json() : { suppressions: [] })
+      .then(d => setSuppressions(d.suppressions ?? []))
+      .catch(() => {})
+      .finally(() => setSuppressionsLoading(false))
+  }, [])
+
+  async function addHoldEntry(e: React.FormEvent) {
+    e.preventDefault()
+    setHoldError(null)
+    setHoldAdding(true)
+    try {
+      const res = await fetch('/api/drip/suppressions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newHoldEmail, reason: newHoldReason || undefined }),
+      })
+      if (!res.ok) {
+        const d = await res.json()
+        setHoldError(d.error ?? 'Failed to add')
+        return
+      }
+      const row = await res.json() as Suppression
+      setSuppressions(prev => [row, ...prev])
+      setNewHoldEmail('')
+      setNewHoldReason('')
+    } catch {
+      setHoldError('Network error')
+    } finally {
+      setHoldAdding(false)
+    }
+  }
+
+  async function removeHoldEntry(id: string) {
+    await fetch(`/api/drip/suppressions/${id}`, { method: 'DELETE' })
+    setSuppressions(prev => prev.filter(s => s.id !== id))
+  }
 
   // ── Org members ──
   const [members, setMembers] = useState<Array<{id: string, full_name: string | null, email: string | null, role: string, created_at: string}>>([])
@@ -715,6 +764,81 @@ export default function SettingsPage() {
           </p>
         </div>
       </SectionCard>
+
+      {/* ── DRIP HOLD LIST ── */}
+      <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
+            <Ban size={17} className="text-amber-400" />
+          </div>
+          <div>
+            <h2 className="text-sm font-mono font-semibold text-foreground">Drip Hold List</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Emails on this list are skipped by all drip sends. Unsubscribe links add entries automatically.</p>
+          </div>
+        </div>
+
+        {/* Add form */}
+        <form onSubmit={addHoldEntry} className="flex gap-2 items-end mb-5">
+          <div className="flex-1">
+            <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">Email</label>
+            <input
+              type="email"
+              value={newHoldEmail}
+              onChange={e => setNewHoldEmail(e.target.value)}
+              placeholder="contact@example.com"
+              required
+              className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:border-amber-500 transition-colors"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">Reason (optional)</label>
+            <input
+              type="text"
+              value={newHoldReason}
+              onChange={e => setNewHoldReason(e.target.value)}
+              placeholder="e.g. client request"
+              className="w-full bg-muted border border-input rounded px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:border-amber-500 transition-colors"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={holdAdding || !newHoldEmail.trim()}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 disabled:opacity-50 transition-colors whitespace-nowrap"
+          >
+            {holdAdding ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+            Add
+          </button>
+        </form>
+        {holdError && <p className="text-red-400 text-xs font-mono mb-3">{holdError}</p>}
+
+        {/* Suppressions list */}
+        {suppressionsLoading ? (
+          <p className="text-xs text-muted-foreground font-mono">Loading…</p>
+        ) : suppressions.length === 0 ? (
+          <p className="text-xs text-muted-foreground font-mono">No emails on hold.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {suppressions.map(s => (
+              <div key={s.id} className="flex items-center justify-between px-3 py-2 bg-muted border border-input rounded">
+                <div className="min-w-0">
+                  <span className="text-sm text-foreground font-mono truncate">{s.email}</span>
+                  {s.reason && <span className="text-xs text-muted-foreground font-mono ml-2">— {s.reason}</span>}
+                </div>
+                <div className="flex items-center gap-3 shrink-0 ml-3">
+                  <span className="text-[11px] text-muted-foreground font-mono">{fmtTime(s.added_at)}</span>
+                  <button
+                    onClick={() => removeHoldEntry(s.id)}
+                    className="text-muted-foreground hover:text-red-400 transition-colors"
+                    title="Remove from hold list"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ── ORGANIZATION MEMBERS ── */}
       <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">

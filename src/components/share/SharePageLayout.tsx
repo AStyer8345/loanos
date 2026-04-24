@@ -16,6 +16,7 @@ import CashToCloseBreakdown from './CashToCloseBreakdown'
 import LOSidebarCard from './LOSidebarCard'
 import ShareVideoEmbed from './ShareVideoEmbed'
 import ScenarioComparisonTable from './ScenarioComparisonTable'
+import MobileComparisonCards from './MobileComparisonCards'
 import SocialProofBlock from './SocialProofBlock'
 import BorrowerQA from './BorrowerQA'
 import BorrowerChat from './BorrowerChat'
@@ -178,10 +179,13 @@ export default function SharePageLayout({ data, displayData, branding, token }: 
               <OptionCardsGrid rows={displayData.rows} mode={mode} />
             </section>
 
-            {/* Comparison Table — visible only for multi-scenario, always expanded */}
+            {/* Comparison — desktop table (md+) + mobile swipe cards (< md) */}
             {hasMultipleOptions && (
               <section>
-                <ScenarioComparisonTable displayData={displayData} />
+                <div className="hidden md:block">
+                  <ScenarioComparisonTable displayData={displayData} />
+                </div>
+                <MobileComparisonCards displayData={displayData} />
               </section>
             )}
 

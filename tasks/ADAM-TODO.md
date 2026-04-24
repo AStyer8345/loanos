@@ -15,7 +15,7 @@
 
 - [ ] [LOANOS] 2026-04-22 🔀 10 MIN — REVIEW AND MERGE PR #4 (`feat/tenant-scoping-hardening`) — Tenant scoping audit complete. 37 tables probed, 0 cross-tenant leaks. Migration 092 applied (RLS policies for `drip_suppressions` + `user_settings`). PR is open on GitHub: `AStyer8345/loanos` → PR #4. Review diff → merge to main. Scott Sears is cleared for login once this lands.
 
-- [ ] [LOANOS] 2026-04-22 📋 SPEC NEEDED — FNM 3.4 IMPORT BEFORE BUILD — GOALS.md #1 Scott blocker. Cannot build without a spec. Need: (1) Which MISMO 3.4 XML fields map to which LoanOS contacts/loans columns? (2) Import flow: file picker UI, API endpoint, or admin-only? (3) What columns does Scott need populated? Drop notes in TODO.md Scott's Pilot section or reply to digest.
+- [x] [LOANOS] 2026-04-22 📋 STALE — FNM 3.4 IMPORT — BUILT 2026-04-23. `/api/mismo/import` + `ImportMismoButton` + `src/lib/mismo/parse.ts` shipped. Scott can upload a Calyx Point MISMO XML export from the Loans page → drag-drop modal → contact + loan created in one call. No spec input needed.
 
 - [x] [LEAD-GEN] 2026-04-20 🔑 RESOLVED 2026-04-22 — SET `LOANOS_AGENT_SECRET` IN N8N — Fixed via HTTP Header Auth credential (not env var — `$env.*` doesn't work on n8n Cloud, host env vars unsupported). Created credential "LoanOS Agent Secret" in n8n with header `Authorization` = `Bearer <value-from-vercel>`, wired into "Notify Adam" node (workflow `nOCDV73m4M0jyL1B`) via Authentication → Generic Credential Type → Header Auth. Removed the hardcoded header + broken `$env` expression from the node.
 

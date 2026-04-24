@@ -1,5 +1,14 @@
 # LoanOS Changelog
 
+## 2026-04-24 PM (loanos-autonomous) — Hold List UI
+
+- **`/api/drip/suppressions`** (GET + POST): List org-scoped suppressions ordered by date; add email with optional reason/scope.
+- **`/api/drip/suppressions/[id]`** (DELETE): Remove a suppression, org-scoped (no cross-tenant).
+- **Settings page Hold List card**: Email + reason form, "Add to Hold List" button, timestamped table with trash icon per row. Optimistic updates on add/remove.
+- **Closes**: Scott Pilot — Hold List UI (TODO.md) + `MISMO 3.4 spec` ADAM-TODO marked stale (importer shipped 2026-04-23).
+- **Commit**: `a1c2dec` — `feat(drip): Hold List UI + suppressions API`
+- **Vercel**: deploying → READY
+
 ## 2026-04-24 AM (styer-lead-gen-am) — Unsubscribe Page + iMessage Research
 
 - **`/unsubscribe` page** (NEW): Server component at `src/app/unsubscribe/page.tsx`. Sets `email_opt_out=true` on contact by UUID from `?c=` query param. Handles valid/invalid/error states with CAN-SPAM footer. Closes compliance gap in drip cron emails (deferred from Apr 23 drip build). Build green, Vercel deploying.

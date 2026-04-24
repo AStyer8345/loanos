@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-04-24 — Day 30 (Launch: April 26)
+
+**Days to launch:** 2
+
+**Yesterday shipped:**
+- `feat(drip)`: Hold List UI + suppressions API — Settings page card with add/delete, 3 API routes (GET/POST/DELETE `/api/drip/suppressions`), org-scoped, no cross-tenant (`a1c2dec`, Vercel READY)
+- `feat(lead-gen)`: Unsubscribe page + iMessage research — CAN-SPAM compliance gap closed; Sendblue recommended for speed-to-lead iMessage (~$0.01/msg, n8n HTTP node, 1-day setup) (`4a152cc`, Vercel READY)
+- `chore(SEC)`: Lead Score Updater migrated to n8n credential (no more inline Supabase JWT) (`f0fa7ac`, Vercel READY)
+
+**Vercel status:** READY — `dpl_GWjWB5BosZpkYbeVyUbUuKJ3s93c` (SHA `0b1c6fb`, prod). All 20 recent deployments READY. ✅
+
+**n8n workflow health:** MCP query errored (type validation bug — could not pull live status). Last confirmed 2026-04-22: 36 workflows, 31 active, no error states. Core workflows assumed active.
+
+**Blockers:**
+- **PR #4 unmerged** — `feat/tenant-scoping-hardening` queued; Scott cannot safely log in until merged (NEEDS ADAM)
+- **`CRON_SECRET` not set in Vercel** — drip cron will not fire; 2-minute fix in Vercel dashboard (NEEDS ADAM)
+- **Marketing site: zero progress** — 2 days to April 26, Adam-owned — HIGHEST RISK
+- **n8n credential hygiene audit not started** — Supabase JWTs still hardcoded inline in multiple workflows (security debt)
+
+**Today's focus:** Adam executes 3 blockers (PR #4 merge + CRON_SECRET + marketing site). Drip end-to-end verification after CRON_SECRET set. Phase 5 email template wiring if blockers clear.
+
+**Risk watch:** 2 days out. All three remaining blockers are Adam-gated. Product is feature-complete for Scott's pilot. Launch slips only if Adam doesn't merge PR #4, set CRON_SECRET, and address the marketing site today. April 26 is achievable but requires action today.
+
+**Open audit findings:** Original audit (2026-04-05): 11 CRITICAL / 10 HIGH. Many addressed (PII encryption, rate limiting, admin gates, admin action log, RLS gap via migration 092). PR #4 closes remaining tenant scoping gaps once merged. Finding #5 (field-level encryption SSN/DOB) remains ADAM-BLOCKED (GLBA attorney).
+
+---
+
 ## 2026-04-22 — Day 28 (Launch: April 26)
 
 **Days to launch:** 4

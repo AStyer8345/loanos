@@ -133,11 +133,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-22 — Day 28 standup. Vercel READY (`dpl_5ciKw4PB7AibBfVkkLj1uNx2ozn9`, SHA `548e82f`). PR #4 (`feat/tenant-scoping-hardening`) queued — 37 tables probed, 0 leaks, migration 092 applied, Scott cleared for login pending merge. 4 days to launch.
+**Last worked on:** 2026-04-24 — Day 30 standup. Vercel READY (`dpl_GWjWB5BosZpkYbeVyUbUuKJ3s93c`, SHA `0b1c6fb`). Hold List UI shipped. Unsubscribe page + iMessage research done. Supabase credential hygiene advancing. 2 days to launch.
 
-**Active blockers:** PR #4 unmerged (Scott cannot safely log in). `LOANOS_AGENT_SECRET` missing from n8n (hot lead auth broken — 30s fix). FNM 3.4 import not started (Scott's #1 blocker). Marketing site zero progress (4 days to April 26 — HIGHEST RISK, Adam-owned).
+**Active blockers:** PR #4 unmerged (Scott cannot safely log in — NEEDS ADAM). `CRON_SECRET` not set in Vercel (drip cron won't fire — 2-min fix, NEEDS ADAM). Marketing site zero progress (2 days to April 26 — HIGHEST RISK, Adam-owned). n8n credential hygiene audit not started.
 
-**What's next:** FNM 3.4 file import (Scott blocker). PR #4 merge (NEEDS ADAM). Drip end-to-end fix. Phase 5 email template wiring.
+**What's next:** Adam merges PR #4 + sets CRON_SECRET. Drip end-to-end verification. Phase 5 email template wiring. Marketing site (Adam-owned).
 
 ## Rules For AI Sessions
 

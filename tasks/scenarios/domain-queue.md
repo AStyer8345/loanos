@@ -133,10 +133,13 @@ borrower engagement signals Adam currently has no visibility into.
   Zero backend needed — pure client-side link. ~30 min build. Closes the workflow gap
   for LOs who text rather than email borrowers. ✅ DONE 2026-04-21 AM
 
-- **Scenario comparison on mobile (swipe cards)** — the ScenarioComparisonTable renders
-  with `overflow-x-auto` on mobile, which works but feels cramped on 390px screens.
-  A `md:hidden` swipeable card version (one column per swipe) would improve mobile experience.
-  ~1.5hr build. Lower priority — existing table is functional.
+- ~~**Scenario comparison on mobile (swipe cards)** — MobileComparisonCards.tsx (md:hidden,
+  print:hidden): one card per scenario, prev/next buttons, dot indicators, gold "Commonly
+  Chosen" treatment. Desktop ScenarioComparisonTable hidden md:hidden on mobile.~~ ✅ DONE 2026-04-24 AM
+
+---
+
+## PROGRAM COMPLETE — Tiers 1–8 all done as of 2026-04-24 AM
 
 ---
 

@@ -124,11 +124,11 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-22 AM — Tier 8 Items 1 + 3 shipped. BorrowerIntentCapture.tsx ("Which option interests you most?" 3-tap buttons, writes to scenarios.borrower_intent JSONB via POST /api/share/[token]/intent, Resend notification to Adam, idempotent). LONoteCard.tsx (gold-bordered card on share page above BorrowerChat, 250-char textarea in ActionsBar). Migration 093 applied (borrower_intent + lo_note). MC gap closed: borrower option interest signal. Commit `ccaced0`, Vercel `dpl_G1SRXiQgn3WPr4GiuRg6GANj4vGE` → READY.
+**Last worked on:** 2026-04-24 AM — Tier 8 Item 5 shipped. MobileComparisonCards.tsx (md:hidden, print:hidden): one card per scenario, prev/next navigation, dot indicators, Commonly Chosen gold treatment. ScenarioComparisonTable hidden on mobile (hidden md:block). Commit `d2f6d18`, Vercel `dpl_5fq2X7ekNaEadb4ohj4mmDNcGc7W` → BUILDING.
 
 **Active blockers:** None.
 
-**What's next:** Tier 8 Item 5 (mobile swipe cards, ~1.5hr) — only remaining Tier 8 item. Alternatively declare Scenarios program complete.
+**What's next:** PROGRAM COMPLETE — Tiers 1–8 all done. Agent can be retired or redirected to other GOALS.md priorities (FNM 3.4, drip campaigns, notes fix).
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->

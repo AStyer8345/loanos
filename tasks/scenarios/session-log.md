@@ -967,3 +967,38 @@ Next session priority: Start with input speed — pre-fill from contact/loan dat
 **Domain queue updates:**
 - Tier 8 Item 1 (Borrower intent capture) — ✅ COMPLETE this session
 - Tier 8 Item 3 (LO personal note) — ✅ COMPLETE this session
+
+---
+
+## AM Session — 2026-04-24 (scenarios-am)
+
+**What was built:**
+- Mobile Comparison Cards (`src/components/share/MobileComparisonCards.tsx`, `SharePageLayout.tsx`)
+  - New `MobileComparisonCards` component (`md:hidden`, `print:hidden`) — one scenario card at a time
+  - Card shows: option label (+ ★ Commonly Chosen badge in gold), full metrics list in label/value pairs
+  - Prev/Next navigation buttons + expanding dot indicators; "X of N options" position hint
+  - Gold card border + badge on the Commonly Chosen option (mirrors OptionCard treatment)
+  - `buildRows()` helper extracts all metrics from row data (conditional on presence: property tax, insurance, HOA, PMI, savings)
+  - `SharePageLayout.tsx`: wrapped `ScenarioComparisonTable` in `hidden md:block`; renders `MobileComparisonCards` alongside it — mobile sees cards, desktop sees table
+  - TypeScript fix: `mode` type from DisplayData is `'purchase' | 'refinance'`, not `'refi'` — caught by strict build
+
+**MC gap closed:** Borrowers on phones (70%+ of viewers) no longer scroll a cramped horizontal table. They now swipe through one option at a time — matching how every e-commerce comparison card on mobile works.
+
+**Build:** ✅ `npm run build` passes, 0 TypeScript errors
+**Commit:** `d2f6d18` — pushed to main
+**Vercel:** `dpl_5fq2X7ekNaEadb4ohj4mmDNcGc7W` — BUILDING at session close (expected READY)
+
+**Files touched:**
+- `src/components/share/MobileComparisonCards.tsx` (new)
+- `src/components/share/SharePageLayout.tsx` (import + render + hide desktop table on mobile)
+- No auth/RLS/multi-tenant changes
+
+**TIER 8 COMPLETE — ALL TIERS COMPLETE**
+Tiers 1–8 all done. Every Mortgage Coach gap identified at program start has been closed.
+
+**Program status:** COMPLETE. Scenarios agent can be retired or redirected to other GOALS.md priorities.
+
+**Domain queue updates:**
+- Tier 8 Item 5 (Mobile swipe cards) — ✅ COMPLETE this session
+- Tier 8 COMPLETE
+- **PROGRAM COMPLETE — Tiers 1–8 all done as of 2026-04-24 AM**

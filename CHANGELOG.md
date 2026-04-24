@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-04-24 AM (loanos-scenarios-am) — Mobile Comparison Cards (Tier 8 Complete)
+
+- **`MobileComparisonCards.tsx`** (new): `md:hidden`, `print:hidden` component on share page — one scenario card per screen, prev/next navigation with dot indicators, "Commonly Chosen" gold treatment mirrors desktop table.
+- **`SharePageLayout.tsx`**: desktop `ScenarioComparisonTable` wrapped in `hidden md:block`; mobile sees swipe cards, desktop sees full table.
+- **Scenarios program COMPLETE**: Tiers 1–8 all done. Every Mortgage Coach gap identified at program start has been closed. Agent can be retired or redirected.
+- **Commit**: `d2f6d18` — `feat(scenarios): mobile swipe cards for scenario comparison table`
+- **Vercel**: `dpl_5fq2X7ekNaEadb4ohj4mmDNcGc7W` — BUILDING (expected READY)
+
 ## 2026-04-24 PM (loanos-autonomous) — Hold List UI
 
 - **`/api/drip/suppressions`** (GET + POST): List org-scoped suppressions ordered by date; add email with optional reason/scope.

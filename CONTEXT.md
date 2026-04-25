@@ -96,30 +96,30 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-24 AM — Week 38 build (Nov 23–29): "Post 175 — The Truth About Floating Your Rate" (Facebook real-talk, ID: 9457adb6, Nov 23) + "Post 176 — DTI Explained: What Realtors Need to Know" (LinkedIn education, ID: 3682e64b, Nov 25). Both APPROVED, QA PASS, 9/10. Research: PMMS 6.23% (Thu Apr 24 release), declining. GBP scan: 0 new content. Rolling pillar: Auth ~30.0% / Personal ~29.9% / Education ~30.1% / RT ~13.6%. NotebookLM: 15th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-25 AM — Week 40 build (Dec 7–13): Post 179 — "Why I tell most people NOT to refinance" (Facebook real_talk → authority, ID: 66263057, Dec 8 9 AM CT) + Post 180 — "Reserves explained: what underwriters actually want" (Instagram education, ID: 868fe397, Dec 10 9 AM CT). Both APPROVED, QA PASS, 9/10 first draft, EVERGREEN. Step 1B: 1 GBP auto-publish (rates/2026-04-24.html via Publer job 69ec6d688411bab0f17a87ab) + queued for Architect. Activity logging clean (no auth errors). NotebookLM: 17th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 15+ consecutive sessions — NEEDS ADAM. Post 157 (ID: 94e1d9a7, LinkedIn, Sep 24) needs blog link in first comment before publish. DUPLICATE ALERT: Week 29 built twice — orphaned duplicates in social_drafts.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 17+ consecutive sessions — NEEDS ADAM. NEW: master-agent.md Step 1B uses `platform: "google"` for GBP records but DB constraint rejects it; format: "static_image" also rejected (only text_only/reel_script valid). Step 1B GBP social_drafts insert skipped this session.
 
-**What's next:** Week 39 (Nov 30–Dec 6): Instagram priority (last used Nov 20, Post 174). RT at ~13.6%, continue pushing toward 15%. Content-repost-queue: rates/2026-04-14 native carousel still pending for Architect.
+**What's next:** Week 40 PM session: Architect can pull rates/2026-04-24 native-post angles from content-repost-queue.md. Week 41 (Dec 14–20): LinkedIn re-entry due (last LI: Wk39 Post 178). Continue RT push toward 15% (now ~14.5%). Surface master-agent.md Step 1B/format constraints to Adam for spec update.
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-24 AM — CAN-SPAM compliance gap closed: `/unsubscribe` page built (server component, sets email_opt_out=true by contact UUID, handles invalid/missing id). iMessage speed-to-lead research complete — Sendblue recommended. Commit `4a152cc`, Vercel deploying.
+**Last worked on:** 2026-04-25 AM — Drip reliability fix: `referred_by` merge tag now resolves from `contacts.referred_by` in `/api/drip/run` (closes deferred item from 2026-04-24). Ghost Referral data-integrity guard added: if `referred_by` is null/empty, skip send (drip_sends status='skipped') and advance enrollment so contact still progresses. Build green; commit pending push.
 
-**Active blockers:** (1) ADAM must set `CRON_SECRET` in Vercel dashboard (cron won't fire — 2-min fix). (2) LOANOS_AGENT_SECRET resolved (HTTP Header Auth cred in n8n). (3) FNM 3.4 import not started — Scott's #1 blocker. (4) TCPA form language required before Sendblue iMessage build.
+**Active blockers:** (1) `CRON_SECRET` not set in Vercel — drip cron won't fire (NEEDS ADAM, 2-min fix). (2) TCPA consent language required on styermortgage.com forms before Sendblue activation (NEEDS ADAM). (3) Sendblue API key needed for n8n wiring (NEEDS ADAM). (4) `LOANOS_AGENT_SECRET` not set in n8n env — Hot Lead notifications fail to authenticate. (5) PR #4 (`feat/tenant-scoping-hardening`) unmerged — Scott blocked. (6) FNM 3.4 import shipped 2026-04-23 (per ADAM-TODO entry) — verify in code if still flagged.
 
-**What's next:** Verify first drip send fires after CRON_SECRET set. Sendblue iMessage build (after ADAM adds TCPA language + Sendblue API key). FNM 3.4 file import for Scott. PR #4 merge.
+**What's next:** (1) Build Realtor Relationship drip sequence (day 3/10/30) — next non-blocked lead-gen target per session-log 2026-04-22/24. (2) Scaffold Sendblue iMessage HTTP Request node in n8n Web Lead Automation + Pre-Approval Lead Notify with stub (Adam-blocked on TCPA + API key but plumbing can land). (3) Date-field / condition-trigger drip scheduler (Long-Term Nurture, Past Client Retention, Realtor Relationships) — separate from `relative_days` cron path.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-23 PM — Nightly NotebookLM PUSH+CURATE. Removed 4 (audit-Apr22, CONTEXT Apr22, SEJ Enterprise SEO Trends [4 more specific sources], GSC Impressions article [covered by GSC Guide]). Added 4 (CONTEXT Apr23, audit-Apr23, pillar page research, SEL topic clusters guide). 50/50. Digest SENT (Zapier success).
+**Last worked on:** 2026-04-24 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (audit-Apr23, CONTEXT Apr23, 2026-04-06-local-seo-ai-web). Added 3 (refreshed CONTEXT Apr24, audit-Apr24, SEL AI Overviews CTR recovery study). 50/50. Digest SENT (Zapier success). Master log appended + Master notebook re-synced.
 
-**Active blockers:** USDA compliance: Buda/Smithville/Elgin/Florence/Jarrell/Liberty Hill pages claim USDA (Adam confirmation needed — HIGH). GTM suburb quick-form not counting as Google Ads conversions ($500/mo unattributed — HIGH).
+**Active blockers:** USDA cleanup pending — Smithville/Elgin/Florence/Jarrell/Liberty Hill body+schema+FAQ + pillar-page loan table (HIGH). GTM suburb quick-form not counting as Google Ads conversions ($500/mo unattributed — HIGH). 90-day GSC export not yet pulled (blocks Page-2/3 quick-win identification).
 
-**What's next:** Blog post "How to Buy a House in Austin TX 2026" (April 24 — pillar, 3k+ words, links all suburb+loan pages). GSC Request Indexing — Taylor/Smithville/Elgin/Florence/Jarrell. USDA cleanup pending Adam confirmation.
+**What's next:** (1) Finish USDA cleanup across remaining suburb pages + pillar draft. (2) Resolve GTM conversion tracking gap (`generate_lead` → Google Ads conversion tag). (3) Round Rock #2 → #1 push (Teravista/Forest Creek/Old Town markers + RRISD + "beat builder rates" hook + GSC URL Inspection submit).
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->

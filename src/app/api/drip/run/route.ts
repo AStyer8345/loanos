@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { renderDripHtml } from '@/lib/workflows/drip-render'
 import { shouldExitDrip } from '@/lib/workflows/drip-helpers'
 import { sendViaResend } from '@/lib/resend/send'
-import { hasAuthoredEmail, getAuthoredEmail } from '@/lib/drip/authored-emails'
+import { hasAuthoredEmail, getAuthoredEmail, DRIP_CAMPAIGN_IDS } from '@/lib/drip/authored-emails'
 import type { TriggerConfig } from '@/lib/drip/types'
 
 const PHYSICAL_ADDRESS = '5900 Balcones Drive, Suite 100, Austin TX 78731'
@@ -48,7 +48,11 @@ export async function GET(request: Request): Promise<NextResponse> {
       }
 
       const [{ data: contactData }, { data: recentEvents }] = await Promise.all([
-        supabase.from('contacts').select('email_opt_out').eq('id', row.contact_id).single(),
+        supabase
+          .from('contacts')
+          .select('email_opt_out, referred_by')
+          .eq('id', row.contact_id)
+          .single(),
         supabase
           .from('activity_log')
           .select('event_type')
@@ -84,10 +88,18 @@ export async function GET(request: Request): Promise<NextResponse> {
         continue
       }
 
+      const referredBy = (contactData?.referred_by ?? '').trim()
+
+      // Ghost Referral copy hard-codes "{{referred_by}} passed your name along".
+      // If the referrer is missing, the email reads broken — skip the send but
+      // still advance the enrollment so the contact moves through the sequence.
+      const isGhostReferral = row.campaign_id === DRIP_CAMPAIGN_IDS.GHOST_REFERRAL
+      const skipForMissingReferrer = isGhostReferral && !referredBy
+
       const authored = getAuthoredEmail(row.campaign_id, row.step_order)!
       const vars: Record<string, string> = {
         first_name: row.contact_first_name ?? '',
-        referred_by: '',
+        referred_by: referredBy,
       }
       const htmlBody = buildEmailHtml(renderDripHtml(authored.plain, vars), row.contact_id)
 
@@ -114,6 +126,22 @@ export async function GET(request: Request): Promise<NextResponse> {
           updated_at: now,
         })
         .eq('id', row.enrollment_id)
+
+      if (skipForMissingReferrer) {
+        await supabase.from('drip_sends').insert({
+          org_id: row.org_id,
+          enrollment_id: row.enrollment_id,
+          step_id: row.step_id,
+          contact_id: row.contact_id,
+          channel: 'email',
+          status: 'skipped',
+          generated_subject: authored.subject,
+          generated_body: 'skipped: ghost_referral missing referred_by',
+          sent_at: now,
+        })
+        stats.skipped++
+        continue
+      }
 
       await sendViaResend({
         to: row.contact_email,

@@ -1,43 +1,41 @@
-## Mission Brief — 2026-04-24 AM
+## Mission Brief — 2026-04-25 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-1. Drip CAN-SPAM compliance — unsubscribe endpoint (carry-forward from Apr 23 drip build)
-2. Speed-to-lead research — outbound iMessage options (GOALS.md priority)
+Drip reliability — fix `referred_by` merge tag in Ghost Referral campaign (deferred from 2026-04-24)
 
 ### Session Type
-[x] Execute / Build (Sequence C) — unsubscribe endpoint
-[x] Research + Planning (Sequence A) — iMessage
+[x] Execute / Build (Sequence C)
 
-### Context
-Previous session (Apr 23 AM) shipped drip cron infrastructure. Three items deferred:
-1. Unsubscribe endpoint missing — drip emails link to `/unsubscribe?c={id}` but page doesn't exist
-2. referred_by merge tag resolves to empty string in Ghost Referral emails
-3. Long-Term Nurture / Past Client Retention require date-field triggers (separate scheduler)
-
-GOALS.md priority this week: speed-to-lead iMessage when form submitted.
+### Why This Today
+GOALS.md priority: "Drip campaigns — not working the way they should. Spend time this week fixing so Scott and I can both use them. Critical for beta utility." Adam-blocked items (CRON_SECRET in Vercel, Sendblue API key, TCPA form language, PR #4 merge) cannot be advanced this session. Of the deferred items in 2026-04-24's session-log, the `referred_by` merge tag fix is the highest-value, smallest-scope, fully-actionable item that improves drip quality for Scott beta launch.
 
 ### Objectives
-1. ✅ Build `/unsubscribe` page — sets email_opt_out=true, shows CAN-SPAM-compliant confirmation
-2. ✅ Research outbound iMessage options — spec Sendblue vs BlueBubbles vs Twilio
+1. Fetch `contacts.referred_by` in the drip cron's per-row contact lookup
+2. Pass it into the merge-vars object so `{{referred_by}}` resolves correctly in Ghost Referral emails (subject + body)
+3. Add a data-integrity guard: if the campaign is GHOST_REFERRAL and `referred_by` is null/empty, skip the send (do not deliver a broken email like "got your name from") — log skipped, advance enrollment
 
 ### Definition of Done
-- Unsubscribe page: renders for valid contact_id, sets email_opt_out=true, handles invalid/missing id. Build green. Deployed.
-- iMessage research: written to tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md with recommendation + ADAM action items.
+- `src/app/api/drip/run/route.ts` reads `referred_by` from contacts, passes into renderer
+- Guard added for Ghost Referral with missing referred_by (skips send, advances enrollment)
+- `npm run build` green
+- Commit pushed to `feat/tenant-scoping-hardening` (current working branch per session-log)
+- Vercel deployment reaches READY state
+- Session-log + CONTEXT.md updated
 
 ### Resources / Files in Scope
-- `src/app/unsubscribe/page.tsx` (NEW)
-- `tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md` (NEW)
+- `src/app/api/drip/run/route.ts` — modify (add referred_by select, guard, merge var)
+- `src/lib/drip/authored-emails.ts` — read only (Ghost Referral campaign ID lives here)
+- `src/lib/database.types.ts` — read only (confirm `referred_by` is `string | null` on `contacts`)
 
 ### HIGH RISK Items
-- Unsubscribe page uses service client (bypasses RLS) — intentional for public unsubscribe. No auth token required. UUID is the identifier. Acceptable for this use case.
-- iMessage: TCPA consent language MUST be added to all forms before any text sends activate. Do not build Sendblue integration until forms are updated.
+- Drip cron is in production and authenticated (CRON_SECRET pending in Vercel — but the route deploys regardless; it just returns 401 until the secret is set). Must not break the existing PA Welcome / DPA Guide / Incomplete App / Went Quiet flows.
+- The guard must NOT advance the enrollment past the entire campaign — it should advance to the next step like a normal send. Otherwise we silently kill the entire campaign for a contact missing one merge var.
 
----
-
-<!-- Previous mission archived below -->
-
-## Mission Brief — 2026-04-23 AM
-(archived — drip cron build complete)
+### Scope Cuts (NOT this session)
+- Realtor Relationship drip sequence (day 3/10/30) — separate build, requires new Supabase campaign + step rows
+- Sendblue iMessage scaffolding — Adam-blocked on TCPA + API key
+- Date-field / condition-trigger drip scheduler — separate scope
+- PA / DPA / Incomplete App / Went Quiet email copy edits — out of scope, working as designed

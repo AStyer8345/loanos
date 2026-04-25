@@ -2,6 +2,62 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-25 AM — Lead Generation
+Focus: Drip reliability — `referred_by` merge tag fix + Ghost Referral data-integrity guard
+Type: Execute (Sequence C)
+Week in Queue: Week 14
+
+### Context From Previous Session
+2026-04-24 AM closed CAN-SPAM gap (`/unsubscribe` page) + delivered Sendblue iMessage research. Three deferred items: (1) `referred_by` merge tag empty in Ghost Referral, (2) Long-Term Nurture / Past Client Retention need date-field scheduler, (3) Realtor Relationship drip sequence next build target. Adam-blocked items (CRON_SECRET, Sendblue key, TCPA copy, PR #4 merge) all unchanged. This session picked the highest-value fully-actionable item: `referred_by` merge tag fix.
+
+### Completed
+- **`src/app/api/drip/run/route.ts`** modified:
+  - Added `DRIP_CAMPAIGN_IDS` to existing import from `@/lib/drip/authored-emails`.
+  - Per-row contact lookup now selects `referred_by` in addition to `email_opt_out`.
+  - Renderer merge-vars now pass `referredBy` (trimmed) instead of empty string. Existing PA / DPA / Incomplete App / Went Quiet emails unaffected (they don't reference `{{referred_by}}`).
+  - **Data-integrity guard**: when `campaign_id === DRIP_CAMPAIGN_IDS.GHOST_REFERRAL` and `referredBy` is empty/null, cron writes a `drip_sends` row with `status='skipped'`, increments `stats.skipped`, and continues — without invoking Resend. Enrollment still advances (advance step is BEFORE the send/skip branch). Contact progresses through the sequence on the next cron tick.
+  - Skip reason embedded in `generated_body` for forensic visibility: `'skipped: ghost_referral missing referred_by'`.
+- **Build**: `npm run build` green on first attempt. `/api/drip/run` route emitted in route table (server-only, no client bundle delta).
+
+### Deferred
+- Realtor Relationship drip sequence (day 3/10/30) — needs new Supabase `drip_campaigns` row + `drip_steps` rows + authored emails. Next lead-gen build target.
+- Sendblue iMessage HTTP Request scaffolding in n8n — Adam-blocked on TCPA + API key.
+- Date-field / condition-trigger drip scheduler (Long-Term Nurture, Past Client Retention) — separate from `relative_days` cron path.
+- NotebookLM PULL / PUSH — CLI unavailable 17th+ consecutive session.
+
+### Output Produced
+- Research: None (execute-only session)
+- Spec: None (deferred item picked from prior spec)
+- Build: `src/app/api/drip/run/route.ts` (+18 net lines)
+- Review: Self-reviewed; Ghost Referral copy in `authored-emails.ts` confirmed to be the only template referencing `{{referred_by}}` (subject + body of step 1).
+- QA: Build green; drip_sends.status='skipped' confirmed valid via `database.types.ts` enum.
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged)
+- Drip campaigns wired: 5 (unchanged) — but Ghost Referral now safe to enroll contacts whose `referred_by` is null (previously would have sent broken-looking email).
+
+### Compliance Checks Passed
+- TCPA: N/A — no SMS path touched.
+- CAN-SPAM: unchanged — unsubscribe link + physical address still rendered by `buildEmailHtml`.
+- Data integrity: yes — Ghost Referral broken-merge-tag scenario is now defended.
+
+### Quality Ratings (1-5)
+Research: N/A | Strategy: N/A | Execution: 5 | Review: 5 | QA: 5
+
+### System Improvement Notes
+- The `hasAuthoredEmail`-false branch (line 86-89) skips a step without advancing the enrollment, so a stale enrollment with no authored content for its current step would re-match every cron tick forever. Pre-existing condition; flagged here for a future session.
+
+### BLOCKERS
+- All persistent ADAM blockers unchanged (CRON_SECRET, Sendblue, TCPA, PR #4, LOANOS_AGENT_SECRET).
+
+### Next Session Instructions
+Priority 1: Build Realtor Relationship drip sequence — campaign row in Supabase, 3 steps (day 3 / 10 / 30 cadence post-referral), authored emails in `authored-emails.ts`, n8n trigger from `referral_ytd_count` increment.
+Priority 2: Address pre-existing `hasAuthoredEmail`-false stale-enrollment bug in `/api/drip/run` (advance enrollment with `removed_reason='no_authored_content'`).
+Priority 3: Sendblue iMessage HTTP Request scaffold in n8n (stub credentials + dummy URL until Adam delivers TCPA + API key) — gets the plumbing in place.
+
+Advance queue to next topic: PARTIAL — drip-reliability item closed, Realtor Relationship is the new active build.
+
+---
 ## Session: 2026-04-24 AM — Lead Generation
 Focus: CAN-SPAM Compliance Fix + iMessage Speed-to-Lead Research
 Type: Execute + Research (Sequence C + A)

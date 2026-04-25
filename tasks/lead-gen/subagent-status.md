@@ -1,3 +1,18 @@
+SESSION END: 2026-04-25 04:15:00
+Mode: AM
+Focus: Drip reliability — `referred_by` merge tag fix + Ghost Referral data-integrity guard
+
+DRIP RELIABILITY FIX: COMPLETE — `referred_by` resolves from `contacts.referred_by`, Ghost Referral skips send + advances enrollment when referrer missing.
+Build: npm run build GREEN | Commit pending (will push after status write)
+ADAM action items: 0 new
+Timestamp: 2026-04-25 04:15:00
+SESSION FULLY COMPLETE ✓
+
+SESSION START: 2026-04-25 03:45:00
+Mode: AM
+Focus: Drip reliability — `referred_by` merge tag fix (deferred from 2026-04-24)
+MASTER: Context loaded from session-log + CONTEXT.md + GOALS.md. NotebookLM CLI unavailable (17th+ consecutive session). Executing Sequence C with single targeted fix.
+
 SESSION END: 2026-04-24 04:30:00
 Mode: AM
 Focus: BUILD — Drip unsubscribe endpoint (CAN-SPAM compliance) + iMessage speed-to-lead research
@@ -154,4 +169,19 @@ Foundational docs refreshed: CONTEXT.md (commits ba55af2 + cf81ea5 + c88d3b2 —
 Master log: APPENDED + synced to Styer Mortgage Master notebook
 Daily digest: SENT (Zapier status: success)
 Timestamp: 2026-04-22 10:00 PM
+SESSION FULLY COMPLETE ✓
+
+SESSION END: 2026-04-24 22:00:00
+Mode: PM
+Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 3 (notebooklm-audit-2026-04-23.md, CONTEXT.md Apr 22, 2026-03-27-pre-approval-funnel-spec.md [28 days, superseded])
+Sources added: 3 (refreshed CONTEXT.md Apr 24 21:32, notebooklm-audit-2026-04-24.md, 2026-04-24-imessage-speed-to-lead.md)
+Web sources added: 0 (today's research focus was internal architecture spec)
+Final notebook count: 50/50
+Foundational docs refreshed: CONTEXT.md (commits 4a152cc + a1c2dec + 96b7e93 + f0fa7ac — unsubscribe page, Hold List UI, drip cron, Supabase cred migration)
+Master log: APPENDED + synced to Styer Mortgage Master notebook
+Daily digest: SENT (Zapier status: success)
+Timestamp: 2026-04-24 22:00 PM
 SESSION FULLY COMPLETE ✓

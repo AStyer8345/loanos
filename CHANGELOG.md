@@ -1,5 +1,35 @@
 # LoanOS Changelog
 
+## 2026-04-25 AM (styer-lead-gen-am) — Drip Reliability: `referred_by` Merge Tag
+
+- **`src/app/api/drip/run/route.ts`**: Cron now reads `contacts.referred_by` alongside `email_opt_out`; passes the trimmed value into the `renderDripHtml` merge vars so `{{referred_by}}` resolves correctly in Ghost Referral subject + body. Closes deferred item from 2026-04-24.
+- **Ghost Referral data-integrity guard**: When `campaign_id === GHOST_REFERRAL` and `referred_by` is null/empty, cron skips the Resend send (avoids delivering "got your name from " with empty referrer) but still advances the enrollment + writes a `drip_sends` row with status='skipped'. Contact still progresses through the sequence.
+- **No behavior change** for PA / DPA / Incomplete App / Went Quiet campaigns — they don't use `{{referred_by}}`.
+- **Build**: `npm run build` green on first attempt. Drip cron remains 401-gated until ADAM sets CRON_SECRET in Vercel env.
+
+## 2026-04-25 AM (styer-social-am) — Week 40 Social Content Build
+
+- **Post 179** (Facebook): "Why I tell most people NOT to refinance" — real_talk → authority, ID `66263057`, scheduled Dec 8 9 AM CT. Closes FB gap (last FB: Post 175 Nov 23). NMLS #513013. 9/10 first draft. EVERGREEN.
+- **Post 180** (Instagram): "Reserves explained: what underwriters actually want" — education, ID `868fe397`, scheduled Dec 10 9 AM CT. NMLS #513013. 9/10 first draft. EVERGREEN.
+- **Step 1B GBP**: rates/2026-04-24.html auto-published to GBP via Publer (job 69ec6d688411bab0f17a87ab); IG/FB/LI native angles queued in content-repost-queue.md.
+- **Constraint discoveries**: `social_drafts.platform` rejects "google" and `social_drafts.format` rejects "static_image" — master-agent.md Step 1B + format mapping out of sync with DB schema. Logged for Adam.
+- **NotebookLM**: 17th+ consecutive CLI timeout — PULL/PUSH/master-notebook all skipped (already in ADAM-TODO).
+
+## 2026-04-24 PM (styer-notebooklm-nightly) — Nightly NotebookLM Sync
+
+- **SEO/SEM PUSH+CURATE**: -3 stale (audit-Apr23, CONTEXT Apr23, 2026-04-06-local-seo-ai-web), +3 (refreshed CONTEXT, audit-Apr24, SEL AIO CTR recovery study). 50/50.
+- **Lead Gen PUSH+CURATE**: -3 stale (audit-Apr23, CONTEXT Apr22, 2026-03-27 PA funnel spec), +3 (refreshed CONTEXT, audit-Apr24, 2026-04-24-imessage-speed-to-lead). 50/50.
+- **Master log**: appended `seo-sem-pm` + `lead-gen-pm` entries; re-synced `Styer_Growth_Log.md` to Master notebook.
+- **Digests**: both SENT via Zapier (status: success).
+
+## 2026-04-24 PM (styer-social-pm) — Week 39 Social Content Build
+
+- **Post 177** (Instagram): "The metric I actually care about" — personal/story, ID `6aed737a`, scheduled Nov 30 9 AM CT. Personal pillar. Closes IG gap (last IG: Post 174 Nov 20). NMLS #513013. 9/10 first draft.
+- **Post 178** (LinkedIn): "Pre-approval letter shopping is a tell" — real-talk hot take for realtors, ID `edd32027`, scheduled Dec 2 9 AM CT. Authority pillar (real_talk intent). NMLS #513013. 9/10 first draft.
+- **Compliance**: 0 failures. No specific rates quoted, no APR triggered, no fabricated data, no banned phrases.
+- **Rolling pillar (post-build)**: Auth ~29.6% / Personal ~30.3% / Education ~29.7% / RT ~14.0% — all within ±5%. RT improving toward 15% target.
+- **Skipped**: Step 1B (PM session), Refresh (PM session), NotebookLM PULL/PUSH (16th+ consecutive CLI timeout).
+
 ## 2026-04-24 AM (loanos-scenarios-am) — Mobile Comparison Cards (Tier 8 Complete)
 
 - **`MobileComparisonCards.tsx`** (new): `md:hidden`, `print:hidden` component on share page — one scenario card per screen, prev/next navigation with dot indicators, "Commonly Chosen" gold treatment mirrors desktop table.

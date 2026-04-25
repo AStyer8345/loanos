@@ -3,7 +3,7 @@ Mode: AM
 Focus: Drip reliability — `referred_by` merge tag fix + Ghost Referral data-integrity guard
 
 DRIP RELIABILITY FIX: COMPLETE — `referred_by` resolves from `contacts.referred_by`, Ghost Referral skips send + advances enrollment when referrer missing.
-Build: npm run build GREEN | Commit pending (will push after status write)
+Build: npm run build GREEN | Commit `8bc9827` | Vercel `dpl_9xAt549WG9oHkZ9B1DhMgfSXXyKs` → READY (build ~80s)
 ADAM action items: 0 new
 Timestamp: 2026-04-25 04:15:00
 SESSION FULLY COMPLETE ✓

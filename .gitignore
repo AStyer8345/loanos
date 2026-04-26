@@ -12,6 +12,10 @@
 /.next.nosync/
 .next */
 .next?*
+/.next 2
+/.next 3
+/.next 4
+/.next 5
 /out/
 
 # production
@@ -19,6 +23,7 @@
 
 # misc
 .DS_Store
+*.DS_Store
 *.pem
 
 # debug

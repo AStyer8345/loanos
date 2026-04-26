@@ -1,6 +1,6 @@
 Read /Users/adamstyer/Documents/GOALS.md before starting any session. Interactive sessions must serve current goals — if your task conflicts, log it to TODO.md under NEEDS ADAM and stop. Automated/scheduled tasks continue unless GOALS.md explicitly pauses them.
 
-# LoanOS — Claude Code Instructions
+# LoanOS — Codex Instructions
 
 ## Deploy Workflow (MANDATORY — follow every time)
 

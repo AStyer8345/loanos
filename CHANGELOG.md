@@ -1,5 +1,15 @@
 # LoanOS Changelog
 
+## 2026-04-26 PM (loanos-autonomous) — Drip Recent Activity Timeline
+
+- **Shipped**: `RecentSendsTimeline` component on `/dashboard/drip-campaigns` showing the 15 most-recent `drip_sends` rows across all org campaigns. Columns: Contact, Campaign, Step, Status, When (relative — `Xm/Xh/Xd ago`, falls back to date). Status colors mirror existing `SendHistoryTable`. Graceful empty state until cron fires.
+- **New**: `getRecentSends(orgId, limit)` in `src/lib/drip/queries.ts` — mirrors the `getApprovalQueue` join shape (contacts + drip_steps + drip_campaigns); orders by `created_at` desc.
+- **New**: `GET /api/drip/sends/recent?limit=N` (1..100, default 25) — clamps the param, org-scoped via `getOrganization`, returns `{ sends: DripSendWithDetails[] }`.
+- **TODO update**: Drip Dashboard widgets line in `TODO.md` now annotates per-campaign-enrollment-count + recent-sends-timeline DONE; completion-rate-per-campaign still open.
+- **Build**: green on first pass | **Lint**: clean | **Commit**: `f54c16b` | **Vercel**: `dpl_D4VSz7bEWtWhFSpAHw63HVyvwQVQ` BUILDING → READY (verified post-push).
+- **No destructive ops, no env changes, no schema changes, no n8n changes.**
+- **Adam queue**: unchanged (PR #4 merge, `CRON_SECRET`, NotebookLM CLI, TCPA copy + Sendblue API key, [SOCIAL] backlog) — all pre-existing, none added this run.
+
 ## 2026-04-26 AM (styer-lead-gen-am) — Drip Stale-Enrollment Bug Fix + Realtor Relationship Spec
 
 - **Bug fix:** `src/app/api/drip/run/route.ts` — when `hasAuthoredEmail()` returns false, enrollment is now terminated (`status='removed'`, `removed_reason='no_authored_content'`, `next_send_at=null`) instead of silently re-matching every cron tick. Closes the infinite-loop risk flagged in 2026-04-25 AM session-log "System Improvement Notes".

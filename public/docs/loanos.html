@@ -376,6 +376,9 @@ var DECISIONS = [
   {date:"Apr 2026",title:"Manual Enrollment UI + Drip Root Cause + Tenant Scoping PR",color:"#4cc98a",
    body:"Root cause of drip campaigns not working: n8n scheduler archived 2026-04-16 (no auto-enrollment) + contact detail DRIP CAMPAIGNS card hidden when enrollments empty. Fix: card always renders; + ENROLL button opens inline campaign picker → POST /api/drip/campaigns/[id]/enrollments. No new API routes — enrollment endpoint already existed. Commit b3752fb, Vercel READY. Also: tenant scoping audit complete (PR #4 feat/tenant-scoping-hardening) — 37 tables probed, 0 cross-tenant leaks, migration 092 applied (RLS for drip_suppressions + user_settings). Scott Sears cleared for login pending PR merge.",
    tags:[{label:"Added: Manual Enrollment UI",type:"added"},{label:"Fixed: Drip Root Cause",type:"confirmed"},{label:"PR #4: Tenant Scoping Ready",type:"planned"}]},
+  {date:"Apr 2026",title:"Drip Recent Activity Timeline",color:"#4cc98a",
+   body:"New RecentSendsTimeline component on /dashboard/drip-campaigns shows the 15 most-recent drip_sends rows across all org campaigns: contact, campaign, step, status, and a relative-time label (Xm/Xh/Xd ago, falls back to date). Status colors mirror SendHistoryTable. Graceful empty state. New helper getRecentSends(orgId, limit) in src/lib/drip/queries.ts mirrors the getApprovalQueue join shape. New GET /api/drip/sends/recent?limit=N (clamped 1..100, default 25), org-scoped via getOrganization. Closes the recent-sends-timeline portion of the Drip Dashboard widgets TODO; per-campaign completion rate still open. Commit f54c16b, Vercel dpl_D4VSz7bEWtWhFSpAHw63HVyvwQVQ READY.",
+   tags:[{label:"Added: RecentSendsTimeline",type:"added"},{label:"Added: /api/drip/sends/recent",type:"added"},{label:"Partial: Drip Dashboard widgets",type:"planned"}]},
 ];
 var PRICING = [
   {name:"Starter",price:"$97",desc:"Solo LO getting organized",hl:false,

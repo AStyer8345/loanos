@@ -290,3 +290,30 @@ export async function getApprovalQueueCount(orgId: string): Promise<number> {
   if (error) return 0
   return count ?? 0
 }
+
+export async function getRecentSends(orgId: string, limit = 25): Promise<DripSendWithDetails[]> {
+  const { data, error } = await supabase()
+    .from('drip_sends')
+    .select(`
+      *,
+      contacts!inner(first_name, last_name, email),
+      drip_steps!inner(name),
+      drip_enrollments!inner(campaign_id, drip_campaigns!inner(name))
+    `)
+    .eq('org_id', orgId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+
+  return (data ?? []).map((row: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+    ...row,
+    contact_name: `${row.contacts?.first_name ?? ''} ${row.contacts?.last_name ?? ''}`.trim(),
+    contact_email: row.contacts?.email ?? '',
+    step_name: row.drip_steps?.name ?? '',
+    campaign_name: row.drip_enrollments?.drip_campaigns?.name ?? '',
+    contacts: undefined,
+    drip_steps: undefined,
+    drip_enrollments: undefined,
+  })) as DripSendWithDetails[]
+}

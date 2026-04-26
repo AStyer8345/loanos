@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DripCampaignWithStats } from '@/lib/drip/types'
 import CampaignCard from '@/components/drip/CampaignCard'
+import RecentSendsTimeline from '@/components/drip/RecentSendsTimeline'
 
 export default function DripCampaignsPage() {
   const router = useRouter()
@@ -116,6 +117,8 @@ export default function DripCampaignsPage() {
           ))}
         </div>
       )}
+
+      <RecentSendsTimeline />
     </div>
   )
 }

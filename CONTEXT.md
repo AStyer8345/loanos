@@ -96,48 +96,48 @@ Key files: `CHANGELOG.md` (history), `DECISIONS.md` (arch), `TODO.md` (open work
 ## Social Media Agent Status
 <!-- Social media agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-25 AM — Week 40 build (Dec 7–13): Post 179 — "Why I tell most people NOT to refinance" (Facebook real_talk → authority, ID: 66263057, Dec 8 9 AM CT) + Post 180 — "Reserves explained: what underwriters actually want" (Instagram education, ID: 868fe397, Dec 10 9 AM CT). Both APPROVED, QA PASS, 9/10 first draft, EVERGREEN. Step 1B: 1 GBP auto-publish (rates/2026-04-24.html via Publer job 69ec6d688411bab0f17a87ab) + queued for Architect. Activity logging clean (no auth errors). NotebookLM: 17th+ consecutive timeout — SKIPPED.
+**Last worked on:** 2026-04-25 PM — Week 40 PM build (Dec 7–13): Post 181 — "Stop trying to time the rate" (LinkedIn real_talk → authority, ID: 93cbf901, Dec 11 9 AM CT) + Post 182 — "Three things that actually move your mortgage rate" (Instagram education, ID: 8f71d6a0, Dec 13 9 AM CT). Both APPROVED, QA PASS, 9/10 first draft, EVERGREEN. LinkedIn re-entry hit (last LI was Wk39 Post 178 Dec 2). Real Talk push at ~15% — target essentially hit. Wk40 total: 4 posts (179–182) all approved. Found and flagged duplicate Post 180 record (30da3c7a is dup of 868fe397) for Adam cleanup — not auto-deleted. NotebookLM: 18th+ consecutive timeout — SKIPPED.
 
-**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 17+ consecutive sessions — NEEDS ADAM. NEW: master-agent.md Step 1B uses `platform: "google"` for GBP records but DB constraint rejects it; format: "static_image" also rejected (only text_only/reel_script valid). Step 1B GBP social_drafts insert skipped this session.
+**Active blockers:** BLOCKER-LOANOS-001 (selfies not uploaded — LoanOS stream paused). NotebookLM CLI timing out 18+ consecutive sessions — NEEDS ADAM. master-agent.md Step 1B uses `platform: "google"` for GBP records but DB constraint rejects it; format: "static_image" also rejected (only text_only/reel_script valid). Step 1B GBP social_drafts insert skipped in AM.
 
-**What's next:** Week 40 PM session: Architect can pull rates/2026-04-24 native-post angles from content-repost-queue.md. Week 41 (Dec 14–20): LinkedIn re-entry due (last LI: Wk39 Post 178). Continue RT push toward 15% (now ~14.5%). Surface master-agent.md Step 1B/format constraints to Adam for spec update.
+**What's next:** Week 41 (Dec 14–20): Posts 183+. Facebook re-entry available (last FB Post 179 Dec 8). Mix is healthy across IG/FB/LI. Real Talk target essentially hit (~15%) — let it stabilize. content-repost-queue.md rates/2026-04-24 IG static + FB conversational still pending — only consume in a TIMELY rate week. Surface duplicate Post 180 cleanup to Adam (added to ADAM-TODO).
 
 
 ## Lead Gen Agent Status
 <!-- Lead gen agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-25 AM — Drip reliability fix: `referred_by` merge tag now resolves from `contacts.referred_by` in `/api/drip/run` (closes deferred item from 2026-04-24). Ghost Referral data-integrity guard added: if `referred_by` is null/empty, skip send (drip_sends status='skipped') and advance enrollment so contact still progresses. Build green; commit pending push.
+**Last worked on:** 2026-04-26 AM — Drip stale-enrollment bug fix + Realtor Relationship spec. `/api/drip/run` now terminates enrollments with `removed_reason='no_authored_content'` when authored content is missing for a step, instead of silently re-matching the same row every cron tick (closed infinite-loop risk flagged in 2026-04-25 AM session-log). Spec written for 3-step Realtor Relationship drip (day 3/10/30 post-referral cadence) at `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md` — ready for next builder, no Adam blockers to activate. Build GREEN.
 
-**Active blockers:** (1) `CRON_SECRET` not set in Vercel — drip cron won't fire (NEEDS ADAM, 2-min fix). (2) TCPA consent language required on styermortgage.com forms before Sendblue activation (NEEDS ADAM). (3) Sendblue API key needed for n8n wiring (NEEDS ADAM). (4) `LOANOS_AGENT_SECRET` not set in n8n env — Hot Lead notifications fail to authenticate. (5) PR #4 (`feat/tenant-scoping-hardening`) unmerged — Scott blocked. (6) FNM 3.4 import shipped 2026-04-23 (per ADAM-TODO entry) — verify in code if still flagged.
+**Active blockers:** (1) `CRON_SECRET` not set in Vercel — drip cron won't fire (NEEDS ADAM, 2-min fix). (2) TCPA consent language required on styermortgage.com forms before Sendblue activation — copy drafted in `tasks/lead-gen/research/2026-04-25-tcpa-sms-one-to-one-consent-web.md` (NEEDS ADAM approval). (3) Sendblue API key needed for n8n wiring (NEEDS ADAM signup). (4) `LOANOS_AGENT_SECRET` not set in n8n env — Hot Lead notifications fail to authenticate. (5) PR #4 (`feat/tenant-scoping-hardening`) unmerged — Scott blocked.
 
-**What's next:** (1) Build Realtor Relationship drip sequence (day 3/10/30) — next non-blocked lead-gen target per session-log 2026-04-22/24. (2) Scaffold Sendblue iMessage HTTP Request node in n8n Web Lead Automation + Pre-Approval Lead Notify with stub (Adam-blocked on TCPA + API key but plumbing can land). (3) Date-field / condition-trigger drip scheduler (Long-Term Nurture, Past Client Retention, Realtor Relationships) — separate from `relative_days` cron path.
+**What's next:** (1) Build Realtor Relationship drip per spec — Supabase campaign + 3 steps, authored emails, n8n wire from `H5doQYLLIAg0zMug` (~3-4 hr next builder session). (2) Once `CRON_SECRET` is set, verify drip cron firings end-to-end in prod (check `drip_sends` rows). (3) Adam decisions on 2 iMessage blockers (TCPA copy + Sendblue signup) to unblock Sendblue build.
 
 ## SEO/SEM Agent Status
 <!-- SEO/SEM agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-24 PM — Nightly NotebookLM PUSH+CURATE. Removed 3 (audit-Apr23, CONTEXT Apr23, 2026-04-06-local-seo-ai-web). Added 3 (refreshed CONTEXT Apr24, audit-Apr24, SEL AI Overviews CTR recovery study). 50/50. Digest SENT (Zapier success). Master log appended + Master notebook re-synced.
+**Last worked on:** 2026-04-25 PM — Nightly NotebookLM PUSH+CURATE. Removed 6 (audit-Apr24, CONTEXT Apr24, 2026-04-10-onpage-financial-seo-web, title-meta CTR article, generic real-estate SEO article, async-retry duplicate). Added 5 (refreshed CONTEXT Apr25, audit-Apr25, 2026-04-25-aeo-geo-2026-forecast-web research, SEJ "State of AEO & GEO in 2026", SEL "Agentic engine optimization"). 50/50. Digest SENT (Zapier success). Master log appended + Master notebook re-synced. Today's site work (separate daily-opt + suburb-editor tasks): Hutto deepening, footer Awards sitewide standardization 56/57, 2 more rate-shopper AEO body paragraphs (6/10).
 
-**Active blockers:** USDA cleanup pending — Smithville/Elgin/Florence/Jarrell/Liberty Hill body+schema+FAQ + pillar-page loan table (HIGH). GTM suburb quick-form not counting as Google Ads conversions ($500/mo unattributed — HIGH). 90-day GSC export not yet pulled (blocks Page-2/3 quick-win identification).
+**Active blockers:** USDA cleanup pending — Smithville/Elgin/Florence/Jarrell/Liberty Hill body+schema+FAQ + pillar-page loan table (HIGH). GTM suburb quick-form not counting as Google Ads conversions ($500/mo unattributed — HIGH). 90-day GSC export not yet pulled (blocks Page-2/3 quick-win identification). NotebookLM Step 0 in daily-opt SKILL.md references missing `notebook_advisor.py` — 3rd run confirming dead path; ESCALATED Adam decision.
 
-**What's next:** (1) Finish USDA cleanup across remaining suburb pages + pillar draft. (2) Resolve GTM conversion tracking gap (`generate_lead` → Google Ads conversion tag). (3) Round Rock #2 → #1 push (Teravista/Forest Creek/Old Town markers + RRISD + "beat builder rates" hook + GSC URL Inspection submit).
+**What's next:** (1) AEO sweep on next 2 rate-shopper posts (what-delays-closing + how-to-read-a-loan-estimate) — target 8/10 done. (2) Retire daily-opt NotebookLM Step 0 if Adam hasn't restored the script. (3) Finish USDA cleanup + Round Rock #2 → #1 push. (4) Monday 2026-04-27 — verify GSC sitemap shows Success status.
 
 ## Scenarios Agent Status
 <!-- Scenarios agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-24 AM — Tier 8 Item 5 shipped. MobileComparisonCards.tsx (md:hidden, print:hidden): one card per scenario, prev/next navigation, dot indicators, Commonly Chosen gold treatment. ScenarioComparisonTable hidden on mobile (hidden md:block). Commit `d2f6d18`, Vercel `dpl_5fq2X7ekNaEadb4ohj4mmDNcGc7W` → BUILDING.
+**Last worked on:** 2026-04-26 AM — 2nd consecutive no-build exit. Re-verified Tiers 1–8 complete + GOALS.md still has no scenarios work. Refreshed (did not duplicate) the existing NEEDS ADAM entry in `TODO.md` line 16 — now flagged 2nd consecutive AM exit (Apr 25 + Apr 26).
 
-**Active blockers:** None.
+**Active blockers:** No mission remaining for this scheduled task — needs retire / redirect / pause decision (see TODO.md NEEDS ADAM).
 
-**What's next:** PROGRAM COMPLETE — Tiers 1–8 all done. Agent can be retired or redirected to other GOALS.md priorities (FNM 3.4, drip campaigns, notes fix).
+**What's next:** Adam decision (a) retire cron, (b) redirect agent to FNM 3.4 / drip / notes domain, (c) leave dormant. No further code work possible until decision.
 
 ## Standup Agent Status
 <!-- Standup agent updates these three fields each session. Replace, never append. -->
 
-**Last worked on:** 2026-04-24 — Day 30 standup. Vercel READY (`dpl_GWjWB5BosZpkYbeVyUbUuKJ3s93c`, SHA `0b1c6fb`). Hold List UI shipped. Unsubscribe page + iMessage research done. Supabase credential hygiene advancing. 2 days to launch.
+**Last worked on:** 2026-04-26 — Day 32 standup. 5 days to launch (May 1). Vercel still READY on `dpl_6P2DVnUe4mAUTJnyh8kj3XnpJS9n` (SHA `1f48077`); no new code merged to main in ~24h (only PM social/NotebookLM work + new PR #6 `codex/agent-onboarding-docs` doc-only branch with 2 READY preview builds). n8n: 38 workflows, 33 active, 5 inactive (all intentional). Rancho Gmail Poller flipped active overnight.
 
-**Active blockers:** PR #4 unmerged (Scott cannot safely log in — NEEDS ADAM). `CRON_SECRET` not set in Vercel (drip cron won't fire — 2-min fix, NEEDS ADAM). Marketing site zero progress (2 days to April 26 — HIGHEST RISK, Adam-owned). n8n credential hygiene audit not started.
+**Active blockers (all rolled 4+ standups, Adam-gated — no movement):** PR #4 (`feat/tenant-scoping-hardening`) merge unconfirmed; `CRON_SECRET` set in Vercel? today's 13:00 UTC is first chance to verify drip fix in prod; `LOANOS_AGENT_SECRET` in n8n still missing; TCPA copy + Sendblue API key for iMessage; marketing site silent; PR #6 newly opened (low-risk, doc-only).
 
-**What's next:** Adam merges PR #4 + sets CRON_SECRET. Drip end-to-end verification. Phase 5 email template wiring. Marketing site (Adam-owned).
+**What's next:** Verify drip cron end-to-end at today's 13:00 UTC firing. FNM 3.4 / Calyx Point coverage check on the shipped MISMO importer. Notes / activity log fix (still in GOALS.md as a launch-critical blocker, no code touched in 24h).
 
 ## Rules For AI Sessions
 

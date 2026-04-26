@@ -2,6 +2,58 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-26 AM — Lead Generation
+Focus: Drip stale-enrollment bug fix + Realtor Relationship drip spec
+Type: Execute (Sequence C, surgical) + Research (Sequence A, spec write)
+Week in Queue: Week 14
+
+### Context From Previous Session
+2026-04-25 AM closed the `referred_by` merge-tag fix and added a Ghost Referral data-integrity guard (commit `8bc9827`, Vercel READY). System Improvement Notes flagged a separate pre-existing bug: when `hasAuthoredEmail` returns false, `/api/drip/run/route.ts` lines 86-89 `continue` without advancing or removing the enrollment — the RPC returns the same row on every cron tick (infinite loop). Priority 1 from prior session was Realtor Relationship drip (no spec yet); Priority 2 was this hasAuthoredEmail bug. This session picked both: surgical fix + spec write, no premature build.
+
+### Completed
+- **`src/app/api/drip/run/route.ts` modified** (+8 lines): the `!hasAuthoredEmail()` branch now updates the enrollment to `status='removed'`, `removed_reason='no_authored_content'`, `next_send_at=null`, mirroring the existing `exit_rule` pattern at lines 78-83. Comment explains the failure mode. Defensive — should not fire in practice for any of the 5 currently-defined campaigns (PA Welcome 6/6, DPA Guide 8/8, Ghost Referral 4/4, Incomplete App 3/3, Went Quiet 4/4) but eliminates the loop risk if a campaign is ever added with missing authored content.
+- **Spec written**: `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md`. 3-step post-referral cadence (day 3/10/30). Trigger: existing realtor ack workflow `H5doQYLLIAg0zMug` after the ack email sends. Build steps: Supabase INSERT (1 campaign + 3 steps), code (~70 lines in authored-emails.ts), n8n (1 HTTP Request node added to existing workflow). Compliance bar: RESPA (no quid-pro-quo), CAN-SPAM (existing footer), unsubscribe path (existing `email_opt_out` enforcement). Estimated 3-4 hr for next builder session.
+- **Build**: `npm run build` GREEN on first attempt. Route table unchanged.
+
+### Deferred
+- Realtor Relationship drip BUILD — spec ready, not executing this session. Next builder picks up.
+- Sendblue iMessage HTTP Request scaffold — Adam-blocked (TCPA copy + API key).
+- Date-field / condition-trigger drip scheduler (Long-Term Nurture, Past Client Retention) — separate from `relative_days` cron path.
+- NotebookLM PULL / PUSH — CLI unavailable 18th+ consecutive session.
+
+### Output Produced
+- Build: `src/app/api/drip/run/route.ts` (+8 net lines)
+- Spec: `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md` (NEW, 100 lines)
+- Review: Self-reviewed; the new branch mirrors the established `exit_rule` pattern in the same file. No new SQL columns required (`status`, `removed_reason`, `next_send_at` already exist).
+- QA: Build green; drip_enrollments.removed_reason is text, accepts arbitrary string per `database.types.ts`.
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged)
+- Drip campaigns wired: 5 (unchanged) — now safe against any future authored-content gap.
+
+### Compliance Checks Passed
+- TCPA: N/A — no SMS path touched.
+- CAN-SPAM: unchanged — `buildEmailHtml` still renders unsubscribe link + physical address.
+- Data integrity: yes — closes the cron infinite-loop risk.
+
+### Quality Ratings (1-5)
+Research: 5 (spec) | Strategy: 5 | Execution: 5 (surgical fix) | Review: 5 | QA: 5
+
+### System Improvement Notes
+- Both items completed bracket the drip system around the launch window: one removes a latent risk, one queues the next high-value campaign. Realtor drip activation has zero Adam-blocked dependencies once built — the path from spec to live is unblocked.
+- Ghost Referral copy uses `{{referred_by}}` not `{{first_name_borrower}}` — the spec calls out a future merge-var refactor for the Realtor Relationship Step 1 personalization but recommends generic copy in v1 to keep scope tight.
+
+### BLOCKERS
+- All persistent ADAM blockers unchanged (CRON_SECRET, Sendblue, TCPA, PR #4, LOANOS_AGENT_SECRET).
+
+### Next Session Instructions
+Priority 1: Build Realtor Relationship drip per `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md` (Supabase rows + authored emails + n8n wire — ~3-4 hr).
+Priority 2: Once Adam sets `CRON_SECRET`, verify drip cron firings in prod (`drip_sends` rows over 24-48h).
+Priority 3: Sendblue iMessage HTTP Request scaffold in n8n (stub credentials + dummy URL until Adam delivers TCPA + API key).
+
+Advance queue to next topic: PARTIAL — stale-enrollment bug closed; Realtor Relationship is the active build target with a ready spec.
+
+---
 ## Session: 2026-04-25 AM — Lead Generation
 Focus: Drip reliability — `referred_by` merge tag fix + Ghost Referral data-integrity guard
 Type: Execute (Sequence C)

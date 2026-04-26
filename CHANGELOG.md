@@ -1,5 +1,54 @@
 # LoanOS Changelog
 
+## 2026-04-26 AM (styer-lead-gen-am) — Drip Stale-Enrollment Bug Fix + Realtor Relationship Spec
+
+- **Bug fix:** `src/app/api/drip/run/route.ts` — when `hasAuthoredEmail()` returns false, enrollment is now terminated (`status='removed'`, `removed_reason='no_authored_content'`, `next_send_at=null`) instead of silently re-matching every cron tick. Closes the infinite-loop risk flagged in 2026-04-25 AM session-log "System Improvement Notes".
+- **Spec written:** `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md` — 3-step post-referral cadence (day 3/10/30), Supabase + n8n + authored-emails wiring, RESPA + CAN-SPAM checklist. Ready for next builder session, no Adam blockers to activate.
+- **Build:** `npm run build` GREEN on first pass. Route table unchanged.
+- **NotebookLM PULL/PUSH:** SKIPPED — CLI unavailable 18th+ consecutive session.
+- **No new ADAM action items.**
+
+## 2026-04-26 AM (loanos-scenarios-am) — 2nd No-Build Session
+
+- **No code changes**: Scenarios program still complete (Tiers 1–8 done, last build `d2f6d18` 2026-04-24 AM). `tasks/scenarios/domain-queue.md` empty.
+- **GOALS.md re-checked** (week of April 20): no scenarios priorities listed; LoanOS focus remains FNM 3.4 import, drip campaigns fix, notes/activity log.
+- **Refreshed existing NEEDS ADAM entry** in `TODO.md` (line 16) — now annotated as 2nd consecutive AM exit (2026-04-25, 2026-04-26). Did not duplicate per stale-flag memory rule.
+- **Skipped**: NotebookLM PULL (per recent CLI timeout pattern), subagent chain (no mission), build, commit, push, master-notebook push.
+- **CONTEXT.md**: Scenarios Agent Status three fields refreshed.
+
+## 2026-04-26 (loanos-launch-standup) — Day 32 Standup
+
+- **Days to launch:** 5 (target May 1, 2026 per GOALS.md week of April 20).
+- **Vercel:** all 20 most-recent deployments READY. Latest prod still `dpl_6P2DVnUe4mAUTJnyh8kj3XnpJS9n` (SHA `1f48077`). 2 new previews READY on PR #6 `codex/agent-onboarding-docs` (`a85df6f`, `a731289`) — doc-only.
+- **n8n health:** 38 workflows, 33 active, 5 inactive (all intentional). Rancho Moonrise Gmail Poller (`Ky5foSIFqMmYuny0`) flipped active overnight. All core LoanOS workflows ACTIVE.
+- **No new feature/code merges to main since 2026-04-25 AM** (~24h). Adam-gated blockers (PR #4 merge, `CRON_SECRET`, `LOANOS_AGENT_SECRET`, TCPA copy, Sendblue API key, marketing site) all rolled forward unchanged.
+- **Audits folder:** unchanged from 2026-04-25 — `SECURITY-AUDIT-2026-04-05.md` + `SUPPORT-STACK-2026-04-05.md`. Finding #5 (field-level encryption) still ADAM-BLOCKED on GLBA attorney.
+- **Standup written to:** `tasks/standup-log.md`.
+
+## 2026-04-25 PM (styer-social-pm) — Week 40 PM Build (Posts 181–182)
+
+- **Posts written:** 2 new EVERGREEN drafts inserted to `social_drafts`. Post 181 (`93cbf901-ba9c-463b-8715-33857df669a1`, LinkedIn real_talk → authority, "Stop trying to time the rate", Dec 11 15:00 UTC). Post 182 (`8f71d6a0-cc02-4a25-bdd2-d50b4854ef6d`, Instagram education, "Three things that actually move your mortgage rate", Dec 13 15:00 UTC).
+- **Pillar progress:** Real Talk push to 15% essentially complete (~14.8–15.0% after Post 181). Wk40 mix balanced across FB/IG/LI/IG; LinkedIn re-entry achieved (last LI was Post 178 Dec 2).
+- **Compliance / quality:** 9/10 first draft on both, zero rewrites. NMLS #513013 in both. No specific rate numbers (no APR trigger). BBQ + Jessica tests clean. QA verified via SELECT.
+- **Issue surfaced (not auto-resolved):** Duplicate Post 180 record (`30da3c7a` is identical to canonical `868fe397`) — likely AM session curl retry. Flagged in `tasks/ADAM-TODO.md` for 1-min Adam cleanup.
+- **Skipped:** NotebookLM PULL/PUSH (18th+ consecutive CLI timeout, NEEDS ADAM); Refresh 07 (PM-only); content-repost-queue.md IG static + FB conversational angles for rates/2026-04-24 (would force APR + TIMELY classification on Dec schedule dates).
+
+## 2026-04-25 AM (loanos-scenarios-am) — No-Build Session, Mission Conflict Logged
+
+- **No code changes**: Tiers 1–8 of the Scenarios program completed 2026-04-24 AM (`d2f6d18` mobile swipe cards). No remaining items in `tasks/scenarios/domain-queue.md`.
+- **GOALS.md alignment check**: Week of April 20 LoanOS priorities are FNM 3.4 import, drip campaigns fix, notes/activity log — no Scenarios work listed.
+- **Action taken**: Per scheduled-task rule, added a NEEDS ADAM entry to `TODO.md` requesting a retire/redirect/pause decision for the `loanos-scenarios-am` cron.
+- **CONTEXT.md**: Scenarios Agent Status three fields refreshed (last worked on / active blockers / what's next).
+- **Build / deploy**: Skipped — no code touched.
+
+## 2026-04-25 (loanos-launch-standup) — Day 31 Standup
+
+- **Launch target update**: GOALS.md (week of April 20) shifted target April 26 → May 1, 2026. 6 days out as of today. Standup log + CONTEXT.md updated to reflect new date; prior standup entries preserved.
+- **Vercel**: All 20 most-recent deployments READY. Latest prod = `dpl_6P2DVnUe4mAUTJnyh8kj3XnpJS9n` (SHA `1f48077`, AM session-end commit). No failed builds in the visible window.
+- **n8n health**: 38 workflows, 32 active, 6 inactive — all inactivity is intentional (Refi Watch placeholders, Closed Loan Review Request, Morning Briefing Team not yet activated, Contract Received v3 superseded, Rancho Gmail Poller new on 2026-04-25). All core LoanOS workflows ACTIVE.
+- **Audits folder**: No new reports since `SECURITY-AUDIT-2026-04-05.md` and `SUPPORT-STACK-2026-04-05.md`. Open security items unchanged from 2026-04-24 standup.
+- **Standup written to**: `tasks/standup-log.md`.
+
 ## 2026-04-25 AM (styer-lead-gen-am) — Drip Reliability: `referred_by` Merge Tag
 
 - **`src/app/api/drip/run/route.ts`**: Cron now reads `contacts.referred_by` alongside `email_opt_out`; passes the trimmed value into the `renderDripHtml` merge vars so `{{referred_by}}` resolves correctly in Ghost Referral subject + body. Closes deferred item from 2026-04-24.
@@ -3546,3 +3595,28 @@ Arive (loan event)
 ### Master Growth Log
 - Appended seo-sem-pm + lead-gen-pm entries
 - Re-synced to Styer Mortgage Master notebook (source refreshed)
+
+## 2026-04-25 — Nightly NotebookLM Sync (PM Scheduled Task)
+
+### SEO/SEM NotebookLM PUSH+CURATE
+- Removed 6 stale/redundant sources: audit-2026-04-24, CONTEXT.md Apr 24 (stale), 2026-04-10-onpage-financial-seo-web (15d, redundant), title-meta CTR article (sprint complete), generic real-estate SEO article (mortgage-specific stronger elsewhere), SEJ AEO/GEO duplicate from async retry
+- Added 5 new sources: refreshed CONTEXT.md (Apr 25, post-Hutto deepening + footer Awards 56/57 + AEO 6/10), notebooklm-audit-2026-04-25, 2026-04-25-aeo-geo-2026-forecast-web research, SEJ "State of AEO & GEO in 2026", SEL "Agentic engine optimization"
+- Web research focus: AEO/agentic-search forecast and playbook (supports the dominant April rate-shopper AEO sweep)
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Lead Gen NotebookLM PUSH+CURATE
+- AM session shipped earlier: drip reliability fix — `referred_by` merge tag resolves from `contacts.referred_by`; Ghost Referral guard skips send + advances enrollment when referrer missing. Commit `8bc9827`, Vercel `dpl_9xAt549WG9oHkZ9B1DhMgfSXXyKs` → READY.
+- Removed 4 stale sources: audit-2026-04-24, CONTEXT.md Apr 24 (stale), 2026-03-28-rate-alert-funnel-spec (28d, superseded by Set Rate webhook in prod), 2026-04-06-lo-waitlist-spec (Phase 4 future, not active)
+- Added 4 new sources: refreshed CONTEXT.md (Apr 25 21:29), notebooklm-audit-2026-04-25, 2026-04-25-tcpa-sms-one-to-one-consent-web research, scotsmanguide.com "Navigating the perils of lead generation"
+- Web research focus: TCPA one-to-one consent rule (in effect April 11, 2026) — fills regulatory gap ahead of upcoming Sendblue iMessage build
+- Digest sent via Zapier: success
+- Notebook: 50/50
+
+### Master Growth Log
+- Appended seo-sem-pm + lead-gen-pm entries
+- Re-synced to Styer Mortgage Master notebook (source refreshed)
+
+### Adam Action Items (NEW — both NEEDS ADAM)
+- TCPA disclosure copy approval for 5 lead-capture forms — drafted in `tasks/lead-gen/research/2026-04-25-tcpa-sms-one-to-one-consent-web.md`
+- Sendblue account signup — credentials needed before n8n iMessage credential can be provisioned

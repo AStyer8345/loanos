@@ -84,6 +84,13 @@ export async function GET(request: Request): Promise<NextResponse> {
       }
 
       if (!hasAuthoredEmail(row.campaign_id, row.step_order)) {
+        // No authored content for this step → terminate the enrollment.
+        // Without this update, next_send_at stays in the past and the RPC
+        // returns the same row on every cron tick (infinite loop).
+        await supabase
+          .from('drip_enrollments')
+          .update({ status: 'removed', removed_reason: 'no_authored_content', next_send_at: null, updated_at: now })
+          .eq('id', row.enrollment_id)
         stats.skipped++
         continue
       }

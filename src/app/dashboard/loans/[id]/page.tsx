@@ -2206,28 +2206,49 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
       } else if (workflow.triggerType === 'pdf') {
         if (!file) { setError('Please select a file.'); setSending(false); return }
         if (!userId) { setError('Not authenticated.'); setSending(false); return }
-        // Upload to Supabase Storage first, then send only the signed URL to the
-        // proxy. Direct multipart through the proxy hits Vercel's 4.5MB body
-        // limit (FUNCTION_PAYLOAD_TOO_LARGE) for typical contract PDFs.
+        // Upload to Supabase Storage first to sidestep Vercel's 4.5MB function
+        // ingress (FUNCTION_PAYLOAD_TOO_LARGE on multipart). n8n then fetches
+        // the file from Storage server-side using its service-role JWT.
         const supabase = createClient()
         const storagePath = `${userId}/${loan.id}/automations/${Date.now()}_${file.name}`
         const { error: uploadErr } = await supabase.storage
           .from('documents')
           .upload(storagePath, file, { contentType: file.type || 'application/pdf' })
         if (uploadErr) { setError('Upload failed: ' + uploadErr.message); setSending(false); return }
-        const { data: signed, error: signErr } = await supabase.storage
-          .from('documents')
-          .createSignedUrl(storagePath, 600)
-        if (signErr || !signed?.signedUrl) {
-          setError('Could not generate signed URL: ' + (signErr?.message || 'unknown'))
-          setSending(false)
-          return
+
+        if (workflow.id === 'contract-received') {
+          // n8n's contract-received webhook routes on body.doc_type === 'contract'
+          // and downloads the PDF from `documents/{body.file_path}` itself.
+          res = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              doc_type: 'contract',
+              file_path: storagePath,
+              file_name: file.name,
+              loan_id: loan.id,
+              user_id: userId,
+              organization_id: loan.organization_id,
+            }),
+          })
+        } else {
+          // Other pdf automations (pre-approval, final-cd, refi-intake, …)
+          // still expect multipart `file` + `loan_context` at n8n. Send a
+          // signed URL; the proxy fetches and re-emits the multipart shape.
+          const { data: signed, error: signErr } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(storagePath, 600)
+          if (signErr || !signed?.signedUrl) {
+            setError('Could not generate signed URL: ' + (signErr?.message || 'unknown'))
+            setSending(false)
+            return
+          }
+          res = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...loanContext, file_url: signed.signedUrl, file_name: file.name }),
+          })
         }
-        res = await fetch(proxyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...loanContext, file_url: signed.signedUrl, file_name: file.name }),
-        })
       } else {
         res = await fetch(proxyUrl, {
           method: 'POST',

@@ -1,5 +1,51 @@
 # LoanOS Changelog
 
+## 2026-04-27 PM (loanos-autonomous) — Drip Completion Rate Widget
+
+- **Shipped**: Per-campaign completion rate inline on each `CampaignCard` on `/dashboard/drip-campaigns`. Renders "X% completed" between `enrolled` and `lastSend`, with a `title=` tooltip explaining the math. Empty state ("— completion") shows until at least one enrollment transitions to `completed` or `removed`.
+- **Math**: `completed / (completed + removed)` × 100, rounded. Excludes still-active enrollments so the rate doesn't drift to 0% just because a campaign is busy. Tooltip surfaces the raw counts so it's not a black box.
+- **Type**: `DripCampaignWithStats` gains `completed_count: number` and `removed_count: number`. Only two consumers (`page.tsx` passes the type through, `CampaignCard` reads it) — both updated.
+- **Query**: `getCampaignsWithStats()` adds two parallel `select('id', { count: 'exact', head: true })` calls per campaign (filtered by `status='completed'` and `status='removed'`). No schema changes, no new RPC, no new API route. The existing 3-query parallel block becomes a 5-query parallel block.
+- **Closes**: Drip Dashboard widgets (`TODO.md` Scott Pilot line 40) — all three widgets now shipped (active enrollments per campaign, recent sends timeline, completion rate per campaign).
+- **Build**: green on first pass | **Lint**: clean | **Commit**: `a4e8f54` | **Vercel**: `dpl_7SjND6PJmpHubZFV9TmTrpdTPEMF` BUILDING → READY (~80s, production).
+- **No destructive ops, no env changes, no schema changes, no n8n changes.**
+- **Adam queue**: unchanged from 2026-04-27 AM (CRON_SECRET, Realtor Relationships drip decision, Long-Term Nurture / Past Client Retention archive-or-author decision, PA-funnel zero-contacts investigation, Sendblue + TCPA copy, NotebookLM CLI, PR #4 merge, [SOCIAL] backlog).
+- **Circuit breaker**: clean.
+
+## 2026-04-27 AM (styer-lead-gen-am) — Drip Pipeline Data-Integrity Audit + RPC Fix
+
+- **CRITICAL fix**: `get_due_drip_enrollments()` RPC referenced two non-existent columns (`ct.status`, `l.rate`) and was returning 500 on every call. Two migrations applied (`fix_get_due_drip_enrollments_contact_status_column`, `fix_get_due_drip_enrollments_loan_rate_column`) — `ct.stage AS contact_status`, `l.interest_rate AS loan_rate`. Return shape preserved; no application/types change required.
+- **Audit findings**: drip system has never sent a single email (drip_sends total = 0; drip_enrollments total = 0). Adam's mental model of "shipped, blocked on CRON_SECRET" was incomplete — the RPC was also broken. Both gates now resolved on the platform side; manual enrollment + CRON_SECRET remain.
+- **3 active campaigns missing authored content**: Long-Term Nurture (2 steps), Past Client Retention (6 steps), Realtor Relationships (4 steps). Apr 26 terminate-guard correctly silently terminates any enrollment in those — but it means those campaigns can't fire until content is authored or campaigns archived.
+- **Realtor Relationships campaign already exists in Supabase** (`ef52ed56-8a22-4d15-9f12-a1796ccf17b6`). Apr 26 spec proposed creating it from scratch — that path is now invalidated. Build scope shrinks to: register UUID in `authored-emails.ts` + author 4 emails + n8n trigger wire.
+- **Spec schema bug**: 2026-04-26 realtor spec INSERT references `slug` column (does not exist) and `trigger_type` on `drip_campaigns` (it's on `drip_steps`). Flagged for any future spec touching this schema.
+- **Audit report**: `tasks/lead-gen/audits/2026-04-27-drip-data-integrity-audit.md`.
+
+## 2026-04-27 AM (styer-social-am) — Step 1B GBP + Week 43 Content Build
+
+- **GBP auto-published**: New rate page `rates/2026-04-24.html` (30-yr 6.25% APR 6.32%, U.S./Iran negotiations driving bond rally — down from 6.37% Apr 14) — Publer job `69ef10a645572ded59c1ba30`. NMLS #513013 + APR disclosure baked in. social_activity logged (`a06ba3b7`). IG/FB/LI native versions queued in `content-repost-queue.md` (war-headline framing) for Architect to pick up — no drafts written per 2026-04-19 GBP-only Step 1B policy.
+- **Posts shipped to social_drafts**: 2. Post 187 (LinkedIn, education, ID `8db4f633`) Mon Dec 28 9 AM CT — "Rate shopping vs lender shopping" (realtor + buyer hybrid, lender-vetting heuristic). Post 188 (Facebook, authority / Real Talk, ID `dc9f2568`) Wed Dec 30 9 AM CT — "Year-end honesty on rate predictions" (admits forecasting was wrong, points back to today's-rate math). Both EVERGREEN, 9/10 first draft, APPROVED, QA PASS. NMLS #513013 in both; Post 188 quotes ~6.25% APR 6.32% with disclosure.
+- **Builder note**: Initial bash-quoted INSERT stripped apostrophes; mid-session PATCH via Python restored full contractions ("they're", "I'm", "we're", etc.) on both posts before Quality + Reviewer ran. Pattern matches prior session-log notes — Python or PG E-strings required for any future inserts.
+- **Pillar mix after Wk43**: Auth ~30% / Personal ~29% / Education ~29% / RT ~14-15% — all within ±5% tolerance. LinkedIn re-entry hit (closed 11-day gap from Post 184 Dec 17).
+- **Step 1B template gap**: master-agent.md 3A still asks for `platform: "google"` `social_drafts` row — DB constraint rejects (allowed: all/facebook/instagram/linkedin). Skipped insert; logged for future patch (drop the insert OR relax constraint).
+- **NotebookLM PUSH**: skipped (20th+ consecutive CLI timeout). Pattern unchanged — NEEDS ADAM.
+
+## 2026-04-26 PM (styer-notebooklm-nightly) — NotebookLM Sync (SEO/SEM + Lead Gen)
+
+- **SEO/SEM notebook curated**: 49/50 (-3 stale: CONTEXT Apr 25, Pasted Text junk, 2026-04-14 a11y/CWV web research; +2: refreshed CONTEXT Apr 26 from styerteam-mortgage-site, audit-Apr26).
+- **Lead Gen notebook curated**: 50/50 (-3 stale: CONTEXT Apr 25, audit-Apr25, 2026-04-10 quarterly rate review build; +3: refreshed CONTEXT Apr 26 from loanos-clone, audit-Apr26, today's realtor relationship drip spec).
+- **Master log updated**: Both digests appended to `memory/styer-mortgage/Styer_Growth_Log.md`; resynced into Styer Mortgage Master notebook.
+- **Daily digests sent**: Both via Zapier webhook → adam@thestyerteam.com (status: success on both).
+- **No new Adam action items from SEO/SEM**; 4 carryover items from Lead Gen (CRON_SECRET, realtor drip activation/cadence call, Sendblue signup, TCPA copy approval).
+
+## 2026-04-26 PM (styer-social-pm) — Week 42 Content Build
+
+- **Posts shipped to social_drafts**: 2 posts. Post 185 (Instagram, personal, ID `8d4ffc28`) Mon Dec 21 9 AM CT — Christmas-week reflection (highlight-reel-trap + spouse-as-asset, Brittany Jo by name). Post 186 (Facebook, authority, ID `5eaf3703`) Sat Dec 26 9 AM CT — January 2027 mortgage prep (Three Cs framework + FICO 8 hot take).
+- **Both EVERGREEN, 9/10 first draft, APPROVED, QA PASS**. NMLS #513013 in Post 186 (loan-product content); Post 185 has no loan content so NMLS not required. No specific rates → APR not triggered. Em-dashes + apostrophes preserved as Unicode via PG E-strings.
+- **Pillar mix after Wk42**: Auth ~30% / Personal ~30% / Education ~28% / RT ~14-15% — all within ±5% tolerance. IG re-entry hit (last IG: Post 182 Dec 13). LI takes the bench this week.
+- **Reconciliation note**: Wk41 (today AM, scheduled run unlogged in session-log.md) shipped Posts 183–184 (FB personal Dec 15 + LI education Dec 17) — confirmed via DB query before this PM build.
+- **NotebookLM PUSH**: skipped (19th+ consecutive CLI timeout). Pattern unchanged — NEEDS ADAM.
+
 ## 2026-04-26 PM (loanos-autonomous) — Drip Recent Activity Timeline
 
 - **Shipped**: `RecentSendsTimeline` component on `/dashboard/drip-campaigns` showing the 15 most-recent `drip_sends` rows across all org campaigns. Columns: Contact, Campaign, Step, Status, When (relative — `Xm/Xh/Xd ago`, falls back to date). Status colors mirror existing `SendHistoryTable`. Graceful empty state until cron fires.

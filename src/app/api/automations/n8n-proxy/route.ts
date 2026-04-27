@@ -69,6 +69,57 @@ export async function POST(req: NextRequest) {
         fd.append(key, value as Blob | string)
       }
       upstream = await fetch(target, { method: 'POST', body: fd })
+    } else if (contentType.includes('application/json')) {
+      const text = await req.text()
+      let parsed: Record<string, unknown> | null = null
+      try {
+        const j = JSON.parse(text)
+        if (j && typeof j === 'object' && !Array.isArray(j)) parsed = j as Record<string, unknown>
+      } catch {
+        // not JSON-parseable; fall through to plain forward
+      }
+
+      if (parsed && typeof parsed.file_url === 'string') {
+        // PDF-via-URL path: client uploaded the file to Supabase Storage to
+        // sidestep Vercel's 4.5MB ingress limit, then sent us the signed URL.
+        // Fetch it here and forward to n8n as the same multipart shape it has
+        // always received (binary `file` + `loan_context` JSON string).
+        const supabaseBase = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+        let allowedHost: string | null = null
+        try { allowedHost = supabaseBase ? new URL(supabaseBase).host : null } catch { allowedHost = null }
+        let fileUrlParsed: URL
+        try { fileUrlParsed = new URL(parsed.file_url) } catch {
+          return NextResponse.json({ error: 'Invalid file_url' }, { status: 400 })
+        }
+        if (!allowedHost || fileUrlParsed.host !== allowedHost) {
+          return NextResponse.json({ error: 'file_url host not allowed' }, { status: 400 })
+        }
+
+        const fileRes = await fetch(parsed.file_url)
+        if (!fileRes.ok) {
+          return NextResponse.json(
+            { error: `Failed to fetch uploaded file: ${fileRes.status}` },
+            { status: 502 }
+          )
+        }
+        const fileBlob = await fileRes.blob()
+        const fileName = typeof parsed.file_name === 'string' ? parsed.file_name : 'upload.pdf'
+        const loanContext: Record<string, unknown> = {}
+        for (const [k, v] of Object.entries(parsed)) {
+          if (k !== 'file_url' && k !== 'file_name') loanContext[k] = v
+        }
+
+        const fd = new FormData()
+        fd.append('file', fileBlob, fileName)
+        fd.append('loan_context', JSON.stringify(loanContext))
+        upstream = await fetch(target, { method: 'POST', body: fd })
+      } else {
+        upstream = await fetch(target, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: text,
+        })
+      }
     } else {
       const body = await req.text()
       upstream = await fetch(target, {

@@ -2162,6 +2162,7 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const { userId } = useOrg()
 
   const displayName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ') || loan.borrower_name || loan.loan_name || '(unnamed)'
 
@@ -2204,10 +2205,29 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
         })
       } else if (workflow.triggerType === 'pdf') {
         if (!file) { setError('Please select a file.'); setSending(false); return }
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('loan_context', JSON.stringify(loanContext))
-        res = await fetch(proxyUrl, { method: 'POST', body: fd })
+        if (!userId) { setError('Not authenticated.'); setSending(false); return }
+        // Upload to Supabase Storage first, then send only the signed URL to the
+        // proxy. Direct multipart through the proxy hits Vercel's 4.5MB body
+        // limit (FUNCTION_PAYLOAD_TOO_LARGE) for typical contract PDFs.
+        const supabase = createClient()
+        const storagePath = `${userId}/${loan.id}/automations/${Date.now()}_${file.name}`
+        const { error: uploadErr } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, file, { contentType: file.type || 'application/pdf' })
+        if (uploadErr) { setError('Upload failed: ' + uploadErr.message); setSending(false); return }
+        const { data: signed, error: signErr } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(storagePath, 600)
+        if (signErr || !signed?.signedUrl) {
+          setError('Could not generate signed URL: ' + (signErr?.message || 'unknown'))
+          setSending(false)
+          return
+        }
+        res = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...loanContext, file_url: signed.signedUrl, file_name: file.name }),
+        })
       } else {
         res = await fetch(proxyUrl, {
           method: 'POST',

@@ -87,6 +87,8 @@ export interface DripSendRow {
 export interface DripCampaignWithStats extends DripCampaignRow {
   step_count: number
   enrollment_count: number
+  completed_count: number
+  removed_count: number
   last_send_at: string | null
 }
 

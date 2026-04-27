@@ -15,6 +15,14 @@ export default function CampaignCard({ campaign, onClick }: CampaignCardProps) {
     ? `Last send: ${new Date(campaign.last_send_at).toLocaleDateString()}`
     : 'No sends yet'
 
+  const finishedCount = campaign.completed_count + campaign.removed_count
+  const completionRate = finishedCount > 0
+    ? `${Math.round((campaign.completed_count / finishedCount) * 100)}% completed`
+    : '— completion'
+  const completionTitle = finishedCount > 0
+    ? `${campaign.completed_count} of ${finishedCount} finished enrollments completed all steps (${campaign.removed_count} removed)`
+    : 'No finished enrollments yet'
+
   return (
     <div
       onClick={onClick}
@@ -30,6 +38,7 @@ export default function CampaignCard({ campaign, onClick }: CampaignCardProps) {
         <div className="flex gap-6 font-mono text-[11px] text-loanmuted">
           <span>{campaign.step_count} steps</span>
           <span>{campaign.enrollment_count} enrolled</span>
+          <span title={completionTitle}>{completionRate}</span>
           <span>{lastSend}</span>
         </div>
       </div>

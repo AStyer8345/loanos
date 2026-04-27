@@ -29,9 +29,11 @@ export async function getCampaignsWithStats(orgId: string): Promise<DripCampaign
 
   const stats = await Promise.all(
     campaigns.map(async (c) => {
-      const [stepRes, enrollRes, sendRes] = await Promise.all([
+      const [stepRes, enrollRes, completedRes, removedRes, sendRes] = await Promise.all([
         supabase().from('drip_steps').select('id', { count: 'exact', head: true }).eq('campaign_id', c.id),
         supabase().from('drip_enrollments').select('id', { count: 'exact', head: true }).eq('campaign_id', c.id).eq('status', 'active'),
+        supabase().from('drip_enrollments').select('id', { count: 'exact', head: true }).eq('campaign_id', c.id).eq('status', 'completed'),
+        supabase().from('drip_enrollments').select('id', { count: 'exact', head: true }).eq('campaign_id', c.id).eq('status', 'removed'),
         supabase().from('drip_sends').select('sent_at').eq('org_id', orgId).not('sent_at', 'is', null).order('sent_at', { ascending: false }).limit(1),
       ])
       return {
@@ -39,6 +41,8 @@ export async function getCampaignsWithStats(orgId: string): Promise<DripCampaign
         exit_rules: (c.exit_rules as unknown as DripCampaignWithStats['exit_rules']) ?? [],
         step_count: stepRes.count ?? 0,
         enrollment_count: enrollRes.count ?? 0,
+        completed_count: completedRes.count ?? 0,
+        removed_count: removedRes.count ?? 0,
         last_send_at: sendRes.data?.[0]?.sent_at ?? null,
       }
     })

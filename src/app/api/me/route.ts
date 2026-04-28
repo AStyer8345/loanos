@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
+import { getOrgFeatures } from '@/lib/features/getOrgFeatures'
 import { checkRateLimit } from '@/lib/rateLimit'
 
 export async function GET(request: NextRequest) {
@@ -11,7 +12,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const ctx = await getOrganization()
-    return NextResponse.json(ctx)
+    const features = await getOrgFeatures()
+    return NextResponse.json({ ...ctx, features })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

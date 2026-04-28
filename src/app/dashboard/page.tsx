@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
+import { getOrgFeatures } from '@/lib/features/getOrgFeatures'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
@@ -35,6 +36,7 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
   const supabase = createClient()
+  const features = await getOrgFeatures()
 
   // ── System admin check (for EmailAutomationCard gate) ──────────────────────
   let isSystemAdmin = false
@@ -562,7 +564,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      {isSystemAdmin && (
+      {isSystemAdmin && features.email_intelligence && (
         <div className="px-4 lg:px-6 pt-4">
           <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
             <EmailAutomationCard />

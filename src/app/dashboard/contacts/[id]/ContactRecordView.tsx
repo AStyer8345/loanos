@@ -24,6 +24,7 @@ import {
   BarChart2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
+import { useOrg } from '@/components/OrgProvider'
 import AutomationPanel from '@/components/automations/AutomationPanel'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
@@ -1073,6 +1074,7 @@ function ActivityFeedItem({ item, onDelete }: { item: ContactActivityRow; onDele
 
 // ── Main component ───────────────────────────────────────────────────────────
 export function ContactRecordView(props: Props) {
+  const { features } = useOrg()
   const {
     contact,
     loans,
@@ -1353,14 +1355,16 @@ export function ContactRecordView(props: Props) {
             <GitMerge size={13} />
             Merge
           </button>
-          <Link
-            href={`/dashboard/scenarios/new?contact_id=${contact.id}`}
-            style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)', textDecoration: 'none' }}
-            title="Create scenario pre-filled with this contact"
-          >
-            <BarChart2 size={13} />
-            Create Scenario
-          </Link>
+          {features.scenarios && (
+            <Link
+              href={`/dashboard/scenarios/new?contact_id=${contact.id}`}
+              style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)', textDecoration: 'none' }}
+              title="Create scenario pre-filled with this contact"
+            >
+              <BarChart2 size={13} />
+              Create Scenario
+            </Link>
+          )}
         </div>
 
         {/* Log prompt after Call/Text/Email */}
@@ -1919,6 +1923,7 @@ export function ContactRecordView(props: Props) {
                 </div>
 
                 {/* Drip Campaigns */}
+                {features.drip_campaigns && (
                 <div style={cardStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: dripEnrollments.length > 0 ? 12 : 0 }}>
                     <div style={labelStyle}>DRIP CAMPAIGNS</div>
@@ -2092,15 +2097,18 @@ export function ContactRecordView(props: Props) {
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* ── Email Automations ── */}
-                <div style={cardStyle}>
-                  <AutomationPanel
-                    recordType="contact"
-                    recordId={contact.id}
-                    contactId={contact.id}
-                  />
-                </div>
+                {features.automations && (
+                  <div style={cardStyle}>
+                    <AutomationPanel
+                      recordType="contact"
+                      recordId={contact.id}
+                      contactId={contact.id}
+                    />
+                  </div>
+                )}
 
               </div>
             )}

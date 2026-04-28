@@ -1,5 +1,30 @@
 # LoanOS Changelog
 
+## 2026-04-28 (org-feature-flags) — Per-org UI feature flags shipped
+
+- **Schema**: migration `094_org_features.sql` adds `organizations.features jsonb`. NULL or missing key = enabled (default-on). Adam's row stays NULL — no UX change. Scott Sears's org (`40377391-…`) seeded with all 9 gated flags = `false`.
+- **Helper**: `src/lib/features/getOrgFeatures.ts` — server-only, `react.cache()` per request. Reads `organizations.features` for the authenticated user's org and coerces to a fully-typed `OrgFeatures` object. Client-safe types/constants live at `src/lib/features/types.ts` (no server-only imports).
+- **Plumbing**: `dashboard/layout.tsx` (server) calls helper and passes features to `<TopNav features={…} />`. `OrgProvider` extended to fetch features via `/api/me` and expose them to client components via `useOrg().features`.
+- **UI gates** (default = render; flag `false` = hide):
+  - TopNav primary "Email" pillar → `drip_campaigns`
+  - TopNav More menu — Scenarios, Lenders, Marketing, Drafts, Templates → respective flags. More button auto-hides when no items remain (Scott's case). Mobile sheet mirrors the same filtering.
+  - Dashboard `EmailAutomationCard` → `email_intelligence` (still also requires sys-admin)
+  - Contact detail "Create Scenario" link → `scenarios`
+  - Contact detail "DRIP CAMPAIGNS" card → `drip_campaigns`
+  - Contact detail "Email Automations" / `AutomationPanel` → `automations`
+- **Admin UI**: `/admin/feature-flags` (sys-admin only via existing admin layout `isSystemAdmin()` redirect + `requireAdmin()` on the API route). Loads all orgs, renders a checkbox grid for the 9 flags. PATCH writes back to `organizations.features` jsonb (or NULL when fully default).
+- **Verification**: `npm run build` green. Supabase RLS impersonation probe via `SET LOCAL request.jwt.claims` confirms — Scott reads back all 9 flags `false`; Adam reads back `features: null` (default-on path). Out of scope: API route gating (RLS already covers tenant isolation per 2026-04-21 audit).
+
+## 2026-04-28 (loanos-launch-standup) — Day 34 standup written
+
+- **Standup**: `tasks/standup-log.md` Day 34 entry prepended. 3 days to May 1.
+- **Two blockers dropped**: PR #4 (`feat/tenant-scoping-hardening`) confirmed merged in commit history (`9db5d22`); `CRON_SECRET` confirmed set + middleware exemption shipped (`241cf9a`, `3315102`). Both had been rolling 5+ standups as NEEDS-ADAM items.
+- **Vercel**: latest prod `dpl_2EbrzaRZBJSzUdzZSfrwHnpUxYxj` (SHA `5935dea`) READY; all 20 most-recent deployments READY.
+- **n8n**: 38 workflows, 33 active, 5 inactive (all intentional — Pre-Drop Warm-Up, Quarterly Rate Review, Review Request polling, Morning Briefing Team unwired, Contract Received v3 staging).
+- **Audits**: 0 CRITICAL open, 1 MEDIUM remains (#5 field-level encryption, ADAM-BLOCKED on GLBA attorney). No new audit reports since 2026-04-05.
+- **CONTEXT.md** Standup Agent Status block (3 fields) refreshed.
+- Read-only standup. Zero code changes, zero Supabase mutations, zero n8n changes.
+
 ## 2026-04-28 PM (loanos-autonomous) — MISMO importer follow-ups (error surface + pre-submission dedup)
 
 - **Shipped**: Two surgical follow-ups to the 2026-04-23 MISMO importer (Scott Pilot scope) — both items flagged in `TODO.md` line 44–48.
@@ -3737,3 +3762,9 @@ Arive (loan event)
 ### Adam Action Items (NEW — both NEEDS ADAM)
 - TCPA disclosure copy approval for 5 lead-capture forms — drafted in `tasks/lead-gen/research/2026-04-25-tcpa-sms-one-to-one-consent-web.md`
 - Sendblue account signup — credentials needed before n8n iMessage credential can be provisioned
+
+## 2026-04-28 AM — Scenarios no-op (4th consecutive)
+- 4th consecutive no-build exit (Apr 25/26/27/28); Scenarios Tiers 1–8 still complete, GOALS.md still has no scenarios work
+- Updated NEEDS ADAM in TODO.md to reflect 4-streak and recommend option (b) redirect → FNM 3.4 / drip given 3-day runway to May 1
+- Refreshed CONTEXT.md "Scenarios Agent Status" three fields; appended session-log.md entry
+- No code changes, no commit, no deploy

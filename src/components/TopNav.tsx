@@ -30,6 +30,7 @@ import {
 import SignOutButton from '@/app/dashboard/SignOutButton'
 import GlobalSearch from './GlobalSearch'
 import ActivityFeed from './ActivityFeed'
+import type { OrgFeatures } from '@/lib/features/types'
 
 type Section =
   | 'dashboard'
@@ -46,22 +47,29 @@ type NavItem = {
   icon: React.ReactNode
 }
 
+type MoreItem = {
+  label: string
+  href: string
+  icon: React.ReactNode
+  requires?: keyof OrgFeatures
+}
+
 // Primary nav — the four pillars a non-technical LO needs day one.
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS_ALL: (NavItem & { requires?: keyof OrgFeatures })[] = [
   { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
   { label: 'Pipeline',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
   { label: 'Contacts',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
-  { label: 'Email',     section: 'email',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" /> },
+  { label: 'Email',     section: 'email',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" />, requires: 'drip_campaigns' },
 ]
 
 // Secondary nav — power-user surfaces tucked behind a More dropdown.
 // All map to section 'more' so the More button highlights when any are active.
-const MORE_ITEMS: { label: string; href: string; icon: React.ReactNode }[] = [
-  { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" /> },
-  { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" /> },
-  { label: 'Marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" /> },
-  { label: 'Drafts',    href: '/dashboard/drafts',    icon: <Inbox className="size-4" /> },
-  { label: 'Templates', href: '/dashboard/automations', icon: <FileCode className="size-4" /> },
+const MORE_ITEMS_ALL: MoreItem[] = [
+  { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" />, requires: 'scenarios' },
+  { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" />, requires: 'lender_knowledge' },
+  { label: 'Marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" />, requires: 'marketing' },
+  { label: 'Drafts',    href: '/dashboard/drafts',    icon: <Inbox className="size-4" />, requires: 'drip_campaigns' },
+  { label: 'Templates', href: '/dashboard/automations', icon: <FileCode className="size-4" />, requires: 'automations' },
 ]
 
 function sectionFromPath(pathname: string): Section | null {
@@ -81,10 +89,13 @@ function sectionFromPath(pathname: string): Section | null {
   return null
 }
 
-export default function TopNav() {
+export default function TopNav({ features }: { features: OrgFeatures }) {
   const pathname = usePathname()
   const router = useRouter()
   const currentSection = sectionFromPath(pathname || '')
+
+  const NAV_ITEMS = NAV_ITEMS_ALL.filter(i => !i.requires || features[i.requires])
+  const MORE_ITEMS = MORE_ITEMS_ALL.filter(i => !i.requires || features[i.requires])
 
   // More dropdown state + click-outside handler
   const [moreOpen, setMoreOpen] = useState(false)
@@ -142,6 +153,7 @@ export default function TopNav() {
               })}
 
               {/* More dropdown */}
+              {MORE_ITEMS.length > 0 && (
               <div ref={moreRef} className="relative">
                 <button
                   type="button"
@@ -189,6 +201,7 @@ export default function TopNav() {
                   </div>
                 )}
               </div>
+              )}
             </nav>
           </div>
 
@@ -285,10 +298,14 @@ export default function TopNav() {
                       )
                     })}
 
-                    <div className="my-3 border-t border-input" />
-                    <div className="px-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                      More
-                    </div>
+                    {MORE_ITEMS.length > 0 && (
+                      <>
+                        <div className="my-3 border-t border-input" />
+                        <div className="px-3 pb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                          More
+                        </div>
+                      </>
+                    )}
                     {MORE_ITEMS.map(item => {
                       const isActive = pathname?.startsWith(item.href) ?? false
                       return (

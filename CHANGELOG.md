@@ -1,5 +1,66 @@
 # LoanOS Changelog
 
+## 2026-04-28 PM (loanos-autonomous) — MISMO importer follow-ups (error surface + pre-submission dedup)
+
+- **Shipped**: Two surgical follow-ups to the 2026-04-23 MISMO importer (Scott Pilot scope) — both items flagged in `TODO.md` line 44–48.
+- **`MISMOUpload.tsx`**: error handler on `/api/mismo/parse` now reads the JSON `error` body (`{ error?: string }`) when the response is non-OK, falling back to `Failed to parse MISMO file (HTTP <status>)` if the body is unparseable. The catch block surfaces the actual error message via `e.message`. Users now see the real reason (e.g. "Could not extract a borrower name or loan number from this file. Is it a MISMO 3.4 export?") instead of the generic "verify the format" line.
+- **`api/mismo/import/route.ts`**: secondary dedup branch added when `parsed.loan.loan_number` is null (pre-submission Calyx Point exports — Scott's first uploads). Matches existing `(organization_id, contact_id, property_address, loan_amount)` rows; only fires when all three optional fields are populated. Same response shape as the loan_number dedup branch (`{ loan_id, contact_id, duplicate: true }`). No new index — `.eq()` filters use existing org_id + contact_id columns; `loan_amount` + `property_address` are populated whenever the source file has them.
+- **Skipped (deferred per TODO judgment)**: contact-match race (Adam noted "not urgent for Scott's solo use"); co-borrower regex greediness ("fine for single-borrower beta with Scott").
+- **Build**: green on first pass | **Lint**: clean | **Commit**: pending | **Vercel**: pending.
+- **Adam queue cleanup**: `[LEAD-GEN] 2026-04-23 SET CRON_SECRET IN VERCEL` and `[LOANOS] 2026-04-22 REVIEW AND MERGE PR #4` both confirmed already done in commit history (`241cf9a`, `3315102`, `9db5d22`) — marked [x] in `tasks/ADAM-TODO.md`.
+- **No destructive ops, no env changes, no schema changes, no n8n changes.**
+- **Circuit breaker**: clean (verified — latest production `dpl_7Eqf8rbu7VvUbctQU3YGrmukyhuy` READY before this run started).
+
+## 2026-04-28 AM (styer-lead-gen-am) — PA-funnel zero-leads diagnosis
+
+- **Diagnosis output**: `tasks/lead-gen/research/2026-04-28-pa-funnel-zero-leads-diagnosis.md` (NEW). PA-funnel zero-leads flag from 2026-04-27 audit RESOLVED as "not a code bug" — code path traces clean end-to-end (get-preapproved.html → lead-intake.js → /api/contacts/web-lead all preserve `lead_source: 'Pre-Approval Funnel'`). Funnel has captured ≤1 real submission since 2026-03-29; ZERO since the 2026-04-15 lead-intake.js cutover. n8n PA-notify webhook triggerCount = 1 in 32 days. Recommendation: traffic/CTR analysis, not code surgery.
+- **ADAM-TODO**: "INVESTIGATE — ZERO PA-FUNNEL CONTACTS" → resolved [x]. Replaced with agent-actionable "ANALYZE — `/get-preapproved` traffic + CTR" entry for next session.
+- **CONTEXT.md** Lead Gen Agent Status block updated.
+- **NotebookLM CLI**: 0.3.4 responsive — first successful AM lead-gen op in 20 sessions. Pull report at `tasks/lead-gen/notebooklm-pull-2026-04-28.md`.
+- Read-only investigation. Zero code changes, zero Supabase mutations, zero n8n changes.
+
+## 2026-04-28 AM (styer-social-am) — Step 1B GBP + Wk45 Content Build (Posts 191–192)
+
+- **GBP auto-published**: New blog `blog/2026-04-27-why-home-prices-arent-crashing.html` ("Why Home Prices Aren't Crashing" — Adam's lock-in/equity/no-2008 thesis). Publer job `69f062de8b17fc4ff5c6b9ea`, 250 words, NMLS #513013 baked in, directional rate language only (no APR-disclosure trigger). social_activity logged (`4f2f32c7`). Companion realtor-update SKIPPED on GBP (duplicate data with blog — would dilute feed); both pieces queued in `content-repost-queue.md` for Architect's IG/FB/LI native pipeline (realtor update flagged LinkedIn-PRIMARY).
+- **Posts shipped to social_drafts**: 2 EVERGREEN. Post 191 (Facebook, Real Talk → DB `authority`, ID `5c64d991`, Mon Jan 11 2027 9 AM CT) — borrower-facing native of blog, "Three years of YouTube crash predictions" framing. Post 192 (LinkedIn, Education, ID `1abae5ab`, Wed Jan 13 2027 9 AM CT) — realtor-facing native of realtor-update, "If your buyer says 'I'm waiting for the crash,' here's the conversation" — teaches objection-handling.
+- Both 9/10 first draft, 0 rewrites. BBQ + Jessica tests PASS. Reviewer APPROVED, QA PASS. Apostrophes + em-dashes preserved via Python urllib insert. NMLS #513013 in both (loan-related content). All stats traced to source content (80% lock-in / 53% equity / 38 metros / 34% Feb cuts / Great Housing Reset / MBA -4% / spring +11% / ~1% growth) — no fabrication, no specific rate %, no specific payment $ (delta-only language).
+- Strategy: route Step 1B queued content immediately into native posts to maximize today's content investment freshness window. Closes 12-day FB gap from Post 188 Dec 30.
+- Initial Post 191 with `pillar='real_talk'` rejected by check constraint — re-inserted with `pillar='authority'` (matches Wk44 Post 190 RT→authority pattern). Builder activity logged (`46c70b05`).
+- 🎉 **NotebookLM CLI RECOVERED after 22-day outage** — first successful push since 2026-04-12. Master notebook note `ce305c48-4cdf-485c-a9e9-2567c578516e` + social domain notebook note `57df50d6-b94d-4451-830d-04714c281f73` both written. CLI 0.3.4. All ops (use, note create) returned in seconds, well under 60s budget. Recommend monitoring next AM session before declaring blocker fully resolved.
+
+## 2026-04-27 PM 22:00 (styer-notebooklm-nightly) — SEO/SEM + Lead Gen NotebookLM PUSH+CURATE
+
+- SEO/SEM notebook: removed 3 stale (CONTEXT.md Apr 26, audit-2026-04-26, 2026-04-17 refi-content-seo-web), added 2 fresh (refreshed CONTEXT.md Apr 27 + audit-2026-04-27). Final 49/50.
+- Lead Gen notebook: removed 3 stale (CONTEXT.md Apr 26, audit-2026-04-26, 2026-04-12 mailchimp-execution-pack — Mailchimp drip approach retired), added 3 fresh (refreshed CONTEXT.md + audit-2026-04-27 + 2026-04-27 drip-data-integrity-audit). Final 50/50.
+- Master growth log appended with seo-sem-pm + lead-gen-pm digest entries; Styer Mortgage Master notebook re-synced (source refreshed).
+- Daily digests written to `tasks/seo-sem/digests/2026-04-27-digest.md` + `tasks/lead-gen/digests/2026-04-27-digest.md` — emails NOT sent (scheduled task SKILL.md overrides curator playbook Step 5c with "Do not send any emails to Adam"; 2026-04-26 violation acknowledged + corrected tonight).
+- 4 NEW NEEDS ADAM items from lead-gen AM session surfaced in digest: CRON_SECRET verification (now load-bearing post-RPC-fix), Realtor Relationships activation criteria + cadence, Long-Term Nurture + Past Client Retention archive vs author, investigate zero `lead_source='Pre-Approval Funnel'` contacts.
+
+## 2026-04-27 PM (styer-social-pm) — Wk44 Content Build (Posts 189–190)
+
+- Wk44 (Jan 4–10, 2027): 2 EVERGREEN drafts inserted into `social_drafts`. Post 189 — "No more New Year's resolutions" (Instagram, Personal pillar, ID `eeee4d95`, Mon Jan 4 9 AM CT). Post 190 — "Pre-approval letters are paper" (LinkedIn, Real Talk → DB `authority`, ID `a26e45b6`, Wed Jan 6 9 AM CT).
+- Both posts 9/10 first draft, 0 rewrites. BBQ + Jessica tests PASS — Adam-specific framing in both ("Bible open" + "highlight reel" 189; "rate engine" + "week three of escrow" + empathetic competitor framing 190). Reviewer APPROVED, QA PASS.
+- Pillar mix lifts Personal toward 30% (was ~29%); Real Talk holds ~15% target. LinkedIn + Instagram both refreshed (closed 14-day IG gap from Post 185 Dec 21).
+- NMLS #513013 included on Post 190 (qualification work mentioned); not required Post 189 (no rate/loan content). No specific rates quoted → APR not triggered.
+- Step 1B + Refresh + NotebookLM PULL/PUSH all skipped per PM cadence + 21st-consecutive CLI timeout. social_activity logged for both inserts (`e71ba4e4`, `f1765a84`).
+
+## 2026-04-27 AM (loanos-scenarios-am) — 3rd Consecutive No-Build Exit
+
+- Read GOALS.md (Week of Apr 20) — LoanOS Product priorities are FNM 3.4 import, drip campaigns, notes/activity log fix. No scenarios work on the list.
+- Re-confirmed Tiers 1–8 of the Scenarios program are all COMPLETE (last build 2026-04-24 AM, mobile swipe cards) — nothing left in `tasks/scenarios/domain-queue.md` to ship.
+- Discovered prior NEEDS ADAM entry was missing from TODO.md (CONTEXT.md pointed to line 16; that line is the Mailchimp Customer Journeys item). Added a fresh NEEDS ADAM entry above the NotebookLM playbook reconciliation entry, now logging 3 consecutive no-build runs (Apr 25 + Apr 26 + Apr 27).
+- Updated CONTEXT.md Scenarios Agent Status (three fields) + appended this session to `tasks/scenarios/session-log.md` + wrote EXIT to `tasks/scenarios/subagent-status.md`.
+- No code touched, no commits, no Vercel deploy. Awaiting Adam decision (retire / redirect / pause).
+
+## 2026-04-27 (loanos-launch-standup) — Day 33 Standup (4 days to May 1)
+
+- Standup entry written to `tasks/standup-log.md`.
+- Vercel: all 20 most-recent deployments READY; latest prod `dpl_5d9rnLYT3oCZwfWXmPyc4Nxh2fu1`.
+- n8n: 38 workflows, 33 active, 5 inactive (all intentional). Core launch workflows ACTIVE.
+- Yesterday shipped: Recent Activity timeline (`f54c16b`). Today shipped: completion rate widget (`a4e8f54`) + AM RPC fix (`get_due_drip_enrollments` column rename).
+- Blockers (all Adam-gated, rolled 5+): PR #4 merge, CRON_SECRET, LOANOS_AGENT_SECRET, TCPA/Sendblue, 3 drip campaigns missing content, marketing site silent.
+- Conflict logged: scheduled-task config references April 26 launch (passed); operational target is May 1 per GOALS.md.
+
 ## 2026-04-27 PM (loanos-autonomous) — Drip Completion Rate Widget
 
 - **Shipped**: Per-campaign completion rate inline on each `CampaignCard` on `/dashboard/drip-campaigns`. Renders "X% completed" between `enrolled` and `lastSend`, with a `title=` tooltip explaining the math. Empty state ("— completion") shows until at least one enrollment transitions to `completed` or `removed`.

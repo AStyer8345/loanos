@@ -91,12 +91,15 @@ export default function MISMOUpload({ onImport }: MISMOUploadProps) {
         body: formData,
       })
 
-      if (!res.ok) throw new Error('Failed to parse MISMO file')
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null
+        throw new Error(body?.error || `Failed to parse MISMO file (HTTP ${res.status})`)
+      }
 
       const data = (await res.json()) as { fields: ParsedMismo; filename: string }
       setParsed(data.fields)
     } catch (e) {
-      setError('Failed to parse MISMO file. Please verify the format.')
+      setError(e instanceof Error ? e.message : 'Failed to parse MISMO file. Please verify the format.')
       console.error(e)
     } finally {
       setUploading(false)

@@ -116,6 +116,28 @@ export async function POST(req: NextRequest) {
           duplicate: true,
         })
       }
+    } else if (parsed.property.address && parsed.loan.loan_amount != null) {
+      // Pre-submission Calyx exports omit loan_number — dedup on
+      // (contact_id, property_address, loan_amount) instead.
+      const { data: dupe, error: dupeErr } = await supabase
+        .from('loans')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('contact_id', contactId)
+        .eq('property_address', parsed.property.address)
+        .eq('loan_amount', parsed.loan.loan_amount)
+        .limit(1)
+        .maybeSingle()
+      if (dupeErr) {
+        return NextResponse.json({ error: `Loan dedup check failed: ${dupeErr.message}` }, { status: 500 })
+      }
+      if (dupe) {
+        return NextResponse.json({
+          loan_id: dupe.id,
+          contact_id: contactId,
+          duplicate: true,
+        })
+      }
     }
 
     // 6) Loan insert

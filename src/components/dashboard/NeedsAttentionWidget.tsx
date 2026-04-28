@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, Clock, ExternalLink, X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { useOrg } from '@/components/OrgProvider'
 import { Card } from '@/components/ui/card'
 import type { NeedsAttentionItem } from '@/lib/needsAttention'
+
+// Intents that justify a NEW LEAD badge — must match the engagement set in
+// needsAttentionScore. A "new lead" is only meaningful if the unknown sender is
+// trying to engage; bare automated/system mail with contact_id=NULL is not.
+const ENGAGEMENT_INTENTS = new Set(['question', 'status_request', 'scheduling', 'complaint', 'urgent'])
 
 interface NeedsAttentionWidgetProps {
   items: NeedsAttentionItem[]
@@ -34,20 +37,26 @@ function daysLabel(n: number): string {
 
 export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
-  const supabase = createClient()
-  const { organizationId } = useOrg()
 
   const visible = items.filter(i => !dismissed.has(i.id))
 
   async function handleDismiss(id: string) {
     setDismissed(prev => new Set([...prev, id]))
-    if (!organizationId) return
-    await supabase
-      .from('activity_log')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update({ dismissed: true } as any)
-      .eq('id', id)
-      .eq('organization_id', organizationId)
+    // activity_log has no UPDATE RLS policy — client .update() silently fails.
+    // Use the service-role endpoint that already handles this for the inbox.
+    const res = await fetch('/api/emails/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailId: id, dismiss: true }),
+    })
+    if (!res.ok) {
+      setDismissed(prev => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+      console.error('[NeedsAttention] dismiss failed', await res.text())
+    }
   }
 
   if (visible.length === 0) return null
@@ -78,7 +87,7 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    {item.is_new_lead && (
+                    {item.is_new_lead && ENGAGEMENT_INTENTS.has(item.ai_intent ?? '') && (
                       <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
                         🆕 NEW LEAD
                       </span>

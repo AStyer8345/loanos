@@ -37,8 +37,8 @@ export type ExtractedContact = {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const STAGES = [
-  'lead', 'pre-app', 'application', 'pre-approved',
-  'in process', 'closing', 'closed', 'other',
+  'lead', 'cold', 'pre-app', 'application', 'pre-approved',
+  'in process', 'closing', 'closed', 'other lender', 'other',
   // Common shorthand
   'new app', 'new application', 'active', 'pre-approval',
 ]
@@ -55,6 +55,8 @@ const STAGE_NORMALIZE: Record<string, string> = {
   'in process': 'In Process',
   'closing': 'Closing',
   'closed': 'Closed',
+  'cold': 'Cold',
+  'other lender': 'Other Lender',
   'other': 'Other',
 }
 

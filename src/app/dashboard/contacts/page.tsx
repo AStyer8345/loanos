@@ -210,7 +210,7 @@ const QUICK_FILTERS = [
 type CustomListRule = { field: string; operator: string; value: string }
 type CustomList = { id: string; name: string; page: 'contacts' | 'loans'; rules: CustomListRule[] }
 const LS_CUSTOM_LISTS_KEY = 'loanos_custom_lists_v1'
-const STAGES = ['Lead', 'Pre-App', 'Application', 'Pre-Approved', 'In Process', 'Closing', 'Closed', 'Other'] as const
+const STAGES = ['Lead', 'Cold', 'Pre-App', 'Application', 'Pre-Approved', 'In Process', 'Closing', 'Closed', 'Other Lender', 'Other'] as const
 
 const CONTACT_FILTER_FIELDS = [
   { id: 'contact_type', label: 'Type' },
@@ -262,6 +262,7 @@ const ALL_COLUMNS: ColumnDef[] = [
         {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—'}
       </Link>
     ) },
+  { id: 'created_at',   label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
   { id: 'type',         label: 'Type',             minWidth: 100, render: c => c.contact_type ?? '—' },
   { id: 'phone',        label: 'Phone',            minWidth: 140, render: c => <PhoneCell value={c.phone} /> },
   { id: 'email',        label: 'Email',            minWidth: 220, render: c => <EmailCell value={c.email} /> },
@@ -310,7 +311,6 @@ const ALL_COLUMNS: ColumnDef[] = [
         </span>
       )
     } },
-  { id: 'created',         label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
 ]
 
 const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by', 'last_touch']
@@ -323,12 +323,14 @@ const DRAGGABLE_COL_IDS = ALL_COLUMNS.filter(c => c.id !== 'name').map(c => c.id
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   const map: Record<string, string> = {
     'Lead':         'color-mix(in srgb, var(--primary) 15%, transparent)',
+    'Cold':         'rgba(120,160,200,0.18)',
     'Pre-App':      'color-mix(in srgb, var(--primary) 20%, transparent)',
     'Application':  'rgba(100,160,255,0.15)',
     'Pre-Approved': 'rgba(80,200,120,0.15)',
     'In Process':   'rgba(80,160,200,0.15)',
     'Closing':      'rgba(160,100,220,0.15)',
     'Closed':       'rgba(100,100,100,0.15)',
+    'Other Lender': 'rgba(220,90,90,0.18)',
   }
   return {
     display: 'inline-block', padding: '2px 8px', borderRadius: 3,
@@ -682,16 +684,25 @@ export default function ContactsPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LS_COLUMNS_KEY)
-      if (stored) setVisibleColumns(JSON.parse(stored))
+      if (stored) {
+        const parsed: string[] = JSON.parse(stored)
+        const renamed = parsed.map(id => id === 'created' ? 'created_at' : id)
+        if (!renamed.includes('created_at')) renamed.push('created_at')
+        setVisibleColumns(renamed)
+      } else {
+        setVisibleColumns([...DEFAULT_COLUMNS, 'created_at'])
+      }
     } catch {}
     try {
       const storedOrder = localStorage.getItem(LS_COL_ORDER_KEY)
       if (storedOrder) {
         const parsed: string[] = JSON.parse(storedOrder)
-        // Merge: keep stored order, add any new columns at the end
+        const renamed = parsed.map(id => id === 'created' ? 'created_at' : id)
+        const withoutCreated = renamed.filter(id => id !== 'created_at' && DRAGGABLE_COL_IDS.includes(id))
         const merged = [
-          ...parsed.filter(id => DRAGGABLE_COL_IDS.includes(id)),
-          ...DRAGGABLE_COL_IDS.filter(id => !parsed.includes(id)),
+          'created_at',
+          ...withoutCreated,
+          ...DRAGGABLE_COL_IDS.filter(id => id !== 'created_at' && !withoutCreated.includes(id)),
         ]
         setColumnOrder(merged)
       }

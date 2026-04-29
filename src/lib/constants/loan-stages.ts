@@ -195,18 +195,18 @@ export const IN_PROCESS_STATUSES = rawStatusesForGroup(STAGE_GROUPS.IN_PROCESS)
 // These are the canonical values stored in the contacts.stage column.
 
 const CANONICAL_CONTACT_STAGES = [
-  'Lead', 'Pre-App', 'Application', 'Pre-Approved',
-  'In Process', 'Closing', 'Closed', 'Other',
+  'Lead', 'Cold', 'Pre-App', 'Application', 'Pre-Approved',
+  'In Process', 'Closing', 'Closed', 'Other Lender', 'Other',
 ] as const
 
 const CONTACT_STAGE_MAP: Record<string, string> = {
   'Closed Client':           'Closed',
   'LOAN_FUNDED':             'Closed',
   'Funded / Closed':         'Closed',
-  'Lead - Cold / Inactive':  'Lead',
+  'Lead - Cold / Inactive':  'Cold',
   'Lead - Contacted':        'Lead',
   'Lead - New':              'Lead',
-  'Long Term':               'Lead',
+  'Long Term':               'Cold',
   'UNDERWRITING_SUBMITTED':  'In Process',
   'DISCLOSURE_SENT':         'In Process',
   'APPROVED_WITH_CONDITION': 'Pre-Approved',

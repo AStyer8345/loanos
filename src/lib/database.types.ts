@@ -17,6 +17,13 @@ export type Database = {
       activity_log: {
         Row: {
           action: string
+          ai_classified_at: string | null
+          ai_confidence: number | null
+          ai_intent: string | null
+          ai_reasoning: string | null
+          ai_sentiment: string | null
+          ai_suggested_action: string | null
+          ai_urgency: string | null
           contact_id: string | null
           created_at: string
           dismissed: boolean | null
@@ -35,6 +42,13 @@ export type Database = {
         }
         Insert: {
           action: string
+          ai_classified_at?: string | null
+          ai_confidence?: number | null
+          ai_intent?: string | null
+          ai_reasoning?: string | null
+          ai_sentiment?: string | null
+          ai_suggested_action?: string | null
+          ai_urgency?: string | null
           contact_id?: string | null
           created_at?: string
           dismissed?: boolean | null
@@ -53,6 +67,13 @@ export type Database = {
         }
         Update: {
           action?: string
+          ai_classified_at?: string | null
+          ai_confidence?: number | null
+          ai_intent?: string | null
+          ai_reasoning?: string | null
+          ai_sentiment?: string | null
+          ai_suggested_action?: string | null
+          ai_urgency?: string | null
           contact_id?: string | null
           created_at?: string
           dismissed?: boolean | null
@@ -1387,6 +1408,64 @@ export type Database = {
           },
         ]
       }
+      drip_suppressions: {
+        Row: {
+          added_at: string
+          added_by: string
+          campaign_id: string | null
+          contact_id: string | null
+          email: string
+          id: string
+          org_id: string
+          reason: string | null
+          scope: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          email: string
+          id?: string
+          org_id: string
+          reason?: string | null
+          scope?: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          email?: string
+          id?: string
+          org_id?: string
+          reason?: string | null
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_suppressions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "drip_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_suppressions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drip_suppressions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_drafts: {
         Row: {
           automation_id: string | null
@@ -2661,6 +2740,8 @@ export type Database = {
           calendly_link: string | null
           created_at: string
           custom_email_reply_to: string | null
+          from_email: string | null
+          from_name: string | null
           id: string
           los_type: string | null
           los_verification_mode: string
@@ -2681,6 +2762,8 @@ export type Database = {
           calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
+          from_email?: string | null
+          from_name?: string | null
           id?: string
           los_type?: string | null
           los_verification_mode?: string
@@ -2701,6 +2784,8 @@ export type Database = {
           calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
+          from_email?: string | null
+          from_name?: string | null
           id?: string
           los_type?: string | null
           los_verification_mode?: string
@@ -2729,6 +2814,7 @@ export type Database = {
         Row: {
           brand_color: string | null
           created_at: string
+          features: Json | null
           id: string
           logo_url: string | null
           name: string
@@ -2739,6 +2825,7 @@ export type Database = {
         Insert: {
           brand_color?: string | null
           created_at?: string
+          features?: Json | null
           id?: string
           logo_url?: string | null
           name: string
@@ -2749,6 +2836,7 @@ export type Database = {
         Update: {
           brand_color?: string | null
           created_at?: string
+          features?: Json | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -3101,9 +3189,9 @@ export type Database = {
           borrower_name: string | null
           borrower_qa: Json | null
           created_at: string | null
-          lo_note: string | null
           current_loan_data: Json | null
           id: string
+          lo_note: string | null
           mismo_file_url: string | null
           narrative: string | null
           narrative_edited: boolean | null
@@ -3127,9 +3215,9 @@ export type Database = {
           borrower_name?: string | null
           borrower_qa?: Json | null
           created_at?: string | null
-          lo_note?: string | null
           current_loan_data?: Json | null
           id?: string
+          lo_note?: string | null
           mismo_file_url?: string | null
           narrative?: string | null
           narrative_edited?: boolean | null
@@ -3153,9 +3241,9 @@ export type Database = {
           borrower_name?: string | null
           borrower_qa?: Json | null
           created_at?: string | null
-          lo_note?: string | null
           current_loan_data?: Json | null
           id?: string
+          lo_note?: string | null
           mismo_file_url?: string | null
           narrative?: string | null
           narrative_edited?: boolean | null
@@ -3217,6 +3305,30 @@ export type Database = {
           ip_address?: string | null
           resource?: string | null
           resource_id?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          block_key: string
+          body: string
+          label: string
+          page: string
+          updated_at: string
+        }
+        Insert: {
+          block_key: string
+          body?: string
+          label: string
+          page: string
+          updated_at?: string
+        }
+        Update: {
+          block_key?: string
+          body?: string
+          label?: string
+          page?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3734,6 +3846,7 @@ export type Database = {
         Args: { p_share_token: string }
         Returns: undefined
       }
+      morning_briefing_pipeline: { Args: { as_of?: string }; Returns: Json }
       pipeline_stage_aging: {
         Args: never
         Returns: {
@@ -3912,3 +4025,4 @@ export const Constants = {
     },
   },
 } as const
+

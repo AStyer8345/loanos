@@ -32,6 +32,24 @@ export async function GET(request: Request): Promise<NextResponse> {
   const now = new Date().toISOString()
   const stats = { processed: 0, sent: 0, skipped: 0, errors: 0 }
 
+  // Per-org From: + Reply-To cache (one fetch per org per cron tick)
+  const orgFromCache = new Map<string, { from?: string; replyTo?: string }>()
+  async function getOrgFrom(orgId: string): Promise<{ from?: string; replyTo?: string }> {
+    const cached = orgFromCache.get(orgId)
+    if (cached) return cached
+    const { data } = await supabase
+      .from('org_settings')
+      .select('from_email, from_name, custom_email_reply_to')
+      .eq('organization_id', orgId)
+      .maybeSingle()
+    const from = data?.from_email
+      ? (data.from_name ? `${data.from_name} <${data.from_email}>` : data.from_email)
+      : undefined
+    const result = { from, replyTo: data?.custom_email_reply_to ?? undefined }
+    orgFromCache.set(orgId, result)
+    return result
+  }
+
   // RPC returns active enrollments with next_send_at <= NOW(), joined to their next step
   const { data: rows, error: rpcErr } = await supabase.rpc('get_due_drip_enrollments')
 
@@ -150,10 +168,13 @@ export async function GET(request: Request): Promise<NextResponse> {
         continue
       }
 
+      const orgFrom = await getOrgFrom(row.org_id)
       await sendViaResend({
         to: row.contact_email,
         subject: authored.subject,
         body: htmlBody,
+        from: orgFrom.from,
+        replyTo: orgFrom.replyTo,
         tags: {
           campaign_id: row.campaign_id,
           enrollment_id: row.enrollment_id,

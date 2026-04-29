@@ -19,6 +19,8 @@ export interface ResendSendParams {
   to: string
   subject: string
   body: string          // HTML
+  from?: string         // override From: header (already-formatted, e.g. '"Adam" <adam@x.com>')
+  replyTo?: string      // override Reply-To
   tags?: Record<string, string>
   log?: ResendLogContext
 }
@@ -26,10 +28,11 @@ export interface ResendSendParams {
 export async function sendViaResend(params: ResendSendParams): Promise<string> {
   const resend = getResendClient()
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_ADDRESS ?? 'adam@styermortgage.com',
+    from: params.from ?? process.env.RESEND_FROM_ADDRESS ?? 'adam@styermortgage.com',
     to: params.to,
     subject: params.subject,
     html: params.body,
+    replyTo: params.replyTo,
     tags: params.tags
       ? Object.entries(params.tags).map(([name, value]) => ({ name, value }))
       : undefined,

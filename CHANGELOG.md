@@ -1,5 +1,57 @@
 # LoanOS Changelog
 
+## 2026-04-29 PM (loanos-autonomous) — No-build cycle (current phase work blocked)
+
+- **Bucket A (autonomous-eligible)**: 0 items. Most "Now" TODO items require Adam input (DKIM verification, selfies, Realtor Relationships cadence/trigger decision, Long-Term Nurture / Past Client Retention archive-vs-author decision, Mailchimp customer journey approval). Drip cron end-to-end proof requires choosing an Adam-controlled contact to enroll — out of scope for autonomous (PII risk + Adam's preference).
+- **Bucket B (Adam-blocked)**: no new items added — all current blockers already in `tasks/ADAM-TODO.md`. Surfaced one new flag below.
+- **Bucket C (out-of-scope)**: Refi Opportunity List V2 (post-Scott V1), Self-Serve Tenant Domain Onboarding (post-V1), in-flight contact-stage taxonomy work (see flag).
+- **Circuit breaker**: clean. Latest production `dpl_HnNowWSefN5uRwEBPo9tvttnrFZz` (commit `4ac0812`) READY. All 20 most-recent deployments READY, no ERROR/QUEUED/CANCELED.
+- **Drip pipeline state** (read-only): `drip_sends` total = 0; `drip_enrollments` total = 0 (active=0, completed=0, removed=0); `drip_campaigns` active = 8. Cron config correct in `vercel.json` (`/api/drip/run` at `0 13 * * *`); CRON_SECRET set + middleware exemption shipped 2026-04-23. Cron will no-op until enrolled. Vercel runtime-log MCP returned only 1 log line in 2 days (likely retention/filter limit) — could not directly confirm cron firing successfully on empty queue. Would require enrolling a real contact to prove end-to-end.
+- **n8n inventory** (live): 38 workflows, 33 active, 5 inactive (intentional: Pre-Drop Warm-Up, Quarterly Rate Review, Closed Loan Review Request, Morning Briefing Team unwired, Contract Received v3 staging). Matches yesterday's standup. No drift.
+- **Uncommitted in-progress feature work flagged** (NEW Adam queue item): 4 src files staged on `main` working tree but never committed — adds new contact stages "Cold" + "Other Lender" across `src/lib/constants/loan-stages.ts`, `src/lib/chat-command-parser.ts`, `src/app/dashboard/contacts/page.tsx` (badges + filter list + `created_at` column rename), and a typed-filter-rules upgrade on `src/app/dashboard/loans/page.tsx` (number/date/enum operators). Not in TODO.md, so autonomous task did NOT commit per "never invent work" rule. Adam needs to either commit (after own review/build) or revert.
+- **No code changes, no schema changes, no env changes, no n8n changes, no destructive ops.**
+
+## 2026-04-29 AM (styer-social-am) — Wk47 Content Build (Posts 195–196) + NotebookLM CLI confirmed
+
+- **Posts shipped to social_drafts**: 2 EVERGREEN. Post 195 (Facebook, Real Talk → DB `authority`, ID `8848472f`, Mon Jan 25 2027 9 AM CT) — late-January reality check on "I'll start in spring" buyers; voice-guide coaching cadence ("If you're 6 months out, we map the 6 months"); 60–90 day close-timeline math; DM-START CTA; NMLS #513013 included. Post 196 (Instagram, Personal, ID `60f7551e`, Thu Jan 28 2027 9 AM CT) — quiet-morning reflection: "Brittany Jo," kids back at school, "small holy ground of an ordinary morning"; faith-resonant without preachy; no CTA, no NMLS (no loan content).
+- Both 9/10 first draft, 0 rewrites. BBQ + Jessica tests PASS. Reviewer APPROVED, QA PASS. Apostrophes + em-dashes + en-dash (60–90) preserved via Python urllib insert. Wife-name spelling matched DB convention ("Brittany Jo," 5/5 prior posts).
+- Strategy: closes 14-day FB gap from Post 191 Jan 11; rests LinkedIn after consecutive Wk45/46 LI posts; lifts Real Talk pillar.
+- Step 1B: 0 new website content — directories scanned, all files already in tracker. Refresh: 0 active TIMELY drafts in 48-hr horizon (Post 46 PCE Apr 30 is `status=rejected`).
+- **NotebookLM CLI confirmed working** — 2nd consecutive AM after 22-day outage. Domain notebook + master notebook both updated. The 2026-04-19 NOTEBOOKLM CLI item can now be marked resolved.
+- Build/review/QA reports + spec written under `tasks/social-media/`. Activity logged (`c1889582`).
+
+## 2026-04-29 PM (styer-notebooklm-nightly) — Both notebooks PUSH+CURATE complete
+
+- **SEO/SEM notebook**: removed 3 stale (CONTEXT Apr 27, audit-Apr27, daily-opt-Apr27) + added 3 fresh (CONTEXT Apr 29, audit-Apr29, daily-opt-Apr29) → 49/50.
+- **Lead Gen notebook**: removed 3 stale (CONTEXT Apr 27, audit-Apr27, "Eastern U.S. dominates 2026's best FTB markets" — 25+ days old + redundant) + added 3 fresh (CONTEXT Apr 29, audit-Apr29, funnel-and-drip-status-snapshot-Apr29) → 50/50.
+- Master log `Styer_Growth_Log.md` appended with both `seo-sem-pm` and `lead-gen-pm` sections (~+86 lines); re-synced to Styer Mortgage Master notebook.
+- Both digests written to file only — NOT sent. Per scheduled-task SKILL.md override: "Do not send any emails to Adam. All reporting goes into project files only." TODO line 20 reconciliation item remains open.
+- 0 web sources added either notebook — coverage strong across AEO/GEO/AIO (SEO/SEM, 8+ recent) and drip/compliance/realtor/market (Lead Gen, ~50 sources). One-time observation: SEO/SEM `source add` returned IDs but didn't appear in `source list` on first try; re-add succeeded. Lead Gen had no recurrence after a 6-second sleep — may be timing-dependent.
+
+## 2026-04-29 AM (styer-lead-gen-am) — Funnel + drip status snapshot
+
+- **Sequence A research, no code changes.** Live Supabase reads + HTTP probe + on-disk GSC inventory.
+- **PA funnel still zero submissions** for 8th consecutive day since 2026-04-15 lead-intake cutover. 12 contacts in window — all manual CRM / Arive imports / SEO-agent inserts. No `lead_source='Pre-Approval Funnel'` rows.
+- **Drip pipeline: 0 sends / 0 enrollments.** Cron + RPC + per-org From: address all wired; loop has nothing to iterate. 8 active campaigns; 3 (Long-Term Nurture / Past Client Retention / Realtor Relationships) still lack rendered email bodies in `authored-emails.ts`.
+- **GSC data gap identified** — most recent on-disk export is 2026-03-26 (predates PA funnel deploy 2026-03-29). Yesterday's queued GSC analysis is blocked on data; defer to SEO/SEM agent's pending 90-day pull.
+- Output: `tasks/lead-gen/research/2026-04-29-funnel-and-drip-status-snapshot.md`. 0 new Adam action items.
+
+## 2026-04-29 (loanos-launch-standup) — Day 35 standup
+
+- Standup entry appended to `tasks/standup-log.md` covering yesterday's three commits since Day 34: per-org UI feature flags `ec9659a` (migration 094, Scott seeded with 9 flags false), Needs Your Attention dismiss + NEW LEAD badge gating fix `288ff16`, per-org From: address + Reply-To `4ac0812` (migration 095, drip cron passes through to `sendViaResend`).
+- Vercel: `dpl_HnNowWSefN5uRwEBPo9tvttnrFZz` READY (latest prod, SHA `4ac0812`); all 20 most-recent deployments READY, no ERROR/QUEUED/CANCELED.
+- n8n: 38 workflows / 33 active / 5 inactive (all intentional, unchanged from yesterday). MCP returns no failed-execution flag on any active workflow.
+- Audits: 0 CRITICAL / 1 MEDIUM open (#5 field-level encryption, ADAM-BLOCKED on GLBA attorney). No new audit reports under `audits/` since 2026-04-05.
+- New blocker logged: Resend DKIM verification for Scott's `mortgagesolutionslp.com` sender domain — gates live drip sends from Scott's org. Added to TODO.md and CONTEXT.md Standup Agent Status.
+
+## 2026-04-28 PM (styer-social-pm) — Wk46 Content Build (Posts 193–194)
+
+- **Posts shipped to social_drafts**: 2 EVERGREEN. Post 193 (Instagram, Real Talk → DB `authority`, ID `1913660b`, Tue Jan 19 2027 9 AM CT) — January intent-vs-action callout, "first 15 minutes are the hardest part" / "starting gun" close, NMLS #513013 included (qualifying content). Post 194 (LinkedIn, Personal, ID `a4b6c488`, Thu Jan 21 2027 9 AM CT) — highlight-reel-trap reflection using voice-guide quotes ("24 deals/$10M month", "drive home after $10k day"), no CTA, no NMLS (no loan content).
+- Both 9/10 first draft, 0 rewrites. BBQ + Jessica tests PASS. Reviewer APPROVED, QA PASS. Apostrophes + em-dashes preserved via Python urllib insert. No fabricated personal/family details on Post 194 — sticks strictly to voice-guide language.
+- Strategy: IG re-entry (closes 15-day gap from Post 189 Jan 4); Real Talk pillar lift from ~14% to ~16% (trending toward 20% target); MLK Day Mon Jan 18 skipped — Tue/Thu publish dates.
+- Build/review/QA reports + spec written to `tasks/social-media/`. Activity logged (`a281a3d2`). Wk45 drafts (191/192) untouched.
+- NotebookLM PUSH skipped — PM stuck with established CLI-broken fallback; AM-session CLI-recovery item awaits next-AM confirmation run.
+
 ## 2026-04-28 (org-feature-flags) — Per-org UI feature flags shipped
 
 - **Schema**: migration `094_org_features.sql` adds `organizations.features jsonb`. NULL or missing key = enabled (default-on). Adam's row stays NULL — no UX change. Scott Sears's org (`40377391-…`) seeded with all 9 gated flags = `false`.

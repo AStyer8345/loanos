@@ -214,31 +214,63 @@ const DRAGGABLE_LOAN_COL_IDS = LOAN_COLUMNS.filter(c => c.id !== 'borrower_name'
 type CustomListRule = { field: string; operator: string; value: string }
 type CustomList = { id: string; name: string; page: 'contacts' | 'loans'; rules: CustomListRule[] }
 
-const LOAN_FILTER_FIELDS = [
-  { id: 'status', label: 'Status' },
-  { id: 'loan_purpose', label: 'Purpose' },
-  { id: 'loan_program', label: 'Program' },
-  { id: 'closing_date', label: 'Closing Date' },
+type FilterFieldType = 'text' | 'number' | 'date' | 'enum'
+type FilterField = {
+  id: string
+  label: string
+  type: FilterFieldType
+  options?: readonly string[]
+}
+
+const LOAN_FILTER_FIELDS: readonly FilterField[] = [
+  { id: 'status',        label: 'Status',        type: 'enum', options: STAGE_OPTIONS },
+  { id: 'loan_purpose',  label: 'Purpose',       type: 'text' },
+  { id: 'loan_program',  label: 'Program',       type: 'text' },
+  { id: 'closing_date',  label: 'Closing Date',  type: 'date' },
+  { id: 'interest_rate', label: 'Interest Rate', type: 'number' },
+  { id: 'loan_amount',   label: 'Loan Amount',   type: 'number' },
+  { id: 'ltv',           label: 'LTV',           type: 'number' },
+  { id: 'back_end_dti',  label: 'DTI',           type: 'number' },
+  { id: 'credit_score',  label: 'FICO',          type: 'number' },
+  { id: 'lead_source',   label: 'Lead Source',   type: 'text' },
 ] as const
 
-const FILTER_OPERATORS = [
-  { id: 'is', label: 'is' },
-  { id: 'is_not', label: 'is not' },
-  { id: 'contains', label: 'contains' },
-  { id: 'before', label: 'before' },
-  { id: 'after', label: 'after' },
-] as const
+const OPERATORS_BY_TYPE: Record<FilterFieldType, readonly { id: string; label: string }[]> = {
+  text:   [{ id: 'is', label: 'is' }, { id: 'is_not', label: 'is not' }, { id: 'contains', label: 'contains' }],
+  number: [{ id: 'eq', label: '=' }, { id: 'gt', label: '>' }, { id: 'gte', label: '≥' }, { id: 'lt', label: '<' }, { id: 'lte', label: '≤' }],
+  date:   [{ id: 'is', label: 'on' }, { id: 'before', label: 'before' }, { id: 'after', label: 'after' }],
+  enum:   [{ id: 'is', label: 'is' }, { id: 'is_not', label: 'is not' }],
+}
+
+function fieldDef(id: string): FilterField | undefined {
+  return LOAN_FILTER_FIELDS.find(f => f.id === id)
+}
+
+function operatorsForField(id: string): readonly { id: string; label: string }[] {
+  const f = fieldDef(id)
+  return f ? OPERATORS_BY_TYPE[f.type] : OPERATORS_BY_TYPE.text
+}
 
 function applyCustomListRulesLoan(query: any, rules: CustomListRule[]): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   let q = query
   for (const r of rules) {
     if (!r.value?.trim()) continue
     const val = r.value.trim()
-    if (r.operator === 'is') q = q.eq(r.field, val)
-    else if (r.operator === 'is_not') q = q.neq(r.field, val)
+    const f = fieldDef(r.field)
+    // Numeric coercion — skip rule entirely if value isn't a valid number
+    let v: string | number = val
+    if (f?.type === 'number') {
+      const n = Number(val)
+      if (Number.isNaN(n)) continue
+      v = n
+    }
+    if (r.operator === 'is' || r.operator === 'eq') q = q.eq(r.field, v)
+    else if (r.operator === 'is_not') q = q.neq(r.field, v)
     else if (r.operator === 'contains') q = q.ilike(r.field, `%${val}%`)
-    else if (r.operator === 'before') q = q.lt(r.field, val)
-    else if (r.operator === 'after') q = q.gt(r.field, val)
+    else if (r.operator === 'before' || r.operator === 'lt') q = q.lt(r.field, v)
+    else if (r.operator === 'after' || r.operator === 'gt') q = q.gt(r.field, v)
+    else if (r.operator === 'gte') q = q.gte(r.field, v)
+    else if (r.operator === 'lte') q = q.lte(r.field, v)
   }
   return q
 }
@@ -1753,11 +1785,21 @@ export default function LoansPage() {
               className="w-full border border-[var(--input)] rounded px-3 py-2 text-sm font-mono bg-[var(--bg)] text-foreground placeholder:text-muted-foreground mb-4 focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Filter rules (AND)</div>
-            {newListRules.map((rule, idx) => (
+            {newListRules.map((rule, idx) => {
+              const f = fieldDef(rule.field)
+              const ops = operatorsForField(rule.field)
+              const inputType = f?.type === 'number' ? 'number' : f?.type === 'date' ? 'date' : 'text'
+              return (
               <div key={idx} className="flex gap-2 mb-2 flex-wrap items-center">
                 <select
                   value={rule.field}
-                  onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, field: e.target.value } : r))}
+                  onChange={e => {
+                    const newField = e.target.value
+                    const newOps = operatorsForField(newField)
+                    setNewListRules(prev => prev.map((r, i) => i === idx
+                      ? { ...r, field: newField, operator: newOps.some(o => o.id === r.operator) ? r.operator : newOps[0].id, value: '' }
+                      : r))
+                  }}
                   className="min-w-[100px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground"
                 >
                   {LOAN_FILTER_FIELDS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
@@ -1767,19 +1809,33 @@ export default function LoansPage() {
                   onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, operator: e.target.value } : r))}
                   className="min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground"
                 >
-                  {FILTER_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
+                  {ops.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
                 </select>
-                <input
-                  placeholder="Value"
-                  value={rule.value}
-                  onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
-                  className="flex-1 min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground placeholder:text-muted-foreground"
-                />
+                {f?.type === 'enum' ? (
+                  <select
+                    value={rule.value}
+                    onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
+                    className="flex-1 min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground"
+                  >
+                    <option value="">— select —</option>
+                    {(f.options ?? []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    type={inputType}
+                    step={f?.type === 'number' ? 'any' : undefined}
+                    placeholder={f?.type === 'number' ? 'e.g. 6.5' : 'Value'}
+                    value={rule.value}
+                    onChange={e => setNewListRules(prev => prev.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
+                    className="flex-1 min-w-[80px] border border-[var(--input)] rounded px-2 py-1.5 text-xs font-mono bg-[var(--bg)] text-foreground placeholder:text-muted-foreground"
+                  />
+                )}
                 {newListRules.length > 1 && (
                   <button type="button" onClick={() => setNewListRules(prev => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-foreground p-1 transition-colors">×</button>
                 )}
               </div>
-            ))}
+              )
+            })}
             <button
               type="button"
               onClick={() => setNewListRules(prev => [...prev, { field: 'status', operator: 'is', value: '' }])}

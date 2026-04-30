@@ -2,6 +2,219 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-30 AM — Lead Generation
+Focus: Realtor Relationships drip email body drafts (Sequence B — Strategy/Architect, copy-only)
+Type: Strategy / Architecture (Sequence B)
+Week in Queue: Week 16
+
+### Context From Previous Session
+2026-04-29 AM produced the 8th consecutive funnel/drip status snapshot showing zero `lead_source='Pre-Approval Funnel'` contacts since 2026-04-15 lead-intake cutover, and zero drip sends/enrollments. Three deferrals queued: (1) synthetic PA-funnel submit, (2) speculative Realtor Relationships copy, (3) defer GSC pull to SEO/SEM agent. Today picks up #2 (#1 deferred — would trigger n8n PA Lead Notify webhook → email Adam, which violates this scheduled task's "no emails to Adam" rule).
+
+### Completed
+- **NotebookLM PULL** — CLI v0.3.4 responsive (3-day post-recovery streak). 12 notes inventoried; most recent is 2026-04-28 PA-funnel diagnosis. Pull report at `tasks/lead-gen/notebooklm-pull-2026-04-30.md`.
+- **Mission redefined** — broke the 8-day "snapshot zero-state" loop. Today's mission: author Realtor Relationships drip copy (not Adam-blocked) while cadence (Adam-blocked) waits.
+- **Supabase read-only checks**:
+  - `drip_campaigns` row `ef52ed56-8a22-4d15-9f12-a1796ccf17b6`: name "Realtor Relationships", audience=`realtor`, status=`active`, exit_rules: unsubscribe + bounce_limit (max 2) + inactive
+  - 4 `drip_steps` confirmed in DB: (1) Deal Anniversary annual_date `first_deal_date`, (2) Milestone Celebration condition `deals_milestone:5`, (3) Co-Marketing Offer relative_days 180, (4) Holiday annual_date `holiday_thanksgiving` — all `tone=quiet_confidence`, channel=email, with skeleton briefs
+  - `drip_sends` total = 0 (24h = 0); `drip_enrollments` total = 0 — confirms no movement since per-org From: address shipped commit `4ac0812`. Pipeline plumbed, awaiting first enrollment
+- **Authored 4 email body drafts** matching campaign step structure, voice-aligned to `tasks/social-media/adam-voice-and-workflow.md` § "REALTOR RELATIONSHIPS" + § "VOICE AND TONE":
+  1. Deal Anniversary — references specific transaction (`{{transaction_address}}`, `{{transaction_buyer_name}}`), peer-level, no hard CTA
+  2. Milestone Celebration — `{{deal_count}}` merge tag, "the relationship is the asset" close
+  3. Co-Marketing Offer — three concrete options (open house flyer / first-meeting guide / 60-sec video), realtor-as-hero framing
+  4. Holiday (Thanksgiving) — "no pitch, no ask" — voice-guide-aligned (some posts should just end)
+- **Flagged 4 merge-tag dependencies** that builder must verify before wiring: `{{transaction_address}}`, `{{transaction_buyer_name}}`, `{{deal_count}}`, `{{first_deal_date}}` — all sourced from `loans` table joined on `realtor_id`. Drafts file calls these out under "Merge-tag dependencies".
+- **Output**: `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md` (~170 lines)
+
+### Key Findings
+1. Realtor Relationships campaign step structure is authored correctly in DB (matches existing `tasks/lead-gen/specs/2026-04-26-realtor-relationship-drip-spec.md` intent — but per 2026-04-27 audit, that spec also had wrong column references). Today's drafts target the actual DB rows.
+2. Cadence questions in ADAM-TODO 2026-04-27 #2 remain unblocked — but all 4 require runtime decisions (when `first_deal_date` populates, milestone re-fire policy, day-180 anchor) that are independent of copy.
+3. Drip cron continues to be a fully plumbed pipeline awaiting its first enrollment. Standup agent's "manually enroll one Adam contact in PA Welcome to prove end-to-end" recommendation is still the cleanest unlock — but creating an enrollment fires real email and must remain a manual Adam action, not autonomous.
+
+### Output
+- `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md` (4 email bodies, ~170 lines)
+- `tasks/lead-gen/notebooklm-pull-2026-04-30.md` (PULL report, ~30 lines)
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief)
+
+### Recommendations Logged for Next Session (no Adam dependency)
+1. Long-Term Nurture (`audience=lead`, 2 steps, annual_date triggers) and Past Client Retention (`audience=past_client`, 6 steps, mixed triggers) — both still skeleton-only with archive-vs-author Adam decision pending. Drafting copy speculatively for these is gated on Adam choosing "keep" vs "archive" — different bet vs Realtor Relationships, where the campaign already has 4 active steps Adam clearly intends to use.
+2. Builder spec: when Adam returns Realtor Relationships cadence answer, builder writes one PR that (a) registers `DRIP_CAMPAIGN_IDS.REALTOR_RELATIONSHIPS = 'ef52ed56-...'` in `authored-emails.ts`, (b) appends 4-step record from `tasks/lead-gen/drafts/2026-04-30-...md`, (c) verifies merge-tag resolution path for the 4 new vars (`{{transaction_address}}`, etc.), (d) wires per-org From: address (already done — `4ac0812`), (e) seeds enrollment for the 28 candidate realtors per Adam's chosen activation criterion.
+3. Skip 9th funnel/drip status snapshot tomorrow unless something material changes (new submission, cron runs, Adam unblocks one of the 4 carryover items).
+
+### Compliance
+- Zero new compliance items. Drafts use `{{unsubscribe_url}}` merge tag (CAN-SPAM) and rely on `renderDripHtml()` wrapper for NMLS #513013 + Equal Housing Lender + physical address — same pattern as the 5 existing authored campaigns. No new TCPA exposure (these are email-only; SMS/Sendblue path is separate).
+
+### NotebookLM PUSH
+See SESSION_END entry in `subagent-status.md` — pushed lead-gen note + master log entry.
+
+---
+## Session: 2026-04-29 AM — Lead Generation
+Focus: Funnel + drip status snapshot (Sequence A — Research)
+Type: Research (Sequence A)
+Week in Queue: Week 15
+
+### Context From Previous Session
+2026-04-28 AM closed the PA-funnel zero-leads diagnosis as "not a code bug — traffic/CTR problem" and queued an agent task: pull GSC + GA4 metrics for `/get-preapproved.html`. Today's session attempted that, found a data gap (most recent on-disk GSC export pre-dates the PA funnel deployment), and broadened scope to a status snapshot covering funnel volume + drip pipeline + GSC data availability.
+
+### Completed
+- **Funnel volume snapshot** (Supabase MCP) — 14-day window since 2026-04-15 lead-intake cutover:
+  - 12 contacts total: 9 null-source (all manual CRM additions — 7 realtors + 2 Pre-Approved-stage borrowers from Arive imports), 1 Rate Check Form, 1 Website, 1 AEO: ChatGPT
+  - **0 contacts with `lead_source='Pre-Approval Funnel'`** — 8th consecutive day with zero real PA-funnel form fires
+- **Drip pipeline read-only check** (Supabase MCP):
+  - `drip_sends` total = 0 (24h = 0, 7d = 0)
+  - `drip_enrollments` total = 0 (active = 0, 7d = 0)
+  - 8 active campaigns with full skeleton step coverage in `drip_steps` (including the 3 previously-flagged "unauthored" — but content authoring lives in `src/lib/drips/authored-emails.ts`, not DB; those 3 still lack rendered email bodies in code)
+  - Cron is plumbed (CRON_SECRET set 2026-04-23) and per-org From: address is wired (Standup 04-29) — no enrollments means no work
+- **GSC data gap identified** — most recent on-disk export `tasks/seo-sem/gsc/Pages.csv` is dated 2026-03-26, predating PA-funnel deployment (commit `1b3f0be` 2026-03-29). `/get-preapproved.html` does not appear in any of the 7 existing GSC CSVs. Yesterday's queued GSC analysis is **blocked on data**, not effort.
+- **Live page check** — `https://styermortgage.com/get-preapproved.html` → HTTP 200, 27.4 KB, sub-700ms TTFB. Page is live and reachable.
+
+### Key Findings
+1. PA funnel zero-submissions confirmed for 8th consecutive day; not a regression — a stable absence
+2. Drip pipeline is fully plumbed but has zero enrollments; the cron has nothing to iterate
+3. The actionable GSC analysis queued from 2026-04-28 cannot run against existing data — needs fresh pull (lightweight Adam ask) OR can defer until SEO/SEM agent's 90-day GSC export lands (already on their queue)
+
+### Output
+- Research report: `tasks/lead-gen/research/2026-04-29-funnel-and-drip-status-snapshot.md` (~150 lines)
+
+### Recommendations Logged for Next Session (no Adam dependency)
+1. Synthetic round-trip submit on `/get-preapproved.html` to verify form-write produces `lead_source='Pre-Approval Funnel'` contact (closes the loop yesterday's code-review-only diagnosis left open)
+2. Speculative content authoring for Realtor Relationships email bodies (cadence is Adam-blocked; copy is not)
+3. Defer GSC pull request — let SEO/SEM agent's 90-day export cover it
+
+### Compliance
+- Zero new compliance items. TCPA / CAN-SPAM / NMLS unchanged.
+
+### NotebookLM
+- PULL: SKIPPED for the AM cycle — yesterday's pull report is current, 11 notes inventoried, no new context to fetch
+- PUSH: SKIPPED — no new note worth a notebook source today; today's report is itself a snapshot of state already known. Will re-evaluate next session if findings warrant.
+
+### Adam Action Items
+- 0 NEW
+- All 4 carryover items unchanged: Realtor Relationships cadence, Long-Term Nurture/Past Client Retention fate, TCPA copy, Sendblue signup. (CRON_SECRET, LOANOS_AGENT_SECRET, PR #4 — cleared in prior sessions per ADAM-TODO [x] markings.)
+
+Timestamp: 2026-04-29 03:30:00
+SESSION FULLY COMPLETE ✓
+
+---
+## Session: 2026-04-28 AM — Lead Generation
+Focus: Investigate the zero-`lead_source='Pre-Approval Funnel'` mystery flagged in 2026-04-27 audit
+Type: Research (Sequence A)
+Week in Queue: Week 14
+
+### Context From Previous Session
+2026-04-27 AM closed a critical drip RPC fix and produced a data-integrity audit. Audit ended with 4 deferred Adam decisions (CRON_SECRET, Realtor Relationships activation, Long-Term Nurture/Past Client Retention fate) + 1 agent-actionable item: investigate why `lead_source='Pre-Approval Funnel'` returns 0 contacts despite get-preapproved.html being live since 2026-03-29. This session picked the agent-actionable item — every other queue item is Adam-blocked.
+
+### Completed
+- **NotebookLM PULL** — CLI `notebooklm` 0.3.4 responsive again (1st successful AM op in 20 sessions); switched to lead-gen notebook `4213513c…` and listed 11 historical notes. Notes from 2026-04-09 → 2026-04-27 are absent (CLI outage); session-log.md is the source of truth for that window. Pull report: `tasks/lead-gen/notebooklm-pull-2026-04-28.md`.
+- **Code path audit** — traced both PA-funnel paths end-to-end:
+  - `get-preapproved.html` → `lead-intake.js` (post-2026-04-15 cutover)
+  - `prequal.html` → `script.js` → `subscribe-lead.js` (legacy, kept for rollback)
+  - Both paths preserve `lead_source: 'Pre-Approval Funnel'` through to `/api/contacts/web-lead/route.ts` line 233. **No bug.**
+- **Quantification via Supabase + n8n MCP**:
+  - `referral_type='web_lead'` since 2026-03-29 = 7 contacts; 0 with PA-Funnel lead_source
+  - n8n `J9Pe24vUi6fpZtdZ` (Pre-Approval Lead Notify) triggerCount = 1 in 32 days
+  - 1 contact ever has "TCPA Consent" in notes (Jung Lee, 2026-04-13, predates lead-intake cutover); was manually edited to lead_source='AEO' on 2026-04-16
+  - `activity_log` `contact_created` events since 2026-03-29 = 4 (all routes combined)
+- **Diagnosis**: PA funnel form has captured zero real submissions since 2026-04-15 cutover. Most "web_lead" rows are SEO-agent manual inserts (AEO/Claude lead_source). This is a traffic/conversion problem, not a code bug.
+- **Output**: `tasks/lead-gen/research/2026-04-28-pa-funnel-zero-leads-diagnosis.md` (NEW, ~110 lines).
+
+### Deferred
+- GSC + GA4 traffic pull for /get-preapproved.html — next agent session, no Adam dependency
+- Server-side `web_lead_inbound` logging hook in /api/contacts/web-lead — bundle with next build session
+- Realtor Relationships build — content-only, still Adam-blocked on activation criteria
+- Long-Term Nurture / Past Client Retention archive vs. author — still Adam-blocked
+
+### Output Produced
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-04-28.md` (NEW)
+- Diagnosis report: `tasks/lead-gen/research/2026-04-28-pa-funnel-zero-leads-diagnosis.md` (NEW)
+- No code modified, no commits, no Supabase mutations, no n8n changes.
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged)
+- Drip campaigns wired: 5 with content + 3 active-but-unauthored (unchanged from 2026-04-27)
+- drip_sends total: 0 (unchanged)
+- PA funnel real-submission count, 32-day window: ≤1 (Jung Lee, predates cutover)
+
+### Compliance Checks Passed
+- TCPA / CAN-SPAM: N/A — no email/SMS sent.
+- Read-only investigation. Zero risk.
+
+### Quality Ratings (1-5)
+Research: 5 (cleanly disambiguated traffic vs. code bug) | Strategy: N/A | Execution: N/A | Review: 5 | QA: 5
+
+### System Improvement Notes
+- The web-lead route currently has no inbound observability — to find out whether `lead_source: 'Pre-Approval Funnel'` is reaching the route, we had to triangulate via n8n trigger counts + activity_log + notes signature. A 2-line `activity_log.insert({ action:'web_lead_inbound', summary: lead_source, ... })` BEFORE the dedup check would make future investigations a 1-row SQL query. Filed as build-session candidate.
+- The 2026-04-27 audit's flagging this as "likely a form-write bug" was reasonable based on signals available, but turned out wrong. Lesson: zero counts can mean "code broken" OR "no traffic" — disambiguate with traffic/upstream metrics before assuming bug.
+
+### BLOCKERS
+- None new. CRON_SECRET still gates drip end-to-end verification (Adam-blocked).
+
+### Next Session Instructions
+Priority 1: Pull GSC + GA4 metrics for /get-preapproved.html since 2026-04-15. Confirm: impressions vs. clicks vs. submissions. If impressions exist but CTR is low → title/meta rewrite per GOALS.md. If page views exist but no submissions → form/CTA audit.
+Priority 2: Once Adam sets CRON_SECRET, manually enroll one Adam-controlled contact in PA Welcome to verify drip loop (carryover from 2026-04-27).
+Priority 3: Realtor Relationships build (content-only) — still Adam-blocked on activation criteria.
+Priority 4: Long-Term Nurture + Past Client Retention archive vs. author — still Adam-blocked.
+
+Advance queue to next topic: PARTIAL — PA-funnel mystery resolved as not-a-bug. Surface area shifts from "lead-gen code reliability" to "lead-gen page conversion."
+
+---
+## Session: 2026-04-27 AM — Lead Generation
+Focus: Drip pipeline data-integrity audit + verify the 2026-04-26 terminate-guard
+Type: Strategy / Audit (Sequence B) → escalated to small Execute (DB function fix)
+Week in Queue: Week 14
+
+### Context From Previous Session
+2026-04-26 AM closed the drip stale-enrollment terminate-guard (`removed_reason='no_authored_content'`) and authored the Realtor Relationship drip spec. PM session was a NotebookLM curate — no code/data changes. Three priorities entered today: (1) verify the terminate-guard against any historical stuck enrollments, (2) once `CRON_SECRET` is set, verify cron firings end-to-end, (3) Realtor Relationship build (Adam-blocked on activation criteria). Picked the audit because Adam-blocked items don't move and the terminate-guard's prod behavior was unverified.
+
+### Completed
+- **Drip schema audit via Supabase MCP** — found 8 active campaigns vs. the 5 in `authored-emails.ts`. Long-Term Nurture, Past Client Retention, and **Realtor Relationships** are all `status='active'` in DB but have no authored content registered. Realtor Relationships already exists at `ef52ed56-8a22-4d15-9f12-a1796ccf17b6` with 4 `drip_steps` rows (mixed `relative_days` / `condition` / `annual_date` triggers).
+- **Critical RPC fix** — `get_due_drip_enrollments()` referenced two non-existent columns: `ct.status` (real: `stage`) and `l.rate` (real: `interest_rate`). The cron handler `/api/drip/run` calls this RPC and returns 500 on any error — meaning the entire drip cron has been silently 500ing on every tick, regardless of `CRON_SECRET` state. Two migrations applied: `fix_get_due_drip_enrollments_contact_status_column`, `fix_get_due_drip_enrollments_loan_rate_column`. Return shape preserved (`ct.stage AS contact_status`, `l.interest_rate AS loan_rate`); `database.types.ts` does not require regeneration. RPC now returns clean count.
+- **Enrollment audit** — `drip_enrollments` total = 0, `drip_sends` total = 0. The drip pipeline has never delivered an email. Adam's mental model in CONTEXT.md ("blocked on CRON_SECRET") was incomplete — even with CRON_SECRET set the RPC error would have prevented all sends. Both gates are now resolved on the platform side; manual enrollment is the remaining gap.
+- **Eligibility sizing** — 2,938 total contacts, 2,606 mailable, 1,173 realtors via `contact_type`, 28 realtors with `referral_ytd_count > 0` (immediate Realtor Relationship audience), 481 contacts with `lead_source='Realtor Referral'`, **0 with `lead_source='Pre-Approval Funnel'`** (likely a form-write bug — needs separate investigation).
+- **Realtor Relationship spec re-scoping** — the 2026-04-26 spec proposed `INSERT INTO drip_campaigns (id, org_id, name, slug, status, trigger_type, audience)` but `slug` does not exist and `trigger_type` is on `drip_steps` not `drip_campaigns`. Combined with the campaign-already-exists discovery, this means the build scope shrinks to: register UUID in `authored-emails.ts` + author 4 emails (one per existing step) + n8n trigger wire (after Adam's activation criteria call).
+- **Audit report** — `tasks/lead-gen/audits/2026-04-27-drip-data-integrity-audit.md` (NEW, 100+ lines).
+
+### Deferred
+- Realtor Relationship build — content-only now, ~1.5 hr; still blocked on Adam activation criteria call.
+- Manual enrollment proof-of-life — needs Adam's `CRON_SECRET` first.
+- Long-Term Nurture + Past Client Retention fate — Adam decision: archive or author content?
+- `lead_source='Pre-Approval Funnel'` zero-count investigation — separate session, likely a form/route fix.
+- NotebookLM PULL / PUSH — CLI unavailable 19th+ consecutive session.
+
+### Output Produced
+- DB migrations: 2 (RPC fix, two-step because the second column error only surfaced after fixing the first).
+- Audit report: `tasks/lead-gen/audits/2026-04-27-drip-data-integrity-audit.md` (NEW).
+- No application code modified, no commits, no n8n changes.
+
+### Lead Gen Metrics Updated
+- Funnels live: 3 (unchanged on the surface; in reality the drip half was 500ing, now plumbing-clean).
+- Drip campaigns wired: 5 with content + 3 active-but-unauthored = 8 active total in DB.
+- drip_sends total: 0 (unchanged — system has never sent).
+
+### Compliance Checks Passed
+- TCPA / CAN-SPAM: N/A — no email sent.
+- Data integrity: yes — closes a critical gap (broken RPC was silent).
+- Migrations: pure DDL on a single SECURITY DEFINER function, reversible. No data mutated.
+
+### Quality Ratings (1-5)
+Research: 5 (caught two latent prod bugs) | Strategy: 5 | Execution: 5 (surgical migrations) | Review: 5 | QA: 5 (verified with `SELECT COUNT(*) FROM get_due_drip_enrollments()` post-fix → 0, no error)
+
+### System Improvement Notes
+- The cron handler returns 500 on `rpcErr`. Without observability, this would never surface. Recommend: add a structured log + Vercel cron alert routing to Slack/email for drip route 5xx responses. Filed as a future enhancement, not in this session's scope.
+- The 2026-04-22 manual enrollment UI shipped without an end-to-end happy-path test — if any contact had been manually enrolled between then and today, the cron would have appeared to "do nothing" and the failure mode (RPC 500) was invisible because no one was running curl tests.
+- `database.types.ts` declares the RPC return type — TypeScript could not catch SQL column mismatches inside a function body. Recommend the regenerate-types script include a `SELECT * FROM <each_rpc>() LIMIT 0` smoke check before commit.
+
+### BLOCKERS
+- Per-CONTEXT.md persistent blockers unchanged on the human side; on the technical side the broken-RPC blocker is now closed.
+
+### Next Session Instructions
+Priority 1: Verify cron end-to-end. Once Adam sets `CRON_SECRET`, manually enroll Adam's own contact record (or any test contact) in PA Welcome via the manual enrollment UI. Wait one cron tick, confirm a `drip_sends` row appears and `drip_enrollments.next_send_at` advances.
+Priority 2: Decide fate of Long-Term Nurture + Past Client Retention (archive vs. author content). If Adam chimes in, build content. If not, archive both via `UPDATE drip_campaigns SET status='archived' WHERE id IN (...)`.
+Priority 3: Realtor Relationships build (content-only). Wait for Adam activation criteria call. When unblocked: register UUID + 4 emails + n8n wire (~1.5 hr).
+Priority 4: Investigate the zero-`lead_source='Pre-Approval Funnel'` mystery. Likely needs a read of `subscribe-lead.js` + `quick-add` route to find where the value is being lost.
+
+Advance queue to next topic: PARTIAL — drip plumbing is now functional, but proving the loop is the next milestone.
+
+---
 ## Session: 2026-04-26 AM — Lead Generation
 Focus: Drip stale-enrollment bug fix + Realtor Relationship drip spec
 Type: Execute (Sequence C, surgical) + Research (Sequence A, spec write)

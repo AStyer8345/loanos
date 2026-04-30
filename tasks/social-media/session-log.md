@@ -2,6 +2,355 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-04-30 AM — Maintenance-only (Scheduled Task — styer-social-am)
+
+**Focus**: Reconcile queue against social_drafts truth, push deferred Wk48 PM note to NotebookLM, no new build.
+
+**Completed:**
+- SESSION_START written: 2026-04-30 02:29 CDT, Mode: AM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist). LoanOS stream remains paused.
+- Step 1B (GBP scan): SKIPPED — 0 new website content. All visible files in `rates/`, `blog/2026-*.html`, `realtor-updates/` already in `gbp-content-tracker.md`.
+- NotebookLM PULL: SUCCESS (CLI v0.3.4). 3rd consecutive AM PULL post-recovery. Latest existing note: 2026-04-29 AM Wk47 build (no Wk48 PM yet — confirms the deferred-PUSH gap).
+- Refresh (07): 0 active TIMELY drafts within 48-hr horizon (Apr 30 → May 2). Confirmed via `social_drafts?classification=timely&status=draft&scheduled_for∈[now, now+48h]` — empty.
+- Today's mission: MAINTENANCE-ONLY explicitly. Reasoning written in `today-mission.md` and `notebooklm-pull-2026-04-30.md`. Cushion is 4 weeks (target ≤2 weeks would be acceptable); Posts 191–198 cover Jan 11 → Feb 4, 2027; queue's strategic entries already consumed; remaining queue is rate/market-themed and PM advice was "consume only if a rate/market slot opens." Forcing a sub-9 cushion-builder violates 2026-04-19 quality-over-cadence rule.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- Queue audit: confirmed Post 191 (5c64d991, FB, "Three years of crash predictions") consumed `blog/2026-04-27-why-home-prices-arent-crashing.html`; Post 192 (1abae5ab, LI, "Your buyer is waiting for the crash. Here's the conversation.") consumed `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html`. Both built during Wk45 (2026-04-28 AM) but never moved from Pending in `content-repost-queue.md`.
+- `content-repost-queue.md`: 2026-04-28 blog + 2026-04-28 newsletter rows moved from Pending to Completed with Post IDs and reconciliation note. Pending now contains only 2026-04-20 bond-rally + 2026-04-15 rate update (both rate/market-themed, awaiting matching slot).
+- NotebookLM PUSH: combined "Wk48 PM Build (Posts 197-198) + 2026-04-30 AM Maintenance" note created (ID `3f3ece44`). Closes deferred Wk48 PM gap.
+- Master notebook: SOCIAL daily entry pushed (ID `96c02360`) to `d6a855c3-2c83-4991-88c7-ce1b91c0c3be`. Switched back to social-media notebook.
+- CONTEXT.md, CHANGELOG.md, TODO.md updates: see entries in this session.
+
+**Reports:**
+- No build/review/QA reports written this session (no build).
+- `notebooklm-pull-2026-04-30.md` ✓
+- `today-mission.md` ✓ (MAINTENANCE session type)
+
+**Deferred / Outstanding:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- `content-repost-queue.md` Pending: 2 entries — `blog/2026-03-30-why-rates-improved-today-bond-rally.html` + `rates/2026-04-14.html`. Both rate/market themed; consume when a rate/market slot opens.
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO.
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending.
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`.
+
+**Next Session Instructions (PM 2026-04-30):**
+- Step 1B: scan `rates/`, `blog/`, `realtor-updates/` for new content since this AM.
+- NotebookLM PULL/PUSH: PM session can defer per established efficiency pattern (no new note material if no build runs).
+- Backlog still 4 weeks deep — only build Wk49 if a rate/market slot is genuinely needed or new content forces it. Otherwise continue maintenance-mode discipline. Do NOT auto-build to extend cushion to 5 weeks — quality > cadence.
+
+---
+## Session: 2026-04-29 PM — Week 48 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Wk48 (Feb 1–7, 2027) — extend ahead-by-3 cushion to 4 weeks; lift Education pillar back on target; rest Facebook (Post 195 Jan 25 was fresh); close 12-day LinkedIn gap (last LI Post 194 Jan 21). Both posts EVERGREEN.
+
+**Completed:**
+- SESSION_START written: 2026-04-29 21:22 CDT, Mode: PM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist). LoanOS stream remains paused.
+- Step 1B: SKIPPED (PM session — AM only per master-agent.md).
+- Refresh (07): SKIPPED (PM session — Refresh runs AM only).
+- NotebookLM PULL/PUSH: deferred to AM session per established efficiency pattern.
+- Research: Reused AM rate context. Wk48 publish window has no known TIMELY events — both posts EVERGREEN. (No new research file written.)
+- Architect: Wk48 2-post plan. Post 197 LinkedIn Education Tue Feb 2 + Post 198 Instagram Personal Thu Feb 4. Spec: `specs/2026-04-29-pm-week48-spec.md` ✓
+- Builder: 2 posts inserted via Python urllib (preserved curly apostrophes ’ + em-dashes — + en-dash 200–500). Post 197 (LI Education, ID `dbcbaed3`, NMLS #513013 included, Texas option-fee/earnest-money explainer). Post 198 (IG Personal, ID `60948a41`, no NMLS — no loan content; Brittany Jo + Roman's coat). Activity logged (`d1b8f4a0`).
+- Quality: 9/10 first draft on both, no rewrites. Adam-specific framing: Post 197 uses Texas-specific transactional walkthrough ($200–$500 option, ~1% earnest, escrow at title company, "weird smell in the garage" beat); Post 198 grounded in concrete domestic detail (45°F Austin, peanut butter sleeve, twice-wiped, juice box). BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS verified Post 197 (transactional/loan-adjacent); Post 198 has no loan/rate content (NMLS not required). No specific rates → APR not triggered. No fabricated data — Brittany Jo wife-name spelling matches all 6 prior post mentions (Posts 191/194/196 + earlier). No guaranteed outcomes. No banned phrases. Brand correct. Schedule clear of holidays/conflicts.
+- QA: 2/2 posts in `social_drafts`. `status=draft`, `scheduled_for` set, apostrophes + em-dashes + en-dash preserved, NMLS where required, 0 placeholders. Wk45–Wk47 drafts (191–196) untouched. PASS.
+- Build report: `build-reports/2026-04-29-pm-week48-build.md` ✓
+- Review: `reviews/2026-04-29-pm-week48-review.md` ✓
+- QA report: `qa-reports/2026-04-29-pm-week48-qa.md` ✓
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: PM entry inserted at top.
+- TODO.md: social line updated with Wk48 references + rolling-pillar update.
+
+**Post IDs — Week 48**
+| Post | ID | Platform | Pillar (Editorial → DB) | Classification | Scheduled |
+|------|----|----------|--------------------------|----------------|-----------|
+| 197 | dbcbaed3-6689-4695-b92a-5eba1b4d9811 | linkedin | Education → education | evergreen | 2027-02-02T15:00Z |
+| 198 | 60948a41-ece7-48bc-9f34-a0fe158c90ec | instagram | Personal → personal | evergreen | 2027-02-04T15:00Z |
+
+**Rolling Pillar (estimated after Wk48)**: Auth ~28% / Personal ~32% / Education ~32% / RT ~9% (DB-tagged). Education back on target. RT (DB-tagged) drifts slightly low — bias next 1–2 posts toward Real Talk → DB `authority` to recover.
+
+**Deferred:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: 4 entries pending — rates/2026-04-24, blog/2026-04-27, realtor-updates/2026-04-27, blog/2026-03-30 — only consume when a market/rate-themed slot opens
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`
+
+**Next Session Instructions (AM):**
+- Step 1B: scan rates/, blog/, realtor-updates/ for new content since 2026-04-29 AM session.
+- NotebookLM PULL: should still work (3rd consecutive AM CLI test post-recovery).
+- Refresh: 0 TIMELY drafts within 48-hr horizon as of tonight (Wk45–Wk48 all evergreen). Confirm at AM run.
+- Plan Wk49 (Feb 8–14, 2027) only if architect needs to extend the now-4-week cushion. Backlog now covers Jan 11 → Feb 4, 2027 (8 drafts in flight: 191–198). Reasonable to skip Wk49 build and instead consume from `content-repost-queue.md` if a rate/market slot opens, or rebuild Real Talk → DB `authority` cadence (currently slightly low).
+- Watch for new website content posted between AM and PM (rates, blog, realtor-updates).
+
+---
+## Session: 2026-04-29 AM — Week 47 Content Build + NotebookLM CLI confirmed (Scheduled Task — styer-social-am)
+
+**Focus**: Wk47 (Jan 25–31, 2027) — close 14-day FB gap (last FB Post 191 Jan 11), lift Real Talk pillar, rest LinkedIn after consecutive Wk45/46 LI posts. Both posts EVERGREEN.
+
+**Completed:**
+- NotebookLM PULL: SUCCESS (CLI v0.3.4). 2nd consecutive AM working — 22-day outage officially closed. Latest note: 2026-04-28 AM Wk45 build + recovery push.
+- Step 1B: SKIPPED — 0 new website content. Scanned `rates/`, `blog/2026-*.html`, `realtor-updates/` → all visible files already in `gbp-content-tracker.md`.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist). LoanOS stream remains paused.
+- Refresh: 0 active TIMELY drafts within 48-hr horizon (Apr 29 → May 1). Post 46 (PCE/GDP Apr 30) is `status=rejected`. Posts 24/25 (FOMC TIMELY Apr 29) don't exist as drafts. ADAM-TODO entries referencing fills today/tomorrow are stale (no live drafts to fill).
+- Research: DAILY (light). Reused architect's plan from Wk46. No web research within 12-hr window. Wk47 publish window has no known TIMELY events. Both posts EVERGREEN.
+- Architect: Wk47 2-post plan. Post 195 FB Real Talk → DB authority Mon Jan 25 + Post 196 IG Personal Thu Jan 28. Spec: `specs/2026-04-29-am-week47-spec.md` ✓
+- Builder: 2 posts inserted via Python urllib (preserved curly-apostrophes ’ + em-dashes — + en-dash 60–90). Post 195 (FB, ID `8848472f`, NMLS #513013 included) + Post 196 (IG Personal, ID `60f7551e`, no NMLS — no loan content). Activity logged (`c1889582-eea8-416d-9ff7-5455932c73ca`).
+- Quality: 9/10 first draft on both, no rewrites. Adam-specific framing in both: Post 195 uses voice-guide coaching cadence ("If you're 6 months out, we map the 6 months") + 60–90 day timeline math; Post 196 grounded in Adam's actual home (Brittany Jo, kids back at school, dishwasher hum) and the "small holy ground of an ordinary morning" phrase. BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS verified Post 195 (qualifying mentioned); Post 196 has no loan/rate content (NMLS not required). No specific rates → APR not triggered. No fabricated data — Post 196 sticks to verified family details (wife name spelling matches all 5 prior post mentions of "Brittany Jo"). No guaranteed outcomes. No banned phrases. Brand correct.
+- QA: 2/2 posts in `social_drafts`. `status=draft`, `scheduled_for` set, apostrophes + em-dashes + en-dash preserved, NMLS where required, 0 placeholders. Wk44–Wk46 drafts (189–194) untouched. PASS.
+- Build report: `build-reports/2026-04-29-am-week47-build.md` ✓
+- Review: `reviews/2026-04-29-am-week47-review.md` ✓
+- QA report: `qa-reports/2026-04-29-am-week47-qa.md` ✓
+- ADAM-TODO: Marked `[SOCIAL] 2026-04-28 🎉 NOTEBOOKLM CLI RECOVERED` and `[SYSTEM] 2026-04-19 🔧 NOTEBOOKLM CLI` items resolved [x] — 2nd consecutive AM CLI confirmation per recovery instructions.
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: AM entry inserted at top.
+- TODO.md: Wk47 line updated with new post references + rolling-pillar update.
+
+**Post IDs — Week 47**
+| Post | ID | Platform | Pillar (Editorial → DB) | Classification | Scheduled |
+|------|----|----------|--------------------------|----------------|-----------|
+| 195 | 8848472f-c2eb-43f8-8b64-d620085e1605 | facebook | Real Talk → authority | evergreen | 2027-01-25T15:00Z |
+| 196 | 60f7551e-faa3-41b1-8db5-a07dd44263fb | instagram | Personal → personal | evergreen | 2027-01-28T15:00Z |
+
+**Rolling Pillar (estimated after Wk47)**: Auth ~31% / Personal ~31% / Education ~28% / RT ~10% (DB-tagged) — actual RT voice ~30% (Posts 191/195 stored as authority but voice = Real Talk).
+
+**Deferred:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: 4 entries pending — rates/2026-04-24, blog/2026-04-27, realtor-updates/2026-04-27, blog/2026-03-30 — only consume when a market/rate-themed slot opens
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`
+
+**Next Session Instructions (PM):**
+- Step 1B: SKIP (PM session — AM only).
+- Refresh: SKIP (PM session — Refresh runs AM only).
+- Plan Wk48 (Feb 1–7, 2027) only if architect needs to maintain ahead-by-3 cushion. Backlog now covers Jan 11–28 (6 drafts in flight).
+- Watch for new website content posted between AM and PM (rates, blog, realtor-updates).
+
+---
+## Session: 2026-04-28 PM — Week 46 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Week 46 (Jan 18–24, 2027) — Instagram re-entry (last IG: Post 189 Jan 4 → 15-day gap), Real Talk lift (rolling ~14% → ~16%). MLK Day Mon Jan 18 → posts on Tue Jan 19 + Thu Jan 21. Both EVERGREEN.
+
+**Completed:**
+- NotebookLM PULL: SKIPPED (22nd+ consecutive CLI timeout — fallback: session-log.md AM entry + direct DB query of last 10 scheduled drafts).
+- Step 1B: SKIPPED (PM session — AM only per master-agent.md).
+- Refresh: SKIPPED (PM session — Refresh runs AM only).
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (selfies/ empty). LoanOS stream remains paused.
+- Research: DAILY (light). Reused AM rate context. Wk46 publish window has no known TIMELY events. Both posts EVERGREEN. (No new research file written.)
+- Architect: Wk46 2-post plan. Post 193 IG Real Talk → DB `authority` Tue Jan 19 + Post 194 LI Personal Thu Jan 21. Spec: specs/2026-04-28-pm-week46-spec.md ✓
+- Builder: 2 posts inserted via Python urllib (preserved curly-apostrophes ’ + em-dashes —). Post 193 (IG, ID `1913660b`, NMLS #513013 included) + Post 194 (LI Personal Jan 21, ID `a4b6c488`, no NMLS — no loan content).
+- Quality: 9/10 first draft on both, no rewrites. Adam-specific framing: Post 193 uses his coaching cadence ("If you're 6 months out, we map the 6 months") and lands on "starting gun" metaphor; Post 194 quotes voice guide directly ("24 deals in a month, over $10 million", "drive home after a $10k day", "highlight reel"). BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS #513013 verified Post 193 (qualifying mentioned); Post 194 has no loan/rate content (NMLS not required). No specific rates → APR not triggered. No fabricated data — Post 194 sticks to voice-guide language only. No guaranteed outcomes. No banned phrases. Brand correct. Schedule dates skip MLK Day. Rolling pillar PASS.
+- QA: 2/2 posts in social_drafts. Status:draft, scheduled_for set, apostrophes + em-dashes preserved, NMLS where required, 0 placeholders. Wk45 drafts (191, 192) untouched. PASS.
+- social_activity: 1 entry logged (`a281a3d2-c787-4c22-bec1-5780fd303e02`) covering both drafts.
+- Build report: build-reports/2026-04-28-pm-week46-build.md ✓
+- Review: reviews/2026-04-28-pm-week46-review.md ✓
+- QA report: qa-reports/2026-04-28-pm-week46-qa.md ✓
+
+**Post IDs — Week 46**
+| Post | ID | Platform | Pillar (Editorial → DB) | Classification | Scheduled |
+|------|----|----------|--------------------------|----------------|-----------|
+| 193 | 1913660b-fdc0-43ee-8c67-a2e335c4b940 | instagram | Real Talk → authority | evergreen | 2027-01-19T15:00Z |
+| 194 | a4b6c488-6441-4c63-8395-e84c1beac3f6 | linkedin | Personal → personal | evergreen | 2027-01-21T15:00Z |
+
+**Rolling Pillar (estimated after Wk46)**: Auth ~30% / Personal ~30% / Education ~28% / RT ~16% — all within ±5% tolerance. RT lifted from ~14%, trending toward 20% target.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 22nd+ consecutive timeout — but ADAM-TODO has a 2026-04-28 "CLI RECOVERED" note flagging the next AM push as the confirmation run; this PM stuck with the established fallback)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: 4 entries pending — rates/2026-04-24, blog/2026-04-27, realtor-updates/2026-04-27, blog/2026-03-30 — only consume when a market/rate-themed slot opens
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`
+
+**Next Session Instructions (AM):**
+- Step 1B: scan rates/, blog/, realtor-updates/ for new content since 2026-04-28 AM session.
+- If NotebookLM CLI works on PUSH this AM, mark prior 2026-04-19 CLI item resolved. If second consecutive successful PUSH, also clear the 2026-04-28 "RECOVERED" item.
+- Refresh: 0 TIMELY drafts within 48 hr horizon as of tonight (Wk45+Wk46 all evergreen). Confirm at AM run.
+- Plan Wk47 (Jan 25–31, 2027) only if needed — backlog already covers through Jan 21 (4 drafts in flight).
+- Watch for new website content from styerteam-mortgage-site/.
+
+---
+## Session: 2026-04-28 AM — Step 1B GBP + Week 45 Content Build (Scheduled Task — styer-social-am)
+
+**Focus**: Step 1B (GBP-only distribution of new website content) + Week 45 (Jan 11–17, 2027) — Facebook re-entry (last FB Post 188 Dec 30 = 12-day gap when Wk45 hits) + LinkedIn Education cycle. Both posts EVERGREEN. Strategy: capitalize on today's fresh blog + realtor-update content investment by routing both into native posts now (4-day freshness window before next session).
+
+**Completed:**
+- NotebookLM PULL: SKIPPED (22nd+ consecutive CLI timeout). Fallback: session-log.md + direct DB query (10 most-recent scheduled drafts pulled — last LI 190 Jan 6, last IG 189 Jan 4, last FB 188 Dec 30, rolling pillar Auth/Personal/Edu/RT ≈ 30/30/28/15).
+- Step 1B: 2 new content pieces detected — `blog/2026-04-27-why-home-prices-arent-crashing.html` + `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (both Adam's "this isn't 2008" thesis with borrower vs realtor framing, same data set).
+  - GBP: auto-published BLOG version via Publer (job `69f062de8b17fc4ff5c6b9ea`, scheduled 5 min from execution). 250 words. NMLS #513013 baked in. Used directional rate language to avoid APR-disclosure trigger; used delta payment language ("hundreds, often more than a thousand") to avoid specific-payment trigger. social_activity logged (`4f2f32c7-ff48-4b4a-a2b8-2cc3de748f18`).
+  - GBP: SKIPPED realtor-update version — duplicate-data with blog (same lock-in/equity/Reset stats), would dilute feed. Tracker entry marked `gbp:skipped-duplicate-data-with-blog`.
+  - IG/FB/LI: both pieces queued in `content-repost-queue.md` for Architect (per 2026-04-19 GBP-only policy — no drafts written from Step 1B). Realtor update flagged LinkedIn-PRIMARY (realtor partner-resource framing), blog flagged for full LI/IG/FB native versions.
+  - Tracker updated: 2 entries appended for 2026-04-28 AM session.
+- Refresh: 0 TIMELY drafts within next 48 hrs (2026-04-28 → 2026-04-30). No fills needed.
+- Research: DAILY (light). Used today's fresh blog/realtor-update as on-brand source material. Wk45 publish window is 37 weeks out — no known TIMELY events in window. Both posts EVERGREEN. (No new research file written.)
+- Architect: Wk45 2-post plan, both EVERGREEN, both consume Step 1B queued content (immediate routing — extends content lifespan from this morning's investment).
+  - Post 191 (Facebook, Real Talk pillar voice → DB `authority`, Mon Jan 11 9 AM CT) — borrower-facing native of blog.
+  - Post 192 (LinkedIn, Education pillar, Wed Jan 13 9 AM CT) — realtor-facing native of realtor-update.
+- Builder: 2 posts inserted via Python urllib (preserved apostrophes + em-dashes — verified by re-query). Initial Post 191 with `pillar='real_talk'` rejected by check constraint — re-inserted with `pillar='authority'` (matches Wk44 Post 190 RT→authority pattern). Activity logged (`46c70b05-6e00-4b17-8651-c6f06f88e4e4`).
+- Quality: 9/10 first draft on both, no rewrites. Adam-specific framing in both ("I get the texts. I see the YouTube thumbnails." 191; "If you're a realtor, you're hearing this 5 times a week" + "The market is sick. It is not dying." 192). BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS #513013 verified both (loan-related content). All stats traced to source content (80% lock-in / 53% equity / 38 metros / 34% Feb cuts / Great Housing Reset / MBA -4% / spring +11% / ~1% growth — all match). No fabricated data. No specific rate %, no specific payment $ (delta-only). No guaranteed outcomes. No competitor naming. Brand correct.
+- QA: 2/2 posts in social_drafts. Status:draft, scheduled_for set, apostrophes + em-dashes preserved, NMLS present in both, 0 placeholders. Existing scheduled drafts intact. PASS.
+- social_activity: 2 entries logged (`4f2f32c7-ff48-4b4a-a2b8-2cc3de748f18` GBP post + `46c70b05-6e00-4b17-8651-c6f06f88e4e4` builder).
+- gbp-content-tracker.md: 2026-04-28 AM section added with 2 entries.
+- content-repost-queue.md: 2 new "Pending" entries appended for Architect's future native-version pipeline.
+
+**Post IDs — Week 45**
+| Post | ID | Platform | Pillar (Editorial → DB) | Classification | Scheduled |
+|------|----|----------|--------------------------|----------------|-----------|
+| 191 | 5c64d991-0be6-4760-9d9d-d074a4c51f7d | facebook | Real Talk → authority | evergreen | 2027-01-11T15:00Z |
+| 192 | 1abae5ab-170d-4ae3-a135-8b212b7c18c9 | linkedin | Education → education | evergreen | 2027-01-13T15:00Z |
+
+**GBP Distribution — 2026-04-28 AM**
+| Source | Action | Detail |
+|--------|--------|--------|
+| `blog/2026-04-27-why-home-prices-arent-crashing.html` | gbp:posted | Publer job `69f062de8b17fc4ff5c6b9ea`, scheduled +5min, 250 words, NMLS included |
+| `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` | gbp:skipped | Duplicate-data with blog — would dilute GBP feed |
+
+**Rolling Pillar (estimated after Wk45)**: Auth ~31% / Personal ~30% / Education ~29% / RT ~14% — all within ±5% tolerance. RT slightly low (Post 191 stored as `authority` per DB enum but is Real Talk voice — actual RT representation higher than DB tag suggests). Both Wk45 posts ride today's content investment, maximizing freshness window.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 22nd+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: rates/2026-04-24 native posts still pending; rates/2026-04-20 blog still pending
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`
+
+**Next session (PM)**: PM session — could plan Wk46 if Architect needs to keep ahead. Otherwise Wk45 backlog is full. Watch for: (1) any new FOMC/CPI/PCE TIMELY events in Refresh's 48-hr horizon, (2) new website content posted between AM and PM. Pillar mix is well-balanced; if PM has bandwidth, queue rates/2026-04-24 native posts (still pending) since Apr 24 is now 4 days stale and that content's freshness window is closing.
+
+---
+## Session: 2026-04-27 PM — Week 44 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Week 44 (Jan 4–10, 2027) — Personal pillar lift (was ~29%) + Instagram re-entry (last IG: Post 185 Dec 21, 14-day gap closing) + cycle Real Talk on LinkedIn. Both posts EVERGREEN.
+
+**Completed:**
+- NotebookLM PULL: SKIPPED (21st+ consecutive CLI timeout). Fallback: session-log.md + direct DB query (last 15 social_drafts rows) — confirmed Wk43 shipped today AM (Posts 187 LI + 188 FB), last IG was 185 Dec 21, last FB was 188 Dec 30, last LI was 187 Dec 28.
+- Step 1B: SKIPPED (PM session — AM only per master-agent.md).
+- Refresh: SKIPPED (PM session — Refresh runs AM only).
+- Research: DAILY (light). Reused AM rate snapshot (rates/2026-04-24.html → 30-yr 6.25% APR 6.32%, geopolitical bond rally). No new web research within the 12-hr window. Wk44 publish window has no known TIMELY events. Both posts EVERGREEN. (No new research file written.)
+- Architect: Wk44 2-post plan. Post 189 IG Personal Mon Jan 4 + Post 190 LI Real Talk → `authority` Wed Jan 6. Both EVERGREEN. Spec: specs/2026-04-27-pm-week44-spec.md ✓
+- Builder: 2 posts inserted via Python urllib (preserved apostrophes + em-dashes). Post 189 (IG personal Jan 4, ID `eeee4d95`) + Post 190 (LI authority Jan 6, ID `a26e45b6`). NMLS #513013 in Post 190 only (no rate/loan content in 189).
+- Quality: 9/10 first draft on both, no rewrites. Specific to Adam ("Bible open" + "highlight reel" 189; "rate engine" + "week three of escrow" 190). BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS verified Post 190; Post 189 no loan content (NMLS not required). No specific rates → APR not triggered. No fabricated data. No guaranteed outcomes. No competitor naming. Brand correct. Rolling pillar PASS.
+- QA: 2/2 posts in social_drafts. Status:draft, scheduled_for set, apostrophes + em-dashes preserved, NMLS where required, 0 placeholders. Existing scheduled drafts intact. PASS.
+- social_activity: 2 entries logged (e71ba4e4, f1765a84) ✓
+- Build report: build-reports/2026-04-27-pm-week44-build.md ✓
+- Review: reviews/2026-04-27-pm-week44-review.md ✓
+- QA report: qa-reports/2026-04-27-pm-week44-qa.md ✓
+- CONTEXT.md: 3 social fields replaced ✓
+- CHANGELOG.md: PM entry prepended ✓
+
+**Post IDs — Week 44**
+| Post | ID | Platform | Pillar (Editorial → DB) | Classification | Scheduled |
+|------|----|----------|--------------------------|----------------|-----------|
+| 189 | eeee4d95-6eaa-4b34-8d2e-11a49f9fc17f | instagram | Personal → personal | evergreen | 2027-01-04T15:00Z |
+| 190 | a26e45b6-0c62-4089-9464-8f3da5a792d4 | linkedin | Real Talk → authority | evergreen | 2027-01-06T15:00Z |
+
+**Rolling Pillar (estimated after Wk44)**: Auth ~30% / Personal ~30% / Education ~28% / RT ~15% — all within ±5% tolerance. Personal back on target.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 21st+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: rates/2026-04-24 native posts still pending — only consume in TIMELY rate week
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending
+
+**Next Session Instructions:**
+- Week 45 (Jan 11–17, 2027): Facebook re-entry (last FB: 188 Dec 30) + cycle Education or Authority. Real Talk safe to skip a week (~15% target holding).
+- NotebookLM CLI still broken — skip PULL/PUSH, use CONTEXT.md + DB query fallback.
+- DB note: `real_talk` not a valid pillar — keep mapping Real Talk → `authority`.
+- Watch for new website content from styerteam-mortgage-site/ in next AM Step 1B run.
+
+---
+## Session: 2026-04-27 AM — Step 1B GBP + Week 43 Content Build (Scheduled Task — styer-social-am)
+
+**Focus**: Step 1B GBP scan + Week 43 (Dec 28 – Jan 3) — LinkedIn re-entry (last LI: Post 184 Dec 17, 11-day gap) + Education / Real Talk to round out mix per prior PM next-session note. Both posts EVERGREEN.
+
+**Completed:**
+- Step 1B: 1 new rate page detected — `rates/2026-04-24.html` (30-yr 6.25% APR 6.32%, down from 6.37% Apr 14, U.S./Iran negotiations driving bond rally). GBP auto-published via Publer (job `69ef10a645572ded59c1ba30`, ~5 min from session start). NMLS #513013 + APR disclosure baked in. social_activity logged (`a06ba3b7`). IG/FB/LI: queued for Architect in `content-repost-queue.md` (war-headline framing angle, native posts deferred per 2026-04-19 GBP-only policy).
+- Note: master-agent.md Step 1B 3A asks for a `social_drafts` insert with `platform: "google"` for dashboard history, but the `social_drafts_platform_check` constraint rejects it (allowed: all/facebook/instagram/linkedin). Skipped the insert; Publer + tracker + activity log handle audit. Updated subagent-status.md with the discrepancy so a future session can either patch the template or relax the constraint.
+- Refresh: 0 TIMELY drafts due within 48 hrs. Direct content scan of upcoming-48hr drafts returned empty.
+- Research: DAILY (light). Last confirmed 30-yr ~6.25% (rate page Apr 24); MND prior 6.32%. Direction DOWN on geopolitical headlines. No TIMELY events in Wk43 publish window — both posts EVERGREEN. (Reused rate snapshot — no new research file written.)
+- Architect: Wk43 2-post plan. Post 187 LinkedIn / Education (Mon Dec 28 9 AM CT) + Post 188 Facebook / Authority (Wed Dec 30 9 AM CT). LinkedIn re-entry corrects 11-day gap. Pillar mix preserved. (Spec inline in this log entry — no separate spec file written.)
+- Builder: 2 posts written to `social_drafts` via Python PATCH (initial bash-quoted insert dropped apostrophes — fixed with PATCH preserving full contractions). Post 187 (linkedin, education, ID `8db4f633`) — "Rate shopping vs lender shopping" — realtor + buyer audience hybrid. Post 188 (facebook, authority, ID `dc9f2568`) — "Year-end honesty on rate predictions" — Real Talk editorially, mapped to authority per DB constraint. Both EVERGREEN. NMLS #513013 in both; Post 188 quotes ~6.25% / APR 6.32% with disclosure.
+- Quality: Post 187 — 9/10 (first draft, no rewrite). Post 188 — 9/10 (first draft, no rewrite). Both pass 9/10 bar. BBQ + Jessica tests PASS — specific to Adam (admits "I got pieces of it wrong" on rate forecasts; "the good ones have an answer. The rest go quiet" closer).
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS #513013 verified both. Post 188 APR disclosure verified for the quoted rate. No fabricated data (rate trajectory matches Apr 24 site rate page + April MND reads). No guaranteed outcomes. No "The Styer Team". Rolling pillar PASS.
+- QA: 2/2 posts verified in social_drafts — status:draft, scheduled_for set, platforms (linkedin / facebook) correct, pillars correct, NMLS present, contractions preserved post-PATCH, no placeholders. PASS.
+- social_activity: 2 entries logged (`65f00bf3`, `3b4bece2`) ✓
+- subagent-status.md: SESSION START + Step 1B + each subagent recorded ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: AM entry prepended ✓
+- gbp-content-tracker.md: 2026-04-27 entry appended ✓
+- content-repost-queue.md: 2026-04-27 rate page queued for Architect ✓
+
+**Post IDs — Week 43**
+| Post | ID | Platform | Pillar (Editorial) | DB Pillar | Classification | Scheduled |
+|------|----|----------|--------------------|-----------|----------------|-----------|
+| 187 | 8db4f633-e551-4040-bba0-f392c9970acb | linkedin | Education / Real Talk hybrid | education | evergreen | 2026-12-28T15:00Z |
+| 188 | dc9f2568-a8b8-4cfb-9b44-13d3aaa4e122 | facebook | Real Talk | authority | evergreen | 2026-12-30T15:00Z |
+
+**Rolling Pillar (estimated after Wk43)**: Auth ~30% / Personal ~29% / Education ~29% / RT ~14-15% — all within ±5% tolerance. LinkedIn gap closed (was 11 days).
+
+**Deferred:**
+- NotebookLM PULL/PUSH (CLI broken — NEEDS ADAM, 20th+ consecutive timeout). Skipped to avoid hanging process.
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded).
+- content-repost-queue.md: 2026-04-27 rates/2026-04-24 native posts (LI text + IG static/Reel + FB conversational) — pick up in next TIMELY rate week or when slot opens.
+- Duplicate Post 180 cleanup (30da3c7a vs 868fe397) still in CONTEXT.md What's-next.
+
+**Next Session Instructions:**
+- Week 44 (Jan 4 – 10, 2027): Instagram or LinkedIn rotation. Personal pillar slightly low (~29%) — consider Personal post. Real Talk staying near 15% target.
+- Consider consuming the rates/2026-04-24 entry from content-repost-queue.md as a native LinkedIn or Facebook post if a market-themed slot opens.
+- NotebookLM CLI still broken — continue to skip, use CONTEXT.md + DB query fallback.
+- DB note: `real_talk` not a valid pillar — keep mapping Real Talk posts to `authority`.
+- Step 1B 3A `social_drafts` insert template still uses unsupported `platform: "google"` — patch master-agent.md or relax DB constraint to enable dashboard history.
+
+---
+## Session: 2026-04-26 PM — Week 42 Content Build (Scheduled Task — styer-social-pm)
+
+**Focus**: Week 42 (Dec 21–27) — IG re-entry (last IG: Post 182 Dec 13) + balanced pillar mix. Real Talk at ~15% target, let stabilize. Both posts EVERGREEN.
+
+**Reconciliation note**: session-log.md last entry was 2026-04-23 AM (Wk36). CONTEXT.md/DB show intervening sessions ran (Wk37–Wk41 built between Apr 23 PM and Apr 26 AM) but were not logged here. This entry resumes the log going forward; prior unlogged sessions are reflected in CONTEXT.md history and the social_drafts records themselves.
+
+**Completed:**
+- NotebookLM PULL: SKIPPED (19th+ consecutive CLI timeout). Fallback: CONTEXT.md + DB query (`SELECT ... FROM social_drafts ORDER BY scheduled_for DESC`) — confirmed Wk41 shipped today AM (Posts 183 FB personal Dec 15 + 184 LI education Dec 17).
+- Step 1B: SKIPPED (PM session — AM only per master-agent.md).
+- Refresh: SKIPPED (PM session — Refresh runs AM only).
+- Research: 30-yr ~6.32% (last MND read), no TIMELY events in Wk42 publish window. Both posts EVERGREEN. Output: research/2026-04-26-pm-daily-rate-snapshot.md ✓
+- Architect: Wk42 2-post plan. IG personal Dec 21 + FB authority Dec 26. Both EVERGREEN. Spec: specs/2026-04-26-week42-spec.md ✓
+- Builder: 2 posts inserted via PG E-strings (apostrophes + em-dashes preserved as Unicode). Post 185 (IG personal Dec 21, ID 8d4ffc28). Post 186 (FB authority Dec 26, ID 5eaf3703). NMLS #513013 in Post 186 only.
+- Quality: 9/10 first draft on both, no rewrites. Specific to Adam (Brittany Jo by name in 185; Three Cs + FICO 8 hot take in 186). BBQ + Jessica tests PASS.
+- Reviewer: Both APPROVED. 0 compliance failures. NMLS verified Post 186; Post 185 no loan content (NMLS not required). No specific rates — APR not triggered. No fabricated data. No guaranteed outcomes. Rolling pillar PASS.
+- QA: 2/2 posts in social_drafts. Status:draft, scheduled_for set, em-dashes+apostrophes preserved, 0 placeholders. PASS.
+- social_activity: 2 entries logged (243a20ac, 921963ed) ✓
+- Build report: build-reports/2026-04-26-week42-build.md ✓
+- CONTEXT.md: 3 social fields updated ✓
+- CHANGELOG.md: PM entry prepended ✓
+
+**Post IDs — Week 42**
+| Post | ID | Platform | Pillar | Classification | Scheduled |
+|------|----|----------|--------|----------------|-----------|
+| 185 | 8d4ffc28-e321-4028-a74c-1cb1218fe51e | instagram | personal | evergreen | 2026-12-21T15:00Z |
+| 186 | 5eaf3703-8655-498e-98df-dd18fb14a6df | facebook | authority | evergreen | 2026-12-26T15:00Z |
+
+**Rolling Pillar (estimated after Wk42)**: Auth ~30% / Personal ~30% / Education ~28% / RT ~14-15% — all within ±5% tolerance.
+
+**Deferred:**
+- NotebookLM PUSH (CLI broken — NEEDS ADAM, 19th+ consecutive timeout)
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- content-repost-queue.md: rates/2026-04-24 IG static + FB conversational still pending — only consume in TIMELY rate week
+- Duplicate Post 180 (30da3c7a vs 868fe397) — remains in ADAM-TODO
+
+**Next Session Instructions:**
+- Week 43 (Dec 28 – Jan 3): year-end → new-year transition window. LinkedIn re-entry warranted (last LI: Post 184 Dec 17).
+- Pillar: Education or Real Talk to round out mix; avoid stacking another Personal back-to-back.
+- NotebookLM CLI still broken — skip PULL/PUSH, use CONTEXT.md + DB query fallback.
+- DB note: `real_talk` not a valid pillar — map Real Talk posts to `authority`.
+- Verify session-log.md was actually updated (this PM session attempted to recover the gap; future scheduled runs should keep appending).
+
+---
 ## Session: 2026-04-23 AM — Week 36 Content Build (Scheduled Task — styer-social-am)
 
 **Focus**: Week 36 (Nov 9–15) — Real Talk priority (RT at ~12.6%, below 15% target) + Facebook (skipped Wk 35). Both posts EVERGREEN.

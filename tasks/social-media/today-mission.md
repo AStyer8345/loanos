@@ -1,73 +1,51 @@
-## Mission Brief — 2026-04-20 AM
+## Mission Brief — 2026-04-30 AM
 
 ### Domain
 Social Media
 
 ### Focus Area
-Week 31 content build (Oct 7-13, 2026) — close Instagram platform gap, correct education + authority pillar deficits
+**Maintenance-only AM session.** No new post writing. Reconcile content-repost-queue.md against social_drafts truth, run Refresh checks, push deferred Wk48 PM note + this AM note to NotebookLM.
 
 ### Session Type
-[x] Full Cycle (Sequence D)
+- [ ] Research + Planning (Sequence A)
+- [ ] Strategy / Architecture (Sequence B)
+- [ ] Execute / Build (Sequence C)
+- [x] Maintenance (sub-Sequence — orchestrator-defined; no Builder/Quality/Reviewer/QA)
+
+### Why no new build today
+Decision deliberately taken under the 2026-04-19 quality-over-cadence rule:
+- Backlog already covers Jan 11 → Feb 4, 2027 — **4-week cushion**, well above 1–2 posts/week target.
+- 0 new website content detected (rate/blog/realtor-updates dirs match `gbp-content-tracker.md`).
+- 0 TIMELY drafts within 48-hr horizon (Apr 30 → May 2) — Refresh would no-op.
+- Queue audit revealed both 2026-04-28 entries were already consumed by Posts 191 (FB no-crash thesis) and 192 (LI realtor crash conversation) during Wk45 build but never moved to Completed in `content-repost-queue.md`. The two genuinely-pending queue entries (2026-04-20 bond-rally blog, 2026-04-15 rate update natives) are RATE/MARKET themed and PM session advice was: "consume from queue if a rate/market slot opens." No such slot is open in Wk45–Wk48 calendar.
+- Adding cushion to 5 weeks while the queue's strategic entries sit unconsumed and the dashboard shows 8 unapproved drafts breaks discipline. Forcing a sub-9 post just to fill an AM slot is the exact pattern that produced the 176-draft backlog in early April.
 
 ### Objectives
-1. Scan for new website content (Step 1B) — auto-publish to GBP, queue for Architect
-2. Build 2 EVERGREEN posts at 9/10 quality bar
-3. Address platform gap (Instagram) and pillar gap (Education + Authority under 30%)
+1. Move 2026-04-28 blog + 2026-04-28 newsletter entries from "Pending" to "Completed" in `content-repost-queue.md`. Annotate with Post 191 + Post 192 IDs.
+2. Push combined "Wk48 PM Build (Posts 197–198) + Wk49 AM no-build maintenance" note to NotebookLM social-media notebook.
+3. Push session summary to master aggregator notebook.
+4. Update CONTEXT.md, CHANGELOG.md, TODO.md per repo conventions.
+5. Append session-log.md entry capturing the maintenance-only call + the discipline reasoning.
 
 ### Definition of Done
-- ≥1 Instagram post in drafts for Week 31 ✓
-- ≥1 LinkedIn post in drafts for Week 31 ✓
-- Both posts scored ≥9/10 by Quality subagent ✓
-- Both posts approved by Reviewer ✓
-- Both posts verified in social_drafts by QA ✓
+- `content-repost-queue.md` Completed section contains 2026-04-28 blog + 2026-04-28 newsletter rows with Post 191 / Post 192 IDs and date.
+- `notebooklm-pull-2026-04-30.md` exists.
+- NotebookLM push succeeds (Wk48 PM + Wk49 AM combined note).
+- Master notebook gets the SOCIAL daily entry.
+- Session-log entry inserted at top, dated 2026-04-30 AM.
+- CONTEXT.md / CHANGELOG.md / TODO.md updated.
+- subagent-status.md ends with SESSION FULLY COMPLETE.
 
 ### Resources / Files in Scope
-- Supabase social_drafts table
-- Publer API (GBP only)
-- social_activity log
-- CONTEXT.md (3 social fields)
-- CHANGELOG.md
+- `tasks/social-media/content-repost-queue.md` (edit)
+- `tasks/social-media/notebooklm-pull-2026-04-30.md` (already written)
+- `tasks/social-media/session-log.md` (append)
+- `tasks/social-media/subagent-status.md` (overwrite at end)
+- `CONTEXT.md` (3 fields replace)
+- `CHANGELOG.md` (append top)
+- `TODO.md` (update social line)
+- NotebookLM social-media notebook (`736e9c60-6cbb-4a20-8d24-f92b13606c30`) — push 1 note
+- NotebookLM master aggregator notebook (`tasks/master-notebook-id.txt`) — push 1 note
 
 ### HIGH RISK Items
-- None — all posts EVERGREEN, no current rate data, no auto-publish to IG/FB/LI
-
----
-
-## Mission Brief — 2026-04-19 PM
-
-### Domain
-Social Media
-
-### Focus Area
-Week 29 Content Build (Sep 23-29, 2026) — First session under new 9/10 quality policy
-
-### Session Type
-[x] Full Cycle (Sequence D)
-
-### Quality Bar Change
-CRITICAL: Quality bar raised to 9/10 on 2026-04-19 after 176 sub-9 drafts archived. 2 posts/week MAX (down from 5/week).
-Better to ship 1 great post than 2 mediocre ones. Kill anything below 9 after 2 rewrites.
-
-### Objectives
-1. Write 2 EVERGREEN posts that each hit 9/10 quality — LinkedIn authority + Facebook personal
-2. Pick up blog post from content-repost-queue (should-i-refinance) and use as LinkedIn anchor
-3. Complete Reviewer + QA — no compliance failures
-
-### Definition of Done
-- 2 posts in social_drafts with status:draft, scheduled_for set in Week 29 (Sep 23-29)
-- Both posts scored 9/10+ by Quality subagent
-- Reviewer: APPROVED
-- QA: PASS — both posts confirmed in Supabase
-
-### Resources / Files in Scope
-- tasks/social-media/content-repost-queue.md — pending items to incorporate
-- tasks/social-media/adam-voice-and-workflow.md — voice authority
-- Supabase social_drafts table
-- tasks/social-media/subagent-status.md — completion signals
-- tasks/social-media/build-reports/ — output location
-
-### HIGH RISK Items
-- Do NOT insert anything with status other than "draft" into social_drafts for IG/FB/LI
-- Do NOT fabricate rate data or economic events as if occurred
-- Do NOT include a specific rate quote without APR disclosure AND NMLS #513013
-- The 1% refinance post: no specific rate quotes in the body (directional only + illustrative)
+None. No live posts, no scheduled-for changes, no Publer API calls, no compliance-bearing content created.

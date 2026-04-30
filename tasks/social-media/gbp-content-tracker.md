@@ -73,3 +73,16 @@
 ### Scanned 2026-04-22 AM Session
 
 No new content found. All visible rate pages and blog posts already tracked.
+
+### Posted 2026-04-27 AM Session
+
+#### Rate Pages
+2026-04-27 | rate | rates/2026-04-24.html | gbp:posted (Publer job 69ef10a645572ded59c1ba30), ig/fb/li:queued-for-architect (content-repost-queue.md)
+
+### Posted 2026-04-28 AM Session
+
+#### Blog Posts
+2026-04-28 | blog | blog/2026-04-27-why-home-prices-arent-crashing.html | gbp:posted (Publer job 69f062de8b17fc4ff5c6b9ea), ig/fb/li:queued-for-architect (content-repost-queue.md)
+
+#### Newsletter / Realtor Updates
+2026-04-28 | newsletter | realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html | gbp:skipped-duplicate-data-with-blog, ig/fb/li:queued-for-architect (LinkedIn primary — realtor-facing angle)

@@ -2,6 +2,147 @@
 
 ---
 
+## 2026-04-30 — Day 36 (Launch: May 1, per GOALS.md)
+
+**Days to launch:** 1 (May 1) — original config target April 26 has passed by 4 days; operational target remains May 1 per GOALS.md. Continuing to run per task instruction.
+
+**Yesterday shipped (since Day 35 standup):**
+- `feat(loans)`: typed filter rules with adaptive operators + 6 new fields. Loans-page custom-list filter is now type-aware — each field declares `type: text | number | date | enum`, and operators adapt: numeric (`=, >, ≥, <, ≤`), date (`before / after / on`), enum/Status (`is / is not` with valid-stage dropdown), text (`is / is not / contains`). Six new filter fields: Interest Rate, Loan Amount, LTV, DTI, FICO, Lead Source. Numeric coercion in the query builder silently skips invalid input instead of crashing the SQL with a type mismatch. Switching field type resets operator + value to a valid combo. Side benefit: enables a manual Refi Opportunity workflow today (filter by `interest_rate >= X`) ahead of the dedicated V2 page in TODO.md. (`09ccfe4`, `dpl_G48aEEnnnpMYLb5AkWCxGVZbiP56` READY)
+- `feat(contacts)`: add Cold + Other Lender stages. Contact-stage taxonomy expanded — gives Adam explicit slots for "no-touch in 90+ days" and "applied with another lender" pipeline states that previously fell into ambiguous Lead/Pre-App buckets. (`8adb642`)
+- `chore(trackers)`: 2026-04-29 PM autonomous wrap-up — no-build cycle. CHANGELOG entry prepended documenting current-phase work blocked, 0 src changes from autonomous task, circuit breaker clean, drip queue empty, n8n inventory unchanged from prior day. ADAM-TODO flag raised for 4 then-uncommitted src files in working tree (the typed-filter-rules + contact-stages work, since committed in the 11:07 PM cycle). (`2624981`)
+
+**Vercel status:** READY — latest production `dpl_G48aEEnnnpMYLb5AkWCxGVZbiP56` (SHA `09ccfe4`). All 20 most-recent deployments READY, no ERROR/QUEUED/CANCELED states. ✅
+
+**n8n workflow health:** 38 workflows total, 33 active, 5 inactive (all intentional, unchanged from yesterday): `W0K4YDzkZd0Hzv6g` Refi Watch Pre-Drop Warm-Up, `LfLSDgqgb6yCe93C` Refi Watch Quarterly Rate Review, `AK1fBcaX1cPcdlGx` Closed Loan Review Request polling, `24oewjzGR3AxH4QW` Morning Briefing Team (not yet wired), `zQTy23ZRFAty9uTc` Contract Received v3 (parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows all ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj`, last touched 2026-04-28), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`, last touched 2026-04-28), web lead (`PiuIsQpBuydtFM4m`, last touched 2026-04-28), lender ingest (`hHXpKUirhnBCnQTO`), Final CD Email (`SkzrWeR0bHZs8kWX`, last touched 2026-04-29 — minor update, no version bump in launch criticality). MCP returns no failed-execution flag on any active workflow.
+
+**Blockers:**
+- **Resend DKIM verification (Scott org)** — Adam's `adam@thestyerteam.com` already DKIM-verified; Scott's `scott@mortgagesolutionslp.com` still needs domain verified before any per-org From: address can deliver. Live drip sends from Scott's org block on this (NEEDS ADAM, day 2 on this list).
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify webhook (`nOCDV73m4M0jyL1B`) still unauthenticated (NEEDS ADAM, rolled 10+ standups).
+- **TCPA copy + Sendblue API key** — iMessage speed-to-lead (GOALS.md priority) blocked (NEEDS ADAM).
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships; terminate-guard silently kills enrollments until authored or archived (NEEDS ADAM decision per campaign).
+- **Marketing site silent** — zero commits visible from this repo's vantage; per GOALS.md still highest May 1 launch risk.
+- **Selfies not uploaded** — LoanOS social content stream paused (NEEDS ADAM).
+- **Notes / activity log fix** — GOALS.md launch-critical, no code in 7+ days.
+- **MISMO multi-borrower regex greediness** — known pre-launch defect; fine for Scott's solo beta, must fix before any multi-borrower file lands.
+- **FNM 3.4 / Calyx Point file import** — GOALS.md week priority for Scott actually using the product; no code commits visible. MISMO importer ships the dedup + error-surface side, but the Calyx-export ingestion path itself is not confirmed end-to-end.
+
+**Today's focus (autonomous, no Adam dependency):**
+1. Verify drip cron actually fired since 2026-04-28 13:00 UTC — query `drip_sends` for any rows; if zero, manually enroll one Adam-controlled contact in PA Welcome to prove end-to-end loop given the per-org From: address path. (Carried from Day 35 — not confirmed in repo trail yet.)
+2. FNM 3.4 / Calyx Point co-borrower regex test — synthetic 2-borrower fixture against the parser to characterize the boundary before any multi-borrower file lands. (Carried from Day 35.)
+3. Notes / activity log fix — GOALS.md launch-critical, no code in 7+ days. Re-read the original brief and start. (Carried from Day 35.)
+4. Smoke-test the new typed-filter-rules path on Loans page — exercise each field/operator combination, especially the numeric-coercion silent-skip and the enum stage dropdown, before launch traffic touches it.
+
+**Risk watch:** 1 day to May 1. Marketing site silence remains the single biggest lagging indicator with zero commits visible. Drip path is feature-complete for Scott's pilot — only Resend DKIM domain verification on Scott's domain gates live sends. Three carry-over autonomous focus items from Day 35 remain unaddressed in the commit trail; the 2026-04-29 PM wrap-up was explicitly a no-build cycle. Recommend Adam send one real contract through `UfNcdpoVKQZqy0fj` post `4f7586d` to verify the `contract_pdf` Switch branch fires correctly before launch day. **Note:** today's commits skew toward filter UX polish rather than the GOALS.md launch-critical items (FNM import, drip campaigns content, notes/activity fix); on track for May 1 deploy availability but not for full GOALS.md week scope.
+
+**Open audit findings:** 0 CRITICAL (all 4 from 2026-04-05 audit closed). 1 MEDIUM open: #5 field-level encryption (SSN/DOB/income) — ADAM-BLOCKED on GLBA attorney consult. No new audit reports under `audits/` since 2026-04-05.
+
+---
+
+## 2026-04-29 — Day 35 (Launch: May 1, per GOALS.md)
+
+**Days to launch:** 2 (May 1) — original config target April 26 has passed by 3 days; operational target remains May 1 per GOALS.md. Continuing to run per task instruction.
+
+**Yesterday shipped (since Day 34 standup):**
+- `feat(features)`: per-org UI feature flags for Scott Pilot. Migration 094 adds `organizations.features jsonb` (NULL = all-on, preserves Adam's UX). Server helper `src/lib/features/getOrgFeatures.ts` (request-cached) + client-safe types. TopNav Email pillar + More menu (Scenarios/Lenders/Marketing/Drafts/Templates), dashboard `EmailAutomationCard`, contact-detail Drip card + Create Scenario, AutomationPanel all gate on flags. Admin UI at `/admin/feature-flags` (sys-admin only). Scott's row seeded with 9 flags false; Contacts/Pipeline/Loans/Settings remain visible. RLS impersonation probe confirmed both default-on and locked-down paths. (`ec9659a`, `dpl_Bq1SAbkpJ4Ht1SnTaX4u8UzCgZaJ` READY)
+- `fix`: Needs Your Attention dismiss + NEW LEAD badge gating. Dismiss now hits `/api/emails/link` (service role) so it persists across refresh — `activity_log` had no UPDATE RLS policy and the prior client-side `.update()` was silently failing. NEW LEAD badge now requires engagement intent matching the score function; bare automated/system mail with `contact_id=NULL` no longer mislabels. Optimistic UI rolls back on dismiss POST failure. (`288ff16`, `dpl_5F6BkoB59pBjVPTeiEiK9XPKWc5q` READY)
+- `feat(drip)`: per-org From: address + Reply-To for outbound email. Migration 095 adds `org_settings.from_email` + `from_name`. Drip cron now fetches per-org From/Reply-To once per tick and passes through to `sendViaResend`; falls back to `RESEND_FROM_ADDRESS` when null, preserving existing transactional sends. Adam org → "Adam at the Styer Team <adam@thestyerteam.com>", Scott org → "Scott Sears <scott@mortgagesolutionslp.com>". Required for first-tenant pilot. (`4ac0812`, `dpl_HnNowWSefN5uRwEBPo9tvttnrFZz` READY) **NEW BLOCKER:** Resend DKIM verification still pending for both sender domains before live drip sends.
+
+**Vercel status:** READY — latest production `dpl_HnNowWSefN5uRwEBPo9tvttnrFZz` (SHA `4ac0812`). All 20 most-recent deployments READY, no ERROR/QUEUED/CANCELED states. ✅
+
+**n8n workflow health:** 38 workflows total, 33 active, 5 inactive (all intentional, unchanged from yesterday): `W0K4YDzkZd0Hzv6g` Refi Watch Pre-Drop Warm-Up, `LfLSDgqgb6yCe93C` Refi Watch Quarterly Rate Review, `AK1fBcaX1cPcdlGx` Closed Loan Review Request polling, `24oewjzGR3AxH4QW` Morning Briefing Team (not yet wired), `zQTy23ZRFAty9uTc` Contract Received v3 (parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows all ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj`, latest update 2026-04-28 PM), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`, last touched 2026-04-28), web lead (`PiuIsQpBuydtFM4m`, last touched 2026-04-28), lender ingest (`hHXpKUirhnBCnQTO`). MCP returns no failed-execution flag on any active workflow.
+
+**Blockers:**
+- **Resend DKIM verification** (NEW today) — Adam org `adam@thestyerteam.com` already DKIM-verified at Resend; Scott org `scott@mortgagesolutionslp.com` needs domain verified before any per-org From: address can actually deliver. Live drip sends from Scott's org block on this (NEEDS ADAM).
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify webhook (`nOCDV73m4M0jyL1B`) still unauthenticated (NEEDS ADAM, rolled 9+ standups).
+- **TCPA copy + Sendblue API key** — iMessage speed-to-lead (GOALS.md priority) blocked (NEEDS ADAM).
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships; terminate-guard silently kills enrollments until authored or archived (NEEDS ADAM decision per campaign).
+- **Marketing site silent** — zero commits visible from this repo's vantage; per GOALS.md still highest May 1 launch risk.
+- **Selfies not uploaded** — LoanOS social content stream paused (NEEDS ADAM).
+- **Notes / activity log fix** — GOALS.md launch-critical, no code in 6+ days.
+- **MISMO multi-borrower regex greediness** — known pre-launch defect; fine for Scott's solo beta, must fix before any multi-borrower file lands.
+
+**Today's focus (autonomous, no Adam dependency):**
+1. Verify drip cron fired post-CRON_SECRET fix — query `drip_sends` for any rows since 2026-04-28 13:00 UTC; if zero, manually enroll one Adam-controlled contact in PA Welcome to prove end-to-end loop given the new per-org From: address path.
+2. FNM 3.4 / Calyx Point co-borrower regex test — synthetic 2-borrower fixture against the parser to characterize the boundary before any multi-borrower file lands.
+3. Notes / activity log fix — GOALS.md launch-critical, no code in 6+ days. Re-read the original brief and start.
+
+**Risk watch:** 2 days to May 1. Marketing site silence remains the single biggest lagging indicator with no commits visible. Drip path is now feature-complete for Scott's pilot — per-org From: + per-org Reply-To shipped today; only the Resend DKIM domain verification gates live sends from Scott's org. Recommend Adam send one real contract through `UfNcdpoVKQZqy0fj` post `4f7586d` deploy to verify the `contract_pdf` Switch branch fires correctly before launch day.
+
+**Open audit findings:** 0 CRITICAL (all 4 from 2026-04-05 audit closed). 1 MEDIUM open: #5 field-level encryption (SSN/DOB/income) — ADAM-BLOCKED on GLBA attorney consult. No new audit reports under `audits/` since 2026-04-05.
+
+---
+
+## 2026-04-28 — Day 34 (Launch: May 1, per GOALS.md)
+
+**Days to launch:** 3 (May 1) — original config target April 26 has passed by 2 days; operational target remains May 1 per GOALS.md. Continuing to run per task instruction.
+
+**Yesterday shipped (since Day 33 standup):**
+- `fix`: route automation PDF uploads (pre-approval, final-cd, refi-intake, contract-received) through Supabase Storage signed URLs to bypass Vercel's 4.5MB function ingress limit. Client uploads to `documents` bucket, posts JSON with short-lived signed URL; proxy fetches server-side and re-emits multipart to n8n — no n8n changes required (`318348e`, `dpl_9pjHazkbLwBBUuANX7ptLbahtmsF` READY).
+- `fix(contract-received)`: send JSON body that matches n8n's `contract_pdf` Switch branch — root-caused last week's "working" runs landing in the loanos_record fast path (39ms, drafts assembled from loan record only, PDF never parsed). Contract-received now sends `{ doc_type, file_path, file_name, loan_id, user_id, organization_id }`; other PDF automations keep file_url path (`4f7586d`, `dpl_7Eqf8rbu7VvUbctQU3YGrmukyhuy` READY).
+- `feat(mismo)`: MISMO importer follow-ups (Scott Pilot scope) — `MISMOUpload.tsx` now surfaces server JSON `error` body instead of generic "Failed to parse"; `api/mismo/import` adds secondary dedup on `(org_id, contact_id, property_address, loan_amount)` when `loan_number` is null (Calyx pre-submission exports). No schema changes (`04fd3a9` + tracker `e6ace46` + confirm `5935dea`, `dpl_BdfRuVfuovTSJUTN51mEeBN7e35F` + `dpl_2EbrzaRZBJSzUdzZSfrwHnpUxYxj` READY).
+
+**Vercel status:** READY — latest production `dpl_2EbrzaRZBJSzUdzZSfrwHnpUxYxj` (SHA `5935dea`). All 20 most-recent deployments READY, no ERROR/QUEUED states. ✅
+
+**n8n workflow health:** 38 workflows total, 33 active, 5 inactive (all intentional): `W0K4YDzkZd0Hzv6g` Refi Watch Pre-Drop Warm-Up, `LfLSDgqgb6yCe93C` Refi Watch Quarterly Rate Review, `AK1fBcaX1cPcdlGx` Closed Loan Review Request polling, `24oewjzGR3AxH4QW` Morning Briefing Team (not yet wired), `zQTy23ZRFAty9uTc` Contract Received v3 (parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows all ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj` updated 2026-04-22), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`), web lead (`PiuIsQpBuydtFM4m`), lender ingest (`hHXpKUirhnBCnQTO`). MCP returns no failed-execution flag on any active workflow.
+
+**Blockers:**
+- ✅ **PR #4 (`feat/tenant-scoping-hardening`) — RESOLVED.** Confirmed merged in commit history (`9db5d22`); CHANGELOG 2026-04-28 PM closes it. Drops from blocker list.
+- ✅ **`CRON_SECRET` in Vercel — RESOLVED.** Empty-commit env rebind shipped (`241cf9a`) + middleware exemption for `/api/drip/run` (`3315102`). Drops from blocker list.
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify webhook (`nOCDV73m4M0jyL1B`) still unauthenticated (NEEDS ADAM, rolled 8+ standups).
+- **TCPA copy + Sendblue API key** — iMessage speed-to-lead (GOALS.md priority) blocked (NEEDS ADAM).
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships; terminate-guard silently kills enrollments until authored or archived (NEEDS ADAM decision per campaign).
+- **Marketing site silent** — zero commits visible from this repo's vantage; GOALS.md still calls this highest launch risk for May 1 ship.
+- **Selfies not uploaded** — LoanOS social content stream paused (NEEDS ADAM).
+- **Notes / activity log fix** — GOALS.md launch-critical, no code in 5+ days.
+- **MISMO multi-borrower regex greediness** — known pre-launch defect; fine for Scott's solo beta, must fix before any multi-borrower file lands.
+
+**Today's focus (autonomous, no Adam dependency):**
+1. Verify drip cron actually fires post-CRON_SECRET — query `drip_sends` after 13:00 UTC to confirm enrollments process; manually enroll one Adam-controlled contact in PA Welcome to prove end-to-end loop.
+2. FNM 3.4 / Calyx Point coverage check on the now-shipped MISMO importer — co-borrower regex greediness is a known defect; quick parser-only test against a synthetic 2-borrower fixture would validate the boundary before launch.
+3. Notes / activity log fix — GOALS.md launch-critical, no code in 5+ days. Re-read original brief and start.
+
+**Risk watch:** Marketing site silence remains the single biggest May 1 lagging indicator — 3 days out, no visible movement. Drip cron has now had its prerequisites cleared (CRON_SECRET set + RPC fixed yesterday), so day-1 evidence of `drip_sends > 0` is the immediate proof point. CD & Contract Extractor (`HkLjsnnhT5MgrX5H`) now active 2+ weeks; today's contract-received PDF body fix means the dual-path workflow `UfNcdpoVKQZqy0fj` will route through the contract_pdf branch correctly the first time it fires post-deploy — recommend Adam send one real contract through to verify before launch day.
+
+**Open audit findings:** 0 CRITICAL (all 4 from 2026-04-05 audit closed). 1 MEDIUM open: #5 field-level encryption (SSN/DOB/income) — ADAM-BLOCKED on GLBA attorney consult. #9 admin action log + #10 sys-vs-org admin separation closed 2026-04-16. No new audit reports under `audits/` since 2026-04-05.
+
+---
+
+## 2026-04-27 — Day 33 (Launch: May 1, per GOALS.md)
+
+**Days to launch:** 4 (May 1) — note: the scheduled task config still references April 26, which has passed. Operational target is May 1 per GOALS.md. Logging the conflict; continuing to run.
+
+**Yesterday shipped (2026-04-26):**
+- `feat(drip)`: Recent Activity timeline on `/dashboard/drip-campaigns` — `getRecentSends()` + `GET /api/drip/sends/recent` + `RecentSendsTimeline.tsx` (15 most-recent sends, contact/campaign/step/status/relative time, status-tinted, graceful empty state) (`f54c16b`, Vercel `dpl_D4VSz7bEWtWhFSpAHw63HVyvwQVQ` READY)
+- `chore(trackers)`: 2026-04-26 PM autonomous wrap-up (`a98f081`, Vercel `dpl_94N724zTHbYfxfzAj3zarkNxuAxC` READY)
+
+**Today already shipped (2026-04-27):**
+- `feat(drip)`: Completion rate widget on each `CampaignCard` ("X% completed", math `completed / (completed + removed)`, tooltip exposes raw counts, "— completion" empty state). Closes Scott Pilot Drip Dashboard widgets — all 3 widgets shipped. (`a4e8f54`, Vercel `dpl_7SjND6PJmpHubZFV9TmTrpdTPEMF` READY ~80s)
+- `fix(supabase)`: AM lead-gen audit fixed `get_due_drip_enrollments()` RPC (two non-existent columns: `ct.status` → `ct.stage`, `l.rate` → `l.interest_rate`). Drip cron path was 500ing pre-fix regardless of CRON_SECRET. Audit revealed drip_sends total = 0; system has never actually sent.
+
+**Vercel status:** READY — latest prod `dpl_5d9rnLYT3oCZwfWXmPyc4Nxh2fu1` (SHA `bc6af8a`, tracker commit). All 20 most-recent deployments READY, including 2 PR #6 (`codex/agent-onboarding-docs`) preview builds. ✅
+
+**n8n workflow health:** 38 workflows total, 33 active, 5 inactive (all intentional: `W0K4YDzkZd0Hzv6g` Refi Watch Pre-Drop, `LfLSDgqgb6yCe93C` Refi Watch Quarterly, `AK1fBcaX1cPcdlGx` Closed Loan Review Request, `24oewjzGR3AxH4QW` Morning Briefing Team, `zQTy23ZRFAty9uTc` Contract Received v3 staging). Core launch workflows all ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`), web lead (`PiuIsQpBuydtFM4m`), lender ingest (`hHXpKUirhnBCnQTO`), referral ack (`H5doQYLLIAg0zMug`).
+
+**Blockers (all rolled 5+ standups, Adam-gated):**
+- **PR #4 unmerged** (`feat/tenant-scoping-hardening`) — Scott still cannot safely log in (NEEDS ADAM)
+- **`CRON_SECRET` not set in Vercel** — now actually load-bearing after AM RPC fix; 13:00 UTC daily cron will not fire until set (NEEDS ADAM)
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify webhook still unauthenticated (NEEDS ADAM)
+- **TCPA copy + Sendblue API key** — iMessage speed-to-lead build paused on these (NEEDS ADAM)
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships; Apr 26 terminate-guard silently kills any enrollment until authored or archived (NEEDS ADAM decision per campaign)
+- **Marketing site silent** — no commits visible from this repo's vantage point; per GOALS.md still highest launch risk
+- **Selfies not uploaded** — LoanOS social content stream still paused
+
+**Today's focus (autonomous, no Adam dependency):**
+- After 13:00 UTC: query Vercel cron history + `drip_sends` table to confirm whether cron fired; if it did and 0 rows wrote, diagnose; if `CRON_SECRET` still unset, log a no-op observation and move on.
+- FNM 3.4 / Calyx Point coverage check on the shipped MISMO importer (parser regex greediness on co-borrower files is a known pre-launch defect — TODO.md Scott Pilot section line 49).
+- Notes / activity log fix — still in GOALS.md as a launch-critical blocker; no code touched in 24h. Re-scope and pick up if no other autonomous threads.
+
+**Risk watch:** 4 days to May 1. Same Adam-gated blockers rolled into a 5th consecutive standup. Today's AM RPC fix removed a hidden second blocker on the drip path — but Adam still gates CRON_SECRET, PR #4 merge, and content authoring decisions for 3 campaigns. Product surface is feature-complete for Scott's pilot; demo data is screenshot-ready; what's missing is exclusively Adam's queue. May 1 still achievable, slipping if no movement on Adam's queue this week.
+
+**Open audit findings:** Original SECURITY-AUDIT-2026-04-05 (22 days old, no new audits): 11 CRITICAL / 10 HIGH at issuance. Resolved since: PII encryption (Crit #3), rate limiting (Crit #2), admin gates (Crit #4), admin action log (Med #9), org admin separation (Med #10), org-scoped RLS gaps via migration 092. Remaining: **#1 Arive webhook multi-tenant** (scaffolded, shadow mode); **#5 field-level encryption SSN/DOB/income** (ADAM-BLOCKED, GLBA attorney). PR #4 closes remaining tenant-scoping gaps once merged.
+
+---
+
 ## 2026-04-24 — Day 30 (Launch: April 26)
 
 **Days to launch:** 2

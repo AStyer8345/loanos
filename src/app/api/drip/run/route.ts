@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { renderDripHtml } from '@/lib/workflows/drip-render'
 import { shouldExitDrip } from '@/lib/workflows/drip-helpers'
-import { sendViaResend } from '@/lib/resend/send'
+import { sendEmail, type OrgPrefsCache } from '@/lib/email/sendEmail'
 import { hasAuthoredEmail, getAuthoredEmail, DRIP_CAMPAIGN_IDS } from '@/lib/drip/authored-emails'
 import type { TriggerConfig } from '@/lib/drip/types'
 
@@ -32,23 +32,10 @@ export async function GET(request: Request): Promise<NextResponse> {
   const now = new Date().toISOString()
   const stats = { processed: 0, sent: 0, skipped: 0, errors: 0 }
 
-  // Per-org From: + Reply-To cache (one fetch per org per cron tick)
-  const orgFromCache = new Map<string, { from?: string; replyTo?: string }>()
-  async function getOrgFrom(orgId: string): Promise<{ from?: string; replyTo?: string }> {
-    const cached = orgFromCache.get(orgId)
-    if (cached) return cached
-    const { data } = await supabase
-      .from('org_settings')
-      .select('from_email, from_name, custom_email_reply_to')
-      .eq('organization_id', orgId)
-      .maybeSingle()
-    const from = data?.from_email
-      ? (data.from_name ? `${data.from_name} <${data.from_email}>` : data.from_email)
-      : undefined
-    const result = { from, replyTo: data?.custom_email_reply_to ?? undefined }
-    orgFromCache.set(orgId, result)
-    return result
-  }
+  // Per-org sending-prefs cache shared across all sends in this tick.
+  // sendEmail() reads provider + From metadata once per org, then routes
+  // each send through Microsoft Graph or Resend per the cached prefs.
+  const orgPrefsCache: OrgPrefsCache = new Map()
 
   // RPC returns active enrollments with next_send_at <= NOW(), joined to their next step
   const { data: rows, error: rpcErr } = await supabase.rpc('get_due_drip_enrollments')
@@ -168,13 +155,11 @@ export async function GET(request: Request): Promise<NextResponse> {
         continue
       }
 
-      const orgFrom = await getOrgFrom(row.org_id)
-      await sendViaResend({
+      await sendEmail({
+        orgId: row.org_id,
         to: row.contact_email,
         subject: authored.subject,
         body: htmlBody,
-        from: orgFrom.from,
-        replyTo: orgFrom.replyTo,
         tags: {
           campaign_id: row.campaign_id,
           enrollment_id: row.enrollment_id,
@@ -185,7 +170,7 @@ export async function GET(request: Request): Promise<NextResponse> {
           contactId: row.contact_id,
           template: `drip_step_${row.step_order}`,
         },
-      })
+      }, orgPrefsCache)
 
       await supabase.from('drip_sends').insert({
         org_id: row.org_id,

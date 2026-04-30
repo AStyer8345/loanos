@@ -2740,12 +2740,19 @@ export type Database = {
           calendly_link: string | null
           created_at: string
           custom_email_reply_to: string | null
+          email_provider: string | null
           from_email: string | null
           from_name: string | null
           id: string
           los_type: string | null
           los_verification_mode: string
           mailchimp_list_ids: Json | null
+          ms_graph_connected_at: string | null
+          ms_graph_email: string | null
+          ms_graph_token_auth_tag: string | null
+          ms_graph_token_ciphertext: string | null
+          ms_graph_token_expires_at: string | null
+          ms_graph_token_iv: string | null
           n8n_webhook_url: string | null
           onboarding_completed: boolean
           onboarding_step: number
@@ -2762,12 +2769,19 @@ export type Database = {
           calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
+          email_provider?: string | null
           from_email?: string | null
           from_name?: string | null
           id?: string
           los_type?: string | null
           los_verification_mode?: string
           mailchimp_list_ids?: Json | null
+          ms_graph_connected_at?: string | null
+          ms_graph_email?: string | null
+          ms_graph_token_auth_tag?: string | null
+          ms_graph_token_ciphertext?: string | null
+          ms_graph_token_expires_at?: string | null
+          ms_graph_token_iv?: string | null
           n8n_webhook_url?: string | null
           onboarding_completed?: boolean
           onboarding_step?: number
@@ -2784,12 +2798,19 @@ export type Database = {
           calendly_link?: string | null
           created_at?: string
           custom_email_reply_to?: string | null
+          email_provider?: string | null
           from_email?: string | null
           from_name?: string | null
           id?: string
           los_type?: string | null
           los_verification_mode?: string
           mailchimp_list_ids?: Json | null
+          ms_graph_connected_at?: string | null
+          ms_graph_email?: string | null
+          ms_graph_token_auth_tag?: string | null
+          ms_graph_token_ciphertext?: string | null
+          ms_graph_token_expires_at?: string | null
+          ms_graph_token_iv?: string | null
           n8n_webhook_url?: string | null
           onboarding_completed?: boolean
           onboarding_step?: number

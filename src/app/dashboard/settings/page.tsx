@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import {
   Mail, CheckCircle, Loader2,
   Eye, EyeOff, Save, Zap, Globe, Share2, User, Bot, RotateCcw, Send, Megaphone,
-  Ban, Trash2, Plus,
+  Ban, Trash2, Plus, Inbox,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrg } from '@/hooks/useOrg'
@@ -212,6 +212,12 @@ export default function SettingsPage() {
   const [outreachPrompt, setOutreachPrompt] = useState('')
   const [outreachIsCustom, setOutreachIsCustom] = useState(false)
 
+  // ── Email sending provider state ──
+  const [emailProvider, setEmailProvider] = useState<'resend' | 'microsoft' | 'google'>('resend')
+  const [msEmail, setMsEmail] = useState<string | null>(null)
+  const [msConnectedAt, setMsConnectedAt] = useState<string | null>(null)
+  const [msDisconnecting, setMsDisconnecting] = useState(false)
+
   // ── Hold List (drip suppressions) ──
   interface Suppression { id: string; email: string; scope: string; reason: string | null; added_at: string }
   const [suppressions, setSuppressions] = useState<Suppression[]>([])
@@ -295,6 +301,28 @@ export default function SettingsPage() {
         if (d.updatedAt) setTimestamps(prev => ({ ...prev, ai: d.updatedAt }))
       })
       .catch(() => {})
+    // Load email-provider state (Microsoft Graph connection status)
+    fetch('/api/settings/email-provider')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.provider) setEmailProvider(d.provider)
+        setMsEmail(d?.msEmail ?? null)
+        setMsConnectedAt(d?.msConnectedAt ?? null)
+      })
+      .catch(() => {})
+    // Surface OAuth callback feedback via URL params
+    const url = new URL(window.location.href)
+    if (url.searchParams.get('ms_connected')) {
+      const email = url.searchParams.get('email') ?? ''
+      setFlashMsg(`✓ Microsoft Graph connected${email ? ` — sending as ${email}` : ''}.`)
+      url.searchParams.delete('ms_connected')
+      url.searchParams.delete('email')
+      window.history.replaceState({}, '', url.toString())
+    } else if (url.searchParams.get('ms_error')) {
+      setFlashMsg(`✗ Microsoft connect failed: ${url.searchParams.get('ms_error')}`)
+      url.searchParams.delete('ms_error')
+      window.history.replaceState({}, '', url.toString())
+    }
     // Load outreach prompt
     fetch('/api/settings/outreach-prompt')
       .then(r => r.json())
@@ -408,6 +436,31 @@ export default function SettingsPage() {
       setFlashMsg('✓ Reset to default outreach prompt.')
     } catch {
       setFlashMsg('✗ Reset failed.')
+    }
+  }
+
+  // ── Disconnect Microsoft Graph ──
+  async function disconnectMicrosoft() {
+    if (!confirm('Disconnect Microsoft 365? Future drip emails will fall back to Resend until you reconnect.')) return
+    setMsDisconnecting(true)
+    try {
+      const res = await fetch('/api/settings/email-provider', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect' }),
+      })
+      if (res.ok) {
+        setEmailProvider('resend')
+        setMsEmail(null)
+        setMsConnectedAt(null)
+        setFlashMsg('✓ Microsoft Graph disconnected.')
+      } else {
+        setFlashMsg('✗ Disconnect failed.')
+      }
+    } catch {
+      setFlashMsg('✗ Disconnect failed.')
+    } finally {
+      setMsDisconnecting(false)
     }
   }
 
@@ -558,6 +611,65 @@ export default function SettingsPage() {
           {flashMsg}
         </div>
       )}
+
+      {/* ── EMAIL SENDING ── */}
+      <div className="bg-card border border-input border-l-[3px] border-l-amber-500 rounded-r-lg p-6">
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-md bg-muted border border-input flex items-center justify-center">
+              <Inbox size={17} className="text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-mono font-semibold text-foreground">Email Sending</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Connect Microsoft 365 to send drip + transactional email from your real mailbox. Falls back to Resend if not connected.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {emailProvider === 'microsoft' && msEmail ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-mono">
+              <CheckCircle size={14} className="text-[#4ADE80]" />
+              <span className="text-foreground">Connected — <span className="text-amber-400">{msEmail}</span></span>
+            </div>
+            {msConnectedAt && (
+              <div className="text-[11px] font-mono text-muted-foreground">
+                Linked {fmtTime(msConnectedAt)}. Mail sends through Microsoft Graph and lands in your real Sent folder.
+              </div>
+            )}
+            <div className="flex gap-2">
+              <a
+                href="/api/auth/microsoft/connect"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-muted border border-input text-foreground hover:bg-muted/80 transition-colors"
+              >
+                <RotateCcw size={12} /> Reconnect
+              </a>
+              <button
+                onClick={disconnectMicrosoft}
+                disabled={msDisconnecting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-red-900/20 border border-red-900/40 text-red-400 hover:bg-red-900/30 disabled:opacity-50 transition-colors"
+              >
+                {msDisconnecting ? <Loader2 size={12} className="animate-spin" /> : <Ban size={12} />}
+                Disconnect
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-xs font-mono text-muted-foreground">
+              Currently sending via <span className="text-foreground">Resend</span>. Connect Microsoft to send from your real mailbox instead.
+            </div>
+            <a
+              href="/api/auth/microsoft/connect"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium bg-amber-500 text-zinc-900 hover:bg-amber-400 transition-colors"
+            >
+              <Mail size={12} /> Connect Microsoft 365
+            </a>
+          </div>
+        )}
+      </div>
 
       {/* ── IDENTITY ── */}
       <SectionCard

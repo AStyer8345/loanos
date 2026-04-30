@@ -1,5 +1,59 @@
 # LoanOS Changelog
 
+## 2026-04-30 AM (scenarios-am) — 6th consecutive no-build exit
+
+- 6th consecutive no-build exit (Apr 25/26/27/28/29/30). Tiers 1–8 of the Scenarios program remain COMPLETE (last build 2026-04-24 AM, mobile swipe cards). [GOALS.md](http://GOALS.md) (Week of Apr 20) still has no scenarios work. **1 day to May 1 launch.**
+- Updated existing NEEDS ADAM entry on `TODO.md` line 19 — bumped streak count to 6, added 2026-04-30 to flagged-dates list, updated runway to "1 day from May 1 (launch tomorrow)", upgraded recommendation from option (b) redirect → option (a) retire-now (rationale: at 6 streaks with launch tomorrow, "leave dormant" has stopped being free).
+- Updated CONTEXT.md "Scenarios Agent Status" three fields per `loanos-clone/CLAUDE.md` rule.
+- Skipped NotebookLM PULL/PUSH operations and master-notebook note for the 4th consecutive run — no new context to query, no work to summarize, and burning the n8n-cap on a confirmed no-mission run is pure waste (matches prior no-build exits Apr 27 / 28 / 29).
+- No code changes, no commits, no deploys. Build state unchanged from PM 2026-04-29: latest prod `dpl_HnNowWSefN5uRwEBPo9tvttnrFZz` (commit `4ac0812` per-org From: address) READY.
+
+## 2026-04-30 PM (loanos-autonomous) — n8n inline credential audit (read-only)
+
+- **Bucket A (autonomous-eligible)**: 2 items shipped. (1) Marked stale 2026-04-29 PM "4 SRC FILES UNCOMMITTED ON MAIN" flag resolved [x] in `tasks/ADAM-TODO.md` — Adam committed both pieces in interactive session as `8adb642 feat(contacts): add Cold + Other Lender stages` and `09ccfe4 feat(loans): typed filter rules with adaptive operators + 6 new fields`, both deployed to production READY. (2) Ran TODO line 17 n8n credential hygiene audit (read-only enumeration via n8n MCP) — output at `tasks/security/n8n-credential-audit-2026-04-30.md`, ~238 lines.
+- **Audit findings**: 27 active LoanOS workflows audited (skipped already-fixed `nOCDV73m4M0jyL1B`). **22 leak inline secrets, 5 are clean.** ~140 inline credential instances across HTTP-node headers and Code-node JS literals. Top types by exposure: (1) Supabase service-role JWT — 21 workflows, ~110 instances (HIGHEST risk: full DB / PII access); (2) LoanOS internal bearer `0bbc8cff...` — 7 workflows, ~14 instances; (3) Publer Bearer-API + Google Gemini key — 4 instances each across 2 social workflows; (4) Mailchimp Basic auth — 1 instance. Anthropic / Resend / OpenAI keys: **0 inline** (all already use n8n credentials). 5 clean workflows: `yTkiV6pf2eZaJw82`, `eb9UsV5Z6odh7Yex`, `Gx5YpWddAhXrEYKT`, `rwi3qEYgJKGGHkHc`, `0M8Vnf6MhB1xtaIg`.
+- **Bonus finding**: `ZUeGy8u8P4o6DPM3` (Refi Watch Anniversary Check-In) `Check Dedup` Code node has a malformed JWT literal (doubled trailing single quote) — may be silently breaking the dedup check. Worth fixing during migration to `$env.SUPABASE_SERVICE_KEY`. Anniversary Check-In hasn't fired yet (first run May 1) so impact is forward-looking only.
+- **Adam-actionable next step**: create 5 canonical n8n credentials in UI (`Supabase Service Role`, `LoanOS Self-Bearer`, `Publer API`, `Gemini API Key`, `Mailchimp List 5053c57af2`) before any workflow migration. Per-workflow node-level fix list captured in audit file. Code-node JWT literals need `$env.SUPABASE_SERVICE_KEY` (n8n credentials cannot be referenced from Code-node JS); `hHXpKUirhnBCnQTO` already uses this env var pattern, suggesting it's set.
+- **Bucket B (Adam-blocked, no new items)**: Resend DKIM for Scott's domain, Realtor Relationships drip cadence/criteria, Long-Term Nurture / Past Client Retention archive-vs-author, TCPA + Sendblue, Scenarios cron retire/redirect (5+ no-op runs), NotebookLM playbook reconcile, 3 active drip campaigns missing authored content, Email Cutover Task 23 env vars. All already in `tasks/ADAM-TODO.md`.
+- **Bucket C (out-of-scope)**: Refi Opportunity List V2 (post-Scott V1), Self-Serve Tenant Domain Onboarding (post-V1), notes / activity log fix (vague — needs spec).
+- **Drip pipeline state** (read-only verification): `drip_sends` total = 0; `drip_enrollments` total = 0 (active=0, completed=0, removed=0); `drip_campaigns` active = 8. Unchanged from yesterday — cron is wired but has nothing to iterate until Adam manually enrolls a contact (Standup notes that must remain a manual Adam action).
+- **Vercel state**: Latest production `dpl_G48aEEnnnpMYLb5AkWCxGVZbiP56` (commit `09ccfe4`) READY. All 20 most-recent deployments READY.
+- **Circuit breaker**: clean.
+- **Destructive ops**: none. **Env changes**: none. **Schema changes**: none. **n8n changes**: none (audit was read-only — no `update_workflow`, `archive_workflow`, or `unpublish_workflow` calls). **Code changes**: none.
+
+## 2026-04-30 AM (styer-lead-gen-am) — Realtor Relationships drip drafts
+
+- Broke 8-day "funnel zero-state snapshot" loop. New mission: speculative copy authoring for the 4 Realtor Relationships drip steps — Adam-blocked on cadence, but copy is not.
+- Authored 4 email body drafts (Deal Anniversary, Milestone Celebration, Co-Marketing Offer, Holiday-Thanksgiving) voice-aligned to `tasks/social-media/adam-voice-and-workflow.md` § "REALTOR RELATIONSHIPS" + § "VOICE AND TONE". Output: `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md` (~170 lines).
+- Read-only Supabase verification: 4 `drip_steps` confirmed in DB matching ADAM-TODO #2 description; `drip_sends` total = 0 / `drip_enrollments` total = 0 (no movement since per-org From: address shipped commit `4ac0812` 2026-04-29 PM).
+- Flagged 4 merge-tag dependencies (`{{transaction_address}}`, `{{transaction_buyer_name}}`, `{{deal_count}}`, `{{first_deal_date}}`) for builder verification before wiring; all sourced from `loans` table joined on `realtor_id`.
+- NotebookLM CLI v0.3.4 PULL successful (3-day post-recovery streak); PUSH note created with new note ID logged in subagent-status SESSION_END.
+
+## 2026-04-30 AM (styer-social-am) — Maintenance-only, no new posts
+
+- **No new posts written.** Backlog already at 4-week cushion (Posts 191–198 cover Jan 11 → Feb 4, 2027). Per 2026-04-19 quality-over-cadence rule, declined to extend to 5 weeks while queue's strategic entries sat unconsumed and dashboard already shows 8 unapproved drafts.
+- **Queue reconciliation**: `content-repost-queue.md` updated. 2026-04-28 blog (`why-home-prices-arent-crashing.html`) → moved to Completed with Post 191 (FB, ID `5c64d991`). 2026-04-28 newsletter (`the-crash-that-isnt-coming-data-for-your-buyers.html`) → moved to Completed with Post 192 (LI, ID `1abae5ab`). Both consumed during Wk45 build (2026-04-28 AM) but never moved from Pending — bug fixed today.
+- **Step 1B**: SKIPPED — 0 new content in `rates/`, `blog/`, `realtor-updates/`. Refresh: 0 TIMELY drafts in 48-hr horizon (Apr 30 → May 2).
+- **NotebookLM PUSH**: combined "Wk48 PM Build (Posts 197-198) + 2026-04-30 AM Maintenance" note (`3f3ece44`) closes the deferred Wk48 PM PUSH gap. Master notebook entry `96c02360` pushed. CLI 3rd consecutive AM success.
+- **Pending queue**: 2 entries remain (2026-04-20 bond-rally blog, 2026-04-15 rate update natives) — both rate/market-themed, awaiting matching slot.
+
+## 2026-04-29 PM-late (styer-notebooklm-nightly, actual 10pm cron) — Duplicate-trigger no-op + 1 targeted refresh
+
+- **Duplicate trigger detected.** This task fired twice on 2026-04-29 — once at ~09:48–09:55 AM (file mtimes), then again at the actual 22:09 cron time. The morning fire ran both halves end-to-end with the SKILL.md-hardcoded `Mode: PM, 22:00 PM` timestamp. Tonight's fire skipped the full PUSH+CURATE (would have flagged morning's fresh Apr 29 sources as stale and removed them).
+- **SEO/SEM**: NO-OP. styerteam-mortgage-site CONTEXT.md unchanged since morning (09:26 mtime), notebook 7f8a80c5 still at 49/50 with current CONTEXT.md (id 431b8353…), no new research/spec/audit files since 09:48.
+- **Lead Gen**: targeted CONTEXT.md refresh only. `loanos-clone/CONTEXT.md` was rewritten at 21:30 by commit `0db8c4c` (daily-opt update — captures typed filter rules + Cold/Other Lender stages + autonomous PM no-build cycle). Deleted morning version (id 69cb2b66) from notebook 4213513c, added 21:30 version (id d9063a25). Notebook back to 50/50.
+- **CLI flag-syntax footgun discovered**: `notebooklm source delete <id> --json` is REJECTED by the CLI (`Error: No such option: --json`). Both subagent playbooks document the wrong invocation. Use `--yes` only for non-interactive. Flagged to ADAM-TODO.
+- **Duplicate-trigger root cause unknown** — could be the cron firing twice, or this scheduled task being invoked manually mid-morning, or a stuck/retried run. Flagged to ADAM-TODO; needs investigation. Pattern: if it recurs tomorrow, the second fire wastes 30+ minutes of work and risks regression on a notebook at the 50-source cap.
+
+## 2026-04-29 PM (styer-social-pm) — Wk48 Content Build (Posts 197–198)
+
+- **Posts shipped to social_drafts**: 2 EVERGREEN. Post 197 (LinkedIn, Education, ID `dbcbaed3`, Tue Feb 2 2027 9 AM CT) — Texas-specific option-fee vs earnest-money explainer; $200–$500 option / ~1% earnest, escrow at title company; lands on "two checks, two purposes"; no CTA, NMLS #513013 included.
+- Post 198 (Instagram, Personal, ID `60948a41`, Thu Feb 4 2027 9 AM CT) — Brittany Jo + Roman's coat with yesterday's peanut butter on the sleeve ("She'd already wiped it down twice"); 45° Austin morning; lands on appreciation for the unseen labor; no CTA, no NMLS (no loan content).
+- Both 9/10 first draft, 0 rewrites. BBQ + Jessica tests PASS. Reviewer APPROVED, QA PASS. Curly apostrophes + em-dashes + en-dash all preserved via Python urllib insert. Brittany Jo spelling matches all 6 prior posts referencing her (now 7th).
+- Strategy: closes 12-day LinkedIn gap from Post 194 Jan 21; lifts Education pillar back on target (~28% → ~32%). Backlog now Jan 11 → Feb 4, 2027 (8 drafts: Posts 191–198 = 4-week cushion).
+- Step 1B + Refresh + NotebookLM PULL/PUSH: SKIPPED (PM session — AM-only steps; NotebookLM deferred to next AM).
+- Build/review/QA reports + spec written under `tasks/social-media/`. Activity logged (`d1b8f4a0`). BLOCKER-LOANOS-001 still active.
+
 ## 2026-04-29 PM (loanos-autonomous) — No-build cycle (current phase work blocked)
 
 - **Bucket A (autonomous-eligible)**: 0 items. Most "Now" TODO items require Adam input (DKIM verification, selfies, Realtor Relationships cadence/trigger decision, Long-Term Nurture / Past Client Retention archive-vs-author decision, Mailchimp customer journey approval). Drip cron end-to-end proof requires choosing an Adam-controlled contact to enroll — out of scope for autonomous (PII risk + Adam's preference).

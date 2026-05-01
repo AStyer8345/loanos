@@ -2,6 +2,65 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-01 AM — Lead Generation
+Focus: On-page conversion audit of `/get-preapproved.html` (Sequence A — Research)
+Type: Research (Sequence A)
+Week in Queue: Week 16
+
+### Context From Previous Session
+2026-04-30 AM authored 4 Realtor Relationships drip email body drafts (copy-only, voice-aligned). Today: copy-blocked piece for Realtor Relationships closed; cadence still Adam-blocked. Drip pipeline 0 sends / 0 enrollments since per-org From: shipped. PA funnel 0 submissions since 2026-04-15 (9th day). The 2026-04-28 ADAM-TODO action item — "ANALYZE traffic + CTR" — still blocked on fresh GSC export. Today's mission: audit the page itself for conversion friction independent of GSC data.
+
+### Completed
+- **NotebookLM PULL** — CLI v0.3.4 responsive (5-day post-recovery streak). 12 notes inventoried; most recent is `46df975d` (2026-04-30 AM Realtor Drafts). Pull report at `tasks/lead-gen/notebooklm-pull-2026-05-01.md`.
+- **Read-only Supabase verification (drip pipeline)**:
+  - `drip_sends` total = 0 (24h = 0)
+  - `drip_enrollments` total = 0 (7d = 0)
+  - `contacts.lead_source='Pre-Approval Funnel'` total = 0 (9th consecutive day)
+  - `contacts` created in last 7 days = 4 (no PA-funnel source)
+  - Pattern unchanged from 2026-04-29 snapshot. Drip cron remains plumbed-and-idle.
+- **Read full source of `get-preapproved.html`** (582 lines, 27.2 KB, mtime 2026-04-28). Audited HTML/inline CSS/form/JS submit flow against conversion-rate-best-practices checklist.
+- **Authored 20 prioritized findings** across HIGH (5) / MEDIUM (7) / LOW (6) tiers, plus compliance spot-check + recommended ship order:
+  - **HIGH:** H1 headline-promise mismatch w/ title; H2 missing purchase-price qualifier (highest-leverage form change); H3 generic testimonial author names; H4 non-clickable review-trust chip; H5 no rate/time anchor in subhead.
+  - **MEDIUM:** M1 title at char cap; M2 meta description lacks CTA; M3 zero JSON-LD schema; M4 missing og:image; M5 missing licensed branch address (compliance flag); M6 Loan Goal dropdown conflates Purchase + FTB; M7 "21-day avg close" claim has no source.
+  - **LOW:** 4th proof point; "60-second" microcopy; sticky mobile phone CTA; FAQ section + FAQPage schema; "Read all 136 reviews →" link; LCP audit.
+- **Compliance spot-check** — all checks pass except M5 (missing licensed branch address — same fix as elsewhere on site, low effort).
+- **Output**: `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` (~330 lines, prioritized findings table + before/after rewrite suggestions for each HIGH-impact item).
+
+### Key Findings
+1. The page is well-built and compliance-safe but **leaves the SERP promise on the table**: title sells "in 24 Hours — 40+ Lenders" but H1 drops both differentiators. H1 rewrite is a single-line change with directionally meaningful conversion lift potential.
+2. **Highest-leverage form change is adding ONE optional purchase-price-range field** (H2). Lead quality differentiation is currently zero — Adam can't tell a $200k FHA from a $1.5M jumbo before reaching out. Adding "Approximate purchase price (optional)" with 6 ranges + "Not sure yet" preserves conversion rate while massively improving inbound usefulness.
+3. **Testimonial credibility is a high-impact, single-PR fix.** Three reviews currently attribute to "Austin Home Buyer" — anonymized reviews underperform named reviews substantially. First-name + last-initial + locale + loan-type pattern is the standard.
+4. **Compliance gap (M5):** Licensed branch address missing from footer. Texas SAFE Act + NMLS Rule MU.4 likely require it on advertising/landing pages. Low-effort fix — bundle with any other footer change.
+5. **No structured data on the page** (M3) — bundled into SEO/SEM agent's existing schema rotation rather than a separate ticket.
+6. **No `og:image`** (M4) — shared URLs render without preview cards. Adam's selfies remain blocked (BLOCKER-LOANOS-001) so logo-only OG is the fallback.
+
+### Output
+- Audit report: `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` (~330 lines, 20 findings prioritized HIGH/MEDIUM/LOW with effort estimates + suggested rewrites)
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-05-01.md` (~40 lines)
+- Mission brief: `tasks/lead-gen/today-mission.md` (refreshed)
+
+### Recommendations Logged for Next Session (no Adam dependency)
+1. **If Adam ships H1 + H4 + H5 in a single PR** (~15 min total), measure CTR on form impression → submission over 14 days. If fresh GSC data lands in same window, layer on the actual impressions/CTR.
+2. **Wait for SEO/SEM agent's 90-day GSC export** before iterating on M1 (title) + M2 (meta description). Title/meta variant A/B should be data-driven, not hunch-driven.
+3. **Coordinate M3 (JSON-LD schema) with SEO/SEM agent's "Schema/JSON-LD audit" rotation** already on their CONTEXT.md — flag get-preapproved.html for inclusion in their next sweep.
+4. Skip `/get-preapproved.html` re-audit until at least one HIGH-tier change ships. Re-auditing a page that hasn't moved is busywork.
+
+### Compliance
+- Zero new compliance items introduced. Audit *flags* one existing compliance gap (M5 — missing physical address). Not a blocker — common-pattern fix.
+- TCPA / CAN-SPAM / NMLS / fair-lending: all unchanged.
+
+### NotebookLM
+- PULL: completed (CLI v0.3.4, 12 notes, 5-day streak)
+- PUSH: planned at session end (note for `2026-05-01-get-preapproved-conversion-audit`)
+
+### Adam Action Items
+- 0 NEW direct adds. The audit findings are agent-recommendations to be acted on by Adam at his next site session — single batched ADAM-TODO line points to the file rather than 20 individual entries (avoids the 04-26 violation pattern of stacking action items).
+- Carryover unchanged: Realtor Relationships cadence, Long-Term Nurture/Past Client Retention archive vs author, TCPA copy, Sendblue signup, GSC pull (all 6 carryover items).
+
+Timestamp: 2026-05-01 04:15:00
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-04-30 AM — Lead Generation
 Focus: Realtor Relationships drip email body drafts (Sequence B — Strategy/Architect, copy-only)
 Type: Strategy / Architecture (Sequence B)

@@ -1,54 +1,56 @@
-## Mission Brief — 2026-04-30 AM
+## Mission Brief — 2026-05-01 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-Realtor Relationships drip email body drafts (autonomous, copy-only) + drip cron read-only verification
+On-page conversion audit of `/get-preapproved.html` — the PA funnel landing page. Identify conversion friction (CTA, copy, social proof, trust signals, mobile friction) without depending on GSC data (which is blocked).
 
 ### Session Type
-[ ] Research + Planning (Sequence A)
-[x] Strategy / Architecture (Sequence B — Author drafts)
+[x] Research + Planning (Sequence A)
+[ ] Strategy / Architecture (Sequence B)
 [ ] Execute / Build (Sequence C)
 [ ] Full Cycle (Sequence D)
 
 ### Why This Mission
 
-8 days running of "PA funnel zero leads" status snapshots. Pattern is established and already surfaced to Adam. Continuing daily snapshots is busywork.
+GOALS.md week priorities for Styer Mortgage Website:
+- "**Conversion**: Make the site work harder. CTAs, trust signals, social proof."
+- "**SEO fixes**: High impressions, low CTR. Audit and rewrite title tags + meta descriptions on the highest-impression pages first." (page-level on-page SEO is in scope here too)
 
-GOALS.md week priority: "Drip campaigns — not working the way they should. Spend time this week fixing so Scott and I can both use them. Critical for beta utility."
+PA funnel has captured zero submissions since 2026-04-15 lead-intake cutover (8th-day pattern as of 2026-04-29). The 2026-04-28 diagnosis confirmed the code path is clean. The 2026-04-28 ADAM-TODO action item — "ANALYZE traffic + CTR" — is blocked on a fresh GSC export (last on-disk 2026-03-26 predates PA-funnel deploy).
 
-Two of the three skeleton-only campaigns (Long-Term Nurture, Past Client Retention) are archive-vs-author Adam-blocked. The third — **Realtor Relationships** — is different: the campaign already exists in Supabase as `ef52ed56-8a22-4d15-9f12-a1796ccf17b6` with 4 active steps. The Adam-blocked piece is **cadence + activation criteria** (which days, which trigger). The **email copy itself is not Adam-blocked** — agent can draft it speculatively. When Adam returns the cadence decision, builder can wire the 4 emails immediately without an authoring loop.
+But the page itself can be audited *without* GSC data. Conversion friction lives in the page: form length, CTA clarity, headline strength, trust signals, social proof, mobile responsiveness, pixel-density of decision-friction. That audit produces a directly-actionable fix list Adam can ship the same day.
+
+This is the cleanest autonomous AM mission today — no Adam-blocked carryovers, no email risk, no DB writes, output file Adam can act on cold.
 
 ### Objectives
-1. Author 4 Realtor Relationships email body drafts using Adam's voice (`tasks/social-media/adam-voice-and-workflow.md`). One per existing campaign step. Mortgage-broker-to-realtor-partner tone — not realtor-to-buyer. Each email: subject, preview text, full body, CTA. NMLS #513013 + Equal Housing Lender disclosure.
-2. Read-only Supabase verification: has the drip cron fired since per-org From: address shipped (commit `4ac0812`)? Query drip_sends + drip_enrollments + the 4 Realtor Relationships steps to confirm step structure matches what we're authoring against.
-3. Output: `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md` — 4 emails in append-to-`authored-emails.ts`-ready format.
+1. Read `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/get-preapproved.html` end-to-end (HTML + inline CSS + form structure).
+2. Score the page against a conversion-rate-best-practices checklist: above-the-fold value prop, CTA visibility/clarity, form length, social proof, trust signals (NMLS, BBB, testimonials), TCPA disclosure clarity, mobile-friction (input types, autofill, viewport), page weight, time-to-interactive friction.
+3. Produce a prioritized fix list — rank each finding HIGH / MEDIUM / LOW by estimated conversion-lift impact + estimated implementation effort.
+4. Cross-reference with the page-level SEO basics: title tag, meta description, H1 structure, schema markup, canonical, internal links — flag any low-hanging-fruit rewrites for the GOALS.md CTR work.
+5. Read-only Supabase check: any drip enrollments since 2026-04-30 PM? (1-line answer to confirm Scott Pilot launch hasn't accidentally moved the needle on its own.)
 
 ### Definition of Done
-- 4 email bodies written, voice-aligned, compliance-aligned, in a single drafts file.
-- Drip cron status confirmed via Supabase (1-line answer in session-log: fired or not since 2026-04-29 13:00 UTC).
-- ADAM-TODO refresh: cadence-decision item still open; copy-blocked piece now closes (drafts ready when Adam decides).
+- 1 audit file at `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` — prioritized findings table + before/after rewrite suggestions for at least 3 HIGH-impact items.
+- Drip enrollment status confirmed (1 line in session-log).
+- ADAM-TODO refresh: surface any HIGH-impact findings that Adam can ship in <30 min (CTA copy, headline, meta description) as agent-actionable next-session items.
 
 ### Resources / Files in Scope
-- READ: `tasks/social-media/adam-voice-and-workflow.md` (voice guide)
-- READ: `src/lib/drip/authored-emails.ts` (existing drip body format reference)
-- READ: Supabase `drip_campaigns` (Realtor Relationships steps detail) + `drip_sends` + `drip_enrollments` (cron health)
-- WRITE: `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md` (NEW)
-- TOUCH: `tasks/lead-gen/session-log.md`, `CONTEXT.md` (3-field block), `CHANGELOG.md`, `TODO.md`, `ADAM-TODO.md`
+- READ: `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/get-preapproved.html` (live page source)
+- READ: Supabase `drip_sends` + `drip_enrollments` (cron movement check)
+- READ: Supabase `contacts` filter `lead_source='Pre-Approval Funnel'` (any new since 2026-04-29 16:30?)
+- WRITE: `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` (NEW)
+- TOUCH: `tasks/lead-gen/session-log.md`, `CONTEXT.md` (3-field block), `CHANGELOG.md`, `TODO.md`, `tasks/ADAM-TODO.md`
 
 ### HIGH RISK Items
-- None. No DB writes. No code commits. No outbound email. Drafts file only.
-- Drafts must be flagged "DRAFT — pending Adam cadence decision" so they're not mistakenly wired into the campaign without approval.
+- None. No DB writes. No code commits. No outbound email. Audit file only.
+- Audit must distinguish "agent recommendation" from "decided fix" — Adam approves before any styerteam-mortgage-site code changes (separate repo + separate agent).
 
-### Compliance Checklist (apply to each email body)
-- [ ] NMLS #513013 in footer
-- [ ] Equal Housing Lender disclosure in footer
-- [ ] Physical address: 5900 Balcones Drive, Suite 100, Austin TX 78731
-- [ ] Unsubscribe merge tag `{{unsubscribe_url}}`
-- [ ] No guaranteed-approval language
-- [ ] No fair-lending protected-class targeting
-- [ ] Voice = Adam's authoritative-without-arrogance tone, mortgage-broker-to-realtor-partner
+### Compliance Checklist
+- [ ] Page check: NMLS #513013 visible? Equal Housing Lender disclosure visible? TCPA consent language present (per 2026-04-24 iMessage research prereq)?
+- [ ] No guaranteed-approval language in page or in any rewrite suggestion.
+- [ ] No fair-lending protected-class targeting in copy suggestions.
 
 ### Sequence
-B (Strategy) — light architect role, no builder/QA/reviewer needed because output is project-files-only drafts that go through Adam approval before any builder action. Reporter still runs at end.
+A (Research only). Reporter runs at end. No Builder, QA, Reviewer needed — output is project-files-only research that goes through Adam approval before any styerteam-mortgage-site code action.

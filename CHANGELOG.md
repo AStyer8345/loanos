@@ -1,5 +1,52 @@
 # LoanOS Changelog
 
+## 2026-05-01 PM (loanos-autonomous) — Tracker hygiene cycle (May 1 launch day)
+
+- **Bucket A (autonomous-eligible)**: 1 item — roll in this morning's subagent tracker churn (CHANGELOG/CONTEXT/TODO/ADAM-TODO + per-agent session-log/subagent-status/today-mission for lead-gen, social, seo-sem) so the working tree starts the next session clean. Same hygiene pattern as `d6fb6e7` (2026-04-30 AM) and `2624981b` (2026-04-29 PM). 11 modified tracker files, +337/-87 lines, no code changes.
+- **Bucket B (Adam-blocked, no new items)**: Resend DKIM for Scott's `mortgagesolutionslp.com` (gates Scott's first live drip send), Realtor Relationships drip cadence/criteria, Long-Term Nurture / Past Client Retention archive-vs-author, TCPA copy + Sendblue API for iMessage speed-to-lead, Scenarios cron retire/redirect (6+ no-op AM runs), NotebookLM playbook reconcile (email-or-no-email), 5 canonical n8n credentials creation (gates the 22-workflow inline-secret migration), `/get-preapproved.html` audit ship-approval (4 PRs queued in styerteam-mortgage-site repo), Email Cutover Task 23 env vars + Resend webhook config + WORKFLOW_DEVKIT_LEAD_INTAKE flip. All already in `tasks/ADAM-TODO.md`.
+- **Bucket C (out-of-scope)**: Refi Opportunity List V2 (post-Scott V1 drip proven), Self-Serve Tenant Domain Onboarding (post-V1 scaling), notes/activity log fix (vague — needs spec), `1b58ef9` Microsoft Graph adapter follow-ups (Adam shipped today, no autonomous follow-up needed yet — provider router is wired with Resend fallback, drip and transactional sends through `sendEmail()` per migration 096 / `org_settings.email_provider`).
+- **Build state**: `npm run build` ✓ green first pass — Compiled successfully, 113/113 static pages generated. Working tree (modified trackers + Adam's untracked AGENTS.md / docs/AI_AGENT_ONBOARDING.md / docs/REPO_STRUCTURE.md / agent-artifact directories) compiles clean.
+- **Vercel state**: Latest production `dpl_ELzK5iGE1TNLBP1hZcQaKJBTcAD5` (commit `1b58ef9` — Microsoft Graph OAuth send adapter + provider routing, migration 096 `org_settings.email_provider` + encrypted MS Graph token columns) READY. All 20 most-recent deployments READY.
+- **Drip pipeline state** (read-only, unchanged from yesterday): `drip_sends` total = 0 (24h = 0); `drip_enrollments` total = 0 (active=0, completed=0, removed=0); `drip_campaigns` active = 8. Cron wired and CRON_SECRET set; will no-op until Adam manually enrolls a contact (Standup notes that must remain a manual Adam action). Microsoft Graph adapter live in code path but not yet exercised — no org has flipped `email_provider='microsoft'` yet.
+- **n8n inventory**: not re-enumerated this run (audit done 04-30 PM; no migration possible until Adam creates 5 canonical credentials per `tasks/security/n8n-credential-audit-2026-04-30.md`). Anniversary Check-In (`ZUeGy8u8P4o6DPM3`) malformed-JWT bonus finding still open — first cron firing today (May 1) will attempt to run with broken dedup; impact is forward-looking only. Worth Adam-attention but not autonomous-fixable in isolation.
+- **Skipped autonomous-territory items**: untracked `AGENTS.md` + `docs/AI_AGENT_ONBOARDING.md` + `docs/REPO_STRUCTURE.md` (Adam's intentional uncommitted AI-agent setup files from Apr 25, his call to commit), and ~80 untracked subagent artifact files in `tasks/{lead-gen,seo-sem,social-media}/{audits,digests,drafts,research,build-reports,qa-reports,reviews,specs,notebooklm-*}/` (these belong to specific subagent sessions; rolling them into a tracker-hygiene commit would mass-attribute work).
+- **Circuit breaker**: clean. **Destructive ops**: none. **Env changes**: none. **Schema changes**: none. **n8n changes**: none. **Code changes**: none.
+
+## 2026-05-01 AM (styer-lead-gen-am) — Conversion audit of `/get-preapproved.html`
+
+- Sequence A (Research) — 1 audit file authored, 0 code changes, 0 commits, 0 outbound.
+- Read full source of `/get-preapproved.html` (582 lines, 27.2 KB, mtime 2026-04-28). Audited HTML/inline CSS/form/JS submit flow against conversion-rate-best-practices checklist.
+- Output: `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` (~330 lines, 20 prioritized findings: 5 HIGH / 7 MEDIUM / 6 LOW + compliance spot-check + recommended ship order).
+- HIGH-tier highlights: H1 headline-promise mismatch w/ `<title>` tag; H2 missing purchase-price qualifier (highest-leverage form change — one optional dropdown massively improves lead quality without conversion hit); H3 generic testimonial author names; H4 non-clickable review trust chip; H5 no rate/time anchor in hero subhead.
+- Compliance spot-check: 11/12 pass; 1 flag (M5 — missing licensed branch address in footer; Texas SAFE Act / NMLS MU.4 fix, low effort).
+- Read-only Supabase verification: `drip_sends` total = 0 (24h = 0); `drip_enrollments` total = 0 (7d = 0); `lead_source='Pre-Approval Funnel'` contacts = 0 (9th consecutive day). Pattern unchanged from 2026-04-29 snapshot.
+- NotebookLM PULL: CLI v0.3.4 responsive (5-day post-recovery streak); 12 notes inventoried. PUSH planned at session end.
+- ADAM-TODO: 1 NEW batched line points to audit file (no per-finding ticket sprawl).
+
+## 2026-05-01 AM (styer-social-am) — 3rd consecutive maintenance-only
+
+- 3rd consecutive maintenance-only social session (AM 04-30 + PM 04-30 + AM 05-01). No build. PM 04-30 explicit handoff triggers (rate/market slot via new content; Real Talk pillar acute) neither fired.
+- Step 1B AM scan: 0 new website content. Latest tracked items still match newest files in `rates/`, `blog/2026-*.html`, `realtor-updates/`.
+- Refresh (07): 0 TIMELY drafts in 48-hr horizon (May 1 → May 3) confirmed via Supabase REST.
+- Cushion verification: 8 drafts (Posts 191–198) Jan 11 → Feb 4, 2027 all `status=draft` — 4-week cushion intact.
+- NotebookLM PULL: 4th consecutive AM CLI success (v0.3.4). PUSH deferred per established no-build efficiency pattern.
+
+## 2026-04-30 PM (nightly-notebooklm-sync) — Both notebooks curated, 49/50 + 50/50
+
+- SEO/SEM PUSH+CURATE: removed 3 (CONTEXT.md Apr 29 stale, audit-04-29 superseded, daily-opt 04-29 superseded), added 3 (refreshed CONTEXT.md Apr 30, audit-04-30, daily-opt 04-30). Final 49/50.
+- Lead Gen PUSH+CURATE: removed 3 (CONTEXT.md older, audit-04-29 superseded, hot-lead-notification-gap.md historical), added 3 (refreshed CONTEXT.md Apr 30, audit-04-30, today's realtor-relationships email-bodies drafts). Final 50/50.
+- Master log appended +89 lines (43 seo-sem-pm + 46 lead-gen-pm) and re-synced to Styer Mortgage Master notebook (replaced 9f2c8cf3 → a2301fcf → 81901deb).
+- Both daily digests written to project files only — no email sent (scheduled-task SKILL.md override of curator playbook Step 5c/6c).
+- 0 web sources added either notebook this run — coverage strong on AEO/GEO and TCPA/drip-automation respectively.
+
+## 2026-04-30 PM (styer-social-pm) — 2nd consecutive maintenance-only
+
+- 2nd consecutive maintenance-only social session (AM was also maintenance). No build. Held the line on 2026-04-19 quality > cadence rule per AM's explicit handoff.
+- Verified Wk45–Wk48 cushion intact via Supabase: 8 drafts (Posts 191–198), Jan 11 → Feb 4 2027, all `status=draft`, all evergreen. 4-week cushion.
+- 0 TIMELY drafts in 48-hr horizon (Apr 30 → May 2). 0 new website content since AM scan. Pending repost queue still 2 rate/market entries awaiting matching slot.
+- Step 1B + Refresh + NotebookLM PULL/PUSH all skipped per pattern (AM-only or no-build defer).
+- Updated CONTEXT.md "Social Media" three fields. `today-mission.md` written as MAINTENANCE.
+
 ## 2026-04-30 AM (scenarios-am) — 6th consecutive no-build exit
 
 - 6th consecutive no-build exit (Apr 25/26/27/28/29/30). Tiers 1–8 of the Scenarios program remain COMPLETE (last build 2026-04-24 AM, mobile swipe cards). [GOALS.md](http://GOALS.md) (Week of Apr 20) still has no scenarios work. **1 day to May 1 launch.**

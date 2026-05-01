@@ -2,6 +2,82 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-01 AM — Maintenance-only (Scheduled Task — styer-social-am)
+
+**Focus**: 3rd consecutive maintenance-only session per PM 04-30 explicit handoff. Verify cushion + TIMELY horizon, scan Step 1B, NotebookLM PULL test, close cleanly.
+
+**Completed:**
+- SESSION_START written: 2026-05-01 02:29:22 CDT, Mode: AM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist via `ls` — directory itself missing). LoanOS stream remains paused.
+- Step 1B (GBP scan): 0 new website content. Latest tracked still match newest files: `rates/2026-04-24.html` (last tracked 2026-04-27 AM), `blog/2026-04-27-why-home-prices-arent-crashing.html` (last tracked 2026-04-28 AM), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (last tracked 2026-04-28 AM).
+- NotebookLM PULL: SUCCESS (CLI v0.3.4). 4th consecutive AM PULL post-recovery (04-28, 04-29, 04-30, 05-01). Latest existing note: `3f3ece44` (2026-04-29 PM Wk48 Build + 2026-04-30 AM Maintenance combined). No new notes since — confirms PM 04-30 deferred PUSH per pattern.
+- Refresh (07): 0 active TIMELY drafts within 48-hr horizon (May 1 → May 3). Confirmed via `social_drafts?classification=eq.timely&status=eq.draft&scheduled_for=gte.2026-05-01&scheduled_for=lte.2026-05-03` → empty.
+- Today's mission: MAINTENANCE-ONLY explicitly. Reasoning written in `today-mission.md` and `notebooklm-pull-2026-05-01.md`. Cushion 4 weeks; 0 TIMELY; 0 new content; no rate/market slot opening; RT pillar gap is mostly a tagging artifact (voice-RT stored as `authority`). PM 04-30 explicit handoff: "3rd consecutive maintenance session is acceptable" — both fire conditions absent.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- Cushion verification: 8 drafts (Posts 191–198) returned by `social_drafts?status=eq.draft&scheduled_for=gte.2027-01-11&order=scheduled_for.asc`, all `status=draft`, schedule Jan 11 → Feb 4 2027. 4-week cushion intact.
+- NotebookLM PUSH: DEFERRED per established efficiency pattern (no build = no new note material). Will combine into next build session's PUSH (consistent with `3f3ece44` precedent).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: AM entry inserted at top.
+- TODO.md: social posts line refreshed (3-streak maintenance state, May 1 → May 3 horizon).
+
+**Reports:**
+- No build/review/QA reports written this session (no build).
+- `notebooklm-pull-2026-05-01.md` ✓
+- `today-mission.md` ✓ (MAINTENANCE session type)
+
+**Deferred / Outstanding:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- `content-repost-queue.md` Pending: still 2 entries — `blog/2026-03-30-why-rates-improved-today-bond-rally.html` + `rates/2026-04-14.html`. Both rate/market themed; consume when a rate/market slot opens.
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO.
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending.
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`.
+- NotebookLM PUSH for 2026-04-30 PM and 2026-05-01 AM — both deferred to next build session per pattern.
+
+**Next Session Instructions (PM 2026-05-01):**
+- Step 1B: SKIP per master-agent.md (AM only). Informational scan still useful — flag any new content for AM 2026-05-02.
+- NotebookLM PULL/PUSH: PM session can defer per established efficiency pattern (no new note material if no build runs).
+- Confirm 0 TIMELY drafts within 48-hr horizon (May 1 → May 3) via Supabase `social_drafts?classification=timely&status=draft`.
+- Backlog still 4 weeks deep through Feb 4, 2027 — cushion is fine. Build Wk49 only if a rate/market slot is genuinely needed or new content forces it. Otherwise 4th consecutive maintenance session is acceptable. Do NOT auto-build to extend cushion to 5 weeks — quality > cadence.
+- If still no build by AM 2026-05-02, re-evaluate: a 5th consecutive maintenance run starts to look like "no movement at all" — consider whether the pillar artifact is masking a real RT gap, or whether the queue's 2 rate/market entries could justify an opportunistic Wk49 build under the 9/10 bar.
+
+---
+## Session: 2026-04-30 PM — Maintenance-only (Scheduled Task — styer-social-pm)
+
+**Focus**: 2nd consecutive maintenance-only session. No build. Verify cushion + TIMELY horizon, close session cleanly.
+
+**Completed:**
+- SESSION_START written: 2026-04-30 21:22 CDT, Mode: PM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist). LoanOS stream remains paused.
+- Step 1B (GBP): SKIPPED per master-agent.md (AM only). Informational scan: 0 new website content since 2026-04-30 AM — all visible files in `rates/`, `blog/2026-*.html`, `realtor-updates/` already in `gbp-content-tracker.md`.
+- Refresh (07): SKIPPED (PM only). Re-verified independently via Supabase `social_drafts?classification=timely&status=draft` → empty. 0 TIMELY drafts in 48-hr horizon (Apr 30 → May 2).
+- Cushion verification: queried Supabase `social_drafts?status=draft&scheduled_for=gte.2027-01-11` → 8 drafts returned (Posts 191–198), all evergreen, schedule Jan 11 → Feb 4 2027. 4-week cushion intact.
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build runs → no new note material). Next PUSH when next build runs.
+- Mission: MAINTENANCE-only explicit. Reasoning written in `today-mission.md`. Followed AM session's explicit handoff: "Do NOT auto-build to extend cushion to 5 weeks — quality > cadence." No matching rate/market slot for the 2 pending queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`).
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: PM entry inserted at top.
+- TODO.md: no change (no new posts, no new flags, queue unchanged).
+
+**Reports:**
+- No build/review/QA reports written this session (no build).
+- `today-mission.md` ✓ (MAINTENANCE session type)
+
+**Deferred / Outstanding:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded)
+- `content-repost-queue.md` Pending: still 2 entries — `blog/2026-03-30-why-rates-improved-today-bond-rally.html` + `rates/2026-04-14.html`. Both rate/market themed; consume when a rate/market slot opens.
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO.
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending.
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`.
+- NotebookLM PUSH for 2026-04-30 PM — deferred to next build session per pattern.
+
+**Next Session Instructions (AM 2026-05-01):**
+- Step 1B: scan `rates/`, `blog/`, `realtor-updates/` for new content since 2026-04-30 AM (gbp-content-tracker.md).
+- NotebookLM PULL: test 4th consecutive AM CLI success.
+- Refresh: confirm 0 TIMELY drafts within 48-hr horizon (May 1 → May 3).
+- Backlog now 4 weeks deep through Feb 4, 2027 — cushion is fine. Build Wk49 only if (a) new content forces a rate/market angle, or (b) Real Talk pillar gap becomes acute (currently ~9% DB-tagged but voice-RT typically stored as `authority`, so this is mostly a tagging artifact, not a real gap). Otherwise 3rd consecutive maintenance session is acceptable.
+- If no build, defer NotebookLM PUSH again — but still run PULL.
+
+---
 ## Session: 2026-04-30 AM — Maintenance-only (Scheduled Task — styer-social-am)
 
 **Focus**: Reconcile queue against social_drafts truth, push deferred Wk48 PM note to NotebookLM, no new build.

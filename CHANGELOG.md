@@ -1,5 +1,62 @@
 # LoanOS Changelog
 
+## 2026-05-02 (loanos-autonomous) — Tracker hygiene cycle (post-launch + 1)
+
+- **Bucket A (autonomous-eligible)**: 1 item — roll in this morning's subagent tracker churn (lead-gen, social, scenarios, seo-sem, standup) so the working tree starts the next session clean. Same hygiene pattern as `c4fee70` (2026-05-01 PM) and `d6fb6e7` (2026-04-30 AM). 14 modified tracker files, +443/-87 lines, no code changes.
+- **Bucket B (Adam-blocked, no new items)**: Resend DKIM for Scott's `mortgagesolutionslp.com` (gates Scott's first live drip send), Realtor Relationships drip cadence/criteria, Long-Term Nurture / Past Client Retention archive-vs-author, TCPA copy + Sendblue API for iMessage speed-to-lead, Scenarios cron retire/redirect (7+ no-op AM runs), NotebookLM playbook reconcile (email-or-no-email), 5 canonical n8n credentials creation (gates the 22-workflow inline-secret migration), `/get-preapproved.html` audit ship-approval (4 PRs queued in styerteam-mortgage-site repo), `/rate-alert.html` audit ship-approval (4 PRs + 1 cross-page bundle in styerteam-mortgage-site repo, NEW today AM), Email Cutover Task 23 env vars + Resend webhook config + WORKFLOW_DEVKIT_LEAD_INTAKE flip. All already in `tasks/ADAM-TODO.md`.
+- **Bucket C (out-of-scope)**: Refi Opportunity List V2 (post-Scott V1 drip proven), Self-Serve Tenant Domain Onboarding (post-V1 scaling), notes/activity log fix (vague — needs spec), `1b58ef9` Microsoft Graph adapter follow-ups (no org has flipped `email_provider='microsoft'` yet — provider router is wired with Resend fallback per migration 096).
+- **Build state**: `npm run build` ✓ green first pass — Compiled successfully. Working tree (modified trackers + Adam's untracked AGENTS.md / docs/AI_AGENT_ONBOARDING.md / docs/REPO_STRUCTURE.md / agent-artifact directories) compiles clean.
+- **Vercel state**: Latest production `dpl_ELzK5iGE1TNLBP1hZcQaKJBTcAD5` (commit `1b58ef9`) READY. No new deploy required for tracker-only commit but Vercel will auto-deploy on push and reach READY.
+- **Drip pipeline state** (read-only, unchanged): `drip_sends`=0, `drip_enrollments`=0, `drip_campaigns` active=8. Cron wired and CRON_SECRET set; will no-op until Adam manually enrolls a contact. Microsoft Graph adapter live in code path but not yet exercised — no org has flipped `email_provider='microsoft'`.
+- **n8n inventory**: not re-enumerated (audit done 04-30 PM; no migration possible until Adam creates 5 canonical credentials per `tasks/security/n8n-credential-audit-2026-04-30.md`). Anniversary Check-In (`ZUeGy8u8P4o6DPM3`) malformed-JWT bonus finding still open — first cron firing yesterday (May 1) attempted to run with broken dedup; impact forward-looking only.
+- **Skipped autonomous-territory items**: untracked `AGENTS.md` + `docs/AI_AGENT_ONBOARDING.md` + `docs/REPO_STRUCTURE.md` (Adam's intentional uncommitted AI-agent setup files from Apr 25, his call to commit), and ~80 untracked subagent artifact files in `tasks/{lead-gen,seo-sem,social-media}/{audits,digests,drafts,research,build-reports,qa-reports,reviews,specs,notebooklm-*}/` (these belong to specific subagent sessions; rolling them into a tracker-hygiene commit would mass-attribute work).
+- **Circuit breaker**: clean. **Destructive ops**: none. **Env changes**: none. **Schema changes**: none. **n8n changes**: none. **Code changes**: none.
+
+## 2026-05-02 AM (styer-lead-gen-am) — `/rate-alert.html` conversion audit (Sequence A)
+
+- **Audit complete:** `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` — 17 prioritized findings for `/rate-alert.html` (HIGH 5 / MEDIUM 6 / LOW 6) + cross-page bundling table identifying 4 items that should ship as single shared PRs with yesterday's get-preapproved findings.
+- **HIGH compliance + conversion finding (H1):** TCPA bundled-consent on Rate Alert page — single required checkbox covers phone + email + text. Fix is to mirror the two-checkbox pattern already shipped on `/get-preapproved.html` per BLOCKER-001 partial-resolution. Single-PR fix, both compliance AND conversion lift.
+- **Read-only pipeline check (post-May-1 launch):** `drip_sends`=0, `drip_enrollments`=0, `lead_source='Pre-Approval Funnel'`=0 (10th day), `lead_source='Rate Alert Funnel'`=0 (34 days since deploy). 5 contacts created in 7d (3 null, 1 AEO:ChatGPT, 1 Website) — May 1 launch produced zero funnel movement.
+- **L1 surfaced:** sample email From: address still uses retired `thestyerteam.com` brand — violates global CLAUDE.md rule. Per-org `from_email` shipped commit `4ac0812` is the actual outbound; sample preview should match.
+- **NotebookLM:** PULL completed (CLI v0.3.4, 13 notes, 6-day streak). PUSH planned at session end. ADAM-TODO updated with single batched line pointing to audit file (file-pointer pattern, no per-finding stacking).
+
+## 2026-05-02 AM (styer-social-am) — 5th consecutive maintenance-only session
+
+- 5-streak maintenance pattern preserved (AM 04-30 → PM 04-30 → AM 05-01 → PM 05-01 → AM 05-02). Posts built across 5 sessions: 0. Cushion drift: 0. Quality bar held.
+- Cushion deeper than tracked — Supabase query returned 47 `status=draft` rows scheduled Sep 23 2026 → Feb 4 2027. Closest cluster Posts 191–198 confirmed (Jan 11 → Feb 4 2027). Pillar mix in nearest 8: authority×3, education×2, personal×3 (75% RT-adjacent — voice-RT maps to `authority` per DB enum).
+- Step 1B scanned `rates/`, `blog/2026-*.html`, `realtor-updates/` in styerteam-mortgage-site. **0 new content pieces.** Every file already in `gbp-content-tracker.md`. Aligned with GOALS.md (Week of Apr 20) "No new content on any site (improve existing only)" — confirms zero-input feed is steady-state, not a content-pipeline issue.
+- Refresh (07): 0 TIMELY drafts in 48-hr horizon (May 2 02:29 CDT → May 4 02:29 CDT) confirmed via Supabase REST.
+- 5-streak threshold (PM 05-01 handoff trigger) evaluated. Decision: hold pattern through Mon 05-04 weekly GOALS update. New 7-streak escalation rule documented: PM 05-04 escalates to Adam if (a) GOALS doesn't redirect AND (b) 0 new content. Two options surfaced — opportunistic Wk49 with NEW sourcing (NotebookLM/loanos-pool), or cron pause with Adam approval.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build — both fire conditions still absent). NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). PUSH backlog now 4 sessions deep (PM 04-30, AM 05-01, PM 05-01, AM 05-02) — will combine into next build session.
+- BLOCKER-LOANOS-001 still active — `tasks/social-media/assets/selfies/` does not exist (28 days). Non-LoanOS pillars unaffected.
+- Reporting limited to project files: session-log, today-mission, CONTEXT, CHANGELOG, TODO. No emails sent, no daily digest (per scheduled task instructions).
+
+## 2026-05-01 PM (styer-notebooklm-nightly) — Dual NotebookLM PUSH+CURATE sync
+
+- **SEO/SEM notebook (7f8a80c5):** removed 2 (CONTEXT.md 1121b165 stale Apr 27, notebooklm-audit-2026-04-30.md cbc7eefd superseded). Added 3 (refreshed CONTEXT.md from styerteam-mortgage-site reflecting today's commits 1aeec3c Westlake Hills Round 1 closeout 13/13 + e0a1d9f blog CTA+footer fix + 768767b PM bookkeeping AEO denominator, notebooklm-audit-2026-05-01.md, 2026-05-01-digest.md). Final 50/50.
+- **Lead Gen notebook (4213513c):** removed 3 (CONTEXT.md 29d6da50 stale Apr 30, notebooklm-audit-2026-04-30.md c4000254 superseded, 2026-04-23-mortgage-drip-automation-web.md b9c77187 duplicated by 7 better authoritative drip sources). Added 3 (refreshed CONTEXT.md, notebooklm-audit-2026-05-01.md, today's research file `2026-05-01-get-preapproved-conversion-audit.md`). Final 50/50.
+- **Master log:** appended +68 lines total (seo-sem-pm + lead-gen-pm entries) → `Styer_Growth_Log.md` 6133 → 6201 lines. Master notebook (5348ff90) re-synced twice (seo-sem swap e19299b5 → fresh; lead-gen swap 69eaf50c → fresh).
+- **Digests:** WRITTEN to project files only (NOT sent) — `tasks/seo-sem/digests/2026-05-01-digest.md` + `tasks/lead-gen/digests/2026-05-01-digest.md`. Followed scheduled-task SKILL.md override of curator playbook Step 5c.
+- **Web research:** 0 added (both notebooks have strong web coverage — SEO/SEM ~30 web sources on AEO/GEO/local SEO/schema/CWV/compliance; Lead Gen 28 sources on Mailchimp/Scotsman Guide/TCPA/CFPB/FTC/TDHCA/HUD/Unbounce). No targeted gap surfaced.
+- **NEW Adam action items:** 0 net — all carryover (USDA cleanup cascade, GSC URL Inspection sweep, about.html address mismatch 6th run, voice-first AEO carve-out policy, NotebookLM PULL Step 0 14th dead run; Realtor Relationships drip cadence, BLOCKER-003 deploy verify, BLOCKER-001 homepage TCPA, outbound iMessage path, ship-order on 5 HIGH-tier `/get-preapproved.html` findings).
+- **No code changes, no deploys, no schema changes, no n8n changes.** CONTEXT.md still 161 lines (over 150 cap) — overage existed pre-edit, structural across other agents' sections, out-of-scope for this cron.
+
+## 2026-05-01 PM (styer-social-pm) — 4th consecutive maintenance-only session
+
+- 4-streak maintenance pattern preserved (AM 04-30, PM 04-30, AM 05-01, PM 05-01). No build, no Architect/Builder/Quality/Reviewer/QA. Cushion intact: 8 drafts (Posts 191–198) Jan 11 → Feb 4, 2027 all `status=draft` (Supabase re-verified). Pillar mix: authority×3, education×2, personal×3.
+- AM 05-01 trigger questions resolved: (1) RT pillar gap = tagging artifact (DB enum excludes `real_talk`; voice-RT stores as `authority`; cushion = 75% RT-adjacent — not a real gap). (2) 2 stale rate/market queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`) don't warrant Wk49 — Post 195 already covers Q1 spring market angle and forcing 2-5+ wk stale entries violates 9/10 quality bar.
+- PM-skipped per master-agent.md: Step 1B (AM only — informational scan found 0 new website content), Refresh 07 (AM only — independently verified empty 48-hr TIMELY horizon May 1 → May 3).
+- NotebookLM PULL/PUSH deferred per established efficiency pattern (no build = no new note material). Pattern preserved across PM 04-30 and PM 05-01. Latest note still `3f3ece44` from 2026-04-29 PM.
+- No emails sent to Adam, no daily digest sent (per scheduled task instructions). Reporting limited to project files: session-log, today-mission, CONTEXT, CHANGELOG, TODO.
+
+## 2026-05-01 AM (scenarios-am) — 7th consecutive no-build exit (LAUNCH DAY)
+
+- 7th consecutive no-build exit (Apr 25/26/27/28/29/30 + May 1). Tiers 1–8 of the Scenarios program remain COMPLETE (last build 2026-04-24 AM mobile swipe cards, 7 days ago). [GOALS.md](http://GOALS.md) (Week of Apr 20) still has no scenarios work. **Today IS May 1 launch day.**
+- Updated existing NEEDS ADAM entry on `TODO.md` line 19 — bumped streak count to 7, added 2026-05-01 to flagged-dates list, updated framing from "1 day from May 1 (launch tomorrow)" → "today (2026-05-01) IS the May 1 launch day", reinforced option (a) retire-now-today as strongest recommendation (Adam-attention on a 7th streak bump on launch day itself has negative value).
+- Updated CONTEXT.md "Scenarios Agent Status" three fields per `loanos-clone/CLAUDE.md` rule. (CONTEXT.md unchanged at 161 lines — 11-line overflow is structural across other agent sections; trimming the Scenarios block alone cannot bring the file under 150 and trimming peer-agent sections is out of scope for this cron.)
+- Skipped NotebookLM PULL/PUSH operations and master-notebook note for the 5th consecutive run — no new context to query, no work to summarize, rate-capped notebook should not burn cycles on a confirmed no-mission run (matches prior no-build exits Apr 27/28/29/30).
+- No code changes, no commits, no deploys. Build state unchanged from PM 2026-04-30 (autonomous tracker hygiene): latest prod `dpl_ELzK5iGE1TNLBP1hZcQaKJBTcAD5` (commit `1b58ef9` Microsoft Graph OAuth send adapter, migration 096) READY.
+
 ## 2026-05-01 PM (loanos-autonomous) — Tracker hygiene cycle (May 1 launch day)
 
 - **Bucket A (autonomous-eligible)**: 1 item — roll in this morning's subagent tracker churn (CHANGELOG/CONTEXT/TODO/ADAM-TODO + per-agent session-log/subagent-status/today-mission for lead-gen, social, seo-sem) so the working tree starts the next session clean. Same hygiene pattern as `d6fb6e7` (2026-04-30 AM) and `2624981b` (2026-04-29 PM). 11 modified tracker files, +337/-87 lines, no code changes.

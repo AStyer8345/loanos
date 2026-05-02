@@ -1,3 +1,47 @@
+SESSION START: 2026-05-02 03:45:09
+Mode: AM
+Focus: /rate-alert.html conversion audit (Sequence A — companion to 2026-05-01 /get-preapproved audit)
+MASTER: Context loaded. Activating NotebookLM pull next.
+
+SESSION END: 2026-05-02 04:05:00
+Mode: AM
+Focus: /rate-alert.html conversion audit (Sequence A — Research)
+MASTER: All objectives complete. Read-only DB queries + 1 audit file. No code changes, no DB writes.
+
+RATE-ALERT AUDIT: COMPLETE — 17 prioritized findings (HIGH 5 / MEDIUM 6 / LOW 6), compliance spot-check, cross-page bundling table, recommended ship order:
+- H1 (HIGH compliance + conversion): TCPA bundled-consent two-checkbox split — mirror /get-preapproved pattern
+- H2 (HIGH): subhead Lock-or-Wait differentiator
+- H3 (HIGH): sharper CTA copy
+- H4 (HIGH): form-column social proof
+- H5 (HIGH): sample email rates undated/rate-agnostic (eliminates ongoing maintenance)
+- 6 MEDIUM + 6 LOW
+- Cross-page bundling identified 4 items overlapping yesterday's get-preapproved audit (OG image / 21-day footnote / footer address / JSON-LD schema)
+
+PIPELINE STATUS (read-only Supabase 2026-05-02 03:50 CT): drip_sends=0, drip_enrollments=0, lead_source='Pre-Approval Funnel'=0 (10th day), lead_source='Rate Alert Funnel'=0 (34 days since deploy). 5 contacts in 7d (3 null / 1 AEO:ChatGPT / 1 Website). May 1 LoanOS beta launch produced ZERO funnel movement.
+
+OUTPUT: `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` (~280 lines)
+
+ADAM ACTION ITEMS: 1 NEW (single batched ADAM-TODO line, file-pointer pattern). Carryover unchanged: Realtor cadence + activation, Long-Term/Past Client archive vs author, TCPA copy, Sendblue signup, GSC pull, get-preapproved 7 prioritized fixes (all 7 still pending Adam authorize from yesterday).
+
+NOTEBOOKLM PUSH (lead-gen): note created in notebook 4213513c
+NOTEBOOKLM PUSH (master): note created in notebook d6a855c3
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+Files updated:
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief)
+- `tasks/lead-gen/notebooklm-pull-2026-05-02.md` (NEW)
+- `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` (NEW)
+- `tasks/lead-gen/session-log.md` (May 2 AM entry prepended)
+- `CHANGELOG.md` (May 2 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced)
+- `tasks/ADAM-TODO.md` (1 new line; file-pointer pattern)
+- `TODO.md` (rate-alert audit findings line added under existing get-preapproved line)
+
+Timestamp: 2026-05-02 04:05:00
+SESSION FULLY COMPLETE ✓
+
+---
+
 SESSION START: 2026-04-30 03:45:08
 Mode: AM
 Focus: TBD — load context, assess prior session deferrals, define mission
@@ -496,3 +540,21 @@ Files updated:
 Timestamp: 2026-05-01 04:15:00
 SESSION FULLY COMPLETE ✓
 
+
+---
+
+SESSION_END: 2026-05-01 22:10:00
+Mode: PM
+Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): COMPLETE
+Sources removed: 3 (CONTEXT.md 29d6da50 stale Apr 30, notebooklm-audit-2026-04-30.md c4000254 superseded, 2026-04-23-mortgage-drip-automation-web.md b9c77187 duplicated by 7 better authoritative sources)
+Sources added: 3 (refreshed CONTEXT.md, notebooklm-audit-2026-05-01.md, 2026-05-01-get-preapproved-conversion-audit.md today's research)
+Web sources added: 0 (notebook holds 28 authoritative web sources covering Mailchimp / Scotsman Guide / TCPA / CFPB / FTC / TDHCA / HUD / Unbounce — coverage strong, no gap surfaced)
+Final notebook count: 50 / 50
+Foundational docs refreshed: CONTEXT.md (commits c4fee70 PM autonomous wrap-up + ec9659a per-org UI feature flags Scott Pilot + d6fb6e7 + others)
+Master log: APPENDED (6167 → 6201 lines for lead-gen-pm) + synced to Styer Mortgage Master notebook (deleted 69eaf50c, added fresh)
+Daily digest: WRITTEN to file (NOT SENT) — scheduled task SKILL.md explicitly overrides curator playbook Step 5c with "Do not send any emails to Adam. All reporting goes into project files only." Digest at tasks/lead-gen/digests/2026-05-01-digest.md.
+NEW Adam action items: 0 net (all carryover — BLOCKER-003 deploy verify, BLOCKER-001 homepage TCPA, Realtor Relationships drip cadence/activation, outbound iMessage path decision, ship-order on 5 HIGH-tier `/get-preapproved.html` findings)
+Timestamp: 2026-05-01 22:24 PM
+SESSION FULLY COMPLETE ✓

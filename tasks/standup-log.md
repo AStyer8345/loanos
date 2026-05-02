@@ -2,6 +2,56 @@
 
 ---
 
+## 2026-05-01 — Day 37 — LAUNCH DAY (per GOALS.md)
+
+**Days to launch:** 0 — May 1, 2026 is today. Original config target April 26 has passed by 5 days; operational target per GOALS.md North Star ("Ship LoanOS beta with confirmed users by May 1, 2026") is today. Latest commit `c4fee70` is explicitly tagged "May 1 launch day, tracker hygiene". Continuing daily standup runs per task instruction (task said "If launch date has passed, note it in the log and continue running until disabled").
+
+**Yesterday shipped (since Day 36 standup):**
+- `feat(email)`: Microsoft Graph OAuth send adapter (provider routing). Per-org email provider selection — drip + transactional sends now flow through `sendEmail()` which dispatches to Microsoft Graph (OAuth user mailbox) or Resend (fallback ESP) based on `org_settings.email_provider`. Migration 096 adds `email_provider` + AES-256-GCM-encrypted MS Graph token columns (same security context as Arive credential storage). New: `src/lib/microsoft/encryptToken.ts`, `src/lib/microsoft/graph.ts` (proactive 60s-buffer token refresh, code-for-token exchange, `/me` lookup at consent), `src/lib/email/sendEmail.ts` provider router with Resend fallback so drip never silently drops on Graph failure, `/api/auth/microsoft/connect` (HMAC-signed state). Per-tick prefs cache avoids N+1 on `org_settings`. (`1b58ef9`, `dpl_ELzK5iGE1TNLBP1hZcQaKJBTcAD5` READY — and earlier same-SHA `dpl_36LiTKSTwgtZN43WeLaKTjwb1E9F` READY)
+- `chore(security)`: n8n inline credential audit (2026-04-30 PM autonomous). Read-only enumeration of inline secrets across 27 active LoanOS n8n workflows. Findings: 22 of 27 leak inline credentials, 5 clean. ~140 inline credential instances total. Top types: Supabase service-role JWT (21 wf, ~110 instances), LoanOS internal bearer (7 wf, ~14), Publer + Gemini (4 each), Mailchimp Basic (1). Anthropic / Resend / OpenAI: 0 inline. Output written to `tasks/security/n8n-credential-audit-2026-04-30.md`. Bonus finding: `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) Check Dedup code node has malformed JWT literal — silently broken dedup, hadn't fired yet (first cron May 1 = today). (`2984aee`, `dpl_8emoqpoErGycRkBM115Zo2ucjMW6` READY)
+- `chore(trackers)`: rolled in 2026-04-30 AM subagent tracker churn (`d6fb6e7`) and 2026-05-01 PM autonomous wrap-up (`c4fee70`). Both no-code commits — bucket A is autonomous-eligible only; all current-phase feature work (Email Cutover Task 23, Scott Pilot drip end-to-end proof, 3 missing-content campaigns, Anniversary Check-In malformed-JWT fix in isolation, conversion audit ship-approval) remains Adam-blocked.
+
+**Vercel status:** READY — latest production `dpl_HkEEE1SBzx3rL9MN3Gzxz2Yn7aGd` (SHA `c4fee70`, 2026-05-01 PM). All 20 most-recent deployments READY, no ERROR/QUEUED/CANCELED states. ✅
+
+**n8n workflow health:** 39 workflows total (was 38; +1 today: `nPtgpbhtPkw6yltC` "Rancho Moonrise — Chat Log + Notify", active, created 2026-05-01 01:23:36 UTC — webhook for Rancho site chatbot, inserts to `rancho_chat_logs`, emails session-end digest via Resend). 5 inactive (all intentional, unchanged): `W0K4YDzkZd0Hzv6g` Refi Watch Pre-Drop Warm-Up, `LfLSDgqgb6yCe93C` Refi Watch Quarterly Rate Review, `AK1fBcaX1cPcdlGx` Closed Loan Review Request, `24oewjzGR3AxH4QW` Morning Briefing Team, `zQTy23ZRFAty9uTc` Contract Received v3 (parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows all ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj`), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`), web lead (`PiuIsQpBuydtFM4m`), lender ingest (`hHXpKUirhnBCnQTO`), Final CD (`SkzrWeR0bHZs8kWX`). MCP returns no failed-execution flag on any active workflow. **Watch:** `ZUeGy8u8P4o6DPM3` (Refi Watch Anniversary Check-In) has the broken-JWT dedup logic flagged by yesterday's audit — first cron is today; if it fires before Adam's fix, dedup silently fails but no broken sends should escape (the parallel guards downstream still hold).
+
+**Blockers (NEEDS ADAM, all carried from Day 36):**
+- **Resend DKIM verification (Scott org)** — Adam's `adam@thestyerteam.com` DKIM-verified; Scott's `scott@mortgagesolutionslp.com` still needs domain verified before any per-org From: address can deliver. **Day 3 on this list.** Live drip sends from Scott's org block on this. With the new MS Graph adapter shipped, Scott now also has the option to OAuth into his own Microsoft mailbox (`/api/auth/microsoft/connect`) and bypass Resend entirely if he prefers — that path doesn't need DKIM since it sends from his mailbox.
+- **5 canonical n8n credentials** — yesterday's audit identified 5 distinct credential types with ~140 inline instances across 22 workflows. Adam needs to create these in n8n UI before the workflow migration can proceed (per `feedback_n8n_rest_put_first.md`, MCP `update_workflow` wipes credential bindings — must use REST PUT for the migration once credentials exist).
+- **Anniversary Check-In malformed JWT** (`ZUeGy8u8P4o6DPM3`) — Adam-controlled fix because the workflow has inline credentials that get wiped if MCP edits it; must edit via n8n UI directly. First cron fires today.
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify webhook (`nOCDV73m4M0jyL1B`) still unauthenticated. Rolled 11+ standups.
+- **TCPA copy + Sendblue API key** — iMessage outbound (GOALS.md week priority for speed-to-lead) blocked.
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships. Terminate-guard silently kills enrollments until authored or archived (decision per campaign).
+- **Marketing site silent** — zero commits visible from this repo's vantage. Per GOALS.md, still highest launch-day risk for the public-facing announcement.
+- **Selfies not uploaded** — LoanOS social content stream paused.
+- **Notes / activity log fix** — GOALS.md launch-critical, still no code in 8+ days.
+- **MISMO multi-borrower regex greediness** — known pre-launch defect; fine for Scott's solo beta, must fix before any multi-borrower file lands.
+- **FNM 3.4 / Calyx Point file import** — GOALS.md week priority for Scott actually using the product. MISMO importer ships dedup + error-surface side, but the Calyx-export ingestion path itself remains unconfirmed end-to-end. **Critical for Scott pilot utility.**
+- **Conversion audit ship-approval** — pending Adam decision per yesterday's `c4fee70` commit message.
+
+**Today's focus (autonomous, no Adam dependency):**
+1. **Verify Microsoft Graph adapter end-to-end** — the new `1b58ef9` ships the OAuth path but needs at least one synthetic round-trip: connect a test mailbox via `/api/auth/microsoft/connect`, drip cron picks up `email_provider='microsoft'` for that org, send fires through Graph, falls back to Resend on simulated 401. Smoke-test before any tenant flips the provider switch.
+3. **Verify drip cron fired since 2026-04-28** — query `drip_sends` for any rows. If still zero, manually enroll one Adam-controlled contact in PA Welcome to prove end-to-end loop. (Carried from Day 36.)
+3. **FNM 3.4 / Calyx Point co-borrower regex test** — synthetic 2-borrower fixture against the parser to characterize the multi-borrower boundary before any real file lands. (Carried from Day 36.)
+4. **Notes / activity log fix** — GOALS.md launch-critical, no code in 8+ days. Re-read original brief and start. (Carried from Day 36.)
+
+**Risk watch:** **Launch day. 0 days remaining.** Ship-readiness summary:
+- ✅ App: deployable, all green Vercel
+- ✅ Drip pipeline: shipped (PA + DPA n8n workflows write to Supabase enrollments/sends/suppressions; migration 095 per-org From; 1b58ef9 multi-provider send routing)
+- ✅ Tenant scoping: per-org feature flags (Phase Scott Pilot)
+- ✅ Email provider flexibility: Microsoft Graph OR Resend per-org
+- ❌ Scott's mailbox: needs Resend DKIM **OR** MS Graph OAuth — neither completed; without one, Scott's first drip enrollment will fail at send
+- ❌ FNM 3.4 import: Scott can't load his pipeline without it (Calyx Point export → LoanOS)
+- ❌ Marketing site: zero progress visible — public-facing announcement risk
+- ⚠️ Anniversary Check-In broken dedup fires today; secondary downstream guards expected to hold but unverified
+- ⚠️ Notes/activity log launch-critical fix unstarted (8+ days)
+
+**Recommendation:** Today's commits skew toward provider-routing infrastructure (MS Graph adapter is meaningful — gives Scott a no-DKIM path) but the GOALS.md week scope (FNM import, drip content, notes/activity log) remains incomplete. Beta launch is ship-ready for Adam-only tenant. **Scott's first usable session blocks on either DKIM verification OR an MS Graph mailbox connect, whichever Scott chooses first.** Worth flagging today to Adam on the launch announcement framing — "live for Scott's pilot" vs "live & ready for any user" are different stories.
+
+**Open audit findings:** 0 CRITICAL, 0 HIGH (all 2026-04-05 SECURITY-AUDIT findings previously closed per Day 36 entry; 1 MEDIUM open — field-level encryption SSN/DOB/income, ADAM-BLOCKED on GLBA attorney consult). No new audit reports under `audits/` since 2026-04-05 (audits/ contents unchanged: SECURITY-AUDIT-2026-04-05.md + SUPPORT-STACK-2026-04-05.md). Yesterday's n8n credential audit (`tasks/security/n8n-credential-audit-2026-04-30.md`) is tracked separately under `tasks/security/`, not `audits/` — surfaces 22-of-27 inline credential leaks but is not formally CRITICAL/HIGH-rated.
+
+---
+
 ## 2026-04-30 — Day 36 (Launch: May 1, per GOALS.md)
 
 **Days to launch:** 1 (May 1) — original config target April 26 has passed by 4 days; operational target remains May 1 per GOALS.md. Continuing to run per task instruction.

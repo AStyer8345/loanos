@@ -2,6 +2,68 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-02 AM — Lead Generation
+Focus: On-page conversion audit of `/rate-alert.html` (Sequence A — Research; companion to 2026-05-01 `/get-preapproved.html` audit)
+Type: Research (Sequence A)
+Week in Queue: Week 16
+
+### Context From Previous Session
+2026-05-01 AM authored 20 prioritized findings for `/get-preapproved.html` (HIGH 5 / MEDIUM 7 / LOW 6). Logged a single batched ADAM-TODO line for site-side ship. Today picks up the second main lead-gen funnel — `/rate-alert.html` — using the same methodology. Independent of all 4 carryover Adam blockers (Realtor Relationships cadence, Long-Term Nurture archive vs author, TCPA copy approval, Sendblue signup, GSC pull). Yesterday (2026-05-01) was Adam's LoanOS beta launch day with Scott Sears.
+
+### Completed
+- **NotebookLM PULL** — CLI v0.3.4 responsive (6-day post-recovery streak). 13 notes inventoried; most recent is `35eb2f1c` (2026-05-01 AM get-preapproved audit). Pull report at `tasks/lead-gen/notebooklm-pull-2026-05-02.md`.
+- **Read full source of `rate-alert.html`** (598 lines, 25.3 KB, mtime 2026-04-28). Audited HTML/inline CSS/form/JS submit flow against same conversion-rate-best-practices checklist used yesterday + heavier TCPA-compliance posture (Rate Alert is a recurring-message product, so TCPA exposure is naturally elevated).
+- **Authored 17 prioritized findings** across HIGH (5) / MEDIUM (6 — 1 withdrew on re-read) / LOW (6) tiers, plus compliance spot-check + cross-page bundling table + recommended ship order:
+  - **HIGH:** H1 TCPA bundled-consent (compliance + conversion — bundles phone/email/text into one required checkbox; rate-alert is uniquely sensitive because the product IS recurring marketing); H2 subhead missing "Lock-or-Wait" differentiator; H3 generic CTA copy; H4 zero social proof in form column; H5 sample email shows 5-week-old stale rates.
+  - **MEDIUM:** M1 no email-typo prevention; M2 form-tagline filler; M3 rate-move alert promise > what's built; M4 unsourced 21-day claim (carry-over from yesterday); M5 missing og:image (carry-over); M6 zero JSON-LD (carry-over); M7 withdrew on re-read.
+  - **LOW:** L1 sample From: address uses retired `thestyerteam.com` brand (CLAUDE.md global rule violation); L2 stat-label consistency; L3 no tertiary cross-sell to /get-preapproved; L4 sample-label microcopy; L5 no FAQ; L6 mobile form-card stacking pattern.
+- **Compliance spot-check** — all checks pass except H1 (TCPA bundled-consent — HIGH) and C1 (footer address mismatch — LOW; same root cause as the about.html / index.html mismatch SEO/SEM agent has tracked since 2026-04). Bundle resolution.
+- **Cross-page bundling table** — 4 audit findings overlap with yesterday's get-preapproved audit (OG image, 21-day footnote, footer address, JSON-LD schema) and should ship in single shared PR rather than per-page.
+- **Read-only Supabase verification (post-May-1 launch)**:
+  - `drip_sends` total = 0 (24h = 0)
+  - `drip_enrollments` total = 0 (7d = 0)
+  - `contacts.lead_source='Pre-Approval Funnel'` total = 0 (10th consecutive day)
+  - `contacts.lead_source='Rate Alert Funnel'` total = 0 (34 days since deploy)
+  - `contacts` created last 7d = 5 (3 null / 1 AEO:ChatGPT / 1 Website) — up from 4 last snapshot but no funnel-source new contacts. **May 1 LoanOS beta launch produced zero funnel movement.**
+- **Output**: `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` (~280 lines, prioritized findings + before/after rewrites for each HIGH-impact item + cross-page bundling table + ship order).
+
+### Key Findings
+1. **`/rate-alert.html` is a better-designed page than `/get-preapproved.html`** in several respects (cleaner hero ratio, dedicated sample-email preview, sharper credibility section). But the words on the page leave the value-prop on the table — same pattern as yesterday's audit.
+2. **The single most important change is H1 — TCPA two-checkbox split**. Both compliance fix AND conversion lift in one edit. The Pre-Approval page already uses this pattern; Rate Alert wasn't updated to match. Rate Alert is uniquely sensitive because the product IS recurring marketing — bundling phone/email/text into one required tickbox creates real TCPA exposure on a recurring-marketing product.
+3. **Sample email rates are 5 weeks stale** (H5). Two paths: (A) make undated and rate-agnostic — recommended, eliminates maintenance commitment forever; (B) auto-refresh from JSON endpoint — over-engineering for current traffic.
+4. **The Rate Alert funnel has captured ZERO subscribers in 34 days since deploy** (from Supabase). Combined with the 0-submissions Pre-Approval funnel pattern (10th day), this is now the second confirmed zero-state funnel. The "no GSC data yet" gating is the same upstream-of-page bottleneck both pages share.
+5. **L1 sample From: address uses `thestyerteam.com`** — violates the global CLAUDE.md rule (business name is "Adam Styer | Mortgage Solutions LP", never "The Styer Team"). Per-org `from_email` shipped commit `4ac0812` is the actual outbound address. Sample preview should be updated to match.
+6. **Cross-page bundling identified for 4 items** (OG image fallback, 21-day-close footnote, footer-address resolve, JSON-LD schema) — these should ship as single cross-page PRs rather than per-page work.
+
+### Output
+- Audit report: `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` (~280 lines, 17 findings prioritized HIGH/MEDIUM/LOW with effort estimates + suggested rewrites + cross-page bundling table)
+- Pull report: `tasks/lead-gen/notebooklm-pull-2026-05-02.md` (~25 lines)
+- Mission brief: `tasks/lead-gen/today-mission.md` (refreshed)
+
+### Recommendations Logged for Next Session (no Adam dependency)
+1. **Adam ships H1 + H2 + H3 as single rate-alert PR** (~25 min): TCPA two-checkbox split + subhead Lock-or-Wait differentiator + CTA copy. Compliance + 3 highest-leverage edits in one ship.
+2. **Cross-page PR for OG image + footer address + 21-day footnote** — bundle yesterday's get-preapproved finding M4/M5/M7 with rate-alert M5/C1/M4. Single shared PR, ~15 min.
+3. **Coordinate M6 (JSON-LD schema for /rate-alert)** with SEO/SEM agent's existing schema rotation (already coordinated for /get-preapproved per yesterday's note).
+4. **Skip rate-alert page re-audit until at least H1 + H2 + H3 ship**. Same rule as get-preapproved audit — re-auditing unchanged pages is busywork.
+5. **Tomorrow's mission**: with both main funnel pages audited, next-page candidates are (a) homepage Quick Quote / Quick Contact forms (BLOCKER-001 partial — homepage forms still need TCPA fix per 2026-03-25), (b) `/refi-savings.html` if it exists, or (c) thank-you.html post-submit experience. Pick whichever has highest queue priority.
+
+### Compliance
+- **H1 surfaced as HIGH compliance + conversion**: TCPA bundled-consent on Rate Alert page. The fix already exists on `/get-preapproved.html` per BLOCKER-001 partial-resolution; just bring rate-alert into line. Single-PR fix.
+- **C1 surfaced as LOW compliance**: footer address mismatch (Sam Houston Circle vs domain-queue's canonical Balcones Drive) — bundle with SEO/SEM agent's existing about.html / index.html address mismatch tracking.
+- TCPA / CAN-SPAM / NMLS / fair-lending / Equal Housing Lender / APR disclosures: all otherwise clean.
+
+### NotebookLM
+- PULL: completed (CLI v0.3.4, 13 notes, 6-day streak)
+- PUSH: planned at session end (note for `2026-05-02-rate-alert-conversion-audit`)
+
+### Adam Action Items
+- **1 NEW** (single batched ADAM-TODO line, file-pointer pattern — avoids the 04-26 violation of stacking action items per finding).
+- Carryover unchanged: Realtor Relationships cadence + activation, Long-Term Nurture/Past Client Retention archive vs author, TCPA copy, Sendblue signup, GSC pull, get-preapproved 7 prioritized fixes (all 7 still pending Adam authorize from yesterday).
+
+Timestamp: 2026-05-02 04:00:00
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-01 AM — Lead Generation
 Focus: On-page conversion audit of `/get-preapproved.html` (Sequence A — Research)
 Type: Research (Sequence A)

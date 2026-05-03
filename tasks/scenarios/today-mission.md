@@ -1,32 +1,31 @@
-## Scenarios Mission Brief — 2026-04-24 AM
+## Scenarios Mission Brief — 2026-05-03 AM
 
 ### Focus Area
-Tier 8 Item 5 — Mobile swipe cards for scenario comparison table
+None — MAINTENANCE-ONLY (9th consecutive no-build exit).
 
 ### Why This Matters
-ScenarioComparisonTable renders with overflow-x-auto on mobile — functional but cramped on 390px screens.
-Borrowers on phones (70%+ of viewers) see a pinched, horizontal-scrolling table that's hard to read.
-A swipeable card version (one option per card, prev/next navigation) matches how mobile users
-expect to compare options — like swiping through product cards on any e-commerce app.
-Closes the last remaining Tier 8 item and completes the Scenarios program.
+Tiers 1–8 of the Scenarios program are all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). GOALS.md (Week of April 20, last updated 2026-04-20) lists no scenarios work; LoanOS Product priorities are FNM 3.4 import, drip campaigns, notes/activity log fix. Today is launch+2 (May 1 in rearview). **Mon 2026-05-04 is tomorrow** — next GOALS.md weekly refresh and natural retire-or-redirect moment for this cron.
 
 ### Session Type
-[x] Build
+[x] Maintenance only (no Sequence A/B/C activates without a mission)
 
 ### Objectives
-1. Create MobileComparisonCards.tsx — md:hidden, shows one scenario column per card, prev/next navigation
-2. Update SharePageLayout.tsx — render MobileComparisonCards and hide ScenarioComparisonTable on mobile
-3. Build passes with 0 TypeScript errors
+1. Refresh existing NEEDS ADAM (TODO.md line 19) — bump streak to 9, add 2026-05-03 to flagged-dates list, frame as "Mon 05-04 GOALS refresh tomorrow".
+2. Update CONTEXT.md Scenarios three fields.
+3. Append CHANGELOG entry + session-log entry.
 
 ### Files in Scope
-- src/components/share/MobileComparisonCards.tsx (new)
-- src/components/share/SharePageLayout.tsx (render mobile cards + hide desktop table on mobile)
+- TODO.md (NEEDS ADAM line 19)
+- CONTEXT.md (three Scenarios Agent Status fields)
+- CHANGELOG.md (one dated entry)
+- tasks/scenarios/session-log.md (one entry)
+- tasks/scenarios/subagent-status.md (SESSION END marker)
 
 ### Definition of Done
-- MobileComparisonCards visible at 390px viewport, ScenarioComparisonTable visible on md+
-- "Commonly Chosen" gold treatment matches desktop table
-- Build passes, committed and pushed
+- NEEDS ADAM bumped to 9-streak with 2026-05-03 flagged.
+- CONTEXT.md three fields current.
+- CHANGELOG appended above 2026-05-03 AM social entry.
+- session-log entry appended.
 
 ### Subagents to Activate
-[x] Builder Subagent (direct)
-[x] QA Subagent (npm run build)
+None — no mission means no Sequence A/B/C.

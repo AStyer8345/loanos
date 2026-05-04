@@ -2,6 +2,61 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-04 AM — Lead Generation
+Focus: Homepage forms (`#hero-quick-form` + `#quick-contact-form`) conversion + TCPA compliance audit (Sequence A — Research). Third in funnel-page audit series (May 1: get-preapproved; May 2: rate-alert; May 4: homepage forms). Specifically targets BLOCKER-001's open piece — homepage forms still bundled-consent per 2026-03-25 audit.
+Type: Research (Sequence A)
+Week in Queue: Week 17
+
+### Context From Previous Session
+2026-05-02 AM authored 17 prioritized findings for `/rate-alert.html` (HIGH 5 / MEDIUM 6 / LOW 6) + cross-page bundling table identifying 4 items overlapping with 2026-05-01 `/get-preapproved.html` audit. No work has shipped from either prior audit yet — all 12 HIGH-tier items across two pages remain queued. Today picks up the third (homepage forms, BLOCKER-001 open) using the same methodology. NotebookLM CLI auth expired as of 2026-05-03 PM (SEO/SEM nightly skipped); PUSH expected to be skipped today.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` — same failure as 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-04 AM entry). Continued session per master-agent.md error-handling rule "NotebookLM sync failure NEVER blocks the build chain."
+- **Read full source of `index.html`** (1126 lines). Identified two homepage forms: `#hero-quick-form` (Quick Quote, lines 373–410) and `#quick-contact-form` (Quick Contact, lines 674–716). Read `script.js` handler functions (`initHeroQuickForm`, `submitForm`) and confirmed end-to-end submit flow via `subscribe-lead.js`.
+- **Authored 17 prioritized findings** across HIGH (5) / MEDIUM (6) / LOW (6) tiers + compliance spot-check + cross-page bundling table + ship order:
+  - **HIGH:** H1 TCPA bundled-consent on BOTH forms (compliance + conversion — same fix pattern shipped on `/get-preapproved.html`); H2 Quick Quote subhead missing (form floats without offer context); H3 generic CTA copy ("Get My Quote"); H4 Loan Goal options diverge across forms (different vocabularies, casings, missing values); H5 `lead_source` body field 'Quick Quote' / 'Quick Contact' is not landing in DB (zero rows in 90 days, while 8 'Website' fallback rows exist — likely deploy gap or recent code change).
+  - **MEDIUM:** M1 Quick Contact success UX asymmetric to Quick Quote (no thank-you redirect); M2 no purchase-price qualifier on either form (cross-page bundling with /get-preapproved M2); M3 TCPA copy uses "purchase" instead of best-practice "loan"; M4 trust-badge dedup; M5 footer address verification; M6 JSON-LD MortgageBroker schema cross-coordination.
+  - **LOW:** L1 hero submit button uses `btn-sm` for primary CTA; L2 hero form input contrast (white-on-glass); L3 Quick Contact lacks phone-call fallback; L4 `novalidate` JS-only validation; L5 0.75rem labels small; L6 Quick Contact loanGoal values lowercased + abbreviated.
+- **Compliance spot-check (12 items)**: 8 PASS / 1 PARTIAL (M3 phrase) / 2 FAIL (H1 — collapses into one fix) / 1 FLAG (M5 footer address verify).
+- **Cross-page bundling**: a single 30-min PR can resolve TCPA two-checkbox split across `/index.html` (2 forms) + `/rate-alert.html` (1 form) — combined with `/get-preapproved.html` already shipped, would close the entire site-wide TCPA bundled-consent compliance debt. Loan Goal taxonomy unification + JSON-LD schema also bundle cross-page.
+- **Read-only Supabase verification (post-May-1 launch)**:
+  - `drip_sends` total = 0 (24h = 0; consistent with 5-week zero state)
+  - `drip_enrollments` total = 0 (7d = 0)
+  - `contacts.lead_source='Pre-Approval Funnel'` = 0 (12th consecutive day)
+  - `contacts.lead_source='Rate Alert Funnel'` = 0 (36 days since deploy)
+  - `contacts.lead_source='Quick Quote'` = 0 (90 days)
+  - `contacts.lead_source='Quick Contact'` = 0 (90 days)
+  - `contacts.lead_source='Website'` = 8 (90 days, most recent 2026-04-30 — these are the actual homepage form submissions falling back to legacy default)
+  - `contacts` created last 7d = 3 (2 null / 1 Website)
+  - Inferred run rate from 'Website' fallback: ~1 homepage form submission/wk steady-state. Pattern unchanged.
+
+### Key Findings
+1. **Homepage forms ARE generating leads** (~1/wk, 8 in 90 days), unlike PA + Rate Alert funnels which are 0. The homepage is the only owned-channel source actually capturing real lead-form submissions.
+2. **BLOCKER-001 partial-resolution is still partial** — both homepage forms still bundle SMS into a single required TCPA checkbox. The fix is identical to `/get-preapproved.html`'s shipped pattern. Single PR resolves all remaining bundled-consent debt across the site.
+3. **`lead_source: 'Quick Quote'` / 'Quick Contact'` body fields aren't landing in DB** despite being explicitly set in `script.js` lines 407 + 523. Either the script.js change isn't deployed to Netlify, or it's deployed but no submissions have hit since (last 'Website' submission was 2026-04-30, 4 days ago).
+4. **Loan Goal taxonomy is fragmented across 3 funnel pages + 2 homepage forms** (5 distinct vocabularies). Unifying yields cleaner LoanOS dashboard + drip campaign segmentation.
+5. **Two of the three audited funnel pages (Pre-Approval, Rate Alert) have ZERO captures**; the homepage's two forms are the only capture surface that's actually working. Suggests the next-priority intervention isn't more page-level conversion fixes — it's traffic / CTR upstream of the funnel pages, which is the SEO/SEM agent's GSC-pull-pending work.
+
+### Output
+- Audit report: `tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md` (~330 lines, 17 findings prioritized HIGH/MEDIUM/LOW with effort estimates + suggested rewrites + cross-page bundling table + form inventory + compliance spot-check)
+- NotebookLM error log: `tasks/lead-gen/notebooklm-errors.md` (2026-05-04 AM entry)
+- Updated: today-mission.md, session-log.md, CHANGELOG.md, CONTEXT.md (3 Lead Gen fields), ADAM-TODO.md (1 new batched line), TODO.md, subagent-status.md
+
+### Adam Action Items
+1 NEW batched ADAM-TODO line (file-pointer pattern, no per-finding stacking — consistent with 05-01 + 05-02 audits). Carryover unchanged: Realtor Relationships activation criteria + cadence; Long-Term Nurture + Past Client Retention archive vs author; TCPA copy approval; Sendblue signup; GSC pull (still pending SEO/SEM agent's 90-day export); 12 HIGH-tier items queued from prior two audits awaiting Adam authorize.
+
+### Compliance / Risk
+None taken on. Read-only audit. Zero code changes, zero deploys, zero email/SMS fired, zero Supabase mutations.
+
+### NotebookLM PUSH
+SKIPPED — CLI auth expired, same failure as 2026-05-03 PM. Will resume when Adam runs `/Users/adamstyer/.local/bin/notebooklm login`.
+
+### What Next Session Should Prioritize
+1. Tomorrow's mission with all 3 main funnel pages audited: pick from (a) homepage above-the-fold non-form conversion review, (b) `/thank-you.html` post-submit experience review (handles 3 funnel types), (c) `/refinance-quote.html` audit (4th funnel page surfaced today), (d) verification pass on H5 — confirm whether script.js explicit `lead_source` body fields are deployed to Netlify (read-only, no code changes).
+2. Skip page re-audit until at least one HIGH-tier change ships across any of the three audited pages.
+3. If NotebookLM CLI auth restored before next session, run delayed PUSH covering 05-04 AM session output.
+
+---
 ## Session: 2026-05-02 AM — Lead Generation
 Focus: On-page conversion audit of `/rate-alert.html` (Sequence A — Research; companion to 2026-05-01 `/get-preapproved.html` audit)
 Type: Research (Sequence A)

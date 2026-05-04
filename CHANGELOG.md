@@ -1,5 +1,43 @@
 # LoanOS Changelog
 
+## 2026-05-04 (loanos-autonomous) — Tracker hygiene cycle (post-launch + 3)
+
+- **Bucket A (autonomous-eligible)**: 1 item — roll in this morning's subagent tracker churn (lead-gen, social, seo-sem) so the working tree starts the next session clean. 5th consecutive tracker-hygiene cycle following `369c8fb` (2026-05-03), `4d0323c` (2026-05-02), `c4fee70` (2026-05-01 PM), `d6fb6e7` (2026-04-30 AM). 13 modified tracker files (CHANGELOG / CONTEXT / TODO / ADAM-TODO + 9 subagent state files), zero code changes.
+- **Bucket B (Adam-blocked, no new items from me)**: AM agents already appended 2 new lines to `tasks/ADAM-TODO.md` today — homepage forms TCPA + conversion audit (Lead Gen 2026-05-04 AM, 17 findings, ~330 lines) and `notebooklm` CLI re-auth needed (now 2 sessions blocked: 2026-05-03 PM + 2026-05-04 AM). Carryover queue unchanged: Resend DKIM for `mortgagesolutionslp.com`, Realtor Relationships drip cadence/criteria, Long-Term Nurture / Past Client Retention archive-vs-author, TCPA copy + Sendblue API, Scenarios cron retire/redirect (now 9 no-op AM runs — Mon 05-04 GOALS refresh date arrived but file unchanged at `2026-04-19 13:51` per AM social-am `stat`), NotebookLM playbook reconcile, 5 canonical n8n credentials, 3 styerteam-mortgage-site audit ship-approvals (get-preapproved + rate-alert + homepage forms), Email Cutover Task 23 env vars + Resend webhook + WORKFLOW_DEVKIT_LEAD_INTAKE flip, CONTEXT.md trim under 150-line cap.
+- **Bucket C (out-of-scope)**: same as 2026-05-03 — Refi Opportunity List V2, Self-Serve Tenant Domain Onboarding, notes/activity log fix (no spec on disk), Microsoft Graph adapter follow-ups (no org has flipped `email_provider='microsoft'`), MISMO multi-borrower regex characterization (preventative).
+- **Build state**: `npm run build` ✓ green first pass — Compiled successfully. Working tree compiles clean.
+- **Vercel state**: latest production deploy `dpl_9184MNUWedNav4Qd9rpJeuzp7fCE` (commit `4d0323c`) READY (last code change 2026-05-02). Today's tracker commit will queue the next deploy (auto on push).
+- **Drip pipeline state** (read-only, unchanged): `drip_sends`=0, `drip_enrollments`=0, `drip_campaigns` active=8. Cron wired and CRON_SECRET set; will no-op until Adam manually enrolls a contact.
+- **n8n inventory**: not re-enumerated (audit 2026-04-30 PM stands; no migration possible until Adam creates 5 canonical credentials per `tasks/security/n8n-credential-audit-2026-04-30.md`). Anniversary Check-In (`ZUeGy8u8P4o6DPM3`) malformed-JWT bonus finding still open — third cron firing tomorrow (May 5) will run with broken dedup; impact forward-looking only.
+- **Skipped autonomous-territory items**: untracked `AGENTS.md` + `docs/AI_AGENT_ONBOARDING.md` + `docs/REPO_STRUCTURE.md` (Adam's intentional uncommitted Apr 25 setup files), and ~80 untracked subagent artifact files in `tasks/{lead-gen,seo-sem,social-media}/{audits,digests,drafts,research,build-reports,qa-reports,reviews,specs,notebooklm-*}/` (mass-attribution risk — same precedent as 2026-05-03).
+- **Circuit breaker**: clean. **Destructive ops**: none. **Env changes**: none. **Schema changes**: none. **n8n changes**: none. **Code changes**: none.
+- **Email digest**: skipped per established autonomous pattern (no Resend transactional template wired for this routine; n8n pathway also unverified). 5-line summary recorded here in CHANGELOG instead.
+
+## 2026-05-04 AM (styer-lead-gen-am) — Homepage forms TCPA + conversion audit (Sequence A)
+
+- **Audit shipped (read-only)**: `tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md` (~330 lines). 17 prioritized findings (HIGH 5 / MEDIUM 6 / LOW 6) covering both `#hero-quick-form` (Quick Quote) and `#quick-contact-form` (Quick Contact). Compliance spot-check: 8 PASS / 1 PARTIAL / 2 FAIL (TCPA bundled-consent — collapses into single H1 fix) / 1 FLAG (footer address verify).
+- **Cross-page bundling identified**: single 30-min PR (TCPA two-checkbox split on 2 homepage forms + 1 rate-alert form) closes site-wide TCPA bundled-consent compliance debt. /get-preapproved.html already shipped this pattern; this would close BLOCKER-001.
+- **Pipeline read-only verification**: `drip_sends`=0, `drip_enrollments`=0, PA Funnel=0 (12th day), Rate Alert Funnel=0 (36 days), Quick Quote=0, Quick Contact=0, Website=8 in 90 days (most recent 2026-04-30 — homepage forms ARE producing ~1 lead/wk steady-state but falling back to legacy 'Website' default).
+- **H5 deploy-gap finding**: `script.js` lines 407 + 523 set explicit `lead_source: 'Quick Quote'` / 'Quick Contact'` body fields, but DB shows zero rows under those values. Likely either script.js change isn't deployed to Netlify or it post-dates 2026-04-30.
+- **NotebookLM PULL + PUSH SKIPPED** — CLI auth still expired (2nd consecutive session). Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-04 AM entry).
+- **Files touched**: `tasks/lead-gen/{today-mission.md, session-log.md, subagent-status.md, notebooklm-errors.md}`, `CHANGELOG.md`, `CONTEXT.md` (3 Lead Gen fields), `tasks/ADAM-TODO.md` (1 new batched line), `TODO.md`. Zero code changes, zero deploys, zero email/SMS, zero Supabase mutations, zero commits this session.
+
+## 2026-05-04 AM (styer-social-am) — Maintenance-only, 9th consecutive
+
+- **GOALS.md weekly refresh check**: `stat` shows `2026-04-19 13:51` — Adam did NOT refresh this Monday morning. Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed.
+- **Pipeline state verified read-only**: 47 drafts in cushion (Sep 23 2026 → Feb 4 2027, drift = 0 across all 9 maintenance sessions); 0 TIMELY drafts in 48-hr horizon (May 4 07:29 UTC → May 6 07:29 UTC); 0 new website content (`rates/2026-04-24.html`, `blog/2026-04-27-...`, `realtor-updates/2026-04-27-...` all already in `gbp-content-tracker.md`).
+- **Architect / Builder / Quality / Reviewer / QA: SKIPPED**. NotebookLM PULL/PUSH deferred per pattern (PUSH backlog now 8 sessions deep — PM 04-30 → AM 05-04). BLOCKER-LOANOS-001 still active (selfies dir missing, day 30).
+- **Forward rule**: PM 2026-05-04 = planned escalation point. If GOALS still unrefreshed by PM, append a NEEDS ADAM item to `tasks/ADAM-TODO.md` with two options: (a) opportunistic Wk49 with NEW sourcing, or (b) cron pause with Adam approval. Do NOT pause cron unilaterally.
+- Files touched: `tasks/social-media/{subagent-status.md, today-mission.md, session-log.md}`, `CONTEXT.md` (3 social fields), `TODO.md` (social posts line). No emails, no Publer calls, no Supabase mutations, no commits.
+
+## 2026-05-03 PM (notebooklm-nightly) — NotebookLM sync no-op, CLI auth expired
+
+- **Both halves (SEO/SEM + Lead Gen) skipped** — `notebooklm` CLI returns `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` on every command (`use`, `list --json`, all `source` ops). Cannot re-authenticate from a non-interactive scheduled task; `notebooklm login` opens a browser OAuth flow that requires Adam at the keyboard.
+- Steps 1–6 of `tasks/seo-sem/subagents/00-notebooklm.md` (activate, staleness audit, web sweep, push session files, master log sync, daily digest) all blocked at Step 1; same for the lead-gen mirror.
+- No notebook contact, no source list mutations, no master log appends, no Master notebook re-sync, no digests written. Local files unchanged outside the trackers below.
+- Logged to: `tasks/seo-sem/notebooklm-errors.md` (2026-05-03 entry) and `tasks/lead-gen/notebooklm-errors.md` (2026-05-03 entry). SESSION_END appended to both `tasks/{seo-sem,lead-gen}/subagent-status.md`. CONTEXT.md SEO/SEM Agent Status block updated (3 fields). TODO.md NEEDS ADAM updated with the relogin action.
+- **ADAM ACTION:** run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. The next nightly run (2026-05-04 22:00) will pick up automatically.
+
 ## 2026-05-03 (loanos-autonomous) — Tracker hygiene cycle (post-launch + 2)
 
 - **Bucket A (autonomous-eligible)**: 1 item — roll in this morning's subagent tracker churn (lead-gen, social, scenarios, seo-sem, standup) so the working tree starts the next session clean. Same hygiene pattern as `4d0323c` (2026-05-02), `c4fee70` (2026-05-01 PM), and `d6fb6e7` (2026-04-30 AM). 11 modified tracker files, no code changes.
@@ -30,6 +68,17 @@
 - CONTEXT.md three Scenarios fields updated (Last worked on / Active blockers / What's next). CONTEXT.md still at 161 lines — 11-line overflow is structural across peer agent sections (Standup, Lead Gen, SEO/SEM, Social Media); compacting peer agents is out of cron scope (consistent with prior 8 sessions).
 - Skipped per established no-mission pattern: NotebookLM PULL/PUSH (7th consecutive run skipped), master notebook note (no work to summarize, "no emails to Adam" rule), all 4 scenarios subagents (no Sequence A/B/C activates without a mission), `npm run build` (zero code changes), git commit/push (rolls into next loanos-autonomous tracker hygiene commit per established pattern).
 - Net effect: 4 tracker files touched (TODO, CONTEXT, CHANGELOG, session-log) + today-mission.md + subagent-status.md SESSION_START/END markers. Zero code, zero schema, zero n8n, zero env.
+
+## 2026-05-03 PM (styer-social-pm) — 8th consecutive maintenance-only session
+
+- 8-streak maintenance pattern preserved (AM 04-30 → PM 04-30 → AM 05-01 → PM 05-01 → AM 05-02 → PM 05-02 → AM 05-03 → **PM 05-03**). Posts built across 8 sessions: 0. Cushion drift: 0 (47 drafts unchanged).
+- Cushion verified via Supabase REST: 47 `status=draft` rows scheduled Sep 23 2026 → Feb 4 2027 (closest cluster Posts 191–198, Jan 11 → Feb 4 2027). Pillar mix in nearest 8: authority×3, education×2, personal×3 (75% RT-adjacent). Identical to AM 05-03.
+- Step 1B SKIPPED (PM session per master-agent.md). Informational scan for AM 05-04 handoff: 0 new website content — every visible file in `rates/`, `blog/2026-*.html`, `realtor-updates/` already in `gbp-content-tracker.md`. 8th consecutive zero-input scan, aligned with GOALS.md "No new content on any site (improve existing only)."
+- Refresh (07) SKIPPED (PM session). Independently re-verified via Supabase REST `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-04T02:22:00Z&scheduled_for=lt.2026-05-06T02:22:00Z` → `[]`. 0 TIMELY drafts in 48-hr horizon (May 4 02:22 UTC → May 6 02:22 UTC).
+- **Mon 2026-05-04 GOALS weekly refresh is tomorrow.** Forward rule unchanged: PM 2026-05-04 is the planned escalation point if (a) Mon 05-04 GOALS update does NOT redirect AND (b) 0 new content. Two options preserved — opportunistic Wk49 with NEW sourcing (NotebookLM/loanos-pool, viable only if selfies unblock LoanOS or non-LoanOS angle surfaces), or cron pause with Adam approval.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build — both fire conditions still absent). NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern. PUSH backlog now 7 sessions deep (PM 04-30, AM 05-01, PM 05-01, AM 05-02, PM 05-02, AM 05-03, PM 05-03) — combines into next build.
+- BLOCKER-LOANOS-001 still active — `tasks/social-media/assets/selfies/` does not exist (29 days, `ls` exit 1). Non-LoanOS pillars unaffected.
+- Reporting limited to project files: session-log, today-mission, CONTEXT, CHANGELOG, TODO. No emails sent, no daily digest (per scheduled task instructions).
 
 ## 2026-05-03 AM (styer-social-am) — 7th consecutive maintenance-only session
 

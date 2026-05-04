@@ -1,3 +1,47 @@
+SESSION START: 2026-05-04 03:45:28
+Mode: AM
+Focus: TBD — load context, assess prior session deferrals, define mission
+MASTER: Context loading. Activating master-agent.md.
+
+SESSION END: 2026-05-04 04:15:00
+Mode: AM
+Focus: Homepage forms (`#hero-quick-form` + `#quick-contact-form`) conversion + TCPA compliance audit (Sequence A — Research). Third in funnel-page audit series (BLOCKER-001 carryover).
+MASTER: All objectives complete. Read-only Supabase queries + 1 audit file. No code changes, no DB writes.
+
+HOMEPAGE FORMS AUDIT: COMPLETE — 17 prioritized findings (HIGH 5 / MEDIUM 6 / LOW 6), compliance spot-check (8 PASS / 1 PARTIAL / 2 FAIL / 1 FLAG), cross-page bundling table, recommended ship order:
+- H1 (HIGH compliance + conversion): TCPA two-checkbox split on BOTH homepage forms — single 30-min PR bundling with rate-alert H1 closes BLOCKER-001 entirely
+- H2 (HIGH): Quick Quote subhead missing
+- H3 (HIGH): generic CTA copy ("Get My Quote")
+- H4 (HIGH): Loan Goal taxonomy fragmented across 3 funnel pages (cross-page bundle w/ /get-preapproved M6)
+- H5 (HIGH): `lead_source: 'Quick Quote'` / 'Quick Contact' body fields not landing in DB (zero rows 90d while 8 'Website' fallback rows exist — likely Netlify deploy gap)
+- 6 MEDIUM + 6 LOW (4 cross-page bundle items)
+
+PIPELINE STATUS (read-only Supabase 2026-05-04 03:55 CT): drip_sends=0, drip_enrollments=0, lead_source='Pre-Approval Funnel'=0 (12th day), lead_source='Rate Alert Funnel'=0 (36 days), lead_source='Quick Quote'=0 (90d), lead_source='Quick Contact'=0 (90d), lead_source='Website'=8 (90d, most recent 2026-04-30 — homepage forms ARE producing ~1/wk steady-state captures falling back to legacy default). Contacts created last 7d = 3 (2 null / 1 Website).
+
+OUTPUT: `tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md` (~330 lines)
+
+ADAM ACTION ITEMS: 1 NEW batched ADAM-TODO line for homepage audit (file-pointer pattern) + 1 NEW [SYSTEM] line for NotebookLM CLI relogin (3rd surface — also tracked under SEO/SEM nightly + previously surfaced under SEO/SEM agent CONTEXT.md). Carryover unchanged: Realtor cadence + activation, Long-Term/Past Client archive vs author, TCPA copy, Sendblue signup, GSC pull, get-preapproved 7 prioritized fixes, rate-alert 5 HIGH-tier fixes.
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth expired (2nd consecutive session, same as 2026-05-03 PM).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief)
+- `tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md` (NEW, ~330 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-04 AM entry)
+- `tasks/lead-gen/session-log.md` (May 4 AM entry prepended)
+- `CHANGELOG.md` (May 4 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced)
+- `tasks/ADAM-TODO.md` (1 new batched audit line + 1 new NotebookLM relogin line)
+- `TODO.md` (homepage forms audit findings line added before existing rate-alert + get-preapproved lines)
+
+Timestamp: 2026-05-04 04:15:00
+SESSION FULLY COMPLETE ✓
+
+---
+
 SESSION START: 2026-05-02 03:45:09
 Mode: AM
 Focus: /rate-alert.html conversion audit (Sequence A — companion to 2026-05-01 /get-preapproved audit)
@@ -566,3 +610,19 @@ Mode: AM
 Focus: TBD — load context, assess prior session deferrals, define mission
 MASTER: Context loading. Activating master-agent.md.
 
+
+**SESSION_END**
+- DateTime: 2026-05-03 22:09:50
+- Mode: PM
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED
+- All `notebooklm` CLI commands return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.`
+- Cannot re-authenticate from a scheduled (non-interactive) session — `notebooklm login` opens a browser flow that requires Adam.
+- Steps 1–5 (notebook activate, staleness audit, web sweep, push session files, master log sync) all blocked at Step 1.
+- Step 6 (daily digest) skipped — would have nothing to query against.
+- Local files unchanged; nothing destructive performed.
+- Logged to: tasks/lead-gen/notebooklm-errors.md (2026-05-03 entry)
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. Once restored, the next nightly run will pick up automatically.
+Timestamp: 2026-05-03 22:09:50
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry)

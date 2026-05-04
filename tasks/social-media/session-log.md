@@ -2,6 +2,95 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-04 AM — Maintenance-only (Scheduled Task — styer-social-am)
+
+**Focus**: 9th consecutive maintenance-only session. Mon 2026-05-04 was the planned weekly GOALS refresh day — verify whether Adam redirected the social agent. PM 05-04 remains the planned escalation point.
+
+**Completed:**
+- SESSION_START written: 2026-05-04 02:29 CDT, Mode: AM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist via `ls` — directory itself missing, exit 1; the `assets/` parent directory is also missing). LoanOS stream remains paused (30 days).
+- **GOALS.md weekly refresh check**: `stat -f "%Sm"` returns `2026-04-19 13:51` — file unchanged for 14 days. **Adam did NOT refresh GOALS.md this Monday morning.** Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed. Maintenance pattern is the correct posture.
+- Step 1B (GBP): scanned `rates/`, `blog/2026-*.html`, `realtor-updates/` in `~/Documents/Claude/styerteam-mortgage-site/`. **0 new content pieces.** Latest still match prior tracker entries: `rates/2026-04-24.html` (posted 04-27, Publer job `69ef10a645572ded59c1ba30`), `blog/2026-04-27-why-home-prices-arent-crashing.html` (posted 04-28, Publer job `69f062de8b17fc4ff5c6b9ea`), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (queued for Architect 04-28, GBP skipped duplicate). 9th consecutive zero-input scan. No GBP webhook fires, no `content-repost-queue.md` appends.
+- Refresh (07): queried Supabase `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-04T07:29:00Z&scheduled_for=lt.2026-05-06T07:29:00Z` → `[]`. **0 TIMELY drafts in 48-hr horizon (May 4 07:29 UTC → May 6 07:29 UTC).** Refresh subagent had nothing to fill — completes instantly per spec.
+- Cushion verification: queried Supabase `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&scheduled_for=gte.2026-05-04&order=scheduled_for.asc` → **47 drafts returned**, schedule range Sep 23 2026 → Feb 4 2027. Earliest = Post 157 (LinkedIn authority, Sep 23). Pillar mix in nearest 8: authority×3, education×2, personal×3 (75% RT-adjacent — voice-RT stores as `authority` per DB enum). **Cushion drift = 0 across all 9 maintenance sessions.**
+- Mission: MAINTENANCE-only explicit. Reasoning written in `today-mission.md`. Both PM 04-30 fire conditions still absent (no rate/market slot opening in next 30 days, no acute Real Talk pillar gap that isn't a tagging artifact).
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). Pattern preserved across PM 04-30 → AM 05-04. PUSH backlog now 8 sessions deep — will combine into next build session's PUSH (consistent with `3f3ece44` precedent).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: AM 05-04 entry inserted at top.
+- TODO.md: social posts line refreshed for 9-streak; PM 05-04 escalation rule preserved + sharpened (GOALS not refreshed = forward escalation locked in unless something changes by PM).
+- No emails sent to Adam (per scheduled task instructions). No daily digest sent.
+
+**Reports:**
+- No build/review/QA reports written this session (no build).
+- `today-mission.md` ✓ (MAINTENANCE session type, AM 05-04)
+
+**Deferred / Outstanding:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded — 30 days)
+- `content-repost-queue.md` Pending: 2 stale entries — `blog/2026-03-30-why-rates-improved-today-bond-rally.html` (5+ wks stale) + `rates/2026-04-14.html` (3+ wks stale). Both rate/market themed. Do NOT consume unless market context refreshes.
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO.
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending.
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`.
+- NotebookLM PUSH backlog: 8 sessions deep (PM 04-30, AM 05-01, PM 05-01, AM 05-02, PM 05-02, AM 05-03, PM 05-03, AM 05-04) — all deferred to next build session per pattern.
+- **GOALS.md weekly refresh missed (Mon 2026-05-04).** Adam may refresh later in the day; PM 05-04 should re-check.
+
+**Next Session Instructions (PM 2026-05-04):**
+- **PM 2026-05-04 is the planned escalation point.** Re-check GOALS.md modification time first thing. If `stat` still shows `2026-04-19 13:51` (i.e., Adam did not refresh during the day):
+  - This is the 10th consecutive maintenance session.
+  - Add a NEEDS ADAM item to `tasks/ADAM-TODO.md` (Reporter-style append) presenting two options:
+    1. Opportunistic Wk49 with NEW sourcing (NotebookLM pull / loanos-pool audit — viable only if selfies unblock LoanOS OR a non-LoanOS angle surfaces from notebook context).
+    2. Cron pause with Adam approval (cushion is ~9 months deep; resume when GOALS shift).
+  - Do NOT pause the cron unilaterally. Default = continue maintenance until Adam responds.
+- If GOALS.md HAS been refreshed: re-read it, follow whatever new directive Adam set, abandon escalation plan.
+- Step 1B SKIPPED (PM-only). Informational scan only — flag any new content for AM 05-05.
+- Refresh SKIPPED (PM-only). Independently re-verify TIMELY horizon stays empty May 4 → May 6.
+- Cushion check: re-confirm 47 drafts still `status=draft` (no manual intervention by Adam expected, but verify).
+- NotebookLM PULL/PUSH: keep deferring per pattern unless build runs.
+
+**Streak metric:** AM 04-30 (1) → PM 04-30 (2) → AM 05-01 (3) → PM 05-01 (4) → AM 05-02 (5) → PM 05-02 (6) → AM 05-03 (7) → PM 05-03 (8) → **AM 05-04 (9)**. Posts built across 9 sessions: 0. Cushion drift: 0 (47 drafts unchanged). Quality bar held: yes (zero published beats sub-9). New content opportunities missed: 0 (none surfaced). GOALS.md unchanged 14 days (last refresh Apr 19; Mon refresh missed).
+
+---
+## Session: 2026-05-03 PM — Maintenance-only (Scheduled Task — styer-social-pm)
+
+**Focus**: 8th consecutive maintenance-only session. One session away from PM 05-04 escalation point. Verify cushion + TIMELY horizon, scan informational content, close cleanly. No build.
+
+**Completed:**
+- SESSION_START written: 2026-05-03 21:22 CDT, Mode: PM.
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` does not exist via `ls` — directory itself missing, exit 1). LoanOS stream remains paused (29 days).
+- Step 1B (GBP): SKIPPED per master-agent.md (AM only). Informational scan for AM 05-04 handoff: 0 new website content. Latest tracked still match newest files (`rates/2026-04-24.html`, `blog/2026-04-27-why-home-prices-arent-crashing.html`, `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html`). Nothing to flag. 8th consecutive zero-input scan.
+- Refresh (07): SKIPPED per master-agent.md (AM only). Re-verified independently via Supabase `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-04T02:22:00Z&scheduled_for=lt.2026-05-06T02:22:00Z` → `[]`. **0 TIMELY drafts in 48-hr horizon (May 4 02:22 UTC → May 6 02:22 UTC).**
+- Cushion verification: queried Supabase `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&scheduled_for=gte.2026-05-03&order=scheduled_for.asc` → **47 drafts returned**, schedule range 2026-09-23 → 2027-02-04. Earliest = `2026-09-23T15:00Z` (Post 157, LinkedIn authority). Closest cluster Posts 191–198 confirmed all `status=draft`. Pillar mix in nearest 8: authority×3, education×2, personal×3 (75% RT-adjacent). **Cushion drift = 0 across all 8 maintenance sessions.**
+- Mission: MAINTENANCE-only explicit. Reasoning written in `today-mission.md`. Both PM 04-30 fire conditions still absent (no rate/market slot opening, no acute Real Talk pillar gap that isn't a tagging artifact).
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). Pattern preserved across PM 04-30, AM 05-01, PM 05-01, AM 05-02, PM 05-02, AM 05-03, PM 05-03. Will combine into next build session's PUSH (consistent with `3f3ece44` precedent).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next).
+- CHANGELOG.md: PM entry inserted at top (above today's AM social entry).
+- TODO.md: social posts line refreshed to reflect 8-streak maintenance state + 05-04 escalation rule preserved.
+- No emails sent to Adam (per scheduled task instructions). No daily digest sent.
+
+**Reports:**
+- No build/review/QA reports written this session (no build).
+- `today-mission.md` ✓ (MAINTENANCE session type, PM 05-03)
+
+**Deferred / Outstanding:**
+- LoanOS stream (BLOCKER-LOANOS-001 selfies not uploaded — 29 days)
+- `content-repost-queue.md` Pending: 2 stale entries — `blog/2026-03-30-why-rates-improved-today-bond-rally.html` (5+ wks stale) + `rates/2026-04-14.html` (3+ wks stale). Both rate/market themed. Do NOT consume unless market context refreshes.
+- Duplicate Post 180 (30da3c7a vs 868fe397) — pre-existing, still in ADAM-TODO.
+- master-agent.md Step 1B 3A patch (GBP `platform:"google"` insert template vs DB constraint) — still pending.
+- DB pillar enum — `real_talk` still excluded; keep mapping Real Talk → `authority`.
+- NotebookLM PUSH backlog: 7 sessions deep (PM 04-30, AM 05-01, PM 05-01, AM 05-02, PM 05-02, AM 05-03, PM 05-03) — all deferred to next build session per pattern.
+
+**Next Session Instructions (AM 2026-05-04):**
+- **Mon 05-04 is GOALS.md weekly refresh day.** First action: re-read `GOALS.md` to detect Adam's weekly redirect (or absence thereof). If GOALS shifts the social mandate (e.g., new content focus, new platforms, paused workstreams), pivot accordingly.
+- Step 1B: scan `rates/`, `blog/`, `realtor-updates/` for new content since 2026-05-03 PM. PM 05-03 informational scan found 0 new content; AM should re-verify and flag any net-new pieces for distribution.
+- NotebookLM PULL: 8th consecutive AM CLI test. PUSH still deferred unless build runs.
+- Refresh (07): confirm 0 TIMELY drafts within 48-hr horizon (May 4 → May 6) via Supabase.
+- **PM 2026-05-04 is the planned escalation point.** If AM 05-04 GOALS update doesn't redirect AND PM 05-04 still finds 0 new content, escalate to Adam at PM 05-04 with two options: (a) opportunistic Wk49 with NEW sourcing (NotebookLM pull / loanos-pool audit — viable only if selfies unblock LoanOS or a non-LoanOS angle surfaces), or (b) cron pause with Adam approval (acknowledge cushion is 9 months deep, resume only when GOALS shift).
+- LoanOS stream still blocked by selfies — flag in subagent-status if Adam uploads selfies before AM 05-04.
+
+**Streak metric:** AM 04-30 (1) → PM 04-30 (2) → AM 05-01 (3) → PM 05-01 (4) → AM 05-02 (5) → PM 05-02 (6) → AM 05-03 (7) → **PM 05-03 (8)**. Posts built across 8 sessions: 0. Cushion drift: 0 (47 drafts unchanged). Quality bar held: yes (zero published beats sub-9). New content opportunities missed: 0 (none surfaced).
+
+---
 ## Session: 2026-05-02 AM — Maintenance-only (Scheduled Task — styer-social-am)
 
 **Focus**: 5th consecutive maintenance-only session. Verify cushion + TIMELY horizon, evaluate PM 05-01 5-streak threshold trigger. No build.

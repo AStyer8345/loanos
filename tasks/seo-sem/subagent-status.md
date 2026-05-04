@@ -1,4 +1,22 @@
 **SESSION_END**
+- DateTime: 2026-05-03 22:09:50
+- Mode: PM
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED
+- All `notebooklm` CLI commands return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.`
+- Cannot re-authenticate from a scheduled (non-interactive) session — `notebooklm login` opens a browser flow that requires Adam.
+- Steps 1–5 (notebook activate, staleness audit, web sweep, push session files, master log sync) all blocked at Step 1.
+- Step 6 (daily digest) skipped — would have nothing to query against.
+- Local files unchanged; nothing destructive performed.
+- Logged to: tasks/seo-sem/notebooklm-errors.md (2026-05-03 entry)
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. Once restored, the next nightly run will pick up automatically.
+Timestamp: 2026-05-03 22:09:50
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry)
+
+---
+
+**SESSION_END**
 - DateTime: 2026-05-02 22:10:06
 - Mode: PM
 - Agent: Nightly NotebookLM Sync (Scheduled Task)

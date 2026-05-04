@@ -9,3 +9,5 @@
 
 [2026-03-26 PM] URL ADD TIMEOUT: https://www.searchenginejournal.com/how-to-use-schema-for-local-seo-a-complete-guide/294973/ — "Request timed out calling ADD_SOURCE" after 30s. Retry next session.
 SEJ timeout - URL: https://www.searchenginejournal.com/local-seo-content-strategy/431651/ — timed out 3 times on 2026-03-29
+
+[2026-05-03 22:09 PM] AUTH EXPIRED: All notebooklm CLI commands returning `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` Cannot run interactively from scheduled task — Adam must run `notebooklm login` manually. PUSH+CURATE skipped this session (no notebook contact possible). Daily digest not generated. Foundational doc refresh deferred to next successful session.

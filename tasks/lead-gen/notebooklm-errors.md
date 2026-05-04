@@ -36,3 +36,15 @@
 - https://www.nationalmortgagenews.com/news/lenders-predict-2026-rebound-led-by-refis-and-home-equity
 Reason: National Mortgage News content behind paywall. Use Scotsman Guide or CFPB as alternatives.
 
+## 2026-05-03 PM — Auth Expired
+
+[2026-05-03 22:09 PM] AUTH EXPIRED: All notebooklm CLI commands returning `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` Cannot run interactively from scheduled task — Adam must run `notebooklm login` manually. PUSH+CURATE skipped this session (no notebook contact possible). Daily digest not generated. Foundational doc refresh deferred to next successful session.
+
+
+---
+
+## 2026-05-04 AM — Auth Still Expired (2nd consecutive session)
+
+[2026-05-04 03:48 AM] Same `Authentication expired or invalid` failure on `notebooklm list --json`. Skipped both PULL (Step 3 of master-agent.md) and PUSH (Step 8). Continued session per master-agent.md error-handling rule "NotebookLM sync failure NEVER blocks the build chain." Today's session output (`2026-05-04-homepage-forms-conversion-audit.md`) is queued for delayed PUSH whenever Adam runs `/Users/adamstyer/.local/bin/notebooklm login`.
+
+ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. This blocks both Lead Gen + SEO/SEM nightly notebook syncs. Already tracked under SEO/SEM agent's Active blockers in CONTEXT.md.

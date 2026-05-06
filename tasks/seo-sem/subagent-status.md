@@ -1,4 +1,39 @@
 **SESSION_END**
+- DateTime: 2026-05-05 22:10:30
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-05 target — no late-fire pattern this run, jitter +10 min only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (4th consecutive nightly run)
+- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-05 PM-cron-on-time entry).
+- ADAM-TODO line 18 already files this — count refreshed in place per stale-flags rule (no fresh entry stacked).
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- Backlog estimate: ~8 stale sources + ~5 ready-to-add accumulated in notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
+Timestamp: 2026-05-05 22:10:30
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 4th consecutive nightly)
+
+---
+
+**SESSION_END**
+- DateTime: 2026-05-05 11:03:07
+- Mode: PM (cron fired ~13h late vs 22:00 CDT 05-04 target — same late-fire pattern as styer-social-am at 10:10 CDT today)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (3rd consecutive nightly run)
+- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error as 2026-05-03 PM. Error redirect now points at WebLiteSignIn flow on accounts.google.com.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-05 PM-cron-late entry).
+- ADAM-TODO line 16 already files this — refreshed counts rather than re-stacking a fresh entry (per stale-flags rule).
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+Timestamp: 2026-05-05 11:03:07
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 3rd consecutive)
+
+---
+
+**SESSION_END**
 - DateTime: 2026-05-03 22:09:50
 - Mode: PM
 - Agent: Nightly NotebookLM Sync (Scheduled Task)

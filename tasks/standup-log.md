@@ -2,6 +2,124 @@
 
 ---
 
+## 2026-05-06 — Day 42 (post-launch +10 vs original Apr 26 target / +5 vs May 1 GOALS target)
+
+**Days to launch:** N/A — launched. Original task target Apr 26 passed; GOALS.md May 1 target also passed. Beta is live (per `c4fee70` "May 1 launch day" commit).
+
+**Yesterday shipped:**
+- Nothing. Zero new commits 2026-05-05. HEAD still `5fd8e6b` (2026-05-04 autonomous tracker hygiene). PM 05-05 wrap-up cycle did not produce a commit — second consecutive stalled wrap-up day.
+- Last real feature code on main: `1b58ef9` Microsoft Graph OAuth send adapter (2026-04-30). Six straight tracker-only or zero-commit days since.
+
+**Vercel status:** READY — `dpl_HpsoHiffWTea7mQEivqmC2zAQW8u` (commit `5fd8e6b`) production. No ERROR/QUEUED/BUILDING. Last 20 deployments all READY.
+
+**n8n workflow health:** 39 total, 34 active, 5 inactive (all intentional/expected). No error states detected.
+- Inactive: `W0K4YDzkZd0Hzv6g` (Pre-Drop Warm-Up), `LfLSDgqgb6yCe93C` (Quarterly Rate Review), `AK1fBcaX1cPcdlGx` (Review Request polling — deactivated 2026-04-13), `24oewjzGR3AxH4QW` (Morning Briefing Team — pending config), `zQTy23ZRFAty9uTc` (Contract Received v3 — dev duplicate).
+- Watch (carryover): `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) malformed-JWT in Check Dedup code node — silently broken dedup, ~5 firings now since May 1 first cron. Not a hard error in n8n's eyes; needs manual fix.
+
+**Blockers:**
+- **Drip pipeline still shows 0 sends** — 8th+ day at zero. End-to-end loop unproven post-launch.
+- **Scott's mailbox ungated** — needs DKIM verification OR MS Graph flip; 7th day.
+- **NotebookLM CLI auth expired** — 4th consecutive day, blocks SEO/SEM nightly PUSH+CURATE and Lead Gen morning PULL. Adam must run `/Users/adamstyer/.local/bin/notebooklm login`.
+- **5 canonical n8n credentials uncreated** — 22 of 27 active workflows still leak inline secrets per 2026-04-30 audit.
+- **Social PM 05-04 escalation** awaits Adam decision (A redirect / B pause) — 3+ cycles open.
+- **Scenarios cron** — 11+ consecutive no-build exits; needs retire / redirect / pause decision.
+- **CONTEXT.md still over 150-line cap** (162 lines) — violates project rule, never trimmed by autonomous agents.
+- **GOALS.md not refreshed Mon 2026-05-04** — 16 days stale, week-of-Apr-20 directive still nominally in force.
+
+**Today's focus:** Bucket A (autonomous-eligible) is empty — every meaningful unblock requires Adam. Sensible work for autonomous lanes today: (1) verify Vercel/n8n/audit health (this standup), (2) trim CONTEXT.md back under 150 lines if not already done, (3) attempt drip end-to-end smoke proof if any contact can be enrolled without Adam input. Highest-leverage Adam ask remains: reserve 60 min to clear DKIM, TCPA two-checkbox PR (lead-gen closeout spec is ready at `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md`), Scenarios disposition, `notebooklm login`, social PM 05-04 answer, GOALS refresh.
+
+**Risk watch:** Beta is technically live but operationally unverified — drip queue at 0 sends for 8+ days is the load-bearing signal that the cutover didn't fully take. If Scott logs in and sees no drip activity, the pilot stalls. Six-day zero-feature-code streak + stalled PM wrap-up cycles + skipped Mon GOALS refresh = autonomous lanes are at hygiene-only exhaustion across all five agents (standup, social, lead-gen, SEO/SEM, scenarios). On track operationally on the build/deploy side; off track on validation and post-launch traction.
+
+**Open audit findings:** No new audit files (`audits/` still has only 2026-04-05 SECURITY + SUPPORT-STACK). Per CONTEXT.md, security tracker remaining: 1 ADAM-BLOCKED — finding #5 field-level encryption (SSN/DOB/income) awaiting GLBA attorney consultation. All other 2026-04-05 critical + high findings are closed. Net: 0 new CRITICAL/HIGH; 1 carryover ADAM-BLOCKED.
+
+---
+
+## 2026-05-05 — Day 41 — POST-LAUNCH +4 (wrap-up cycle stalled)
+
+**Days to launch:** −4 (May 1 launch passed; original config target Apr 26 passed by 9 days). Continuing daily standup runs per task instruction. Today is Tue 2026-05-05 — Mon GOALS refresh day was yesterday and Adam did NOT refresh (`stat` from yesterday's social-am confirmed `2026-04-19 13:51`); week-of-Apr-20 directive still governs all autonomous lanes.
+
+**Yesterday shipped (since Day 40 standup):**
+- **ZERO new commits.** `git log -5` matches Day 40 verbatim: HEAD still `5fd8e6b chore(trackers): 2026-05-04 autonomous wrap-up — post-launch +3 tracker hygiene`. **Still unpushed** to `origin/main` (`git log origin/main..HEAD` returns it for a 2nd day) — first time the daily autonomous wrap-up cycle has stalled across two consecutive standups. No code, no schema, no n8n, no env changes.
+- **PM 05-04 wrap-up commit did not happen.** All 4 prior post-launch days (May 1 / 2 / 3 / 4) closed with a same-evening tracker-hygiene wrap-up commit; PM 2026-05-04 is the first to skip. Working tree carries the uncommitted churn: 8 modified tracker files (CONTEXT.md, CHANGELOG.md, TODO.md, ADAM-TODO.md, 3 social task files, this standup-log) + ~75 untracked files (lead-gen/seo-sem/social digests, audits, build-reports, qa-reports, specs accumulated across the launch window).
+- 2026-05-04 PM `styer-social-pm` cron fired ~9h late at **2026-05-05 05:46 CDT** per CONTEXT note. 10th consecutive maintenance session. **Escalation fired** per AM 05-04 forward rule: appended `[SOCIAL] 2026-05-04 PM ❓ DECISION` to `tasks/ADAM-TODO.md` — two options (A: opportunistic Wk49 with NEW non-LoanOS sourcing / B: pause cron until next GOALS refresh). Recommendation: (B) pause. Social cushion stable: 47 `status=draft` rows Sep 23 2026 → Feb 4 2027, drift = 0 across all 10 sessions. 0 TIMELY drafts in 48-hr horizon.
+- 2026-05-04 PM `seo-sem-pm` and `lead-gen-pm` did NOT run (CONTEXT.md "Last worked on" still 2026-05-03 PM and 2026-05-04 AM respectively). NotebookLM CLI auth blocking both lanes (3rd consecutive expired-auth night).
+- **Five consecutive launch-window days have produced only tracker-hygiene + maintenance** (May 1 launch day → +1 → +2 → +3 → +4). Today is the first day the wrap-up commit step itself has skipped.
+
+**Vercel status:** READY — production deploy **UNCHANGED** since Day 40 standup: `dpl_2ohSMUJQigy4gCKS26G78LJ4tnGL` (SHA `369c8fb`, 2026-05-03 23:57 UTC). All 20 most-recent production deployments READY across 7+ days, no ERROR/QUEUED/CANCELED. ✅ `5fd8e6b` still unpushed for a 2nd day — Vercel auto-deploy gated until push (low impact: tracker hygiene only).
+
+**n8n workflow health:** 39 workflows total (unchanged since 2026-05-01). 5 inactive, all intentional, unchanged from yesterday: `W0K4YDzkZd0Hzv6g` (Refi Watch Pre-Drop Warm-Up), `LfLSDgqgb6yCe93C` (Refi Watch Quarterly Rate Review), `AK1fBcaX1cPcdlGx` (Closed Loan Review Request), `24oewjzGR3AxH4QW` (Morning Briefing Team), `zQTy23ZRFAty9uTc` (Contract Received v3 — parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj`), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`), web lead (`PiuIsQpBuydtFM4m`), lender ingest (`hHXpKUirhnBCnQTO`), Final CD (`SkzrWeR0bHZs8kWX`), Rancho chat (`nPtgpbhtPkw6yltC`). MCP returned no failed-execution flag on any active workflow. **Watch (5th day open):** `ZUeGy8u8P4o6DPM3` (Refi Watch Anniversary Check-In) malformed-JWT dedup logic — broken dedup since first cron May 1; presumed 4 firings (May 1/2/3/4) all with broken logic, May 5 firing pending. Impact remains "forward-looking only" per CHANGELOG note (downstream guards prevent broken sends), but undeduped activity_log writes accumulate.
+
+**Blockers (NEEDS ADAM, all carried from Day 40, plus 2 new — none resolved):**
+- **Resend DKIM verification (Scott org)** — 7th day. Scott's `mortgagesolutionslp.com` not DKIM-verified. With MS Graph adapter shipped (`1b58ef9`), Scott has both ESP and OAuth paths — neither completed.
+- **5 canonical n8n credentials** — `tasks/security/n8n-credential-audit-2026-04-30.md` flags ~140 inline instances across 22 workflows. Gates the migration.
+- **Anniversary Check-In malformed JWT** (`ZUeGy8u8P4o6DPM3`) — broken dedup; ~4 cron firings since first run with broken logic.
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify (`nOCDV73m4M0jyL1B`) still unauthenticated. 15+ standups.
+- **TCPA copy + Sendblue API key** — outbound iMessage (GOALS.md week priority for speed-to-lead) blocked.
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships (4 bodies drafted 2026-04-30, awaiting cadence call).
+- **Marketing site silent** — zero commits visible from this repo's vantage. Public-facing announcement still undecided.
+- **Selfies not uploaded** — LoanOS social content stream paused 31+ days.
+- **Notes / activity log fix** — GOALS.md launch-critical, no code in 12+ days. Spec still vague.
+- **MISMO multi-borrower regex greediness** — fine for Scott's solo beta; gating any multi-borrower file.
+- **FNM 3.4 / Calyx Point file import** — GOALS.md priority for Scott pilot utility. Calyx-export ingestion path remains unconfirmed end-to-end.
+- **Conversion audit ship-approvals** — `/get-preapproved.html` (5 HIGH from 2026-05-01), `/rate-alert.html` (5 HIGH from 2026-05-02), homepage forms Quick Quote + Quick Contact (5 HIGH from 2026-05-04). All three audits in `tasks/lead-gen/research/`; builder runs in `styerteam-mortgage-site` repo. Single 30-min cross-page TCPA bundling PR closes site-wide bundled-consent compliance debt entirely.
+- **Scenarios cron retire/redirect** — 10th consecutive no-op AM run yesterday; Mon 05-04 GOALS refresh did not happen (the natural drop-the-cron moment passed). Recommendation strongest yet for option (a) retire NOW.
+- **NotebookLM playbook reconcile** — email-vs-no-email contradiction between SKILL.md and subagent playbooks; ~8 nightly runs honored SKILL.md override.
+- **`notebooklm` CLI auth expired** — 3rd consecutive night blocked across Lead Gen + SEO/SEM. Resolution: Adam runs `/Users/adamstyer/.local/bin/notebooklm login` from any terminal.
+- **Social PM 05-04 ADAM-TODO escalation** — agent appended `[SOCIAL] 2026-05-04 PM ❓ DECISION` line. Awaits Adam choice: (A) opportunistic Wk49 with NEW non-LoanOS sourcing, or (B) pause cron until next GOALS refresh.
+- **`5fd8e6b` commit unpushed** — 2nd day open. Low-impact (tracker hygiene only).
+- **NEW: Daily wrap-up commit cycle stalled** — PM 2026-05-04 wrap-up did not commit. First time across the post-launch window the autonomous wrap-up loop has skipped a cycle. ~75 untracked files now accumulated in working tree. Not destructive, but signals autonomous lanes are exhausting hygiene-only output.
+- **CONTEXT.md over 150-line cap** (161 lines, was 162 yesterday — 1-line drift down). Surgery is content judgment, not safe in autonomous mode.
+
+**Today's focus:** Operational monitoring during the post-launch window. **Five-day zero-feature-code streak + stalled wrap-up cycle + Mon GOALS skip = three converging signals** that the autonomous monitoring lanes are at the natural exhaustion point for hygiene-only output. The single 60-min Adam decision block surfaced for 4 consecutive standups remains the highest-leverage unblock: (a) Resend DKIM domain verify, (b) site-wide TCPA two-checkbox PR (3 funnel pages), (c) Scenarios cron retire/redirect/pause, (d) NotebookLM playbook reconcile + CLI re-auth, (e) social PM 05-04 escalation answer, (f) GOALS.md weekly refresh (skipped Mon 05-04, next natural moment is Mon 2026-05-11). Each is minutes-of-decision; together they unlock 6+ streams of autonomous work.
+
+**Risk watch:** Five-day post-launch zero-feature-code streak. **Wrap-up commit cycle stall is the new signal** (Day 40 → Day 41) — every prior post-launch day closed with a same-evening tracker-hygiene commit; PM 05-04 was the first to skip. Pattern is consistent with autonomous lanes correctly recognizing they have nothing meaningful to commit and quieting down rather than producing more empty churn — which is the right behavior, but means the daily standup is now operating with maximum information staleness on Adam's side until either (a) GOALS.md refreshes Mon 2026-05-11, or (b) Adam clears at least one queued decision. Anniversary Check-In dedup degradation now at ~4 firings; impact bound by downstream guards but undeduped activity_log writes accumulate.
+
+**Open audit findings:** 0 CRITICAL / 0 HIGH / 1 MEDIUM under `audits/` (field-level encryption, ADAM-BLOCKED on GLBA attorney). `audits/` directory contents unchanged since 2026-04-05 (`SECURITY-AUDIT-2026-04-05.md`, `SUPPORT-STACK-2026-04-05.md`). Worth noting outside `audits/`: `tasks/security/n8n-credential-audit-2026-04-30.md` documents ~140 inline credential instances across 22 active workflows — top-priority Bucket B item, gated on Adam creating 5 canonical credentials in n8n UI.
+
+---
+
+## 2026-05-04 — Day 40 — POST-LAUNCH +3 (Mon GOALS-refresh day, NOT refreshed)
+
+**Days to launch:** −3 (May 1 launch passed; original config target Apr 26 passed by 8 days). Continuing daily standup runs per task instruction. **Today is Mon 2026-05-04 — the weekly GOALS.md refresh day** flagged by social-am, scenarios-am, and the last 3 standups as the natural moment for new direction. AM social-am `stat` on `GOALS.md` shows `2026-04-19 13:51` — **Adam did NOT refresh this morning.** Week of Apr 20 directive still governs all autonomous lanes.
+
+**Yesterday shipped (since Day 39 standup):**
+- 1 new commit: `5fd8e6b chore(trackers): 2026-05-04 autonomous wrap-up — post-launch +3 tracker hygiene`. **NOT yet pushed to `origin/main`** — local HEAD is 1 commit ahead of remote (`git log origin/main..HEAD`). Vercel auto-deploy will fire whenever push happens. 13 modified tracker files, 0 code / 0 schema / 0 n8n / 0 env changes — same hygiene pattern as `369c8fb`, `4d0323c`, `c4fee70`.
+- 2026-05-04 AM `styer-lead-gen-am` ran homepage-forms (Quick Quote + Quick Contact) conversion + TCPA audit (`tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md`, ~330 lines, 17 findings: 5 HIGH / 6 MEDIUM / 6 LOW). **Cross-page bundling identified:** single 30-min PR (TCPA two-checkbox split on 2 homepage forms + 1 rate-alert form) closes site-wide TCPA bundled-consent compliance debt — get-preapproved already shipped this pattern. **H5 deploy-gap finding:** `script.js` lines 407+523 explicitly set `lead_source: 'Quick Quote'` / `'Quick Contact'` but Supabase shows zero rows under those values in 90 days while 8 'Website' fallback rows exist (most recent 2026-04-30) — likely Netlify deploy gap. Pipeline read-only verification: `drip_sends`=0, `drip_enrollments`=0, PA Funnel=0 (12th day), Rate Alert Funnel=0 (36 days), Quick Quote=0, Quick Contact=0, Website=8 (90d).
+- 2026-05-04 AM `styer-social-am` ran 9th consecutive maintenance-only session. 47 `status=draft` rows confirmed via Supabase REST (Sep 23 2026 → Feb 4 2027, drift = 0 across all 9 maintenance sessions). 0 new website content (9th consecutive zero-input scan). 0 TIMELY drafts in 48hr horizon (May 4 07:29 UTC → May 6 07:29 UTC). PM 2026-05-04 = planned escalation point if GOALS still unrefreshed by then.
+- **Four consecutive launch-window days have produced only tracker-hygiene + maintenance** (May 1 launch day → May 2 +1 → May 3 +2 → May 4 +3). Mon GOALS refresh did not happen.
+- `notebooklm` CLI auth still expired (2nd consecutive Lead Gen session blocked, 1 SEO/SEM session blocked). Adam must run `notebooklm login`.
+
+**Vercel status:** READY — production deploy unchanged: `dpl_2ohSMUJQigy4gCKS26G78LJ4tnGL` (SHA `369c8fb`, 2026-05-03 23:57 UTC). All 20 most-recent production deployments READY across 7 days, no ERROR/QUEUED/CANCELED states. ✅ **Note:** Today's `5fd8e6b` commit is unpushed — Vercel hasn't seen it yet. Push will trigger auto-deploy.
+
+**n8n workflow health:** 39 workflows total (unchanged since 2026-05-01). 5 inactive, all intentional, unchanged from yesterday: `W0K4YDzkZd0Hzv6g` (Refi Watch Pre-Drop Warm-Up), `LfLSDgqgb6yCe93C` (Refi Watch Quarterly Rate Review), `AK1fBcaX1cPcdlGx` (Closed Loan Review Request), `24oewjzGR3AxH4QW` (Morning Briefing Team), `zQTy23ZRFAty9uTc` (Contract Received v3 — parallel-test alongside live `UfNcdpoVKQZqy0fj`). Core launch workflows ACTIVE: Arive sync (`1tagvoU0UXtdDiMY`, `9JyzzwKac8v3uQ7d`), Contract Received (`UfNcdpoVKQZqy0fj`), drip nurtures (`rwi3qEYgJKGGHkHc` PA, `0M8Vnf6MhB1xtaIg` DPA), inbound email log (`qgb99Eh2ziy0INMk`), web lead (`PiuIsQpBuydtFM4m`), lender ingest (`hHXpKUirhnBCnQTO`), Final CD (`SkzrWeR0bHZs8kWX`), Rancho chat (`nPtgpbhtPkw6yltC`). MCP returned no failed-execution flag on any active workflow. **Watch (4th day open):** `ZUeGy8u8P4o6DPM3` (Refi Watch Anniversary Check-In) malformed-JWT dedup logic — broken dedup since first cron May 1; 3 cron firings since (May 1 / May 2 / May 3) all ran with broken logic. Impact remains "forward-looking only" per CHANGELOG note (downstream guards prevent broken sends), but undeduped activity_log writes accumulate.
+
+**Blockers (NEEDS ADAM, all carried from Day 39, plus 2 new from AM agents — none resolved):**
+- **Resend DKIM verification (Scott org)** — 6th day. Scott's `mortgagesolutionslp.com` not DKIM-verified. With MS Graph adapter shipped (`1b58ef9`), Scott has both ESP and OAuth paths — neither completed.
+- **5 canonical n8n credentials** — `tasks/security/n8n-credential-audit-2026-04-30.md` flags ~140 inline instances across 22 workflows. Gates the migration.
+- **Anniversary Check-In malformed JWT** (`ZUeGy8u8P4o6DPM3`) — broken dedup, 3 crons fired since first run. Adam fix still pending.
+- **`LOANOS_AGENT_SECRET` in n8n** — hot-lead notify (`nOCDV73m4M0jyL1B`) still unauthenticated. 14+ standups.
+- **TCPA copy + Sendblue API key** — outbound iMessage (GOALS.md week priority for speed-to-lead) blocked.
+- **3 active drip campaigns missing authored content** — Long-Term Nurture, Past Client Retention, Realtor Relationships (4 bodies drafted 2026-04-30, awaiting cadence call).
+- **Marketing site silent** — zero commits visible from this repo's vantage. Public-facing announcement still undecided.
+- **Selfies not uploaded** — LoanOS social content stream paused 30+ days.
+- **Notes / activity log fix** — GOALS.md launch-critical, no code in 11+ days. Spec still vague.
+- **MISMO multi-borrower regex greediness** — fine for Scott's solo beta; gating any multi-borrower file.
+- **FNM 3.4 / Calyx Point file import** — GOALS.md priority for Scott pilot utility. Calyx-export ingestion path remains unconfirmed end-to-end.
+- **Conversion audit ship-approvals** — `/get-preapproved.html` (5 HIGH from 2026-05-01), `/rate-alert.html` (5 HIGH from 2026-05-02), AND **NEW: homepage forms (Quick Quote + Quick Contact) (5 HIGH from 2026-05-04)**. All three audits in `tasks/lead-gen/research/`; builder runs in `styerteam-mortgage-site` repo. **Single 30-min cross-page TCPA bundling PR closes site-wide bundled-consent compliance debt entirely.**
+- **Scenarios cron retire/redirect** — 9th consecutive no-op AM run today. Mon GOALS refresh did not happen — recommendation strongest yet for option (a) retire NOW or option (b) redirect to FNM 3.4 importer (Scott's actual gating item per GOALS.md).
+- **NotebookLM playbook reconcile** — email-vs-no-email contradiction between SKILL.md and subagent playbooks; ~7 nightly runs honored SKILL.md override.
+- **NEW: `notebooklm` CLI auth expired** — 2nd consecutive Lead Gen session blocked + 1 SEO/SEM session blocked. Resolution: Adam runs `/Users/adamstyer/.local/bin/notebooklm login` from any terminal. Next nightly run picks up automatically.
+- **NEW: Today's `5fd8e6b` commit unpushed** — first time the wrap-up commit hasn't reached `origin/main` by the time the standup runs. Vercel deploy gated until push. Low-impact (tracker hygiene only) but worth flagging because every prior wrap-up cycle pushed same-session.
+- **CONTEXT.md over 150-line cap** (162 lines) — flagged Day 39, still open. Surgery is content judgment, not safe in autonomous mode.
+
+**Today's focus:** Operational monitoring during the post-launch window. **Mon 2026-05-04 GOALS.md refresh day arrived but Adam did NOT refresh** — the single biggest unblock available before any new direction is the same 60-min Adam decision block surfaced for 3 consecutive standups: (a) Resend DKIM domain verify, (b) site-wide TCPA two-checkbox PR (now closes 3 funnel pages, not 2), (c) Scenarios cron retire/redirect/pause, (d) NotebookLM playbook reconcile + CLI re-auth. Each is minutes-of-decision; together they unlock ~6 streams of autonomous work (the new homepage-forms audit just added a 6th).
+
+**Risk watch:** Four-day post-launch zero-feature-code streak. **The Mon GOALS refresh skip is itself the new signal** — last week's GOALS still drives autonomous lanes, all of which are correctly in maintenance/research mode by design (current GOALS says "Ship LoanOS beta with confirmed users by May 1, 2026" — target hit). Without a refresh, the autonomous lanes will continue producing tracker hygiene + research-only output until either (a) GOALS refreshes or (b) Adam unblocks at least one queued ship-approval. Anniversary Check-In dedup degradation now at 3 firings; impact bound by downstream guards but undeduped activity_log writes accumulate. PM social-media will trigger its planned escalation today (10th consecutive maintenance, append NEEDS ADAM with two options: opportunistic Wk49 vs cron pause). Notebook CLI 2nd day blocked = nightly NotebookLM staleness audit on the recovery run will have to delete more sources than usual.
+
+**Open audit findings:** 0 CRITICAL / 0 HIGH / 1 MEDIUM under `audits/` (field-level encryption, ADAM-BLOCKED on GLBA attorney). `audits/` directory contents unchanged since 2026-04-05. Worth noting outside `audits/`: `tasks/security/n8n-credential-audit-2026-04-30.md` documents ~140 inline credential instances across 22 active workflows — top-priority Bucket B item, gated on Adam creating 5 canonical credentials in n8n UI.
+
+---
+
 ## 2026-05-03 — Day 39 — POST-LAUNCH +2
 
 **Days to launch:** −2 (May 1 launch passed). Continuing daily standup runs per task instruction ("If launch date has passed, note it in the log and continue running until disabled").

@@ -1,55 +1,43 @@
-## Mission Brief — 2026-05-04 AM
+## Mission Brief — 2026-05-06 AM
 
 ### Domain
 Social Media
 
 ### Focus Area
-Maintenance only — 9th consecutive maintenance session (AM 04-30 → PM 04-30 → AM 05-01 → PM 05-01 → AM 05-02 → PM 05-02 → AM 05-03 → PM 05-03 → **AM 05-04**). Mon 2026-05-04 was the planned weekly GOALS refresh day. **GOALS.md was NOT refreshed by Adam this morning** (last modified 2026-04-19 13:51) — therefore no redirect, no pause directive, maintenance pattern continues into PM 05-04 (the planned escalation point).
+Maintenance only — 13th consecutive maintenance session (AM 04-30 → PM 04-30 → AM 05-01 → PM 05-01 → AM 05-02 → PM 05-02 → AM 05-03 → PM 05-03 → AM 05-04 → PM 05-04 → AM 05-05 → PM 05-05 → **THIS SESSION**). Per PM 05-05 forward rule: ESCALATION HELD because `[SOCIAL] 2026-05-04 PM ❓ DECISION` line in `tasks/ADAM-TODO.md` is still `[ ]` open with no Adam response between PM 05-05 (fired 21:23 CDT) and this AM session (fired 02:29 CDT, ~5h apart). One-ask-per-cycle still active. 3rd cycle now open.
 
 ### Session Type
 [ ] Research + Planning (Sequence A)
 [ ] Strategy / Architecture (Sequence B)
 [ ] Execute / Build (Sequence C)
 [ ] Full Cycle (Sequence D)
-[x] Maintenance (no Architect/Builder/Quality/Reviewer/QA)
+[x] Maintenance only (no Architect/Builder/Quality/Reviewer/QA, no ADAM-TODO append — held per forward rule)
 
 ### Reasoning
-- **GOALS.md weekly refresh check (per AM 05-04 handoff instruction)**: `stat` returns `2026-04-19 13:51` — file unchanged for 14 days. Adam has not redirected the social agent. Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No pause workstream listed. Maintenance pattern remains correct posture.
-- **Cushion intact**: 47 drafts scheduled Sep 23 2026 → Feb 4 2027 (Posts 157, 158, 161, 162, 163, 164, 167, 168, 169, 170, ...). Verified via Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&scheduled_for=gte.2026-05-04&order=scheduled_for.asc` → 47 rows. Earliest = Post 157 (LinkedIn authority, Sep 23). **Cushion drift = 0 across all 9 maintenance sessions.**
-- **0 TIMELY drafts in 48-hr horizon** (May 4 07:29 UTC → May 6 07:29 UTC). Supabase REST returned `[]` for `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-04T07:29:00Z&scheduled_for=lt.2026-05-06T07:29:00Z`. Refresh subagent (07) had nothing to fill — completes instantly per spec.
-- **Step 1B (AM only) — 0 new website content.** `ls -1t` on `~/Documents/Claude/styerteam-mortgage-site/{rates,blog/2026-*.html,realtor-updates}`:
-  - rates: latest = `rates/2026-04-24.html` — already posted to GBP 04-27 (Publer job 69ef10a645572ded59c1ba30) and queued for Architect IG/FB/LI.
-  - blog: latest = `blog/2026-04-27-why-home-prices-arent-crashing.html` — already posted to GBP 04-28 (Publer job 69f062de8b17fc4ff5c6b9ea) and queued for Architect.
-  - realtor-updates: latest = `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` — already queued for Architect (LinkedIn primary). GBP skipped 04-28 (duplicate data with companion blog).
-  - **9th consecutive zero-input scan**. Confirms Adam holding to GOALS.md "improve existing only" directive.
-- **Do NOT consume the 2 stale rate/market queue entries** (`blog/2026-03-30-bond-rally` 5+ wks stale, `rates/2026-04-14` 3+ wks stale). Cushion's Post 195 (FB authority, "Spring buyers are calling now") already covers Q1 spring market angle. Stale entries fail 9/10 quality bar.
-- **BLOCKER-LOANOS-001 still active**: `tasks/social-media/assets/selfies/` does not exist (30 days). LoanOS stream paused; non-LoanOS pillars unaffected.
-- **PM 2026-05-04 = planned escalation point.** If PM 05-04 (a) GOALS still hasn't been refreshed AND (b) still finds 0 new content AND (c) selfies still missing, escalate to Adam via NEEDS ADAM in TODO.md with two options:
-  - (a) opportunistic Wk49 with NEW sourcing (NotebookLM pull / loanos-pool audit — viable only if selfies unblock LoanOS or a non-LoanOS angle surfaces).
-  - (b) cron pause with Adam approval (acknowledge cushion is 9 months deep, resume when GOALS shift).
+- **GOALS.md weekly refresh check**: `stat -L` returns `Apr 20 09:37:31 2026` — file unchanged 16 days (cron sees same `Apr 19 13:51:27 2026` symlink mtime as prior sessions). Mon 05-04 GOALS day passed without action. Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs.
+- **Cushion intact**: 47 drafts scheduled Sep 23 2026 → Feb 4 2027. Verified via Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&scheduled_for=gte.2026-05-05&order=scheduled_for.asc` → 47 rows. Earliest = Post 157 (LinkedIn authority, 2026-09-23). **Cushion drift = 0 across all 13 maintenance sessions.**
+- **0 TIMELY drafts in 48-hr horizon** (2026-05-06T07:30Z → 2026-05-08T07:30Z). Supabase REST returned `[]`. Refresh (07) has nothing to fill.
+- **Step 1B (AM-only)** — ran. Latest site files unchanged (`rates/2026-04-24.html`, `blog/2026-04-27-why-home-prices-arent-crashing.html`, `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html`). 12th consecutive zero-input scan. No GBP auto-publish, no IG/FB/LI queue additions.
+- **BLOCKER-LOANOS-001 still active**: `tasks/social-media/assets/selfies/` does not exist (`ls` exit 1, parent `assets/` also missing — 33 days). LoanOS pillar locked.
+- **ADAM-TODO escalation line still `[ ]` open** — 3 cycles open (filed PM 05-04 → unanswered through AM 05-05 → PM 05-05 → still unanswered now). Per PM 05-05 forward rule: hold maintenance, do NOT re-escalate.
 
 ### Objectives
-1. Verify pipeline state (cushion + TIMELY horizon + informational content scan) — DONE.
-2. Hold maintenance pattern; queue PM 05-04 escalation per forward rule — DONE (this file).
+1. Verify pipeline state (cushion + TIMELY horizon) — DONE.
+2. Hold escalation per forward rule — DONE (no append to ADAM-TODO).
 3. Close session cleanly: session-log entry, CONTEXT/CHANGELOG/TODO updated.
 
 ### Definition of Done
-- session-log.md has 2026-05-04 AM entry inserted at top.
-- CONTEXT.md three social fields replaced (Last worked on / Active blockers / What's next).
-- CHANGELOG.md AM entry inserted at top.
-- TODO.md social posts line refreshed (9-streak count + PM 05-04 escalation rule confirmed).
-- subagent-status.md SESSION FULLY COMPLETE.
+- session-log.md prepended with AM 05-06 entry.
+- CONTEXT.md social fields refreshed (Last worked on / Active blockers / What's next).
+- CHANGELOG.md entry inserted.
+- TODO.md social posts line refreshed in-place (13-streak, AM 05-06 forward rule).
+- subagent-status.md SESSION_END signal at end.
+- ADAM-TODO untouched.
+- No build, no NotebookLM PUSH, no emails, no daily digest.
 
 ### Resources / Files in Scope
-- `tasks/social-media/subagent-status.md` (status signal)
-- `tasks/social-media/today-mission.md` (this file)
-- `tasks/social-media/session-log.md` (prepend AM entry)
-- `CONTEXT.md` / `CHANGELOG.md` / `TODO.md` (state files)
-- Supabase `social_drafts` table (read-only verification — completed)
-- `~/Documents/Claude/styerteam-mortgage-site/{rates,blog,realtor-updates}` (read-only scan — completed)
-- `/Users/adamstyer/Documents/GOALS.md` (weekly refresh check — file unchanged)
+Read-only: `GOALS.md`, `tasks/ADAM-TODO.md`, `tasks/social-media/BLOCKERS.md`, `tasks/social-media/session-log.md`, `tasks/social-media/gbp-content-tracker.md`, Supabase `social_drafts` table (filter only).
+Write: `tasks/social-media/subagent-status.md`, `tasks/social-media/today-mission.md` (this file), `tasks/social-media/session-log.md`, `CONTEXT.md` (3 fields only), `CHANGELOG.md` (new entry), `TODO.md` (in-place line refresh).
 
 ### HIGH RISK Items
-- None. No content writes, no Publer calls, no n8n executions, no Supabase mutations.
-- NotebookLM PULL/PUSH: deferred per established efficiency pattern (no build = no new note material). PUSH backlog now 8 sessions deep (PM 04-30, AM 05-01, PM 05-01, AM 05-02, PM 05-02, AM 05-03, PM 05-03, AM 05-04) — will combine into next build session.
-- No emails sent to Adam (per scheduled task instructions).
+None. No published content, no Supabase writes, no n8n triggers, no compliance surface touched.

@@ -2,6 +2,132 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-06 AM — Lead Generation
+Focus: **Compliance Closeout PR — Drop-In Spec.** Consolidate H1 finding from each of the 4 funnel-page audits (2026-05-01 → 2026-05-05) into a single ship-ready PR document with copy-paste-ready code. Highest-leverage Sequence-A move available without Adam input.
+Type: Research / Spec authoring (Sequence A)
+Week in Queue: Week 17 (post audit-series milestone)
+
+### Context From Previous Session
+2026-05-05 AM completed the 4-of-4 funnel-page audit milestone (`/thank-you.html` audit, 17 findings). Combined HIGH-tier across the series = 20 findings. Forward rule: "skip page re-audit until at least one HIGH-tier change ships." None of the 20 HIGH-tier findings have shipped — Adam has not authorized any Builder run on styerteam-mortgage-site since the series began. NotebookLM CLI auth still expired (5th day, 8th sub-session). Mission framing for today: shift from producing more findings to compressing the existing pile into a single Adam-authorize-friendly PR spec — convert "20 findings, 8 PRs, 80 min" into "1 PR, 30 min, here's the diff."
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid` (verified inline). 5th consecutive day blocked, 8th sub-session blocked since 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-06 AM entry). Continued session per master-agent.md error-handling rule.
+- **Read all 4 audit H1 sections** (`/get-preapproved.html`, `/rate-alert.html`, homepage forms, `/thank-you.html`). Read corresponding production HTML/JS line ranges in `styerteam-mortgage-site` to extract exact current code. Surfaced one previously-undocumented finding: `/get-preapproved.html` checkbox A still uses bundled "phone, email, or text" wording and "Consent is not a condition of purchase" — the BLOCKER-001 partial-resolution shipped two checkboxes but did NOT tighten checkbox A's copy. This means the get-preapproved page is closer to compliant than the homepage/rate-alert pages but still not all the way there. The closeout PR addresses this.
+- **Authored compliance-closeout PR spec at `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md`** (~360 lines). Single PR; 5 files touched (`index.html` × 2 forms, `rate-alert.html`, `get-preapproved.html`, `thank-you.html`, `script.js`); 6 atomic diffs each in current-vs-proposed format with full HTML/JS so a Builder subagent or Adam directly can copy-paste. Includes 8-step post-deploy test plan, compliance-impact table (closes 4 of 5 series FAILs + fully resolves BLOCKER-001), risk assessment (5 rows, all LOW or NONE), out-of-scope list (4 things explicitly NOT bundled), Builder execution checklist (9 steps).
+- **Read-only Supabase pipeline check (2026-05-06 ~03:55 CT):** drip_sends_total = 0, drip_enrollments_total = 0, lead_source='Pre-Approval Funnel' = 0 (14th day, +1 vs yesterday), lead_source='Rate Alert Funnel' = 0 (38 days since deploy, +1), lead_source='Quick Quote' (90d) = 0, lead_source='Quick Contact' (90d) = 0, lead_source='Website' (90d) = 8 (unchanged from 05-04 + 05-05), contacts_7d = 3 (same shape as 05-05). **Pattern unchanged across 5 consecutive baselines.**
+- **Bonus finding flagged in spec § 3.5:** `thank-you.html` line 717 lo-waitlist branch contains `mailto:adam@thestyerteam.com` — global CLAUDE.md violation. Spec proposes `mailto:styer.adam@gmail.com` (Adam's actual email per user-context); Adam can override.
+
+### Output
+- `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md` (NEW, ~360 lines)
+
+### Adam Action Items
+- 1 NEW batched ADAM-TODO line for the closeout-PR spec (file-pointer pattern). Designed to **collapse** the 4 prior audit ADAM-TODO lines (`[LEAD-GEN] 2026-05-05`, `[LEAD-GEN] 2026-05-04`, `[LEAD-GEN] 2026-05-02`, `[LEAD-GEN] 2026-05-01`) into a single decision: "authorize this PR or push back." Carryover: the 4 prior lines are NOT marked `[x]` (they remain ship-able as the broader audit references), but the new line supersedes them as the next-up ask. NotebookLM CLI re-auth line from 05-04 unchanged.
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 5th day)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 4 lead-gen audit/spec files queued for delayed PUSH (rate-alert 05-02, homepage forms 05-04, thank-you 05-05, closeout spec 05-06)
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-06)
+- `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md` (NEW, ~360 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-06 AM entry)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END)
+- `tasks/lead-gen/session-log.md` (May 6 AM entry prepended)
+- `CHANGELOG.md` (May 6 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift)
+- `tasks/ADAM-TODO.md` (1 new batched closeout-PR line, prepended above 05-05 audit line)
+- `TODO.md` (closeout-PR line prepended above audit lines)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) `/refinance-quote.html` audit (never audited; would extend series to 5/5).
+(b) `/austin-mortgage-rates.html` audit (high-traffic SEO landing page that CTAs into the funnel; never audited as a capture surface).
+(c) Builder Sequence C run if Adam authorizes the closeout spec (ship the PR end-to-end).
+(d) Spec the next consolidation: PR-2 (HIGH-tier conversion findings — H2/H3/H4/H5 across the 4 audits) once compliance closeout ships.
+(e) Verification pass: deterministic POST to `/.netlify/functions/subscribe-lead` to characterize the upstream H5 deploy gap from 05-04 (8 'Website' fallback rows mystery).
+
+**Held forward:** skip page re-audit until at least one HIGH-tier change ships.
+
+Timestamp: 2026-05-06 04:30:00
+SESSION FULLY COMPLETE ✓
+
+---
+## Session: 2026-05-05 AM — Lead Generation
+Focus: `/thank-you.html` cross-funnel post-submit audit (Sequence A — Research). 4th in funnel-page audit series after 2026-05-01 (`/get-preapproved.html`), 2026-05-02 (`/rate-alert.html`), 2026-05-04 (homepage `#hero-quick-form` + `#quick-contact-form`).
+Type: Research (Sequence A)
+Week in Queue: Week 17
+
+### Context From Previous Session
+2026-05-04 AM authored 17 prioritized findings on homepage forms (HIGH 5 / MEDIUM 6 / LOW 6). Tomorrow's mission options were: (a) homepage above-the-fold non-form review, (b) `/thank-you.html` post-submit (handles all funnel types), (c) `/refinance-quote.html` audit. **Picked (b)** — thank-you handles 6 routed funnel types via `?type=` URL-param branching, making it the highest-leverage single page in the series. Also closes the H5 "deploy gap" hypothesis from 05-04 audit by inline production source check. NotebookLM CLI auth expired as of 2026-05-03 PM (now 3rd consecutive AM blocked); PUSH expected to be skipped today.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid` (same as 2026-05-03 PM and 2026-05-04 AM). Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-05 AM entry). Continued session per master-agent.md error-handling rule "NotebookLM sync failure NEVER blocks the build chain."
+- **H5 deploy-gap from 05-04 closed inline.** `curl https://styermortgage.com/script.js?v=20260417` returned the production-served file (28,961 bytes). Lines 407, 523, 739 carry the explicit `lead_source` literals: `'Quick Contact'`, `'Quick Quote'`, `'Pre-Approval Funnel'`. **Hypothesis falsified — code IS deployed.** The Supabase delivery gap is upstream — most likely real homepage submissions are extremely rare (~1/week steady-state per 90d data), and the 8 'Website' fallback rows come from non-homepage sources writing the default. Action item flagged for next session: deterministic test body to `/.netlify/functions/subscribe-lead` to confirm round-trip.
+- **Read full source of `thank-you.html`** (724 lines). Mapped the inline IIFE branching at lines 621–720: 6 routed `?type=` branches (`ftb-dpa-guide`, `rate-alert`, `quick-quote`, `refinance`, `preapproval`, `lo-waitlist`) plus a default fallback for missing/unknown values. Documented per-branch DOM mutations in a 7×7 routing-map table.
+- **Authored 17 prioritized findings** + compliance spot-check + cross-page bundling table + ship order:
+  - **HIGH (5):** H1 3-step "What Happens Next" Step 3 ("Letter or quote in 24 hrs") misleads rate-alert / FTB-DPA / lo-waitlist branches; H2 rate-alert branch hides Calendly entirely (kills path-to-call for warm leads); H3 ftb-dpa-guide branch *replaces* phone CTA element (should append); H4 PA branch is bare — only h1 text changes, no PA-specific reassurance copy despite being the warmest funnel; H5 default fallback for unknown/missing `?type=` is a silent error mode — add dataLayer instrumentation.
+  - **MEDIUM (6):** M1 identical `<title>` across all 6 branches; M2 quick-quote follow-up form re-collects `referral_source` (already captured in UTM); M3 no privacy reassurance on the 9-question optional follow-up form; M4 generic Calendly h2 across branches; M5 `mailto:adam@thestyerteam.com` (line 717, lo-waitlist branch) violates global "never use The Styer Team" rule; M6 Google Ads conversion fires unconditionally for `?type=lo-waitlist` — separate product, should suppress.
+  - **LOW (6):** L1 inline `style=""` in 3-step block; L2 GA conversion fires on every refresh (no sessionStorage dedup); L3 no testimonial on thank-you page; L4 no meta description (moot under `noindex,nofollow`); L5 escape-literal em-dashes in IIFE; L6 fixed 700px Calendly height ignores mobile.
+- **Compliance spot-check (10 items)**: 7 PASS / 1 N/A / 2 FAIL. FAILs: H1 (branch-content mismatch — 3-step block "Letter or quote in 24 hrs" shown to non-PA funnels) + M5 (`thestyerteam.com` Voice rule violation).
+- **Cross-page bundling identified**: M1 `<title>` bundle (3 audits); M5 `thestyerteam.com` references bundle with rate-alert L1; footer-address sweep now includes 4 pages (get-preapproved + rate-alert + homepage + thank-you); L3 testimonial swap-in shape matches rate-alert M2.
+- **Recommended ship order** (5 PRs, ~80 min total):
+  1. PR-1 (~25 min): H1 + H2 + H3 — single inline-IIFE edit; closes 2 of 2 compliance FAILs.
+  2. PR-2 (~15 min): H4 PA branch reassurance copy.
+  3. PR-3 (~10 min): H5 dataLayer instrumentation.
+  4. PR-4 (~15 min): cross-page brand-consistency + footer-address sweep (4 pages).
+  5. PR-5 (~15 min): all M + L items in a single light pass.
+- **Pipeline snapshot via Supabase MCP (read-only, 2026-05-05 10:25 CT)**:
+  - `drip_sends` total = 0 / 7d = 0
+  - `drip_enrollments` total = 0 / 7d = 0
+  - `contacts.lead_source = 'Pre-Approval Funnel'` total = 0 (13th consecutive day)
+  - `contacts.lead_source = 'Rate Alert Funnel'` total = 0 (37 days since deploy)
+  - `contacts.lead_source = 'Quick Quote'` total = 0 (90d, unchanged from 05-04)
+  - `contacts.lead_source = 'Quick Contact'` total = 0 (90d, unchanged from 05-04)
+  - `contacts.lead_source = 'Website'` total = 8 (90d, unchanged from 05-04)
+  - Contacts created last 7d = 3 (2 null + 1 Website 2026-04-30)
+  - **Pattern unchanged from 05-04 baseline — no movement.**
+- **Audit series milestone**: 4 of 4 primary funnel pages now audited. Combined HIGH-tier across the series = 20 fixes. A single "compliance closeout" PR bundling H1 from each audit (3-form TCPA two-checkbox split + thank-you 3-step block fix) would resolve 4 of the 5 series compliance FAILs.
+
+### Output
+- `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` — NEW, ~330 lines (cross-funnel routing map + 17 findings + compliance + bundling + ship order + audit series summary).
+
+### Adam Action Items
+- **1 NEW** batched ADAM-TODO line for thank-you audit (file-pointer pattern, no per-finding stacking — consistent with 05-01 / 05-02 / 05-04).
+- **0 net new on prior items.** Carryover unchanged: Realtor cadence + activation, Long-Term/Past Client archive vs author, TCPA copy, Sendblue signup, GSC fresh export, get-preapproved 7 prioritized fixes, rate-alert 5 HIGH-tier fixes, homepage forms 5 HIGH-tier fixes, NotebookLM CLI re-auth.
+
+### NotebookLM
+- PULL: SKIPPED — CLI auth expired (3rd consecutive AM).
+- PUSH (lead-gen): SKIPPED — same auth failure.
+- PUSH (master): SKIPPED — same auth failure.
+- Daily digest: SKIPPED per scheduled-task SKILL.md rule "no emails to Adam, project files only."
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-05)
+- `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` (NEW, ~330 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-05 AM entry appended)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 5 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced)
+- `tasks/ADAM-TODO.md` (1 new batched audit line)
+- `TODO.md` (thank-you audit findings line added)
+- `tasks/lead-gen/subagent-status.md` (SESSION FULLY COMPLETE)
+
+### What's Next
+- **Builder PR-1 (H1+H2+H3)** is the highest-leverage single ship across the entire 4-audit series — closes 2 compliance FAILs with one inline-IIFE edit.
+- **Verification pass next session** on the deeper H5 follow-up: send a deterministic POST body to `/.netlify/functions/subscribe-lead` and observe whether a row lands in Supabase under explicit `lead_source: 'Quick Quote'` value.
+- **Tomorrow's mission options**: (a) `/refinance-quote.html` audit (4th funnel page, never audited); (b) Builder run to ship PR-1 if Adam authorizes (Sequence C); (c) `/austin-mortgage-rates.html` audit (high-traffic SEO landing, often referenced by rate-alert branch); (d) GSC pull if SEO/SEM agent has progressed on the 90-day export.
+- **If `notebooklm login` restored before next session**, run delayed PUSH covering 3 backlogged session outputs (homepage forms 05-04 + thank-you 05-05 + this session's master log line).
+- **Skip page re-audit until at least one HIGH-tier change ships** — forward rule held from 05-04, still in force.
+
+Timestamp: 2026-05-05 11:00 CDT
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-04 AM — Lead Generation
 Focus: Homepage forms (`#hero-quick-form` + `#quick-contact-form`) conversion + TCPA compliance audit (Sequence A — Research). Third in funnel-page audit series (May 1: get-preapproved; May 2: rate-alert; May 4: homepage forms). Specifically targets BLOCKER-001's open piece — homepage forms still bundled-consent per 2026-03-25 audit.
 Type: Research (Sequence A)

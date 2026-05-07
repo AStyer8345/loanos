@@ -2,6 +2,65 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-07 AM — Lead Generation
+Focus: **PR-2 Conversion Consolidation — Drop-In Spec.** Continue the consolidation arc from 2026-05-06 closeout-PR. Bundle the conversion-focused HIGH-tier findings (H2–H5) from the 3 form-page audits (05-01 get-preapproved, 05-02 rate-alert, 05-04 homepage forms) into one ship-ready PR with copy-paste-ready diffs. Thank-you-page H2–H5 stays separate (different file, different concerns).
+Type: Research / Spec authoring (Sequence A)
+Week in Queue: Week 17 (post audit-series milestone, post-launch +6)
+
+### Context From Previous Session
+2026-05-06 AM authored the compliance closeout PR spec consolidating H1 from all 4 audits. That spec is open-`[ ]` in ADAM-TODO 1 day, no Adam acknowledgment. NotebookLM CLI auth still expired (6th calendar day, 9th sub-session blocked). Pipeline frozen at 5 consecutive identical baselines. Forward rule held: "skip page re-audit until at least one HIGH-tier change ships." Today's mission: continue the consolidation pattern instead of producing more audit findings — author PR-2 (conversion-focused consolidation) so when Adam authorizes the closeout PR, Builder can ship PR-1 then PR-2 back-to-back.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (verified inline at 03:46 CDT). 6th consecutive day blocked, 9th sub-session blocked since 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-07 AM entry). Continued session per master-agent.md error-handling rule.
+- **Read 3 form-page audit HIGH-tier sections** (05-01 get-preapproved H1–H5, 05-02 rate-alert H2–H5 [H1 in closeout], 05-04 homepage forms H2–H3 [H1 in closeout, H4 out-of-scope LoanOS dependency, H5 informational only]). Cross-referenced against 05-06 closeout-PR § 7 out-of-scope decisions for consistency.
+- **Read production source at cited line numbers** for `index.html` (lines 365–415 hero Quick Quote, 670–717 Quick Contact), `get-preapproved.html` (lines 320–407 hero/form, 459–476 testimonials, 510–579 inline submit handler), `rate-alert.html` (lines 360–479 hero/form/sample-email block). Extracted verbatim current code so Builder can copy-paste.
+- **Surfaced new finding inline:** Quick Quote / Quick Contact homepage forms STILL show 0 rows in 90d under their explicit `lead_source` literals, but 'Website' fallback got +1 new row 2026-05-06 (brunalexandra7@hotmail.com, 13:28 UTC). Pattern reinforces 05-05 H5 conclusion: code IS deployed, capture path is upstream-of-handler. Worth a deterministic verification probe (deferred to Adam — § 6 of closeout-PR spec already flags Sendblue prereq dependency).
+- **Authored PR-2 conversion consolidation spec at `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md`** (~452 lines). Single PR; 4 files touched (`get-preapproved.html`, `rate-alert.html`, `index.html`, `script.js`+inline get-preapproved handler); 8 atomic copy-paste-ready diffs in current-vs-proposed format. Includes: 9-step post-deploy test plan, 6-row risk assessment (1 MEDIUM lead-intake.js destructure caveat, 5 LOW or NONE), 3 Adam-data prerequisites broken out as PR-2b deferred items (review chip place_id, named testimonial pulls, form social-proof count) with copy-paste templates ready, 7-item out-of-scope list, 11-step Builder execution checklist. Estimated ship: 45 min Builder + 10 min Adam review.
+- **Read-only Supabase pipeline check (2026-05-07 03:46 CT):** drip_sends_total = 0, drip_enrollments_total = 0, lead_source='Pre-Approval Funnel' = 0 (15th consecutive day), lead_source='Rate Alert Funnel' = 0 (39 days since deploy), lead_source='Quick Quote' (90d) = 0, lead_source='Quick Contact' (90d) = 0, lead_source='Website' (90d) = 9 (was 8 across 5 baselines — **+1 new row 2026-05-06 13:28 UTC**), contacts_7d = 4 (was 3). Movement detected on Website-fallback channel only; named-funnel channels still flat.
+
+### Output
+- `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (NEW, ~452 lines)
+
+### Adam Action Items
+- 1 NEW batched ADAM-TODO line for the PR-2 conversion consolidation spec (file-pointer pattern). Designed to **collapse** the 3 prior conversion-side audit ADAM-TODO lines (`[LEAD-GEN] 2026-05-04 AM`, `[LEAD-GEN] 2026-05-02 AM`, `[LEAD-GEN] 2026-05-01 AM`) into a single decision: "authorize this PR or push back." Carryover: the 3 prior lines remain `[ ]` (audit references stay valid until shipped) but the new line supersedes them as the next-up conversion ask. Closeout-PR ADAM-TODO line from 05-06 (`[LEAD-GEN] 2026-05-06 AM ⭐ COMPLIANCE CLOSEOUT PR`) unchanged — sequencing PR-1-then-PR-2 preserved. NotebookLM CLI re-auth line unchanged.
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 6th day)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 5 lead-gen artifacts queued for delayed PUSH: rate-alert audit (05-02), homepage forms audit (05-04), thank-you audit (05-05), closeout PR spec (05-06), conversion consolidation PR spec (05-07).
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-07)
+- `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (NEW, ~452 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-07 AM entry)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 7 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift)
+- `tasks/ADAM-TODO.md` (1 new batched conversion-PR line, prepended above 05-06 closeout-PR line)
+- `TODO.md` (PR-2 line prepended above closeout-PR line in `Now (this week)` section)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) PR-3 spec — `thank-you.html` H2–H5 conversion findings consolidation (separate file, IIFE-only edits, completes the conversion-side trilogy: PR-1 compliance + PR-2 form-page conversions + PR-3 post-submit conversions).
+(b) PR-4 spec — cross-page M-tier + L-tier light-pass consolidation (footer-address sweep, brand consistency, 4 funnel pages).
+(c) `/refinance-quote.html` audit (never audited; would extend the funnel-page audit series to 5/5 — **but** continues to add to the unactioned pile).
+(d) `/austin-mortgage-rates.html` audit (high-traffic SEO landing page CTAing into funnel; never audited as capture surface).
+(e) Builder Sequence C run if Adam authorizes either closeout PR-1 or conversion PR-2 (ship one or both end-to-end).
+(f) Verification pass: deterministic POST to `/.netlify/functions/lead-intake` (or Netlify Form direct) characterizing the upstream Website-fallback capture path (now 9 rows in 90d, +1 in last 24h — strongest evidence yet that there's a non-script.js path writing 'Website').
+
+**Held forward:** skip page re-audit until at least one HIGH-tier change ships. PR-3 is the natural sequel to PR-2 (continues consolidation arc, doesn't add new findings).
+
+**Recommended for tomorrow:** PR-3 spec (option a) — completes the trilogy and stays consistent with the consolidation arc. Option (f) is also high-leverage but writes to the production function (would create a real Mailchimp tag/contact if not cleaned up); should wait for Adam-in-the-loop session.
+
+Timestamp: 2026-05-07 04:25:00
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-06 AM — Lead Generation
 Focus: **Compliance Closeout PR — Drop-In Spec.** Consolidate H1 finding from each of the 4 funnel-page audits (2026-05-01 → 2026-05-05) into a single ship-ready PR document with copy-paste-ready code. Highest-leverage Sequence-A move available without Adam input.
 Type: Research / Spec authoring (Sequence A)

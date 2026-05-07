@@ -1,5 +1,49 @@
 # LoanOS Changelog
 
+## 2026-05-07 AM (loanos-autonomous) — 7th consecutive tracker-hygiene cycle, recovered yesterday's unpushed HEAD
+
+- **Bucket A (autonomous feature work) empty for 7th consecutive cycle.** All current-phase items remain Adam-blocked: Resend DKIM (`mortgagesolutionslp.com`), drip cron end-to-end smoke (needs Adam to manually enroll a contact), FNM 3.4 importer (Scott's launch-blocker per GOALS.md), Conversion PR-2 spec ship-approval (filed today by lead-gen-am), Compliance Closeout PR-1 ship-approval (filed 05-06), Scenarios cron retire (12-streak), `notebooklm login` (6th day expired), GOALS.md weekly refresh (18 days unchanged, Mon 05-04 skipped, next natural touch Mon 2026-05-11).
+- **Recovered yesterday's unpushed HEAD.** `8f7c678` (2026-05-06 wrap-up) was sitting locally only — Day 42 standup flagged the wrap-up cycle stalled. Today's push carries it plus today's tracker churn to `origin/main`.
+- **Tracker churn rolled in.** 13 modified tracker files (CHANGELOG/CONTEXT/TODO/ADAM-TODO + 9 subagent state files from this morning's lead-gen-am + social-am) + 1 new untracked file (`tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md`, ~452 lines, the PR-2 drop-in spec for Adam authorize). Zero code changes, zero schema changes, zero env changes, zero n8n changes.
+- **Build verified green** (`npm run build`, exit 0) before push.
+- **Vercel state**: latest production deploy `dpl_HpsoHiffWTea7mQEivqmC2zAQW8u` (commit `5fd8e6b`, 2026-05-04 wrap-up) READY. Push will queue the next deploy carrying `8f7c678` + today's hygiene commit.
+- **CONTEXT.md NOT touched** by this routine — already 161 lines (over the 150 cap); the AM agents replaced their three-field status blocks in place, net 0 line drift. Trim is queued as Adam-blocked judgment call (TODO line 24).
+- **No code / no schema / no env / no n8n changes.** Pure tracker hygiene per the routine's hygiene-only fall-through. **Circuit breaker:** clean. **Destructive ops**: none.
+- **Email digest**: skipped per established autonomous pattern (no Resend transactional template wired for this routine; n8n pathway also unverified). 5-line summary recorded here in CHANGELOG instead.
+
+## 2026-05-07 AM (lead-gen-am) — PR-2 conversion consolidation spec authored
+
+- New spec `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (~452 lines) consolidates H2–H5 conversion-focused HIGH-tier findings from 3 form-page audits (05-01 get-preapproved, 05-02 rate-alert, 05-04 homepage forms) into a single PR. 8 atomic copy-paste-ready diffs across 4 files: `get-preapproved.html`, `rate-alert.html`, `index.html`, `script.js` + inline get-preapproved handler. Continues the consolidation arc started by 05-06 closeout-PR (compliance H1). Estimated ship: 45 min Builder + 10 min Adam review.
+- 3 conversion findings split into "PR-2b deferred" with copy-paste templates ready (clickable review chip needs Adam's GBP `place_id`; named testimonials need Adam's name pulls from GBP UI; rate-alert form social-proof needs subscriber count or fallback authorize). Each ships in <10 min once data lands.
+- Read-only Supabase pipeline check (03:46 CT): drip_sends_total=0, drip_enrollments_total=0, lead_source='Pre-Approval Funnel'=0 (15th day), lead_source='Rate Alert Funnel'=0 (39 days), lead_source='Quick Quote'=0 (90d), lead_source='Quick Contact'=0 (90d), lead_source='Website'=9 (90d, **+1 new row 2026-05-06 13:28 UTC: brunalexandra7@hotmail.com — first 'Website' fallback row in 7 days**), contacts_7d=4 (was 3). Movement detected on Website-fallback channel only; named-funnel channels still flat across 6 baselines.
+- NotebookLM PULL/PUSH SKIPPED — CLI auth still expired (6th calendar day, 9th sub-session blocked since 05-03 PM). Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-07 AM entry). Lead Gen PUSH backlog now 5 deep (rate-alert audit 05-02, homepage forms audit 05-04, thank-you audit 05-05, closeout-PR spec 05-06, conversion-consolidation-PR spec 05-07).
+- 1 new ADAM-TODO line added (PR-2 ask, file-pointer pattern). Designed to collapse the 3 prior audit-conversion lines (05-01, 05-02, 05-04) into a single decision. Closeout-PR ADAM-TODO line from 05-06 unchanged — sequencing PR-1-then-PR-2 preserved.
+- Forward rule held: skip page re-audit until at least one HIGH-tier change ships. Recommended tomorrow: PR-3 spec (thank-you-page conversion findings consolidation) — completes the trilogy and stays consistent with the consolidation arc.
+
+## 2026-05-07 AM (styer-social-am) — 15th consecutive maintenance session, escalation HELD (5 cycles open)
+
+- 15th consecutive maintenance-only run; ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open across 5 cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07). Per PM 05-06 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+- GOALS.md `stat -f "%Sm"` returned `Apr 19 13:51:27 2026` — 18 days unchanged. Mon 05-04 GOALS day passed without action; week-of-Apr-20 directive still governs. Next natural refresh Mon 2026-05-11 (4 days out).
+- Cushion verified via Supabase REST: 47 drafts, range 2026-09-23 → 2027-02-04. Earliest = Post 157 (id `32803838-594f-43f6-9ccd-c5cd5cb06916`, LinkedIn authority). Latest = id `60948a41-ece7-48bc-9f34-a0fe158c90ec` (Instagram personal). Pillar mix nearest 8: authority×3, personal×3, education×2 (75% RT-adjacent). **Cushion drift = 0 across all 15 maintenance sessions.** TIMELY 48-hr horizon `[]` (2026-05-07T07:30Z → 2026-05-09T07:30Z).
+- Step 1B (GBP scan, AM-only) executed — 13th consecutive zero-input scan. Latest files match prior tracker (`rates/2026-04-24.html`, `blog/2026-04-27-...`, `realtor-updates/2026-04-27-...`). No GBP auto-publish, no IG/FB/LI queue additions, no tracker append. Refresh (07) AM-only executed — `[]`. Architect/Builder/Quality/Reviewer/QA: SKIPPED (no build).
+- Files updated: `tasks/social-media/subagent-status.md` (SESSION_START + SESSION_FULLY_COMPLETE), `tasks/social-media/today-mission.md` (AM 05-07 mission overwritten), `tasks/social-media/session-log.md` (AM 05-07 entry prepended), `CONTEXT.md` (3 Social fields replaced — net 0 line drift), `TODO.md` (social posts line refreshed in place for 15-streak + PM 05-07 forward rule), this CHANGELOG entry. ADAM-TODO untouched. DECISIONS.md untouched (no new decision). NotebookLM PUSH backlog now 14 sessions deep — also blocked by expired CLI auth (5th day).
+
+## 2026-05-06 PM (styer-notebooklm-nightly) — 5th consecutive nightly no-op, auth expiry persists
+
+- 5th consecutive PM nightly NotebookLM sync skipped — CLI auth still expired. Cron fired ON TIME at 22:10 CDT. `notebooklm list --json` returns same `Authentication expired or invalid` error with WebLiteSignIn redirect. Both SEO/SEM and Lead Gen PUSH+CURATE Steps 1–7 blocked at Step 1. No notebook contact / no source mutations / no master-log appends / no digests sent.
+- Counts bumped: 4th wall-clock day blocked, 5th nightly run blocked, 8 sub-sessions blocked since 05-03 PM (counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06).
+- Lead Gen PUSH backlog now 4 artifacts deep: 2026-05-02 rate-alert audit, 2026-05-04 homepage forms audit, 2026-05-05 thank-you page audit, 2026-05-06 closeout-PR spec. SEO/SEM backlog: notebook last refreshed 2026-05-01 → ~10 stale + ~6 ready-to-add at the 50-source cap.
+- Files updated: `tasks/seo-sem/subagent-status.md` (SESSION_END appended), `tasks/lead-gen/subagent-status.md` (SESSION_END appended), `tasks/seo-sem/notebooklm-errors.md` (2026-05-06 PM-cron-on-time entry), `tasks/lead-gen/notebooklm-errors.md` (same), `tasks/ADAM-TODO.md` line 20 (refreshed counts in place per stale-flags rule), `TODO.md` line 21 (same), `CONTEXT.md` SEO/SEM Agent Status (3 fields replaced — net 0 line drift; cap-overrun pre-existing, surfaced via TODO.md line 23 NEEDS ADAM), this CHANGELOG entry. DECISIONS.md untouched (no decision made). Daily digests NOT sent — scheduled-task SKILL.md rule (file-only reporting).
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from any terminal. Next nightly run picks up automatically.
+
+## 2026-05-06 PM (styer-social-pm) — 14th consecutive maintenance session, escalation HELD (4 cycles open)
+
+- 14th consecutive maintenance-only run; ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open across 4 cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06). Per AM 05-06 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+- GOALS.md `stat -f "%Sm"` returned `Apr 19 13:51:27 2026` — 17 days unchanged. Mon 05-04 GOALS day passed without action; week-of-Apr-20 directive still governs.
+- Cushion verified via Supabase REST: 47 drafts, range 2026-09-23 → 2027-02-04. Pillar mix nearest 8: authority×3, personal×3, education×2 (75% RT-adjacent). **Cushion drift = 0 across all 14 maintenance sessions.** TIMELY 48-hr horizon `[]` (defense-in-depth identity check).
+- Step 1B + Refresh (07): SKIPPED per master-agent.md PM-skip rules. Architect/Builder/Quality/Reviewer/QA: SKIPPED (no build).
+- Files updated: `tasks/social-media/subagent-status.md` (SESSION_START + SESSION_FULLY_COMPLETE), `tasks/social-media/today-mission.md` (PM 05-06 mission overwritten), `tasks/social-media/session-log.md` (PM 05-06 entry prepended), `CONTEXT.md` (3 Social fields replaced — net 0 line drift), `TODO.md` (social posts line refreshed in place for 14-streak + AM 05-07 forward rule), this CHANGELOG entry. ADAM-TODO untouched. DECISIONS.md untouched (no new decision). NotebookLM PUSH backlog now 13 sessions deep — also blocked by expired CLI auth (5th day).
+
 ## 2026-05-06 (loanos-launch-standup) — Day 42 standup, post-launch +5
 
 - Vercel production READY: `dpl_HpsoHiffWTea7mQEivqmC2zAQW8u` (commit `5fd8e6b`). Last 20 deployments all READY — no deploy regressions.

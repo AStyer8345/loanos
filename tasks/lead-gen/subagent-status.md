@@ -1,4 +1,48 @@
 SESSION_START
+- DateTime: 2026-05-07 03:45:51 CDT
+- Mode: AM
+- Focus: TBD — load context, assess prior session deferrals, define mission
+MASTER: Context loading. Activating master-agent.md.
+
+SESSION END: 2026-05-07 04:25:00
+Mode: AM
+Focus: **PR-2 Conversion Consolidation — Drop-In Spec.** Continues the consolidation arc from 05-06 closeout-PR. Bundles H2–H5 conversion-focused HIGH-tier findings from 3 form-page audits (05-01 get-preapproved, 05-02 rate-alert, 05-04 homepage forms) into 1 ship-ready PR document.
+MASTER: All objectives complete. Read-only Supabase query + 1 spec file (~452 lines). Zero code changes, zero commits, zero outbound.
+
+PR-2 SPEC: COMPLETE — `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (~452 lines). Single PR; 4 files touched (`get-preapproved.html`, `rate-alert.html`, `index.html`, `script.js` + inline get-preapproved handler); 8 atomic copy-paste-ready diffs in current-vs-proposed format. Includes: 9-step post-deploy test plan, 6-row risk assessment (1 MEDIUM lead-intake.js destructure caveat with builder verification step, 5 LOW or NONE), 3 Adam-data prerequisites broken out as PR-2b deferred (review chip place_id, named testimonial pulls, form social-proof count) with copy-paste templates ready, 7-item out-of-scope list, 11-step Builder execution checklist. Estimated ship: 45 min Builder + 10 min Adam review.
+
+NEW DATAPOINT SURFACED: Supabase 'Website' fallback channel moved +1 row in last 24h (brunalexandra7@hotmail.com, 2026-05-06 13:28 UTC) — first 'Website' row in 7 days. Named-funnel channels (Quick Quote / Quick Contact / PA Funnel / Rate Alert) still flat across 6 baselines. Reinforces 05-05 H5 conclusion that capture path is upstream-of-handler, not a code-deploy gap. Worth a deterministic verification probe but writes to production function — deferred to Adam-in-the-loop session.
+
+PIPELINE STATUS (read-only Supabase 2026-05-07 03:46 CT, 6th consecutive baseline): drip_sends_total=0, drip_enrollments_total=0, lead_source='Pre-Approval Funnel'=0 (15th day), lead_source='Rate Alert Funnel'=0 (39 days), lead_source='Quick Quote' (90d)=0, lead_source='Quick Contact' (90d)=0, lead_source='Website' (90d)=9 (was 8 across 5 baselines, **+1 new row this cycle**), contacts_7d=4 (was 3). **Pattern shift: Website-fallback channel +1; explicit named-funnel channels unchanged.**
+
+OUTPUT: `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (NEW, ~452 lines)
+
+ADAM ACTION ITEMS: 1 NEW batched ADAM-TODO line for the conversion-consolidation PR-2 spec (file-pointer pattern). Designed to **collapse** the 3 prior conversion-side audit ADAM-TODO lines (05-01, 05-02, 05-04) into a single decision. Closeout-PR ADAM-TODO line from 05-06 unchanged — sequencing PR-1-then-PR-2 preserved. NotebookLM CLI re-auth line unchanged.
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (6th calendar day, 9th sub-session blocked).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-07)
+- `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (NEW, ~452 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-07 AM entry)
+- `tasks/lead-gen/session-log.md` (May 7 AM entry prepended)
+- `CHANGELOG.md` (May 7 AM lead-gen entry prepended above social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged, surfaced in TODO.md NEEDS ADAM since 05-03)
+- `tasks/ADAM-TODO.md` (1 NEW batched conversion-PR line, prepended above 05-06 closeout-PR line)
+- `TODO.md` (PR-2 line prepended above closeout-PR line in `Now (this week)` section)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END this entry)
+
+Timestamp: 2026-05-07 04:25:00
+SESSION FULLY COMPLETE ✓
+
+---
+
+[PRIOR ENTRIES — preserved for continuity]
+
+SESSION_START
 - DateTime: 2026-05-06 03:45:43
 - Mode: AM
 - Focus: TBD — load context, assess prior session deferrals, define mission
@@ -40,66 +84,17 @@ SESSION FULLY COMPLETE ✓
 ---
 
 **SESSION_END**
-- DateTime: 2026-05-05 22:10:30
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-05 target — no late-fire pattern this run)
+- DateTime: 2026-05-06 22:10:30
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-06 target — normal jitter only)
 - Agent: Nightly NotebookLM Sync (Scheduled Task)
 
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (4th consecutive Lead Gen nightly block; 5th Lead Gen block overall counting AM lead-gen-am sessions)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (5th consecutive Lead Gen nightly block; 8th Lead Gen sub-session blocked overall counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06)
 - `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error.
 - Steps 1–7 all blocked at Step 1.
-- Lead Gen PUSH backlog now: 3 lead-gen audit files (2026-05-02 rate-alert, 2026-05-04 homepage forms, 2026-05-05 thank-you page) + 4 PM-side syncs awaiting auth restore.
+- Lead Gen PUSH backlog now: 4 lead-gen artifacts (2026-05-02 rate-alert audit, 2026-05-04 homepage forms audit, 2026-05-05 thank-you page audit, 2026-05-06 closeout-PR spec) + 5 PM-side syncs awaiting auth restore.
 - Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-05 PM-cron-on-time entry).
-- ADAM-TODO line 18 already files this — count refreshed in place per stale-flags rule.
+- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-06 PM-cron-on-time entry).
+- ADAM-TODO line 20 already files this — count refreshed in place per stale-flags rule.
 - ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-Timestamp: 2026-05-05 22:10:30
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 4th consecutive nightly)
-
----
-
-SESSION START: 2026-05-05 10:16:47
-Mode: AM
-Focus: TBD — load context, assess prior session deferrals, define mission
-MASTER: Context loading. Activating master-agent.md.
-
-SESSION END: 2026-05-05 11:00:00
-Mode: AM
-Focus: `/thank-you.html` cross-funnel post-submit audit (Sequence A — Research). 4th in funnel-page audit series.
-MASTER: All objectives complete. Read-only Supabase queries + 1 audit file + 1 inline production source-check. No code changes, no DB writes.
-
-THANK-YOU PAGE AUDIT: COMPLETE — 17 prioritized findings (HIGH 5 / MEDIUM 6 / LOW 6) authored at `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` (~330 lines). Cross-funnel routing map: 6 routed `?type=` branches (`ftb-dpa-guide`, `rate-alert`, `quick-quote`, `refinance`, `preapproval`, `lo-waitlist`) + 1 default fallback. Compliance check: 7 PASS / 1 N/A / 2 FAIL.
-- H1 (HIGH compliance + UX integrity): 3-step "What Happens Next" Step 3 ("Letter or quote in 24 hrs") misleads rate-alert / FTB-DPA / lo-waitlist branches — hide for those branches.
-- H2 (HIGH conversion): rate-alert branch hides Calendly entirely — keep visible for warm leads, retitle h2.
-- H3 (HIGH conversion + accessibility): FTB-DPA branch *replaces* phone CTA — should *append* phone, keep application link.
-- H4 (HIGH conversion): PA branch is bare — only h1 changes, no PA-specific reassurance copy despite being the warmest funnel.
-- H5 (HIGH instrumentation): default fallback for unknown/missing `?type=` is silent error mode — add dataLayer instrumentation for GTM debugging.
-- 6 MEDIUM (M5 = `thestyerteam.com` Voice rule violation; M6 = GA conversion fires for lo-waitlist non-mortgage product).
-- 6 LOW.
-
-H5 DEPLOY-GAP FROM 05-04 CLOSED INLINE: `curl https://styermortgage.com/script.js?v=20260417` returned production-served file (28,961 bytes). Lines 407/523/739 carry `lead_source` literals 'Quick Contact'/'Quick Quote'/'Pre-Approval Funnel'. **Hypothesis falsified — code IS deployed.** Supabase delivery gap is upstream (real homepage submissions extremely rare ~1/wk steady-state; 8 'Website' fallback rows likely come from non-homepage sources writing the default).
-
-PIPELINE STATUS (read-only Supabase 2026-05-05 10:25 CT): drip_sends=0, drip_enrollments=0, lead_source='Pre-Approval Funnel'=0 (13th day), lead_source='Rate Alert Funnel'=0 (37 days since deploy), lead_source='Quick Quote'=0 (90d), lead_source='Quick Contact'=0 (90d), lead_source='Website'=8 (90d, unchanged from 05-04). Contacts created last 7d = 3 (2 null + 1 Website 2026-04-30). **Pattern unchanged from 05-04 baseline — no movement.**
-
-AUDIT SERIES MILESTONE: 4 of 4 primary funnel pages now audited. Combined HIGH-tier across the series = 20 fixes. Single Adam-authorized "compliance closeout" PR bundling H1 from each audit (3-form TCPA two-checkbox split + thank-you 3-step block fix) would resolve 4 of 5 series compliance FAILs.
-
-OUTPUT: `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` (~330 lines)
-
-ADAM ACTION ITEMS: 1 NEW batched ADAM-TODO line for thank-you audit (file-pointer pattern). 0 net new on prior items. NotebookLM CLI re-auth line from 05-04 AM unchanged.
-
-NOTEBOOKLM PULL: SKIPPED — CLI auth expired (3rd consecutive AM session).
-NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
-NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
-DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
-
-Files updated:
-- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-05)
-- `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` (NEW, ~330 lines)
-- `tasks/lead-gen/notebooklm-errors.md` (2026-05-05 AM entry)
-- `tasks/lead-gen/session-log.md` (May 5 AM entry prepended)
-- `CHANGELOG.md` (May 5 AM lead-gen entry prepended)
-- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift)
-- `tasks/ADAM-TODO.md` (1 new batched audit line, prepended above 05-04 PM social escalation line)
-- `TODO.md` (thank-you audit findings line added before existing get-preapproved/homepage/rate-alert lines)
-
-Timestamp: 2026-05-05 11:00:00
-SESSION FULLY COMPLETE ✓
+Timestamp: 2026-05-06 22:10:30
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 5th consecutive nightly)

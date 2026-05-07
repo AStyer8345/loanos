@@ -160,3 +160,9 @@
 **Template decision needed from Adam:** Does the page use the existing styermortgage.com template or get a custom layout?
 
 **Blocks:** LoanOS first-run gate in `tasks/social-media/plans/2026-04-05-pillar-framework-v2-plan.md` Task 14
+
+## ADDED 2026-05-07 AM (Thursday Internal Linking + Funnel Flow rotation)
+
+- ~~[LOW_RISK] products.html hero + bottom CTAs route to raw 1003 instead of tracked /get-preapproved~~ ✅ DONE 2026-05-07 — same swap pattern as 2026-05-06 cluster pages (non-qm-loans, investor-loans, dscr-loans-fredericksburg-tx, high-net-worth-mortgage). Removed `target="_blank" rel="noopener"` on internal hero link per 2026-05-06 AM learning.
+- [MEDIUM_RISK] products.html — 7 in-card "Get Pre-Approved" buttons (Conventional, FHA, VA, Jumbo, Renovation, Construction, Investment cards at lines ~334/377/420/463/506/561/598) still route directly to `https://mslp.my1003app.com/513013/register` instead of `/get-preapproved`. **Higher-volume click target than hero/bottom CTAs.** Same swap pattern as today's hero+bottom would apply. Adam decision: maintain per-loan-type 1003 routing (current state) or unify under tracked landing page. Defer to next Thursday rotation if Adam wants to swap, OR leave as deliberate choice if per-card direct-apply is intended.
+- [MEDIUM_RISK] Site-wide footer link to `/prequal.html` (noindexed in robots.txt) appears in 20 pages including products.html, contact.html, blog.html, calculators.html, fixed-vs-adjustable.html, first-time-buyer-guide.html, improve-credit-score.html, rate-check-buda-kyle.html, rate-check-cedar-park.html, etc. Footer routes users to a noindexed orphan instead of the tracked `/get-preapproved` landing page. Best fix: site-wide footer Edit (replace_all=true on the matched `<li><a href="/prequal.html">Pre-Qualification</a></li>` line). Defer for batch session — same change shape across 20 files in one commit.

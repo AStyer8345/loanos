@@ -1,5 +1,57 @@
 # LoanOS Changelog
 
+## 2026-05-08 AM (loanos-autonomous) — 8th consecutive tracker-hygiene cycle, post-launch +7
+
+- **Bucket A (autonomous feature work) empty for 8th consecutive cycle.** All current-phase items remain Adam-blocked: PR-1 closeout (filed 05-06), PR-2 conversion (filed 05-07), PR-3 thank-you (filed today 05-08 by lead-gen-am — completes the consolidation trilogy), Resend DKIM (`mortgagesolutionslp.com`), drip end-to-end smoke (needs Adam manually enroll a contact), FNM 3.4 importer (Scott's actual gating item per GOALS.md), Scenarios cron retire (13-streak, recommend retire-now), `notebooklm login` (7th day expired, 11 sub-sessions blocked), GOALS.md weekly refresh (19 days unchanged, Mon 05-04 skipped, next natural touch Mon 2026-05-11 = 3 days out).
+- **Tracker churn rolled in.** 18 modified tracker files (CHANGELOG/CONTEXT/TODO/ADAM-TODO + subagent state from this morning's lead-gen-am + social-am + carryover from scenarios/seo-sem/standup) + 1 new untracked file (`tasks/lead-gen/specs/2026-05-08-thank-you-conversion-pr-spec.md`, ~270 lines, the PR-3 drop-in spec for Adam authorize). Zero code changes, zero schema changes, zero env changes, zero n8n changes.
+- **Build verified green** (`npm run build`, exit 0) before push.
+- **Vercel state**: latest production deploy pre-push READY (commit `83006e6`). Push will queue the next deploy carrying today's tracker hygiene.
+- **CONTEXT.md NOT touched** by this routine — already 161 lines (over the 150 cap); the AM agents replaced their three-field status blocks in place, net 0 line drift. Trim is queued as Adam-blocked judgment call (TODO line 25).
+- **No code / no schema / no env / no n8n changes.** Pure tracker hygiene per the routine's hygiene-only fall-through. **Circuit breaker:** clean. **Destructive ops**: none.
+- **Email digest**: skipped per established autonomous pattern (no Resend transactional template wired for this routine; n8n pathway also unverified). 5-line summary recorded here in CHANGELOG instead.
+
+## 2026-05-08 AM (styer-lead-gen-am) — PR-3 thank-you-conversion drop-in spec authored
+
+- Authored `tasks/lead-gen/specs/2026-05-08-thank-you-conversion-pr-spec.md` (~270 lines). Single PR; 1 file (`thank-you.html` IIFE only); 4 atomic copy-paste-ready diffs (rate-alert Calendly retain + retitle, FTB-DPA phone CTA append, PA-branch reassurance copy, unknown-type / no-type dataLayer instrumentation). 9-step post-deploy test plan, 6-row risk assessment (all LOW or NONE), explicit out-of-scope table, 14-step Builder execution checklist. Estimated ship: 25 min Builder + 5 min review — cleanest of the three consolidation PRs (single-file scope, no JS / Mailchimp / Supabase coupling).
+- Read-only Supabase pipeline check (7th consecutive baseline): drip_sends=0, drip_enrollments=0, PA Funnel=0 (16th day), Rate Alert=0 (40 days), Quick Quote/Contact=0, Website=10 (90d, **+1 new row 2026-05-08 02:29 UTC: lucashdr@hotmail.com — second 'Website' fallback row in 48h**), contacts_7d=4. Pattern shift accelerating: Website-channel +2 in last 48h while named-funnel channels still flat. Reinforces 05-05 H5 conclusion that capture path is upstream-of-handler, not a code-deploy gap.
+- NotebookLM PULL/PUSH SKIPPED — auth expired 7th calendar day, 11th sub-session blocked since 05-03 PM. PUSH backlog now 6 lead-gen artifacts deep. ADAM-TODO line refreshed in place per stale-flags rule (not re-stacked).
+- 1 new ADAM-TODO line for PR-3 spec; collapses 1 prior thank-you-page audit ADAM-TODO line (05-05) into the PR-3 ask. PR-1 closeout (05-06) and PR-2 conversion (05-07) ADAM-TODO lines unchanged.
+- No code / no schema / no env / no n8n changes. CONTEXT.md Lead Gen Agent fields refreshed in place. Zero outbound, zero deploys, zero commits.
+
+## 2026-05-08 AM (styer-social-am) — 17th consecutive maintenance session, escalation HELD (7th cycle)
+
+- AM 05-08 cron fired on-time at 02:29 CDT (02:00 CDT slot). 17th maintenance-only session in the streak (AM 04-30 → AM 05-08). Per PM 05-07 forward rule: ESCALATION HELD — `[SOCIAL] 2026-05-04 PM ❓ DECISION` line in `tasks/ADAM-TODO.md` still `[ ]` open with no inline response from Adam. 7 cycles open since PM 05-04 filed. One-ask-per-cycle still active; did NOT re-escalate.
+- GOALS.md weekly refresh re-verified: `stat -f "%Sm"` shows `Apr 19 13:51:27 2026` — file unchanged 19 days. Mon 05-04 GOALS day passed without action. Week-of-Apr-20 directive still governs. Next natural refresh Mon 2026-05-11 (3 days out).
+- Step 1B (GBP scan) executed AM-only: latest files match prior tracker — `rates/2026-04-24.html`, `blog/2026-04-27-...`, `realtor-updates/2026-04-27-...`. **14th consecutive zero-input scan.** Refresh (07) executed: 0 TIMELY drafts in 48-hr horizon (May 8 00:00 UTC → May 10 07:30 UTC).
+- Cushion re-verified via Supabase REST (org-filtered): **47 drafts, schedule range 2026-09-23 → 2027-02-04, drift = 0 across all 17 maintenance sessions.** Pillar totals: authority×19, personal×13, education×15. Platform totals: linkedin×18, instagram×16, facebook×13. Cushion exceeds target by ~9 months.
+- **NEW finding — org-filter wrinkle**: an unfiltered cushion query returned 48 rows; the 48th is a LoanOS demo-seed draft (`organization_id=eeeeeeee-...`, `created_by=human`, `scheduled_for=null`, created 2026-04-05). Not Adam's content. Always filter cushion queries by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258`. Documented in today-mission.md + session-log.md to prevent re-investigation tomorrow.
+- NotebookLM PULL/PUSH deferred (PUSH backlog now 16 sessions deep + CLI auth expired 6th day).
+- No code / no schema / no env / no n8n changes. CONTEXT.md social fields refreshed in place (net 0 line drift, file still 161 lines — over cap, surgery deferred to Adam judgment per existing TODO line). No emails sent. No daily digest.
+
+## 2026-05-07 PM (styer-notebooklm-nightly) — Nightly NotebookLM sync no-op, 6th consecutive auth-blocked run
+
+- PM 05-07 cron fired on-time at 22:09 CDT (22:00 CDT slot). Both halves (SEO/SEM PUSH+CURATE + Lead Gen PUSH+CURATE) skipped at Step 1 — `notebooklm list --json` returns same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com.
+- 6th consecutive nightly run blocked (6 wall-clock days since 05-03 PM, 10 total sub-sessions counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 plus the dual nightly fires). No notebook contact, no source mutations, no master log appends, no digest.
+- ADAM-TODO line 22 (NOTEBOOKLM CLI RE-AUTH NEEDED) refreshed in place per stale-flags rule — count bumped to 6 days / 6 nightly runs / 10 sub-sessions; not re-stacked. SEO/SEM + Lead Gen subagent-status.md SESSION_END entries appended. Error logs appended in `tasks/seo-sem/notebooklm-errors.md` + `tasks/lead-gen/notebooklm-errors.md`.
+- Backlog: SEO/SEM ~12 stale sources + ~7 ready-to-add (notebook last refreshed 2026-05-01); Lead Gen 5 audit/spec artifacts (rate-alert 05-02, homepage forms 05-04, thank-you 05-05, closeout-PR spec 05-06, conversion-PR spec 05-07) + 6 PM-side syncs awaiting recovery night.
+- No code / no schema / no env / no n8n changes. CONTEXT.md SEO/SEM agent three fields replaced; Lead Gen field count bumped 9→10. No emails sent (per scheduled-task SKILL.md override).
+
+## 2026-05-07 PM (styer-social-pm) — 16th consecutive maintenance session, escalation HELD (6th cycle)
+
+- PM 05-07 cron fired on-time at 21:22 CDT (21:00 CDT slot). 16th maintenance-only session in the streak (AM 04-30 → PM 05-07). Per AM 05-07 forward rule: ESCALATION HELD — `[SOCIAL] 2026-05-04 PM ❓ DECISION` line in `tasks/ADAM-TODO.md` still `[ ]` open with no inline response from Adam. 6 cycles open since PM 05-04 filed. One-ask-per-cycle still active; did NOT re-escalate.
+- GOALS.md weekly refresh re-verified: `stat -f "%Sm"` shows `Apr 19 13:51:27 2026` — file unchanged 18 days. Mon 05-04 GOALS day passed without action. Week-of-Apr-20 directive still governs. Next natural refresh Mon 2026-05-11 (4 days out).
+- Cushion re-verified via Supabase REST: **47 drafts, schedule range 2026-09-23 → 2027-02-04, drift = 0 across all 16 maintenance sessions.** Pillar totals: authority×19, personal×13, education×15. Platform totals: linkedin×18, facebook×13, instagram×16. Cushion exceeds target by ~9 months.
+- Step 1B (GBP scan) and Refresh (07) SKIPPED per PM session rule (master-agent.md). Defense-in-depth spot-check confirmed no new website content; defense-in-depth Supabase query confirmed 0 TIMELY drafts in 48-hr horizon (May 7 → May 9 07:30 UTC). NotebookLM PULL/PUSH deferred (PUSH backlog 15 sessions deep + CLI auth expired 5th day).
+- No code / no schema / no env / no n8n changes. CONTEXT.md social fields refreshed in place (net 0 line drift, file still 161 lines — over cap, surgery deferred to Adam judgment per existing TODO line). No emails sent. No daily digest.
+
+## 2026-05-07 (loanos-launch-standup) — Day 43 standup, post-launch +6, all systems green
+
+- Daily standup ran clean. Vercel: latest production deploy `dpl_8PvVDA179vNEZ9S5b8M8xXyN2DVB` (commit `d16f8ea`) READY; all 20 most-recent deployments READY. Working tree clean, 0 unpushed commits — Day 42's flagged unpushed-HEAD now recovered.
+- n8n: 39 workflows, 34 active / 5 inactive (all intentional, unchanged from Day 42). No error states. `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) malformed-JWT dedup carries to 6th day open — manual fix still queued, impact bound by downstream guards.
+- Blockers all carry from Day 42 — DKIM, drip-zero-sends (9th day), 5 canonical n8n creds, NotebookLM CLI auth (5th day), TCPA/Sendblue, FNM 3.4 importer, Scenarios cron, social escalation, GOALS.md refresh. 3 conversion-audit ADAM-TODOs (05-01/05-02/05-04) now collapse into a single PR-2 ask via today's new consolidation spec.
+- One positive signal today: first non-zero `lead_source='Website'` row in 7 days (`contacts_7d=4` vs 3 yesterday). Named-funnel channels still flat across 15+ days.
+- No code / no schema / no env / no n8n changes. CONTEXT.md not touched (over 150-line cap, surgery is content judgment). Standup written to `tasks/standup-log.md` per task spec.
+
 ## 2026-05-07 AM (loanos-autonomous) — 7th consecutive tracker-hygiene cycle, recovered yesterday's unpushed HEAD
 
 - **Bucket A (autonomous feature work) empty for 7th consecutive cycle.** All current-phase items remain Adam-blocked: Resend DKIM (`mortgagesolutionslp.com`), drip cron end-to-end smoke (needs Adam to manually enroll a contact), FNM 3.4 importer (Scott's launch-blocker per GOALS.md), Conversion PR-2 spec ship-approval (filed today by lead-gen-am), Compliance Closeout PR-1 ship-approval (filed 05-06), Scenarios cron retire (12-streak), `notebooklm login` (6th day expired), GOALS.md weekly refresh (18 days unchanged, Mon 05-04 skipped, next natural touch Mon 2026-05-11).
@@ -19,6 +71,14 @@
 - NotebookLM PULL/PUSH SKIPPED — CLI auth still expired (6th calendar day, 9th sub-session blocked since 05-03 PM). Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-07 AM entry). Lead Gen PUSH backlog now 5 deep (rate-alert audit 05-02, homepage forms audit 05-04, thank-you audit 05-05, closeout-PR spec 05-06, conversion-consolidation-PR spec 05-07).
 - 1 new ADAM-TODO line added (PR-2 ask, file-pointer pattern). Designed to collapse the 3 prior audit-conversion lines (05-01, 05-02, 05-04) into a single decision. Closeout-PR ADAM-TODO line from 05-06 unchanged — sequencing PR-1-then-PR-2 preserved.
 - Forward rule held: skip page re-audit until at least one HIGH-tier change ships. Recommended tomorrow: PR-3 spec (thank-you-page conversion findings consolidation) — completes the trilogy and stays consistent with the consolidation arc.
+
+## 2026-05-07 AM (loanos-scenarios-am) — 13th consecutive no-build exit
+
+- Tiers 1–8 of Scenarios program complete; GOALS.md `stat -f "%Sm"` returned `Apr 19 13:51:27 2026` (18 days unchanged, Mon 05-04 refresh skipped). Week-of-Apr-20 LoanOS Product priorities are FNM 3.4 / drip campaigns / notes-activity-log — no scenarios mission. Conflict rule applied: log NEEDS ADAM, exit clean.
+- Refreshed standing NEEDS ADAM line in `TODO.md` (12-streak → 13-streak; 2026-05-07 added to flagged-dates list; 18-day stat refreshed; "5 more no-op runs" forecast → "4 more"). No new line opened (stale-flags rule).
+- Replaced 3 Scenarios fields in `CONTEXT.md` (Last worked on / Active blockers / What's next) — net 0 line drift; CONTEXT.md remains 161 lines (over 150 cap, unchanged from prior days, surgery is content judgment per TODO line 24).
+- No subagents activated (no build, no research, no QA). NotebookLM PUSH skipped — CLI auth still expired (5th day blocked, ADAM-TODO line standing). `tasks/scenarios/subagent-status.md` SESSION_START written at top of run; SESSION_END appended at exit.
+- DECISIONS.md untouched (no decision made). No code, no schema, no env, no n8n, no Vercel deploy. Build NOT run — nothing changed to verify.
 
 ## 2026-05-07 AM (styer-social-am) — 15th consecutive maintenance session, escalation HELD (5 cycles open)
 

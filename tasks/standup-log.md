@@ -2,6 +2,36 @@
 
 ---
 
+## 2026-05-07 — Day 43 (post-launch +11 vs original Apr 26 target / +6 vs May 1 GOALS target)
+
+**Days to launch:** N/A — beta is live. Continuing daily standup runs per task instruction.
+
+**Yesterday shipped (since Day 42 standup):**
+- 2 new commits — `8f7c678` (2026-05-06 wrap-up, recovered from yesterday's stall) and `d16f8ea` (2026-05-07 wrap-up, post-launch +6). Both tracker-hygiene only (13 modified tracker files + 1 new untracked spec). Day 42's flagged unpushed-HEAD is **resolved** — today's push carried both commits to `origin/main`.
+- New spec filed: `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (~452 lines, PR-2 conversion consolidation across 3 funnel pages, ~45 min Builder + 10 min Adam review). Pairs with the 05-06 closeout-PR spec — sequenced PR-1 then PR-2 closes site-wide H1+H2-H5 audit debt in roughly an hour of Adam review.
+- Last real feature code on main remains `1b58ef9` (Microsoft Graph adapter, 2026-04-30). 7-day zero-feature-code streak. **Movement detected on lead pipeline today:** first non-zero `lead_source='Website'` row in 7 days (`brunalexandra7@hotmail.com`, 2026-05-06 13:28 UTC; contacts_7d=4 vs 3 yesterday). Named-funnel channels still flat (`Pre-Approval Funnel` 15d zero, `Rate Alert Funnel` 39d zero, `Quick Quote`/`Quick Contact` 90d zero).
+
+**Vercel status:** READY — production deploy advanced to `dpl_8PvVDA179vNEZ9S5b8M8xXyN2DVB` (commit `d16f8ea`, 2026-05-07 06:35 UTC). All 20 most-recent production deployments READY across 8+ days, no ERROR/QUEUED/CANCELED. Working tree clean, 0 unpushed commits.
+
+**n8n workflow health:** 39 total, 34 active, 5 inactive (all intentional, unchanged from Day 42). No error states. Core launch workflows all ACTIVE. **Watch (6th day open, deferred):** `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) malformed-JWT in Check Dedup code node — broken dedup since first cron May 1; ~6 firings now. Impact bound by downstream guards (no broken sends), but undeduped `activity_log` writes accumulate. Manual fix still needed.
+
+**Blockers (all carry from Day 42 — none resolved today):**
+- Resend DKIM verification (`mortgagesolutionslp.com`) — 8th day. Gates Scott's mailbox. MS Graph alternate path also unflipped.
+- Drip pipeline at 0 sends — 9th day. End-to-end loop unproven post-launch.
+- 5 canonical n8n credentials uncreated — 22 active workflows still leak inline secrets per 2026-04-30 audit.
+- `notebooklm` CLI auth expired — 5th calendar day, 9 sub-sessions blocked. Adam runs `/Users/adamstyer/.local/bin/notebooklm login`.
+- TCPA + Sendblue, FNM 3.4 importer, Notes/activity-log fix, Scenarios cron retire, NotebookLM playbook reconcile, social PM 05-04 escalation, GOALS.md weekly refresh (18 days stale, next natural Mon 2026-05-11).
+- 3 conversion audit ship-approvals now collapse into a single PR-2 ask via today's new consolidation spec (closes the 05-01 / 05-02 / 05-04 audit ADAM-TODO lines).
+- `CONTEXT.md` over 150-line cap (161 lines, unchanged from Day 42 — agents replaced fields in place, net 0 drift). Trim is content judgment, not safe in autonomous mode.
+
+**Today's focus:** Standup verification (this entry). Bucket A (autonomous-eligible feature work) remains empty; every meaningful unblock requires Adam. Highest-leverage Adam ask is unchanged: reserve 60 min to clear DKIM, ship-approve PR-1 (compliance closeout) + PR-2 (conversion consolidation), retire/redirect Scenarios cron, run `notebooklm login`, answer social PM 05-04 escalation, and refresh GOALS.md.
+
+**Risk watch:** 7-day zero-feature-code streak now broken in spirit only by today's spec drop — actual ship-approval still pending. The single positive signal today is the first non-zero `Website` lead-source row in 7 days; this is consistent with the site working, just not with the named funnels firing. Anniversary Check-In dedup degradation now at ~6 firings without dedup; still bound by downstream guards. Operational/build/deploy side: clean. Validation/post-launch traction side: still stalled until Adam clears at least one queued decision.
+
+**Open audit findings:** 0 CRITICAL / 0 HIGH / 1 MEDIUM under `audits/` (field-level encryption, ADAM-BLOCKED on GLBA attorney). `audits/` directory unchanged since 2026-04-05. Worth noting outside `audits/`: `tasks/security/n8n-credential-audit-2026-04-30.md` still documents ~140 inline credential instances across 22 active workflows.
+
+---
+
 ## 2026-05-06 — Day 42 (post-launch +10 vs original Apr 26 target / +5 vs May 1 GOALS target)
 
 **Days to launch:** N/A — launched. Original task target Apr 26 passed; GOALS.md May 1 target also passed. Beta is live (per `c4fee70` "May 1 launch day" commit).

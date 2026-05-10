@@ -2,6 +2,199 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-10 AM — Maintenance only, escalation HELD (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
+
+**Focus**: 21st consecutive maintenance session. ADAM-TODO escalation line `[SOCIAL] 2026-05-04 PM` still `[ ]` open across 11 full cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07 → PM 05-07 → AM 05-08 → PM 05-08 → AM 05-09 → PM 05-09 → AM 05-10). Per PM 05-09 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+
+**Completed:**
+- SESSION_START written: 2026-05-10 02:29 CDT, Mode: AM (cron on-time at 02:00 CDT slot, fired 02:29).
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` directory still does not exist — `ls` exit 1, parent `assets/` also missing; 38 days). LoanOS stream remains paused.
+- **GOALS.md weekly refresh check (forward-rule first action)**: `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. File unchanged 21 days. Mon 05-04 GOALS day passed without action; next natural refresh Mon 2026-05-11 (1 day out — tomorrow). Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed.
+- **ADAM-TODO escalation line check**: `grep -n "SOCIAL.*2026-05-04 PM" tasks/ADAM-TODO.md` → line 22, `[ ]` open, no inline response from Adam between PM 05-09 (fired 21:23 CDT) and AM 05-10 (fired 02:29 CDT). Per PM 05-09 forward rule: "If still `[ ]` open with no response, hold maintenance — do NOT re-escalate (one ask per cycle)." Honored. 11th cycle now open.
+- **Step 1B (GBP scan executed AM-only)**: latest files match prior tracker — `rates/2026-04-24.html`, `blog/2026-04-27-why-home-prices-arent-crashing.html`, `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html`. **15th consecutive zero-input scan.** No GBP auto-publish, no IG/FB/LI queue additions, no tracker append.
+- **Refresh (07)**: Supabase REST `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-10T00:00:00Z&scheduled_for=lt.2026-05-12T07:30:00Z` → `[]`. **0 TIMELY drafts in 48-hr horizon (May 10 00:00 UTC → May 12 07:30 UTC).**
+- Cushion verification (Adam-org filtered): queried Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Schedule range 2026-09-23 → 2027-02-04. Earliest = LinkedIn authority (`2026-09-23T15:00:00+00:00`, id `32803838-594f-43f6-9ccd-c5cd5cb06916`, "Post 157 — The One Number That Matters When Deciding to Refinance"). Latest = Instagram personal (`2027-02-04T15:00:00+00:00`, id `60948a41-ece7-48bc-9f34-a0fe158c90ec`, "Post 198 — Then I notice the peanut butter"). **Pillar totals**: authority×19, personal×13, education×15. **Platform totals**: linkedin×18, instagram×16, facebook×13. **Cushion drift = 0 across all 21 maintenance sessions.** Identical readout to PM 05-09.
+- **Org-filter rule re-confirmed**: filtered query (Adam-org + draft only) returns 47; unfiltered query (all orgs, all statuses) returns 232 (mostly older LoanOS demo-seeded rows). Always filter by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on cushion queries.
+- Mission: MAINTENANCE only. Reasoning written in `today-mission.md`. Escalation HELD; no ADAM-TODO append.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). PUSH backlog now 20 sessions deep (PM 04-30 → AM 05-10). Also blocked structurally by expired CLI auth (separate ADAM-TODO line, 8th day).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next). Net line drift kept at 0 to avoid worsening the 161-line cap violation.
+- CHANGELOG.md: AM 05-10 social entry inserted at top of social block.
+- TODO.md: social posts line refreshed in-place for 21-streak + PM 05-10 forward rule.
+
+**Deferred:**
+- All build sequences (Architect/Builder/Quality/Reviewer/QA). Cushion exceeds target by ~9 months.
+- NotebookLM PUSH (20 sessions deep). Awaiting next build OR `notebooklm login` re-auth.
+- 2 stale rate/market queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`) — DO NOT consume; cushion already covers.
+
+**Active blockers:**
+- BLOCKER-LOANOS-001 (selfies, 38 days). LoanOS pillar locked.
+- ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open (11 cycles since PM 05-04 filed). Awaiting Adam.
+- master-agent.md Step 1B 3A still uses `platform: "google"` for GBP `social_drafts` insert — DB constraint rejects it. Workaround documented; not blocking maintenance sessions.
+- DB pillar enum excludes `real_talk` — keep mapping Real Talk voice → `authority`.
+- Bash-quoted INSERTs strip apostrophes — Builder must use Python urllib or PG E-strings (when build resumes).
+- NotebookLM CLI auth expired since 2026-05-03 (8th day, 12 social sub-sessions blocked counting both AM+PM since 05-06).
+
+**Forward rule for PM 05-10**:
+- Re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance). If still `[ ]`, hold maintenance — do NOT re-escalate (one ask per cycle, still active).
+- 22nd consecutive maintenance session continues until Mon 2026-05-11 GOALS refresh (tomorrow) OR Adam re-engages on the open ADAM-TODO line.
+- PM session: skip Step 1B + Refresh (07) per master-agent.md. Cushion check is identical query (Adam-org filter required).
+- **Mon 2026-05-11 GOALS refresh is the natural decision point** — only 1 day out from this session. If GOALS.md mtime changes, break maintenance pattern and re-plan from new directives.
+
+**Files updated:**
+- subagent-status.md (SESSION_START + final block at end of session)
+- today-mission.md (overwritten with AM 05-10 mission brief — MAINTENANCE only)
+- session-log.md (AM 05-10 entry prepended; this file)
+- CONTEXT.md (3 social fields replaced — Last worked on / Active blockers / What's next; net 0 line drift)
+- CHANGELOG.md (AM 05-10 social entry inserted at top)
+- TODO.md (social posts line refreshed for 21-streak + PM 05-10 forward rule)
+- tasks/ADAM-TODO.md NOT touched (one-ask-per-cycle rule)
+- DECISIONS.md NOT touched (no new decision — same forward rule applied)
+
+**No emails sent. No daily digest. Reporting limited to project files per scheduled-task instructions.**
+
+
+---
+## Session: 2026-05-09 PM — Maintenance only, escalation HELD (Scheduled Task — styer-social-pm, on-time fire 21:23 CDT)
+
+**Focus**: 20th consecutive maintenance session. ADAM-TODO escalation line `[SOCIAL] 2026-05-04 PM` still `[ ]` open across 10 full cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07 → PM 05-07 → AM 05-08 → PM 05-08 → AM 05-09 → PM 05-09). Per AM 05-09 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+
+**Completed:**
+- SESSION_START written: 2026-05-09 21:23 CDT, Mode: PM (cron on-time at 21:00 CDT slot, fired 21:23).
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` directory still does not exist; 37 days). LoanOS stream remains paused.
+- **GOALS.md weekly refresh check (forward-rule first action)**: `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. File unchanged 20 days. Mon 05-04 GOALS day passed without action; next natural refresh Mon 2026-05-11 (2 days out). Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed.
+- **ADAM-TODO escalation line check**: `[SOCIAL] 2026-05-04 PM` line still `[ ]` open, no inline response from Adam between AM 05-09 (fired 02:29 CDT) and PM 05-09 (fired 21:23 CDT). Per AM 05-09 forward rule: "If still `[ ]` open with no response, hold maintenance — do NOT re-escalate (one ask per cycle)." Honored. 10th cycle now open.
+- **Step 1B (GBP scan)**: SKIPPED — PM session per master-agent.md.
+- **Refresh (07)**: SKIPPED — PM session per master-agent.md.
+- Cushion verification (Adam-org filtered): queried Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Schedule range 2026-09-23 → 2027-02-04. Earliest = LinkedIn authority (`2026-09-23T15:00:00+00:00`, id `32803838-594f-43f6-9ccd-c5cd5cb06916`). Latest = Instagram personal (`2027-02-04T15:00:00+00:00`, id `60948a41-ece7-48bc-9f34-a0fe158c90ec`). **Pillar totals**: authority×19, personal×13, education×15. **Platform totals**: linkedin×18, instagram×16, facebook×13. **Cushion drift = 0 across all 20 maintenance sessions.** Identical readout to AM 05-09.
+- **Org-filter rule re-confirmed**: filtered query (Adam-org + draft only) returns 47; unfiltered query (all orgs, all statuses) returns 232 (mostly older LoanOS demo-seeded rows). Always filter by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on cushion queries.
+- Mission: MAINTENANCE only. Reasoning written in `today-mission.md`. Escalation HELD; no ADAM-TODO append.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). PUSH backlog now 19 sessions deep (PM 04-30 → PM 05-09). Also blocked structurally by expired CLI auth (separate ADAM-TODO line, 7th day).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next). Net line drift kept at 0 to avoid worsening the 161-line cap violation.
+- CHANGELOG.md: PM 05-09 social entry inserted at top of social block.
+- TODO.md: social posts line refreshed in-place for 20-streak + AM 05-10 forward rule.
+
+**Deferred:**
+- All build sequences (Architect/Builder/Quality/Reviewer/QA). Cushion exceeds target by ~9 months.
+- NotebookLM PUSH (19 sessions deep). Awaiting next build OR `notebooklm login` re-auth.
+- 2 stale rate/market queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`) — DO NOT consume; cushion already covers.
+
+**Active blockers:**
+- BLOCKER-LOANOS-001 (selfies, 37 days). LoanOS pillar locked.
+- ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open (10 cycles since PM 05-04 filed). Awaiting Adam.
+- master-agent.md Step 1B 3A still uses `platform: "google"` for GBP `social_drafts` insert — DB constraint rejects it. Workaround documented; not blocking maintenance sessions.
+- DB pillar enum excludes `real_talk` — keep mapping Real Talk voice → `authority`.
+- Bash-quoted INSERTs strip apostrophes — Builder must use Python urllib or PG E-strings (when build resumes).
+- NotebookLM CLI auth expired since 2026-05-03 (7th day, 11 social sub-sessions blocked counting both AM+PM since 05-06).
+
+**Forward rule for AM 05-10**: re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance). If still `[ ]` open with no response, hold maintenance — do NOT re-escalate (one ask per cycle, still active). 21st consecutive maintenance session continues until Mon 2026-05-11 GOALS refresh OR Adam re-engages. AM session: run Step 1B (GBP scan) + Refresh (07) per master-agent.md. Cushion check is identical query (Adam-org filter required). If GOALS.md mtime changes, break maintenance and re-plan from new directives.
+
+**SESSION FULLY COMPLETE: 2026-05-09 21:23 CDT (PM 05-09 cron on-time)**
+
+---
+## Session: 2026-05-09 AM — Maintenance only, escalation HELD (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
+
+**Focus**: 19th consecutive maintenance session. ADAM-TODO escalation line `[SOCIAL] 2026-05-04 PM` still `[ ]` open across 9 full cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07 → PM 05-07 → AM 05-08 → PM 05-08 → AM 05-09). Per PM 05-08 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+
+**Completed:**
+- SESSION_START written: 2026-05-09 02:29 CDT, Mode: AM (cron on-time at 02:00 CDT slot, fired 02:29).
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` directory still does not exist; 37 days). LoanOS stream remains paused.
+- **GOALS.md weekly refresh check (forward-rule first action)**: `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. File unchanged 20 days. Mon 05-04 GOALS day passed without action; next natural refresh Mon 2026-05-11 (2 days out). Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed.
+- **ADAM-TODO escalation line check**: `grep -n "SOCIAL.*2026-05-04 PM" tasks/ADAM-TODO.md` → line 20, `[ ]` open, no inline response from Adam. Per PM 05-08 forward rule: "If still `[ ]` open with no response, hold maintenance — do NOT re-escalate (one ask per cycle)." Honored.
+- **Step 1B (GBP scan executed AM-only)**: latest files match prior tracker — `rates/2026-04-24.html`, `blog/2026-04-27-why-home-prices-arent-crashing.html`, `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html`. **14th consecutive zero-input scan.** No GBP auto-publish, no IG/FB/LI queue additions, no tracker append.
+- **Refresh (07)**: Supabase REST `social_drafts?status=eq.draft&scheduled_for=gte.2026-05-09T00:00:00Z&scheduled_for=lt.2026-05-11T07:30:00Z` → `[]`. **0 TIMELY drafts in 48-hr horizon (May 9 00:00 UTC → May 11 07:30 UTC).**
+- Cushion verification (Adam-org filtered): queried Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Schedule range 2026-09-23 → 2027-02-04. Earliest = LinkedIn authority (`2026-09-23T15:00:00+00:00`, id `32803838-594f-43f6-9ccd-c5cd5cb06916`). Latest = Instagram personal (`2027-02-04T15:00:00+00:00`, id `60948a41-ece7-48bc-9f34-a0fe158c90ec`). **Pillar totals**: authority×19, personal×13, education×15. **Platform totals**: linkedin×18, instagram×16, facebook×13. **Cushion drift = 0 across all 19 maintenance sessions.** Identical readout to PM 05-08.
+- **Org-filter rule re-confirmed**: filtered query (Adam-org + draft only) returns 47; unfiltered query (all orgs, all statuses) returns 232 (mostly older LoanOS demo-seeded rows). Always filter by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on cushion queries.
+- Mission: MAINTENANCE only. Reasoning written in `today-mission.md`. Escalation HELD; no ADAM-TODO append.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). PUSH backlog now 18 sessions deep (PM 04-30 → AM 05-09). Also blocked structurally by expired CLI auth (separate ADAM-TODO line, 7th day).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next). Net line drift kept at 0 to avoid worsening the 161-line cap violation.
+- CHANGELOG.md: AM 05-09 social entry inserted at top of social block.
+- TODO.md: social posts line refreshed in-place for 19-streak + PM 05-09 forward rule.
+
+**Deferred:**
+- All build sequences (Architect/Builder/Quality/Reviewer/QA). Cushion exceeds target by ~9 months.
+- NotebookLM PUSH (18 sessions deep). Awaiting next build OR `notebooklm login` re-auth.
+- 2 stale rate/market queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`) — DO NOT consume; cushion already covers.
+
+**Active blockers:**
+- BLOCKER-LOANOS-001 (selfies, 37 days). LoanOS pillar locked.
+- ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open (9 cycles since PM 05-04 filed). Awaiting Adam.
+- master-agent.md Step 1B 3A still uses `platform: "google"` for GBP `social_drafts` insert — DB constraint rejects it. Workaround documented; not blocking maintenance sessions.
+- DB pillar enum excludes `real_talk` — keep mapping Real Talk voice → `authority`.
+- Bash-quoted INSERTs strip apostrophes — Builder must use Python urllib or PG E-strings (when build resumes).
+
+**Forward rule for PM 05-09**:
+- Re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance). If still `[ ]`, hold maintenance — do NOT re-escalate (one ask per cycle, still active).
+- 20th consecutive maintenance session continues until Mon 2026-05-11 GOALS refresh (2 days out) OR Adam re-engages on the open ADAM-TODO line.
+- PM session: skip Step 1B + Refresh (07) per master-agent.md. Cushion check is identical query (Adam-org filter required).
+- If GOALS.md mtime changes (Adam refreshes Monday), break maintenance pattern and re-plan from new directives.
+
+**Files updated:**
+- subagent-status.md (SESSION_START + final block at end of session)
+- today-mission.md (overwritten with AM 05-09 mission brief — MAINTENANCE only)
+- session-log.md (AM 05-09 entry prepended; this file)
+- CONTEXT.md (3 social fields replaced — Last worked on / Active blockers / What's next; net 0 line drift)
+- CHANGELOG.md (AM 05-09 social entry inserted at top)
+- TODO.md (social posts line refreshed for 19-streak + PM 05-09 forward rule)
+- tasks/ADAM-TODO.md NOT touched (one-ask-per-cycle rule)
+- DECISIONS.md NOT touched (no new decision — same forward rule applied)
+
+**No emails sent. No daily digest. Reporting limited to project files per scheduled-task instructions.**
+
+---
+## Session: 2026-05-08 PM — Maintenance only, escalation HELD (Scheduled Task — styer-social-pm, on-time fire 21:22 CDT)
+
+**Focus**: 18th consecutive maintenance session. ADAM-TODO escalation line `[SOCIAL] 2026-05-04 PM` still `[ ]` open across 8 full cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07 → PM 05-07 → AM 05-08 → PM 05-08). Per AM 05-08 forward rule "one ask per cycle, do NOT re-escalate" — honored.
+
+**Completed:**
+- SESSION_START written: 2026-05-08 21:22 CDT, Mode: PM (cron on-time at 21:00 CDT slot, fired 21:22).
+- BLOCKER gate check: BLOCKER-LOANOS-001 still active (`tasks/social-media/assets/selfies/` directory still does not exist; 36 days). LoanOS stream remains paused.
+- **GOALS.md weekly refresh check**: `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. File unchanged 19 days. Mon 05-04 GOALS day passed without action; next natural refresh Mon 2026-05-11 (3 days out). Week of Apr 20 directive ("No new content on any site (improve existing only)") still governs. No paused workstreams listed.
+- **ADAM-TODO escalation line check**: `grep` on `[SOCIAL] 2026-05-04 PM ❓` → line still `[ ]` open, no inline response from Adam since AM 05-08. Per AM 05-08 forward rule: hold maintenance, do NOT re-escalate. Honored.
+- **Step 1B (GBP scan)**: SKIPPED — PM session per master-agent.md. Spot-checked file inventory anyway: `rates/2026-04-24.html`, `blog/2026-04-27-why-home-prices-arent-crashing.html`, `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` are still the latest of each type. AM 05-09 will run the official scan.
+- **Refresh (07)**: SKIPPED — PM session per master-agent.md. AM 05-08 readout was 0 TIMELY drafts in 48-hr horizon; AM 05-09 will recheck.
+- Cushion verification (Adam-org filtered): queried Supabase REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Schedule range 2026-09-23 → 2027-02-04. Earliest = LinkedIn authority (`2026-09-23T15:00:00+00:00`, id `32803838-594f-43f6-9ccd-c5cd5cb06916`). Latest = Instagram personal (`2027-02-04T15:00:00+00:00`, id `60948a41-ece7-48bc-9f34-a0fe158c90ec`). Pillar totals: authority×19, personal×13, education×15. Platform totals: linkedin×18, instagram×16, facebook×13. **Cushion drift = 0 across all 18 maintenance sessions.** Identical readout to AM 05-08.
+- **Org-filter rule re-confirmed**: filtered query (Adam-org + draft only) returns 47; unfiltered query (all orgs, all statuses) returns 232 (mostly older LoanOS demo-seeded rows). Always filter by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on cushion queries.
+- Mission: MAINTENANCE only. Reasoning written in `today-mission.md`. Escalation HELD; no ADAM-TODO append.
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+- NotebookLM PULL/PUSH: DEFERRED per established efficiency pattern (no build = no new note material). PUSH backlog now 17 sessions deep (PM 04-30 → PM 05-08). Also blocked structurally by expired CLI auth (separate ADAM-TODO line, 6th day).
+- CONTEXT.md: 3 social fields replaced (Last worked on / Active blockers / What's next). Net line drift kept at 0.
+- CHANGELOG.md: PM 05-08 social entry inserted at top of social block.
+- TODO.md: social posts line refreshed in-place for 18-streak + AM 05-09 forward rule.
+
+**Deferred:**
+- All build sequences (Architect/Builder/Quality/Reviewer/QA). Cushion exceeds target by ~9 months.
+- NotebookLM PUSH (17 sessions deep). Awaiting next build OR `notebooklm login` re-auth.
+- 2 stale rate/market queue entries (`blog/2026-03-30-bond-rally`, `rates/2026-04-14`) — DO NOT consume; cushion already covers.
+
+**Active blockers:**
+- BLOCKER-LOANOS-001 (selfies, 36 days). LoanOS pillar locked.
+- ADAM-TODO `[SOCIAL] 2026-05-04 PM ❓ DECISION` line still `[ ]` open (8 cycles since PM 05-04 filed). Awaiting Adam.
+- master-agent.md Step 1B 3A still uses `platform: "google"` for GBP `social_drafts` insert — DB constraint rejects it. Workaround documented; not blocking maintenance sessions.
+- DB pillar enum excludes `real_talk` — keep mapping Real Talk voice → `authority`.
+- Bash-quoted INSERTs strip apostrophes — Builder must use Python urllib or PG E-strings (when build resumes).
+
+**Forward rule for AM 05-09**:
+- Re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance). If still `[ ]`, hold maintenance — do NOT re-escalate (one ask per cycle, still active).
+- 19th consecutive maintenance session continues until Mon 2026-05-11 GOALS refresh OR Adam re-engages on the open ADAM-TODO line.
+- AM session: run Step 1B (GBP scan) + Refresh (07) per master-agent.md. Cushion check identical query (Adam-org filter required).
+- If GOALS.md mtime changes (Adam refreshes Monday), break maintenance pattern and re-plan from new directives.
+
+**Files updated:**
+- subagent-status.md (SESSION_START + final block at end of session)
+- today-mission.md (overwritten with PM 05-08 mission brief — MAINTENANCE only)
+- session-log.md (PM 05-08 entry prepended; this file)
+- CONTEXT.md (3 social fields replaced — Last worked on / Active blockers / What's next; net 0 line drift)
+- CHANGELOG.md (PM 05-08 social entry inserted at top)
+- TODO.md (social posts line refreshed for 18-streak + AM 05-09 forward rule)
+- tasks/ADAM-TODO.md NOT touched (one-ask-per-cycle rule)
+- DECISIONS.md NOT touched (no new decision — same forward rule applied)
+
+**No emails sent. No daily digest. Reporting limited to project files per scheduled-task instructions.**
+
+---
 ## Session: 2026-05-08 AM — Maintenance only, escalation HELD (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
 
 **Focus**: 17th consecutive maintenance session. ADAM-TODO escalation line `[SOCIAL] 2026-05-04 PM` still `[ ]` open across 7 full cycles (PM 05-04 → AM 05-05 → PM 05-05 → AM 05-06 → PM 05-06 → AM 05-07 → PM 05-07 → AM 05-08). Per PM 05-07 forward rule "one ask per cycle, do NOT re-escalate" — honored.

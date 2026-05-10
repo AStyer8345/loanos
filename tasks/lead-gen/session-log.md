@@ -2,6 +2,125 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-10 AM — Lead Generation
+Focus: **PR-5 Final Light-Pass — All Remaining M+L Tier Across 4 Audits — Drop-In Spec.** Closes the entire 4-audit pile started 05-01. Bundles every M-tier and L-tier residual not already covered by PR-1/PR-2/PR-3/PR-4 into one ship-ready PR with copy-paste-ready diffs. After PR-5 ships, audit-series queue is fully drained.
+Type: Research / Spec authoring (Sequence A)
+Week in Queue: Week 17 (post audit-series milestone, post-launch +9)
+
+### Context From Previous Session
+2026-05-09 AM authored PR-4 (cross-page brand+footer) spec. PR-1/PR-2/PR-3/PR-4 are open `[ ]` in ADAM-TODO with no Adam authorization yet (4/3/2/1 days respectively). NotebookLM CLI auth still expired (9th calendar day, 15th sub-session blocked). Forward rule from 05-09: "skip page re-audit until at least one HIGH-tier change ships" (held); recommended option (a)/(b) PR-5 spec — final light pass, closes the entire 4-audit pile.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (verified inline at 03:46 CDT). 9th consecutive day blocked, 15th sub-session blocked since 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-10 AM entry). Continued session per master-agent.md error-handling rule.
+- **Dispatched general-purpose subagent** to compile exhaustive residual M+L tier list across 4 audits (subtracting items covered by PR-1/2/3/4). Report returned ~20 M-tier residuals + ~20 L-tier residuals + 5 cross-cutting bundles + 3 PR-2b deferred items, with verbatim "current" and "proposed" snippets per finding. Used directly as input for spec § 3.
+- **Authored PR-5 spec at `tasks/lead-gen/specs/2026-05-10-final-light-pass-pr-spec.md`** (~470 lines). Single PR; 6 source files touched; ~40 atomic edits clustered into 6 conceptual groups (§ 3.1–§ 3.6): Cross-cut A (Loan Goal taxonomy unified across 3 funnel surfaces + script.js TAG_MAP), Cross-cut B+C (MortgageBroker + Service JSON-LD + meta description + OG image fallback on get-preapproved + rate-alert), Cross-cut D (21-day footnote sourcing on both pages), homepage polish + M2 purchase_price_range cross-page parity (mirrors PR-2 pattern), get-preapproved hero promotion + microcopy, thank-you + rate-alert polish bundle (per-branch document.title, per-branch Calendly h2, em-dash literal cleanup, GA sessionStorage dedup, mobile order removal, form-tagline microcopy, rate-move language softened, loans-closed fallback social proof). 10-step post-deploy test plan, 10-row risk assessment (8 LOW + 2 NONE — no MEDIUM or HIGH), § 6 Adam-data prereqs (3 decisions, ~3 min total: canonical Loan Goal taxonomy variant, canonical email + address carry-over from PR-4, 21-day average confirmation), § 7 sequencing matrix vs PR-1/PR-2/PR-3/PR-4 with explicit rebase requirements (PR-5 + PR-2 share script.js Quick Contact handler ~lines 380–415; PR-5 + PR-2 share index.html line 408 CTA; PR-5 + PR-2 share get-preapproved.html lines 376–382 Loan Goal; PR-5 + PR-3 share thank-you.html IIFE 621–720; PR-5 + PR-4 share thank-you.html lines 616–618 GA conversion), § 8 out-of-scope table (8 deferred items mapped to PR-2b inline / PR-6 / separate ticket), § 9 15-step Builder execution checklist, § 10 post-ship state of the 4-audit pile. Estimated ship: 60 min Builder + 10 min Adam review.
+- **Read-only Supabase pipeline check (2026-05-10 03:48 CT, 9th consecutive baseline):** drip_sends_total = 0, drip_enrollments_total = 0, lead_source='Pre-Approval Funnel' (90d) = 0 (18th consecutive day), lead_source='Rate Alert Funnel' (90d) = 0 (42 days since deploy), lead_source='Quick Quote' (90d) = 0, lead_source='Quick Contact' (90d) = 0, lead_source='Website' (90d) = 8 (unchanged from 05-09; most recent: `seekmycounsel@gmail.com 2026-04-30 17:48 UTC`), lead_source='AEO' (90d) = 5, lead_source='Web Lead' (90d) = 2, **lead_source IS NULL (90d) = 1 (NEW datapoint — `srhoyt5@gmail.com` 2026-05-09 21:51 UTC, first NULL-source row observed across 9 baselines)**, contacts_7d = 4 (was 3 — net +1 from the NULL row).
+- **NEW DATAPOINT SURFACED: NULL lead_source row.** First time across all 9 baselines a row landed with `lead_source = NULL`. None of PR-5's edits touch any upstream NULL-defaulting code path (PR-1's TCPA work explicitly left lead_source defaulting alone; PR-2's purchase_price_range plumbing didn't touch lead_source; PR-3 thank-you IIFE doesn't write contacts; PR-4 brand+footer doesn't either). Likely manual import (Adam adding a contact directly via UI), iMessage capture (per existing `iMessage → Supabase Log` n8n workflow `nccX5ml82mMGyE9T`), or admin database insert. Logged out-of-scope in PR-5 § 8 + flagged for separate ~30-min audit when bandwidth allows. Reinforces 05-09 forward rule item (f) "coordinate with SEO/SEM agent: lead_source taxonomy — explicit literals, never default."
+- **Audit-series milestone:** PR-5 closes the entire 4-audit pile. Once PR-1+PR-2+PR-3+PR-4+PR-5 ship: BLOCKER-001 fully resolves + ~15 HIGH-tier fixes land + ~25 M+L tier fixes land + 5 of 5 series compliance FAILs close + audit-series queue fully drains. Combined ship time: ~190 min Builder + ~35 min Adam review.
+
+### Output
+- `tasks/lead-gen/specs/2026-05-10-final-light-pass-pr-spec.md` (NEW, ~470 lines)
+
+### Adam Action Items
+- 1 NEW batched ADAM-TODO line for the PR-5 final light-pass spec (file-pointer pattern). Includes the § 6 Adam-data prereqs (3 decisions, ~3 min total). Designed to **collapse** all remaining residual M+L asks across the 4 prior audit lines (05-01 / 05-02 / 05-04 / 05-05) into a single ship decision (audit lines stay `[ ]` as references until shipped). PR-1 / PR-2 / PR-3 / PR-4 ADAM-TODO lines unchanged — sequencing PR-1 → PR-2 → PR-3 → PR-4 → PR-5 preserved. NotebookLM CLI re-auth line refreshed in place per stale-flags rule (NOT re-stacked).
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 9th day)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 8 lead-gen artifacts queued for delayed PUSH: rate-alert audit (05-02), homepage forms audit (05-04), thank-you audit (05-05), closeout PR spec (05-06), conversion consolidation PR spec (05-07), thank-you-conversion PR spec (05-08), cross-page brand-footer PR spec (05-09), final light-pass PR spec (05-10).
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-10)
+- `tasks/lead-gen/specs/2026-05-10-final-light-pass-pr-spec.md` (NEW, ~470 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-10 AM entry)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END this entry)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 10 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged, surfaced in TODO.md NEEDS ADAM since 05-03)
+- `tasks/ADAM-TODO.md` (1 new batched final-light-pass-PR line, prepended above 05-09 cross-page-brand-footer line; NotebookLM re-auth line refreshed in place — count bumped to 9 days / 8 nightly runs / 15 sub-sessions)
+- `TODO.md` (PR-5 line prepended above PR-4 line in `Now (this week)` section; NotebookLM CLI line refreshed in place; backlog count 7 → 8)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) Builder Sequence C run if Adam authorizes any of PR-1 / PR-2 / PR-3 / PR-4 / PR-5 (ship one or more end-to-end). Recommended order: PR-1 → PR-2 → PR-3 → PR-4 → PR-5 per PR-5 spec § 7. PR-3 + PR-4 + PR-5 can bundle into one Builder push (all single-page-low-risk).
+(b) `/refinance-quote.html` audit — natural extension of audit series to 5/5 funnel coverage; produces clean baseline before agent shifts to net-new strategic work.
+(c) `/austin-mortgage-rates.html` audit — high-traffic SEO landing capture surface; never audited.
+(d) Architect-mode strategic work on net-new lead-gen channels (Realtor Relationships drip activation pending Adam decisions, Long-Term Nurture archive vs author).
+(e) NULL `lead_source` row investigation — separate ~30-min audit characterizing the upstream NULL-defaulting code path. Trace: lead-intake.js / subscribe-lead.js / `/api/contacts/web-lead` / iMessage→Supabase n8n workflow `nccX5ml82mMGyE9T` / manual UI insert. Should produce a "real path that writes NULL" answer + recommendation (e.g., enforce lead_source NOT NULL in DB, or set explicit default at insert time).
+(f) Coordinate with SEO/SEM agent: lead_source taxonomy — SEO-agent inserts should default to `'AEO'` literal, never `'Website'`. Carries from 05-09. 5-min cross-agent decision.
+(g) Verification pass: deterministic POST to `/.netlify/functions/lead-intake` characterizing the upstream Website-fallback path. **DOWNGRADED priority per 05-09 correction; still writes to production function so deferred to Adam-in-the-loop session.**
+
+**Held forward:** "skip page re-audit until at least one HIGH-tier change ships" — this rule was held across the 4-audit pile consolidation arc and is now satisfied (PR-5 closes the pile). Once any of PR-1/2/3/4/5 ships, this rule retires; agent may resume page-level audit work.
+
+**Recommended for tomorrow:** option (b) `/refinance-quote.html` audit — natural extension to 5/5 funnel coverage. Produces clean baseline before strategic pivot. Or option (e) NULL lead_source investigation if the new datapoint demands faster characterization. Audit-series queue is now fully drained from PR-5's perspective; the agent's natural next move is either extending audit coverage (option b/c) or pivoting to strategic work (option d).
+
+Timestamp: 2026-05-10 04:30:00 (estimated, see actual SESSION_END in subagent-status.md)
+SESSION FULLY COMPLETE ✓
+
+---
+## Session: 2026-05-09 AM — Lead Generation
+Focus: **PR-4 Cross-Page Brand Consistency + Footer-Address Sweep — Drop-In Spec.** Closes the cross-page consistency debt that PR-1 / PR-2 / PR-3 explicitly deferred. Bundles M-tier brand + footer-address + thank-you M6 (Google Ads suppression for lo-waitlist) into one ship-ready PR with copy-paste-ready diffs across 4 funnel pages.
+Type: Research / Spec authoring (Sequence A)
+Week in Queue: Week 17 (post audit-series milestone, post-launch +8)
+
+### Context From Previous Session
+2026-05-08 AM authored PR-3 (thank-you conversion) spec. PR-1 / PR-2 / PR-3 are open `[ ]` in ADAM-TODO with no Adam authorization yet (3 / 2 / 1 days respectively). NotebookLM CLI auth still expired (8th calendar day, 13th sub-session blocked). Forward rule: "skip page re-audit until at least one HIGH-tier change ships." 05-08 forward rule recommended option (b) PR-4 spec — natural sequel, cross-page footer + brand sweep, no new audit findings.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (verified inline at 03:46 CDT). 8th consecutive day blocked, 13th sub-session blocked since 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-09 AM entry). Continued session per master-agent.md error-handling rule.
+- **Read all 4 audits' M-tier brand/footer/address sections** — get-preapproved M5, rate-alert M5/C1/L1, homepage M5, thank-you M5/M6. Cross-referenced PR-1 § 3.5 + PR-2 § 3.4 to confirm the 2 already-shipped brand swaps (thank-you line 717 mailto + rate-alert line 460 sample From) are NOT duplicated. PR-1 + PR-2 leave **6 surviving thestyerteam.com references** in production.
+- **Read production source at cited line numbers** for `index.html` (lines 95–122 MortgageBroker JSON-LD, 240–248 LocalBusiness JSON-LD, 1050–1062 footer Contact block), `rate-alert.html` (lines 510–524 footer), `get-preapproved.html` (lines 496–501 footer), `thank-you.html` (lines 600–620 footer + GA conversion block). Extracted verbatim current code per file.
+- **Authored PR-4 spec at `tasks/lead-gen/specs/2026-05-09-cross-page-brand-footer-pr-spec.md`** (~340 lines). Single PR; 4 files touched (`index.html` 3 diffs, `rate-alert.html` 1 diff, `get-preapproved.html` 1 diff, `thank-you.html` 1 diff = 6 atomic copy-paste-ready diffs); current-vs-proposed format throughout. Includes: 9-step post-deploy test plan, 7-row risk assessment (all LOW or NONE — no MEDIUM or HIGH risks), explicit § 6 Adam-data prereq (canonical address: Sam Houston Circle vs Balcones Drive — 30-sec decision before Builder ships), § 8 out-of-scope table, 13-step Builder execution checklist, sequencing matrix vs PR-1/PR-2/PR-3 (all 4 PRs touch same files but different line ranges — zero merge conflict risk in any sequence). Estimated ship: 30 min Builder + 5 min Adam review. After PR-4 ships, only PR-5 light-pass M+L tier remains in the audit-series queue.
+- **Read-only Supabase pipeline check (2026-05-09 03:46 CT, 8th consecutive baseline):** drip_sends_total = 0, drip_enrollments_total = 0, lead_source='Pre-Approval Funnel' = 0 (17th day), lead_source='Rate Alert Funnel' = 0 (41 days), lead_source='Quick Quote' (90d) = 0, lead_source='Quick Contact' (90d) = 0, lead_source='Website' (90d) = **8 (was 10 yesterday — net −2)**, contacts_7d = 3 (was 4). Most recent 'Website' row = `seekmycounsel@gmail.com @ 2026-04-30 17:48 UTC` (was `lucashdr@hotmail.com @ 2026-05-08` yesterday).
+- **CRITICAL CORRECTION SURFACED:** The 2 rows that the 05-07 + 05-08 sessions logged as "+1 'Website' fallback row" each (`brunalexandra7@hotmail.com` 05-06 + `lucashdr@hotmail.com` 05-08) have been **recategorized to `lead_source='AEO'`** in Supabase. They are now visible in the last-14-days query as `'AEO'`, matching `joshbarron56@gmail.com 'AEO: ChatGPT'` 04-26 pattern. The "Website-fallback channel +2 in 48h pattern shift" framing in 2026-05-07 + 2026-05-08 session-logs was **wrong** — those rows were SEO-agent manual inserts that got reclassified, not organic form submissions. Reinforces (and corrects) the 2026-04-28 PA-funnel zero-leads diagnosis: SEO-agent inserts default to `'Website'` then get recategorized to `'AEO'`. The deterministic POST verification probe (deferred 3 sessions ago as "single highest-value un-actioned diagnostic") is **less urgent** than 05-07 + 05-08 framed it. There is no upstream non-script.js path actively writing 'Website' rows. Real legit recent form submission: 1 (`emilyprotzman@gmail.com` 05-05 16:33 UTC, lead_source='Web Lead'). True 'Website' fallback channel: 8 rows in 90d, most recent 04-30 — matches "real homepage submissions extremely rare ~1/wk" framing from 05-04 H5.
+
+### Output
+- `tasks/lead-gen/specs/2026-05-09-cross-page-brand-footer-pr-spec.md` (NEW, ~340 lines)
+
+### Adam Action Items
+- 1 NEW batched ADAM-TODO line for the PR-4 cross-page-brand-footer spec (file-pointer pattern). Includes the § 6 Adam-data prereq decision (Sam Houston vs Balcones address + canonical user-facing email choice) — both decisions are 30-sec exchanges. Designed to **collapse** residual brand/footer asks across the 4 prior audit lines (05-01 / 05-02 / 05-04 / 05-05) into a single decision (audit lines stay `[ ]` as references until shipped). PR-1 / PR-2 / PR-3 ADAM-TODO lines unchanged — sequencing PR-1 → PR-2 → PR-3 → PR-4 preserved. NotebookLM CLI re-auth line refreshed in place per stale-flags rule (NOT re-stacked).
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 8th day)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 7 lead-gen artifacts queued for delayed PUSH: rate-alert audit (05-02), homepage forms audit (05-04), thank-you audit (05-05), closeout PR spec (05-06), conversion consolidation PR spec (05-07), thank-you-conversion PR spec (05-08), cross-page brand-footer PR spec (05-09).
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-09)
+- `tasks/lead-gen/specs/2026-05-09-cross-page-brand-footer-pr-spec.md` (NEW, ~340 lines)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-09 AM entry)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END this entry)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 9 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged, surfaced in TODO.md NEEDS ADAM since 05-03)
+- `tasks/ADAM-TODO.md` (1 new batched cross-page-brand-footer-PR line, prepended above 05-08 thank-you-conversion line)
+- `TODO.md` (PR-4 line prepended above PR-3 line in `Now (this week)` section)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) Builder Sequence C run if Adam authorizes any of PR-1 / PR-2 / PR-3 / PR-4 (ship one or more end-to-end). Recommended order: PR-1 → PR-2 → PR-3 → PR-4 per PR-4 spec § 10. PR-3 + PR-4 can bundle (both single-file, both low-risk).
+(b) PR-5 spec — final light pass: all remaining M-tier + L-tier across all 4 audits in single bundle (per-branch titles, meta descriptions, JSON-LD MortgageBroker on non-homepage funnel pages, OG image fallbacks, quick-quote follow-up form refinements, Loan Goal taxonomy unification deferral, M6 already in PR-4). Closes the entire 4-audit pile. ~25-min Builder + 10-min Adam review.
+(c) `/refinance-quote.html` audit (5/5 funnel coverage; never audited).
+(d) `/austin-mortgage-rates.html` audit (high-traffic SEO landing capture surface; never audited).
+(e) Verification pass: deterministic POST to `/.netlify/functions/lead-intake` characterizing the upstream Website-fallback path. **DOWNGRADED from 05-08 framing — the +2 rows that motivated this in 05-07/05-08 turned out to be SEO-agent manual inserts that got recategorized to 'AEO'. Steady-state organic capture is ~1/wk per 05-04 H5.** Still writes to production function so defer to Adam-in-the-loop session, but it's now a low-priority diagnostic, not a high-leverage one.
+(f) Coordinate with SEO/SEM agent: lead_source taxonomy — SEO-agent inserts should default to `'AEO'` literal, never `'Website'`. Single coordination ticket, 5-min cross-agent decision.
+
+**Held forward:** skip page re-audit until at least one HIGH-tier change ships. PR-4 closes the consolidation arc started 05-06. Once any of PR-1/PR-2/PR-3/PR-4 ships, the next session can resume page-level audit work.
+
+**Recommended for tomorrow:** option (b) PR-5 spec — finishes the entire 4-audit pile in one more spec, then the agent has nothing left to consolidate and must shift to verification or new audits. PR-5 is slightly less leveraged than PR-4 (M+L tier vs M-brand+M-compliance) but completes the series cleanly. After PR-5, the natural next move is option (c) or (d) — extending the audit series to 5/5 funnel-page coverage.
+
+Timestamp: 2026-05-09 04:25:00 (estimated, see actual SESSION_END in subagent-status.md)
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-08 AM — Lead Generation
 Focus: **PR-3 Thank-You Conversion Consolidation — Drop-In Spec.** Completes the consolidation trilogy started 05-06 (PR-1 closeout) and continued 05-07 (PR-2 form-page). PR-3 bundles H2–H5 from the 2026-05-05 `/thank-you.html` audit (rate-alert Calendly retain + retitle, FTB-DPA phone CTA append, PA-branch reassurance copy, unknown-type / no-type dataLayer instrumentation) into one ship-ready PR document with copy-paste-ready diffs. H1 (3-step block mismatch) already covered by PR-1 — not duplicated.
 Type: Research / Spec authoring (Sequence A)

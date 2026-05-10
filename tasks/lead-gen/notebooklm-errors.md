@@ -1,5 +1,17 @@
 # NotebookLM Error Log — Lead Generation
 
+## 2026-05-10 AM Session
+
+| Step | Error | Action |
+|------|-------|--------|
+| PULL `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (WebLiteSignIn redirect on accounts.google.com) | SKIPPED — 9th consecutive day blocked, 15th sub-session blocked since 2026-05-03 PM. ADAM-TODO line refreshed in place per stale-flags rule. |
+
+## 2026-05-09 AM Session
+
+| Step | Error | Action |
+|------|-------|--------|
+| PULL `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (WebLiteSignIn redirect on accounts.google.com) | SKIPPED — 8th consecutive day blocked, 13th sub-session blocked since 2026-05-03 PM. ADAM-TODO line refreshed in place per stale-flags rule. |
+
 ## 2026-03-27 AM Session
 
 | URL | Error | Action |
@@ -108,3 +120,11 @@ ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a term
 Lead Gen PUSH backlog now: **6 artifacts** (2026-05-02 rate-alert audit, 2026-05-04 homepage forms audit, 2026-05-05 thank-you page audit, 2026-05-06 closeout PR spec, 2026-05-07 conversion-consolidation PR spec, 2026-05-08 thank-you-conversion PR spec) + 6 PM-side syncs awaiting auth restore. Updated ledger of blocked Lead Gen sub-sessions since 2026-05-03: **11 total** — PM 05-03 nightly, AM 05-04 lead-gen-am, PM 05-04 nightly (13h-late fire), AM 05-05 lead-gen-am, PM 05-05 nightly on-time, AM 05-06 lead-gen-am, PM 05-06 nightly on-time, AM 05-07 lead-gen-am, PM 05-07 nightly on-time, AM 05-08 lead-gen-am (this run). ADAM-TODO line already filed — count refreshed in place per stale-flags rule, NOT re-stacked.
 
 ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. Each additional 24h of delay = ~2 more outdated NotebookLM sources the recovery night's staleness audit must purge. Recovery night will need to push the 6-deep Lead Gen backlog plus the parallel SEO/SEM backlog (notebook last refreshed 2026-05-01 → ~14 stale + ~8 ready-to-add accumulated by now; 50-source cap will force heavy churn).
+
+---
+
+## 2026-05-08 PM-cron-on-time — Auth Still Expired (7th consecutive nightly block, 12th Lead Gen sub-session)
+
+[2026-05-08 22:09 PM-cron-on-time] Same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error on `notebooklm list --json` with WebLiteSignIn redirect. Cron fired ON TIME tonight (22:09 vs 22:00 target — normal jitter). 7th wall-clock day blocked, 7th nightly run blocked, 12th Lead Gen sub-session blocked since 05-03 PM (counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 plus the dual nightly runs). PUSH+CURATE Step 1 blocked → Steps 2–7 all skipped. No notebook contact, no source mutations, no master log appends, no digest. Lead Gen PUSH backlog: 6 audit/spec artifacts (2026-05-02 rate-alert, 2026-05-04 homepage forms, 2026-05-05 thank-you, 2026-05-06 closeout-PR spec, 2026-05-07 conversion-PR spec, 2026-05-08 thank-you-conversion-PR spec) + 7 PM-side syncs awaiting recovery. Local files unchanged outside trackers. ADAM-TODO line refreshed in place (not re-stacked) per stale-flags rule. ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal.
+
+[2026-05-09 22:00 PM-cron-on-time] AUTH EXPIRED (8th consecutive nightly): `notebooklm list --json` → `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` PUSH+CURATE Steps 1–7 all blocked at Step 1. ADAM ACTION: run `notebooklm login` from a terminal.

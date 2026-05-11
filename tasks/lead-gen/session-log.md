@@ -2,6 +2,72 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-11 AM — Lead Generation
+Focus: **NULL `lead_source` diagnostic — characterize and close yesterday's flagged datapoint.** Deliberate break from spec-pile pattern (5 PRs queued, none authorized 4 / 3 / 2 / 1 / 0 days respectively).
+Type: Research / Diagnostic (Sequence A — abbreviated, no Architect handoff)
+Week in Queue: Week 17 (post audit-series milestone, post-launch +10)
+
+### Context From Previous Session
+2026-05-10 AM authored PR-5 final-light-pass spec, closing the 4-audit pile. Spec-pile is now 5 deep (PR-1 / PR-2 / PR-3 / PR-4 / PR-5) with zero Adam authorization. Yesterday's session surfaced "NEW datapoint": `lead_source IS NULL = 1 (srhoyt5@gmail.com 05-09 21:51 UTC, first NULL-source row observed)`. Today's mission: characterize that row + the pattern.
+
+### Completed
+- **NotebookLM PULL — SKIPPED.** CLI returned `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (10th consecutive day blocked; 17th sub-session blocked since 2026-05-03 PM). Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-11 AM entry). Continued session per master-agent.md error-handling rule.
+- **Supabase pipeline baseline (10th consecutive, 03:46 CT):** drip_sends_total=0, drip_enrollments_total=0, lead_source='Pre-Approval Funnel' (90d)=0 (19th day), lead_source='Rate Alert Funnel' (90d)=0 (43 days), lead_source='Quick Quote' (90d)=0, lead_source='Quick Contact' (90d)=0, lead_source='Website' (90d)=8 (unchanged from 05-10), lead_source='AEO' (90d)=**4 (was 5 — overnight reclassification of one AEO row out of the bucket; consistent with the 05-09 framing of SEO-agent rows being mutable between buckets)**, lead_source='Web Lead' (90d)=2, lead_source IS NULL (90d)=**1393 (was reported as "1" by 05-10 session — see decomposition below)**, contacts_7d=4.
+- **NULL `lead_source` flag investigation — DEBUNKED.** Yesterday's "1 NULL row" was a measurement scope artifact, not a true count. Today's 90-day query returned 1393 NULL rows total. Drilled into the population:
+  - **Bulk imports (1364 rows / 1393, 98%):** 2026-03-09 = 788 rows (initial Salesforce/Arive backfill into Adam's org), 2026-04-13 = 428 rows (Scott's pilot MISMO bulk import — confirmed via org_id `40377391-6b4c-4d1a-81d2-ffd743876f0b` matching Scott's tenant per memory `project_scott_pilot.md`), 2026-04-05 = 110 rows, 2026-03-16 = 41 rows. None of these are form submissions.
+  - **Ongoing singletons (29 rows / 1393, 2%):** 3 distinct upstream paths, all expected:
+    - `source='arive_webhook'` (3 rows in 30d) — Susan Snyder 05-01, Kelli Kuenn 04-22, Vy Nguyen 04-16. All `contact_type='borrower' stage='Pre-Approved'`. Arive n8n workflow `1tagvoU0UXtdDiMY` is creating contacts with `lead_source = NULL` (always has — never set this field).
+    - `source='point-import'` (Scott's tenant ongoing) — singletons in Scott's org from manual MISMO uploads post-bulk.
+    - Manual realtor inserts (`contact_type='realtor'`, no source) — Sharon Hoyt (`srhoyt5@gmail.com`) 05-09, Patrick Birdsong 04-28, Chelsea Lumpkin 04-27, Meghan Hughes / Rocelle Lam / Diane Myers / Patrick Birdsong cluster 04-15. These are realtor contacts being added via UI/import scripts; `lead_source` is a borrower-funnel concept, not naturally applicable.
+  - **Funnel-relevant subset** (`contact_type='borrower'`, Adam's org, `source` NULL or non-Arive/Point) = **41 rows / 90d, of which 37 from 2026-03-09 bulk backfill, 4 scattered singletons (latest 2026-04-14), zero in last 30 days.**
+  - **Conclusion: No silent form-failure path exists.** The "1 NULL row 05-09" flag from yesterday's session was a realtor contact (Sharon Hoyt), not a form submission. Flag retired in CONTEXT.md `Active blockers`.
+- **No new audit or PR spec authored.** Deliberate. Pile is 5 deep, 9 days unactioned. Authoring a 6th would compound the bias.
+
+### Output
+- 1 SQL diagnostic trail (read-only, 4 queries) — no artifact file (results in-line in this entry).
+- CONTEXT.md (3 Lead Gen fields refreshed; NULL flag retired).
+- CHANGELOG.md (2026-05-11 AM lead-gen entry prepended).
+- ADAM-TODO.md (NotebookLM line refreshed in place; **no new ASK added**).
+- TODO.md (NotebookLM line refreshed in place).
+
+### Adam Action Items
+**0 new ADAM-TODO lines added** — first session in 10 to not add an action item. NotebookLM CLI re-auth line refreshed in place per stale-flags rule (count bumped to 10 days / 9 nightly runs / 17 sub-sessions). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. Audit lines from 05-01 / 05-02 / 05-04 / 05-05 unchanged.
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 10th day)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 9 lead-gen artifacts queued for delayed PUSH (8 prior specs/audits + today's NULL diagnostic narrative — though the diagnostic narrative is logged in this session entry rather than a standalone artifact, so practical PUSH count remains 8).
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-11)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-11 AM entry)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START + SESSION_END this entry)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 11 AM lead-gen entry prepended above social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged)
+- `tasks/ADAM-TODO.md` (NotebookLM re-auth line refreshed in place — count bumped to 10 days; no new ASK)
+- `TODO.md` (NotebookLM CLI line refreshed in place; backlog count 8 → 9)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) Builder Sequence C run if Adam authorizes any of PR-1 / PR-2 / PR-3 / PR-4 / PR-5 (ship one or more end-to-end). Recommended order: PR-1 → PR-2 → PR-3 → PR-4 → PR-5 per PR-5 spec § 7.
+(b) **Outbound iMessage research** — Sendblue is on GOALS week-of-Apr-20 as "Speed to lead PRIORITY"; the open question per GOALS line 67 is "BlueBubbles, Sendblue, AppleScript-based, n8n integration?" Produce comparison brief (NOT a build) covering: cost/scale, TCPA compliance gating, signed-up account requirement, n8n wiring complexity, 5-min-from-submit SLA feasibility. Output: `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md`. ~45 min agent time, zero Adam-blocked decisions.
+(c) `/refinance-quote.html` audit — natural extension to 5/5 funnel coverage. Produces another audit-artifact, but at least it's a new funnel surface rather than another spec on top of the 5-spec pile.
+(d) Realtor Relationships drip activation — copy bodies already drafted at `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md`; blocked only on Adam cadence + activation criterion decisions (2 questions). Architect-mode session to surface those questions cleanly.
+(e) NULL lead_source root-fix proposal: Arive webhook workflow (`1tagvoU0UXtdDiMY`) should set `lead_source='Arive Borrower Sync'` literal on insert. ~15-min n8n MCP change (via REST PUT to preserve credentials per memory rule). LOW value (these aren't funnel leads) but cleans up the taxonomy. Defer unless bandwidth genuinely empty.
+
+**Held forward:** "skip page re-audit until at least one HIGH-tier change ships" — held across the audit-series consolidation arc; still satisfied (no new audit authored today either).
+
+**Recommended for tomorrow:** **option (b) outbound iMessage research.** Aligns with current GOALS priority ("Speed to lead — PRIORITY"), produces a strategic-not-tactical artifact, breaks the audit-cycle bias, and doesn't add another `[ ]` ADAM-TODO line waiting on authorize — it produces a comparison brief Adam can read and pick from.
+
+Timestamp: 2026-05-11 04:15:00 (estimated, see actual SESSION_END in subagent-status.md)
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-10 AM — Lead Generation
 Focus: **PR-5 Final Light-Pass — All Remaining M+L Tier Across 4 Audits — Drop-In Spec.** Closes the entire 4-audit pile started 05-01. Bundles every M-tier and L-tier residual not already covered by PR-1/PR-2/PR-3/PR-4 into one ship-ready PR with copy-paste-ready diffs. After PR-5 ships, audit-series queue is fully drained.
 Type: Research / Spec authoring (Sequence A)

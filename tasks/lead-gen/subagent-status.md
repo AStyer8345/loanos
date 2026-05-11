@@ -1,4 +1,64 @@
 SESSION_START
+- DateTime: 2026-05-11 03:45:50 CDT
+- Mode: AM
+- Focus: NULL `lead_source` diagnostic — characterize and close yesterday's flagged datapoint. Deliberate break from spec-pile pattern.
+MASTER: Context loading. Activating master-agent.md.
+
+SESSION END: 2026-05-11 04:15:00
+Mode: AM
+Focus: **NULL `lead_source` flag from 05-10 DEBUNKED via diagnostic SQL.** 0 new audits, 0 new PR specs, 0 new ADAM-TODO lines — deliberate break from spec-pile bias.
+MASTER: All objectives complete. Read-only Supabase queries (4) + file updates only. Zero code changes, zero commits, zero outbound.
+
+DIAGNOSTIC: COMPLETE — Yesterday's "1 NULL lead_source row" framing was a measurement-scope artifact. Today's 90-day query returned 1393 NULL rows total. Decomposition:
+- **Bulk imports (1364 rows, 98%):** 2026-03-09 = 788 (initial Adam org backfill), 2026-04-13 = 428 (Scott pilot MISMO bulk in org `40377391-...`), 2026-04-05 = 110, 2026-03-16 = 41. None are form submissions.
+- **Ongoing singletons (29 rows, 2%):** 3 paths, all expected — `source='arive_webhook'` (Arive borrower sync — never sets lead_source), `source='point-import'` (Scott's tenant), manual realtor inserts (`contact_type='realtor'`, no source — Sharon Hoyt `srhoyt5@gmail.com` 05-09 was one of these, NOT a form submission).
+- **Funnel-relevant subset** (`contact_type='borrower'`, Adam's org, source NULL or non-Arive/Point): 41 rows / 90d, 37 from 03-09 bulk backfill, **zero in last 30 days**. No silent form-failure path exists. Flag retired in CONTEXT.md.
+
+PIPELINE STATUS (read-only Supabase 2026-05-11 03:46 CT, 10th consecutive baseline): drip_sends_total=0, drip_enrollments_total=0, lead_source='Pre-Approval Funnel'=0 (19th day), lead_source='Rate Alert Funnel'=0 (43 days), lead_source='Quick Quote' (90d)=0, lead_source='Quick Contact' (90d)=0, lead_source='Website' (90d)=8 (unchanged from 05-10; most recent: seekmycounsel@gmail.com 2026-04-30 17:48 UTC), lead_source='AEO' (90d)=**4 (was 5 — overnight reclassification of one AEO row)**, lead_source='Web Lead' (90d)=2, lead_source IS NULL (90d)=**1393 (true count; yesterday's "1" was scope-filtered)**, contacts_7d=4. **Named-funnel channels still flat across 10 baselines.**
+
+OUTPUT: 0 new files (intentional). 4 SQL diagnostic queries (read-only). Updated: CONTEXT.md (3 Lead Gen fields), CHANGELOG.md (2026-05-11 AM lead-gen entry prepended), TODO.md (NotebookLM line refreshed in place), tasks/ADAM-TODO.md (NotebookLM line refreshed; **no new ASK added — first session in 10 to not add an action item**), tasks/lead-gen/{notebooklm-errors.md, today-mission.md, session-log.md, subagent-status.md}.
+
+ADAM ACTION ITEMS: **0 new lines.** NotebookLM CLI re-auth line refreshed in place (count bumped to 10 days / 9 nightly runs / 17 sub-sessions). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. Today's recommended forward-rule option for tomorrow: **(b) outbound iMessage research** — aligns with current GOALS priority "Speed to lead — PRIORITY", produces a strategic comparison brief covering BlueBubbles vs Sendblue vs AppleScript vs n8n integration paths, doesn't add another `[ ]` line waiting on authorize.
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (10th calendar day, 17th sub-session blocked).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/today-mission.md` (refreshed mission brief for 05-11)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-11 AM entry)
+- `tasks/lead-gen/session-log.md` (May 11 AM entry prepended)
+- `tasks/lead-gen/subagent-status.md` (this SESSION_START + SESSION_END)
+- `CHANGELOG.md` (May 11 AM lead-gen entry prepended above social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged)
+- `tasks/ADAM-TODO.md` (NotebookLM re-auth line refreshed in place; no new ASK)
+- `TODO.md` (NotebookLM CLI line refreshed in place)
+
+Timestamp: 2026-05-11 04:15:00
+SESSION FULLY COMPLETE ✓
+
+---
+
+**SESSION_END**
+- DateTime: 2026-05-10 22:10:01
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-10 target — normal jitter only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (9th consecutive nightly run)
+- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. WebLiteSignIn redirect on accounts.google.com.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-10 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 9 wall-clock days blocked, 9 nightly runs, 16 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09 / 05-10.
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- Lead Gen PUSH backlog: 8 audit/spec artifacts (2026-05-02 rate-alert, 2026-05-04 homepage forms, 2026-05-05 thank-you, 2026-05-06 closeout-PR spec, 2026-05-07 conversion-consolidation PR spec, 2026-05-08 thank-you-conversion PR spec, 2026-05-09 cross-page-brand-footer PR spec, 2026-05-10 final-light-pass PR spec) + 9 PM-side syncs awaiting recovery.
+Timestamp: 2026-05-10 22:10:01
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 9th consecutive nightly)
+
+---
+
+SESSION_START
 - DateTime: 2026-05-10 03:46:01 CDT
 - Mode: AM
 - Focus: TBD — load context, assess prior session deferrals, define mission

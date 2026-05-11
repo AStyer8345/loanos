@@ -1,49 +1,38 @@
-## Mission Brief — 2026-05-10 AM
+## Mission Brief — 2026-05-11 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-**PR-5 Final Light-Pass — All Remaining M-Tier + L-Tier Across 4 Audits — Drop-In Spec.** Closes the entire 4-audit pile. After PR-1 (compliance), PR-2 (conversion), PR-3 (thank-you), PR-4 (cross-page brand+footer), the residual is the M-tier + L-tier polish items the prior 4 PRs explicitly deferred. Bundles all remaining items from `2026-05-01-get-preapproved-conversion-audit.md`, `2026-05-02-rate-alert-conversion-audit.md`, `2026-05-04-homepage-forms-conversion-audit.md`, `2026-05-05-thank-you-page-audit.md` into one ship-ready PR with copy-paste-ready diffs.
-
-This is the natural sequel per session-log 2026-05-09 forward rule (recommended option (a)/(b): PR-5 spec). Held-forward "skip page re-audit until at least one HIGH-tier change ships" honored — no new audit findings produced, only consolidation. Once PR-5 ships, the agent has nothing left to consolidate from the 4-audit pile and must shift to either: (a) `/refinance-quote.html` audit (5/5 funnel coverage), (b) `/austin-mortgage-rates.html` audit (high-traffic SEO landing capture surface), (c) deterministic POST verification probe (Adam-in-the-loop session — DOWNGRADED priority per 05-09 correction), or (d) Architect-mode strategic work on net-new lead-gen channels.
+**NULL `lead_source` diagnostic — characterize and close yesterday's flagged datapoint.** Deliberate break from spec-pile pattern (5 PRs queued, none authorized).
 
 ### Session Type
-[x] Research + Planning (Sequence A)
+[x] Research / Diagnostic (Sequence A — abbreviated, no Architect handoff)
 [ ] Strategy / Architecture (Sequence B)
 [ ] Execute / Build (Sequence C)
 [ ] Full Cycle (Sequence D)
 
 ### Objectives
-1. Read all 4 audits' M-tier + L-tier sections + the 4 prior PR specs to identify the exhaustive residual list (items not already covered by PR-1 / PR-2 / PR-3 / PR-4).
-2. Read the production HTML at cited line numbers so the spec carries verbatim current code.
-3. Author a single drop-in PR spec at `tasks/lead-gen/specs/2026-05-10-final-light-pass-pr-spec.md` containing per-finding diffs (current vs proposed), test plan, risk assessment, sequencing relative to PR-1/PR-2/PR-3/PR-4.
-4. Read-only Supabase pipeline snapshot (9th consecutive baseline expected).
-5. Update trackers (CHANGELOG, CONTEXT, ADAM-TODO, TODO, session-log) per scheduled-task SKILL.md rules.
+1. Run 10th consecutive read-only Supabase pipeline baseline.
+2. Investigate the NULL `lead_source` row pattern flagged 05-10 (`srhoyt5@gmail.com` 05-09 21:51 UTC). Establish: is it a silent form-failure path, or expected non-funnel behavior?
+3. Update CONTEXT/CHANGELOG/TODO with the answer. **Do not author a new audit or PR spec** — pile is already 5 deep, 9 days unactioned.
 
 ### Definition of Done
-- Spec doc exists, mirrors yesterday's PR-4 spec format, and is detailed enough that a Builder subagent (or Adam) could ship without re-reading the source audits.
-- Single new ADAM-TODO line; designed to **collapse** all remaining M+L tier items across the 4 prior audit lines (05-01 / 05-02 / 05-04 / 05-05) into a single ship decision (audit lines stay `[ ]` as references until shipped). PR-1 / PR-2 / PR-3 / PR-4 ADAM-TODO lines unchanged — sequencing PR-1 → PR-2 → PR-3 → PR-4 → PR-5 preserved.
-- Read-only Supabase pipeline check appended to session log; no DB writes.
-- NotebookLM PULL/PUSH skip logged inline (9th calendar day blocked).
+- Baseline numbers logged.
+- NULL `lead_source` flag either retired (with evidence) or escalated to ADAM-TODO with a concrete next step.
+- No new `[ ]` ADAM-TODO line added unless a new ADAM-action is genuinely required.
 
 ### Resources / Files in Scope
-- `tasks/lead-gen/research/2026-05-01-get-preapproved-conversion-audit.md` (read-only)
-- `tasks/lead-gen/research/2026-05-02-rate-alert-conversion-audit.md` (read-only)
-- `tasks/lead-gen/research/2026-05-04-homepage-forms-conversion-audit.md` (read-only)
-- `tasks/lead-gen/research/2026-05-05-thank-you-page-audit.md` (read-only)
-- `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md` (read-only — sequencing reference)
-- `tasks/lead-gen/specs/2026-05-07-conversion-consolidation-pr-spec.md` (read-only — sequencing reference)
-- `tasks/lead-gen/specs/2026-05-08-thank-you-conversion-pr-spec.md` (read-only — sequencing reference)
-- `tasks/lead-gen/specs/2026-05-09-cross-page-brand-footer-pr-spec.md` (read-only — sequencing reference)
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/index.html` (read-only)
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/rate-alert.html` (read-only)
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/get-preapproved.html` (read-only)
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/thank-you.html` (read-only)
-- `/Users/adamstyer/Documents/Claude/styerteam-mortgage-site/script.js` (read-only)
-- `tasks/lead-gen/specs/2026-05-10-final-light-pass-pr-spec.md` (NEW — deliverable)
+- Supabase project `uuqedsvjlkeszrbwzizl` — `contacts` table, read-only.
+- `CONTEXT.md` (Lead Gen Agent Status fields, lines 121–127).
+- `CHANGELOG.md` (prepend dated entry).
+- `TODO.md` (refresh NotebookLM CLI line in place).
+- `tasks/ADAM-TODO.md` (refresh NotebookLM line; do NOT add new ASK).
+- `tasks/lead-gen/notebooklm-errors.md` (10th-day entry).
+- `tasks/lead-gen/session-log.md`, `subagent-status.md`.
 
 ### HIGH RISK Items
-- None. Sequence A: read-only research, single output document. Zero code changes, zero commits, zero outbound. Spec authorizes nothing on its own — Adam reviews before any Builder run.
-- NotebookLM CLI auth still expired (9th day, 15th sub-session expected). PULL/PUSH SKIPPED at start; will surface inline.
-- PR-5 will touch overlapping files with PR-1/PR-2/PR-3/PR-4 — spec must address sequencing explicitly: PR-5 designed to apply LAST after the prior 4; rebase-safe in any order via different line ranges.
+None. Read-only Supabase, no n8n changes, no Mailchimp changes, no styerteam-mortgage-site commits.
+
+### Outcome
+NULL flag retired. 1393 90-day NULL rows decompose to `arive_webhook` + `point-import` (Scott's tenant) + manual realtor inserts. Funnel-relevant subset = 41 rows / 90d, 37 from 2026-03-09 bulk backfill, **zero in last 30 days**. No silent form-failure path exists.

@@ -1,10 +1,10 @@
-## Scenarios Mission Brief — 2026-05-09 AM
+## Scenarios Mission Brief — 2026-05-10 AM
 
 ### Focus Area
 None. Program is complete and out-of-scope per GOALS.md.
 
 ### Why This Matters
-Tiers 1–8 of the Scenarios improvement program are all COMPLETE (last build 2026-04-24 AM mobile swipe cards). GOALS.md (file unchanged 20 days; Mon 2026-05-04 refresh day skipped) lists FNM 3.4 / drip campaigns / notes-activity-log as this week's LoanOS Product priorities — no Scenarios work. The cron is in a steady-state no-build holding pattern awaiting Adam's retire / redirect / pause decision (now 15 consecutive no-build exits).
+Tiers 1–8 of the Scenarios improvement program are all COMPLETE (last build 2026-04-24 AM mobile swipe cards). GOALS.md (file unchanged 21 days; Mon 2026-05-04 refresh day skipped) lists FNM 3.4 / drip campaigns / notes-activity-log as this week's LoanOS Product priorities — no Scenarios work. The cron is in a steady-state no-build holding pattern awaiting Adam's retire / redirect / pause decision (now 16 consecutive no-build exits).
 
 ### Session Type
 [ ] Research + Design
@@ -13,22 +13,22 @@ Tiers 1–8 of the Scenarios improvement program are all COMPLETE (last build 20
 [X] MAINTENANCE-ONLY — refresh standing NEEDS ADAM line + tracker fields, exit clean.
 
 ### Objectives
-1. Refresh TODO.md NEEDS ADAM line (14-streak → 15-streak; runway 3 → 2 no-op runs until Mon 2026-05-11 GOALS refresh).
+1. Refresh TODO.md NEEDS ADAM line (15-streak → 16-streak; runway 2 → 1 no-op run until Mon 2026-05-11 GOALS refresh = tomorrow).
 2. Replace 3 Scenarios fields in CONTEXT.md (no append; net 0 line drift).
 3. Append CHANGELOG.md entry + session-log.md entry.
 
 ### Files in Scope
 - `TODO.md` (NEEDS ADAM line refresh in place)
 - `CONTEXT.md` (3-field replace in Scenarios Agent Status block)
-- `CHANGELOG.md` (top-of-day append in 2026-05-09 section)
+- `CHANGELOG.md` (top-of-day append in 2026-05-10 section)
 - `tasks/scenarios/session-log.md` (append)
 - `tasks/scenarios/today-mission.md` (this file, overwrite)
 - `tasks/scenarios/subagent-status.md` (SESSION_START + SESSION_END markers)
 
 ### Definition of Done
-- TODO.md NEEDS ADAM line shows 15-streak with 2026-05-09 added.
-- CONTEXT.md Scenarios Agent Status reflects 15-streak; line count unchanged.
-- session-log.md has 2026-05-09 entry following prior-day shape.
+- TODO.md NEEDS ADAM line shows 16-streak with 2026-05-10 added.
+- CONTEXT.md Scenarios Agent Status reflects 16-streak; line count unchanged.
+- session-log.md has 2026-05-10 entry following prior-day shape.
 - subagent-status.md has SESSION_FULLY_COMPLETE marker.
 
 ### Subagents to Activate

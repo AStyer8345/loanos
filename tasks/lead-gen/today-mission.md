@@ -1,38 +1,44 @@
-## Mission Brief — 2026-05-11 AM
+## Mission Brief — 2026-05-12 AM
 
 ### Domain
 Lead Generation
 
 ### Focus Area
-**NULL `lead_source` diagnostic — characterize and close yesterday's flagged datapoint.** Deliberate break from spec-pile pattern (5 PRs queued, none authorized).
+**Outbound iMessage comparison brief.** Per yesterday's forward rule option (b) and GOALS.md week-of-Apr-20 priority "Speed to lead — PRIORITY". Decision pending per GOALS line 67: which path — BlueBubbles, Sendblue, AppleScript, n8n integration?
 
 ### Session Type
-[x] Research / Diagnostic (Sequence A — abbreviated, no Architect handoff)
+[x] Research + Planning (Sequence A)
 [ ] Strategy / Architecture (Sequence B)
 [ ] Execute / Build (Sequence C)
 [ ] Full Cycle (Sequence D)
 
 ### Objectives
-1. Run 10th consecutive read-only Supabase pipeline baseline.
-2. Investigate the NULL `lead_source` row pattern flagged 05-10 (`srhoyt5@gmail.com` 05-09 21:51 UTC). Establish: is it a silent form-failure path, or expected non-funnel behavior?
-3. Update CONTEXT/CHANGELOG/TODO with the answer. **Do not author a new audit or PR spec** — pile is already 5 deep, 9 days unactioned.
+1. Produce a strategic comparison brief at `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md` covering all 4 GOALS-listed paths plus a 5th alternative (Twilio + native n8n SMS) — go deeper than 04-24 doc on each.
+2. Surface the **5-minute-from-submit SLA feasibility** per option (the actual measurable GOAL.md requirement).
+3. Quantify the **TCPA gating chain** — what must ship before any iMessage automation can fire.
+4. Deliver a concrete recommendation Adam can pick from in 5 minutes, with no further research needed.
 
 ### Definition of Done
-- Baseline numbers logged.
-- NULL `lead_source` flag either retired (with evidence) or escalated to ADAM-TODO with a concrete next step.
-- No new `[ ]` ADAM-TODO line added unless a new ADAM-action is genuinely required.
+- Brief authored, side-by-side option table included.
+- 0 new spec lines on top of the existing 5-deep pile (PR-1 through PR-5 still unauthorized).
+- ADAM-TODO gets 1 brief-pointer line + the existing NotebookLM CLI line refreshed (in place, not stacked).
+- All 4 session files updated (CONTEXT, CHANGELOG, TODO, DECISIONS unchanged unless real decision made).
 
 ### Resources / Files in Scope
-- Supabase project `uuqedsvjlkeszrbwzizl` — `contacts` table, read-only.
-- `CONTEXT.md` (Lead Gen Agent Status fields, lines 121–127).
-- `CHANGELOG.md` (prepend dated entry).
-- `TODO.md` (refresh NotebookLM CLI line in place).
-- `tasks/ADAM-TODO.md` (refresh NotebookLM line; do NOT add new ASK).
-- `tasks/lead-gen/notebooklm-errors.md` (10th-day entry).
-- `tasks/lead-gen/session-log.md`, `subagent-status.md`.
+- READ-ONLY:
+  - `tasks/lead-gen/research/2026-04-24-imessage-speed-to-lead.md` (prior brief)
+  - `GOALS.md` (week-of-Apr-20)
+  - n8n workflow IDs `PiuIsQpBuydtFM4m` (Web Lead Automation) + `J9Pe24vUi6fpZtdZ` (Pre-Approval Lead Notify) + `nccX5ml82mMGyE9T` (iMessage → Supabase Log, inbound only)
+  - `ADAM-TODO.md` line `2026-04-24 SENDBLUE SPEED-TO-LEAD` (2 prereqs)
+- WRITE:
+  - `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md` (new)
+  - 4 standard session files
+  - `tasks/lead-gen/notebooklm-errors.md` (2026-05-12 AM entry)
 
 ### HIGH RISK Items
-None. Read-only Supabase, no n8n changes, no Mailchimp changes, no styerteam-mortgage-site commits.
+**None — Sequence A research only.** No code changes. No outbound. No funnel modifications. The brief is a decision document; the decision itself is Adam's, gated on:
+- TCPA two-checkbox closeout (already covered by PR-1 spec at `tasks/lead-gen/specs/2026-05-06-compliance-closeout-pr-spec.md` — unauthorized)
+- Sendblue (or alternative provider) signup + API key delivery
 
-### Outcome
-NULL flag retired. 1393 90-day NULL rows decompose to `arive_webhook` + `point-import` (Scott's tenant) + manual realtor inserts. Funnel-relevant subset = 41 rows / 90d, 37 from 2026-03-09 bulk backfill, **zero in last 30 days**. No silent form-failure path exists.
+### Forward
+Today is the 11th consecutive day blocked on NotebookLM CLI auth. Master `notebooklm-errors.md` will refresh. Steps 3 (PULL) + 8 (PUSH master notebook) skip per error-handling rule.

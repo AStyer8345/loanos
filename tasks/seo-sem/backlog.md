@@ -76,7 +76,7 @@
 
 ## ADDED 2026-04-01 AM
 - ~~[MEDIUM_RISK] Blog post: "How to Qualify for a Mortgage When Self-Employed in Austin TX"~~ ✅ DONE 2026-04-02 — blog/2026-04-02-self-employed-mortgage-austin-tx.html (written outside session, found in AM audit)
-- [LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms (after TCPA required — SMS opt-in is optional/separate per 2026 FCC rules, same pattern as /get-preapproved)
+- ~~[LOW_RISK] Add SMS opt-in checkbox to 24 suburb forms~~ ✅ DONE 2026-04-06 — commit 6fb8883 (duplicate of completed entry below; cleaned up 2026-05-11 by styer-site-daily re-verify gate — verified live on 25/25 suburb files via `sms_opt_in` name attr)
 - ~~[LOW_RISK] Blog post CTA audit: verify all 12 blog posts link CTAs to /get-preapproved (not raw loan app URL)~~ ✅ DONE 2026-04-05 — all 17 posts pass; mslp.my1003app.com appears only in global nav "Apply Now" button (by design)
 
 ## ADDED 2026-04-01 — SEO AUDIT FINDINGS (source: April 2026 full-site audit)

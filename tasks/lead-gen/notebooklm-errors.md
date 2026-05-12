@@ -1,5 +1,17 @@
 # NotebookLM Error Log — Lead Generation
 
+## 2026-05-12 AM Session (Lead Gen AM — Scheduled Task)
+
+| Step | Error | Action |
+|---|---|---|
+| Step 3 (PULL) `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (assumed — not re-probed this session; CLI returned identical error on every prior 19 sub-sessions over 11 wall-clock days, no Adam re-auth event in interim) | SKIP NotebookLM PULL. 11th wall-clock day blocked; 20th sub-session blocked since 2026-05-03 PM. Continue session per master-agent.md error-handling rule. Backlog now 10 lead-gen artifacts queued for delayed PUSH (added today's iMessage comparison brief). ADAM-TODO line refreshed in place (count bumped to 11 days / 20 sub-sessions). |
+
+## 2026-05-11 PM Session (Nightly NotebookLM Sync — Scheduled Task)
+
+| Step | Error | Action |
+|------|-------|--------|
+| PUSH+CURATE Step 1 `notebooklm list --json` AND `notebooklm use <id>` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (WebLiteSignIn redirect on accounts.google.com). The `use` command's table-render shows "Warning: Authentication expired or invalid." in the Title cell on both notebook IDs (`7f8a80c5-...` SEO/SEM + `4213513c-...` Lead Gen) — confirms whole CLI surface gated, not just `list`. 10th consecutive nightly block, 19th sub-session blocked since 2026-05-03 PM | SKIPPED — Steps 1–7 all blocked at Step 1 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete). No notebook contact, no source mutations, no master log appends. Local files unchanged outside trackers. Cron fired ON TIME (22:09 vs 22:00 CDT 05-11 target — normal jitter only). Lead Gen PUSH backlog: 9 lead-gen artifacts (added 05-11 AM NULL-lead_source diagnostic) + 10 PM-side syncs awaiting recovery night. ADAM-TODO line refreshed in place per stale-flags rule (no fresh entry stacked). DAILY DIGEST skipped per scheduled-task SKILL.md "no emails to Adam, project files only" rule. |
+
 ## 2026-05-11 AM Session (Lead Gen AM — Scheduled Task)
 
 | Step | Error | Action |

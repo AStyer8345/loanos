@@ -1,4 +1,22 @@
 **SESSION_END**
+- DateTime: 2026-05-11 22:09:38
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-11 target — normal jitter only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (10th consecutive nightly run)
+- `notebooklm list --json` AND `notebooklm use <id>` both return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` Redirect references WebLiteSignIn flow on accounts.google.com. The `use` command's table-render shows "Warning: Authentication expired or invalid." in the Title cell on both notebook IDs (SEO/SEM `7f8a80c5-...` + Lead Gen `4213513c-...`), confirming the whole CLI surface is gated, not just `list`.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-11 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 10 consecutive nightly runs blocked, 19 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09 / 05-10 / 05-11.
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~20 stale sources + ~11 ready-to-add (CONTEXT.md refresh × 10 days, daily-opt logs × 10 days, audit files × 10 days, capped at 50-source ceiling — recovery night will require maximum churn).
+Timestamp: 2026-05-11 22:09:38
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 10th consecutive nightly)
+
+---
+
+**SESSION_END**
 - DateTime: 2026-05-08 22:09:39
 - Mode: PM (cron fired ON TIME vs 22:00 CDT 05-08 target — normal jitter only)
 - Agent: Nightly NotebookLM Sync (Scheduled Task)

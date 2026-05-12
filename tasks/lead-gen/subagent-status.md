@@ -1,3 +1,22 @@
+**SESSION_END**
+- DateTime: 2026-05-11 22:09:38
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-11 target — normal jitter only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (10th consecutive nightly run)
+- `notebooklm list --json` AND `notebooklm use <id>` both return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` WebLiteSignIn redirect. `use` command's table-render shows "Warning: Authentication expired or invalid." in the Title cell on both notebook IDs (SEO/SEM `7f8a80c5-...` + Lead Gen `4213513c-...`).
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-11 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 10 consecutive nightly runs blocked, 19 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09 / 05-10 / 05-11.
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- Lead Gen PUSH backlog: 9 audit/spec artifacts (2026-05-02 rate-alert, 2026-05-04 homepage forms, 2026-05-05 thank-you, 2026-05-06 closeout-PR spec, 2026-05-07 conversion-consolidation PR spec, 2026-05-08 thank-you-conversion PR spec, 2026-05-09 cross-page-brand-footer PR spec, 2026-05-10 final-light-pass PR spec, plus 2026-05-11 AM NULL-lead_source diagnostic) + 10 PM-side syncs awaiting recovery.
+- DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+Timestamp: 2026-05-11 22:09:38
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 10th consecutive nightly)
+
+---
+
 SESSION_START
 - DateTime: 2026-05-11 03:45:50 CDT
 - Mode: AM
@@ -268,3 +287,24 @@ NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (8th consecutive nightly run)
 - Lead Gen PUSH backlog: 7 lead-gen artifacts + 8 PM-side syncs awaiting recovery night (PM 05-03 through PM 05-09 + AM 05-04 through AM 05-09 PULL fails).
 Timestamp: 2026-05-09 22:00:00
 SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 8th consecutive nightly)
+
+---
+
+SESSION_START
+- DateTime: 2026-05-12 03:45:15 CDT
+- Mode: AM
+- Focus: Outbound iMessage research brief — comparison of BlueBubbles vs Sendblue vs AppleScript vs n8n integration paths. Aligns with GOALS.md "Speed to lead — PRIORITY".
+MASTER: Context loading. Activating master-agent.md.
+
+SESSION END: 2026-05-12 04:15:00
+Mode: AM
+Focus: **Outbound iMessage strategic comparison brief authored.** Per yesterday's forward-rule option (b) + GOALS.md "Speed to lead — PRIORITY" + GOALS line 67 Decisions Pending. 1 research artifact (~370 lines, 5 paths × 10-dim decision matrix), 0 new PR specs (spec pile holds at 5), 1 new ADAM-TODO line.
+MASTER: All objectives complete. Read-only context loads (8 files per master-agent.md Step 1) + brief authoring + 9 file updates. Zero code changes, zero commits, zero outbound.
+
+OUTPUT: 1 new file (`tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md`). 0 SQL queries (deliberate skip — 11 consecutive identical baselines). Updated: CONTEXT.md (3 Lead Gen fields), CHANGELOG.md (2026-05-12 AM lead-gen entry prepended), TODO.md (NotebookLM line refreshed in place; backlog 9 → 10), tasks/ADAM-TODO.md (1 new iMessage brief line + NotebookLM line refreshed), tasks/lead-gen/{notebooklm-errors.md, today-mission.md, session-log.md, subagent-status.md}.
+
+PIPELINE STATUS: NOT MEASURED this session (intentional). 11 consecutive identical baselines mean signal-to-noise from another read is zero. Last measured 2026-05-11 03:46 CT: named funnels still flat (PA Funnel=0 day 19, Rate Alert=0 day 43, Quick Quote/Contact=0), `lead_source='Website'` fallback at 8 / 90d (~1/wk steady-state), AEO=4, Web Lead=2, NULL=1393 (mostly Arive + Scott-pilot bulk + manual realtor inserts, all expected per yesterday's diagnostic).
+
+ADAM ACTION ITEMS: 1 new line (iMessage brief pointer at `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md`). NotebookLM CLI re-auth line refreshed in place (count bumped to 11 days / 20 sub-sessions). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. Today's recommended forward-rule option for tomorrow: **(a) `/refinance-quote.html` audit** — final unconsolidated funnel-page surface, brings coverage to 5/5; same forward-rule logic that justified today's iMessage brief (strategic input not another spec).
+Timestamp: 2026-05-12 04:15:00
+SESSION FULLY COMPLETE ✓

@@ -1,45 +1,60 @@
-## Mission Brief — 2026-05-12 AM
+## Mission Brief — 2026-05-13 AM
 
 ### Domain
 Social Media
 
-### Focus Area
-MAINTENANCE — 25th consecutive maintenance session. Cushion holds at 47 drafts (Sep 23 2026 → Feb 4 2027, drift = 0 across all 25 sessions). 0 TIMELY drafts due in 48-hr horizon. GOALS.md still pinned at Apr 19 2026 mtime (3rd consecutive weekly skip carrying into Tue 05-12). ADAM-TODO line `[SOCIAL] 2026-05-04 PM ❓ DECISION` open across 15 cycles. Escalation HELD per PM 05-11 forward rule (one ask per cycle).
-
 ### Session Type
-[x] Maintenance (no Sequence A/B/C/D — gate checks only)
+MAINTENANCE (27th consecutive — gate-driven, no build)
+
+### Focus Area
+Two gate checks (GOALS.md mtime, ADAM-TODO line state) + cushion verification + Step 1B GBP scan + Refresh (07). All non-build subagents skipped.
+
+### Gate Results
+- **GOALS.md mtime:** `Apr 19 13:51:27 2026` — UNCHANGED (24 days stale). 3rd consecutive Mon GOALS-day skip fully realized (Mon 05-11). Next refresh window Mon 05-18. Week-of-Apr-20 directive ("improve existing only") still governs.
+- **ADAM-TODO `[SOCIAL] 2026-05-04 PM` line:** still `[ ]` open across 17 cycles. Per forward rule "one ask per cycle, do NOT re-escalate" — honored.
+- **Step 1B (GBP scan):** 0 new content (16th consecutive zero-input scan). All visible site files tracked: `rates/2026-04-24.html` (posted 04-27), `blog/2026-04-27-...` (posted 04-28), `realtor-updates/2026-04-27-...` (posted 04-28). GBP step skipped.
+- **Refresh (07):** 0 TIMELY drafts in 48-hr horizon (2026-05-13T07:30 UTC → 2026-05-15T07:30 UTC). Refresh skipped — nothing to fill.
+- **Cushion (Adam-org, `scheduled_for` column):** 47 drafts, Sep 23 2026 → Feb 4 2027. Earliest = LinkedIn authority "Post 157" (id `32803838...`). Latest = Instagram personal "Post 198" (id `60948a41...`). Pillar mix: authority×19 / education×15 / personal×13. Platform mix: linkedin×18 / instagram×16 / facebook×13. **Drift = 0 across all 27 maintenance sessions.**
+- **BLOCKER-LOANOS-001:** still active (42 days). `tasks/social-media/assets/` parent + `selfies/` subdir both missing. LoanOS pillar stream paused.
 
 ### Objectives
-1. Confirm GOALS.md mtime unchanged overnight (BREAK pattern if changed).
-2. Confirm `[SOCIAL] 2026-05-04 PM` ADAM-TODO line still `[ ]` with no inline Adam response.
-3. Run Step 1B (GBP scan) — verify no new website content vs `gbp-content-tracker.md`.
-4. Run Refresh (07) — verify 0 TIMELY drafts in 48-hr horizon.
-5. Verify cushion via Supabase REST (Adam-org filter + `scheduled_for` column): expect 47 drafts, range Sep 23 2026 → Feb 4 2027.
-6. Update CONTEXT.md / CHANGELOG.md / TODO.md / session-log.md / subagent-status.md.
+1. Confirm gates → MAINTENANCE only.
+2. Verify cushion drift = 0.
+3. Update CONTEXT.md / CHANGELOG.md / TODO.md / session-log.md per master-agent.md closing rules.
+4. Do NOT touch ADAM-TODO.md (one-ask-per-cycle rule).
+5. Do NOT touch DECISIONS.md (no new decision).
 
 ### Definition of Done
-- All gate checks logged.
-- Cushion count + range confirmed identical to PM 05-11.
-- Tracker files refreshed in place (CONTEXT.md net 0 line drift, stays at 161).
-- No escalation appended to ADAM-TODO (one-ask-per-cycle honored).
-- Session log entry prepended.
-- Forward rule for PM 05-12 written.
+- subagent-status.md SESSION_START + final block written.
+- session-log.md prepended with AM 05-13 entry.
+- CONTEXT.md social block: 3 fields replaced (no append).
+- CHANGELOG.md social block: dated entry prepended with 3-5 bullets.
+- TODO.md social posts line refreshed for 27-streak + AM 05-13 forward rule.
+- No emails, no daily digest, no ADAM-TODO append.
 
-### Resources / Files in Scope
-- `tasks/social-media/subagent-status.md`
-- `tasks/social-media/session-log.md`
-- `tasks/social-media/today-mission.md` (this file)
-- `tasks/social-media/gbp-content-tracker.md` (read-only this session)
-- `tasks/social-media/BLOCKERS.md` (read-only — BLOCKER-LOANOS-001 still active, 41 days)
-- `CONTEXT.md` / `CHANGELOG.md` / `TODO.md` (loanos-clone root)
-- Supabase REST (`social_drafts` table, Adam org `18613f82-fdd9-42dd-a09e-f3c577328258`)
-- `tasks/ADAM-TODO.md` (READ-ONLY — Reporter appends, Master does not)
+### Architect / Builder / Quality / Reviewer / QA
+SKIPPED — no build.
+
+### NotebookLM PULL / PUSH
+DEFERRED — CLI auth expired (11th day). PUSH backlog now 26 sessions deep — combines into next build session.
+
+### Forward Rule for PM 05-13
+- Re-check `tasks/ADAM-TODO.md` `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch.
+- Re-check `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` — if mtime changes, BREAK maintenance pattern.
+- If both unchanged, hold maintenance — do NOT re-escalate. 28th consecutive maintenance session.
+- PM session: skip Step 1B + Refresh (AM-only per master-agent.md). Cushion check is identical query.
+- Mon 05-18 is the next planned GOALS refresh; if it slips, **4th-consecutive-week threshold** triggers cohort-pause planning signal flagged in PM 05-12.
+
+### Resources Touched
+- `tasks/social-media/subagent-status.md` (overwrite)
+- `tasks/social-media/today-mission.md` (overwrite — this file)
+- `tasks/social-media/session-log.md` (prepend)
+- `tasks/social-media/gbp-content-tracker.md` (read-only — no change)
+- `tasks/social-media/content-repost-queue.md` (read-only — no change)
+- `CONTEXT.md` (3 social fields replaced)
+- `CHANGELOG.md` (prepend social entry)
+- `TODO.md` (refresh social line)
+- Supabase `social_drafts` (read-only — count + min/max only)
 
 ### HIGH RISK Items
-- None. Maintenance-only session. No writes to `social_drafts`. No GBP auto-publish. No NotebookLM PULL/PUSH (CLI auth expired 10th day). No code changes. No git push.
-
-### Forward Rule for PM 05-12
-- First action: `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` — if mtime changes during the day (Adam refreshes Tue), BREAK maintenance pattern and re-plan from new directives.
-- Re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance).
-- If GOALS still unchanged AND ADAM-TODO line still `[ ]`, hold maintenance — do NOT re-escalate (one ask per cycle still active). 26th consecutive maintenance session.
-- PM session: SKIP Step 1B + Refresh (07) per master-agent.md (both AM-only). Cushion check is identical query (Adam-org filter + `scheduled_for` column).
+None. Read-only session.

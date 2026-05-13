@@ -1,3 +1,48 @@
+SESSION_START
+- DateTime: 2026-05-13 03:45:35 CDT
+- Mode: AM
+- Focus: `/refinance-quote.html` funnel-page audit — last unconsolidated primary funnel surface (brings audit coverage to 5/5). Per 2026-05-12 AM forward rule recommended option (a). Strategic input not another spec on the 5-deep pile.
+MASTER: Context loaded. NotebookLM PULL skipped (12th day expired auth — confirmed via inline probe). Proceeding to audit authoring.
+
+SESSION END: 2026-05-13 04:15:00
+Mode: AM
+Focus: **`/refinance-quote.html` funnel-page audit COMPLETE.** Closes primary-funnel-page audit coverage to 5/5. 12 NEW findings (5 HIGH + 7 MEDIUM) — zero overlap with PR-1..PR-5; § 5 PR coverage map confirms entire 5-PR pile does NOT touch refinance-quote.html. 0 new PR specs, 1 new ADAM-TODO line (audit pointer).
+
+DIAGNOSTIC: Refinance Funnel lead_source = 0 captures in 90d (12th day named-channel zero-streak observation). Adds refinance-funnel to the all-zero band alongside Pre-Approval, Rate Alert, Quick Quote, Quick Contact. Only `lead_source='Website'` shows organic captures (8/90d), and per 2026-05-11 NULL diagnostic + 2026-05-09 SEO-agent taxonomy correction, those trace to upstream SEO-agent direct inserts not form submissions.
+
+KEY FINDINGS:
+- **H1 (cleanest fix):** `/refinance-quote.html:541` redirects to `/thank-you` without `?type=refinance` query string — refi captures land on default thank-you branch instead of routed refinance branch. 1-line fix. Not covered by PR-1..PR-5.
+- **H2:** subscribe-lead.js:2 stale comment still claims refinance-quote calls it — false (page now calls lead-intake.js). Rollback signature risk if Adam reverts to subscribe-lead during a WDK incident.
+- **H4:** Zero JSON-LD on the page. PR-5 § 3.2 adds Service + MortgageBroker JSON-LD to get-preapproved + rate-alert but NOT refinance-quote.
+- **H5:** Footer missing physical address — same M5 gap PR-4 closes on get-preapproved. Cleanest "PR-4 + 1 line" extension target.
+- **M1:** 4 cards displayed vs 6 form-select goals — Remove PMI + Shorten Term in form but not in display.
+- **M8:** Refi Watch funnel (per 2026-04-05 spec) has no entrypoint from this page. Adam decision needed (archive vs author).
+
+OUTPUT: 1 new file (audit). § 6 recommends PR-6 batched ship (~25 min Builder + ~5 min Adam = 30 min total) — deferred until at least one of PR-1..PR-5 ships to avoid spec-pile compound. Updated: CONTEXT.md (3 Lead Gen fields), CHANGELOG.md (2026-05-13 AM lead-gen entry prepended), TODO.md (NotebookLM line refreshed in place), tasks/ADAM-TODO.md (1 new audit pointer line + NotebookLM re-auth refreshed in place), tasks/lead-gen/{notebooklm-errors.md, today-mission.md, session-log.md, subagent-status.md}.
+
+ADAM ACTION ITEMS: 1 NEW line (refinance-quote audit pointer). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 + iMessage brief lines unchanged. NotebookLM CLI re-auth line refreshed in place (count bumped to 12 days / 21 sub-sessions; not stacked).
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (12th calendar day, 21st sub-session blocked; verified inline at 03:46 CDT).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure. Backlog now 11 artifacts deep.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/research/2026-05-13-refinance-quote-funnel-audit.md` (NEW, ~430 lines)
+- `tasks/lead-gen/today-mission.md` (refreshed for 05-13)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-13 AM entry prepended)
+- `tasks/lead-gen/session-log.md` (May 13 AM entry prepended)
+- `tasks/lead-gen/subagent-status.md` (this SESSION_START + SESSION_END)
+- `CHANGELOG.md` (May 13 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift)
+- `tasks/ADAM-TODO.md` (1 new audit-pointer line + NotebookLM re-auth refreshed in place)
+- `TODO.md` (NotebookLM CLI line refreshed in place; backlog count 10 → 11)
+
+Timestamp: 2026-05-13 04:15:00
+SESSION FULLY COMPLETE ✓
+
+---
+
 **SESSION_END**
 - DateTime: 2026-05-11 22:09:38
 - Mode: PM (cron fired ON TIME vs 22:00 CDT 05-11 target — normal jitter only)

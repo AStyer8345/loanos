@@ -2,6 +2,65 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-13 AM — Lead Generation
+Focus: **`/refinance-quote.html` funnel-page audit — last unconsolidated primary funnel surface.** Per 2026-05-12 AM forward rule recommended option (a). Closes audit coverage to 5/5 on primary owned-channel lead-capture surfaces. Deliberate strategic input artifact rather than another spec on top of the 5-deep PR pile (PR-1 through PR-5 still unauthorized 7 / 6 / 5 / 4 / 3 days respectively).
+Type: Research / Audit (Sequence A)
+Week in Queue: Week 18 (post audit-series milestone, post-launch +12)
+
+### Context From Previous Session
+2026-05-12 AM authored the outbound iMessage strategic comparison brief (~370 lines) at `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md`. Recommended Sendblue (primary) + Twilio-primary (strong alternative). Today closes 5/5 funnel-page audit coverage per yesterday's forward rule option (a). NotebookLM CLI auth still expired (12th day verified inline).
+
+### Completed
+- **NotebookLM PULL — SKIPPED (verified inline).** `notebooklm list --json` returned identical `Authentication expired or invalid` error with WebLiteSignIn redirect. 12th consecutive day blocked, 21st sub-session blocked since 2026-05-03 PM. Logged to `tasks/lead-gen/notebooklm-errors.md` (2026-05-13 AM entry).
+- **Targeted Supabase query (read-only, single query):** `contacts.lead_source ILIKE '%refi%' OR '%refinance%'` over 90d = **0 rows**. Refinance Funnel joins Pre-Approval Funnel (20d at 0), Rate Alert Funnel (44d at 0), Quick Quote (90d at 0), Quick Contact (90d at 0) in the all-zero named-channel band. Full pipeline baseline skipped per yesterday's noise-floor logic (11 consecutive identical baselines = zero signal value from another full read).
+- **Authored `/refinance-quote.html` funnel-page audit at `tasks/lead-gen/research/2026-05-13-refinance-quote-funnel-audit.md`** (~430 lines). Sections: § 0 page funnel role, § 1 pipeline state (0 refi captures in 90d), § 2 HIGH findings (5 — H1 missing `?type=refinance` query string on redirect to thank-you, H2 stale subscribe-lead.js comment + rollback signature drift risk, H3 GA4 conversion-event dedup ambiguity, H4 zero JSON-LD on the page, H5 footer missing physical address same M5 gap PR-4 closes on get-preapproved), § 3 MEDIUM findings (8 — M1 4-vs-6 refi-types card/select mismatch, M2 brand consistency clean ✓ reference, M3 missing og:image, M4 inline UTM script + utm.js redundancy, M5 21-day claim refi-honesty, M6 136+ reviews chip sourcing, M7 "Same day" Adam-review claim, M8 Refi Watch entrypoint missing per 04-05 spec), § 4 LOW findings (5, mostly ignore), § 5 PR coverage map vs PR-1..PR-5 (12 NEW findings, 1 already-clean reference, zero findings already covered in full), § 6 recommended PR-6 ship sequence (~25 min Builder + ~5 min Adam = 30 min total), § 7 status + forward rule.
+- **No new PR spec authored.** Deliberate — same logic as 05-12 brief. Spec pile holds at 5 (PR-1 through PR-5). Audit is a research artifact, not a spec.
+- **Net new ADAM-TODO line:** 1 (audit pointer, file-pointer pattern). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. NotebookLM CLI re-auth line refreshed in place per stale-flags rule (count bumped to 12 days / 21 sub-sessions).
+
+### Output
+- `tasks/lead-gen/research/2026-05-13-refinance-quote-funnel-audit.md` (NEW, ~430 lines)
+
+### Adam Action Items
+- **1 NEW ADAM-TODO line** for the refinance-quote audit pointer. PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. 2026-05-12 iMessage brief line unchanged. NotebookLM CLI re-auth line refreshed in place (count bumped to 12 days / 21 sub-sessions; not stacked per stale-flags rule).
+
+### NotebookLM
+- PULL: SKIPPED (auth expired, 12th day verified inline)
+- PUSH (lead-gen): SKIPPED (auth expired)
+- PUSH (master): SKIPPED (auth expired)
+- Backlog now 11 lead-gen artifacts queued for delayed PUSH: rate-alert audit (05-02), homepage forms audit (05-04), thank-you audit (05-05), closeout-PR spec (05-06), conversion-PR spec (05-07), thank-you-conversion PR spec (05-08), cross-page-brand-footer PR spec (05-09), final-light-pass PR spec (05-10), NULL-lead_source diagnostic (05-11), iMessage comparison brief (05-12), refinance-quote audit (05-13).
+
+### Daily Digest
+SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only")
+
+### Files Updated
+- `tasks/lead-gen/research/2026-05-13-refinance-quote-funnel-audit.md` (NEW, ~430 lines)
+- `tasks/lead-gen/today-mission.md` (overwritten with 05-13 mission)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-13 AM entry prepended)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START prepended; SESSION_END to follow)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `CHANGELOG.md` (May 13 AM lead-gen entry prepended)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced — net 0 line drift; pre-existing 161-line cap-overrun unchanged)
+- `tasks/ADAM-TODO.md` (1 new refinance-quote audit pointer line + NotebookLM re-auth line refreshed in place — count bumped to 12 days / 21 sub-sessions)
+- `TODO.md` (NotebookLM CLI line refreshed in place; backlog count 10 → 11)
+- DECISIONS.md: unchanged (no decision made this session)
+
+### Forward Rule
+**Tomorrow's mission options:**
+(a) `/austin-mortgage-rates.html` audit — high-traffic SEO landing capture surface; never audited; extends audit coverage to 6 pages. Bias-check: yet another audit; spec pile still 5 deep; produces no new PR.
+(b) **Realtor Relationships drip activation Architect-mode session** — copy bodies drafted 2026-04-30 at `tasks/lead-gen/drafts/2026-04-30-realtor-relationships-email-bodies.md`; blocked only on 2 Adam decisions (cadence + activation criterion). ~30 min agent time, surfaces decisions cleanly + activates a *channel* (vs. continuing to audit existing channels). Aligns with GOALS line 36 priority "Reach out to MJ — high producer."
+(c) PA-funnel GSC + GA4 traffic + CTR pull (per 2026-04-28 follow-up ADAM-TODO) — characterize the upstream-of-form bottleneck. Requires Google API access (may need Adam OAuth scope re-share).
+(d) NULL `lead_source` root-fix proposal — Arive webhook workflow `1tagvoU0UXtdDiMY` should set `lead_source='Arive Borrower Sync'` literal on insert. ~15-min n8n MCP change via REST PUT (per memory `feedback_n8n_rest_put_first.md`). LOW value, deferred until bandwidth empty.
+(e) Strategic pivot pause day — re-read GOALS.md + write 1-page "what would 20 qualified leads/month look like, what specifically is blocking that today" diagnostic. Strategic-not-tactical artifact; no new specs, no new audits.
+(f) Builder Sequence C if Adam authorizes any of PR-1 / PR-2 / PR-3 / PR-4 / PR-5 OR picks an iMessage path AND authorizes PR-1.
+
+**Held forward:** "skip page re-audit until at least one HIGH-tier change ships" — held; option (a) above is a NEW SEO capture surface (6/6 coverage), not a re-audit. Rule retires once any of PR-1..PR-5 OR PR-6 ships.
+
+**Recommended for tomorrow:** **option (b) Realtor Relationships drip Architect session** — surfaces 2 Adam decisions cleanly + activates a *channel* rather than auditing existing surfaces. Audit-mode work queue is now fully drained from primary-funnel-page coverage (5/5 achieved). Natural pivot point to channel-activation work. Doesn't add another `[ ]` ADAM-TODO line waiting on authorize — surfaces 2 specific decisions that unblock activation.
+
+Timestamp: 2026-05-13 04:15:00 (estimated, see actual SESSION_END in subagent-status.md)
+SESSION FULLY COMPLETE ✓
+
+---
 ## Session: 2026-05-12 AM — Lead Generation
 Focus: **Outbound iMessage strategic comparison brief.** Per yesterday's forward-rule option (b) and GOALS.md week-of-Apr-20 priority "Speed to lead — PRIORITY" + GOALS.md line 67 Decisions Pending ("BlueBubbles, Sendblue, AppleScript, n8n integration?"). Deliberate strategic pivot away from the 5-deep spec pile (PR-1 through PR-5 all unauthorized through today, 6 / 5 / 4 / 3 / 2 days respectively).
 Type: Research / Strategic comparison (Sequence A)

@@ -1,4 +1,110 @@
 SESSION_START
+- DateTime: 2026-05-15 10:06:53 CDT
+- Mode: AM
+- Focus: Pile-pressure snapshot — deliberately NO new spec (Sequence A light pass)
+MASTER: Context loaded. NotebookLM PULL skipped (14th day verified inline at 10:06 CDT). Proceeding to status verification + meta-pattern surface.
+
+SESSION END: 2026-05-15 10:30:00 CDT
+Mode: AM
+Focus: **Pile-pressure snapshot COMPLETE — deliberately NO new spec.** Sequence A (Research Only) light pass. Skipped all 5 forward-rule options from 05-14 AM (Long-Term Nurture / Past Client Retention / austin-mortgage-rates audit / GSC+GA4 pull / NULL lead_source proposal) because picking any would deepen a 10-item [LEAD-GEN] pile Adam has not drawn down in 9 consecutive sessions. Output: 1 research file (~140 lines), 0 new specs/audits/briefs, **0 new ADAM-TODO lines**.
+
+LIVE STATE VERIFIED READ-ONLY (5 SELECT queries):
+- Realtor Relationships drip Phase-1 spec untouched: campaign `ef52ed56-...` Steps 1+2+4 still `annual_date`/`condition`/`annual_date`; drip_enrollments=0; drip_sends=0 org-wide.
+- Realtor universe unchanged: 1,059 total / Pool A=24 / Pool B=158.
+- 30-day named-source funnel histogram: AEO×2 + Website×2 + AEO:ChatGPT×1 + Rate Check Form×1 + Web Lead×1 = 7 named captures. Named-channel funnels (PA Funnel / Rate Alert / Quick Quote / Quick Contact / Refinance Funnel) all 0 — ≥30-day streak continued.
+- **NEW SIGNAL surfaced today:** AEO is a sustained channel — 5 lifetime captures over 31 days (Apr 7 / Apr 13 / Apr 26 ChatGPT-tagged / May 6 / May 8) = ~1 every 6 days; only growing "owned" surface during this window.
+- Rate Check Form = single capture from 04-16; taxonomy footnote only.
+
+META-PATTERN: ADAM-TODO open/done ratio = 104/30 = 3.47×. [LEAD-GEN] pending stack = 10 items spanning 1–18 days unauthorized. Last [LEAD-GEN] flip `[ ]` → `[x]` was BLOCKER-005 on 2026-04-01 (44 days ago). Net pile change last 9 sessions = +10 / −0. Agent has saturated Adam's review queue.
+
+FORWARD RULE (set today): Continue Sequence A until ≥1 pending [LEAD-GEN] item flips `[ ]` → `[x]`. If Adam authorizes between sessions, pivot to Builder-readiness check on authorized item. **DO NOT pile spec #11 in any case.** Eligible focuses going forward: refresh same pile-pressure snapshot (recurring dated artifact) / PA-funnel GSC+GA4 status check / NULL lead_source ~15-min n8n REST PUT proposal. Cohort-pause planning signal pending Mon 05-18 GOALS.md refresh.
+
+OUTPUT: 1 new file (`tasks/lead-gen/research/2026-05-15-pile-pressure-snapshot.md`, ~140 lines). Updated: CONTEXT.md (3 Lead Gen fields, net 0 line drift; still 161 lines), CHANGELOG.md (2026-05-15 AM lead-gen entry prepended above social-am), TODO.md (NotebookLM line refreshed in place; count → 14 days / 28 sub-sessions; backlog → 13), tasks/ADAM-TODO.md (NotebookLM CLI re-auth line refreshed in place; **0 NEW ADAM-TODO lines** per meta-pattern observation), tasks/lead-gen/{notebooklm-errors.md, today-mission.md, session-log.md, subagent-status.md}.
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (14th calendar day, 28th sub-session blocked; verified inline at 10:06 CDT — WebLiteSignIn redirect persists; no Adam re-auth event in ~30h since AM 05-14 probe).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure. Backlog now 13 artifacts.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/research/2026-05-15-pile-pressure-snapshot.md` (NEW, ~140 lines)
+- `tasks/lead-gen/today-mission.md` (refreshed for 05-15 AM)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-15 AM entry prepended)
+- `tasks/lead-gen/session-log.md` (May 15 AM entry prepended above May 14 AM)
+- `tasks/lead-gen/subagent-status.md` (this SESSION_START + SESSION_END)
+- `CHANGELOG.md` (May 15 AM lead-gen entry prepended above social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced in place — net 0 line drift; pre-existing 161-line cap-overrun unchanged)
+- `tasks/ADAM-TODO.md` (NotebookLM CLI re-auth line refreshed in place; **0 NEW ADAM-TODO lines** per meta-pattern observation)
+- `TODO.md` (NotebookLM CLI line refreshed in place; count → 14 days / 28 sub-sessions; backlog → 13 lead-gen artifacts)
+
+Timestamp: 2026-05-15 10:30:00 CDT
+SESSION FULLY COMPLETE ✓
+
+---
+
+SESSION_START
+- DateTime: 2026-05-14 03:45:45 CDT
+- Mode: AM
+- Focus: Realtor Relationships drip activation Architect-mode session. Per 2026-05-13 AM forward-rule option (b). Strategic input — different lane (drip-channel activation) from the 14-day spec-pile bias. Directly addresses GOALS.md week-of-Apr-20 line "Drip campaigns — not working the way they should. Spend time this week fixing."
+MASTER: Context loaded. NotebookLM PULL skipped (13th day verified inline). Proceeding to architect spec authoring.
+
+SESSION END: 2026-05-14 03:57:45
+Mode: AM
+Focus: **Realtor Relationships drip activation Architect-mode spec COMPLETE.** 1 new spec (~357 lines) + zero new PR specs (spec pile holds at 5: PR-1..PR-5) + 1 new ADAM-TODO line (activation spec pointer). **Discovered the real gating constraint via source-code read:** `src/app/api/drip/run/route.ts` lines 119-129 only compute `next_send_at` from `relative_days` triggers. `annual_date` + `condition` trigger types have no evaluator anywhere in the codebase — Steps 1, 2, 4 of `ef52ed56-...` (currently configured as `annual_date`/`condition`/`annual_date`) cannot fire on schedule today regardless of Adam's 04-27 cadence/activation decisions. Re-frames the open ADAM-TODO question.
+
+PHASE-1 PLAN (Builder ~60 min once Adam authorizes 3 decisions in § 5): restructure all 4 steps to `relative_days` at 0/90/180/270 day cadence (quarterly touchpoints aligning with campaign description "3-4 touchpoints/year"); Pool B batch enrollment via INSERT SELECT of **158 distinct realtors** with at least 1 linked closed loan via `buyer_agent_contact_id`; merge-tag resolver extension in `run/route.ts` for `transaction_address`/`transaction_buyer_name`/`deal_count`/`first_deal_date` via JOIN on `loans`; Step 1+4 copy reanchor (drop "one year ago" + "Thanksgiving" framing); `drip_steps` UPDATE migration (3 statements); pre-filter on `email_opt_out=false` + 90-day bounce/complaint exclusion.
+
+PHASE-2 PLAN (deferred, ~3 hrs Builder if engagement gates ≥30% open + ≥3% reply across first 50 sends): build `annual_date` evaluator + US holiday calendar lookup + `condition` evaluator for `deals_milestone:5` crossings; restructure to original 4-trigger plan; re-enroll Pool B on annual cadence.
+
+LIVE STATE PULLED READ-ONLY (4 SELECT queries): realtor universe = 1,059 total / 24 with `referral_ytd_count > 0` (Pool A) / **158 distinct realtors in Pool B (linked closed loans)**. Drip system: `drip_enrollments_total=0`, `drip_sends_total=0` org-wide — cleanest possible greenfield, nothing in motion to break. Loan status breakdown: 740 Closed + 13 LOAN_FUNDED = 753 funded; 368 linked to realtor contact; 620 with `closing_date`. Campaign metadata + 4-step trigger config + exit rules pulled clean for `ef52ed56-8a22-4d15-9f12-a1796ccf17b6`.
+
+PIPELINE BASELINE: Skipped per 12-baseline noise-floor rule (signal-to-noise zero from another full re-read). Targeted Supabase: drip-enrollment-state queries are the relevant signal today, not channel baselines. Named funnel channels still flat per yesterday's 05-13 read (PA Funnel=0 day 21, Rate Alert=0 day 45, Quick Quote/Contact=0 90d).
+
+OUTPUT: 1 new file (`tasks/lead-gen/specs/2026-05-14-realtor-relationships-activation-spec.md`, ~357 lines). Updated: CONTEXT.md (3 Lead Gen fields), CHANGELOG.md (2026-05-14 AM lead-gen entry prepended), TODO.md (Realtor Relationships line prepended above PR-5; NotebookLM line refreshed in place; backlog 11 → 12), tasks/ADAM-TODO.md (1 new activation spec line + NotebookLM line refreshed in place), tasks/lead-gen/{notebooklm-errors.md, today-mission.md, session-log.md, subagent-status.md}.
+
+ADAM ACTION ITEMS: 1 NEW line (Realtor Relationships activation spec pointer with 3 decisions inline at file pointer). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 + refinance-quote audit (05-13) + iMessage brief (05-12) ADAM-TODO lines unchanged. 04-27 ADAM-TODO #2 (cadence/activation reference) stays `[ ]` open until Phase-1 ships (file-pointer to today's spec). NotebookLM CLI re-auth line refreshed in place (count bumped to 13 days / 26 sub-sessions; not stacked per stale-flags rule).
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (13th calendar day, 26th sub-session blocked; verified inline at 03:46 CDT).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Files updated:
+- `tasks/lead-gen/specs/2026-05-14-realtor-relationships-activation-spec.md` (NEW, ~357 lines)
+- `tasks/lead-gen/today-mission.md` (refreshed for 05-14 AM)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-14 AM entry prepended)
+- `tasks/lead-gen/session-log.md` (May 14 AM entry prepended above May 13 AM)
+- `tasks/lead-gen/subagent-status.md` (this SESSION_START + SESSION_END)
+- `CHANGELOG.md` (May 14 AM lead-gen entry prepended above social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced in place — net 0 line drift; pre-existing 162-line cap-overrun unchanged)
+- `tasks/ADAM-TODO.md` (1 NEW activation-spec line prepended above 05-13 refinance-quote line; NotebookLM re-auth line refreshed in place)
+- `TODO.md` (Realtor Relationships line prepended above PR-5 in `Now (this week)` section; NotebookLM CLI line refreshed; backlog 11 → 12)
+
+Timestamp: 2026-05-14 03:57:45
+SESSION FULLY COMPLETE ✓
+
+---
+
+**SESSION_END**
+- DateTime: 2026-05-13 22:11:16
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-13 target — normal jitter +11 min only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task — PART 2 Lead Gen)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (12th consecutive nightly run)
+- `notebooklm list --json` re-verified by PART 1 SEO/SEM this session at 22:11 CDT: returns identical `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event detected in the ~18h since AM 05-13 lead-gen-am pull. Wed 05-13 24h re-auth window now closed.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-13 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 12 wall-clock days, 12 consecutive nightly runs, 25 sub-sessions blocked counting tonight's PM nightly.
+- Lead Gen PUSH backlog: 11 lead-gen artifacts (rate-alert 05-02, homepage forms 05-04, thank-you 05-05, closeout-PR spec 05-06, conversion-PR spec 05-07, thank-you-conversion PR spec 05-08, cross-page-brand-footer PR spec 05-09, final-light-pass PR spec 05-10, NULL-lead_source diagnostic 05-11, iMessage comparison brief 05-12, refinance-quote funnel audit 05-13) + 12 PM-side syncs awaiting recovery.
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
+Timestamp: 2026-05-13 22:11:16
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 12th consecutive nightly)
+
+---
+
+SESSION_START
 - DateTime: 2026-05-13 03:45:35 CDT
 - Mode: AM
 - Focus: `/refinance-quote.html` funnel-page audit — last unconsolidated primary funnel surface (brings audit coverage to 5/5). Per 2026-05-12 AM forward rule recommended option (a). Strategic input not another spec on the 5-deep pile.

@@ -1,5 +1,23 @@
 # NotebookLM Error Log — Lead Generation
 
+## 2026-05-15 AM Session (Lead Gen AM — Scheduled Task)
+
+| Step | Error | Action |
+|---|---|---|
+| Step 3 (PULL) `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (re-verified inline this session at 10:06 CDT — WebLiteSignIn redirect on accounts.google.com persists; no Adam re-auth event in the ~30h since AM 05-14 lead-gen-am probe) | SKIP NotebookLM PULL. **14th wall-clock day blocked**; 28th sub-session blocked since 2026-05-03 PM (incremented +1 from AM 05-14 lead-gen-am's 27th sub-session count, plus +1 for tonight's pending PM-cron at 22:00 CDT 05-14 which also no-op'd silently — verified via standup Day 51 note that 13 sub-session count carried forward without nightly increment). Continue session per master-agent.md error-handling rule. **Backlog now 13 lead-gen artifacts queued for delayed PUSH** (added today's 05-15 AM pile-pressure snapshot). ADAM-TODO line refreshed in place per stale-flags rule (count bumped to 14 days / 28 sub-sessions; no fresh entry stacked). Step 8 (master notebook push) also SKIPPED. **Wed 05-13 24h re-auth window now fully passed**; next inflection = Mon 2026-05-18 GOALS.md refresh (3 days out) → if also skips, 4th-consecutive-week cohort-pause planning signal trips. |
+
+## 2026-05-14 AM Session (Lead Gen AM — Scheduled Task)
+
+| Step | Error | Action |
+|---|---|---|
+| Step 3 (PULL) `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (re-verified inline this session at 03:46 CDT — WebLiteSignIn redirect on accounts.google.com persists; no Adam re-auth event in interim wall-clock day) | SKIP NotebookLM PULL. 13th wall-clock day blocked; 26th sub-session blocked since 2026-05-03 PM (incremented +1 from PM 05-13 nightly's 25th sub-session count for today's AM lead-gen-am pull). Continue session per master-agent.md error-handling rule. Backlog now 12 lead-gen artifacts queued for delayed PUSH (added today's Realtor Relationships activation architect spec). ADAM-TODO line refreshed in place per stale-flags rule (count bumped to 13 days / 26 sub-sessions; no fresh entry stacked). Step 8 (master notebook push) also SKIPPED. |
+
+## 2026-05-13 PM Session (Nightly NotebookLM Sync — Scheduled Task)
+
+| Step | Error | Action |
+|------|-------|--------|
+| PUSH+CURATE Step 1 `notebooklm list --json` (re-verified this session at 22:11 CDT) | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (WebLiteSignIn redirect on accounts.google.com). No Adam re-auth event in the ~18h since AM 05-13 lead-gen-am pull (03:46 CDT). 12th consecutive nightly block, 25th sub-session blocked since 2026-05-03 PM | SKIPPED — Steps 1–7 all blocked at Step 1 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete). No notebook contact, no source mutations, no master log appends. Local files unchanged outside trackers. Cron fired ON TIME (22:11 vs 22:00 CDT 05-13 target — normal jitter +11 min). Lead Gen PUSH backlog: 11 lead-gen artifacts (added 05-13 AM refinance-quote funnel audit) + 12 PM-side syncs awaiting recovery night. ADAM-TODO line refreshed in place per stale-flags rule (no fresh entry stacked). DAILY DIGEST skipped per scheduled-task SKILL.md "no emails to Adam, project files only" rule. Wed 05-13 24h re-auth window now closed — 3rd-consecutive-Mon GOALS-skip + Tue 05-12 + Wed 05-13 catch-up windows all fully passed. 4th-consecutive-week threshold = Mon 05-18 (5 days out). |
+
 ## 2026-05-13 AM Session (Lead Gen AM — Scheduled Task)
 
 | Step | Error | Action |

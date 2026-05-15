@@ -2,6 +2,87 @@
 
 ---
 
+## 2026-05-15 — Day 51 (post-launch +19 vs original Apr 26 target / +14 vs May 1 GOALS target)
+
+**Days to launch:** N/A — beta is live. Today is Friday 2026-05-15. GOALS.md still shows `Last updated: 2026-04-20` — **25 days stale**. Day 50 (Thu 2026-05-14) standup-log entry did NOT get filed (no `## 2026-05-14` heading in `tasks/standup-log.md`) — the autonomous standup cron skipped a day for the first time in the 14-day post-launch hygiene streak. Adam-facing AM/PM agents (lead-gen-am, social-am, social-pm) DID run on 05-14 per CHANGELOG entries; the gap is isolated to the standup lane. Next natural GOALS refresh window is Mon 2026-05-18 (3 days out).
+
+**Yesterday shipped (since Day 49 standup, covers both 05-14 and 05-15-to-now):**
+- **0 new commits on `origin/main` since `2df6700` (2026-05-13).** First 2-day commit gap in the 14-day post-launch streak. Working tree dirty: 17 modified tracker files + 1 new untracked spec (`tasks/lead-gen/specs/2026-05-14-realtor-relationships-activation-spec.md`, ~357 lines). The 05-14 autonomous wrap-up commit cycle did not fire, leaving the tree in a pending-commit state for >24 hours.
+- **New artifact (05-14 AM lead-gen-am, uncommitted):** Realtor Relationships activation architect spec. **Different lane** from the PR-1..PR-5 pile — breaks the 14-day audit-spec bias by targeting GOALS.md week-of-Apr-20 line "Drip campaigns — not working the way they should." Spec discovers the real blocker: `src/app/api/drip/run/route.ts` lines 119-129 only compute `next_send_at` from `relative_days` triggers; `annual_date` + `condition` trigger types have **no evaluator anywhere in the codebase** — Steps 1/2/4 of campaign `ef52ed56-...` cannot fire on schedule today regardless of cadence/activation decisions. Phase-1 ship-now plan (~60 min Builder): restructure all 4 steps to `relative_days` (0/90/180/270 quarterly cadence), Pool B batch enrollment (158 distinct realtors via `buyer_agent_contact_id`), merge-tag resolver extension, copy reanchor on Steps 1+4. 3 Adam decisions (~5 min) each with sensible defaults — recommendation: ship Phase-1 with all 3 defaults.
+- Last real feature code on `main` remains `1b58ef9` (Microsoft Graph adapter, 2026-04-30). **15-day zero-feature-code streak** (was 13 on Day 49; Day 50 skipped).
+
+**Vercel status:** READY — production deploy unchanged at `dpl_87bYxwsTZas4Axyr4U3MQirT1D1q` (commit `2df6700`, 2026-05-13). No new deployments in 2 days (matches 0-commit window). 20 most-recent production deployments all READY, no ERROR/QUEUED/CANCELED across 16+ days. Working tree NOT clean (18 pending items) — first dirty-tree standup of the post-launch run.
+
+**n8n workflow health:** **40 workflows, 35 active, 5 inactive** (identical to Day 49 inventory — no new workflows, no state changes in 2 days). All core launch workflows ACTIVE. No new errored/failed executions surfaced. Inactive set (all intentional/expected):
+- `W0K4YDzkZd0Hzv6g` — Refi Pre-Drop Warm-Up
+- `LfLSDgqgb6yCe93C` — Quarterly Rate Review
+- `AK1fBcaX1cPcdlGx` — Review Request polling (deactivated 2026-04-13, replaced by one-click button)
+- `24oewjzGR3AxH4QW` — Morning Briefing Team (pending config, not in MCP)
+- `zQTy23ZRFAty9uTc` — Contract Received v3 (staging copy; original `UfNcdpoVKQZqy0fj` active)
+
+**Watch (14th day open, deferred):** `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) malformed-JWT in Check Dedup code node — broken dedup since first cron May 1; ~15 firings now. Impact bound by downstream guards. Untouched in autonomous mode (n8n edits require Adam per `memory/tools/n8n.md`).
+
+**Blockers (all carry from Day 49 — none resolved across the 2-day gap):**
+- Resend DKIM verification (`mortgagesolutionslp.com`) — 16th day. Gates Scott's mailbox.
+- Drip pipeline at 0 sends — 17th day. End-to-end loop still unproven post-launch. **Now has a Phase-1 ship-ready spec** (Realtor Relationships activation) as an alternate first-send path that bypasses DKIM by reusing Adam's existing `thestyerteam.com`-verified domain.
+- 5 canonical n8n credentials uncreated — 22 active workflows still leak inline secrets.
+- `notebooklm` CLI auth expired — 14th calendar day. Lead Gen PUSH backlog now 12 artifacts; ~29 sub-sessions no-op'd cumulatively. Adam runs `/Users/adamstyer/.local/bin/notebooklm login`.
+- TCPA + Sendblue, FNM 3.4 importer (Scott's launch-blocker per GOALS.md), Notes/activity-log fix.
+- Scenarios cron retire (**20-streak** of no-op exits — strongest retire signal in queue history).
+- Social PM 05-04 escalation — **22 cycles unanswered**.
+- GOALS.md weekly refresh — 25 days stale; 3 consecutive Mon skips (04-27 / 05-04 / 05-11) + Tue/Wed/Thu/Fri catch-up windows passed.
+- 5 conversion-audit ship-approvals queued: PR-1 (closeout, **9d unauthorized**) + PR-2 (form-page, 8d) + PR-3 (thank-you, 7d) + PR-4 (brand+footer, 6d) + PR-5 (final light-pass, 5d).
+- iMessage path decision (Day 48 brief, ~370 lines) — 3 days open.
+- Realtor Relationships Phase-1 spec (new today) — 3 Adam decisions @ ~5 min total. **Highest-leverage NEW ask in queue** — unblocks first drip send post-launch.
+- `CONTEXT.md` over 150-line cap (161 lines, unchanged 10+ days).
+- Working tree dirty for 24+ hours — autonomous wrap-up commit cycle did not fire on 05-14.
+
+**Today's focus:** Standup verification (this entry). Bucket A (autonomous-eligible feature work) remains empty for the **15th consecutive cycle** (counting the Day 50 skip). Every meaningful unblock requires Adam. Highest-leverage Adam ask shifts today: the **3 Realtor Relationships decisions** are the cheapest path to flipping the drip-queue-at-0-sends signal (no DKIM dependency, reuses Adam's verified domain, copy already drafted). Other asks unchanged: PR-1..PR-5 quintet ship-authorize (~190 min Builder + ~35 min Adam review for full sweep), retire/redirect Scenarios cron (20-streak), `notebooklm login`, answer social PM 05-04 escalation, read iMessage brief and pick a path, refresh GOALS.md Mon 2026-05-18.
+
+**Risk watch:** 15-day zero-feature-code streak. **New realized risk:** the autonomous wrap-up commit cycle missed 2026-05-14 — working tree has 18 pending items including a load-bearing new spec. If 05-15 PM cycle also fails to fire, the spec stays unpushed and unavailable to next-session agents reading `tasks/lead-gen/`. **Secondary realized risk (Day 49 prediction confirmed):** lead-gen audit lane DID rotate to a different lane (drip activation architect spec) rather than continuing PR-spec output on secondary pages — productive pivot, but still spec-only and Adam-blocked. Operational/build/deploy side: clean (no n8n, Vercel, or build incidents 16+ days). Validation/post-launch traction side: stalled until Adam clears at least one queued decision; Realtor Relationships Phase-1 is now the cheapest unblock. **Cohort-pause planning signal** (flagged PM 05-12): if Mon 2026-05-18 GOALS refresh also slips, 4th-consecutive-week threshold triggers planning to pause ALL 5 agents' scheduled crons as a cohort.
+
+**Open audit findings:** 0 new files in `audits/` (still only `SECURITY-AUDIT-2026-04-05.md` + `SUPPORT-STACK-2026-04-05.md`). Original CRITICAL/HIGH set from 2026-04-05 was largely cleared by the 2026-04-21 tenant-scoping hardening pass (PR #4, 37 tables probed, 0 leaks, migration 092). No new CRITICAL/HIGH surfaced. Lead-gen funnel audits + n8n credential audit live outside `audits/` under `tasks/lead-gen/` and `tasks/security/` — those are the meaningful HIGH-tier piles still open, all Adam-blocked.
+
+---
+
+## 2026-05-13 — Day 49 (post-launch +17 vs original Apr 26 target / +12 vs May 1 GOALS target)
+
+**Days to launch:** N/A — beta is live. Today is Wednesday 2026-05-13. GOALS.md still shows `Last updated: 2026-04-20` — **23 days stale**, Monday 2026-05-11 refresh confirmed missed (as Day 48 predicted). The 22→23-day staleness streak is now the operational floor; next natural refresh window is Mon 2026-05-18.
+
+**Yesterday shipped (since Day 48 standup):**
+- 1 new commit on `origin/main`: `2df6700` (2026-05-13 autonomous wrap-up — post-launch +12 tracker hygiene). **12th consecutive hygiene-only cycle.** Commit message: "Bucket A empty: all current-phase items Adam-blocked (PR-1..PR-5 specs 7/6/5/4/3 days unauthorized, PR-6 deferred, DKIM, drip enrollment, FNM Scott onboarding, Scenarios cron retire 18-streak, notebooklm login 12th day, GOALS refresh 24 days unchanged, iMessage path decision). Build green (113 static pages); zero code/schema/env/n8n changes."
+- New artifact: refinance-quote.html funnel-page audit (~430 lines). **5/5 primary-funnel-page audit coverage milestone reached** — get-preapproved + rate-alert + homepage + thank-you + refinance-quote now all covered. Audit-spec lane has no more primary-funnel pages to file; will rotate to secondary pages (austin-mortgage-rates.html) or strategic Architect-mode work next cycle.
+- Last real feature code on main remains `1b58ef9` (Microsoft Graph adapter, 2026-04-30). **13-day zero-feature-code streak** (was 12 yesterday).
+
+**Vercel status:** READY — production deploy advanced to `dpl_87bYxwsTZas4Axyr4U3MQirT1D1q` (commit `2df6700`, 2026-05-13). 20 most-recent production deployments all READY, no ERROR/QUEUED/CANCELED across 14+ days. Working tree clean post-commit, 0 unpushed.
+
+**n8n workflow health:** **40 workflows, 35 active, 5 inactive.** Yesterday's reported 34/6 split corrected today — `0YWMmEGo2bHA8bJ7` (Rancho Inquiry Drip Sender) is flagged `active: true` in the MCP response (it was categorized "inactive" yesterday based on TEST MODE node, not the workflow's actual active flag). All core launch workflows ACTIVE. Inactive set (all intentional/expected):
+- `W0K4YDzkZd0Hzv6g` — Refi Pre-Drop Warm-Up
+- `LfLSDgqgb6yCe93C` — Quarterly Rate Review
+- `AK1fBcaX1cPcdlGx` — Review Request polling (deactivated 2026-04-13, replaced by one-click button)
+- `24oewjzGR3AxH4QW` — Morning Briefing Team (pending config, not in MCP)
+- `zQTy23ZRFAty9uTc` — Contract Received v3 (staging copy; original `UfNcdpoVKQZqy0fj` active)
+
+**Watch (12th day open, deferred):** `ZUeGy8u8P4o6DPM3` (Anniversary Check-In) malformed-JWT in Check Dedup code node — broken dedup since first cron May 1; ~13 firings now. Impact bound by downstream guards. Undeduped `activity_log` writes accumulate. Untouched in autonomous mode (n8n edits require Adam per `memory/tools/n8n.md`).
+
+**Blockers (all carry from Day 48 — none resolved today; 23-day GOALS staleness now operational baseline):**
+- Resend DKIM verification (`mortgagesolutionslp.com`) — 14th day. Gates Scott's mailbox. MS Graph alternate path also unflipped.
+- Drip pipeline at 0 sends — 15th day. End-to-end loop still unproven post-launch — the load-bearing post-launch validation signal.
+- 5 canonical n8n credentials uncreated — 22 active workflows still leak inline secrets per 2026-04-30 audit.
+- `notebooklm` CLI auth expired — 12th calendar day. Adam runs `/Users/adamstyer/.local/bin/notebooklm login`.
+- TCPA + Sendblue, FNM 3.4 importer (Scott's launch-blocker per GOALS.md), Notes/activity-log fix, Scenarios cron retire (18-streak), NotebookLM playbook reconcile, social PM 05-04 escalation (14 cycles), GOALS.md weekly refresh (23 days stale).
+- 5 conversion-audit ship-approvals queued: PR-1 (closeout, 7d unauthorized) + PR-2 (form-page, 6d) + PR-3 (thank-you, 5d) + PR-4 (brand+footer, 4d) + PR-5 (final light-pass, 3d). Recommended order PR-1 → PR-2 → PR-3 → PR-4 → PR-5; Builder ships all five back-to-back in ~190 min total + ~35 min Adam review.
+- iMessage path decision (Day 48 brief, ~370 lines) — strategic comparison ready for Adam read, 1 day open.
+- `CONTEXT.md` over 150-line cap (161 lines, unchanged 8+ days). Trim is content judgment, deferred in autonomous mode.
+
+**Today's focus:** Standup verification (this entry). Bucket A (autonomous-eligible feature work) remains empty for the **13th consecutive cycle**. Every meaningful unblock requires Adam. Highest-leverage Adam ask is unchanged: DKIM, PR-1..PR-5 quintet ship-authorize, retire/redirect Scenarios cron, `notebooklm login`, answer social PM 05-04 escalation, read iMessage brief and pick a path, refresh GOALS.md. New today: read refinance-quote.html audit if any items want a separate PR-6 spec ahead of secondary-page rotation.
+
+**Risk watch:** 13-day zero-feature-code streak. **Realized risk (Day 48 prediction confirmed):** Monday GOALS refresh missed → "spec-only" autonomous mode is now the steady state across the lead-gen audit lane, which has exhausted primary-funnel-page spec backlog. Bucket A surface continues to shrink. Drip queue at 0 sends 15th day = launch-validation signal has not flipped. Operational/build/deploy side: clean (no n8n, Vercel, or build incidents 14+ days). Validation/post-launch traction side: stalled until Adam clears at least one queued decision. New observation: lead-gen audit lane spec output rotates to secondary pages or strategic work next cycle — if Adam wants this lane to keep producing spec artifacts vs. rotate to a different lane, that's a decision worth surfacing.
+
+**Open audit findings:** 0 new files in `audits/` (still only `SECURITY-AUDIT-2026-04-05.md` + `SUPPORT-STACK-2026-04-05.md`). Original CRITICAL/HIGH set from 2026-04-05 was largely cleared by the 2026-04-21 tenant-scoping hardening pass (PR #4, 37 tables probed, 0 leaks, migration 092). No new CRITICAL/HIGH surfaced today. Note: lead-gen funnel audits + n8n credential audit live outside `audits/` under `tasks/lead-gen/` and `tasks/security/` — those are the meaningful HIGH-tier piles still open, all Adam-blocked.
+
+---
+
 ## 2026-05-12 — Day 48 (post-launch +16 vs original Apr 26 target / +11 vs May 1 GOALS target)
 
 **Days to launch:** N/A — beta is live. Today is Tuesday 2026-05-12. **GOALS.md weekly refresh DID NOT happen yesterday** (Mon 05-11) — file still shows `Last updated: 2026-04-20`. The 22-day staleness streak that Day 47 flagged as "decision pressure point today" is now realized. Predicted "3rd consecutive week of hygeine-only exhaustion" is now the operational state.

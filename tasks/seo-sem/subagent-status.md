@@ -1,4 +1,24 @@
 **SESSION_END**
+- DateTime: 2026-05-13 22:11:16
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-13 target — normal jitter +11 min only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (12th consecutive nightly run)
+- `notebooklm list --json` re-verified this session at 22:11 CDT: returns identical `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event detected in the ~18h since AM 05-13 lead-gen-am pull (03:46 CDT) — Wed 05-13 24h re-auth window now closed; 3rd-consecutive-Mon GOALS-skip + Tue 05-12 + Wed 05-13 catch-up windows all fully passed.
+- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-13 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 12 wall-clock days blocked, 12 consecutive nightly runs, 25 sub-sessions blocked counting tonight's PM nightly (added SEO/SEM + Lead Gen halves to AM 05-13 lead-gen-am's 23rd sub-session count).
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~24 stale sources + ~13 ready-to-add (CONTEXT.md refresh × 12 days, daily-opt logs × 12 days, audit files × 12 days, capped at 50-source ceiling — recovery night will require maximum churn).
+- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
+- 4th-consecutive-week threshold approaching: next planned GOALS refresh window = Mon 2026-05-18 (5 days out). If that also slips, hygiene-only exhaustion across all 5 agents flips from individual-agent-decision to cohort-pause planning signal.
+Timestamp: 2026-05-13 22:11:16
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 12th consecutive nightly)
+
+---
+
+**SESSION_END**
 - DateTime: 2026-05-12 22:10:00
 - Mode: PM (cron fired ON TIME vs 22:00 CDT 05-12 target — normal jitter only)
 - Agent: Nightly NotebookLM Sync (Scheduled Task)

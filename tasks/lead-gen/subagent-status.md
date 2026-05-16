@@ -1,4 +1,45 @@
 SESSION_START
+- DateTime: 2026-05-16 03:45:44 CDT
+- Mode: AM
+- Focus: TBD — load context, assess 05-15 AM pile-pressure snapshot + forward rule, define mission
+MASTER: Context loading. Activating master-agent.md.
+
+SESSION END: 2026-05-16 04:15:00 CDT
+Mode: AM
+Focus: **2nd consecutive deliberate-restraint session. Status-verification micro-pass — 0 new files authored.** Per 05-15 AM forward rule: "Continue Sequence A until ≥1 pending [LEAD-GEN] item flips `[ ]` → `[x]`. **DO NOT pile spec #11 in any case.**" Saturday 05-16 cron on-time at 03:45 CDT. ADAM-TODO open/done unchanged at 104/30 = 3.47× (verified via grep). Last [LEAD-GEN] flip remains 2026-04-28 (18 days ago). 0 [LEAD-GEN] items flipped overnight — restraint rule continues unchanged.
+
+LIVE STATE VERIFIED READ-ONLY (2 SELECT queries + 1 CLI probe):
+- Realtor Relationships campaign `ef52ed56-8a22-4d15-9f12-a1796ccf17b6` Steps 1+2+4 still `annual_date`/`condition`/`annual_date`; only Step 3 is `relative_days`. Phase-1 spec from 05-14 AM still untouched.
+- `drip_enrollments_total` = 0 / `drip_sends_total` = 0 org-wide (12+ consecutive identical baselines).
+- All 5 named-funnel 90d counts = 0: `lead_source='Pre-Approval Funnel'` / `'Rate Alert Funnel'` / `'Quick Quote'` / `'Quick Contact'` / `'Refinance Funnel'`.
+- NotebookLM CLI `notebooklm list --json` returns `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` WebLiteSignIn redirect — same error string as the prior 28 sub-sessions.
+
+META-PATTERN (unchanged from 05-15 AM): Pile-pressure restraint continues. 10-item [LEAD-GEN] pending stack holds; agent has not added to it for 2 consecutive sessions. Eligible non-pile-adding focuses: refresh same pile-pressure snapshot (recurring dated artifact) / PA-funnel GSC+GA4 status check (credentials-blocked) / NULL `lead_source` proposal (already debunked 05-11). All 3 options offered zero net signal today vs yesterday's read — declined.
+
+FORWARD RULE (extends 05-15 AM rule): Continue Sequence A minimal-restraint pattern. If Adam authorizes ≥1 pending [LEAD-GEN] item between now and Sun 05-17 AM, pivot to Builder-readiness check on that item. If Adam authorizes nothing AND GOALS.md still unchanged Mon 05-18, hygiene-only exhaustion across all 5 agents flips to cohort-pause planning signal.
+
+OUTPUT: **0 new files** in `tasks/lead-gen/{research,specs}/`. **0 new ADAM-TODO lines.**
+
+Files updated (7 in place):
+- `tasks/lead-gen/subagent-status.md` (this SESSION_START + SESSION_END)
+- `tasks/lead-gen/today-mission.md` (overwritten for 05-16 AM)
+- `tasks/lead-gen/notebooklm-errors.md` (2026-05-16 AM entry prepended)
+- `tasks/lead-gen/session-log.md` (05-16 AM entry prepended above 05-15 AM)
+- `CHANGELOG.md` (05-16 AM lead-gen entry prepended above 05-16 social-am entry)
+- `CONTEXT.md` (3 Lead Gen Agent fields replaced in place — net 0 line drift; still 161 lines / 11+ days over cap, tracked in TODO.md NEEDS ADAM)
+- `TODO.md` + `tasks/ADAM-TODO.md` (NotebookLM CLI re-auth lines refreshed in place; counts → 15 days / 29 sub-sessions / 13 PM-side syncs awaiting recovery; **0 new ADAM-TODO lines added today**)
+
+NOTEBOOKLM PULL: SKIPPED — CLI auth still expired (15th calendar day, 29th sub-session blocked since 2026-05-03 PM; verified inline at 03:47 CDT).
+NOTEBOOKLM PUSH (lead-gen): SKIPPED — same auth failure.
+NOTEBOOKLM PUSH (master): SKIPPED — same auth failure.
+DAILY DIGEST: SKIPPED (scheduled-task SKILL.md rule — "no emails to Adam, project files only").
+
+Timestamp: 2026-05-16 04:15:00 CDT
+SESSION FULLY COMPLETE ✓
+
+---
+
+SESSION_START
 - DateTime: 2026-05-15 10:06:53 CDT
 - Mode: AM
 - Focus: Pile-pressure snapshot — deliberately NO new spec (Sequence A light pass)
@@ -459,3 +500,22 @@ PIPELINE STATUS: NOT MEASURED this session (intentional). 11 consecutive identic
 ADAM ACTION ITEMS: 1 new line (iMessage brief pointer at `tasks/lead-gen/research/2026-05-12-imessage-comparison-brief.md`). NotebookLM CLI re-auth line refreshed in place (count bumped to 11 days / 20 sub-sessions). PR-1 / PR-2 / PR-3 / PR-4 / PR-5 ADAM-TODO lines unchanged. Today's recommended forward-rule option for tomorrow: **(a) `/refinance-quote.html` audit** — final unconsolidated funnel-page surface, brings coverage to 5/5; same forward-rule logic that justified today's iMessage brief (strategic input not another spec).
 Timestamp: 2026-05-12 04:15:00
 SESSION FULLY COMPLETE ✓
+
+---
+
+**SESSION_END**
+- DateTime: 2026-05-15 22:10:38
+- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-15 target — normal jitter +10 min only)
+- Agent: Nightly NotebookLM Sync (Scheduled Task)
+
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (13th consecutive nightly fire blocked)
+- `notebooklm list --json` re-verified this session at 22:10 CDT — same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event in the ~18h since AM 05-15 lead-gen-am pull at 03:46 CDT — full Fri 05-15 catch-up window now closed.
+- Steps 1–7 all blocked at Step 1. No notebook contact, no source mutations, no master log appends.
+- Local files unchanged outside trackers; nothing destructive performed.
+- Logged: tasks/lead-gen/notebooklm-errors.md (2026-05-15 PM-cron-on-time entry).
+- ADAM-TODO existing flag refreshed in place per stale-flags rule. 14 wall-clock days blocked, 13 consecutive nightly fires blocked (PM 05-14 cron gap excluded), 30 sub-sessions blocked counting tonight's PM nightly.
+- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
+- Lead Gen PUSH backlog: 13 lead-gen artifacts (rate-alert 05-02 / homepage forms 05-04 / thank-you 05-05 / closeout-PR spec 05-06 / conversion-PR spec 05-07 / thank-you-conversion PR spec 05-08 / cross-page-brand-footer PR spec 05-09 / final-light-pass PR spec 05-10 / NULL-lead_source diagnostic 05-11 / iMessage comparison brief 05-12 / refinance-quote funnel audit 05-13 / Realtor Relationships activation architect spec 05-14 / pile-pressure snapshot 05-15) + 13 PM-side syncs awaiting recovery.
+- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
+Timestamp: 2026-05-15 22:10:38
+SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 13th consecutive nightly fire)

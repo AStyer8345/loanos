@@ -1,5 +1,11 @@
 # NotebookLM Error Log — Lead Generation
 
+## 2026-05-16 AM Session (Lead Gen AM — Scheduled Task)
+
+| Step | Error | Action |
+|---|---|---|
+| Step 3 (PULL) `notebooklm list --json` | `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` (re-verified inline this session at 03:46 CDT — WebLiteSignIn redirect on accounts.google.com persists; no Adam re-auth event in the ~17.5h since AM 05-15 lead-gen-am probe at 10:06 CDT) | SKIP NotebookLM PULL. **15th wall-clock day blocked**; 29th sub-session blocked since 2026-05-03 PM (incremented +1 from AM 05-15 lead-gen-am's 28th sub-session count; PM 05-15 nightly fire was logged but did not increment per the inline standup convention — counted separately in standup Day 51 note). Continue session per master-agent.md error-handling rule. **Backlog still 13 lead-gen artifacts queued for delayed PUSH** (no new artifact authored today — pile-pressure restraint session per 05-15 AM forward rule). ADAM-TODO line refreshed in place per stale-flags rule (count bumped to 15 days / 29 sub-sessions; no fresh entry stacked). Step 8 (master notebook push) also SKIPPED. **Next inflection = Mon 2026-05-18 GOALS.md refresh (2 days out)** → if also skips, 4th-consecutive-week cohort-pause planning signal trips. Saturday catch-up window now mostly burned; only ~18h until Sun AM lead-gen-am next checkpoint. |
+
 ## 2026-05-15 AM Session (Lead Gen AM — Scheduled Task)
 
 | Step | Error | Action |
@@ -184,3 +190,9 @@ ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a term
 [2026-05-08 22:09 PM-cron-on-time] Same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error on `notebooklm list --json` with WebLiteSignIn redirect. Cron fired ON TIME tonight (22:09 vs 22:00 target — normal jitter). 7th wall-clock day blocked, 7th nightly run blocked, 12th Lead Gen sub-session blocked since 05-03 PM (counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 plus the dual nightly runs). PUSH+CURATE Step 1 blocked → Steps 2–7 all skipped. No notebook contact, no source mutations, no master log appends, no digest. Lead Gen PUSH backlog: 6 audit/spec artifacts (2026-05-02 rate-alert, 2026-05-04 homepage forms, 2026-05-05 thank-you, 2026-05-06 closeout-PR spec, 2026-05-07 conversion-PR spec, 2026-05-08 thank-you-conversion-PR spec) + 7 PM-side syncs awaiting recovery. Local files unchanged outside trackers. ADAM-TODO line refreshed in place (not re-stacked) per stale-flags rule. ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal.
 
 [2026-05-09 22:00 PM-cron-on-time] AUTH EXPIRED (8th consecutive nightly): `notebooklm list --json` → `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` PUSH+CURATE Steps 1–7 all blocked at Step 1. ADAM ACTION: run `notebooklm login` from a terminal.
+
+---
+
+## 2026-05-15 PM-cron-on-time — Auth Still Expired (13th consecutive nightly fire, 14 calendar days, 30 sub-sessions)
+
+[2026-05-15 22:10 PM-cron-on-time] Same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error on `notebooklm list --json` with WebLiteSignIn redirect (accounts.google.com). Cron fired ON TIME (22:10 vs 22:00 CDT 05-15 target — normal jitter +10 min). PUSH+CURATE Step 1 blocked → Steps 2–7 all skipped. No notebook contact, no source mutations, no master log appends, no digest. Lead Gen PUSH backlog: 13 artifacts (rate-alert 05-02 / homepage forms 05-04 / thank-you 05-05 / closeout-PR spec 05-06 / conversion-PR spec 05-07 / thank-you-conversion PR spec 05-08 / cross-page-brand-footer PR spec 05-09 / final-light-pass PR spec 05-10 / NULL-lead_source diagnostic 05-11 / iMessage comparison brief 05-12 / refinance-quote funnel audit 05-13 / Realtor Relationships activation architect spec 05-14 / pile-pressure snapshot 05-15) + 13 PM-side syncs awaiting recovery. Local files unchanged outside trackers. ADAM-TODO line refreshed in place (not re-stacked) per stale-flags rule. ACTION: Adam must run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal.

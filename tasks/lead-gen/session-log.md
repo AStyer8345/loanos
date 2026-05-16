@@ -2,6 +2,29 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-05-16 AM — Lead Generation
+
+**DateTime:** 2026-05-16 03:45 CDT (cron on-time vs 03:00 slot)
+**Mode:** AM
+**Sequence:** A (Research Only — minimal verification pass, 0 new files)
+**Focus:** Status-verification micro-pass. **2nd consecutive deliberate-restraint session** per 05-15 AM forward rule.
+
+### What was verified (read-only, 2 SELECT queries + 1 CLI probe)
+- Realtor Relationships campaign `ef52ed56-8a22-4d15-9f12-a1796ccf17b6` Steps 1+2+4 still `annual_date`/`condition`/`annual_date` (Phase-1 spec from 05-14 AM untouched; only Step 3 is `relative_days`).
+- `drip_enrollments_total` = 0 / `drip_sends_total` = 0 org-wide (unchanged across 12+ consecutive baselines).
+- All 5 named-funnel 90d counts = 0: PA Funnel / Rate Alert / Quick Quote / Quick Contact / Refinance Funnel.
+- NotebookLM CLI auth still expired (15th wall-clock day, 29th sub-session blocked). Same WebLiteSignIn redirect.
+- ADAM-TODO open/done counts unchanged at 104/30 (3.47× ratio); 0 [LEAD-GEN] lines flipped `[ ]` → `[x]` overnight; last flip remains 2026-04-28 (18 days ago).
+
+### Forward rule (set today — extends 05-15 AM rule)
+Continue Sequence A minimal-restraint pattern until ≥1 pending [LEAD-GEN] item flips `[ ]` → `[x]`. Eligible focuses if a longer next session: refresh same pile-pressure snapshot (recurring dated artifact) / PA-funnel GSC+GA4 status check (still credential-blocked per SEO/SEM status) / NULL `lead_source` ~15-min n8n REST PUT proposal (already debunked 05-11 — not a real signal). **DO NOT author another PR spec, audit, brief, or activation spec.** Pile is at saturation. Cohort-pause planning signal still pending Mon 05-18 GOALS.md refresh.
+
+### Output
+- 0 new files in `tasks/lead-gen/research/` or `tasks/lead-gen/specs/`.
+- 7 files refreshed in place (today-mission.md, notebooklm-errors.md prepend, session-log.md prepend, subagent-status.md SESSION_END, CONTEXT.md 3 Lead Gen fields, CHANGELOG.md dated entry prepend, TODO.md + ADAM-TODO.md NotebookLM lines refreshed).
+- 0 new ADAM-TODO lines.
+
+---
 ## Session: 2026-05-15 AM — Lead Generation
 
 **DateTime:** 2026-05-15 10:06 CDT

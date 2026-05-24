@@ -130,12 +130,12 @@ Seller(s): [SELLER NAME(S)]<br>
 Buyer's Agent: [BA NAME] — [BA BROKERAGE]<br>
 Listing Agent: [LA NAME] — [LA BROKERAGE]<br>
 Title: [TITLE COMPANY NAME] — [TITLE CONTACT NAME]<br>
-Lender: Adam Styer — Mortgage Solutions LP
+Lender: Adam Styer — HyperSmart Home Loans
 </p>
 <p>Let me know if I'm missing anyone or if any of the above needs correcting. Let's get this closed.</p>
 <p>
 Adam Styer<br>
-Senior Loan Officer | Mortgage Solutions LP<br>
+Senior Loan Officer | HyperSmart Home Loans<br>
 NMLS# 513013<br>
 (512) 956-6010<br>
 adam@thestyerteam.com
@@ -167,7 +167,7 @@ This is a SEPARATE email draft sent to the borrower(s) only.
 <li><strong>Clear to Close</strong> — Once all conditions are met, we issue the clear to close and you'll receive your final closing numbers.</li>
 <li><strong>Closing Day</strong> — Currently scheduled for <strong>[CLOSING DATE]</strong>. You sign, you fund, you get the keys.</li>
 </ol>
-<p><a href="https://mslp.my1003app.com/513013/register?time=1767737197980" style="display: inline-block; background-color: #1a73e8; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Loan Portal — Upload Documents</a></p>
+<p><a href="https://hypersmart.my1003app.com/513013/register?time=1767737197980" style="display: inline-block; background-color: #1a73e8; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Loan Portal — Upload Documents</a></p>
 <hr style="border: 1px solid #cccccc;">
 <p style="font-weight: bold; font-size: 15px;">IMPORTANT — PROTECT YOUR APPROVAL</p>
 <hr style="border: 1px solid #cccccc;">
@@ -201,7 +201,7 @@ Your Agent: <strong>[BA NAME]</strong>
 <p>Looking forward to getting this done for you.</p>
 <p>
 Adam Styer<br>
-Senior Loan Officer | Mortgage Solutions LP<br>
+Senior Loan Officer | HyperSmart Home Loans<br>
 NMLS# 513013<br>
 (512) 956-6010<br>
 adam@thestyerteam.com
@@ -210,7 +210,7 @@ adam@thestyerteam.com
 </html>
 ```
 **Hardcoded links — do not change:**
-- Loan Application: https://mslp.my1003app.com/513013/register?time=1767737197980
+- Loan Application: https://hypersmart.my1003app.com/513013/register?time=1767737197980
 - Calendar: https://calendly.com/adamstyer/15minutes
 - Phone: 512-956-6010
 - Email: adam@thestyerteam.com

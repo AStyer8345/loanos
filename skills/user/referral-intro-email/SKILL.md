@@ -48,15 +48,15 @@ HTML TEMPLATE:
 
 <p>I'll also include a link to the loan application below. You're welcome to wait until after we talk to complete it, but if you'd like to get started now, it can help make that first conversation more productive by dialing in your purchasing power and next steps. Completely up to you.</p>
 
-<p><a href="https://mslp.my1003app.com/513013/register?time=1767737197980">Loan Application</a></p>
+<p><a href="https://hypersmart.my1003app.com/513013/register?time=1767737197980">Loan Application</a></p>
 
 <p>Looking forward to connecting.</p>
 
-<p>Adam Styer<br>Senior Loan Officer | Mortgage Solutions LP<br>NMLS# 513013<br>(512) 956-6010<br>adam@thestyerteam.com</p>
+<p>Adam Styer<br>Senior Loan Officer | HyperSmart Home Loans<br>NMLS# 513013<br>(512) 956-6010<br>adam@thestyerteam.com</p>
 
 Hardcoded links — do not change:
 - Calendar: https://calendly.com/adamstyer/15minutes
-- Loan Application: https://mslp.my1003app.com/513013/register?time=1767737197980
+- Loan Application: https://hypersmart.my1003app.com/513013/register?time=1767737197980
 - Phone: 512-956-6010
 - Email: adam@thestyerteam.com
 - NMLS: 513013
@@ -78,7 +78,7 @@ Instructions parameter format:
 Create a draft email in Microsoft Outlook with the following:
 
 To: [BUYER EMAIL]
-Subject: Connecting with You – Adam Styer | Mortgage Solutions LP
+Subject: Connecting with You – Adam Styer | HyperSmart Home Loans
 Body Format: HTML
 Body: [FULL HTML BODY — single line, no line breaks]
 
@@ -123,5 +123,5 @@ Use salesforce_create_note or update the Notes field on the contact record.
 - Missing fields: Flag in checklist. Leave [PLACEHOLDER] in email. Do not guess.
 - Links: Hardcoded. Never change without Adam's instruction.
 - Draft method: Zapier Outlook tool only. body/subject/bodyFormat params = null. Everything in instructions.
-- Subject line: Always use: Connecting with You – Adam Styer | Mortgage Solutions LP
+- Subject line: Always use: Connecting with You – Adam Styer | HyperSmart Home Loans
 - Do not auto-send. Draft only. Adam sends from Outlook.

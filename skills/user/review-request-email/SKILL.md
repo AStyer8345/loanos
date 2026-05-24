@@ -69,7 +69,7 @@ Replace `[FIRST_NAME]` and `[BORROWER_EMAIL]` with provided values. Flatten to s
         <!-- Header -->
         <tr>
           <td style="background-color:#1E2761;padding:30px 40px;text-align:center;">
-            <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Adam Styer | Mortgage Solutions LP</h1>
+            <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Adam Styer | HyperSmart Home Loans</h1>
             <p style="color:#a8b8d8;margin:6px 0 0 0;font-size:14px;">Senior Loan Officer | NMLS# 513013</p>
           </td>
         </tr>
@@ -124,7 +124,7 @@ Replace `[FIRST_NAME]` and `[BORROWER_EMAIL]` with provided values. Flatten to s
                 </td>
                 <td style="vertical-align:top;">
                   <p style="margin:0;font-size:16px;font-weight:700;color:#1E2761;">Adam Styer</p>
-                  <p style="margin:2px 0;font-size:13px;color:#666666;">Senior Loan Officer | Mortgage Solutions LP</p>
+                  <p style="margin:2px 0;font-size:13px;color:#666666;">Senior Loan Officer | HyperSmart Home Loans</p>
                   <p style="margin:2px 0;font-size:13px;color:#666666;">NMLS# 513013</p>
                   <p style="margin:2px 0;font-size:13px;"><a href="tel:5129566010" style="color:#1E2761;text-decoration:none;">(512) 956-6010</a></p>
                   <p style="margin:2px 0;font-size:13px;"><a href="mailto:adam@thestyerteam.com" style="color:#1E2761;text-decoration:none;">adam@thestyerteam.com</a></p>

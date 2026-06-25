@@ -143,6 +143,8 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'CLEAR_TO_CLOSE': 'clear_to_close',
   'CTC': 'clear_to_close',
   'Closing': 'clear_to_close',
+  'DOCS_OUT': 'clear_to_close',
+  'Docs Out': 'clear_to_close',
 
   // Funded / Closed
   'funded': 'funded',
@@ -331,6 +333,8 @@ export const STATUS_HEX: Record<string, string> = {
   'Clear to Close':           '#16A34A',
   'Clear To Close':           '#16A34A',
   'CTC':                      '#16A34A',
+  'DOCS_OUT':                 '#16A34A',
+  'Docs Out':                 '#16A34A',
   'APPROVED':                 '#0891B2',
   'Approved':                 '#0891B2',
   'APPROVED_WITH_CONDITIONS': '#0891B2',

@@ -85,6 +85,7 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'Application': 'pre_approval',
   'application_intake': 'pre_approval',
   'APPLICATION_INTAKE': 'pre_approval',
+  'App Intake': 'pre_approval',
   'PREAPPROVED': 'pre_approval',
   'QUALIFICATION': 'pre_approval',
 
@@ -99,6 +100,7 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'In Process': 'processing',
   'under_contract': 'processing',
   'Loan in Process': 'processing',
+  'Vvoe completed': 'processing',
 
   // Disclosed
   'disclosed': 'disclosed',
@@ -145,6 +147,7 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'Closing': 'clear_to_close',
   'DOCS_OUT': 'clear_to_close',
   'Docs Out': 'clear_to_close',
+  'cd_issued': 'clear_to_close',
 
   // Funded / Closed
   'funded': 'funded',
@@ -154,6 +157,9 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'Closed/Funded': 'funded',
   'LOAN_FUNDED': 'funded',
   'Closed Client': 'funded',
+  'Purchased': 'funded',
+  'Post closing docs': 'funded',
+  'Freddie': 'funded', // sold to Freddie Mac = closed/funded
 }
 
 /**
@@ -324,6 +330,7 @@ export const STATUS_HEX: Record<string, string> = {
   'In Process':               '#D97706',
   'processing':               '#D97706',
   'Processing':               '#D97706',
+  'Vvoe completed':           '#D97706',
   'RE_SUBMITTAL':             '#DC2626',
   'RESUBMIT':                 '#DC2626',
   'Resubmit':                 '#DC2626',
@@ -335,6 +342,7 @@ export const STATUS_HEX: Record<string, string> = {
   'CTC':                      '#16A34A',
   'DOCS_OUT':                 '#16A34A',
   'Docs Out':                 '#16A34A',
+  'cd_issued':                '#16A34A',
   'APPROVED':                 '#0891B2',
   'Approved':                 '#0891B2',
   'APPROVED_WITH_CONDITIONS': '#0891B2',
@@ -353,6 +361,9 @@ export const STATUS_HEX: Record<string, string> = {
   'Closed/Funded':            '#C9A84C',
   'LOAN_FUNDED':              '#C9A84C',
   'Closed Client':            '#C9A84C',
+  'Purchased':                '#C9A84C',
+  'Post closing docs':        '#C9A84C',
+  'Freddie':                  '#C9A84C',
 
   // Pre-approval / lead family
   'Started':                  '#A855F7',
@@ -364,6 +375,7 @@ export const STATUS_HEX: Record<string, string> = {
   'Application':              '#6366F1',
   'application_intake':       '#6366F1',
   'APPLICATION_INTAKE':       '#6366F1',
+  'App Intake':               '#6366F1',
   'PREAPPROVED':              '#818CF8',
   'QUALIFICATION':            '#6366F1',
   'New Application':          '#60A5FA',

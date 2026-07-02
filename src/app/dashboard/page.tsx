@@ -18,6 +18,8 @@ import {
 } from '@/lib/leadSources'
 import { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
 import { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
+import { type StalledItem } from '@/components/dashboard/StalledWidget'
+import { type CompPlan, type CompRow } from '@/components/dashboard/CompensationPanel'
 
 const NEW_LEADS_WINDOW_DAYS = 30
 
@@ -68,7 +70,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     supabase
       .from('org_settings')
-      .select('onboarding_completed')
+      .select('onboarding_completed, stalled_threshold_days')
       .eq('organization_id', organizationId)
       .single(),
     supabase
@@ -273,6 +275,105 @@ export default async function DashboardPage() {
   // "Needs Your Attention" — AI-classified inbound emails from the last 7 days.
   // Server-side fetch because the scoring logic is shared with automations.
   const needsAttention = await getNeedsAttention(supabase, organizationId)
+
+  // ── Stalled: active loans with no touch past the org threshold ───────────
+  const stalledThresholdDays = orgSettings?.stalled_threshold_days ?? 7
+  const stalledLoanItems: StalledItem[] = activeLoans
+    .map(l => {
+      const activityTs = lastActivityMap.get(l.id)
+      const lastTouch = Math.max(
+        activityTs ? new Date(activityTs).getTime() : 0,
+        l.updated_at ? new Date(l.updated_at).getTime() : 0,
+        l.created_at ? new Date(l.created_at).getTime() : 0,
+      )
+      const daysSince = lastTouch > 0 ? Math.floor((now.getTime() - lastTouch) / 86400000) : 0
+      return {
+        id: l.id,
+        kind: 'loan' as const,
+        name: [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.loan_name || 'Unknown',
+        detail: `${l.status ?? ''}${l.loan_amount ? ` · ${Math.round(l.loan_amount / 1000)}k` : ''}`,
+        daysSince,
+        href: `/dashboard/loans/${l.id}`,
+      }
+    })
+    .filter(item => item.daysSince >= stalledThresholdDays)
+
+  // ── Never-contacted leads: zero outbound touches since intake ────────────
+  const OUTBOUND_ACTIONS = ['communication.logged', 'note_added', 'email_outbound', 'sms_sent', 'email.sent', 'drip_send']
+  const { data: openLeads = [] } = await supabase
+    .from('contacts')
+    .select('id, first_name, last_name, created_at')
+    .eq('organization_id', organizationId)
+    .eq('stage', 'Lead')
+    .neq('hot_lead_dismissed', true)
+    .not('contact_type', 'in', '("realtor","agent","lender","title")')
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  const openLeadIds = (openLeads ?? []).map(c => c.id)
+  let neverContactedLeads: typeof openLeads = []
+  if (openLeadIds.length > 0) {
+    const [{ data: manualTouches }, { data: logTouches }] = await Promise.all([
+      supabase.from('contact_activity').select('contact_id').in('contact_id', openLeadIds),
+      supabase.from('activity_log').select('contact_id').in('contact_id', openLeadIds).in('action', OUTBOUND_ACTIONS),
+    ])
+    const touched = new Set([
+      ...(manualTouches ?? []).map(t => t.contact_id),
+      ...(logTouches ?? []).map(t => t.contact_id),
+    ])
+    neverContactedLeads = (openLeads ?? []).filter(c => !touched.has(c.id))
+  }
+
+  const stalledLeadItems: StalledItem[] = (neverContactedLeads ?? []).map(c => ({
+    id: c.id,
+    kind: 'lead' as const,
+    name: [c.first_name, c.last_name].filter(Boolean).join(' ') || 'Unknown',
+    detail: 'lead since intake',
+    daysSince: c.created_at ? Math.floor((now.getTime() - new Date(c.created_at).getTime()) / 86400000) : 0,
+    href: `/dashboard/contacts/${c.id}`,
+  }))
+
+  const stalledItems = [...stalledLeadItems, ...stalledLoanItems]
+    .sort((a, b) => b.daysSince - a.daysSince)
+    .slice(0, 20)
+
+  // ── Compensation: plan + per-funded-loan rows (auto-created by DB trigger) ─
+  const [{ data: compPlanRow }, { data: compRaw = [] }] = await Promise.all([
+    supabase
+      .from('comp_plans')
+      .select('id, comp_bps, company_share_pct, loa_fee_bps, broker_fee, correspondent_fee, default_deal_type')
+      .eq('organization_id', organizationId)
+      .eq('is_active', true)
+      .maybeSingle(),
+    supabase
+      .from('loan_compensation')
+      .select('id, loan_id, deal_type, loan_amount, comp_bps, gross_source, gross_comp, total_deductions, net_comp, net_bps, payout_status, loans(borrower_first_name, borrower_last_name, loan_name, funding_date, closing_date)')
+      .eq('organization_id', organizationId),
+  ])
+
+  const compRows: CompRow[] = (compRaw ?? [])
+    .map(r => {
+      const loan = r.loans as unknown as {
+        borrower_first_name: string | null; borrower_last_name: string | null
+        loan_name: string | null; funding_date: string | null; closing_date: string | null
+      } | null
+      return {
+        id: r.id,
+        loan_id: r.loan_id,
+        borrower: [loan?.borrower_first_name, loan?.borrower_last_name].filter(Boolean).join(' ') || loan?.loan_name || 'Unknown',
+        fundedDate: loan?.funding_date ?? loan?.closing_date ?? null,
+        loan_amount: r.loan_amount,
+        deal_type: r.deal_type,
+        comp_bps: r.comp_bps,
+        gross_source: r.gross_source,
+        gross_comp: r.gross_comp,
+        total_deductions: r.total_deductions,
+        net_comp: r.net_comp,
+        net_bps: r.net_bps,
+        payout_status: r.payout_status,
+      }
+    })
+    .sort((a, b) => (b.fundedDate ?? '').localeCompare(a.fundedDate ?? ''))
 
   // newLeads, recentApplications, activityEntries removed — dashboard redesign
 
@@ -608,6 +709,11 @@ export default async function DashboardPage() {
         aeoBucket={aeoBucket}
         seoBucket={seoBucket}
         realtorPerformanceRows={realtorPerformanceRows}
+        stalledItems={stalledItems}
+        neverContactedCount={(neverContactedLeads ?? []).length}
+        stalledThresholdDays={stalledThresholdDays}
+        compPlan={(compPlanRow as CompPlan | null) ?? null}
+        compRows={compRows}
       />
     </>
   )

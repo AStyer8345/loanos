@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Search, Link2, X, Inbox, FileText, Sparkles, User } from 'lucide-react'
+import { Search, Link2, X, Inbox, FileText, Sparkles, User, UserPlus } from 'lucide-react'
 
 type UnmatchedEmail = {
   id: string
@@ -376,6 +376,37 @@ export default function UnmatchedEmailsPage() {
     setIMessages(prev => prev.filter(e => e.id !== email.id))
   }
 
+  const createContactFromEmail = async (email: UnmatchedEmail) => {
+    if (!email.from_address) return
+    // Parse a name from the display name ("First Last" / "Last, First") or the address local part
+    const raw = ((email.metadata?.from_name as string) || '').trim()
+    let first = '', last: string | null = null
+    if (raw && !raw.includes('@')) {
+      const parts = raw.includes(',') ? raw.split(',').map(s => s.trim()).reverse() : raw.split(/\s+/)
+      first = parts[0] || raw
+      last = parts.slice(1).join(' ') || null
+    } else {
+      const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+      const parts = email.from_address.split('@')[0].split(/[._-]+/).filter(Boolean)
+      first = cap(parts[0] || email.from_address)
+      last = parts[1] ? cap(parts[1]) : null
+    }
+    const res = await fetch('/api/contacts/quick-add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        confirmed: true,
+        contact: { first_name: first, last_name: last, email: email.from_address, stage: 'Lead', contact_type: 'borrower' },
+      }),
+    })
+    if (!res.ok) {
+      console.error('[inbox-review] createContactFromEmail failed:', await res.text())
+      return
+    }
+    const { contact } = await res.json()
+    if (contact?.id) await linkToContact(email, contact.id)
+  }
+
   const dismissEmail = async (emailId: string) => {
     const res = await fetch('/api/emails/link', {
       method: 'POST',
@@ -563,6 +594,20 @@ export default function UnmatchedEmailsPage() {
                     >
                       <Link2 size={11} /> Link
                     </button>
+                    {!isIMsg && email.from_address && (
+                      <button
+                        onClick={() => createContactFromEmail(email)}
+                        title="Create contact from sender and link"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center',
+                          padding: '5px 6px', borderRadius: 4, cursor: 'pointer',
+                          background: 'rgba(16,185,129,0.1)', color: '#34D399',
+                          border: '1px solid rgba(16,185,129,0.3)',
+                        }}
+                      >
+                        <UserPlus size={11} />
+                      </button>
+                    )}
                     <button
                       onClick={() => dismissEmail(email.id)}
                       title="Dismiss"

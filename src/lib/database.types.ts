@@ -727,6 +727,68 @@ export type Database = {
           },
         ]
       }
+      comp_plans: {
+        Row: {
+          admin_fee: number
+          broker_fee: number
+          closing_coord_fee: number
+          comp_bps: number
+          company_share_pct: number
+          correspondent_fee: number
+          created_at: string
+          default_deal_type: string
+          id: string
+          is_active: boolean
+          loa_fee_bps: number
+          name: string
+          organization_id: string
+          processing_fee: number
+          updated_at: string
+        }
+        Insert: {
+          admin_fee?: number
+          broker_fee?: number
+          closing_coord_fee?: number
+          comp_bps?: number
+          company_share_pct?: number
+          correspondent_fee?: number
+          created_at?: string
+          default_deal_type?: string
+          id?: string
+          is_active?: boolean
+          loa_fee_bps?: number
+          name?: string
+          organization_id: string
+          processing_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_fee?: number
+          broker_fee?: number
+          closing_coord_fee?: number
+          comp_bps?: number
+          company_share_pct?: number
+          correspondent_fee?: number
+          created_at?: string
+          default_deal_type?: string
+          id?: string
+          is_active?: boolean
+          loa_fee_bps?: number
+          name?: string
+          organization_id?: string
+          processing_fee?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_activity: {
         Row: {
           activity_type: string | null
@@ -1629,6 +1691,99 @@ export type Database = {
           },
         ]
       }
+      loan_compensation: {
+        Row: {
+          broker_fee: number
+          comp_bps: number
+          company_share_amt: number | null
+          company_share_pct: number
+          correspondent_fee: number
+          created_at: string
+          deal_type: string
+          fixed_fees_amt: number | null
+          gross_comp: number | null
+          gross_source: string
+          id: string
+          loa_fee_amt: number | null
+          loa_fee_bps: number
+          loan_amount: number | null
+          loan_id: string
+          net_bps: number | null
+          net_comp: number | null
+          notes: string | null
+          organization_id: string
+          other_deduction: number
+          payout_status: string
+          total_deductions: number | null
+          updated_at: string
+        }
+        Insert: {
+          broker_fee?: number
+          comp_bps?: number
+          company_share_amt?: number | null
+          company_share_pct?: number
+          correspondent_fee?: number
+          created_at?: string
+          deal_type?: string
+          fixed_fees_amt?: number | null
+          gross_comp?: number | null
+          gross_source?: string
+          id?: string
+          loa_fee_amt?: number | null
+          loa_fee_bps?: number
+          loan_amount?: number | null
+          loan_id: string
+          net_bps?: number | null
+          net_comp?: number | null
+          notes?: string | null
+          organization_id: string
+          other_deduction?: number
+          payout_status?: string
+          total_deductions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          broker_fee?: number
+          comp_bps?: number
+          company_share_amt?: number | null
+          company_share_pct?: number
+          correspondent_fee?: number
+          created_at?: string
+          deal_type?: string
+          fixed_fees_amt?: number | null
+          gross_comp?: number | null
+          gross_source?: string
+          id?: string
+          loa_fee_amt?: number | null
+          loa_fee_bps?: number
+          loan_amount?: number | null
+          loan_id?: string
+          net_bps?: number | null
+          net_comp?: number | null
+          notes?: string | null
+          organization_id?: string
+          other_deduction?: number
+          payout_status?: string
+          total_deductions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_compensation_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: true
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_compensation_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loan_milestone_events: {
         Row: {
           borrower_email: string | null
@@ -1913,6 +2068,7 @@ export type Database = {
           signed_docs_status: string | null
           status: string | null
           status_date: string | null
+          status_normalized: string | null
           submission_date: string | null
           synced_at: string | null
           tax_transcript_ordered_date: string | null
@@ -2143,6 +2299,7 @@ export type Database = {
           signed_docs_status?: string | null
           status?: string | null
           status_date?: string | null
+          status_normalized?: string | null
           submission_date?: string | null
           synced_at?: string | null
           tax_transcript_ordered_date?: string | null
@@ -2373,6 +2530,7 @@ export type Database = {
           signed_docs_status?: string | null
           status?: string | null
           status_date?: string | null
+          status_normalized?: string | null
           submission_date?: string | null
           synced_at?: string | null
           tax_transcript_ordered_date?: string | null
@@ -2761,6 +2919,7 @@ export type Database = {
           setup_arive_done: boolean
           setup_automations_done: boolean
           setup_import_done: boolean
+          stalled_threshold_days: number
           updated_at: string
         }
         Insert: {
@@ -2790,6 +2949,7 @@ export type Database = {
           setup_arive_done?: boolean
           setup_automations_done?: boolean
           setup_import_done?: boolean
+          stalled_threshold_days?: number
           updated_at?: string
         }
         Update: {
@@ -2819,6 +2979,7 @@ export type Database = {
           setup_arive_done?: boolean
           setup_automations_done?: boolean
           setup_import_done?: boolean
+          stalled_threshold_days?: number
           updated_at?: string
         }
         Relationships: [
@@ -2976,6 +3137,81 @@ export type Database = {
           },
         ]
       }
+      rancho_chat_logs: {
+        Row: {
+          bot_answer: string | null
+          created_at: string
+          id: string
+          page_url: string | null
+          session_id: string
+          user_agent: string | null
+          user_message: string | null
+        }
+        Insert: {
+          bot_answer?: string | null
+          created_at?: string
+          id?: string
+          page_url?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_message?: string | null
+        }
+        Update: {
+          bot_answer?: string | null
+          created_at?: string
+          id?: string
+          page_url?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_message?: string | null
+        }
+        Relationships: []
+      }
+      rancho_drip_state: {
+        Row: {
+          clock_start_ts: string
+          created_at: string
+          first_name: string | null
+          gmail_thread_id: string
+          inquiry_id: string | null
+          last_drip_message_id: string | null
+          last_outbound_ts: string
+          last_step_sent: number
+          last_step_sent_ts: string | null
+          status: string
+          to_email: string
+          updated_at: string
+        }
+        Insert: {
+          clock_start_ts: string
+          created_at?: string
+          first_name?: string | null
+          gmail_thread_id: string
+          inquiry_id?: string | null
+          last_drip_message_id?: string | null
+          last_outbound_ts: string
+          last_step_sent?: number
+          last_step_sent_ts?: string | null
+          status: string
+          to_email: string
+          updated_at?: string
+        }
+        Update: {
+          clock_start_ts?: string
+          created_at?: string
+          first_name?: string | null
+          gmail_thread_id?: string
+          inquiry_id?: string | null
+          last_drip_message_id?: string | null
+          last_outbound_ts?: string
+          last_step_sent?: number
+          last_step_sent_ts?: string | null
+          status?: string
+          to_email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rancho_events: {
         Row: {
           artwork_storage_path: string | null
@@ -2993,6 +3229,7 @@ export type Database = {
           is_active: boolean
           price: string | null
           publer_post_id: string | null
+          show_in_popup: boolean
           sort_order: number
           start_time: string | null
           ticket_url: string | null
@@ -3015,6 +3252,7 @@ export type Database = {
           is_active?: boolean
           price?: string | null
           publer_post_id?: string | null
+          show_in_popup?: boolean
           sort_order?: number
           start_time?: string | null
           ticket_url?: string | null
@@ -3037,6 +3275,7 @@ export type Database = {
           is_active?: boolean
           price?: string | null
           publer_post_id?: string | null
+          show_in_popup?: boolean
           sort_order?: number
           start_time?: string | null
           ticket_url?: string | null
@@ -3048,6 +3287,7 @@ export type Database = {
       rancho_photos: {
         Row: {
           alt_text: string
+          aspect_ratio: string
           created_at: string
           id: string
           is_active: boolean
@@ -3060,6 +3300,7 @@ export type Database = {
         }
         Insert: {
           alt_text?: string
+          aspect_ratio?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -3072,6 +3313,7 @@ export type Database = {
         }
         Update: {
           alt_text?: string
+          aspect_ratio?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -3080,6 +3322,48 @@ export type Database = {
           sort_order?: number
           storage_path?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rancho_site_images: {
+        Row: {
+          alt_text: string
+          aspect_ratio: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          page: string
+          public_url: string
+          slot_key: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string
+          aspect_ratio?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          page: string
+          public_url?: string
+          slot_key: string
+          storage_path?: string
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string
+          aspect_ratio?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          page?: string
+          public_url?: string
+          slot_key?: string
+          storage_path?: string
           updated_at?: string
         }
         Relationships: []
@@ -3868,6 +4152,7 @@ export type Database = {
         Returns: undefined
       }
       morning_briefing_pipeline: { Args: { as_of?: string }; Returns: Json }
+      normalize_loan_status: { Args: { raw: string }; Returns: string }
       pipeline_stage_aging: {
         Args: never
         Returns: {
@@ -4046,4 +4331,3 @@ export const Constants = {
     },
   },
 } as const
-

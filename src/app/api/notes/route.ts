@@ -24,12 +24,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'content is required' }, { status: 400 })
   }
 
-  if (!contact_id && !loan_id) {
-    return NextResponse.json(
-      { error: 'At least one of contact_id or loan_id is required' },
-      { status: 400 },
-    )
-  }
+  // contact_id / loan_id are optional — a note with neither is a global
+  // scratchpad note surfaced on the dashboard.
 
   const serviceClient = createServiceClient()
 
@@ -87,7 +83,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(note)
 }
 
-// GET /api/notes — fetch notes for a contact or loan
+// GET /api/notes — fetch notes for a contact or loan, or (no params) the
+// org-wide recent notes roll-up for the dashboard scratchpad, with linked
+// contact/loan names joined for display.
 export async function GET(request: NextRequest) {
   let organizationId: string
   try {
@@ -101,21 +99,14 @@ export async function GET(request: NextRequest) {
   const contactId = params.get('contact_id')
   const loanId = params.get('loan_id')
 
-  if (!contactId && !loanId) {
-    return NextResponse.json(
-      { error: 'contact_id or loan_id is required' },
-      { status: 400 },
-    )
-  }
-
   const serviceClient = createServiceClient()
   let query = serviceClient
     .from('notes')
-    .select('*')
+    .select('*, contacts(first_name, last_name), loans(loan_name, borrower_first_name, borrower_last_name)')
     .eq('organization_id', organizationId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
-    .limit(100)
+    .limit(contactId || loanId ? 100 : 50)
 
   if (contactId) query = query.eq('contact_id', contactId)
   if (loanId) query = query.eq('loan_id', loanId)

@@ -30,6 +30,10 @@ import LeadSourceChart from './charts/LeadSourceChart'
 import NewLeadsChart from './charts/NewLeadsChart'
 import type { LeadSourceCategory } from '@/lib/leadSources'
 import MarketingActivity from './charts/MarketingActivity'
+import NotesScratchpad from './NotesScratchpad'
+import StalledWidget, { type StalledItem } from './StalledWidget'
+import UnknownSendersWidget from './UnknownSendersWidget'
+import CompensationPanel, { type CompPlan, type CompRow } from './CompensationPanel'
 import AeoVsSeoCard from '@/components/dashboard/analytics/AeoVsSeoCard'
 import SourceConversionTable, { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
 import RealtorPerformanceTable, { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
@@ -68,6 +72,11 @@ interface DashboardClientProps {
   aeoBucket: { leads: number; funded: number; volume: number }
   seoBucket: { leads: number; funded: number; volume: number }
   realtorPerformanceRows: RealtorPerformanceRow[]
+  stalledItems: StalledItem[]
+  neverContactedCount: number
+  stalledThresholdDays: number
+  compPlan: CompPlan | null
+  compRows: CompRow[]
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────
@@ -196,6 +205,12 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* Mini Pipeline Table removed 2026-04-16 — duplicated the Pipeline tab one click away */}
 
+          {/* ── Command center row: Notes scratchpad + Unknown senders ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <NotesScratchpad />
+            <UnknownSendersWidget />
+          </div>
+
           {/* ── New Applications & Pre-Approvals ── */}
           {props.newAppsAndPAs.length > 0 && (
             <Card className="overflow-hidden">
@@ -235,6 +250,13 @@ export default function DashboardClient(props: DashboardClientProps) {
           {props.needsAttention.length > 0 && (
             <NeedsAttentionWidget items={props.needsAttention} />
           )}
+
+          {/* ── Stalled: loans with no movement + never-contacted leads ── */}
+          <StalledWidget
+            items={props.stalledItems}
+            neverContactedCount={props.neverContactedCount}
+            thresholdDays={props.stalledThresholdDays}
+          />
 
           {/* ── Two-column: Hot Leads (compact) + Rate Lock (compact) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -280,6 +302,9 @@ export default function DashboardClient(props: DashboardClientProps) {
               </Card>
             ))}
           </div>
+
+          {/* ── Compensation: live from funded loans + comp plan ── */}
+          <CompensationPanel plan={props.compPlan} rows={props.compRows} />
 
           {/* Charts — YoY Volume + Commission Forecast */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

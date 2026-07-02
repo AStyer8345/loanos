@@ -1,5 +1,210 @@
 # LoanOS Changelog
 
+## 2026-07-02 (Adam-directed) — Unified Command Center: dashboard widgets + compensation tracking + status normalization
+
+- **LoanOS product work RESUMED by Adam's explicit directive** — GOALS.md updated (LoanOS product un-paused; marketing/Client Ops pauses retained).
+- **DB — `loans.status_normalized`** (migration `loan_status_normalized`): SQL `normalize_loan_status()` mirrors `loan-stages.ts` RAW_STATUS_MAP + maps inactive statuses (cancelled/dead/denied/withdrawn/suspended/on_hold) to their own keys instead of the app's 'lead' fallback. Trigger on insert/update of `status`, full backfill (1,184 funded / 44 inactive / 3 lead), index on `(organization_id, status_normalized)`.
+- **DB — compensation tracking** (migration `compensation_tracking`): `comp_plans` (org defaults from Adam's comp calculator spreadsheet: 200 bps gross, 10% company share, 25 bps LOA, $879 broker + $379 correspondent fees) + `loan_compensation` (one row per funded loan; compute trigger derives gross/deductions/net/net-bps; auto-create trigger fires when a loan reaches `status_normalized='funded'`; gross seeds from Arive `commission_amount` when present, else plan math). Backfilled 69 rows for 2026-funded loans ($411k gross / $211k net at plan defaults). Org-scoped RLS on both tables.
+- **DB** — `org_settings.stalled_threshold_days` (default 7).
+- **Dashboard Pipeline tab** (now the command center): `NotesScratchpad` (global quick-jot writing to `notes` table — contact_id/loan_id now optional in `/api/notes`; org-wide recent-notes roll-up with linked record names), `UnknownSendersWidget` (unmatched inbound emails grouped by sender; create-contact + ignore-sender actions; deep link to Inbox Review), `StalledWidget` (active loans past the editable threshold + never-contacted leads ranked by wait).
+- **Dashboard Performance tab**: `CompensationPanel` — gross/deductions/net YTD + avg net bps chips, editable comp-plan defaults, per-loan inline editing (deal type, gross override → 'manual' source, payout status pending/confirmed/paid). Supersedes the seed-data `/dashboard/performance` demo as the comp source of truth (legacy page left in place, untouched).
+- **Inbox Review** (`/dashboard/emails/unmatched`): new create-contact-from-sender action (parses name from header/address, quick-adds as Lead, links all their emails).
+- **APIs**: `GET/PUT /api/comp/plan`, `PATCH /api/comp/loans/[id]`, `PATCH /api/settings/stalled-threshold`; `/api/notes` global-note support.
+- **Model**: `CLAUDE_MODEL` → `claude-fable-5` (Adam's directive).
+- `database.types.ts` regenerated from live schema. Build green.
+
+## 2026-07-02 (loanos-autonomous) — paused, no-op exit
+
+- GOALS.md (week of 05-18, last updated 06-06) still lists "No LoanOS product work — paused indefinitely" + Pause List "Any task that primarily serves LoanOS or Client Ops." Per the autonomous-task pause protocol (Step 1): logged this note, took zero actions, exited cleanly. No TODO/ADAM-TODO triage, no build, no deploy, no MCP writes, no email digest. Fifth consecutive pause no-op (06-29 / 06-30 / 07-01 / 07-02). Working tree carries other agents' uncommitted tracker edits — left untouched (not swept/committed).
+
+## 2026-07-01 (loanos-autonomous) — paused, no-op exit
+
+- GOALS.md (week of 05-18, last updated 06-06) still lists "No LoanOS product work — paused indefinitely." Per the autonomous-task pause protocol: logged this note, took zero actions, exited cleanly. No TODO/ADAM-TODO triage, no build, no deploy, no MCP writes. Fourth consecutive pause no-op (06-29 / 06-30 / 07-01).
+
+## 2026-06-30 (loanos-autonomous) — paused, no-op exit
+
+- GOALS.md (week of 05-18, last updated 06-06) lists "No LoanOS product work — paused indefinitely." Per the autonomous-task pause protocol: logged this note, took zero actions, exited cleanly. No TODO/ADAM-TODO triage, no build, no deploy, no MCP writes.
+
+## 2026-06-30 (lead-gen-am) — speed-to-lead verify; scorer healthy, 4 real web leads + 1 test + 1 dup
+
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY — 6 execs since 06-23 (29162/29166/30450/30451/30594/31220) ALL success; zero errored execs since the 06-09 two-bug fix continues to hold. Every Website-source lead scored within ~2s of create.
+- 12 new contacts swept since 06-23 (covers the 06-24/25/26 AM sessions with no log entries). Web-form (3/cold): Phu Le (06-23), Erin Smith (06-23), Joel Geddes ×2 (06-27 — duplicate double-submit), "Codex Diagnostic" (06-28 — synthetic TEST lead from a Codex session against the live endpoint), Nathaly Cruz (06-29). Web-lead path proven on 10+ consecutive real leads. Rest are lead_source=null/0/new Arive/manual rows (scorer correctly idle).
+- Hot-lead sweep: only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15. No new hot leads; NOT re-stacked per anti-bloat.
+- Data hygiene noted, not escalated (both cold/harmless): Joel Geddes dup row 06-27; "Codex Diagnostic" test contact left in prod `contacts` 06-28.
+- NotebookLM PULL/PUSH skipped — CLI auth expired (58 days, live-probed). Cron late/catch-up fire (~8h). Trackers only: subagent-status, today-mission, session-log, CONTEXT 3 Lead-Gen fields. 0 live writes, 0 notifications, 0 emails.
+
+## 2026-06-30 (styer-social-am) — maintenance hold; styer-gbp-weekly old-brand recurrence confirmed
+
+- Step 1B scan: **0 new content** — newest blog 06-23, newest newsletter 06-22, both tracked/HELD 06-27. GBP-ready bundle stable at **7** + 1 hard-held May-18 rate page; no Adam ack on ADAM-TODO L13.
+- **Confirmed the 06-27 PM prediction:** `styer-gbp-weekly` published "GBP Weekly: Self-Employed Reality Check — Week 26" live to GBP Sun 06-28 ~15:25 CDT under the old-brand footer "Adam Styer | Mortgage Solutions LP | NMLS #513013" (posted count 8→9, footer live-verified in `social_drafts`). On-strategy content, only footer wrong. Next fire Sun 07-05.
+- Did NOT pause the task or edit the live post (outward-facing/irreversible — Adam's call). Refreshed ADAM-TODO L12 in place (recurrence now real, not hypothetical) — no new escalation line stacked.
+- Cushion 48 (REST head `0-47/48` = 47 SQL-authoritative), drift 0. Refresh 07 no-op (earliest draft 2026-09-23). NotebookLM PULL/PUSH skipped — CLI auth expired (~58 days). Builder/Architect/Quality/Reviewer/QA held.
+- Trackers only: subagent-status SESSION_START/END, gbp-content-tracker 06-30 scan note, ADAM-TODO L12, CONTEXT.md 3 Social fields, TODO line 25. 0 live writes, 0 Publer calls, 0 social_drafts inserts, 0 emails, 0 fabricated data.
+
+## 2026-06-30 (scenarios-am) — 59th consecutive no-build maintenance exit
+
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged since the 06-29 Monday window. No regime change; scenarios-am block (GOALS line 68) still untouched. Mission paused (line 36), cron kept (line 68).
+- Tue 06-30 is a non-refresh day (no new declined-moment); count stays at five (06-06 + 06-08 + 06-15 + 06-22 + 06-29). Next natural window = Mon 07-07. 58th session was 06-29; today = 59th.
+- No mission activates → 0 of 4 subagents run. No `src/` touch, no `npm run build`, no git push, no email (per task rule).
+- Refreshed trackers only: TODO line 30 (58→59 streak, through-date 06-30), CONTEXT.md 3 Scenarios fields (net-0 drift), today-mission.md, subagent-status SESSION_START/END. Stale-flags rule honored — refreshed in place, not re-stacked. Recommendation holds at (c) pause.
+
+## 2026-06-29 (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, mtime `Jun 6 16:34:23 2026` — unchanged) still lists "No LoanOS product work — paused indefinitely" + Paused Workstreams "LoanOS product (all of it)" + Pause List "Any task that primarily serves LoanOS or Client Ops." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest (paused no-op).
+
+## 2026-06-29 (scenarios-am) — 58th consecutive no-build maintenance exit
+
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. No regime change; scenarios-am block (GOALS line 68) still untouched. Mission paused (line 36), cron kept (line 68).
+- **Mon 06-29 IS the flagged 5th-moment weekly-refresh window — passed untouched at this ~10:01 CDT AM fire.** Fifth declined redirect opportunity (06-06 + 06-08 + 06-15 + 06-22 + 06-29); removes the last "redirect imminent" rationale. 57th session was 06-28; today = 58th.
+- No mission activates → 0 of 4 subagents run. No `src/` touch, no `npm run build`, no git push, no email (per task rule).
+- Refreshed trackers only: TODO line 30 (57→58 streak, through-date 06-29, 5th declined moment logged), CONTEXT.md 3 Scenarios fields (net-0 drift), today-mission.md, subagent-status SESSION_START/END. Stale-flags rule honored — refreshed in place, not re-stacked. Recommendation hardened to (c) pause.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~57 days) + master-notebook note (no work + CLI blocked).
+
+## 2026-06-28 (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, mtime `Jun 6 16:34:23 2026` — unchanged) still lists "No LoanOS product work — paused indefinitely" + Paused Workstreams "LoanOS product (all of it)" + Pause List "Any task that primarily serves LoanOS or Client Ops." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest (paused no-op).
+
+## 2026-06-28 (scenarios-am) — 57th consecutive no-build maintenance exit
+
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. No regime change; scenarios-am block (GOALS line 68) still untouched. Mission paused (line 36), cron kept (line 68).
+- 06-27 AM scenarios-am cron GAPPED (no fire — only loanos-autonomous logged 06-27). Last scenarios-am session was 06-26 (56th); today (Sun 06-28, late fire ~15:23 CDT) = 57th no-build exit. Sunday is not a refresh window; next natural window = Mon 06-29 (tomorrow — the flagged 5th-moment window).
+- No mission activates → 0 of 4 subagents run. No `src/` touch, no `npm run build`, no git push, no email (per task rule).
+- Refreshed trackers only: TODO line 30 (56→57 streak, through-date 06-28, 06-27 gap noted, Mon 06-29 = imminent 5th declined-moment window), CONTEXT.md 3 Scenarios fields (net-0 drift), today-mission.md, subagent-status SESSION_START/END. Stale-flags rule honored — refreshed in place, not re-stacked.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~56 days) + master-notebook note (no work + CLI blocked).
+
+## 2026-06-27 (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, mtime `Jun 6 16:34:23 2026` — unchanged) still lists "No LoanOS product work — paused indefinitely" + Paused Workstreams "LoanOS product (all of it)" + Pause List "Any task that primarily serves LoanOS or Client Ops." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest (paused no-op).
+
+## 2026-06-26 PM (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, mtime `Jun 6 16:34:23 2026` — unchanged since last exit) still lists "No LoanOS product work — paused indefinitely" + Paused Workstreams "LoanOS product (all of it)" + Pause List "Any task that primarily serves LoanOS or Client Ops." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest (paused no-op).
+
+## 2026-06-26 AM (scenarios-am) — 56th consecutive no-build maintenance exit
+
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. No regime change; scenarios-am block (GOALS line 68) still untouched. Mission paused (line 36), cron kept (line 68).
+- 06-25 AM scenarios-am cron GAPPED (no fire — not a session; trackers untouched since 06-24 confirm it). Today 06-26 Fri = 56th no-build exit; not a refresh window, next is Mon 06-29.
+- No mission activates → 0 of 4 subagents run. No `src/` touch, no `npm run build`, no git push, no email (per task rule).
+- Refreshed trackers only: TODO line 30 (55→56 streak, through-date 06-26, 06-25 gap noted), CONTEXT.md 3 Scenarios fields (net-0 drift, file stays 145 lines), today-mission.md, subagent-status SESSION_START/END. Stale-flags rule honored — refreshed in place, not re-stacked.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~54 days) + master-notebook note (no work + CLI blocked).
+
+## 2026-06-25 (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, last updated 06-06) still lists "No LoanOS product work — paused indefinitely" + Paused Workstreams "LoanOS product (all of it)" + Pause List "Any task that primarily serves LoanOS." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest (paused no-op).
+
+## 2026-06-24 PM (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18, mtime `Jun 6 16:34`) still lists "No LoanOS product work — paused indefinitely" + Pause List "Any task that primarily serves LoanOS." Routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest sent (paused no-op).
+
+## 2026-06-24 AM (scenarios-am) — 55th consecutive no-build maintenance exit
+
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. No regime change; scenarios-am block (GOALS line 68) still untouched. Mission paused (line 36), cron kept (line 68).
+- No mission activates → 0 of 4 subagents run. No `src/` touch, no `npm run build`, no git push, no email (per task rule).
+- Refreshed trackers only: TODO line 30 (54→55 streak, through-date 06-24), CONTEXT.md 3 Scenarios fields (net-0 line drift, file stays 145 lines), today-mission.md, subagent-status SESSION_START/END. Stale-flags rule honored — refreshed in place, not re-stacked.
+- NotebookLM PULL/PUSH + master-notebook note skipped — CLI auth expired (~52 days; Adam runs `notebooklm login`).
+- Adam decision still open on TODO line 30 since 05-18: (b) redirect / (c) pause cron / (d) narrow-scope — not (a) retire. Four declined redirect moments (06-06 + 06-08 + 06-15 + 06-22) tilt to (c)/(d). Next natural refresh window = Mon 06-29.
+
+## 2026-06-23 PM (styer-social-pm) — maintenance hold, no change since 06-16
+
+- PM convention: skipped Step 1B + Refresh 07 (both AM-only). Live awareness scan (slug-date, not `ls -t`): nothing dated after 06-16; newest piece still `blog/2026-06-16-dscr-loan-requirements-texas.html` (7 days unchanged).
+- Bundle holds at **5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market blog [decaying — ship first] + 06-16 DSCR-requirements). No Adam ack — ADAM-TODO 06-18 flag still `[ ]`; anti-stacking, no new line.
+- Cushion live-verified **47** via REST head (`0-46/47`, SQL-authoritative); drift 0, no writes since 2026-04-30. GOALS.md unchanged (`Jun 6 16:34`; social-media-pm in "Keep running").
+- Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy lock). NotebookLM PULL/PUSH + master-note skipped — CLI auth expired (~51 days). BLOCKER-LOANOS-001 (selfies dir absent) re-verified, still active, LoanOS-stream-only (moot — stream paused).
+- Refreshed trackers only: CONTEXT social "Last worked on" field, TODO line 25 scan-date/cushion, today-mission, subagent-status, session-log. 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data.
+
+## 2026-06-23 AM (scenarios-am) — no-op maintenance, 54-streak
+
+- Regime check: `stat -L` GOALS.md mtime `Jun 6 16:34:23 2026` unchanged; still "Week of May 18"; scenarios-am still kept (GOALS line 68), product work still paused (line 36).
+- Today (Tue 06-23) is **not** a weekly-refresh window — Monday 06-22 already passed untouched (4th declined redirect moment, recorded last session). Next natural window = Mon 06-29.
+- No mission, no code, no build, no push, no email. Program COMPLETE (Tiers 1–8, last code build 2026-04-24).
+- Conflict stands on TODO line 30; recommendation held at (c) pause cron after 54-streak / full-month-plus of daily no-ops.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~51 days), all 4 subagents (no mission), master-notebook note. Refreshed trackers only: CONTEXT 3 Scenarios fields, TODO line 30 count/date, today-mission, subagent-status.
+
+## 2026-06-22 (loanos-autonomous) — paused, clean exit
+
+- GOALS.md (week of 05-18) still lists "No LoanOS product work — paused indefinitely"; routine exited at Step 1 without categorizing or executing. No code, schema, env, n8n, or deploy changes. No email digest sent (paused no-op).
+
+## 2026-06-22 AM (lead-gen-am) — read-only verify, pipeline healthy, no new traffic
+
+- Cron LATE FIRE (~7h43m, fired 10:43 CDT). **06-21 AM session GAPPED** — SESSION_START written 07:07, no SESSION_END / no session-log entry; swept contacts since 06-20 to cover both windows.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY — ZERO execs since 06-20 (last 27675/Tracy 06-19), zero errored execs since the 06-09 two-bug fix.
+- ZERO new contacts since 06-20 (Supabase swept from 06-20T00:00Z). Nothing missed across the 06-21 gap. No speed-to-lead miss. Quiet 3-day stretch.
+- Hot-lead sweep: only Emily Christensen (70/hot, 05-05), standing ADAM-TODO L15; NOT re-stacked (anti-bloat).
+- NotebookLM PULL/PUSH skipped — CLI auth live-probed 10:43 CDT, still expired (50 days). No live-system writes, no notifications, no emails. No ADAM-TODO/TODO/DECISIONS/domain-queue change.
+
+## 2026-06-22 AM (styer-social-am) — Step 1B scan, 0 new content, maintenance hold
+
+- Step 1B GBP scan executed: slug-date scan of rates/blog/realtor-updates found **0 new content** — nothing dated after 06-16; newest piece still `blog/2026-06-16-dscr-loan-requirements-texas.html` (6 days unchanged).
+- HELD pool stable at 6 (5 one-word-GBP-ready + 1 hard-held stale May 18 rate page); ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]` — refresh-in-place, no new escalation line per anti-stacking.
+- Cushion live-verified 48 via REST head (`0-47/48` = 47 SQL-authoritative known ±1, drift 0, no writes since 2026-04-30). Refresh 07 inline no-op (earliest draft 2026-09-23).
+- Builder/Architect/Quality/Reviewer/QA held (MSLP→HyperSmart positioning + site-copy lock). BLOCKER-LOANOS-001 (selfies dir absent) re-verified, still active, LoanOS-stream-only.
+- NotebookLM PULL/PUSH/master-note skipped — CLI auth expired (~50 days). 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data.
+
+## 2026-06-22 AM (scenarios-am) — no-op maintenance, 53-streak
+
+- Regime check: `stat -L` GOALS.md mtime `Jun 6 16:34:23 2026` unchanged; still "Week of May 18"; scenarios-am still kept (line 68), product work still paused (line 36).
+- **Monday 06-22 weekly-refresh window passed untouched at this AM fire = 4th declined redirect moment** (06-06 edit retained pause + 06-08 + 06-15 + 06-22 Mondays). Confirms (c) dormant / (d) narrow-scope over (b) redirect.
+- No mission, no code, no build, no push, no email. Program COMPLETE (Tiers 1–8, last code build 2026-04-24).
+- Conflict stands on TODO line 30; recommendation held at (c) pause cron. Next natural refresh window = Mon 06-29.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~50 days), all 4 subagents (no mission), master-notebook note.
+- Refreshed trackers only: CONTEXT 3 Scenarios fields, TODO line 30 count/date, today-mission, subagent-status.
+
+## 2026-06-21 PM (styer-social-pm) — maintenance hold, no change since 06-16
+
+- PM convention: skipped Step 1B (GBP scan) + Refresh 07 — both AM-only. Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy lock).
+- Bundle holds at 5 GBP-ready pieces awaiting one "ship it"; no Adam ack (ADAM-TODO 06-18 flag still `[ ]`). No new ADAM-TODO line (anti-stacking).
+- Cushion live-verified 48 via REST head (`0-47/48` = 47 SQL, drift 0); GOALS.md unchanged (`Jun 6 16:34`).
+- NotebookLM PULL/PUSH/master-note skipped — CLI auth re-verified expired (~49 days). BLOCKER-LOANOS-001 (selfies dir absent) re-verified, still active, LoanOS-stream-only.
+- 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data.
+
+## 2026-06-21 (loanos-autonomous) — paused per GOALS.md, clean exit, no work performed
+
+- GOALS.md (week of 2026-05-18, mtime Jun 6) pauses LoanOS product + marketing indefinitely (lines 36, 45) and lists "Any task that primarily serves LoanOS" on the Scheduled Tasks Pause List (line 57). Per routine Step 1, autonomous worker wrote this one-line note and exited — no buckets categorized, no code, no commits beyond this line, no email digest. Unchanged regime since 2026-06-20 run.
+
+## 2026-06-21 AM (scenarios-am) — no-op maintenance, 52-streak
+
+- Regime check: `stat -L` GOALS.md mtime `Jun 6 16:34:23 2026` unchanged; still "Week of May 18"; scenarios-am still kept (line 68), product work still paused (line 36).
+- No mission, no code, no build, no push, no email. Program COMPLETE (Tiers 1–8, last code build 2026-04-24).
+- Conflict stands on TODO line 30; recommendation held at (c) pause cron. Sun 06-21 not a refresh window; Mon 06-22 is the next — if untouched, 4th declined redirect moment.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~49 days), all 4 subagents (no mission), master-notebook note.
+- Refreshed trackers only: CONTEXT 3 Scenarios fields, TODO line 30 count/date, today-mission, subagent-status.
+
+## 2026-06-20 (loanos-autonomous) — paused per GOALS.md, clean exit, no work performed
+
+- GOALS.md (week of 2026-05-18, mtime Jun 6) pauses LoanOS product + marketing indefinitely (lines 36, 45) and lists "Any task that primarily serves LoanOS" on the Scheduled Tasks Pause List (line 57). Per routine Step 1, autonomous worker wrote this one-line note and exited — no buckets categorized, no code, no commits beyond this line, no email digest.
+
+## 2026-06-20 AM (scenarios-am) — no-op maintenance, 51-streak
+
+- Regime check: `stat -L` GOALS.md mtime `Jun 6 16:34:23 2026` = unchanged; file still "Week of May 18". No scenarios-am redirect/un-pause added since the 06-06 edit. Sat 06-20 is not a refresh window (next Mon 06-22). Mission stays paused (GOALS line 36); cron stays kept (line 68).
+- Status: Scenarios program COMPLETE (Tiers 1–8, last code build 2026-04-24). **51st consecutive no-build no-op exit** since 05-18 — a full month-plus of daily no-ops. Standing conflict on TODO line 30; honored scheduled-task "log conflict + stop" rule.
+- Edits (tracker-only — no src/, no build, no push, no email): TODO line 30 → 50→51 + through-date 06-20 + 06-10→06-20 no-op stretch; CONTEXT 3 Scenarios fields (net-0 drift, 145 lines, under cap); CHANGELOG this entry; today-mission overwritten; subagent-status SESSION_START/END.
+- Skipped: NotebookLM PULL/PUSH (CLI auth live-probed expired ~48 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+- Did NOT pause the cron: GOALS line 68 explicitly keeps scenarios-am on the Keep-running list, so pausing remains Adam's call (recommendation logged, not executed).
+
+## 2026-06-20 AM (lead-gen-am) — scorer healthy, 5th consecutive web lead scored, no hot leads
+
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY: only exec since the 06-19 AM verify = **27675** (06-19 16:47:38, SUCCESS, 0.83s); zero errored execs since the 06-09 two-bug fix holds.
+- 1 new contact: **Tracy Foster** (Website, 06-19 16:47:36) → exec 27675 SUCCESS ~2s later → 3/cold = **5th consecutive proven real web-lead** (Nicole → Austin → Madison + Diana → Tracy). Shares surname with Madison Foster (06-16) but distinct first names = separate leads, not a dupe. No unscored web lead, no speed-to-lead miss.
+- Hot-lead sweep (full table): only Emily Christensen (70/hot, 05-05), standing as ADAM-TODO L15. No new hot leads. NOT re-stacked (anti-bloat).
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed 03:46 CDT, same WebLiteSignIn redirect (~48 calendar days expired). Standing Adam action (`notebooklm login`); not re-stacked.
+- Read-only verify: no Builder/Reviewer/QA, no live-system writes, no notifications, no emails. Files: subagent-status, today-mission, session-log, CONTEXT (3 Lead-Gen fields), CHANGELOG. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+
+## 2026-06-19 PM (styer-social-pm) — maintenance hold, no change since 06-18 (bundle 5)
+
+- PM convention: skipped Step 1B (GBP scan) + Refresh 07 — both AM-only. Live-scanned website dirs anyway for awareness: newest blog still `2026-06-16-dscr-loan-requirements-texas.html` — nothing new since the 06-18 AM detection, bundle stays at **5** GBP-ready pieces awaiting one "ship it".
+- Cushion live-verified at **47** drafts via Supabase SQL (47 draft / 2 approved / 7 posted / 179 rejected); no writes since 2026-04-30. (06-18 PM REST head read 48 — the known ±1 between REST head and SQL count; SQL is authoritative here. Not real drift.)
+- No Adam ack landed: standing 06-18 ready-to-ship bundle flag still `[ ]`. GOALS.md unchanged (`Jun 6 16:34`). Builder/Architect/Quality/Reviewer/QA all held — MSLP→HyperSmart positioning + site-copy compliance lock.
+- NotebookLM PULL/PUSH + master-notebook note skipped (CLI auth expired ~47d — Adam runs `notebooklm login`). BLOCKER-LOANOS-001 (selfies) still active but moot (LoanOS stream paused per GOALS). No new blockers; no new ADAM-TODO line (anti-stacking).
+- Writes: 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data.
+
+## 2026-06-19 AM (scenarios-am) — no-op maintenance, 50-streak milestone
+
+- Regime check: `stat -L` GOALS.md mtime `Jun 6 16:34:23 2026` = unchanged; file still "Week of May 18". No scenarios-am redirect/un-pause added since the 06-06 edit. Fri 06-19 is not a refresh window (next Mon 06-22). Mission stays paused (GOALS line 36); cron stays kept (line 68).
+- Status: Scenarios program COMPLETE (Tiers 1–8, last code build 2026-04-24). **50th consecutive no-build no-op exit** since 05-18 — a full month of daily no-ops. Standing conflict on TODO line 30; honored scheduled-task "log conflict + stop" rule.
+- Edits (tracker-only — no src/, no build, no push, no email): TODO line 30 → 49→50 + through-date 06-19 + 50-streak/full-month note + explicit "agent will not self-pause, GOALS line 68 keeps it running"; CONTEXT 3 Scenarios fields (net-0 drift, 145 lines, under cap); CHANGELOG this entry; today-mission overwritten; subagent-status SESSION_START/END.
+- Skipped: NotebookLM PULL/PUSH (CLI auth expired ~47 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+- Did NOT pause the cron: GOALS line 68 explicitly keeps scenarios-am on the Keep-running list, so pausing remains Adam's call (recommendation logged, not executed).
+
 ## 2026-06-18 (loanos-autonomous) — paused per GOALS.md, clean exit, no work performed
 
 - GOALS.md (week of 2026-05-18) pauses LoanOS product + marketing indefinitely and lists "Any task that primarily serves LoanOS" on the Scheduled Tasks Pause List. Per routine Step 1, autonomous worker wrote this one-line note and exited — no buckets categorized, no code, no commits beyond this line, no email digest.

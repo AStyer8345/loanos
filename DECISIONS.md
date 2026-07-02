@@ -1,5 +1,51 @@
 # LoanOS — Architecture Decisions
 
+## [2026-07-02] — Compensation: DB-Computed Model Tied to Loans, Not a Spreadsheet Import
+
+**Chose:** `comp_plans` (org defaults) + `loan_compensation` (one row per funded loan, unique on `loan_id`), with a BEFORE trigger computing gross/deductions/net and an AFTER trigger on `loans` auto-creating rows at `status_normalized='funded'`. Gross seeds from Arive `commission_amount` when present (`gross_source='arive'`), otherwise plan bps math (`'plan'`); manual edits flip to `'manual'`.
+**Over:** Importing the Excel as a static table (dies immediately), computing in app code only (n8n/SQL can't reuse it), or Postgres generated columns (can't reference other generated columns).
+**Why:** Comp must live on the same record as the loan and stay current without Adam maintaining a spreadsheet. Trigger-computed fields keep one formula source (the DB) for the app, SQL analytics, and n8n. Backfill limited to 2026-funded loans — fabricating comp for 1,100+ historical loans under today's plan would be fiction.
+**Context:** Formula from Adam's Kyber comp calculator: net = gross(amount × bps) − company share % − LOA bps − fixed broker/correspondent fees − other. LOA defaults to 25 bps on every loan — Adam should zero it in the plan if most files have no LOA.
+
+## [2026-07-02] — Loan Status: Normalize in the DB, Not Just at Read Time
+
+**Chose:** `loans.status_normalized` column maintained by trigger + SQL `normalize_loan_status()` mirroring `loan-stages.ts`, with inactive statuses (cancelled/dead/denied/withdrawn/suspended/on_hold) mapped to their own keys.
+**Over:** Continuing read-time-only normalization in TS (SQL analytics, comp triggers, and n8n each re-invent the mapping — and the TS fallback silently turns unknown/dead statuses into 'lead').
+**Why:** 30+ raw status variants in prod made every SQL funnel/close-rate/stalled query wrong. One canonical column, two sources kept in sync (TS map for UI labels, SQL function for data). New statuses that miss both maps land in 'lead' and surface visibly.
+
+## [2026-06-06 AM] — Social: Verify Hold Premises Against Source; Retire Cron-Streak Bookkeeping
+
+**Chose:** (1) Re-verify the GBP-distribution hold against the actual site HTML — found all 4 HELD pieces already use HyperSmart branding, so the "site still uses Mortgage Solutions LP" reason was false. Surface 4 brand-clean, on-positioning pieces to Adam for a one-word GBP release rather than auto-publishing them. (2) Stop the per-session cron-streak / hour-counter / recovery-state bookkeeping that had accreted across subagent-status, session-log, and ADAM-TODO L18/L24.
+
+**Over:** (a) Continuing to inherit the unverified "MSLP branding" hold reason for a 21st session; (b) auto-publishing all 4 HELD pieces to GBP autonomously at 2 AM; (c) keeping the cron-reliability prose growing each run.
+
+**Why:**
+- The hold reason had been copied forward ~20 sessions without anyone re-reading the source files. A 30-second `grep` showed it was wrong — exactly the failure mode Adam's "verify blockers via MCP before surfacing" feedback warns about. Stale assertions in tracker files must be checked against ground truth, not propagated.
+- Auto-publishing 4 public GBP posts at once during Adam's active compliance-review transition is outward-facing and hard to reverse. One day's delay for a one-word nod is cheap; a wrong public post during compliance review is not. Asymmetric risk → surface, don't ship.
+- The cron-streak bookkeeping tracked scheduler jitter Adam never acts on. It made every session look busy while burying the one real signal. Same call that already retired the L28 scenarios cron line as "non-actionable noise."
+
+**Trade-off accepted:** The 4 HELD pieces stay undistributed until Adam responds. Mitigation: framed as a single one-word release in ADAM-TODO L18 + CONTEXT What's-next; the DSCR content is freshest and most on-strategy, so the leverage of releasing grows, not decays.
+
+**Context:** styer-social-am 2026-06-06. New content: 2 DSCR blogs published 2026-06-05. GOALS "complicated income" positioning (self-employed/1099/bank-statement/DSCR/jumbo). NotebookLM CLI auth confirmed still expired inline. Builder remains paused pending positioning-pillar + site-copy lock.
+
+**Extended 2026-06-06 AM (lead-gen-am):** Same cron-streak/sub-session bookkeeping retirement now applies to the lead-gen agent. Its status/log/CONTEXT prose had accreted the same non-actionable "Nth-consecutive-restraint", "degradation-trend-AT-N", "recovery-at-N" tracking. Lead-gen now tracks only: the real blocker (NotebookLM auth), GOALS mtime, and whether buildable on-goal work exists. No separate decision block — this is one policy across the agent cohort.
+
+## [2026-05-17 PM] — Social Cushion: Keep Bodies, Defer Footer to Adam, Hold Architect Re-Run
+
+**Chose:** Keep all 47 existing `social_drafts` cushion rows as-is. Bodies survive the GOALS-driven repositioning unchanged. Brand-footer disposition deferred to Adam (3-option ADAM-TODO line filed). Architect re-baseline (new pillars) held until Adam confirms (a) footer call AND (b) styermortgage.com repositioning copy is locked.
+
+**Over:** (a) Bulk-archive the cushion and rebuild against new pillars; (b) Auto-PATCH all 33 stale-footer rows to "HyperSmart Loans" tonight; (c) Run Architect → Builder against new pillars immediately and ship native posts ahead of the site copy refresh.
+
+**Why:**
+- **Cushion audit found zero content violations of the new positioning rules** (Week of May 18 GOALS): 0 close-time / "21-day" / "fastest close" matches; 2 performance-metric matches are both authentic "Nine years of doing this" credibility lines woven into stories (Posts 164 + 173) — those fit the new story-driven specialist voice. Body content is publishable.
+- **Footer is a regime decision, not a maintenance decision.** CLAUDE.md mandates "HyperSmart Loans"; master-agent.md (older) still says "Adam Styer \| Mortgage Solutions LP"; GOALS Phase B is "name swap once new company name is locked." Three valid futures (rewrite to HyperSmart now / hold for new company / rewrite when name locks). Adam picks.
+- **Running Architect before site copy locks creates contradiction risk.** New positioning is "complicated income" specialist + wholesale pricing — but those pages don't exist on styermortgage.com yet. Drafts that reference "see the bank-statement loan page on my site" would land before the page exists. Wait for site to lead, social follows.
+- **Cadence is not the constraint.** Cushion is 9 months deep at 1-2/week. No publishing pressure justifies racing.
+
+**Trade-off accepted:** Cushion ships with the old brand footer for any draft Adam approves before he decides footer disposition. Worst case = ~2-3 weeks of "Adam Styer \| Mortgage Solutions LP" on LinkedIn/IG/FB before name swap or Adam's call. Mitigation: Adam can override per-draft in the dashboard at approval time.
+
+**Context:** GOALS.md refreshed 2026-05-17 12:11 CDT — first refresh in 28 days. Symlink-stat bug on `/Users/adamstyer/Documents/GOALS.md` (it's a symlink to `Daily Operating System/GOALS.md`; bare `stat -f` returns the symlink's own mtime) caused all 5 scheduled agents to read "28 days stale" all day. Fix surfaced as separate ADAM-TODO line.
+
 ## [2026-04-21] — n8n Freeze: New Work Ships in Next.js
 
 **Chose:** Freeze n8n at its current 17-workflow footprint. All new features ship as Next.js routes or Vercel Workflow DevKit workflows. Scott Sears's tenant (and every future tenant) runs with zero n8n surface area — any feature that currently depends on an n8n workflow is feature-flagged off in his org.

@@ -3,16 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  Brain, ListChecks, ArrowRight,
+  ListChecks, ArrowRight,
 } from 'lucide-react'
-import SmartActionQueue from '@/components/SmartActionQueue'
-import type { ScoredLoan } from '@/lib/scoreLoans'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell,
 } from 'recharts'
-import DailyBriefingPanel from './DailyBriefingPanel'
-import DailyScheduleWidget from './DailyScheduleWidget'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
@@ -29,7 +25,6 @@ import DaysToCloseGauge from './charts/DaysToCloseGauge'
 import LeadSourceChart from './charts/LeadSourceChart'
 import NewLeadsChart from './charts/NewLeadsChart'
 import type { LeadSourceCategory } from '@/lib/leadSources'
-import MarketingActivity from './charts/MarketingActivity'
 import NotesScratchpad from './NotesScratchpad'
 import StalledWidget, { type StalledItem } from './StalledWidget'
 import UnknownSendersWidget from './UnknownSendersWidget'
@@ -51,7 +46,6 @@ interface DashboardClientProps {
   volumeThisMonth: number; volumeYTD: number
   stageData: StageData[]
   chartData: ChartPoint[]
-  scoredLoans: ScoredLoan[]
   hotLeads: HotLead[]
   needsAttention: NeedsAttentionItem[]
   funnelData: Array<{ stage: string; count: number }>
@@ -67,7 +61,6 @@ interface DashboardClientProps {
   leadSourceData: Array<{ source: string; count: number; volume: number }>
   newLeadSourceData: Array<{ source: LeadSourceCategory; count: number }>
   newLeadsWindowDays: number
-  marketingLog: Array<{ id: string; date: string; activity: string; channel: string; notes?: string }>
   sourceConversionRows: SourceConversionRow[]
   aeoBucket: { leads: number; funded: number; volume: number }
   seoBucket: { leads: number; funded: number; volume: number }
@@ -105,7 +98,7 @@ function fmtDateShort(s: string | null): string {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function DashboardClient(props: DashboardClientProps) {
-  const [tab, setTab] = useState<'pipeline' | 'performance' | 'briefing' | 'queue'>('pipeline')
+  const [tab, setTab] = useState<'pipeline' | 'performance'>('pipeline')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   return (
@@ -146,14 +139,6 @@ export default function DashboardClient(props: DashboardClientProps) {
               onClick={() => setTab('performance')}
               className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'performance' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             >Performance</button>
-            <button
-              onClick={() => setTab('briefing')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'briefing' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
-            ><Brain size={11} />Briefing</button>
-            <button
-              onClick={() => setTab('queue')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'queue' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
-            ><ListChecks size={11} />Queue</button>
           </div>
         </div>
       </div>
@@ -276,11 +261,6 @@ export default function DashboardClient(props: DashboardClientProps) {
           {/* ── Top Realtors ── */}
           <ReferralLeaderboard data={props.referralData} />
 
-          {/* ── Two-column: Marketing Activity + Schedule ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <MarketingActivity log={props.marketingLog} />
-            <DailyScheduleWidget />
-          </div>
         </div>
       )}
 
@@ -378,17 +358,6 @@ export default function DashboardClient(props: DashboardClientProps) {
         </div>
       )}
 
-      {/* ═══ BRIEFING TAB ═══ */}
-      {tab === 'briefing' && (
-        <div className="max-w-3xl">
-          <DailyBriefingPanel />
-        </div>
-      )}
-
-      {/* ═══ QUEUE TAB ═══ */}
-      {tab === 'queue' && (
-        <SmartActionQueue scoredLoans={props.scoredLoans} />
-      )}
     </div>
   )
 }

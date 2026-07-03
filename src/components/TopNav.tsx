@@ -74,7 +74,6 @@ const MORE_ITEMS_ALL: MoreItem[] = [
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
-  if (pathname.startsWith('/dashboard/briefing')) return 'dashboard'
   if (pathname.startsWith('/dashboard/loans')) return 'pipeline'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
   // Email pillar consolidates the three outbound-email surfaces

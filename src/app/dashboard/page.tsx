@@ -7,7 +7,6 @@ import DashboardClient from '@/components/dashboard/DashboardClient'
 import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
 import { getOrgFeatures } from '@/lib/features/getOrgFeatures'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
-import { rankLoans, type LoanForScoring } from '@/lib/scoreLoans'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { getNeedsAttention } from '@/lib/needsAttention'
 import {
@@ -29,11 +28,9 @@ const INACTIVE = new Set(INACTIVE_STATUSES.map(s => s.toLowerCase()))
 
 export default async function DashboardPage() {
   let organizationId: string
-  let userId: string
   try {
     const ctx = await getOrganization()
     organizationId = ctx.organizationId
-    userId = ctx.userId
   } catch {
     redirect('/auth/login')
   }
@@ -60,11 +57,10 @@ export default async function DashboardPage() {
     Date.now() - NEW_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
   ).toISOString()
 
-  // Parallel fetch: org_settings + loans + mcc_state + recent contacts + all contacts (for analytics)
+  // Parallel fetch: org_settings + loans + recent contacts + all contacts (for analytics)
   const [
     { data: orgSettings },
     { data: loans = [] },
-    { data: mccRow },
     { data: recentContacts = [] },
     { data: allContacts = [] },
   ] = await Promise.all([
@@ -78,12 +74,6 @@ export default async function DashboardPage() {
       .select('id, status, loan_amount, closing_date, estimated_closing_date, funding_date, pre_approval_expiry_date, rate_lock_expiration, borrower_first_name, borrower_last_name, loan_name, loan_type, loan_program, loan_term, interest_rate, commission_amount, contact_id, created_at, updated_at, lender_name, referral_source, rate_lock_date, rate_lock_days, referring_agent_email, referring_agent_name, application_date')
       .eq('organization_id', organizationId)
       .order('estimated_closing_date', { ascending: true }),
-    supabase
-      .from('mcc_state')
-      .select('value')
-      .eq('user_id', userId)
-      .eq('key', 'mcc')
-      .single(),
     supabase
       .from('contacts')
       .select('lead_source, referrer, source_page, utm_params')
@@ -224,23 +214,6 @@ export default async function DashboardPage() {
       lastActivityMap.set(row.loan_id, row.occurred_at)
     }
   }
-
-  const loansForScoring: LoanForScoring[] = activeLoans.map(l => ({
-    id: l.id,
-    loan_name: l.loan_name,
-    borrower_first_name: l.borrower_first_name,
-    borrower_last_name: l.borrower_last_name,
-    status: l.status,
-    loan_amount: l.loan_amount,
-    loan_program: l.loan_program,
-    lender_name: l.lender_name ?? null,
-    closing_date: l.closing_date,
-    estimated_closing_date: l.estimated_closing_date,
-    updated_at: l.updated_at ?? null,
-    lastActivityAt: lastActivityMap.get(l.id) ?? null,
-  }))
-
-  const scoredLoans = rankLoans(loansForScoring)
 
   // Get most recent contact_activity note per lead
   const webLeadIds = (webLeadContacts ?? []).map(c => c.id)
@@ -599,12 +572,6 @@ export default async function DashboardPage() {
     ((recentContacts ?? []) as unknown as ContactSourceFields[])
   )
 
-  // ── Marketing activity log (from mcc_state JSON blob) ───────────────────
-  interface MarketingLogEntry { id: string; date: string; activity: string; channel: string; notes?: string }
-  const mccValue = mccRow?.value as Record<string, unknown> | null
-  const rawLog = (mccValue?.log ?? []) as MarketingLogEntry[]
-  const marketingLog = rawLog.slice(0, 10) // most recent 10
-
   // ── Analytics: Source conversion, AEO vs SEO, Realtor performance ───────
   // Past-client referrer set — any contact whose loan is funded. Contacts
   // referred by them get auto-tagged as Past Client.
@@ -690,7 +657,6 @@ export default async function DashboardPage() {
         stageData={stageData}
         chartData={chartData}
         sparklineMonths={sparklineMonths}
-        scoredLoans={scoredLoans}
         hotLeads={hotLeads}
         needsAttention={needsAttention}
         funnelData={funnelData}
@@ -705,7 +671,6 @@ export default async function DashboardPage() {
         leadSourceData={leadSourceData}
         newLeadSourceData={newLeadSourceData}
         newLeadsWindowDays={NEW_LEADS_WINDOW_DAYS}
-        marketingLog={marketingLog}
         sourceConversionRows={sourceConversionRows}
         aeoBucket={aeoBucket}
         seoBucket={seoBucket}

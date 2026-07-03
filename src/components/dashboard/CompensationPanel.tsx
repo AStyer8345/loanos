@@ -42,9 +42,9 @@ const DEAL_TYPES = ['both', 'brokered', 'correspondent', 'none'] as const
 const PAYOUT_STATUSES = ['pending', 'confirmed', 'paid'] as const
 
 const SOURCE_BADGE: Record<string, { label: string; cls: string }> = {
-  arive: { label: 'Arive', cls: 'bg-blue-900/40 text-blue-400' },
-  plan: { label: 'Plan', cls: 'bg-zinc-800 text-muted-foreground' },
-  manual: { label: 'Manual', cls: 'bg-violet-900/40 text-violet-400' },
+  arive: { label: 'Arive', cls: 'bg-blue-900/50 text-blue-300 border border-blue-500/40' },
+  plan: { label: 'Plan', cls: 'bg-zinc-700 text-zinc-200 border border-zinc-500/50' },
+  manual: { label: 'Manual', cls: 'bg-violet-900/50 text-violet-300 border border-violet-500/40' },
 }
 
 export default function CompensationPanel({ plan, rows: initialRows }: CompensationPanelProps) {
@@ -100,9 +100,9 @@ export default function CompensationPanel({ plan, rows: initialRows }: Compensat
         <span className="text-[10px] font-mono text-muted-foreground">funded loans, auto-synced</span>
         <button
           onClick={() => setShowPlan(v => !v)}
-          className="ml-auto flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+          className="ml-auto flex items-center gap-1.5 text-[11px] font-mono font-medium text-foreground bg-muted border border-input rounded px-2.5 py-1 hover:border-[#C9A84C]/60 transition-colors"
         >
-          <Settings2 className="w-3 h-3" /> Plan defaults
+          <Settings2 className="w-3.5 h-3.5" /> Plan defaults
         </button>
       </div>
 
@@ -209,7 +209,7 @@ export default function CompensationPanel({ plan, rows: initialRows }: Compensat
                     <select
                       value={r.deal_type}
                       onChange={e => patchRow(r.id, { deal_type: e.target.value })}
-                      className="bg-muted border border-input rounded px-1 py-0.5 text-[10px] font-mono text-foreground focus:outline-none"
+                      className="bg-muted border border-zinc-600 rounded px-1.5 py-1 text-[11px] font-mono text-foreground focus:outline-none focus:border-[#C9A84C]/60"
                     >
                       {DEAL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
@@ -235,8 +235,8 @@ export default function CompensationPanel({ plan, rows: initialRows }: Compensat
                     <select
                       value={r.payout_status}
                       onChange={e => patchRow(r.id, { payout_status: e.target.value })}
-                      className={`bg-muted border border-input rounded px-1 py-0.5 text-[10px] font-mono focus:outline-none ${
-                        r.payout_status === 'paid' ? 'text-emerald-400' : r.payout_status === 'confirmed' ? 'text-blue-400' : 'text-muted-foreground'
+                      className={`bg-muted border border-zinc-600 rounded px-1.5 py-1 text-[11px] font-mono focus:outline-none focus:border-[#C9A84C]/60 ${
+                        r.payout_status === 'paid' ? 'text-emerald-300' : r.payout_status === 'confirmed' ? 'text-blue-300' : 'text-zinc-300'
                       }`}
                     >
                       {PAYOUT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}

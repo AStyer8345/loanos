@@ -2,10 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import EmailAutomationCard from '@/components/dashboard/EmailAutomationCard'
-import { getOrgFeatures } from '@/lib/features/getOrgFeatures'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { getNeedsAttention } from '@/lib/needsAttention'
@@ -35,23 +32,6 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
   const supabase = createClient()
-  const features = await getOrgFeatures()
-
-  // ── System admin check (for EmailAutomationCard gate) ──────────────────────
-  let isSystemAdmin = false
-  {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const service = createServiceClient() as any
-      const { data: adminRow } = await service
-        .from('system_admins')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-      isSystemAdmin = Boolean(adminRow)
-    }
-  }
 
   const newLeadsWindowStart = new Date(
     Date.now() - NEW_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
@@ -196,7 +176,7 @@ export default async function DashboardPage() {
       .eq('organization_id', organizationId)
       .eq('stage', 'Lead')
       .neq('hot_lead_dismissed', true)
-      .not('contact_type', 'in', '("realtor","agent","lender","title")')
+      .or('contact_type.is.null,contact_type.eq.borrower')
       .gte('created_at', fourteenDaysAgo.toISOString())
       .order('created_at', { ascending: false }) as Promise<{ data: Array<{
         id: string; first_name: string | null; last_name: string | null
@@ -280,7 +260,7 @@ export default async function DashboardPage() {
     .eq('organization_id', organizationId)
     .eq('stage', 'Lead')
     .neq('hot_lead_dismissed', true)
-    .not('contact_type', 'in', '("realtor","agent","lender","title")')
+    .or('contact_type.is.null,contact_type.eq.borrower')
     .order('created_at', { ascending: false })
     .limit(100)
 
@@ -533,7 +513,7 @@ export default async function DashboardPage() {
 
   // ── New applications & pre-approvals (recent, sorted by created_at) ─────
   const EXCLUDED_STATUSES = ['Dead', 'Cancelled', 'canceled', 'Denied', 'Withdrawn', 'Suspended']
-  const newAppsAndPAs = (loans ?? [])
+  const newAppLoans = (loans ?? [])
     .filter(l => {
       if (!l.status || EXCLUDED_STATUSES.includes(l.status)) return false
       const key = normalizeToStageKey(l.status)
@@ -541,16 +521,66 @@ export default async function DashboardPage() {
     })
     .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
     .slice(0, 15)
-    .map(l => ({
+
+  // Enrich with contact-level source/referrer and the latest touch note —
+  // loans rarely carry lead_source; the contact usually does.
+  const newAppContactIds = [...new Set(newAppLoans.map(l => l.contact_id).filter(Boolean))] as string[]
+  const newAppLoanIds = newAppLoans.map(l => l.id)
+  const contactMeta = new Map<string, { lead_source: string | null; referred_by: string | null }>()
+  const lastNoteByKey = new Map<string, string>() // contact or loan id → newest note text
+  if (newAppContactIds.length > 0 || newAppLoanIds.length > 0) {
+    const [{ data: metaRows }, { data: noteRows }, { data: actRows }] = await Promise.all([
+      newAppContactIds.length > 0
+        ? supabase.from('contacts').select('id, lead_source, referred_by').in('id', newAppContactIds)
+        : Promise.resolve({ data: [] as Array<{ id: string; lead_source: string | null; referred_by: string | null }> }),
+      supabase
+        .from('notes')
+        .select('contact_id, loan_id, content, created_at')
+        .eq('organization_id', organizationId)
+        .is('deleted_at', null)
+        .or([
+          newAppLoanIds.length > 0 ? `loan_id.in.(${newAppLoanIds.join(',')})` : '',
+          newAppContactIds.length > 0 ? `contact_id.in.(${newAppContactIds.join(',')})` : '',
+        ].filter(Boolean).join(','))
+        .order('created_at', { ascending: false })
+        .limit(60),
+      newAppContactIds.length > 0
+        ? supabase
+            .from('contact_activity')
+            .select('contact_id, notes, logged_at')
+            .in('contact_id', newAppContactIds)
+            .not('notes', 'is', null)
+            .order('logged_at', { ascending: false })
+            .limit(60)
+        : Promise.resolve({ data: [] as Array<{ contact_id: string | null; notes: string | null; logged_at: string | null }> }),
+    ])
+    for (const r of metaRows ?? []) contactMeta.set(r.id, { lead_source: r.lead_source, referred_by: r.referred_by })
+    // notes and contact_activity are each newest-first; first write wins per key
+    for (const n of noteRows ?? []) {
+      for (const key of [n.loan_id, n.contact_id]) {
+        if (key && !lastNoteByKey.has(key)) lastNoteByKey.set(key, n.content ?? '')
+      }
+    }
+    for (const a of actRows ?? []) {
+      if (a.contact_id && !lastNoteByKey.has(a.contact_id)) lastNoteByKey.set(a.contact_id, a.notes ?? '')
+    }
+  }
+
+  const newAppsAndPAs = newAppLoans.map(l => {
+    const meta = l.contact_id ? contactMeta.get(l.contact_id) : undefined
+    const note = lastNoteByKey.get(l.id) ?? (l.contact_id ? lastNoteByKey.get(l.contact_id) : undefined) ?? null
+    return {
       id: l.id,
       name: [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.loan_name || 'Unknown',
       amount: l.loan_amount ?? 0,
       status: l.status,
       stage: normalizeToStageKey(l.status),
       createdAt: l.created_at,
-      loanType: l.loan_type,
-      referralSource: l.referral_source,
-    }))
+      lastNote: note ? note.replace(/\s+/g, ' ').slice(0, 90) : null,
+      referredBy: meta?.referred_by ?? l.referring_agent_name ?? null,
+      leadSource: meta?.lead_source ?? l.referral_source ?? null,
+    }
+  })
 
   // ── Lead source breakdown ───────────────────────────────────────────────
   const sourceMap = new Map<string, { count: number; volume: number }>()
@@ -633,13 +663,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      {isSystemAdmin && features.email_intelligence && (
-        <div className="px-4 lg:px-6 pt-4">
-          <Suspense fallback={<div className="h-32 animate-pulse bg-muted rounded-lg" />}>
-            <EmailAutomationCard />
-          </Suspense>
-        </div>
-      )}
       <DashboardClient
         totalActive={totalActive}
         totalActiveVolume={totalActiveVolume}

@@ -10,7 +10,7 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
-import { statusHex } from '@/lib/constants/loan-stages'
+import { statusHex, getStageLabel } from '@/lib/constants/loan-stages'
 import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import NeedsAttentionWidget from '@/components/dashboard/NeedsAttentionWidget'
 import type { NeedsAttentionItem } from '@/lib/needsAttention'
@@ -57,7 +57,7 @@ interface DashboardClientProps {
   forecastData: Array<{ month: string; actual: number; projected: number }>
   daysToCloseData: Array<{ type: string; avgDays: number; count: number }>
   pipelineLoans: Array<{ id: string; name: string; amount: number; status: string | null; closingDate: string | null; rate: number | null; commission: number; rateLockExp: string | null; lender: string | null }>
-  newAppsAndPAs: Array<{ id: string; name: string; amount: number; status: string | null; stage: string; createdAt: string | null; loanType: string | null; referralSource: string | null }>
+  newAppsAndPAs: Array<{ id: string; name: string; amount: number; status: string | null; stage: string; createdAt: string | null; lastNote: string | null; referredBy: string | null; leadSource: string | null }>
   leadSourceData: Array<{ source: string; count: number; volume: number }>
   newLeadSourceData: Array<{ source: LeadSourceCategory; count: number }>
   newLeadsWindowDays: number
@@ -209,7 +209,8 @@ export default function DashboardClient(props: DashboardClientProps) {
                       <TableHead className="text-left">Borrower</TableHead>
                       <TableHead>Stage</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Last note</TableHead>
+                      <TableHead>Referred by</TableHead>
                       <TableHead>Source</TableHead>
                       <TableHead className="text-right">Date</TableHead>
                     </TableRow>
@@ -217,12 +218,13 @@ export default function DashboardClient(props: DashboardClientProps) {
                   <TableBody>
                     {props.newAppsAndPAs.map(l => (
                       <TableRow key={l.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => window.location.href = `/dashboard/loans/${l.id}`}>
-                        <TableCell className="font-medium text-foreground">{l.name}</TableCell>
+                        <TableCell className="font-medium text-foreground whitespace-nowrap">{l.name}</TableCell>
                         <TableCell>{l.status && <StageBadge status={l.status} />}</TableCell>
                         <TableCell className="text-right text-muted-foreground">{l.amount ? fmtK(l.amount) : '—'}</TableCell>
-                        <TableCell className="text-muted-foreground">{l.loanType ?? '—'}</TableCell>
-                        <TableCell className="text-muted-foreground truncate max-w-[120px]">{l.referralSource ?? '—'}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{fmtDateShort(l.createdAt)}</TableCell>
+                        <TableCell className="text-foreground/75 max-w-[280px] truncate" title={l.lastNote ?? undefined}>{l.lastNote ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-[130px]">{l.referredBy ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-[120px]">{l.leadSource ?? '—'}</TableCell>
+                        <TableCell className="text-right text-muted-foreground whitespace-nowrap">{fmtDateShort(l.createdAt)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -375,7 +377,7 @@ function StageBadge({ status }: { status: string | null }) {
         borderColor: `${hex}44`,
       }}
     >
-      {status}
+      {getStageLabel(status)}
     </span>
   )
 }

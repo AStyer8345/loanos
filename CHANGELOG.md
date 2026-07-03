@@ -1,5 +1,13 @@
 # LoanOS Changelog
 
+## 2026-07-03 (Adam-directed) — noise cleanup + needs-attention upgrade + n8n repairs + email cutover
+
+- **Cleanup (commit `6bfe0fb`, −2,897 lines):** dashboard reduced to two tabs (Pipeline command center + Performance). Cut Briefing/Queue tabs, MarketingActivity + DailyScheduleWidget widgets, dead routes (build-tracker, system-map, waitlist, briefing, reports/*), `/dashboard/performance` seed-data demo → redirect, unreferenced components (TodoList, NavDropdown, KpiCard, StageAgingTable), orphaned `scoreLoans` lib, one-time admin backfill APIs. All verified zero-importers before deletion; recoverable from git history. Audit false-positives NOT cut: share/* (live borrower share page), GlobalSearch/ActivityFeed (TopNav), OutreachChat (AI chat), workflow deps (WDK), @hello-pangea/dnd (contacts).
+- **Needs-attention widget (commit `c41833e`):** decrypts PII for surfaced items — shows sender name/address + subject, expandable message preview, mailto reply, Inbox Review deep link.
+- **n8n — Outlook CD & Contract Extractor (`HkLjsnnhT5MgrX5H`) triple fix** (broken since 04-29): 409 dup-key crash → idempotent insert; `new URL`/`require('https')` blocked in Cloud sandbox → `this.helpers.httpRequest` Buffer upload; added file_path dedupe guard. 33 backlog docs attached to loans, 15 dupes purged, proof run clean.
+- **n8n — Arive sync comp clobbering fixed:** status-update + new-loan workflows no longer overwrite `commission_amount`/gross/net with Arive's 0-when-unset — manual comp entries survive milestones.
+- **Email cutover:** adam.styer@hypersmart.loan live — 18 workflows updated (recipients/reply-to/signatures), forwarding hypersmart→thestyerteam with keep-a-copy; Nathaly Cruz lead's dropped phone restored. Resend From: swap awaits hypersmart.loan DKIM.
+
 ## 2026-07-03 (loanos-autonomous) — first unpaused cycle: MISMO loans stamp lead_source; rest of Command Center follow-ups triaged to Adam
 
 - **Phase resumed.** GOALS.md (mtime `Jul 2 12:38`) un-paused LoanOS product work; Current Phase = Unified Command Center (Phase 1 shipped 07-02). First autonomous work cycle after 4 paused no-ops (06-29 → 07-02).

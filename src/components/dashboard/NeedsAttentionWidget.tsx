@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, Clock, ExternalLink, X } from 'lucide-react'
+import { AlertTriangle, Clock, ExternalLink, Mail, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import type { NeedsAttentionItem } from '@/lib/needsAttention'
 
@@ -37,6 +37,7 @@ function daysLabel(n: number): string {
 
 export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  const [expanded, setExpanded] = useState<string | null>(null)
 
   const visible = items.filter(i => !dismissed.has(i.id))
 
@@ -79,10 +80,17 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
           const reasoning = item.ai_reasoning
           const confidence = item.ai_confidence != null ? Math.round(item.ai_confidence * 100) : null
 
+          const senderLabel = item.contact_name
+            ?? item.from_name
+            ?? item.from_address
+            ?? 'Unknown sender'
+          const isOpen = expanded === item.id
+
           return (
             <div
               key={item.id}
-              className={`px-4 py-3 border-l-[3px] ${accent} bg-card/80 hover:bg-card transition-colors`}
+              className={`px-4 py-3 border-l-[3px] ${accent} bg-card/80 hover:bg-card transition-colors cursor-pointer`}
+              onClick={() => setExpanded(isOpen ? null : item.id)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -109,21 +117,33 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
                     </span>
                   </div>
                   <div className="text-sm font-semibold text-foreground mb-0.5 truncate">
-                    {item.contact_name ?? (item.is_new_lead ? 'Unknown sender (not in contacts)' : 'Unknown sender')}
-                    {item.ai_intent && (
-                      <span className="ml-2 text-xs font-mono text-muted-foreground">
-                        [{item.ai_intent}]
+                    {senderLabel}
+                    {item.from_address && senderLabel !== item.from_address && (
+                      <span className="ml-2 text-xs font-mono text-muted-foreground font-normal">
+                        {item.from_address}
                       </span>
                     )}
                   </div>
-                  {reasoning && (
+                  {item.subject && (
+                    <div className="text-xs text-foreground/90 truncate mb-0.5">{item.subject}</div>
+                  )}
+                  {!isOpen && reasoning && (
                     <div className="text-xs text-muted-foreground line-clamp-2">
                       {reasoning}
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  {item.from_address && (
+                    <a
+                      href={`mailto:${item.from_address}?subject=${encodeURIComponent(item.subject ? `Re: ${item.subject}` : '')}`}
+                      className="p-1.5 hover:bg-input rounded-md text-muted-foreground hover:text-emerald-400 transition-colors"
+                      title={`Reply to ${item.from_address}`}
+                    >
+                      <Mail size={14} />
+                    </a>
+                  )}
                   {contactHref && (
                     <Link
                       href={contactHref}
@@ -142,6 +162,30 @@ export default function NeedsAttentionWidget({ items }: NeedsAttentionWidgetProp
                   </button>
                 </div>
               </div>
+
+              {/* Expanded message view */}
+              {isOpen && (
+                <div className="mt-2 pt-2 border-t border-input/60" onClick={e => e.stopPropagation()}>
+                  {item.body_snippet ? (
+                    <p className="text-xs text-foreground/85 leading-relaxed whitespace-pre-wrap">
+                      {item.body_snippet}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">No message preview available.</p>
+                  )}
+                  {reasoning && (
+                    <p className="text-[11px] font-mono text-muted-foreground mt-2">AI: {reasoning}</p>
+                  )}
+                  {item.is_new_lead && (
+                    <Link
+                      href="/dashboard/emails/unmatched"
+                      className="inline-block mt-2 text-[11px] font-mono text-[#C9A84C]/80 hover:text-[#C9A84C]"
+                    >
+                      Open in Inbox Review (link or create contact) →
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           )
         })}

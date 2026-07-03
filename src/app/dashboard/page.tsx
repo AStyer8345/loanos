@@ -273,8 +273,9 @@ export default async function DashboardPage() {
   }))
 
   // "Needs Your Attention" — AI-classified inbound emails from the last 7 days.
-  // Server-side fetch because the scoring logic is shared with automations.
-  const needsAttention = await getNeedsAttention(supabase, organizationId)
+  // Service client: the fetcher decrypts activity_log_pii for surfaced items
+  // (sender/subject/body); org scoping is applied inside via organizationId.
+  const needsAttention = await getNeedsAttention(createServiceClient(), organizationId)
 
   // ── Stalled: active loans with no touch past the org threshold ───────────
   const stalledThresholdDays = orgSettings?.stalled_threshold_days ?? 7

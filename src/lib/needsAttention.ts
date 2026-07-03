@@ -2,12 +2,14 @@
  * "Needs Your Attention" widget — data fetcher + scoring logic.
  *
  * Reads from activity_log (public columns, populated by the n8n Inbound Email
- * classifier). Does NOT decrypt PII — subject comes from the optional
- * contact-name join + activity_log.summary, not from the encrypted companion.
+ * classifier), then decrypts the PII companion for ONLY the surfaced items so
+ * the widget can show who the sender is and what the message says.
  *
  * Org-scoped via the caller passing organization_id. No ambient auth here.
+ * The caller must pass a client that can read activity_log_pii (service role).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { decryptActivityPii } from '@/lib/activity/pii'
 
 export interface NeedsAttentionItem {
   id: string
@@ -24,6 +26,10 @@ export interface NeedsAttentionItem {
   is_new_lead: boolean
   score: number
   daysAgo: number
+  from_name: string | null
+  from_address: string | null
+  subject: string | null
+  body_snippet: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -190,11 +196,46 @@ export async function getNeedsAttention(
         is_new_lead: isNewLead,
         score,
         daysAgo,
+        from_name: null as string | null,
+        from_address: null as string | null,
+        subject: null as string | null,
+        body_snippet: null as string | null,
       }
     })
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, MAX_ITEMS)
+
+  // Decrypt sender/subject/body for just the surfaced items so the widget
+  // shows who wrote and what — instead of "Unknown sender" noise.
+  if (scored.length > 0) {
+    const { data: piiRows } = await client
+      .from('activity_log_pii')
+      .select('activity_id, pii_ciphertext, pii_iv, pii_tag, key_version')
+      .in('activity_id', scored.map(i => i.id))
+
+    if (piiRows && piiRows.length > 0) {
+      try {
+        const decrypted = decryptActivityPii(
+          piiRows.map(p => ({ id: p.activity_id as string, activity_log_pii: p }))
+        )
+        const byId = new Map(decrypted.map(d => [d.id, d.pii]))
+        for (const item of scored) {
+          const pii = byId.get(item.id)
+          if (!pii) continue
+          item.from_address = pii.from_address ?? null
+          item.subject = pii.subject ?? null
+          item.body_snippet = pii.body_snippet ?? null
+          const meta = pii.metadata as { from_name?: string } | null
+          item.from_name = meta?.from_name ?? null
+        }
+      } catch (err) {
+        // Missing PII_ENCRYPTION_KEY (e.g. local dev) — widget degrades to
+        // the old label-only view rather than crashing the dashboard.
+        console.error('[needsAttention] PII decrypt skipped:', err)
+      }
+    }
+  }
 
   return scored
 }

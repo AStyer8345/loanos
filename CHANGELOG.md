@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## 2026-07-03 (loanos-autonomous) — first unpaused cycle: MISMO loans stamp lead_source; rest of Command Center follow-ups triaged to Adam
+
+- **Phase resumed.** GOALS.md (mtime `Jul 2 12:38`) un-paused LoanOS product work; Current Phase = Unified Command Center (Phase 1 shipped 07-02). First autonomous work cycle after 4 paused no-ops (06-29 → 07-02).
+- **Shipped (Bucket A):** `/api/mismo/import` now copies the linked contact's `lead_source` onto the loan it creates — widened the two contact-match selects + the created-contact select to include `lead_source`, capture it, and stamp it on the loan insert (null stays unstamped via the existing null-filter). Executes the code-side slice of TODO "Stamp lead_source onto loans at creation." Directly benefits Scott's pilot (MISMO is his loan-entry path). Build green (`✓ Compiled successfully`).
+- **Queued for Adam (Bucket B, see tasks/ADAM-TODO.md):** primary Arive-webhook lead_source stamping (n8n `1tagvoU0UXtdDiMY`, ~1,250 loans, prod write path — not an unattended edit); comp-plan defaults sanity-check; 788-email unmatched backlog triage (PII); waiting-on classification (design decision); duplicate-scan v2 (migration + RPC + fuzzy threshold on customer data, low payoff); lead-source label cleanup (UPDATE on `contacts` = HARD STOP).
+- **Not touched:** CSV loan importer (`/api/import/loans`) doesn't link loans to contacts — no source to copy. No schema/env/n8n changes. Circuit breaker: clean.
+
+## 2026-07-03 (scenarios-am) — regime change detected: 60-session "product-work paused" premise is now void
+
+- `stat -L` GOALS.md mtime = **`Jul 2 12:38:29`**, advanced from `Jun 6 16:34` — Adam's 07-02 edit **resumed LoanOS product work**. First scenarios-am fire to see it (07-02 AM run at ~10:17 predated the 12:38 edit).
+- Old root conflict retired: GOALS no longer pauses LoanOS product work, so the "mission blocked / five declined redirect moments" framing is dead. New state = cron fires into an **un-paused-but-unassigned** slot (Scenarios program complete + no scenarios directive in the refresh + Adam's directed focus is the command center).
+- Reframed TODO line 40 to the cleaner 2-way fork and **flipped the recommendation to (b) redirect** to "complicated income" Scenarios templates (self-employed/1099/bank-statement/DSCR/jumbo) — a redirect now has a real GOALS-aligned target; else (c) pause.
+- Tracker-only: CONTEXT (3 Scenarios fields), TODO line 40, today-mission, subagent-status. No `src/`, no build, no push, no email. NotebookLM PULL/PUSH + subagents skipped (CLI auth expired ~60 days; no mission).
+
 ## 2026-07-02 (Adam-directed) — Unified Command Center: dashboard widgets + compensation tracking + status normalization
 
 - **LoanOS product work RESUMED by Adam's explicit directive** — GOALS.md updated (LoanOS product un-paused; marketing/Client Ops pauses retained).

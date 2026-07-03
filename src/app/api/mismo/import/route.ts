@@ -45,22 +45,26 @@ export async function POST(req: NextRequest) {
     // 4) Contact match-or-create
     //    Match by email (case-insensitive), else by (last_name, first_name).
     let contactId: string | null = null
+    let contactLeadSource: string | null = null
     if (parsed.borrower.email) {
       const { data: matches, error: matchErr } = await supabase
         .from('contacts')
-        .select('id')
+        .select('id, lead_source')
         .eq('organization_id', organizationId)
         .ilike('email', parsed.borrower.email)
         .limit(2)
       if (matchErr) {
         return NextResponse.json({ error: `Contact email lookup failed: ${matchErr.message}` }, { status: 500 })
       }
-      if (matches && matches.length === 1) contactId = matches[0].id
+      if (matches && matches.length === 1) {
+        contactId = matches[0].id
+        contactLeadSource = matches[0].lead_source
+      }
     }
     if (!contactId && parsed.borrower.first_name && parsed.borrower.last_name) {
       const { data: match, error: matchErr } = await supabase
         .from('contacts')
-        .select('id')
+        .select('id, lead_source')
         .eq('organization_id', organizationId)
         .eq('last_name', parsed.borrower.last_name)
         .eq('first_name', parsed.borrower.first_name)
@@ -70,6 +74,7 @@ export async function POST(req: NextRequest) {
       }
       if (match && match.length === 1) {
         contactId = match[0].id
+        contactLeadSource = match[0].lead_source
       }
     }
 
@@ -90,12 +95,13 @@ export async function POST(req: NextRequest) {
         .insert([Object.fromEntries(
           Object.entries(contactInsert).filter(([, v]) => v !== null && v !== undefined)
         ) as unknown as ContactInsert])
-        .select('id')
+        .select('id, lead_source')
         .single()
       if (error) {
         return NextResponse.json({ error: `Contact insert failed: ${error.message}` }, { status: 500 })
       }
       contactId = created.id
+      contactLeadSource = created.lead_source
     }
 
     // 5) Loan dedup on loan_number (if present)
@@ -148,6 +154,7 @@ export async function POST(req: NextRequest) {
       organization_id: organizationId,
       user_id: userId,
       contact_id: contactId,
+      lead_source: contactLeadSource,
       borrower_name: borrowerDisplayName,
       borrower_first_name: parsed.borrower.first_name,
       borrower_last_name: parsed.borrower.last_name,

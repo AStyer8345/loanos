@@ -1,5 +1,27 @@
 # LoanOS Changelog
 
+## 2026-07-04 (loanos-autonomous) — Bucket A empty; main verified healthy, nothing shipped
+
+- **Phase:** Unified Command Center (GOALS.md un-paused product work 07-02). Verified clean starting state via Vercel MCP: latest prod `dpl_FDk2sJWW64gdwCtuuoHjvE3sQZiX` (commit `01e7f52`) READY; all 20 most-recent deployments READY. Circuit breaker: clean.
+- **Triaged every Command Center follow-up (TODO § Now) by reading the actual code — no clean autonomous slice remains after yesterday's MISMO `lead_source` ship (`85c9fbf`):** Arive-webhook `lead_source` = prod n8n write path (Adam/supervised); comp-plan defaults = Adam decision; 788-email backlog = manual PII; waiting-on classification = `needsAttention.ts` is inbound-email-only with no direction signal, so the heuristic encodes Adam's ops semantics (guessing); lead-source label cleanup = UPDATE on `contacts` (HARD STOP); duplicate-scan v2 = `find_duplicate_contacts` is an RPC → needs a `CREATE OR REPLACE FUNCTION` migration + pg_trgm fuzzy-name threshold on PII data for a 5-pair payoff (07-03 punted to Adam; still correct).
+- **All of the above already queued in `tasks/ADAM-TODO.md` L12 (07-03) — deliberately NOT re-stacked** (per Adam's no-stale-flag / no-noise feedback). No new ADAM-TODO lines authored.
+- **No code / schema / env / n8n changes.** Committed only the top-level shared trackers (CHANGELOG/CONTEXT/TODO/ADAM-TODO carry today's AM-agent entries); per-agent `tasks/*/` status files left to their owners. Email digest sent to Adam.
+
+## 2026-07-04 (scenarios-am) — no-op maintenance, 62-streak, no regime change since 07-02
+
+- `stat -L -f "%Sm" GOALS.md` → `Jul 2 12:38:29 2026`, UNCHANGED since the 07-02 regime change. No scenarios-specific directive added in the 2 days since; GOALS line 72 still just keeps the cron ("scenarios-am — LO work — keep").
+- State stands from 07-03: product-work pause is lifted (Command Center resumed 07-02), but scenarios-am fires **un-paused-but-unassigned** — Scenarios queue empty (program COMPLETE Tiers 1–8), directed focus is the command center, charter binds this cron to Scenarios files only. No code / build / push / email.
+- Refreshed in place (no new escalation stacked): TODO line 43 (61→62-streak, through 07-04), CONTEXT 3 Scenarios fields, today-mission overwritten, subagent-status SESSION_START/END. Recommendation holds at (b) redirect to "complicated income" templates, else (c) pause.
+- Skipped: NotebookLM PULL/PUSH + master-notebook note (CLI auth expired ~62 days — sister lead-gen-am live-probed 06:04 CDT today confirms); all 4 subagents (no mission).
+
+## 2026-07-04 (lead-gen-am) — speed-to-lead read-only verify: scorer healthy, no web lead in window
+
+- Read-only Sequence A verify (no build, no live-system writes, no notifications, no emails). Cron LATE fire (~3h, SESSION_START 06:04 CDT).
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY — `get_workflow_details`: active=true, responseMode=onReceived, versionId==activeVersionId, updatedAt 2026-06-09 (the fix). **Zero execs since 06-30**, zero errored execs since the 06-09 two-bug fix holds.
+- **3 new contacts since 06-30, all non-web path** (scorer correctly idle, none Website-source): Kara Geoge (Realtor Referral, 07-03), Belinda Zapata (null/@capstonetitle.com, 06-30), Alex Korn (null/@compass.com, 06-30). No speed-to-lead miss.
+- Hot-lead sweep: only Emily Christensen (70/hot, 05-05), already standing ADAM-TODO L15 — NOT re-stacked.
+- NotebookLM PULL/PUSH skipped — CLI auth live-probed 06:04 CDT, still expired (62 days). Trackers only (subagent-status, today-mission, session-log, CONTEXT 3 Lead-Gen fields, CHANGELOG).
+
 ## 2026-07-03 (Adam-directed) — noise cleanup + needs-attention upgrade + n8n repairs + email cutover
 
 - **Cleanup (commit `6bfe0fb`, −2,897 lines):** dashboard reduced to two tabs (Pipeline command center + Performance). Cut Briefing/Queue tabs, MarketingActivity + DailyScheduleWidget widgets, dead routes (build-tracker, system-map, waitlist, briefing, reports/*), `/dashboard/performance` seed-data demo → redirect, unreferenced components (TodoList, NavDropdown, KpiCard, StageAgingTable), orphaned `scoreLoans` lib, one-time admin backfill APIs. All verified zero-importers before deletion; recoverable from git history. Audit false-positives NOT cut: share/* (live borrower share page), GlobalSearch/ActivityFeed (TopNav), OutreachChat (AI chat), workflow deps (WDK), @hello-pangea/dnd (contacts).

@@ -20,6 +20,8 @@ After **every** `git push`:
 
 Before doing any work, read `CONTEXT.md` — it contains the current project status, schema details, and session history.
 
+Before changing code, also read `docs/AI_AGENT_ONBOARDING.md` and `docs/REPO_STRUCTURE.md`.
+
 ## Project
 
 - Repo: `/Users/adamstyer/Documents/loanos-clone`

@@ -46,6 +46,9 @@ git push origin main
 ## Docs
 
 - `CONTEXT.md` — Current project state (read first every session)
+- `docs/AI_AGENT_ONBOARDING.md` — Top AI-agent friction points and safe workflow
+- `docs/REPO_STRUCTURE.md` — Repo map by ownership area
+- `docs/README.md` — Documentation index
 - `CHANGELOG.md` — What changed and when
 - `DECISIONS.md` — Architecture decisions with reasoning
 - `TODO.md` — Prioritized open work

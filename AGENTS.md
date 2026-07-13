@@ -1,39 +1,58 @@
-Read /Users/adamstyer/Documents/GOALS.md before starting any session. Interactive sessions must serve current goals — if your task conflicts, log it to TODO.md under NEEDS ADAM and stop. Automated/scheduled tasks continue unless GOALS.md explicitly pauses them.
+# LoanOS Agent Instructions
 
-# LoanOS — Codex Instructions
+`AGENTS.md` is the authoritative instruction file for AI-assisted work in this repository. These rules are tool-neutral and apply whether the work is performed through ChatGPT, Codex, Claude, or another coding agent.
 
-## Deploy Workflow (MANDATORY — follow every time)
+## Read first
 
-Before **every** `git push`:
-1. Run `npm run build` in `/Users/adamstyer/Documents/loanos-clone`
-2. If it fails — fix all errors, then re-run build until it passes
-3. Only push when build is green
+1. `CONTEXT.md` — current project state and active constraints.
+2. `docs/AI_AGENT_ONBOARDING.md` — safe workflow and known repo hazards.
+3. `docs/REPO_STRUCTURE.md` — ownership map for code, integrations, docs, and historical work.
+4. `TODO.md` — active work and items requiring Adam's decision.
 
-After **every** `git push`:
-1. Use the Vercel MCP (`list_deployments` then `get_deployment_build_logs`) to watch the deployment
-2. If `state: ERROR` — read the logs, fix the code, push again
-3. Confirm the deployment reaches `state: READY` before ending the session
-
-**Never leave a session with a failed Vercel deployment.**
-
-## Read First
-
-Before doing any work, read `CONTEXT.md` — it contains the current project status, schema details, and session history.
-
-Before changing code, also read `docs/AI_AGENT_ONBOARDING.md` and `docs/REPO_STRUCTURE.md`.
+When a local `GOALS.md` is available, use it as additional prioritization context. Do not assume a specific absolute path or fail solely because that local file is unavailable.
 
 ## Project
 
-- Repo: `/Users/adamstyer/Documents/loanos-clone`
-- Framework: Next.js 14 (App Router)
-- Database: Supabase (types in `src/lib/database.types.ts`)
-- Deployed to: Vercel — team `astyer8345s-projects`, project `loanos`
-- Team ID: `team_aJNpxKvLlNTUiDdWTdhX0Vgf`
+- Framework: Next.js 14 App Router.
+- Database: Supabase; generated types live in `src/lib/database.types.ts`.
+- Hosting: Vercel project `loanos` under team `astyer8345s-projects`.
+- Default branch: `main`. Never commit to `master`.
 
-## Key Rules
+## Change rules
 
-- Run `npm run build` before every push — the pre-push git hook enforces this
-- TypeScript strict mode is on — no `any` without `eslint-disable` comment
-- All Supabase inserts using `Object.fromEntries()` must cast to the correct Insert type via `as unknown as XyzInsert`
-- `Json` columns from Supabase must be cast via `unknown` before converting to domain types
-- Never commit to `master` branch — always use `main`
+- Inspect `git status -sb` before editing and do not absorb unrelated worktree changes.
+- Prefer existing patterns over new dependencies or abstractions.
+- Keep tenant isolation and organization scoping intact.
+- TypeScript strict mode is enabled. Avoid `any` unless narrowly justified with an explanatory suppression.
+- Supabase `Json` values must pass through `unknown` before conversion to domain types.
+- Inserts assembled with `Object.fromEntries()` must be cast to the appropriate generated Insert type.
+- Treat routes, workflows, and integrations as production surfaces. Identify callers, authentication, environment variables, and scheduled dependencies before changing them.
+
+## Verification and deployment
+
+Before pushing code changes:
+
+1. Run the smallest relevant tests or checks.
+2. Run `npm run build` from the repository root.
+3. Fix build failures before pushing.
+
+After pushing:
+
+1. Verify the Vercel deployment using available tooling or the GitHub/Vercel status check.
+2. If deployment fails, inspect the logs and correct the failure.
+3. Do not represent work as complete while the associated deployment is known to be failing.
+
+Documentation-only changes still require a reasonable validation of links, file paths, and internal consistency.
+
+## Documentation ownership
+
+- `AGENTS.md`: durable agent operating rules.
+- `CONTEXT.md`: concise current state; replace stale information rather than accumulating session transcripts.
+- `README.md`: human-facing setup and project orientation.
+- `ARCHITECTURE.md`: durable technical architecture.
+- `DECISIONS.md`: material decisions and rationale.
+- `CHANGELOG.md`: chronological record.
+- `TODO.md`: active work, not historical logs.
+- `tasks/`, `audits/`, and `_audit/`: treat as historical or working material unless explicitly identified as current.
+
+When documents disagree, verify against the current code and update or label the stale document. Do not preserve contradictory startup documentation merely for history.

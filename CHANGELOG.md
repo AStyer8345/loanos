@@ -1,5 +1,19 @@
 # LoanOS Changelog
 
+## 2026-07-05 AM (lead-gen-am) — speed-to-lead verify, pipeline healthy, no writes
+
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY: get_workflow_details confirms active=true, versionId==activeVersionId (d54c385e), responseMode=onReceived, updatedAt 2026-06-09 (the fix). Zero errored execs since the 06-09 two-bug fix holds.
+- Zero scorer execs since 07-04 = no new Website web-form lead this window. 1 new contact — Satish Skariah (null lead_source, 0/new, 07-04 22:20), non-web/Arive-manual path, scorer correctly idle. No speed-to-lead miss.
+- Hot-lead sweep (tier=hot OR score≥20, undismissed): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L18. No new hot leads; NOT re-stacked.
+- NotebookLM PULL/PUSH skipped — CLI auth live-probed 11:04 CDT, still expired (63 days). Cron LATE fire (~8h). Read-only verify: no live-system writes, no notifications, no emails.
+
+## 2026-07-05 (scenarios-am) — no-op maintenance, 63-streak, no regime change since 07-02
+
+- `stat -L -f "%Sm" GOALS.md` → `Jul 2 12:38:29 2026`, UNCHANGED. The 07-02 un-pause was already processed by the 07-03/07-04 fires; no scenarios directive added in the 3 days since. GOALS line 72 still just keeps the cron.
+- Program COMPLETE (Tiers 1–8, last code build 2026-04-24). scenarios-am fires un-paused-but-unassigned: empty queue + no directive + Adam's focus is the command center, not Scenarios. Charter binds this cron to Scenarios files only. Report is the correct output; no speculative feature invented.
+- NotebookLM CLI auth live-probed 07-05 → still expired (`notebooklm list` returns WebLiteSignIn redirect, ~63 days). STEP 0 PULL + STEP 7 PUSH/master-note skipped.
+- Tracker-only: refreshed TODO L43 in place (62→63, through 07-05, no new stacked line), 3 CONTEXT Scenarios fields (net-neutral), today-mission + subagent-status; re-anchored session-log after the 07-03/07-04 lean tracker-only cycles. No `src/`, no build, no push, no email.
+
 ## 2026-07-04 (loanos-autonomous) — Bucket A empty; main verified healthy, nothing shipped
 
 - **Phase:** Unified Command Center (GOALS.md un-paused product work 07-02). Verified clean starting state via Vercel MCP: latest prod `dpl_FDk2sJWW64gdwCtuuoHjvE3sQZiX` (commit `01e7f52`) READY; all 20 most-recent deployments READY. Circuit breaker: clean.

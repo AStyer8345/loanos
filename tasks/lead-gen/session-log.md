@@ -2,6 +2,766 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-07-04 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- Cron LATE fire — scheduled 03:00, SESSION_START 06:04 CDT (~3h late, within observed band). Swept contacts since 06-30 to cover the 07-02 AM SESSION_START (no session-log entry) — nothing missed in the gap.
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed 06:04 CDT, same `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 62 calendar days since 2026-05-03. Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live get_workflow_details + exec search) — active=true, responseMode=onReceived, versionId==activeVersionId, updatedAt 2026-06-09 (the fix). **ZERO executions since 06-30** = no new Website web-form lead in the window. **Zero errored execs since the 06-09 two-bug fix holds.**
+- **New contacts since 06-30 (3 rows), ALL non-web path (lead_source ≠ Website → scorer correctly idle):**
+  - Kara Geoge (Realtor Referral, 0/new, 07-03 11:55) — referral/manual path, scorer not called (app POSTs scorer only on Website web-lead create).
+  - Belinda Zapata (lead_source=null, @capstonetitle.com — a title company, 0/new, 06-30 22:02) — transaction party / manual entry.
+  - Alex Korn (lead_source=null, @compass.com — a realtor, 0/new, 06-30 22:02) — manual/realtor entry.
+  - No Website-source lead this window → no web lead unscored, no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only **Emily Christensen** (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue/BLOCKERS change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-30 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- Cron LATE/catch-up fire — scheduled 03:00, SESSION_START 10:59 CDT (~8h late). Swept contacts since 06-23 to cover the AM sessions between (06-24/25/26 wrote SESSION_START; no session-log entries) — nothing missed in the gap.
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed 10:59 CDT, same `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 58 calendar days since 2026-05-03. Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live n8n exec search) — **6 executions since 06-23, ALL status=success** (29162, 29166, 30450, 30451, 30594, 31220). **Zero errored execs since the 06-09 two-bug fix holds.** Every Website-source contact has a matching scorer exec firing within ~2s of create.
+- **New contacts since 06-23 (12 rows):**
+  - Web-form leads (lead_source=Website, scored 3/cold, scorer fired): **Phu Le** (06-23 23:00 → exec 29162), **Erin Smith** (06-23 23:08 → exec 29166), **Joel Geddes ×2** (06-27 16:00 → execs 30450+30451 — **DUPLICATE double-submit**, two rows ~7ms apart), **"Codex Diagnostic"** (06-28 01:42 → exec 30594 — **synthetic TEST lead**, injected by a Codex agent session against the live web-lead endpoint, not a real prospect), **Nathaly Cruz** (06-29 21:47 → exec 31220). Web-lead path now proven on **10+ consecutive real live leads**.
+  - Non-web (lead_source=null, 0/new = Arive/manual sync path, scorer correctly idle): Matthew Latimer (06-23 20:00), Amy Langstraat (06-24), Kylie Lynch + Michael Cossette + Brandi Wheeler (06-25 22:56 3-row batch), Katrina Hillegass (06-26). No web lead unscored; no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only **Emily Christensen** (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads — all this window's web leads scored 3/cold. NOT re-stacked per anti-bloat.
+- Data-hygiene notes (non-urgent, NOT escalated — both cold/harmless): (1) Joel Geddes duplicate row 06-27; (2) "Codex Diagnostic" synthetic test contact left in the prod `contacts` table 06-28 by a Codex session. Both 3/cold; Adam may delete if desired.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue/BLOCKERS change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-23 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- Cron ON-TARGET fire — scheduled 03:00, SESSION_START 03:52 CDT (~52m jitter, within band). First on-target AM fire after a string of late fires (06-22 was ~7h43m late).
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed 03:52 CDT, same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 51 calendar days since 2026-05-03. Standing Adam action; NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live n8n exec search) — **1 execution since 06-22** = 28757 (06-22 20:33:47, SUCCESS, 0.71s). Zero errored execs since the 06-09 two-bug fix holds.
+- **1 new contact since the 06-22 AM verify:** Charlotte Davis (Website, 06-22 20:33:44.452) → scorer exec 28757 fired SUCCESS ~2.6s later → scored 3/cold. **6th consecutive real live web-form lead proven** end-to-end (Nicole 06-11 → Austin 06-12 → Madison + Diana 06-16 → Tracy 06-19 → Charlotte 06-22). Form → app POST → scorer → patch path healthy. No speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. Charlotte 3/cold. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue/BLOCKERS change.
+
+---
+## Session: 2026-06-22 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- Cron LATE FIRE — scheduled 03:00, SESSION_START 10:43 CDT (~7h43m late). **06-21 AM session GAPPED** (SESSION_START at 07:07 written, but no SESSION_END and no session-log entry = did not complete). Swept contacts since 06-20 to cover both windows.
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed 10:43 CDT, same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 50 calendar days since 2026-05-03. Standing Adam action; NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live n8n exec search) — **ZERO executions since 06-20** (last = 27675, Tracy Foster 06-19 16:47). Zero errored execs since the 06-09 two-bug fix holds. No exec = no new web-form lead in the window.
+- **ZERO new contacts since 06-20** (Supabase `contacts` swept from 2026-06-20T00:00Z → now). No lead landed during the 06-21 gapped session either — nothing missed in either window. No speed-to-lead miss. Quiet 3-day stretch (no new web traffic 06-20 → 06-22).
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-20 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed at 03:46 CDT, same WebLiteSignIn redirect. ~48 calendar days since 2026-05-03. Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live n8n exec check) — only exec since the 06-19 AM verify = **27675** (06-19 16:47:38, SUCCESS, 0.83s). Zero errored execs since the 06-09 two-bug fix holds. No exec since 27675 = no new web-form lead since Tracy.
+- New contacts since last AM verify (06-19 03:55), 1: **Tracy Foster** (Website, 06-19 16:47:36) → exec 27675 SUCCESS ~2s later → 3/cold. Real live web-form lead, scored correctly — **5th consecutive proven web-lead** (Nicole 06-11 → Austin 06-12 → Madison + Diana 06-16 → Tracy 06-19). Note: shares surname with Madison Foster (06-16 Website lead); distinct first names = separate leads, not a dupe. No speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-19 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- NotebookLM PULL/PUSH SKIPPED — CLI auth live-probed at 03:55 CDT, same WebLiteSignIn redirect. ~47 calendar days since 2026-05-03. Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY (live n8n exec check) — last 5 execs all SUCCESS: 26700 / 26628 / 25292 / 24941 / 24136. The 3 errored execs (24134 / 23915 / 23867) are ALL pre-fix (06-08 → 06-09 14:13, before the 14:17 fix); zero errored execs since. No exec since 26700 (06-16 21:16) = no new web-form lead since Diana.
+- New contacts since last AM verify (06-18 ~10:55), 4: **Crystal Sandoval** (06-18 21:34), **Theresa Bastian** (06-18 21:34), **David Rowe** (06-18 21:34) — 3-row batch inserted within ~1.5s of each other, all lead_source=null / 0/new = Arive/manual sync path, scorer correctly idle; **Vesper Stamper** (06-18 20:54, lead_source=null, 0/new) — re-entry of the 06-16 Realtor-Referral contact, manual path. No new Website-source lead; scorer correctly didn't fire on any; no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-18 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- NotebookLM PULL/PUSH SKIPPED — CLI auth expired ~46d (since 2026-05-03). Inheriting prior live-confirmed blocked state (PM nightly re-probes live). Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY — 2 new SUCCESS execs since last session: `26628` (06-16 16:54, 0.95s) + `26700` (06-16 21:16, 0.92s); zero errored execs since the 06-09 two-bug fix. Web-lead path now proven on 4 consecutive real leads (Nicole 06-11 → Austin 06-12 → Madison + Diana 06-16).
+- New contacts since 06-16 (5): **Madison Foster** (Website, 06-16 16:54) → exec 26628 → 3/cold ✓; **Diana Sanchez** (Website, 06-16 21:16) → exec 26700 → 3/cold ✓; **Michael Miller** (06-16 19:16), **Carol Bellomy** (06-17 00:16), **Sequoia Johnson** (06-18 01:42) all lead_source=null / 0/new = Arive/manual path, scorer correctly idle (app POSTs scorer only on web-lead create). Two real web leads scored correctly; no unscored web lead, no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L15 (flagged-once 06-15). No new hot leads. NOT re-stacked per anti-bloat.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-16 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+- NotebookLM PULL/PUSH BLOCKED — CLI auth live-confirmed expired (`list` → Google sign-in redirect; ~44d since 2026-05-03). All push/curate/master-notebook steps skipped. Not re-stacked in ADAM-TODO.
+- Scorer `nOCDV73m4M0jyL1B` HEALTHY — execs 24136 (06-09 success) / 24941 (06-11 success) / 25292 (06-12 success); zero errored execs since the 06-09 two-bug fix. No exec since 06-12 = no new web-form lead.
+- New contacts since 06-15 (2): Vesper Stamper (06-15 18:53, lead_source=Realtor Referral, score 0/new) — referral path, scorer correctly didn't fire; Kiersten McBride (06-15 13:43, lead_source=null, 0/new) — already analyzed 06-15 AM as a manual dupe of the 06-04 contact. Neither is a web-form lead; no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05). Already standing as one clean ADAM-TODO line (L14, 06-15). NOT re-stacked per anti-bloat/forward rule.
+- DEFERRED (out of scope / opt-in): backfill re-POST (Adam-opt-in, de-risked, low-value); domain-queue 2–4 (live-system writes, off-priority per GOALS no-funnel-build week); NotebookLM PULL/PUSH (CLI auth expired).
+- Files: CONTEXT.md (3 Lead-Gen fields), CHANGELOG.md, today-mission.md, session-log.md, subagent-status.md. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue change.
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-15 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+### Completed
+- **NotebookLM PULL/PUSH BLOCKED** — CLI auth expired (~43 calendar days since 2026-05-03). Not re-probed this run; inheriting the 06-14 live-confirmed state (same WebLiteSignIn redirect, probed 06-14 03:52 + 02:20 CDT). Standing Adam action (`notebooklm login`), logged 40+×; NOT re-stacked in ADAM-TODO per anti-bloat discipline.
+- **Scorer `nOCDV73m4M0jyL1B` re-confirmed healthy.** Last 3 execs `24136`(06-09) / `24941`(06-11) / `25292`(06-12) all `success`; latest is 25292. Zero errored execs since the 06-09 fix holds. No new execs since 06-12 = no new web-FORM lead in the window.
+- **1 new contact since last session: Kiersten McBride (06-15 13:43 UTC).** lead_source=null, score 0/new, no loan attached. It is a near-duplicate of an existing contact "Kiersten McBride" created 06-04 (same phone 512-382-9808; email differs only by a one-char typo, ctoc.com→ctot.com). = manual/Arive-sync re-entry of someone already in the DB 11 days, NOT a web-form lead. Scorer correctly did NOT fire (app POSTs scorer only on web-lead create) — consistent with prior null-source behavior (Randa, Matthew), not a regression. No speed-to-lead miss. Data-hygiene note only (dupe), not escalated.
+- **Defensive hot-lead sweep (whole table).** Still exactly **1** undismissed hot contact: **Emily Christensen** (Web Lead, 70/hot, created+scored 2026-05-05). PRE-dates the outage (scorer healthy 05-05 → notification fired at creation); `hot_lead_dismissed=false` is UI state only. 41 days old, outside speed-to-lead window.
+
+### Decision — Emily Christensen ESCALATED (one clean ADAM-TODO line) this run
+3rd consecutive appearance (06-13 → 06-14 → 06-15). The 06-14 session set the forward rule: "2nd appearance → escalate cleanly." Recording her silently every session while never closing the loop is its own bloat. Added ONE tight ADAM-TODO line: 30-sec dashboard check — confirm she was worked & dismiss, or follow up if she slipped. Serves GOALS pipeline (work every borrower). Not an email; project-file only per session rules.
+
+### Deferred / Out of scope (unattended AM session)
+- Backfill re-POST (Adam-opt-in per ADAM-TODO; known safe + low-value, max would-be-score 3 / no hot).
+- Domain-queue items 2–4 (activate Website Lead Follow-up `AK1fBcaX1cPcdlGx`; end-to-end test New App Received + Refi Intake) — live-system writes → supervised build session. Off-priority per GOALS (no funnel-building this week).
+- NotebookLM PULL/PUSH + master-notebook note (CLI auth expired).
+
+### Files touched
+subagent-status.md (SESSION START/END), today-mission.md, session-log.md, CONTEXT.md (3 fields), CHANGELOG.md, ADAM-TODO.md (1 Emily line). No domain-queue/TODO.md/DECISIONS.md change (no new actionable build items; anti-bloat).
+
+SESSION COMPLETE ✓ (read-only verify; pipeline healthy; 1 dupe contact noted; recurring hot-lead flag closed out via 1 ADAM-TODO line)
+
+---
+## Session: 2026-06-14 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only. No active BLOCKERS.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No live-system writes, no notifications, no emails.
+
+### Completed
+- **NotebookLM PULL/PUSH BLOCKED** — CLI auth still expired (probed inline 03:52 CDT: same WebLiteSignIn redirect; 42 calendar days since 2026-05-03). Standing Adam action, logged 40+×; NOT re-stacked in ADAM-TODO per anti-bloat discipline.
+- **Scorer `nOCDV73m4M0jyL1B` re-confirmed healthy.** Only execution since 06-12 = `25292` (Austin Smith, success) — already recorded 06-13. Zero errored execs since the 06-09 fix holds.
+- **Zero new contacts since the 06-13 AM session.** Supabase `contacts` since 06-12 returns only Austin Smith (Website, 3/cold, scored via 25292) + Randa Alswaiedi (06-12 23:50, null source = Arive/manual, correctly unscored). No new web-form traffic in the ~17h window.
+- **Defensive hot-lead sweep (whole table, not just recent).** Exactly **1** undismissed hot contact: **Emily Christensen** (Web Lead, 70/hot, created+scored 2026-05-05, updated 05-05 20:30). This PRE-DATES the outage — scorer was healthy on 05-05, so the hot-lead notification fired at creation. `hot_lead_dismissed=false` is UI state only (never dismissed in dashboard), NOT a missed lead or regression. 40 days old, outside speed-to-lead window. NO evidence it was actually missed vs. worked-and-not-dismissed.
+
+### Decision — Emily Christensen NOT escalated to ADAM-TODO this run
+Surfacing a 40-day-old hot lead that was already notified at creation, with zero evidence of an actual miss, would be presumptuous and bloat ADAM-TODO. Recorded here as a finding. If it remains the top undismissed item next session = 2nd appearance → a future run can escalate cleanly per the re-verify-before-resurfacing discipline.
+
+### Deferred / Out of scope (unattended AM session)
+- Backfill re-POST (Adam-opt-in per ADAM-TODO; known safe + low-value, max would-be-score 3 / no hot).
+- Domain-queue items 2–4 (activate Website Lead Follow-up `AK1fBcaX1cPcdlGx`; end-to-end test New App Received + Refi Intake) — all require live-system writes → supervised build session, not a 3 AM autonomous run. Also off-priority per GOALS (no funnel-building this week).
+- NotebookLM PULL/PUSH + master-notebook note (CLI auth expired).
+
+### Files touched
+subagent-status.md (SESSION START/END), today-mission.md, session-log.md, CONTEXT.md (3 fields), CHANGELOG.md. No ADAM-TODO/domain-queue/TODO.md/DECISIONS.md change (no new actionable items; anti-bloat).
+
+SESSION COMPLETE ✓ (read-only verify; pipeline healthy; no new traffic; no buried NEW hot leads)
+
+---
+## Session: 2026-06-13 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification. Verify-only, autonomous, read-only.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No writes to live systems, no notifications, no emails.
+
+### Completed
+- **Scorer `nOCDV73m4M0jyL1B` re-confirmed healthy.** Executions since 06-11: `24941` (06-11 Nicole) + `25292` (06-12 Austin) both `success`. Zero errored execs since the 06-09 fix.
+- **2nd real live web-form lead proves the path again.** Austin Smith (lead_source=Website) created 2026-06-12 20:47:40; scorer exec `25292` ran SUCCESS at 20:47:42 (~2s later); scored 3/lead_tier=cold. Speed-to-lead path now confirmed on two independent real leads (Nicole 06-11, Austin 06-12), not just synthetic QA.
+- **Read-only hot-lead check on recent contacts.** Both web leads scored 3/cold — no hot leads, nothing buried, nothing to surface. Randa Alswaiedi (06-12 23:50, lead_source=null, score 0/new) is an Arive/manual-path contact, correctly NOT scored (the app POSTs the scorer only on web-lead creates) — consistent with prior behavior (Matthew Holzapfel via Arive), not a regression.
+
+### Deferred / Out of scope (unattended AM session)
+- Backfill re-POST (Adam-opt-in per ADAM-TODO line 12; known safe + low-value).
+- domain-queue items 2–4: activate Website Lead Follow-up `AK1fBcaX1cPcdlGx` + test New Application Received `cWESnXXy9UOLB13q` + Refi Intake `yCTydQ7RfZK4DyUg` — live-system writes, queue for a supervised build session.
+- NotebookLM PULL/PUSH + master-notebook note — CLI auth expired ~41 days (`notebooklm login`).
+
+### Files Updated
+CONTEXT.md (Lead Gen 3 fields), CHANGELOG.md (top entry), today-mission.md, subagent-status.md (START/END), this log. No domain-queue / ADAM-TODO / TODO.md / DECISIONS.md change (item #1 already closed 06-12; no new actionable items; avoiding ADAM-TODO bloat per 06-06 guidance).
+
+### BLOCKERS
+None active. BLOCKER-006 remains RESOLVED (now proven on two real leads).
+
+### Next Session
+Pipeline fully verified across two real leads — verify-only sessions continue to run dry. Next meaningful lead-gen progress needs a supervised BUILD session (domain-queue items 2–4) or Adam input (backfill opt-in, `notebooklm login`). An unattended AM verify session has nothing new to add until a new lead event or Adam action occurs.
+
+---
+## Session: 2026-06-12 AM — Lead Generation
+Focus: Speed-to-lead pipeline verification (post-BLOCKER-006). Verify-only, autonomous, read-only.
+Type: Sequence A-equivalent (Research/Verify). No Builder/Reviewer/QA (no build). No writes to live systems, no notifications, no emails.
+
+### Completed
+- **Closed the long-open "web-lead path unproven on a real lead" item.** First real live web-form lead since the 06-09 fix landed: Nicole Renovilla (lead_source=Website) created 2026-06-11 21:02:26; scorer `nOCDV73m4M0jyL1B` exec `24941` ran SUCCESS at 21:02:28 (1.8s later); contact scored 3/lead_tier=cold. End-to-end path (form → `web-lead/route.ts:313` app POST → scorer → patch) confirmed working on real traffic, not just synthetic QA.
+- Re-verified scorer health via MCP: `active`, `responseMode=onReceived`, `versionId == activeVersionId`. Execution history: zero errored execs since the 06-09 fix — 24136 (06-09 QA) + 24941 (06-11 real lead) both `success`; all errors (24134/23915/23867/21055/15829/14323) pre-date or are the fix QA.
+- **Read-only backlog hot-lead scan (new, no re-POST).** Computed each outage-era unscored contact's would-be score from `activity_log` using the scorer's exact point table. Result: max would-be score = **3** (Chloe Parker, Jake Pritchard, Quailton Williams — all just web `contact_created`); every other unscored contact scores 0. **No hidden hot leads.** Several (Jake, Ben Booth, John Lucas, Matthew Holzapfel) already have `loan_created` — converted, scoring moot.
+- **De-risked the backfill.** Since no unscored contact would score ≥20 (hot threshold), re-POSTing the entire backlog fires ZERO hot-lead alerts to Adam — the "re-POST spams Adam" concern that has gated this for days is unfounded. Also low-value (mostly converted loans / no-activity referrals). Recorded in ADAM-TODO line 12 (refreshed in place) + CONTEXT.
+
+### Deferred / Out of scope (unattended AM session)
+- Backfill re-POST (Adam-opt-in per ADAM-TODO line 12; now known safe + low-value).
+- domain-queue items 2–4: activate Website Lead Follow-up `AK1fBcaX1cPcdlGx` + test New Application Received `cWESnXXy9UOLB13q` + Refi Intake `yCTydQ7RfZK4DyUg` — live-system writes, queue for a supervised build session.
+- NotebookLM PULL/PUSH + master-notebook note — CLI auth expired ~40 days (`notebooklm login`).
+
+### Files Updated
+CONTEXT.md (Lead Gen 3 fields), CHANGELOG.md (top entry), domain-queue.md (#1 closed — PROVEN), ADAM-TODO.md (line 12 in place), today-mission.md, subagent-status.md (START/END), this log. No TODO.md / DECISIONS.md change (no architectural decision; domain-queue is the lead-gen tracker per convention).
+
+### BLOCKERS
+None active. BLOCKER-006 remains RESOLVED (now also proven on real traffic).
+
+### Next Session
+The speed-to-lead pipeline is fully verified — verify-only sessions have run dry. Next meaningful lead-gen progress needs a supervised BUILD session (domain-queue items 2–4) or Adam input (backfill opt-in, `notebooklm login`). An unattended AM verify session has nothing new to add until a new lead event or Adam action occurs.
+
+---
+## Session: 2026-06-11 AM — VERIFY-ONLY: speed-to-lead pipeline audit (post-BLOCKER-006)
+
+**DateTime:** 2026-06-11 ~10:08 CDT. **Mode:** AM. **Sequence:** A-equivalent (Research/Verify — read-only). NotebookLM PULL/PUSH skipped (CLI auth expired ~39d).
+
+**Result:** BLOCKER-006 fix verified holding. Scorer healthy AND its trigger path confirmed intact. One real-world gap remains (backfill, Adam-gated) + one thing still unproven (live web-form lead end-to-end). No active blockers; no writes; no notifications fired.
+
+**What I verified:**
+1. Scorer `nOCDV73m4M0jyL1B`: `active`, `responseMode=onReceived`, fix timestamp 2026-06-09 14:17, versionId==activeVersionId. Last success exec 24136 (the 06-09 QA). Only 2 execs since fix (24134 pre-fix err + 24136 QA) → **zero real-lead executions since the fix.**
+2. Resolved the 06-08 audit's open question — *what triggers the scorer*: LoanOS `web-lead/route.ts:313` fire-and-forgets `{contact_id}` → `/webhook/lead-score-update` on every web-lead create. The n8n Web Lead Automation (`PiuIsQpBuydtFM4m`) does NOT call the scorer; the app endpoint does. Trigger is wired correctly.
+3. Why no execs since the fix: the only post-fix contact (Matthew Holzapfel 06-10) came via Arive loan-sync (`loan_created`), not the web form. No new web-form lead arrived to exercise the path — absence of input, not a defect.
+4. Supabase: 19 contacts since 06-01, all `lead_score=0/new`. Chloe Parker + Jake Pritchard (06-08 Website) have `contact_created` (would score 3/new if rescored).
+
+**Notable (non-blocking):** Web Lead Automation logs activity `web_lead.received` (dot) with `contact_id: null` hardcoded → orphaned + not scored; scorer's scored-actions list expects `web_lead_created` (underscore). Scoring still works via the app-logged `contact_created` (+3). Cleanup candidate, not acting. Also: Adam still gets a per-lead Outlook alert from `PiuIsQpBuydtFM4m` independent of the scorer — speed-to-lead notification for web leads was never fully dead.
+
+**Still gated on Adam (ADAM-TODO line 12, unchanged):** backfill the 25 outage-era unscored leads — re-POST re-fires hot-lead alerts, forbidden this session.
+
+**Deferred (write actions, out of scope for verify-only):** domain-queue items 2–4 — activate `AK1fBcaX1cPcdlGx`, test `cWESnXXy9UOLB13q` + `yCTydQ7RfZK4DyUg` end-to-end.
+
+**Files:** CONTEXT.md (Lead Gen block, 3 fields), CHANGELOG.md, domain-queue.md (#1), today-mission.md, subagent-status.md, session-log.md.
+
+DAILY DIGEST: SKIPPED per scheduled-task SKILL.md (no emails to Adam, project files only).
+
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-06-09 AM — RESOLVED BLOCKER-006 (lead scoring restored)
+
+**DateTime:** 2026-06-09 ~09:10 CDT. **Mode:** AM. **Sequence:** C (Execute — blocker fix). NotebookLM PULL/PUSH skipped (CLI auth expired ~37d).
+
+**Result:** Fixed BLOCKER-006 end-to-end. Lead scoring + 5-min hot-lead routing is live again after a ~3-week silent outage.
+
+**What I did:**
+1. Verified still broken live (workflow unchanged since 04-24; 2 new errored execs on 06-08 = real leads dropped). Adam hadn't touched it.
+2. Fix 1 — `Lead Score Webhook` `responseMode` `responseNode`→`onReceived` (REST PUT, credential-safe). Killed the trigger-level "No Respond node" error.
+3. QA replay surfaced a hidden 2nd bug: Supabase cred `qjRCjm5wKJgPGXXY` returned "Invalid API key" (stale secret; raw service-role key valid). Used by only this workflow (of 53). Built new cred `Bi7VTMWZeMnTrS3h`, re-pointed the 3 Supabase nodes.
+4. QA: exec **24136 success** — Webhook→Extract→Get Scored Actions→Compute Score (0)→Patch→Is Hot Lead?(false). `Notify Adam`/`Surface Hot Lead` correctly skipped; no notification to Adam, no real data mutated.
+
+**Escalated to Adam (ADAM-TODO):** 25 of 26 contacts since 05-01 went unscored during the outage — backfill needs Adam (re-POST re-fires hot-lead alerts, forbidden this session). Optional: delete orphaned cred `qjRCjm5wKJgPGXXY`.
+
+**Files:** BLOCKERS.md (RESOLVED), domain-queue.md (#1), CONTEXT.md (Lead Gen block), CHANGELOG.md, today-mission.md, ADAM-TODO.md, memory/tools/n8n.md, subagent-status.md.
+
+**Note:** Prior ~15 sessions were read-only "verification micro-pass" no-ops (cron-jitter / auth bookkeeping). This session returns to substance — kept the log entry short on purpose.
+
+DAILY DIGEST: SKIPPED per scheduled-task SKILL.md (no emails to Adam, project files only).
+
+SESSION COMPLETE ✓
+
+---
+## Session: 2026-05-28 AM — Lead Generation (lead-gen-am scheduled task — fired WITHIN JITTER, both cron subsets RECOVERED-AND-HOLDING-EXTENDED)
+
+**DateTime:** 2026-05-28 04:29 CDT (cron fired ~1h29m late vs 03:00 scheduled = WITHIN normal jitter, <3h threshold). **4th consecutive within-jitter AM lead-gen-am fire** after AM 05-25 + AM 05-26 + AM 05-27 within jitter → **AM 05-28 within jitter = AM-side subset still RECOVERED-AND-HOLDING, watch stays closed**. Cohort cron-reliability subset confirmed by AM 05-27 in-place refresh annotations on L18 PM 05-26 social-pm ON TIME (6th consecutive on-time-or-near social) + AM 05-26 full cohort + PM 05-25 nightly + PM 05-25 social-pm + AM 05-25 full cohort + PM 05-24 + PM 05-23 = **10+ consecutive on-time-or-within-jitter cohort signals = RECOVERED-AND-HOLDING-EXTENDED**.
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule active since 05-18 AM forward rule, extended through every Lead Gen session since — **15th consecutive Lead Gen session under restraint**: PM 05-23 [10th = pile-saturation threshold trip + L14 authored] → PM 05-24 [11th] → AM 05-25 [12th] → AM 05-26 [13th] → AM 05-27 [14th] → **AM 05-28 [15th]**; PM 05-25 + PM 05-26 + PM 05-27 nightly Lead Gen halves at 22:10 CDT were sub-sessions #53 + #55 + #57 but skipped per auth-blocked nightly convention, not counted as restraint-sessions).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired (25 calendar days). Refresh standard session files in place. Note cron-reliability trigger DOES NOT FIRE per AM 05-27 forward rule clause (f) — pattern did not reverse, AM 05-28 lead-gen-am within jitter (1h29m late << 3h threshold).
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. UNCHANGED across Mon 05-18 → Thu 05-28 = 11 full days, including the full Mon 05-25 daytime refresh window + Tue 05-26 daytime catch-up window + Wed 05-27 daytime catch-up window ALL now PASSED. Adam silent past natural weekly cadence + 72h grace (3 days past normal cadence). Week-of-May-18 still governs into a 2nd full week.
+- ADAM-TODO open/done: not re-counted this session. LEAD-GEN slice unchanged from AM 05-23 baseline: 39 open / 18 done.
+- Supabase live state (1 SELECT, 24h after AM 05-27 baseline): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Refi 90d). **Website 90d=0 (was 10 at AM 05-27 = -10, Adam-touched signal: 10 records deleted/archived/reclassified out of 'website' lead_source bucket in 24h).** **NULL lead_source 90d=1394 (unchanged from AM 05-27 — the 10 'website' contacts did NOT migrate to NULL).** contacts_7d=1 (unchanged from AM 05-27).
+- NotebookLM CLI auth probe at 04:29 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. **25 calendar days since first failure 2026-05-03 PM**. **Sub-session #58 for Lead Gen reckoning** (AM 05-27 lead-gen-am was #56 → PM 05-27 nightly Lead Gen at ~22:10 CDT = #57 → AM 05-28 lead-gen-am at 04:29 CDT = #58). No Adam re-auth event in the ~6h+ since PM 05-27 nightly probe (inferred — no observable mtime change on auth state).
+
+### Cron-fire observation (separate from NotebookLM block — BOTH SUBSETS RECOVERED-AND-HOLDING-EXTENDED)
+- AM 05-28 fired at 04:29 CDT, ~1h29m late vs 03:00 target = WITHIN normal jitter (<3h threshold). **4th consecutive within-jitter AM lead-gen-am fire** after AM 05-25 + AM 05-26 + AM 05-27 within jitter. Sequence recovery extended: AM 05-19 normal → AM 05-20 GAPPED → AM 05-21 ~9.5h late → AM 05-22 ~2h18m late → AM 05-23 ~16h36m late (worst-of-run) → AM 05-24 GAPPED → AM 05-25 ~45 min late (within jitter) → AM 05-26 ~45 min late (within jitter) → AM 05-27 ~1h03m late (within jitter) → **AM 05-28 ~1h29m late (within jitter)** = AM-side subset still RECOVERED-AND-HOLDING.
+- Cohort context: 10+ consecutive on-time-or-within-jitter cohort signals confirmed via established AM 05-27 chain (PM 05-26 social-pm on-time at ~21:22 CDT + AM 05-26 full cohort + PM 05-25 nightly + PM 05-25 social-pm + AM 05-25 full cohort + PM 05-24 + PM 05-23) extended by AM 05-27 lead-gen-am within jitter + AM 05-28 lead-gen-am within jitter.
+- Per AM 05-27 forward rule clause (f): "Trigger watch effectively closes; re-arms only if PM 05-27 nightly or AM 05-28 reverts." — AM 05-28 did NOT revert, **trigger remains DOES NOT FIRE**. Watch stays closed; re-arms only if PM 05-28 nightly or AM 05-29 reverts.
+- L49 sub-note flipped from "RECOVERED-AND-HOLDING — 9+ consecutive cohort signals confirm" → "RECOVERED-AND-HOLDING-EXTENDED — 10+ consecutive cohort signals confirm".
+
+### Pile-saturation 15th consecutive session under restraint — L14 refreshed in place
+- **15th consecutive Lead Gen session** under restraint (AM 05-27 was 14th → AM 05-28 = 15th). L14 dedicated line was authored PM 05-23 at 10-session threshold trip; refreshed in place at PM 05-24 (11 sessions), AM 05-25 (12 sessions), AM 05-26 (13 sessions), AM 05-27 (14 sessions), and again this session (15 sessions).
+- Per L14 clause (e) ("Refresh in place per stale-flags rule on subsequent sessions until Adam acks one of (a)/(b)/(c). Do NOT stack additional saturation entries"), L14 bumped to 15 sessions + 25 PM-side syncs (was 24 at AM 05-27 preview-counting PM 05-27; PM 05-27 nightly Lead Gen fired-and-skipped per established pattern; preview-counting tonight's PM 05-28 = 25) + AM 05-28 timestamp + RECOVERED-AND-HOLDING-EXTENDED context + Wed 05-27 daytime-catch-up-passed context. No new dedicated line stacked.
+- Pile state unchanged in substance: 14 lead-gen artifacts queued for delayed PUSH (unchanged across 15 sessions) + 25 PM-side syncs awaiting recovery (next eligible: tonight) + SEO/SEM ~46 stale + ~27 ready-to-add at 50-source cap.
+
+### Supabase signal — Adam-touched website_90d bucket
+- **website_90d dropped from 10 → 0** in 24h between AM 05-27 and AM 05-28 sessions. NULL stayed flat at 1394 (the 10 records did NOT migrate to NULL bucket). contacts_7d unchanged at 1. Interpretation: 10 contacts that had `lead_source='website'` were either (a) deleted, (b) archived, or (c) reclassified to a non-NULL lead_source — Adam-touched action between sessions. Read-only signal of Adam working in Supabase/LoanOS; no named-funnel attribution improvement, no new funnel activity. Folded into L14 + L49 + CONTEXT.md notes; not a trigger for new ADAM-TODO line per restraint clause (c).
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/` (restraint clause (c)).
+- 0 new ADAM-TODO lines (ONE-ASK-PER-CYCLE — L12 social escalation surface refreshed-in-place PM 05-26 already covers shared GOALS-slip + 15-day-saturation context; cron-reliability trigger correctly DID NOT FIRE per clause (f) qualifying condition not met).
+- No Architect/Builder/Quality/Reviewer/QA pass.
+- No NotebookLM PULL (Step 3 skipped per master-agent.md error-handling rule).
+- No master notebook PUSH (Step 8 skipped).
+
+### Forward rule (extends AM 05-27 rule — cron-reliability trigger DID NOT FIRE, both subsets RECOVERED-AND-HOLDING-EXTENDED)
+- (a) If Adam authorizes ANY ranked short-list item OR picks any of the 3 L14 options → next session exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → flip those ADAM-TODO lines `[ ]` → `[x]` in next session.
+- (c) If Adam authorizes nothing again → next session is read-only verification too. **Clause (c) restraint on new specs/audits/briefs/triage memos still holds.** L14 + L49 lines should be refreshed-in-place per stale-flags rule, NOT re-stacked.
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen artifact backlog + 25 PM-side syncs + SEO/SEM PM-side backlog. L14 recommends staged recovery across multiple nights.
+- (e) Pile-saturation 10+ threshold already tripped PM 05-23 — clause (e) retired/superseded.
+- (f) **CRON-RELIABILITY TRIGGER DID NOT FIRE THIS SESSION** — AM 05-28 lead-gen-am within jitter (4th consecutive) + 10+ cohort signals total = subset RECOVERED-AND-HOLDING-EXTENDED. Trigger watch stays closed; re-arms only if PM 05-28 nightly or AM 05-29 reverts.
+- (g) **GOALS.md still `May 17 12:11:31 2026` — Mon 05-25 daytime refresh window + Tue 05-26 daytime catch-up window + Wed 05-27 daytime catch-up window ALL passed without refresh; Adam silent past natural weekly cadence + 72h grace**. If GOALS.md mtime advances during Thu 05-28 daytime, PM 05-28 nightly Lead Gen half re-reads GOALS for any regime change. L12 social escalation surface (refreshed PM 05-26 21:22 CDT to 240h/10-days-open; expected sister-agent refresh with bumped counters) covers shared GOALS-slip context — no separate Lead Gen escalation needed.
+- (h) **website_90d 10 → 0 in 24h observed** — Adam-touched action between sessions reclassified/deleted/archived 10 'website' lead_source contacts; NULL bucket did not absorb them (no NULL migration), and contacts_7d unchanged. Read-only signal of Adam working in Supabase/LoanOS; not in any tracked funnel improvement. PR-3 (NULL diagnostic, 2026-05-11) standing recommendation still holds: Adam authorize one of PR-1..PR-5 to start closing the attribution gap.
+
+### Files updated (this session — 9 standard, refreshed in place; 0 new artifacts; 0 new ADAM-TODO lines)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START prepended at top of session; SESSION_END replaces it at end)
+- `tasks/lead-gen/today-mission.md` (replaced for AM 05-28)
+- `tasks/lead-gen/session-log.md` (this entry prepended after header)
+- `tasks/lead-gen/notebooklm-errors.md` (AM 05-28 entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — Last worked on / Active blockers / What's next refreshed in place; net 0 line drift)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (L14 [SYSTEM] PILE-SATURATION refreshed in place — bumped to 15 sessions + 25 PM-side syncs + AM 05-28 timestamp + RECOVERED-AND-HOLDING-EXTENDED context + Wed 05-27 daytime-catch-up-passed context + website_90d 10→0 Adam-touched signal noted; L49 NotebookLM CLI re-auth refreshed in place — bumped to 25 days / #58 Lead Gen / cron-reliability sub-note flipped from "RECOVERED-AND-HOLDING — 9+ consecutive cohort signals confirm" to "RECOVERED-AND-HOLDING-EXTENDED — 10+ consecutive cohort signals confirm"; NO new dedicated Lead Gen lines)
+- `TODO.md` line 29 refreshed in place
+- DECISIONS.md: UNTOUCHED (no decision made)
+
+### Output
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/`.
+- 0 new ADAM-TODO lines.
+- 9 standard session files refreshed in place.
+
+DAILY DIGEST: SKIPPED per scheduled-task SKILL.md ("no emails to Adam, project files only").
+
+SESSION FULLY COMPLETE ✓ (read-only verification + L14/L49 refresh-in-place at 15-session count + cron-reliability trigger correctly DID NOT FIRE per clause (f) qualifying condition not met; restraint clause (c) + ONE-ASK-PER-CYCLE honored — 15th consecutive Lead Gen session under restraint, both cron subsets RECOVERED-AND-HOLDING-EXTENDED, Adam-touched website_90d 10→0 signal noted)
+
+---
+## Session: 2026-05-27 AM — Lead Generation (lead-gen-am scheduled task — fired WITHIN JITTER, both cron subsets RECOVERED-AND-HOLDING)
+
+**DateTime:** 2026-05-27 04:03 CDT (cron fired ~1h03m late vs 03:00 scheduled = WITHIN normal jitter, <3h threshold). **3rd consecutive within-jitter AM lead-gen-am fire** after AM 05-25 + AM 05-26 within jitter → **AM 05-27 within jitter = AM-side subset still RECOVERED, watch stays closed**. Combined with PM 05-26 styer-social-pm ON TIME at ~21:22 CDT per L18 refresh annotation (6th consecutive on-time-or-near social = RECOVERED-AND-HOLDING per sister social tracking) + AM 05-26 full cohort on-time-or-within-jitter (social-am 02:29 + lead-gen-am 03:45 + scenarios-am 08:00) + PM 05-25 nightly + PM 05-25 social-pm + AM 05-25 full cohort + PM 05-24 + PM 05-23 = **9+ consecutive on-time-or-within-jitter cohort signals**.
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule active since 05-18 AM forward rule, extended through every Lead Gen session since — **14th consecutive Lead Gen session under restraint**: PM 05-23 [10th = pile-saturation threshold trip + L14 authored] → PM 05-24 [11th] → AM 05-25 [12th] → AM 05-26 [13th] → **AM 05-27 [14th]**; PM 05-25 + PM 05-26 nightly Lead Gen halves at 22:10 CDT were sub-sessions #53 + #55 but skipped per auth-blocked nightly convention, not counted as restraint-sessions).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired (24 calendar days). Refresh standard session files in place. Note cron-reliability trigger DOES NOT FIRE per AM 05-26 forward rule clause (f) — pattern did not reverse, AM 05-27 lead-gen-am within jitter (1h03m late << 3h threshold).
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. UNCHANGED across Mon 05-18 → Wed 05-27 = 10 full days, including the full Mon 05-25 daytime refresh window AND the full Tue 05-26 daytime catch-up window now PASSED. Adam silent past natural weekly cadence + 24h grace. Week-of-May-18 still governs into a 2nd full week.
+- ADAM-TODO open/done: not re-counted this session. LEAD-GEN slice unchanged from AM 05-23 baseline: 39 open / 18 done.
+- Supabase live state (1 SELECT, 24h after AM 05-26 baseline): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Refi 90d). **Website 90d=10 (unchanged from AM 05-26).** **NULL lead_source 90d=1394 (was 1393 at AM 05-26 = +1 net new unclassified inbound in 24h).** **contacts_7d=1 (was 2 at AM 05-26 = -1, a contact rolled out of the 7-day window — but combined with NULL +1 indicates a single inbound contact arrived in the past 24h, landing in unclassified bucket).**
+- NotebookLM CLI auth probe at 04:03 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. **24 calendar days since first failure 2026-05-03 PM**. **Sub-session #56 for Lead Gen reckoning** (AM 05-26 lead-gen-am was #54 → PM 05-26 nightly Lead Gen at ~22:10 CDT = #55 → AM 05-27 lead-gen-am at 04:03 CDT = #56). No Adam re-auth event in the ~5h41m since PM 05-26 nightly probe (inferred via L18 PM 05-26 styer-social-pm refresh annotation).
+
+### Cron-fire observation (separate from NotebookLM block — BOTH SUBSETS RECOVERED-AND-HOLDING)
+- AM 05-27 fired at 04:03 CDT, ~1h03m late vs 03:00 target = WITHIN normal jitter (<3h threshold). **3rd consecutive within-jitter AM lead-gen-am fire** after AM 05-25 + AM 05-26 within jitter. Sequence recovery extended: AM 05-19 normal → AM 05-20 GAPPED → AM 05-21 ~9.5h late → AM 05-22 ~2h18m late → AM 05-23 ~16h36m late (worst-of-run) → AM 05-24 GAPPED → AM 05-25 ~45 min late (within jitter) → AM 05-26 ~45 min late (within jitter) → **AM 05-27 ~1h03m late (within jitter)** = AM-side subset still RECOVERED.
+- Cohort context: PM 05-26 styer-social-pm ON TIME at ~21:22 CDT per L18 refresh annotation = 6th consecutive on-time-or-near social signal (PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25 + AM 05-26 + PM 05-26) — RECOVERED-AND-HOLDING per sister social tracking; separate cron-reliability watch stays dissolved.
+- **9+ consecutive on-time-or-within-jitter cohort signals:** AM 05-27 lead-gen-am within jitter + PM 05-26 social-pm on-time + AM 05-26 full cohort + PM 05-25 nightly on-time + PM 05-25 social-pm on-time + AM 05-25 full cohort + PM 05-24 + PM 05-23 = RECOVERED-AND-HOLDING.
+- Per AM 05-26 forward rule clause (f): "Trigger watch effectively closes; re-arms only if PM 05-26 nightly or AM 05-27 reverts." — AM 05-27 did NOT revert, **trigger remains DOES NOT FIRE**. Watch stays closed; re-arms only if PM 05-27 nightly or AM 05-28 reverts.
+- L49 sub-note flipped from "RECOVERED — 7+ consecutive cohort signals confirm" → "RECOVERED-AND-HOLDING — 9+ consecutive cohort signals confirm".
+
+### Pile-saturation 14th consecutive session under restraint — L14 refreshed in place
+- **14th consecutive Lead Gen session** under restraint (AM 05-26 was 13th → AM 05-27 = 14th). L14 dedicated line was authored PM 05-23 at 10-session threshold trip; refreshed in place at PM 05-24 (11 sessions), AM 05-25 (12 sessions), AM 05-26 (13 sessions), and again this session (14 sessions).
+- Per L14 clause (e) ("Refresh in place per stale-flags rule on subsequent sessions until Adam acks one of (a)/(b)/(c). Do NOT stack additional saturation entries"), L14 bumped to 14 sessions + 24 PM-side syncs (was 23 at AM 05-26 preview-counting PM 05-26; PM 05-26 nightly Lead Gen fired-and-skipped per L18 PM 05-26 context; preview-counting tonight's PM 05-27 = 24) + AM 05-27 timestamp + RECOVERED-AND-HOLDING context + Tue 05-26 daytime-catch-up-passed context. No new dedicated line stacked.
+- Pile state unchanged in substance: 14 lead-gen artifacts queued for delayed PUSH (unchanged across 14 sessions) + 24 PM-side syncs awaiting recovery (next eligible: tonight) + SEO/SEM ~44 stale + ~25 ready-to-add at 50-source cap.
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/` (restraint clause (c)).
+- 0 new ADAM-TODO lines (ONE-ASK-PER-CYCLE — L12 social escalation surface refreshed-in-place PM 05-26 already covers shared GOALS-slip + 14-day-saturation context; cron-reliability trigger correctly DID NOT FIRE per clause (f) qualifying condition not met).
+- No Architect/Builder/Quality/Reviewer/QA pass.
+- No NotebookLM PULL (Step 3 skipped per master-agent.md error-handling rule).
+- No master notebook PUSH (Step 8 skipped).
+
+### Forward rule (extends AM 05-26 rule — cron-reliability trigger DID NOT FIRE, both subsets RECOVERED-AND-HOLDING)
+- (a) If Adam authorizes ANY ranked short-list item OR picks any of the 3 L14 options → next session exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → flip those ADAM-TODO lines `[ ]` → `[x]` in next session.
+- (c) If Adam authorizes nothing again → next session is read-only verification too. **Clause (c) restraint on new specs/audits/briefs/triage memos still holds.** L14 + L49 lines should be refreshed-in-place per stale-flags rule, NOT re-stacked.
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen artifact backlog + 24 PM-side syncs + SEO/SEM PM-side backlog. L14 recommends staged recovery across multiple nights.
+- (e) Pile-saturation 10+ threshold already tripped PM 05-23 — clause (e) retired/superseded.
+- (f) **CRON-RELIABILITY TRIGGER DID NOT FIRE THIS SESSION** — AM 05-27 lead-gen-am within jitter (3rd consecutive) + PM 05-26 social-pm on-time (6th consecutive on-time-or-near social per L18 refresh) + 9+ cohort signals total = subset RECOVERED-AND-HOLDING. Trigger watch stays closed; re-arms only if PM 05-27 nightly or AM 05-28 reverts.
+- (g) **GOALS.md still `May 17 12:11:31 2026` — Mon 05-25 daytime refresh window AND Tue 05-26 daytime catch-up window BOTH passed without refresh; Adam silent past natural weekly cadence + 24h grace**. If GOALS.md mtime advances during Wed 05-27 daytime, PM 05-27 nightly Lead Gen half re-reads GOALS for any regime change. L12 social escalation surface (refreshed PM 05-26 21:22 CDT to 240h/10-days-open) covers shared GOALS-slip context — no separate Lead Gen escalation needed.
+- (h) **NULL lead_source +1 in 24h observed** — single new inbound contact landed in unclassified bucket. Read-only signal; not in any tracked funnel. PR-3 (NULL diagnostic, 2026-05-11) standing recommendation holds: Adam authorize one of PR-1..PR-5 to start closing the attribution gap.
+
+### Files updated (this session — 9 standard, refreshed in place; 0 new artifacts; 0 new ADAM-TODO lines)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START prepended at top of session; SESSION_END replaces it at end)
+- `tasks/lead-gen/today-mission.md` (replaced for AM 05-27)
+- `tasks/lead-gen/session-log.md` (this entry prepended after header)
+- `tasks/lead-gen/notebooklm-errors.md` (AM 05-27 entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — Last worked on / Active blockers / What's next refreshed in place; net 0 line drift)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (L14 [SYSTEM] PILE-SATURATION refreshed in place — bumped to 14 sessions + 24 PM-side syncs + AM 05-27 timestamp + RECOVERED-AND-HOLDING context + Tue 05-26 daytime-catch-up-passed context; L49 NotebookLM CLI re-auth refreshed in place — bumped to 24 days / #56 Lead Gen / cron-reliability sub-note flipped from "RECOVERED" to "RECOVERED-AND-HOLDING — 9+ consecutive cohort signals confirm"; NO new dedicated Lead Gen lines)
+- `TODO.md` line 29 refreshed in place
+- DECISIONS.md: UNTOUCHED (no decision made)
+
+---
+## Session: 2026-05-26 AM — Lead Generation (lead-gen-am scheduled task — fired WITHIN JITTER, both cron subsets RECOVERED)
+
+**DateTime:** 2026-05-26 03:45 CDT (cron fired ~45 min late vs 03:00 scheduled = WITHIN normal jitter, <3h threshold). **2nd consecutive within-jitter AM lead-gen-am fire** after AM 05-25 within jitter → **AM 05-26 within jitter = AM-side subset RECOVERED**. Combined with AM 05-26 styer-social-am on-time fire at ~02:29 CDT (5th consecutive on-time-or-near social = "5-in-a-row threshold met" per sister social tracking → cron-reliability subset RECOVERED, separate watch dissolved) + PM 05-25 nightly ON TIME 22:10 CDT (3rd consecutive on-time nightly) + PM 05-25 styer-social-pm ON TIME 21:23 CDT + AM 05-25 full cohort + PM 05-24 + PM 05-23 = **7+ consecutive on-time-or-within-jitter cohort signals**.
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule active since 05-18 AM forward rule, extended through every Lead Gen session since — **13th consecutive Lead Gen session under restraint**: PM 05-23 [10th = pile-saturation threshold trip + L14 authored, was L12 at authorship] → PM 05-24 [11th] → AM 05-25 [12th] → **AM 05-26 [13th]**; PM 05-25 nightly Lead Gen at 22:10 CDT was sub-session #53 but skipped per auth-blocked nightly convention, not counted as restraint-session).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired (23 calendar days). Refresh standard session files in place. Note cron-reliability trigger DOES NOT FIRE per AM 05-25 forward rule clause (f) — pattern did not reverse, AM 05-26 lead-gen-am within jitter (45 min late << 3h threshold).
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. UNCHANGED across Mon 05-18 → Tue 05-26 = 9 full days, including the full Mon 05-25 daytime refresh window now PASSED. Adam silent past natural weekly cadence. Week-of-May-18 still governs into a 2nd week.
+- ADAM-TODO open/done: not re-counted this session. LEAD-GEN slice unchanged from AM 05-23 baseline: 39 open / 18 done.
+- Supabase live state (1 SELECT, 24h after AM 05-25 baseline): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Refi 90d). **Website 90d=10 (unchanged from AM 05-25).** **contacts_7d=2 (unchanged from AM 05-25 — no movement in 24h+; cumulative 75h+ since AM 05-23 baseline).** NULL lead_source 90d=**1393** (unchanged from AM 05-25).
+- NotebookLM CLI auth probe at 03:45 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. **23 calendar days since first failure 2026-05-03 PM**. **Sub-session #54 for Lead Gen reckoning** (AM 05-25 lead-gen-am was #52 → PM 05-25 nightly Lead Gen at 22:10 CDT = #53 → AM 05-26 lead-gen-am at 03:45 CDT = #54). No Adam re-auth event in the ~5h35m since PM 05-25 nightly probe.
+
+### Cron-fire observation (separate from NotebookLM block — BOTH SUBSETS RECOVERED)
+- AM 05-26 fired at 03:45 CDT, ~45 min late vs 03:00 target = WITHIN normal jitter (<3h threshold). **2nd consecutive within-jitter AM lead-gen-am fire** after AM 05-25 within jitter. Sequence recovery: AM 05-19 normal → AM 05-20 GAPPED → AM 05-21 ~9.5h late → AM 05-22 ~2h18m late → AM 05-23 ~16h36m late (worst-of-run) → AM 05-24 GAPPED → AM 05-25 ~45 min late (within jitter) → **AM 05-26 ~45 min late (within jitter)** = AM-side subset RECOVERED.
+- Cohort context: AM 05-26 styer-social-am ON TIME at ~02:29 CDT (per CONTEXT.md Social Media block — "5th consecutive on-time-or-near-on-time social cron signal → cron-reliability subset RECOVERED per 5-in-a-row threshold; separate watch dissolved"). Sister styer-social-am authored AM 05-26 L12 formal escalation line at top of ADAM-TODO this session for separate concerns (L18 cushion-footer + L24 symlink-stat) — informs shared GOALS-slip context but no Lead Gen action item involved.
+- **7+ consecutive on-time-or-within-jitter cohort signals:** AM 05-26 lead-gen-am within jitter + AM 05-26 social-am on-time + PM 05-25 nightly on-time + PM 05-25 social-pm on-time + AM 05-25 full cohort (social-am 02:29 + lead-gen-am 03:45 + scenarios-am 07:30) + PM 05-24 + PM 05-23 = RECOVERED.
+- Per AM 05-25 forward rule clause (f): "Trigger preserved for AM 05-26 if pattern reverses, but materially de-escalated by 4 consecutive cohort signals." — pattern did NOT reverse, **trigger DOES NOT FIRE**. Watch effectively closes; re-arms only if PM 05-26 nightly or AM 05-27 reverts.
+- L49 sub-note flips from "RECOVERING — both subsets stabilized" → "RECOVERED — 7+ consecutive cohort signals confirm".
+
+### Pile-saturation 13th consecutive session under restraint — L14 refreshed in place (line renumbered L12 → L14 after sister social inserted L12)
+- **13th consecutive Lead Gen session** under restraint (AM 05-25 was 12th → AM 05-26 = 13th). L14 dedicated line was authored PM 05-23 at 10-session threshold trip (was L12 at authorship); refreshed in place at PM 05-24 (11 sessions), AM 05-25 (12 sessions), and again this session (13 sessions). Line renumbered L12 → L14 after sister styer-social-am AM 05-26 formal escalation line inserted at L12.
+- Per L14 clause (e) ("Refresh in place per stale-flags rule on subsequent sessions until Adam acks one of (a)/(b)/(c). Do NOT stack additional saturation entries"), L14 bumped to 13 sessions + 23 PM-side syncs (was 22 at AM 05-25 preview-counting PM 05-25; PM 05-25 nightly Lead Gen fired-and-skipped confirmed; preview-counting tonight's PM 05-26 = 23) + AM 05-26 timestamp + RECOVERED context + Mon 05-25 GOALS-slip context. No new dedicated line stacked.
+- Pile state unchanged in substance: 14 lead-gen artifacts queued for delayed PUSH (unchanged across 13 sessions) + 23 PM-side syncs awaiting recovery (next eligible: tonight) + SEO/SEM ~42 stale + ~23 ready-to-add at 50-source cap.
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/` (restraint clause (c)).
+- 0 new ADAM-TODO lines (ONE-ASK-PER-CYCLE — sister styer-social-am already authored AM 05-26 L12 formal escalation covering shared GOALS-slip + 13-day-saturation context; cron-reliability trigger correctly DID NOT FIRE per clause (f) qualifying condition not met).
+- No Architect/Builder/Quality/Reviewer/QA pass.
+- No NotebookLM PULL (Step 3 skipped per master-agent.md error-handling rule).
+- No master notebook PUSH (Step 8 skipped).
+
+### Forward rule (extends AM 05-25 rule — cron-reliability trigger DID NOT FIRE, both subsets RECOVERED)
+- (a) If Adam authorizes ANY ranked short-list item OR picks any of the 3 L14 options → next session exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → flip those ADAM-TODO lines `[ ]` → `[x]` in next session.
+- (c) If Adam authorizes nothing again → next session is read-only verification too. **Clause (c) restraint on new specs/audits/briefs/triage memos still holds.** L14 + L49 lines should be refreshed-in-place per stale-flags rule, NOT re-stacked.
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen artifact backlog + 23 PM-side syncs + SEO/SEM PM-side backlog. L14 recommends staged recovery across multiple nights.
+- (e) Pile-saturation 10+ threshold already tripped PM 05-23 — clause (e) retired/superseded.
+- (f) **CRON-RELIABILITY TRIGGER DID NOT FIRE THIS SESSION** — AM 05-26 lead-gen-am within jitter (2nd consecutive) + AM 05-26 social-am on-time (5-in-a-row "RECOVERED" threshold met) + 7+ cohort signals total = subset RECOVERED. Trigger watch effectively closes; re-arms only if PM 05-26 nightly or AM 05-27 reverts.
+- (g) **GOALS.md still `May 17 12:11:31 2026` — Mon 05-25 daytime refresh window passed without refresh; Adam silent past natural weekly decision point**. If GOALS.md mtime advances during Tue 05-26 daytime, PM 05-26 nightly Lead Gen half re-reads GOALS for any regime change. Sister styer-social-am authored AM 05-26 L12 formal escalation line covering shared GOALS-slip context — no separate Lead Gen escalation needed.
+
+### Files updated (this session — 9 standard, refreshed in place; 0 new artifacts; 0 new ADAM-TODO lines)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START prepended at top of session; SESSION_END replaces it at end)
+- `tasks/lead-gen/today-mission.md` (replaced for AM 05-26)
+- `tasks/lead-gen/session-log.md` (this entry prepended after header)
+- `tasks/lead-gen/notebooklm-errors.md` (AM 05-26 entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — Last worked on / Active blockers / What's next refreshed in place; net 0 line drift)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (L14 [SYSTEM] PILE-SATURATION refreshed in place — bumped to 13 sessions + 23 PM-side syncs + AM 05-26 timestamp + RECOVERED context — line renumbered L12 → L14; L49 NotebookLM CLI re-auth refreshed in place — bumped to 23 days / #54 Lead Gen / cron-reliability sub-note flipped from "RECOVERING — both subsets stabilized" to "RECOVERED — 7+ consecutive cohort signals confirm" — line renumbered L47 → L49; NO new dedicated Lead Gen lines)
+- `TODO.md` line 29 refreshed in place
+- DECISIONS.md: UNTOUCHED (no decision made)
+
+---
+## Session: 2026-05-25 AM — Lead Generation (lead-gen-am scheduled task — fired WITHIN JITTER, AM-side subset RECOVERING)
+
+**DateTime:** 2026-05-25 03:45 CDT (cron fired ~45 min late vs 03:00 scheduled = WITHIN normal jitter, <3h threshold). Combined with AM 05-25 social-am on-time fire at 02:29 CDT (per CONTEXT.md Social Media block), AM-side cron subset is now RECOVERING after 6-day late/gap streak (AM 05-19 onward). Three consecutive on-time-or-within-jitter signals across cohort: PM 05-23 nightly + PM 05-24 nightly + AM 05-25 social-am + AM 05-25 lead-gen-am.
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule active since 05-18 AM forward rule, extended through every Lead Gen session since — **12th consecutive Lead Gen session under restraint**: AM 05-19 → PM 05-19 → [AM 05-20+PM 05-20 GAPPED, excluded] → AM 05-21 → PM 05-21 → AM 05-22 → PM 05-22 nightly → AM 05-23 → PM 05-23 nightly [10th = pile-saturation threshold trip + L12 authored] → [AM 05-24 GAPPED, excluded] → PM 05-24 nightly [11th] → **AM 05-25 [12th]**).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired (22 calendar days). Refresh standard session files in place. Note cron-reliability trigger DOES NOT FIRE per PM 05-24 forward rule clause (f) — AM 05-25 lead-gen-am within jitter, not >3h late.
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. Mon 05-18 through Sun 05-24 all passed with no re-edit. **Today IS Mon 05-25** — Adam's natural weekly refresh cadence, but it's 3:45 AM so the refresh window is ahead (~6-12h out). Week-of-May-18 still governs as of this session.
+- ADAM-TODO open/done: not re-counted this session (~5h32m since AM 05-25 styer-social-am read per CONTEXT.md, no Adam-touched checkbox flips observable from auth state + GOALS mtime stability). LEAD-GEN slice unchanged from AM 05-23 baseline: 39 open / 18 done.
+- Supabase live state (1 SELECT, daily baseline pull — AM 05-24 lead-gen-am gapped, so this is the first fresh pull in ~51h): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Quick Quote / Quick Contact / Refi 90d). **Website 90d=10 (unchanged from AM 05-23).** **contacts_7d=2 (unchanged from AM 05-23 — no movement in 51h+).** NULL lead_source 90d=**1393** (unchanged from AM 05-23 — no Adam-touched archival migrations).
+- NotebookLM CLI auth probe at 03:45 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. **22 calendar days since first failure 2026-05-03 PM**. **Sub-session #52 for Lead Gen reckoning** (PM 05-24 nightly Lead Gen at 22:10 CDT was #51 → AM 05-25 lead-gen-am at 03:45 CDT = #52). No Adam re-auth event in the ~5h35m since PM 05-24 nightly probe.
+
+### Cron-fire observation (separate from NotebookLM block — AM-side subset RECOVERING)
+- AM 05-25 fired at 03:45 CDT, ~45 min late vs 03:00 target = WITHIN normal jitter (<3h threshold). 1st within-jitter AM lead-gen-am fire since AM 05-19. Sequence recovery: AM 05-19 normal → AM 05-20 GAPPED → AM 05-21 ~9.5h late → AM 05-22 ~2h18m late → AM 05-23 ~16h36m late (worst-of-run) → AM 05-24 GAPPED → **AM 05-25 ~45 min late (within jitter)**.
+- Cohort context: AM 05-25 styer-social-am fired ON TIME at 02:29 CDT (per CONTEXT.md Social Media block — "first on-time AM social-am fire in 7 days"). Two consecutive AM-side cron signals in the on-time-or-within-jitter band tonight (social-am 02:29 CDT + lead-gen-am 03:45 CDT).
+- Three consecutive on-time-or-near-on-time signals across cohort: PM 05-23 nightly + PM 05-24 nightly + AM 05-25 social-am + AM 05-25 lead-gen-am. Cron-reliability concern materially de-escalated.
+- Per PM 05-24 forward rule clause (f): "if AM 05-25 lead-gen-am ALSO gaps or fires extremely late (>3h jitter) AND Mon 05-25 daytime passes with zero Adam signal, PM 05-25 nightly authors single dedicated cron-reliability ADAM-TODO line at top of file." — qualifying condition NOT MET (45 min late << 3h threshold). **Trigger DOES NOT FIRE.**
+- L47 sub-note flips from "HETEROGENEOUS — PM/nightly RECOVERING, AM-side DEGRADING" → "RECOVERING — PM/nightly subset 2 consecutive on-time fires + AM-side subset 2 consecutive within-jitter fires this session (social-am 02:29 CDT + lead-gen-am 03:45 CDT)".
+
+### Pile-saturation 12th consecutive session under restraint — L12 refreshed in place
+- **12th consecutive Lead Gen session** under restraint (PM 05-24 was 11th → AM 05-25 = 12th). L12 dedicated line was authored PM 05-23 at 10-session threshold trip; refreshed in place at PM 05-24 (11 sessions); refreshed in place again this session (12 sessions).
+- Per L12 clause (e) ("Refresh in place per stale-flags rule on subsequent sessions until Adam acks one of (a)/(b)/(c). Do NOT stack additional saturation entries"), L12 bumped to 12 sessions + 22 PM-side syncs (was 21 at PM 05-24, +1 for tonight's eventual PM 05-25 nightly Lead Gen half if it runs without re-auth) + AM 05-25 timestamp + AM-side cron RECOVERING context appended. No new dedicated line stacked.
+- Pile state unchanged in substance: 14 lead-gen artifacts queued for delayed PUSH (unchanged across 12 sessions) + 22 PM-side syncs awaiting recovery (next eligible: tonight) + SEO/SEM ~40 stale + ~22 ready-to-add at 50-source cap.
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/` (restraint clause (c)).
+- 0 new ADAM-TODO lines (ONE-ASK-PER-CYCLE + 48h-window-saturation rules — sister L16/L22 social escalations also deferred earlier today; cron-reliability trigger materially de-escalated by 4 consecutive cohort signals, no dedicated line needed).
+- No Architect/Builder/Quality/Reviewer/QA pass.
+- No NotebookLM PULL (Step 3 skipped per master-agent.md error-handling rule).
+- No master notebook PUSH (Step 8 skipped).
+
+### Forward rule (extends PM 05-24 rule — cron-reliability trigger DOES NOT FIRE, AM-side subset RECOVERING)
+- (a) If Adam authorizes ANY ranked short-list item OR picks any of the 3 L12 options → next session exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → flip those ADAM-TODO lines `[ ]` → `[x]` in next session.
+- (c) If Adam authorizes nothing again → next session is read-only verification too. **Clause (c) restraint on new specs/audits/briefs/triage memos still holds.** L12 + L47 lines should be refreshed-in-place per stale-flags rule, NOT re-stacked.
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen artifact backlog + 22 PM-side syncs + SEO/SEM PM-side backlog. L12 recommends staged recovery across multiple nights.
+- (e) Pile-saturation 10+ threshold already tripped PM 05-23 — clause (e) retired/superseded. Recommend NOT adding more graduated thresholds until Adam responds to L12.
+- (f) **CRON-RELIABILITY TRIGGER DOES NOT FIRE THIS SESSION** — AM 05-25 lead-gen-am within jitter. AM-side subset RECOVERING (2 within-jitter fires tonight). Trigger remains armed for future degradation if AM 05-26 reverses pattern, but materially de-escalated.
+- (g) **Today is Mon 05-25** — Adam's natural weekly GOALS-refresh window. PM 05-25 session re-checks GOALS.md mtime first. If mtime advances during daytime, next session immediately re-reads GOALS for any regime change to Lead Gen direction.
+
+### Files updated (this session — 9 standard, refreshed in place; 0 new artifacts; 0 new ADAM-TODO lines)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START prepended at top of session; SESSION_END prepended at end)
+- `tasks/lead-gen/today-mission.md` (replaced for AM 05-25)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `tasks/lead-gen/notebooklm-errors.md` (AM 05-25 entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — Last worked on / Active blockers / What's next refreshed in place; net 0 line drift)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (L12 PILE-SATURATION refreshed in place — bumped to 12 sessions + 22 PM-side syncs + AM 05-25 timestamp + AM-side RECOVERING context; L47 NotebookLM CLI re-auth refreshed in place — bumped to 22 days / #52 Lead Gen / cron-reliability sub-note flipped from "HETEROGENEOUS" to "RECOVERING")
+- `TODO.md` line 29 refreshed in place
+- DECISIONS.md: UNTOUCHED (no decision made)
+
+### Output
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/`.
+- 0 new ADAM-TODO lines.
+- 9 standard session files refreshed in place.
+
+DAILY DIGEST: SKIPPED per scheduled-task SKILL.md ("no emails to Adam, project files only").
+
+SESSION FULLY COMPLETE ✓ (read-only verification + L12/L47 refresh-in-place at 12-session count + cron-reliability trigger correctly DID NOT FIRE per clause (f) qualifying condition not met; restraint clause (c) + ONE-ASK-PER-CYCLE honored — 12th consecutive Lead Gen session under restraint, AM-side cron subset materially RECOVERING)
+
+---
+## Session: 2026-05-23 AM — Lead Generation (lead-gen-am scheduled task — EXTREMELY LATE FIRE, worst AM lead-gen-am fire of run)
+
+**DateTime:** 2026-05-23 19:36 CDT (cron-equivalent — fired EXTREMELY LATE at ~19:36 CDT vs 03:00 scheduled, **~16h36m late** — surpasses AM 05-21's 9.5h as the worst AM lead-gen-am fire of the entire run). PM 05-22 nightly fired at 19:17 CDT 05-23 (~21h17m late, also worst of run for nightly cron); the two crons effectively merged into a single late-fire window at ~19:17–19:36 CDT 05-23. PM 05-22 nightly's session_end claim "AM 05-23 lead-gen-am DID NOT FIRE" is superseded — the cron fired, just 19m after the nightly probe. Cron-reliability degradation pattern continues across 5 scheduled tasks (lead-gen-am, social-am, social-pm, styer-notebooklm-nightly, scenarios-am).
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule still active from 05-18 AM forward rule, extended through every Lead Gen session since — **9th consecutive Lead Gen session under restraint**).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired. Refresh standard session files in place. Note 9th-consecutive-session pile-saturation under restraint; revised 10+ trigger is one session away (PM 05-23 nightly).
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 + Fri 05-22 + Sat 05-23 all passed with no re-edit. Week-of-May-18 still governs.
+- ADAM-TODO open/done: **105 / 31 = 3.39× ratio — UNCHANGED across 7 consecutive Lead Gen-tracked sessions** (AM 05-19, PM 05-19, AM 05-21, PM 05-21, AM 05-22, PM 05-22 nightly, **AM 05-23**; AM 05-20 + PM 05-20 GAPPED — don't count). LEAD-GEN slice: 39 open / 18 done. Zero [LEAD-GEN] lines flipped since PM 05-19. Top of short-list (Realtor Relationships Phase-1, Calendly HMAC, Phase A bundle, Past Client Retention drip, `notebooklm login`) all still `[ ]`.
+- Supabase live state (1 SELECT): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Quick Quote / Quick Contact / Refi 90d). **Website 90d=10 (unchanged from AM 05-22).** **contacts_7d=2 (-1 from AM 05-22's 3 — one record aged out of the 7d rolling window over ~38h gap; not a new add, just rolling-window decay).** NULL lead_source 90d=**1393** (unchanged from AM 05-22 — no Adam-touched archival migrations between sessions).
+- NotebookLM CLI auth probe at 19:36 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. **20 calendar days since first failure 2026-05-03 PM**. **Sub-session #49 for Lead Gen reckoning** (PM 05-22 nightly Lead Gen at 19:17 CDT 05-23 was #48 → AM 05-23 lead-gen-am at 19:36 CDT 05-23 = #49). No Adam re-auth event in the ~19m since PM 05-22 nightly probe.
+
+### Cron-fire observation (separate from NotebookLM block)
+- lead-gen/session-log.md mtime before this session: May 22 05:25-ish CDT (from AM 05-22 entry — the PM 05-22 nightly entry lives in CHANGELOG/subagent-status, not session-log).
+- lead-gen/notebooklm-errors.md mtime before this session: May 23 19:17-ish CDT (from PM 05-22 nightly entry just prepended).
+- AM 05-23 fired at 19:36 CDT, ~16h36m late. Pattern: AM 05-21 (9.5h late) → PM 05-21 (7h10m late) → AM 05-22 (2h18m late, shrinking) → **AM 05-23 was logged as GAPPED by PM 05-22 nightly at 19:17 CDT but FIRED 19m later at 19:36 CDT** → PM 05-22 ~21h17m late (worst of run for nightly) → **AM 05-23 ~16h36m late (worst AM lead-gen-am of run, surpasses AM 05-21's 9.5h)**. The two crons effectively merged into a single 19-min window. Late-fire window REVERSED from the prior shrinking pattern — pattern is WORSENING, not stabilizing. Folded into existing ADAM-TODO line 43 sub-note per restraint rule clause (c) — no new ADAM-TODO line authored.
+
+### Pile-saturation 9th consecutive session under restraint
+- **9th consecutive Lead Gen session** with restraint rule applied (AM 05-19 → PM 05-19 → AM 05-21 → PM 05-21 → AM 05-22 → PM 05-22 nightly Lead Gen half → **AM 05-23**; AM 05-20 + PM 05-20 GAPPED — don't count toward consecutive streak).
+- Per AM 05-22 forward rule clause (e): "**Revised escalation threshold: if 10+ consecutive sessions without movement** (~Sun 2026-05-25 PM after AM 05-23 + PM 05-23 + AM 05-24 + PM 05-24 + AM 05-25), the dedicated ADAM-TODO escalation entry becomes warranted despite restraint." With AM 05-23 firing, the 10+ trigger lands one session away — **PM 05-23 nightly Lead Gen half** would be the 10th if it fires without Adam authorization.
+- Clause (c) "DO NOT author new specs, audits, briefs, or triage memos under any circumstance" still applies. 9th-session threshold reached but new ADAM-TODO escalation line NOT authored — recommendation folded into existing ADAM-TODO line 43 sub-note instead.
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/`.
+- 0 new ADAM-TODO lines.
+- 0 Architect / Builder / Quality / Reviewer / QA runs.
+- 0 NotebookLM source mutations (PULL blocked at Step 1).
+- 0 master notebook updates (PUSH blocked).
+- 0 daily digests sent (scheduled-task SKILL.md "no emails to Adam").
+
+### Files updated (refreshed in place)
+- `tasks/lead-gen/subagent-status.md` (SESSION_START at start + SESSION_END at finish)
+- `tasks/lead-gen/today-mission.md` (replaced)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `tasks/lead-gen/notebooklm-errors.md` (AM 05-23 entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — 3 fields refreshed in place; net 0 line drift)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (NotebookLM line 43 first-refresh-block REPLACED per stale-flags rule — bumped to 20 days / 49 sub-sessions / pile-saturation 9th-session sub-note folded in / cron-reliability sub-note flipped to "WORSENING, AM lead-gen-am 16h36m late tonight = worst of run"; no new line authored)
+- `TODO.md` line 29 first-refresh-block REPLACED in place (same counts)
+- DECISIONS.md: UNTOUCHED
+
+### Forward rule for next Lead Gen session (PM 05-23 nightly if cron fires on time, ~22:00 CDT; or whenever cron next fires)
+- If Adam authorizes anything from ranked short-list → exit restraint.
+- If Adam authorizes nothing → continue read-only verification; do NOT author new content.
+- **10-consecutive-session escalation threshold lands at PM 05-23 nightly Lead Gen half** if it fires without authorization. That session may author a dedicated ADAM-TODO escalation line despite restraint clause (c) — the revised trigger explicitly authorizes it.
+- Cron reliability: AM 05-23 ~16h36m late (worst AM lead-gen-am of run) + PM 05-22 nightly ~21h17m late (worst nightly of run). Pattern spans 5 scheduled tasks. If PM 05-23 nightly also gaps or fires extremely late, escalate cron-reliability to its own dedicated ADAM-TODO line rather than continued sub-note folding into line 43.
+
+---
+## Session: 2026-05-22 AM — Lead Generation (lead-gen-am scheduled task — LATE FIRE, late-fire window shrinking)
+
+**DateTime:** 2026-05-22 05:18 CDT (cron-equivalent — fired LATE at ~05:18 CDT vs 03:00 scheduled, ~2h18m late). Late-fire window shrinking: AM 05-21 was 9.5h late, PM 05-21 was 7h10m late, AM 05-22 is 2h18m late. AM 05-22 styer-social-am also fired late at 05:11 CDT (~3h11m late). PM 05-21 nightly fire happened only ~7m before this fire (at 05:10 CDT 05-22), effectively merging into a single late-fire window.
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule still active from 05-18 AM forward rule, extended through every Lead Gen session since — 7th consecutive Lead Gen session under restraint).
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired. Refresh standard session files in place. Note 7th-consecutive-session pile-saturation threshold reached.
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 + Fri 05-22 AM all passed with no re-edit. Week-of-May-18 still governs.
+- ADAM-TODO open/done: **105 / 31 = 3.39× ratio — UNCHANGED across 5 Lead Gen sessions** (AM 05-19, PM 05-19, AM 05-21, PM 05-21, **AM 05-22**; AM 05-20 + PM 05-20 GAPPED — don't count). LEAD-GEN slice: 39 open / 18 done. Zero [LEAD-GEN] lines flipped since PM 05-19. Top of short-list (Realtor Relationships Phase-1, Calendly HMAC, Phase A bundle, Past Client Retention drip, `notebooklm login`) all still `[ ]`.
+- Supabase live state (1 SELECT): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Quick Quote / Quick Contact / Refi 90d). **Website 90d=10 (unchanged from AM 05-21).** **contacts_7d=3 (unchanged from AM 05-21).** NULL lead_source 90d=**1393** (-1 from yesterday's 1394 — one archival contact moved/deleted between sessions).
+- NotebookLM CLI auth probe at 05:18 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. 19 calendar days since first failure 2026-05-03 PM. Sub-session #46 for Lead Gen reckoning.
+
+### Cron-fire observation (separate from NotebookLM block)
+- lead-gen/session-log.md mtime before this session: May 21 12:36-ish CDT (from AM 05-21 entry).
+- lead-gen/notebooklm-errors.md mtime before this session: May 22 05:10-ish CDT (from PM 05-21 nightly entry).
+- AM 05-22 fired at 05:18 CDT, ~2h18m late. Late-fire window pattern: 9.5h → 7h10m → 2h18m. Improving but not back to normal jitter (<30min). If PM 05-22 (~22:00 CDT target) fires within normal jitter, cron-reliability concern de-escalates to monitoring-only.
+
+### Pile-saturation threshold reached this session
+- **7th consecutive Lead Gen session** with restraint rule applied (AM 05-19 → PM 05-19 → AM 05-21 → PM 05-21 → **AM 05-22**; AM 05-20 + PM 05-20 GAPPED — don't count toward 7-consecutive streak).
+- Per AM 05-21 clause (e) forward rule: "Pile-saturation escalation threshold: 7+ consecutive sessions without movement would now land ~Tue 2026-05-26 → that session will recommend an ADAM-TODO escalation entry."
+- However: clause (c) "DO NOT author new specs, audits, briefs, or triage memos under any circumstance" still applies. Threshold reached but new ADAM-TODO escalation line NOT authored — recommendation folded into existing ADAM-TODO line 43 sub-note instead.
+- Revised escalation trigger: if **10+ consecutive sessions** without movement (PM 05-22 + AM 05-23 + PM 05-23 + AM 05-24 + PM 05-24 + AM 05-25 = ~Sun 2026-05-25 PM), the dedicated ADAM-TODO escalation entry becomes warranted despite restraint.
+
+### What was NOT done (per restraint rule)
+- 0 new files in `tasks/lead-gen/specs/` / `research/` / `audits/`.
+- 0 new ADAM-TODO lines.
+- 0 Architect / Builder / Quality / Reviewer / QA runs.
+- 0 NotebookLM source mutations (PULL blocked at Step 1).
+- 0 master notebook updates (PUSH blocked).
+- 0 daily digests sent (scheduled-task SKILL.md "no emails to Adam").
+
+### Files updated (refreshed in place)
+- `tasks/lead-gen/subagent-status.md` (SESSION_END replaced)
+- `tasks/lead-gen/today-mission.md` (replaced)
+- `tasks/lead-gen/session-log.md` (this entry prepended)
+- `tasks/lead-gen/notebooklm-errors.md` (entry prepended)
+- `CONTEXT.md` (Lead Gen Agent Status — 3 fields refreshed in place)
+- `CHANGELOG.md` (dated entry prepended)
+- `tasks/ADAM-TODO.md` (NotebookLM line 43 first-refresh-block replaced per stale-flags rule; pile-saturation 7th-session sub-note folded in; no new line authored)
+- `TODO.md` line 29 first-refresh-block replaced in place
+- DECISIONS.md: UNTOUCHED
+
+### Forward rule for next Lead Gen session (PM 05-22 nightly if cron fires)
+- If Adam authorizes anything from ranked short-list → exit restraint.
+- If Adam authorizes nothing → continue read-only verification; do NOT author new content.
+- 10-consecutive-session escalation threshold (~Sun 2026-05-25 PM) is the next decision point for authoring a dedicated escalation line.
+- Cron reliability: if PM 05-22 fires within normal jitter (<30min late), de-escalate cron concern to monitoring-only.
+
+---
+## Session: 2026-05-21 AM — Lead Generation (lead-gen-am scheduled task — LATE FIRE)
+
+**DateTime:** 2026-05-21 12:36 CDT (cron-equivalent — fired LATE at ~12:34 CDT vs 03:00 scheduled, ~9.5h late). AM 05-20 lead-gen-am + PM 05-20 nightly Lead Gen half BOTH DID NOT FIRE — first multi-day Lead Gen cron gap of the run. ~62h gap between PM 05-19 22:10 and AM 05-21 12:34. Same late-fire window as styer-social-am AM 05-21 (also fired at 12:34).
+**Mode:** AM (lead-gen-am)
+**Sequence:** Read-only verification micro-pass (no Architect/Builder cycle; restraint rule still active from 05-18 AM forward rule, extended through every Lead Gen session since)
+**Focus:** Verify baseline. Re-confirm NotebookLM CLI auth still expired. Refresh standard session files in place. Note cron gap.
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 1 stat)
+- GOALS.md mtime via `stat -L -f "%Sm"` → `May 17 12:11:31 2026`. Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 (AM) all passed with no re-edit. Week-of-May-18 still governs.
+- ADAM-TODO open/done: **105 / 31 = 3.39× ratio — UNCHANGED across 4 Lead Gen sessions (AM 05-19, PM 05-19, AM 05-20 gap, PM 05-20 gap, AM 05-21).** LEAD-GEN slice: 39 open / 18 done. Zero [LEAD-GEN] lines flipped since PM 05-19. Top of short-list (Realtor Relationships Phase-1, Calendly HMAC, Phase A bundle, Past Client Retention drip, `notebooklm login`) all still `[ ]`.
+- Supabase live state (1 SELECT): drip_enrollments_total=0, drip_sends_total=0, all named funnels still 0 (PA / Rate Alert / Quick Quote / Quick Contact / Refi 90d). **Website 90d=10 (+1 since AM 05-19's 9 — one new website-fallback row over ~62h).** **contacts_7d=3 (+2 since AM 05-19's 1 — meaningful uptick over last 7d rolling window).** NULL lead_source 90d=1394 (+1 — Adam-migrated archival noise, not actionable).
+- NotebookLM CLI auth probe at 12:34 CDT: same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com. 18 calendar days since first failure 2026-05-03 PM.
+
+### Cron-gap observation (separate from NotebookLM block)
+- lead-gen/session-log.md mtime before this session: May 19 22:14:26 CDT.
+- lead-gen/notebooklm-errors.md mtime before this session: May 19 22:13:38 CDT.
+- No AM 05-20 lead-gen-am entry. No PM 05-20 nightly Lead Gen entry. Both CRON GAPS (DID NOT FIRE).
+- styer-social-am AM 05-21 also fired LATE at 12:34 CDT per CHANGELOG. Pattern: overnight crons gapping, late-morning fires only — Mac likely asleep overnight.
+- 2nd nightly Lead Gen-tracked gap of the run (PM 05-14 was first).
+
+### Sub-session count for Lead Gen reckoning
+- PM 05-19 Lead Gen nightly half = #42 (prior count).
+- AM 05-20 lead-gen-am = GAP (not counted).
+- PM 05-20 Lead Gen nightly half = GAP (not counted).
+- AM 05-21 lead-gen-am = **#43** (this session).
+
+### Lead Gen PUSH backlog (carried over from PM 05-19 — no change)
+- 14 lead-gen artifacts queued for delayed PUSH. No new artifact added since 05-18 AM per restraint rule extended through 4 sessions.
+- 17 PM-side syncs awaiting recovery (unchanged since PM 05-20 nightly gapped — no addition).
+
+### Forward rule (unchanged from AM 05-19 — restraint rule still active)
+- (a) If Adam authorizes ANY ranked short-list item → next session exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → next session flips those ADAM-TODO lines `[ ]` → `[x]` in same session.
+- (c) If Adam authorizes nothing again → next session is read-only verification too. **DO NOT author new specs, audits, briefs, or triage memos under any circumstance.**
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen backlog + 17 PM-side syncs + SEO/SEM PM-side backlog (~32 stale + ~18 ready-to-add at 50-source cap).
+- (e) Pile-saturation escalation threshold: 7+ consecutive sessions without movement would land ~Mon 2026-05-25 if crons resume → that session will recommend an ADAM-TODO escalation entry.
+- (f) NEW: if AM 05-22 also fires late or gaps, the Lead Gen cron reliability itself becomes an escalation candidate.
+
+### Files updated (this session, refreshed in place — no new artifacts)
+- subagent-status.md (SESSION_START at start, SESSION_END at finish)
+- today-mission.md (replaced)
+- session-log.md (this entry prepended)
+- notebooklm-errors.md (AM 05-21 entry prepended)
+- CONTEXT.md (Lead Gen Agent Status — Last worked on / Active blockers / What's next refreshed in place)
+- CHANGELOG.md (dated entry prepended)
+- ADAM-TODO.md line 43 (NotebookLM line first-refresh-block replaced in place per stale-flags rule)
+- TODO.md line 29 (NotebookLM line first-refresh-block replaced in place)
+- DECISIONS.md: UNTOUCHED (no decision made)
+
+---
+## Session: 2026-05-19 PM — Lead Generation (Nightly NotebookLM Sync half)
+
+**DateTime:** 2026-05-19 22:10:30 CDT (cron on-time vs 22:00 slot — +9 min jitter, normal range)
+**Mode:** PM (nightly NotebookLM sync — Lead Gen half of styer-notebooklm-nightly scheduled task)
+**Sequence:** N/A (no-op due to auth expiry; not a Lead Gen Architect/Builder cycle)
+**Focus:** No-op PUSH+CURATE attempt. 17th consecutive nightly fire blocked at Step 1 (auth expired). Restraint rule remains in effect from AM 05-19 forward rule.
+
+### What was verified (read-only, 1 CLI probe + 0 SELECTs — Supabase baseline carried over from AM 05-19)
+- NotebookLM CLI auth probe at 22:09 CDT: same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (`accounts.google.com/v3/signin/identifier?...flowName=WebLiteSignIn`). No Adam re-auth event in the ~18.5h since AM 05-19 lead-gen-am probe at 03:46 CDT — full Tue 05-19 daytime catch-up window now closed.
+- PM nightlies do not re-pull the Supabase baseline (that's lead-gen-am's job); AM 05-19's snapshot remains the most recent: drip_enrollments=0, drip_sends=0, PA Funnel/Rate Alert/Quick Quote/Quick Contact/Refi all 0, Website 90d=9 (+1 in last 24h), contacts_7d=1 (quiet intake week).
+- GOALS.md mtime via implicit inheritance (no re-stat needed): `May 17 12:11:31 2026` (unchanged across AM 05-19 + PM 05-19; Mon 05-18 + Tue 05-19 both passed with no re-edit).
+
+### Sub-session count
+- AM 05-19 lead-gen-am at 03:46 CDT = #40 → PM 05-19 SEO/SEM half at 22:09 CDT = #41 → PM 05-19 Lead Gen half at 22:10 CDT = **#42**.
+- 18 wall-clock days blocked, 17 consecutive nightly fires (PM 05-14 cron gap excluded from fire-streak).
+
+### Lead Gen PUSH backlog (carried over from PM 05-18 — no change)
+- 14 lead-gen artifacts queued for delayed PUSH. No new artifact added since 05-18 AM per restraint rule extended through AM 05-19 + PM 05-19.
+- 17 PM-side syncs awaiting recovery (PM 05-18 Lead Gen half = 16 + PM 05-19 Lead Gen half = 17).
+
+### Forward rule (unchanged from AM 05-19)
+- (a) If Adam authorizes ANY ranked short-list item overnight → AM 05-20 exits restraint, runs next-step prep.
+- (b) If Adam acks any Tier 4 RETIRE verdict → AM 05-20 flips those ADAM-TODO lines `[ ]` → `[x]` in same session.
+- (c) If Adam authorizes nothing again → AM 05-20 is read-only verification too. **DO NOT author new specs, audits, briefs, or triage memos under any circumstance.**
+- (d) If Adam runs `notebooklm login` → recovery night pushes 14-deep Lead Gen backlog + 17 PM-side syncs + SEO/SEM PM-side backlog (~32 stale + ~18 ready-to-add at 50-source cap).
+
+### Output
+- 0 new files in `tasks/lead-gen/specs/`, `research/`, or `audits/`.
+- 9 standard session files refreshed in place (Lead Gen + SEO/SEM combined for the PM nightly).
+- 0 new ADAM-TODO lines.
+- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md.
+
+---
+## Session: 2026-05-19 AM — Lead Generation
+
+**DateTime:** 2026-05-19 03:46 CDT (cron on-time vs 03:00 slot — +46 min jitter, normal range)
+**Mode:** AM
+**Sequence:** A (Research Only — read-only verification, 0 new files)
+**Focus:** Status-verification micro-pass per 05-18 AM forward rule. Adam authorized nothing on the ranked short-list overnight; restraint rule re-applied.
+
+### What was verified (read-only, 1 SELECT + 1 CLI probe + 2 grep)
+- GOALS.md mtime via `stat -L -f "%Sm"`: `May 17 12:11:31 2026` (Mon 2026-05-18 fully passed with no re-edit; Week-of-May-18 still governs).
+- ADAM-TODO grep: 105 open / 31 done = 3.39× ratio — **UNCHANGED from 05-18 AM**. Zero [LEAD-GEN] lines flipped `[ ]` → `[x]` overnight. Top of new short-list (Realtor Relationships Phase-1, Calendly HMAC, Phase A compliance bundle, Past Client Retention drip, `notebooklm login`) all still `[ ]`. Last [LEAD-GEN] flip remains 2026-04-28 (21 days ago).
+- Supabase live state (1 SELECT, 10 columns): drip_enrollments_total=0, drip_sends_total=0, PA Funnel 90d=0 (19th day), Rate Alert 90d=0 (44 days), Quick Quote 90d=0, Quick Contact 90d=0, Refi 90d=0, **Website 90d=9 (net +1 from 05-18 AM's 8 — one new website-fallback row in last 24h)**, NULL lead_source 90d=1393 (Adam-migrated archival), **contacts_7d=1** (down from 4 last week — quiet intake week).
+- NotebookLM CLI auth still expired (18th wall-clock day, sub-session #40 for Lead Gen reckoning: PM 05-18 Lead Gen half was #39 → AM 05-19 lead-gen-am = #40). Same `Authentication expired or invalid` error with WebLiteSignIn redirect.
+
+### Forward rule (extends 05-18 AM rule)
+- **If Adam authorizes ANY ranked short-list item overnight** → exit restraint, run next-step prep (Builder-readiness check for Realtor Relationships Phase-1, or copy-direction author session for Past Client Retention, etc.).
+- **If Adam acks any Tier 4 RETIRE verdict** → flip those ADAM-TODO lines `[ ]` → `[x]` in same session.
+- **If Adam authorizes nothing again** → AM 05-20 is read-only too. **DO NOT author new content under any circumstance.** The 05-18 AM pile-realignment memo remains the active recommendation document.
+- **New escalation threshold:** if pile-saturation continues 7+ consecutive sessions without movement (would land Mon 2026-05-25), recommend an ADAM-TODO escalation suggesting Adam either (a) explicitly de-rank items he won't address, or (b) pause lead-gen-am cron until pipeline movement actually happens.
+
+### Output
+- 0 new files in `tasks/lead-gen/specs/`, `research/`, or `audits/`.
+- 7 standard session files refreshed in place (subagent-status, today-mission, session-log, notebooklm-errors, CONTEXT, CHANGELOG, ADAM-TODO NotebookLM line).
+- 0 new ADAM-TODO lines.
+- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md.
+
+### Net intake signal (12-baseline trend, read-only)
+- Website-fallback channel: +1 in last 24h (8 → 9 in 90d window). Named-funnel channels (PA / Rate Alert / Quick Quote / Quick Contact / Refi) all still flat at 0. Pattern unchanged from 05-08 → 05-19: real captures come through the upstream-of-handler "Website" fallback bucket at ~1/wk steady-state; named funnels are not generating leads. **No new diagnostic surfaced this session; deterministic POST probe remains low-priority (deferred to Adam-in-the-loop session) per 05-09 reclassification.**
+
+---
+## Session: 2026-05-18 AM — Lead Generation
+
+**DateTime:** 2026-05-18 03:45 CDT (cron on-time vs 03:00 slot — +45 min jitter, normal range)
+**Mode:** AM
+**Sequence:** A (Research + Planning — re-prioritization decision document; first non-restraint session in 4 days)
+**Focus:** Pile re-evaluation against refreshed GOALS direction. Triage every open [LEAD-GEN] ADAM-TODO line against Week-of-2026-05-18 priorities.
+
+### Trigger chain
+PM 05-17 NotebookLM-nightly session and AM 05-17 lead-gen-am session both forward-hinted: "AM 05-18 lead-gen-am should re-evaluate the 10-item [LEAD-GEN] pile against the NEW direction (complicated income, wholesale pricing, new company transition); retire / re-prioritize specs that no longer align." That trigger condition (GOALS refresh observed) is now met, so today's session legitimately exits the 3-session deliberate-restraint pattern.
+
+### What was produced
+- `tasks/lead-gen/audits/2026-05-18-pile-realignment.md` (~150 lines) — triage memo categorizing 17 open [LEAD-GEN]+[SYSTEM] items into Tier 1 KEEP (5 items, ranked) / Tier 2 RECONCILE (4 items, merge with 2026-05-17 site audit) / Tier 3 DEFER (4 items) / Tier 4 RETIRE/CLOSE (3 items, supersede or paused-by-GOALS). Adam's new short-list = 5 unblocks ordered by leverage: (1) Realtor Relationships Phase-1 3 decisions, (2) Calendly HMAC signing-key paste, (3) Phase A compliance bundle authorize, (4) Past Client Retention drip copy direction, (5) `notebooklm login`. NOT a new spec; recommendation document only.
+
+### What was verified (read-only)
+- `GOALS.md` re-read: Week of 2026-05-18 / lead-gen-am still in "Keep running" list. Phase A items confirmed: testimonials, rate widget, superlatives, EHL/NMLS coverage, GLBA privacy.
+- 2026-05-17 site audit re-read: 18 complex/niche pages exist; "21-day" claims survive in 7+ places; "Apply Now" appears 176 times; testimonials need verification.
+- NotebookLM CLI re-probed at 03:45 CDT: same `Authentication expired or invalid` WebLiteSignIn redirect. 17th wall-clock day blocked, 37th sub-session blocked.
+- 2026-05-14 Realtor Relationships Phase-1 spec: re-read § 5 (3 decisions, defaults). Pool B count = 158 distinct realtors (baseline 12+ consecutive identical).
+- ADAM-TODO open/done re-counted: 105/31 = 3.39× ratio (PM 05-17 social-pm added 2 lines: cushion-footer disposition + symlink-stat bug; expected delta).
+
+### Forward rule (replaces 05-15/05-16/05-17 restraint rule)
+- **If Adam acks any Tier 4 RETIRE/CLOSE verdict** → flip those ADAM-TODO lines `[ ]` → `[x]` in the same session.
+- **If Adam authorizes Realtor Relationships Phase-1** → Builder-readiness check.
+- **If Adam approves Phase A bundle direction** → SEO/SEM PM + styer-site-daily lead; lead-gen-am supports.
+- **If Adam authorizes nothing again** → next session returns to read-only verification. **Do NOT author another triage memo or spec.** The pile is now re-prioritized; new specs only after Adam moves the ranked short-list.
+
+### Output
+- 1 new file: `tasks/lead-gen/audits/2026-05-18-pile-realignment.md`.
+- 0 new files in `tasks/lead-gen/specs/` or `tasks/lead-gen/research/`.
+- 7 standard session files refreshed in place.
+- 0 new ADAM-TODO lines (NotebookLM line refreshed in place per stale-flags rule; bumped to 17 days / 37 sub-sessions).
+
+---
+## Session: 2026-05-17 AM — Lead Generation
+
+**DateTime:** 2026-05-17 03:48 CDT (cron on-time vs 03:00 slot — +48 min jitter)
+**Mode:** AM
+**Sequence:** A (Research Only — minimal verification pass, 0 new files)
+**Focus:** Status-verification micro-pass. **3rd consecutive deliberate-restraint session** per 05-15 AM forward rule (extended through 05-16 AM and now 05-17 AM).
+
+### What was verified (read-only, 2 SELECT queries + 1 CLI probe)
+- Realtor Relationships campaign `ef52ed56-8a22-4d15-9f12-a1796ccf17b6` Steps 1+2+4 still `annual_date`/`condition`/`annual_date` (Step 3 `relative_days`); Phase-1 spec from 05-14 AM untouched.
+- `drip_enrollments_total` = 0 / `drip_sends_total` = 0 org-wide (unchanged across 13+ consecutive baselines).
+- All 5 named-funnel 90d counts = 0: PA Funnel / Rate Alert / Quick Quote / Quick Contact / Refinance Funnel.
+- NotebookLM CLI auth still expired (**16th wall-clock day, 34th sub-session blocked**). Same `Authentication expired or invalid` error with WebLiteSignIn redirect on accounts.google.com.
+- ADAM-TODO open/done counts unchanged at 104/30 (3.47× ratio); 0 [LEAD-GEN] lines flipped `[ ]` → `[x]` overnight; last flip remains 2026-04-28 (19 days ago).
+
+### Forward rule (set today — extends 05-15 AM + 05-16 AM rule)
+Continue Sequence A minimal-restraint pattern until ≥1 pending [LEAD-GEN] item flips `[ ]` → `[x]`. Eligible focuses if a longer next session: refresh same pile-pressure snapshot (recurring dated artifact, last 05-15) / PA-funnel GSC+GA4 status check (still credential-blocked per SEO/SEM status) / NULL `lead_source` ~15-min n8n REST PUT proposal (already debunked 05-11 — not a real signal). **DO NOT author another PR spec, audit, brief, or activation spec.** Pile is at saturation. **Mon 2026-05-18 is THE refresh window (~1 day out).** If Mon 05-18 AM/PM both pass without GOALS refresh, 4th-consecutive-week threshold trips and the cohort-pause planning signal flagged in PM 05-12 should re-fire to ADAM-TODO with explicit recommendation: pause all 5 scheduled agents until next GOALS shift.
+
+### Output
+- 0 new files in `tasks/lead-gen/research/` or `tasks/lead-gen/specs/`.
+- 7 files refreshed in place (today-mission.md, notebooklm-errors.md prepend, session-log.md prepend, subagent-status.md SESSION_END, CONTEXT.md 3 Lead Gen fields, CHANGELOG.md dated entry prepend, TODO.md + ADAM-TODO.md NotebookLM lines refreshed).
+- 0 new ADAM-TODO lines.
+
+---
 ## Session: 2026-05-16 AM — Lead Generation
 
 **DateTime:** 2026-05-16 03:45 CDT (cron on-time vs 03:00 slot)
@@ -2677,3 +3437,15 @@ Priority 4: Homepage Quick Quote + Quick Contact forms — TCPA fix + subscribe-
 
 Advance queue to next topic: NO — Rate Alert Funnel build is code-complete; live QA deferred pending deploy. Declare Week 3 complete only after post-deploy QA passes.
 ---
+
+---
+
+SESSION_END: 2026-07-05 ~11:10 CDT — Mode AM (Speed-to-lead pipeline verification) — COMPLETE ✓
+- Sequence A-equivalent (read-only verify). No Builder/Architect/Reviewer/QA. No live-system writes, no notifications, no emails.
+- NotebookLM PULL/PUSH SKIPPED — live-probed 11:04 CDT, same `Authentication expired or invalid` / WebLiteSignIn redirect (63 calendar days since 2026-05-03). Standing Adam action (`notebooklm login`); NOT re-stacked per anti-bloat.
+- Cron LATE/catch-up fire (scheduled 03:00, SESSION_START 11:04 CDT, ~8h late).
+- Scorer nOCDV73m4M0jyL1B HEALTHY — get_workflow_details confirms active=true, versionId==activeVersionId (d54c385e), responseMode=onReceived, updatedAt 2026-06-09 (the fix). ZERO execs since 07-04 = no new Website web-form lead; zero errored execs since the 06-09 two-bug fix holds.
+- 1 new contact since the 07-04 AM verify: Satish Skariah (lead_source=null, 0/new, 07-04 22:20:31) → non-web/Arive-manual path, scorer correctly idle. No Website-source lead in window → no speed-to-lead miss.
+- Hot-lead sweep (lead_tier=hot OR score>=20, AND hot_lead_dismissed=false): only Emily Christensen (70/hot, 05-05), already standing as ADAM-TODO L18. No new hot leads. NOT re-stacked.
+- Files: subagent-status, today-mission, session-log, CONTEXT (3 Lead-Gen fields), CHANGELOG. No ADAM-TODO/TODO.md/DECISIONS.md/domain-queue/BLOCKERS change.
+SESSION COMPLETE ✓

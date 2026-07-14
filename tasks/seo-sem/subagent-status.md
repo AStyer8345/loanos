@@ -1,404 +1,142 @@
-**SESSION_END**
-- DateTime: 2026-05-13 22:11:16
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-13 target — normal jitter +11 min only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
+SESSION_END: 2026-06-24 22:04 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 22:04 CDT returned the same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 52 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append. Nothing destructive.
+- Cron: on-target fire (+4m vs 06-24 22:00 nominal). Auth live-reprobed (not inherited) — confirmed still blocked. Binary present (symlink intact).
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing, logged 52+×): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (12th consecutive nightly run)
-- `notebooklm list --json` re-verified this session at 22:11 CDT: returns identical `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event detected in the ~18h since AM 05-13 lead-gen-am pull (03:46 CDT) — Wed 05-13 24h re-auth window now closed; 3rd-consecutive-Mon GOALS-skip + Tue 05-12 + Wed 05-13 catch-up windows all fully passed.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-13 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 12 wall-clock days blocked, 12 consecutive nightly runs, 25 sub-sessions blocked counting tonight's PM nightly (added SEO/SEM + Lead Gen halves to AM 05-13 lead-gen-am's 23rd sub-session count).
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~24 stale sources + ~13 ready-to-add (CONTEXT.md refresh × 12 days, daily-opt logs × 12 days, audit files × 12 days, capped at 50-source ceiling — recovery night will require maximum churn).
-- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
-- 4th-consecutive-week threshold approaching: next planned GOALS refresh window = Mon 2026-05-18 (5 days out). If that also slips, hygiene-only exhaustion across all 5 agents flips from individual-agent-decision to cohort-pause planning signal.
-Timestamp: 2026-05-13 22:11:16
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 12th consecutive nightly)
+---
+
+SESSION_END: 2026-06-23 22:09 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 22:09 CDT returned the same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 51 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append. Nothing destructive.
+- Cron: on-target fire (+9m vs 06-23 22:00 nominal). Auth live-reprobed (not inherited) — confirmed still blocked.
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing, logged 51+×): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
+
+---
+
+SESSION_END: 2026-06-22 22:38 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 22:38 CDT returned the same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 50 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append. Nothing destructive.
+- Cron: on-target fire (+38m vs 06-22 22:00 nominal). Auth live-reprobed (not inherited) — confirmed still blocked.
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing, logged 50+×): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
+
+---
+
+SESSION_END: 2026-06-22 03:56 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 03:56 CDT returned the same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 50 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append. Nothing destructive.
+- Cron: late fire (~6h vs 06-21 22:00 nominal). Auth live-reprobed (not inherited) — confirmed still blocked.
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing, TODO.md L31, logged 50+×): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
 **SESSION_END**
-- DateTime: 2026-05-12 22:10:00
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-12 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
+- DateTime: 2026-06-19 22:12 CDT
+- Mode: PM (Nightly NotebookLM Sync — SEO/SEM half)
 
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (11th consecutive nightly run)
-- `notebooklm list --json` re-verified this session: returns identical `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event in the ~24h since AM 05-12 lead-gen-am pull.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-12 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 11 wall-clock days blocked, 11 consecutive nightly runs, 22 sub-sessions blocked counting tonight's PM nightly.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~22 stale sources + ~12 ready-to-add (CONTEXT.md refresh × 11 days, daily-opt logs × 11 days, audit files × 11 days, capped at 50-source ceiling — recovery night will require maximum churn).
-- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
-Timestamp: 2026-05-12 22:10:00
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 11th consecutive nightly)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 22:12 CDT returned the same WebLiteSignIn redirect (`Authentication expired or invalid … Run 'notebooklm login'`). 47 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append. Nothing destructive.
+- Cron: on-target fire (+12m vs 22:00). Auth live-reprobed (not inherited) — confirmed still blocked.
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- FILE PRUNED THIS RUN: status file had grown to 946 lines of near-identical auth-blocked no-op entries (2026-04-19 → 2026-06-18). Trimmed to this entry + 2 most recent for continuity. Full trail recoverable in git history (last commit 69749dc). Acting on the anti-bloat discipline prior sessions cited but never executed.
+- Daily digest: skipped (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing, ADAM-TODO L64, logged 45+×): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-11 22:09:38
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-11 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (10th consecutive nightly run)
-- `notebooklm list --json` AND `notebooklm use <id>` both return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` Redirect references WebLiteSignIn flow on accounts.google.com. The `use` command's table-render shows "Warning: Authentication expired or invalid." in the Title cell on both notebook IDs (SEO/SEM `7f8a80c5-...` + Lead Gen `4213513c-...`), confirming the whole CLI surface is gated, not just `list`.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-11 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 10 consecutive nightly runs blocked, 19 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09 / 05-10 / 05-11.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~20 stale sources + ~11 ready-to-add (CONTEXT.md refresh × 10 days, daily-opt logs × 10 days, audit files × 10 days, capped at 50-source ceiling — recovery night will require maximum churn).
-Timestamp: 2026-05-11 22:09:38
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 10th consecutive nightly)
+SESSION_END: 2026-06-18 22:27 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` at 22:27 CDT returned the same WebLiteSignIn redirect. 46 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. Nothing destructive.
+- Cron: on-target fire (+27m vs 22:00). Auth live-reprobed — confirmed still blocked.
+- ADAM ACTION (standing, ADAM-TODO L64): run `/Users/adamstyer/.local/bin/notebooklm login`.
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-08 22:09:39
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-08 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
+SESSION_END: 2026-06-17 10:29 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live probe at 10:29 CDT returned the same WebLiteSignIn redirect. 45 calendar days since first failure 2026-05-03. Blocked at Step 1. Nothing destructive.
+- Cron: late fire (~12h late vs 06-16 22:00 nominal). Auth live-reprobed — confirmed still blocked.
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`.
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (7th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-08 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 7 wall-clock days, 7 nightly runs, 12 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~14 stale sources + ~8 ready-to-add accumulated in SEO/SEM notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-08 22:09:39
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 7th consecutive nightly)
+---
+*[Pre-2026-06-17 SESSION_END history pruned 2026-06-19 for bloat — 946 lines → lean. Full version recoverable in git history (last full snapshot at commit 69749dc). Auth has been blocked continuously since 2026-05-03; every pruned entry was an identical no-op skip.]*
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-07 22:09:05
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-07 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (6th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-07 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 6 wall-clock days, 6 nightly runs, 10 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~12 stale sources + ~7 ready-to-add accumulated in SEO/SEM notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-07 22:09:05
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 6th consecutive nightly)
+SESSION_END: 2026-06-26 22:46 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 22:46 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 54 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: ON-TARGET fire (SESSION_END 22:46 vs 22:00 target, +46m jitter — within band).
+- Logged no-op to seo-sem/notebooklm-errors.md. ADAM-TODO L64 re-auth line CONSOLIDATED this session (stacked 05-17→06-18 refresh annotations collapsed to single current-state line; ~10KB bloat removed; full history in git).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`.
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-05 22:10:30
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-05 target — no late-fire pattern this run, jitter +10 min only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (4th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-05 PM-cron-on-time entry).
-- ADAM-TODO line 18 already files this — count refreshed in place per stale-flags rule (no fresh entry stacked).
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~8 stale sources + ~5 ready-to-add accumulated in notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-05 22:10:30
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 4th consecutive nightly)
+SESSION_END: 2026-06-29 10:13 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 10:13 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 57 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: LATE/catch-up fire (~12h vs nominal 06-28 22:00). Auth live-reprobed — confirmed still blocked.
+- Logged no-op to seo-sem/notebooklm-errors.md. ADAM-TODO L64 re-auth line already current (no new stack).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`.
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-05 11:03:07
-- Mode: PM (cron fired ~13h late vs 22:00 CDT 05-04 target — same late-fire pattern as styer-social-am at 10:10 CDT today)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (3rd consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error as 2026-05-03 PM. Error redirect now points at WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-05 PM-cron-late entry).
-- ADAM-TODO line 16 already files this — refreshed counts rather than re-stacking a fresh entry (per stale-flags rule).
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-Timestamp: 2026-05-05 11:03:07
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 3rd consecutive)
+SESSION_END: 2026-06-30 11:11 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 11:08 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 58 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: LATE/catch-up fire (~13h vs nominal 06-29 22:00). Auth live-reprobed (shared probe with Lead Gen half) — confirmed still blocked. Binary present (symlink intact).
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Logged no-op to seo-sem/notebooklm-errors.md (1 line; not pruned). NOTE: error logs are UNCOMMITTED in working tree (last commit 69749dc, 2026-05-16) — entries since 05-17 are NOT in git. Do NOT prune them as "recoverable in git"; that history would be lost.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-03 22:09:50
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED
-- All `notebooklm` CLI commands return `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.`
-- Cannot re-authenticate from a scheduled (non-interactive) session — `notebooklm login` opens a browser flow that requires Adam.
-- Steps 1–5 (notebook activate, staleness audit, web sweep, push session files, master log sync) all blocked at Step 1.
-- Step 6 (daily digest) skipped — would have nothing to query against.
-- Local files unchanged; nothing destructive performed.
-- Logged to: tasks/seo-sem/notebooklm-errors.md (2026-05-03 entry)
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal to restore CLI auth. Once restored, the next nightly run will pick up automatically.
-Timestamp: 2026-05-03 22:09:50
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry)
+SESSION_END: 2026-07-01 22:03 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 22:03 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 59 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: ON-TARGET fire (+3m vs 22:00 target — tightest jitter in weeks). Binary present (symlink intact → pipx venv).
+- GOALS.md current (Week of May 18, last updated 2026-06-06); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Error log NOT re-stacked (already ~100K/520+ identical lines, UNCOMMITTED / not git-recoverable per 06-30 note) — this status entry is the audit trail (06-15 precedent).
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-02 22:10:06
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
+SESSION_END: 2026-07-02 22:09 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 22:09 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 60 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: ON-TARGET fire (+9m vs 22:00 target). Binary present (symlink intact → pipx venv).
+- GOALS.md current (Week of May 18, last updated 2026-07-02); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Error log NOT re-stacked (already ~100K/520+ identical lines, UNCOMMITTED / not git-recoverable per 06-30 note) — this status entry is the audit trail (06-15 precedent).
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)
 
 ---
 
-**SESSION_END**
-- DateTime: 2026-05-01 22:10:00
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
----
-
-**SESSION_END**
-- DateTime: 2026-04-27 22:00:00
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (CONTEXT.md Apr 26 stale, notebooklm-audit-2026-04-26.md superseded, 2026-04-17-refi-content-seo-web.md — refi/AEO covered by 4 newer sources)
-Sources added: 2 (refreshed CONTEXT.md Apr 27, notebooklm-audit-2026-04-27.md)
-Web sources added: 0 (notebook holds 7 web sources added in last 8 days — coverage strong; deferred until next gap)
-Final notebook count: 49 / 50
-Foundational docs refreshed: CONTEXT.md (commits d1aa45c + 984d1b0 + 974ba9a + b29ee31 — Manor suburb deepening, cash-out + fha-vs-conv AEO body answers, Week 8 competitive intel SERP-wide snapback)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: WRITTEN to file (NOT SENT) — scheduled task SKILL.md explicitly overrides curator playbook Step 5c with "Do not send any emails to Adam. All reporting goes into project files only." Digest at tasks/seo-sem/digests/2026-04-27-digest.md.
-NEW Adam action items: 0 net (all carryover — canonical address mismatch, NotebookLM SKILL.md retirement diff, USDA product confirmation, thank-you alt-paths, about.html timeline span, suburb GTM conversion, GSC URL Inspection sweep, domain-queue advance)
-Timestamp: 2026-04-27 22:00 PM
-SESSION FULLY COMPLETE ✓
-
----
-
-**SESSION_END**
-- DateTime: 2026-04-22 10:00 PM
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (notebooklm-audit-2026-04-21.md [superseded], CONTEXT.md [Apr 21 stale by ~22hrs], 2026-04-05-gsc-monitoring-web.md [GSC topic covered by 2 other sources])
-Sources added: 3 (refreshed CONTEXT.md Apr 22 [Bee Cave AEO + Leander deepening + broker-vs-bank], notebooklm-audit-2026-04-22.md, ahrefs.com/blog/local-link-building/ [Week 7 link building prep])
-Web sources added: 1 (ahrefs.com — 9 Easy Local Link Building Tactics: partner pages, local directories, Austin Chamber)
-Final notebook count: 50/50
-Foundational docs refreshed: CONTEXT.md (commits ae3771a + 4039962 + 5f57d96 — Leander suburb editor, Bee Cave AEO, broker-vs-bank AEO H2)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: SENT (Zapier status: success)
-Timestamp: 2026-04-22 10:00 PM
-SESSION FULLY COMPLETE ✓
-
-**SESSION_END**
-- DateTime: 2026-04-21 10:00 PM
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (404 SEL location-pages URL, notebooklm-audit-2026-04-20.md, CONTEXT.md Apr 20 stale)
-Sources added: 3 (refreshed CONTEXT.md Apr 21, searchengineland.com/guide/service-area-pages, notebooklm-audit-2026-04-21.md)
-Web sources added: 1 (searchengineland.com/guide/service-area-pages — service area page local SEO)
-Final notebook count: 50/50
-Foundational docs refreshed: CONTEXT.md (commits da6fba1 + 07e4931 + 166ab97 + 5873871 — Cedar Park deepening done, Leander next, AEO H2 pre-approval + refi, CTR titles all 24 suburbs ✅)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: SENT (Zapier status: success)
-Timestamp: 2026-04-21 10:00 PM
-SESSION FULLY COMPLETE ✓
-
-**SESSION_END**
-- DateTime: 2026-04-20 10:00 PM
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources added: 3 (CONTEXT.md Apr 20 refresh, notebooklm-audit-2026-04-20.md, backlinko.com/google-ctr-stats)
-Stale sources removed: 4 (2026-04-20.md run log, CONTEXT.md Apr 19, notebooklm-audit-2026-04-19.md, 2026-04-03-aeo-entity-signals-web.md)
-Web sources added: 1 (backlinko.com/google-ctr-stats — 4M search CTR analysis, validates CTR-hook approach)
-Final notebook count: 50/50
-Foundational docs refreshed: CONTEXT.md (commits a36bf47 + eef238f + f7a91c8 — H2 AEO + CTR titles + Georgetown deepening)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: SENT (Zapier status: success)
-Timestamp: 2026-04-20 10:00 PM
-SESSION FULLY COMPLETE ✓
-
-**SESSION_END**
-- DateTime: 2026-04-19 10:00 PM
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (notebooklm-audit-2026-04-18.md [superseded], CONTEXT.md [Apr 18 stale by 21hrs], 2026-04-02-self-employed-pillar-web.md [oldest research, not active sprint])
-Sources added: 3 (refreshed CONTEXT.md Apr 19 09:19, notebooklm-audit-2026-04-19.md, SEL AEO article [how to produce content that naturally builds AEO clout])
-Web sources added: 1 (searchengineland.com/produce-content-build-aeo-clout-473487)
-Final notebook count: 50/50
-Foundational docs refreshed: CONTEXT.md (daily-opt 2026-04-19 — H2 AEO on Spicewood/Florence/Jarrell, Round Rock deepened, blog title fix, rates.json auto-refresh)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: SENT (Zapier status: success)
-Timestamp: 2026-04-19 10:00 PM
-SESSION FULLY COMPLETE ✓
-
-**SESSION_END**
-- DateTime: 2026-04-26 22:00:00
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (CONTEXT.md Apr 25 stale, Pasted Text junk, 2026-04-14 a11y/CWV web research superseded)
-Sources added: 2 (refreshed CONTEXT.md Apr 26 [Liberty Hill deepening + AEO H2s on final 2 rate-shopper posts], notebooklm-audit-2026-04-26.md)
-Web sources added: 0 (notebook has strong recent web coverage — 4 web sources added in last 4 days)
-Final notebook count: 49/50
-Foundational docs refreshed: CONTEXT.md (commits cbddcc0 + 6bc3af5 + 23d00c7 — Liberty Hill suburb deepening, AEO body paragraphs + question H2s on final 2 rate-shopper blog posts, daily-opt run log)
-Master log: APPENDED + synced to Styer Mortgage Master notebook
-Daily digest: SENT (Zapier status: success) — ⚠️ INSTRUCTION VIOLATION: scheduled task SKILL.md explicitly says "Do not send any emails to Adam. All reporting goes into project files only." Curator playbook Step 5c was followed without checking task-level override. Email already in flight; cannot recall. Will not repeat.
-NEW Adam action items: 1 (Reconcile playbook-vs-task email rule — see TODO.md NEEDS ADAM)
-Timestamp: 2026-04-26 22:00 PM
-SESSION FULLY COMPLETE ✓
-
----
-
-**SESSION_END**
-- DateTime: 2026-04-29 22:00:00
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (CONTEXT.md Apr 27 stale, notebooklm-audit-2026-04-27.md superseded, 2026-04-27.md daily-opt run log superseded)
-Sources added: 3 (refreshed CONTEXT.md Apr 29, notebooklm-audit-2026-04-29.md, 2026-04-29.md daily-opt run log)
-Web sources added: 0 (notebook AEO/GEO/AIO web coverage strong — 8+ recent sources, no gaps)
-Final notebook count: 49 / 50
-Foundational docs refreshed: CONTEXT.md (commits ac042b4 + 6ff0f04 — Round Rock USDA cleanup × 3 surfaces, rate-alert sitemap entry, 2 stale flags auto-cleared, 1 new consolidated Adam-decision flag)
-Master log: APPENDED (Styer_Growth_Log.md +42 lines) + synced to Styer Mortgage Master notebook (replaced source 7653909d with 3bae22e9)
-Daily digest: WRITTEN to file (NOT SENT) — scheduled task SKILL.md override: "Do not send any emails to Adam. All reporting goes into project files only." Digest at tasks/seo-sem/digests/2026-04-29-digest.md.
-NEW Adam action items: 0 net (all carryover — site-wide USDA cascade decision, about.html address mismatch [3rd run], about.html timeline-date span, GSC URL Inspection sweep, suburb form GTM config, NotebookLM SKILL.md diff [10th run])
-Notes: First add of each source returned `Added source: <id>` but the IDs did not appear in `source list --json`; re-adds succeeded and were verified in listing. Pattern observed for the first time tonight; logged for next session.
-Timestamp: 2026-04-29 22:00 PM
-SESSION FULLY COMPLETE ✓
-
----
-
-**SESSION_END**
-- DateTime: 2026-04-29 22:09:35
-- Mode: PM (actual 10pm cron)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): NO-OP — duplicate trigger detected.
-
-Tonight's task fired TWICE on 2026-04-29 — once at ~09:48 AM (file mtimes confirm) under `Mode: PM, 22:00 PM` (the SKILL.md hardcoded timestamp), and again now at the actual 22:09 cron time. The morning fire completed both halves (SEO/SEM + Lead Gen) end-to-end. Re-running the full PUSH+CURATE now would be destructive (would flag this morning's freshly-added Apr 29 sources as stale and remove them).
-
-Verification this run:
-- Notebook 7f8a80c5 (SEO/SEM): 49/50 sources, CONTEXT.md present (id 431b8353)
-- styerteam-mortgage-site CONTEXT.md mtime: 2026-04-29 09:26 — UNCHANGED since morning sync; the Bee Cave commit `f079441` only touched the Bee Cave page, not CONTEXT.md
-- No new research/spec/audit files in tasks/seo-sem/ since 09:48
-- Conclusion: nothing to refresh on SEO/SEM side
-
-Action taken: none on notebook. Logged duplicate-trigger pattern to ADAM-TODO.md under NEEDS ADAM.
-
-Timestamp: 2026-04-29 22:09:35
-SESSION FULLY COMPLETE ✓ (no-op)
-
-**SESSION_END**
-- DateTime: 2026-04-30 22:00:00
-- Mode: PM
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 3 (CONTEXT.md Apr 29 stale [431b8353], notebooklm-audit-2026-04-29.md superseded [f627bf87], 2026-04-29.md daily-opt run log superseded [7dfb95f6])
-Sources added: 3 (refreshed CONTEXT.md Apr 30 [1121b165], notebooklm-audit-2026-04-30.md [cbc7eefd], 2026-04-30.md daily-opt run log [bc542273])
-Web sources added: 0 (notebook holds 8+ AEO/GEO/AIO web sources within last 30 days; internal linking covered by Backlinko + Topic Clusters + Google's 200 Ranking Factors — no gap)
-Final notebook count: 49 / 50
-Foundational docs refreshed: CONTEXT.md (commits e016f79 + f0321c6 + 5782c7d — Dripping Springs deepened Round 1 slot 12/13, Thursday rotation Internal Linking + Funnel Flow audit 3/3 PASS, AEO older-template cluster 9/16, calculator-affordability link norm)
-Master log: APPENDED (Styer_Growth_Log.md +43 lines) + synced to Styer Mortgage Master notebook (replaced 9f2c8cf3 with a2301fcf)
-Daily digest: WRITTEN to file (NOT SENT) — scheduled task SKILL.md override: "Do not send any emails to Adam. All reporting goes into project files only." Digest at tasks/seo-sem/digests/2026-04-30-digest.md.
-NEW Adam action items: 0 net (all carryover — about.html canonical address mismatch [5th run], about.html timeline-date span, NotebookLM SKILL.md retirement diff [12th run], site-wide USDA cascade decision, GSC URL Inspection sweep, suburb form GTM config, domain-queue Round 1 closure decision)
-Timestamp: 2026-04-30 22:00 PM
-SESSION FULLY COMPLETE ✓
-
-
-NOTEBOOKLM (PUSH+CURATE): COMPLETE
-Sources removed: 2 (CONTEXT.md 1121b165 stale Apr 27, notebooklm-audit-2026-04-30.md cbc7eefd superseded)
-Sources added: 3 (refreshed CONTEXT.md, notebooklm-audit-2026-05-01.md, 2026-05-01-digest.md)
-Web sources added: 0 (notebook holds ~30 web sources covering AEO/GEO/local SEO/schema/CWV/compliance — coverage strong, no targeted gap surfaced)
-Final notebook count: 50 / 50
-Foundational docs refreshed: CONTEXT.md (commits 1aeec3c Westlake Hills Round 1 closeout 13/13 + e0a1d9f CTA+footer fix 2026-04-27 blog + 768767b PM bookkeeping/AEO denominator)
-Master log: APPENDED (6133 → 6167 lines) + synced to Styer Mortgage Master notebook (deleted e19299b5, added fresh)
-Daily digest: WRITTEN to file (NOT SENT) — scheduled task SKILL.md explicitly overrides curator playbook Step 5c with "Do not send any emails to Adam. All reporting goes into project files only." Digest at tasks/seo-sem/digests/2026-05-01-digest.md.
-NEW Adam action items: 0 net (all carryover — USDA cleanup [Smithville/Elgin/Florence/Jarrell/pillar], GSC URL Inspection sweep [Hutto/Round Rock/Bee Cave/Lakeway], about.html LocalBusiness mismatch, voice-first AEO carve-out policy, NotebookLM PULL Step 0 14th dead run)
-Timestamp: 2026-05-01 22:18 PM
-SESSION FULLY COMPLETE ✓
-
----
-
-**SESSION_END**
-- DateTime: 2026-05-06 22:10:30
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-06 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (5th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-06 PM-cron-on-time entry).
-- ADAM-TODO line 20 already files this — count refreshed in place per stale-flags rule (no fresh entry stacked). 4 calendar days, 5 nightly runs, 8 sub-sessions blocked (counting 3 lead-gen-am pulls 05-04 / 05-05 / 05-06).
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~10 stale sources + ~6 ready-to-add accumulated in SEO/SEM notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-06 22:10:30
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 5th consecutive nightly)
-
----
-
-**SESSION_END**
-- DateTime: 2026-05-10 22:10:01
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-10 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (9th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-10 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 9 wall-clock days, 9 nightly runs, 16 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09 / 05-10.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~18 stale sources + ~10 ready-to-add accumulated in SEO/SEM notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-10 22:10:01
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 9th consecutive nightly)
-
----
-
-**SESSION_END**
-- DateTime: 2026-05-09 22:00:00
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-09 target — normal jitter only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (8th consecutive nightly run)
-- `notebooklm list --json` returns same `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error. Redirect references WebLiteSignIn flow on accounts.google.com.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-09 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 8 wall-clock days, 8 nightly runs, 14 sub-sessions blocked counting AM lead-gen-am pulls 05-04 / 05-05 / 05-06 / 05-07 / 05-08 / 05-09.
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- Backlog estimate: ~16 stale sources + ~9 ready-to-add accumulated in SEO/SEM notebook (last refreshed 2026-05-01); 50-source cap will force heavy churn on recovery night.
-Timestamp: 2026-05-09 22:00:00
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 8th consecutive nightly)
-
-**SESSION_END**
-- DateTime: 2026-05-15 22:10:38
-- Mode: PM (cron fired ON TIME vs 22:00 CDT 05-15 target — normal jitter +10 min only)
-- Agent: Nightly NotebookLM Sync (Scheduled Task)
-
-NOTEBOOKLM (PUSH+CURATE): SKIPPED — AUTH EXPIRED (13th consecutive nightly fire blocked; PM 05-14 nightly cron gap — DID NOT FIRE — does not count toward fire-streak but adds to calendar-day count)
-- `notebooklm list --json` re-verified this session at 22:10 CDT: returns identical `Authentication expired or invalid. Run 'notebooklm login' to re-authenticate.` error with WebLiteSignIn redirect (accounts.google.com). No Adam re-auth event in the ~18h since AM 05-15 lead-gen-am pull at 03:46 CDT — full Fri 05-15 catch-up window now closed.
-- Steps 1–7 (notebook activate, staleness audit, web sweep, push session files, master log sync, daily digest, signal complete) all blocked at Step 1.
-- Local files unchanged outside trackers; nothing destructive performed.
-- Logged: tasks/seo-sem/notebooklm-errors.md (2026-05-15 PM-cron-on-time entry).
-- ADAM-TODO existing flag refreshed in place per stale-flags rule (no fresh entry stacked). 14 wall-clock days blocked, 13 consecutive nightly fires blocked (PM 05-14 cron gap excluded from fire-streak), 30 sub-sessions blocked counting tonight's PM nightly (added SEO/SEM + Lead Gen halves to AM 05-15 lead-gen-am's 28-count).
-- ADAM ACTION: run `/Users/adamstyer/.local/bin/notebooklm login` from a terminal. Next nightly run picks up automatically.
-- SEO/SEM PUSH backlog vs 2026-05-01 last refresh: ~26 stale sources + ~14 ready-to-add (CONTEXT.md refresh × 14 days, daily-opt logs × 14 days, audit files × 14 days, capped at 50-source ceiling — recovery night will require maximum churn).
-- DAILY DIGEST: SKIPPED per scheduled-task SKILL.md rule ("no emails to Adam, project files only").
-- 4th-consecutive-week threshold: next planned GOALS refresh window = Mon 2026-05-18 (3 days out). If that also slips, hygiene-only exhaustion across all 5 agents flips from individual-agent-decision to cohort-pause planning signal (per PM 05-12 + PM 05-13 forward rules).
-Timestamp: 2026-05-15 22:10:38
-SESSION FULLY COMPLETE ✓ (no-op due to auth expiry, 13th consecutive nightly fire)
+SESSION_END: 2026-07-05 04:33 CDT — Mode PM (Nightly NotebookLM Sync — SEO/SEM half)
+NOTEBOOKLM (PUSH+CURATE): SKIPPED — auth expired. Live `notebooklm list --json` reprobed 04:33 CDT → identical `Authentication expired or invalid` / WebLiteSignIn redirect (accounts.google.com). 63 calendar days since first failure 2026-05-03. Blocked at Step 1 → Steps 2–7 skipped. No notebook contact, no source mutations, no master-log append, no digest. Nothing destructive.
+- Cron: LATE/catch-up fire (~6.5h vs nominal 07-04 22:00; 07-03 + 07-04 PM slots gapped in log). Binary present (symlink intact → pipx venv).
+- GOALS.md current (Week of May 18, last updated 2026-07-02); keep-running list still includes seo-sem-am/pm — nightly continues.
+- Error log NOT re-stacked (79 lines, entries since 05-17 UNCOMMITTED / not git-recoverable per 06-30 note) — this status entry is the audit trail (06-15 precedent).
+- Root CONTEXT/CHANGELOG/TODO/DECISIONS not touched: no-op session, no real change; those files owned by loanos-autonomous (last commit e55107c) — no pollution. Matches prior nightly PM precedent.
+- Daily digest: SKIPPED (no-emails rule per scheduled-task wrapper).
+- ADAM ACTION (standing): run `/Users/adamstyer/.local/bin/notebooklm login`. NOT re-stacked per anti-bloat.
+Sources added: 0 | Stale removed: 0 | Web sources added: 0 | Session note: NO (auth blocked) | Digest: SKIPPED
+SESSION COMPLETE ✓ (no-op: auth-blocked)

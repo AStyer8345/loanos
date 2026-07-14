@@ -2,6 +2,55 @@
 
 ---
 
+## BLOCKER-006 — Lead Scoring Workflow Erroring on Every Live Lead (HIGH)
+**Status:** ✅ RESOLVED — 2026-06-09 AM session (REST PUT, credentials preserved + QA-verified). TWO bugs fixed (second was hidden behind the first).
+**Detected:** 2026-06-08 AM session (Lead Flow Audit)
+**Severity:** HIGH — silent; defeated the domain PRIMARY GOAL (route hot leads to Adam in 5 min) and the GOALS North Star (same-day lead response).
+
+### Resolution (2026-06-09 AM)
+Verified still broken live first (workflow `updatedAt` still 2026-04-24, `responseMode=responseNode`, no Respond node; two NEW errored execs 23867/23915 on 06-08 = live leads dropped). Then fixed both bugs via n8n REST PUT (per memory/tools/n8n.md — preserves credential bindings; MCP update_workflow would wipe them):
+
+**Bug 1 (trigger, the filed one):** `Lead Score Webhook` node `responseMode` changed `responseNode` → `onReceived`. Removes the Respond-to-Webhook dependency (scoring is fire-and-forget). Killed the `WorkflowConfigurationError: No Respond to Webhook node found`.
+
+**Bug 2 (hidden, surfaced only after Bug 1):** With the trigger fixed, the test execution flowed into `Get Scored Actions` and failed `Authorization failed — Invalid API key`. The Supabase Custom Auth credential `qjRCjm5wKJgPGXXY` ("Supabase Service Role"), used by `Get Scored Actions` + `Patch Lead Score` + `Surface Hot Lead`, had a stale/wiped secret (raw service-role key from memory returns HTTP 200, so keys were NOT rotated — likely a prior MCP `update_workflow` credential-wipe). The n8n public API can't update an existing credential's secret, and the cred was used by only this one workflow (checked all 53), so: created NEW `httpCustomAuth` cred `Bi7VTMWZeMnTrS3h` ("Supabase Service Role (rebuilt 2026-06-09)", headers apikey + Authorization Bearer) and re-pointed the 3 nodes to it. `Notify Adam`'s separate `LoanOS Agent Secret` cred (`0f41tr1CKLbSsd50`) left untouched.
+
+### QA evidence
+- After both fixes, versions in sync (`versionId == activeVersionId`); published webhook = `onReceived`.
+- Test POST `{"contact_id":"00000000-…0000"}` → exec **24136 status=success** (2.45s). Path: Webhook → Extract Fields → Get Scored Actions → Compute Score (score=0) → Patch Lead Score → Is Hot Lead? (false). `Surface Hot Lead` + `Notify Adam` correctly NOT executed (fake contact scored 0 → no notification to Adam, no real data mutated).
+- All 4 credential bindings confirmed intact in the PUT response (3× `Bi7VTMWZeMnTrS3h`, 1× `0f41tr1CKLbSsd50`).
+
+### Follow-ups (not blocking the fix)
+- **Backfill:** 25 of 26 contacts created since 2026-05-01 are `lead_score=0`/`tier=new` (unscored during the ~3-wk outage). Now that scoring works, re-POST each `{"contact_id":"<id>"}` to `https://styer.app.n8n.cloud/webhook/lead-score-update` to score/surface them — BUT that re-fires `Notify Adam` for hot ones, so Adam (or a non-restricted session) should run it. Filed in ADAM-TODO.
+- **Cleanup (optional, Adam):** delete orphaned credential `qjRCjm5wKJgPGXXY` in n8n UI (now used by 0 workflows). Left in place — not deleted autonomously.
+- **Memory updated:** `memory/tools/n8n.md` notes the new credential id.
+
+### Original diagnosis (preserved)
+
+### Root Cause (verified live)
+n8n workflow `nOCDV73m4M0jyL1B` ("LoanOS — Lead Score Updater") is **active** but every recent execution errors in ~45ms with:
+> `WorkflowConfigurationError: No Respond to Webhook node found in the workflow`
+
+The `Lead Score Webhook` node is configured `responseMode: "responseNode"` (respond via a Respond-to-Webhook node), but **no Respond-to-Webhook node exists** in the workflow. n8n rejects the call at the trigger — it never reaches Extract Fields / Compute Score / Notify Adam.
+
+### Evidence
+- Errored executions: `21055` (2026-06-01 01:17, matches contact "Quailton"), `15829` (2026-05-19), `14323` (2026-05-15) — all status `error`, same stack.
+- Supabase: web leads since mid-May all land `lead_score=0` / `lead_tier="new"`. Last successfully scored lead: "Emily" 70/hot on 2026-05-05.
+- Workflow `updatedAt` 2026-04-24; last known-good test was exec 5936 on 2026-04-22. Misconfig introduced sometime after.
+
+### Impact
+Every owned-channel web lead is unscored; hot-lead surfacing (`hot_lead_dismissed=false`) and the `Notify Adam` call (`/api/notify/hot-lead`) never fire. Speed-to-lead notification has been dead ~3+ weeks.
+
+### Required Fix (do NOT use MCP update_workflow — it wipes this workflow's 4 credential bindings)
+Pick one, then redeploy via **n8n REST PUT** (preserves credentials) or Adam edits in the n8n UI:
+- **Simplest:** Lead Score Webhook node → set **Respond** = "Immediately" (`responseMode: onReceived`). Scoring is fire-and-forget; the caller doesn't need the score back. Removes the Respond-node dependency entirely.
+- **Alt:** keep `responseNode` and add a "Respond to Webhook" node (200) after Extract Fields.
+Then QA: re-POST one test payload `{"contact_id":"<test>"}` to `https://styer.app.n8n.cloud/webhook/lead-score-update`, confirm execution `success` and `contacts.lead_score` updates.
+
+### Who Resolves
+- Builder subagent (REST PUT per memory/tools/n8n.md) + QA replay — OR Adam (one-click in n8n UI). Per CRITICAL RULE #1, route through Reviewer/QA before marking resolved.
+
+---
+
 ## BLOCKER-001 — TCPA Bundled Consent on Homepage Forms
 **Status:** PARTIALLY RESOLVED — Pending deploy + homepage forms still need fix
 **Detected:** 2026-03-25 AM session

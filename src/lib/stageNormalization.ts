@@ -6,6 +6,9 @@ const CANONICAL_STAGES = [
 const STAGE_MAP: Record<string, string> = {
   'Closed Client': 'Closed',
   'LOAN_FUNDED': 'Closed',
+  'Commission Paid': 'Closed',
+  'commission paid': 'Closed',
+  'COMMISSION_PAID': 'Closed',
   'Lead - Cold / Inactive': 'Lead',
   'Lead - Contacted': 'Lead',
   'Lead - New': 'Lead',

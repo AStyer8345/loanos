@@ -23,7 +23,15 @@ CRM: LoanOS (Supabase) — contacts + loans already populated. All new leads →
 
 ACTIVE: Lead Flow Audit + Activation
   The infrastructure exists. The question is: are the flows connected end-to-end?
-  1. [ ] Test website form submission → confirm n8n fires → confirm LoanOS contact created
+  1. [x] Test website form submission → confirm n8n fires → confirm LoanOS contact created
+        — AUDITED 2026-06-08: web leads DO land in Supabase (latest 06-01). Lead scoring
+          workflow nOCDV73m4M0jyL1B fires but ERRORS on every lead → BLOCKER-006 (HIGH).
+        — RESOLVED 2026-06-09: two bugs fixed via REST PUT (webhook responseMode→onReceived
+          + rebuilt stale Supabase cred → new Bi7VTMWZeMnTrS3h). QA exec 24136 success.
+          Scoring live again. FOLLOW-UP: backfill 25 unscored leads since 05-01 (Adam — re-POST
+          re-fires Notify Adam). See BLOCKER-006 (RESOLVED) for full detail.
+        — VERIFIED 2026-06-11 AM: scorer nOCDV73m4M0jyL1B still healthy (active, onReceived, last success exec 24136). Trigger path confirmed wired — LoanOS web-lead/route.ts:313 POSTs {contact_id} → /webhook/lead-score-update on every web-lead create (n8n PiuIsQpBuydtFM4m does NOT call the scorer; the app does). Zero execs since the fix = no new web-FORM lead since 06-09 (only new contact, Matthew Holzapfel 06-10, came via Arive loan_created). Path still UNPROVEN on a real live web-form lead.
+        — ✅ PROVEN 2026-06-12 AM: real live web-form lead Nicole Renovilla (lead_source=Website) created 06-11 21:02:26; scorer exec 24941 SUCCESS 1.8s later; scored 3/cold. End-to-end web-lead path (form → app POST → scorer → patch) now confirmed on a real lead. Zero errored execs since the 06-09 fix. This step is fully closed. Read-only would-be-score scan of all outage-era unscored contacts: max=3 (no hidden hot leads); backfill de-risked (zero hot alerts on re-POST).
   2. [ ] Activate Website Lead Follow-up workflow (AK1fBcaX1cPcdlGx) — fixed but inactive
   3. [ ] Test New Application Received (cWESnXXy9UOLB13q) end-to-end with fake data
   4. [ ] Test Refi Intake Email (yCTydQ7RfZK4DyUg) end-to-end

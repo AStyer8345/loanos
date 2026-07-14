@@ -160,6 +160,9 @@ const RAW_STATUS_MAP: Record<string, StageKey> = {
   'Purchased': 'funded',
   'Post closing docs': 'funded',
   'Freddie': 'funded', // sold to Freddie Mac = closed/funded
+  'Commission Paid': 'funded',
+  'commission paid': 'funded',
+  'COMMISSION_PAID': 'funded',
 }
 
 /**
@@ -183,6 +186,11 @@ export function getStageLabel(raw: string | null | undefined): string {
  */
 export function isInStageGroup(raw: string | null | undefined, group: readonly StageKey[]): boolean {
   return group.includes(normalizeToStageKey(raw))
+}
+
+/** True for every raw status that represents a completed/funded loan. */
+export function isFundedStatus(raw: string | null | undefined): boolean {
+  return isInStageGroup(raw, STAGE_GROUPS.FUNDED)
 }
 
 // ── Collect all raw status strings that map to a stage group ─────────────────
@@ -248,7 +256,7 @@ export const LOAN_STATUS_OPTIONS = [
   'Loan Setup', 'Disclosed', 'Submitted to UW', 'Approved w/ Conditions',
   'Resubmitted', 'Clear to Close', 'Underwriting', 'Processing',
   'Pre-Approved', 'Lead', 'New Application',
-  'Funded', 'On Hold', 'Cancelled', 'Denied', 'Dead',
+  'Funded', 'Commission Paid', 'On Hold', 'Cancelled', 'Denied', 'Dead',
 ] as const
 
 // ── Pipeline sub-stage definitions (for in-process dashboard bar) ────────────
@@ -358,6 +366,9 @@ export const STATUS_HEX: Record<string, string> = {
   'closed':                   '#C9A84C',
   'funded':                   '#C9A84C',
   'Funded':                   '#C9A84C',
+  'Commission Paid':          '#C9A84C',
+  'commission paid':          '#C9A84C',
+  'COMMISSION_PAID':          '#C9A84C',
   'Closed/Funded':            '#C9A84C',
   'LOAN_FUNDED':              '#C9A84C',
   'Closed Client':            '#C9A84C',

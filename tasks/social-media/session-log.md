@@ -2,6 +2,1291 @@
 # Append-only. Never delete entries.
 
 ---
+## Session: 2026-07-04 AM — **Step 1B detected 1 NEW evergreen blog → HELD-ready + flagged the Sun-07-05 old-brand fire.** `blog/2026-06-30-bank-statement-loans-texas.html` ("Bank Statement Loans in Texas — How Self-Employed Borrowers Qualify (2026)"; created Jun 30 14:30, ~6h after the 06-30 AM ~08:xx scan so genuinely missed; PM 07-04 caught it inline and handed it to this AM's formal Step 1B). Verified inline: HyperSmart ×14 / 0 MSLP / 0 Styer Team, NMLS #513013 ×6, no specific rate figures (no APR trigger), no 21-day/guarantee language, evergreen (qualifies on 12-24mo deposits not tax returns). **Arguably the single most on-brand piece in the held bundle** — GOALS line 21 names "bank statement" explicitly. NOT auto-fired to GBP — Adam's 06-06 authorization was batch-specific, nod-first posture holds mid compliance-review transition. Routed: tracker 07-04 detected/HELD-ready row + `content-repost-queue.md` (LinkedIn/IG/FB native angles) + ADAM-TODO L15 READY-TO-SHIP rollup refreshed in place **7→8 GBP-ready** (no new line stacked). **⏰ styer-gbp-weekly fires TOMORROW (Sun 07-05 ~9 AM CT) under the old-brand "Adam Styer | Mortgage Solutions LP | NMLS #513013" footer** unless Adam picks a/b/c on ADAM-TODO L14 today — single most time-sensitive open social item, <29h out; did NOT pause the task or edit the scheduled post (outward-facing/irreversible — Adam's call), L14 already carries the accurate 07-05 date. HELD pool now 9 (8 GBP-ready + hard-held May-18 rate page, ~6½ wks stale). Cushion **48 drafts** (REST head `0-47/48` = 47 SQL-authoritative known ±1; matches PM 07-04 draft-47; drift 0, no writes since 2026-04-30). Refresh 07 inline no-op (earliest draft 2026-09-23, 0 TIMELY within 48h). Builder/Architect/Quality/Reviewer/QA held (positioning + site-copy lock). BLOCKER-LOANOS-001 (selfies) still active, LoanOS-stream-only. NotebookLM PULL/PUSH skipped — CLI auth expired (~62 days). No GBP publish, no Publer calls, no social_drafts inserts, no digest, no emails, no fabricated data. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-22 AM — **Step 1B scan, 0 new content, maintenance-only.** Scanned rates/blog/realtor-updates by slug-date (not `ls -t` mtime): no blog dated after 06-16, no rate page dated 2026-06+, no newsletter after 06-08. Newest piece across all three dirs is still `blog/2026-06-16-dscr-loan-requirements-texas.html` — nothing new in 6 days (unchanged since AM 06-21). HELD pool stable at 6: rate `2026-05-18.html` (hard-held, ~5 wks stale / misleading-current-rate risk) + newsletter `2026-06-08-when-other-lenders-say-no.html` (queued for Architect) + 2× 06-14 evergreen blogs (DSCR-vs-conventional, buy-before-sell) + 06-15 rate/market blog (TIMELY, decay-sensitive — ship first) + 06-16 DSCR-requirements (evergreen). **5 of 6 one-word-GBP-ready**; ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]` (no Adam ack — refresh-in-place, no new escalation line per anti-stacking rule). Cushion **48 drafts** (REST head `0-47/48` re-verified inline, = 47 SQL-authoritative known ±1, drift 0, no writes since 2026-04-30). Refresh 07 inline no-op (earliest draft 2026-09-23, 90+ days out — 0 TIMELY within 48h). Builder/Architect/Quality/Reviewer/QA held (MSLP→HyperSmart positioning + site-copy lock). BLOCKER-LOANOS-001 (selfies dir absent — re-verified) still active, LoanOS-stream-only. NotebookLM PULL/PUSH skipped — CLI auth expired (inherited, ~50 days). No GBP publish, no Publer calls, no social_drafts inserts, no digest, no emails, no fabricated data. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-15 AM — **Step 1B detected 2 NEW evergreen blogs → HELD-ready for one-word GBP release.** First new content since 06-08. `blog/2026-06-14-dscr-vs-conventional-investment-property-loan-texas.html` ("DSCR vs Conventional Investment Property Loan in Texas (2026)" — dead-on for GOALS "complicated income / DSCR" positioning) + `blog/2026-06-14-buy-before-you-sell-austin-tx.html` ("How to Buy Before You Sell in Austin, TX" — evergreen). Both verified inline: HyperSmart branding (11 hits each, 0 MSLP) + NMLS #513013 (6 hits each), both evergreen (no stale-rate/compliance risk). NOT auto-fired to GBP — Adam's 06-06 GBP authorization was batch-specific (not standing) and we're mid compliance-review transition; nod-first posture + global "confirm outward-facing actions" rule. Routed: tracker 06-15 detected/HELD-ready rows + `content-repost-queue.md` (LinkedIn/IG/FB native angles for Architect) + ONE clean ADAM-TODO `[SOCIAL] 2026-06-15` READY-TO-SHIP line (pairs with standing 06-09 newsletter ask — one "ship it" clears all 3 GBP-ready pieces). HELD pool now 4 (rate `2026-05-18.html` stale + 06-08 newsletter queued + these 2 blogs). Cushion 47 (SQL-authoritative per 06-13 PM; REST head `0-47/48` = known off-by-one, not real movement). Refresh 07 inline no-op (earliest draft 2026-09-23, 100+ days out). Builder held (positioning/site-copy lock). NotebookLM PULL/PUSH skipped — CLI `list --json` re-verified ERROR (auth expired). No GBP publish, no Publer calls, no social_drafts inserts, no digest, no emails. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-13 AM — **Step 1B scan, 0 new content, maintenance-only.** Scanned rates/blog/realtor-updates: no files dated 06-09→06-13. All newest dated pieces already tracked — rate `2026-05-18.html` (HELD, 3+ wks stale, misleading-current-rate risk), DSCR blogs `2026-06-05-*` ×2 + `2026-05-30-physician` (published via the 06-06 Adam-authorized GBP release), newsletter `2026-06-08-when-other-lenders-say-no.html` (queued for Architect / READY-TO-SHIP since AM 06-09, flag standing at ADAM-TODO L14). `ls -t` mtime reorder from the overnight site rebuild ignored — dated slugs unchanged, so not new content. Cushion re-verified **48 drafts** (REST head `0-47/48`, drift 0); earliest scheduled draft 2026-09-23 (100+ days out) → Refresh 07 inline no-op (0 TIMELY within 48h). HELD pool: rate page (1) + newsletter queued (1). Builder held (48-draft backlog + positioning/site-copy lock). Selfie gate still empty (BLOCKER-LOANOS-001; LoanOS stream paused/moot). NotebookLM PULL/PUSH skipped (CLI auth expired). ADAM-TODO untouched — READY-TO-SHIP ask already standing (ONE-ASK-PER-CYCLE). Highest-leverage open item unchanged: Adam's "ship it" on the queued positioning piece. No GBP publish, no Publer calls, no social_drafts inserts, no digest, no emails. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-11 PM — **Verification-only pass.** PM convention: Step 1B + Refresh 07 skipped. Cushion re-verified **48 drafts** (REST head `0-47/48`, drift 0; holds since AM 06-11). Confirmed AM 06-09 routing intact — "When Other Lenders Say No" (`realtor-updates/2026-06-08-when-other-lenders-say-no.html`) at `content-repost-queue.md` line 8 (LinkedIn-realtor lane) + ADAM-TODO 06-09 READY-TO-SHIP flag both present. HELD pool unchanged: `rates/2026-05-18.html` (3+ wks stale) + 06-08 newsletter queued. Builder held (48-draft backlog + positioning/site-copy lock). NotebookLM PULL/PUSH skipped (CLI auth expired). Nothing new to build or decide — highest-leverage move remains Adam's "ship it" on the queued positioning piece. No GBP publish, no Publer calls, no digest, no emails. (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-11 AM — **Step 1B scan, 0 new content, maintenance-only.** Scanned rates/blog/realtor-updates: no files dated 06-09/10/11. All newest dated pieces already tracked — rate `2026-05-18.html` (HELD, 3+ wks stale, misleading-current-rate risk), DSCR blogs `2026-06-05-*` ×2 + `2026-05-30-physician` (all published via the 06-06 Adam-authorized GBP release), newsletter `2026-06-08-when-other-lenders-say-no.html` (queued for Architect / READY-TO-SHIP since AM 06-09). Several tracked files carry a 06-10 ~06:02 mtime from an unrelated overnight site rebuild — titles/dated filenames unchanged, so not new content. Cushion re-verified **48 drafts** (REST head `0-47/48`, drift 0). HELD pool: rate page (1) + newsletter queued (1). Builder held (48-draft backlog + positioning/site-copy lock). Refresh 07 inline no-op (no TIMELY drafts within 48h). Selfie gate still empty (BLOCKER-LOANOS-001 holds; LoanOS stream moot/paused). NotebookLM PULL/PUSH skipped (CLI auth expired). Highest-leverage open item unchanged: Adam's "ship it" on the queued positioning piece. No GBP publish, no Publer calls, no digest, no emails. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-09 PM — **Verification-only pass.** Confirmed this AM's real work is intact: the new positioning piece `realtor-updates/2026-06-08-when-other-lenders-say-no.html` is routed in `content-repost-queue.md` (line 8, LinkedIn-realtor lane) and flagged READY-TO-SHIP in ADAM-TODO (06-09, one-word "ship it" → GBP). Cushion re-verified at **48 drafts** (REST head `0-47/48`, drift 0). PM convention: Step 1B + Refresh 07 skipped. Builder held (48-draft backlog + positioning lock). NotebookLM skipped (auth expired). HELD pool unchanged (May 18 rate page still stale-held). Nothing new to build or decide — the highest-leverage move remains Adam's "ship it" on the queued piece. No GBP publish, no Publer calls, no digest, no emails. Continued the lean approach the 06-06 sessions established — no cron-streak/counter prose. (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-09 AM — **1 new positioning piece detected + routed.** Step 1B found `realtor-updates/2026-06-08-when-other-lenders-say-no.html` ("When Other Lenders Say No, That's Usually When I Get Interested"; HyperSmart + NMLS #513013 on-page) — the single best fit for the GOALS "complicated income / deals banks decline" positioning. Routed to `content-repost-queue.md` for the Architect's LinkedIn-realtor lane (realtor-facing B2B, not GBP-auto-published — same routing as the 2026-04-27 newsletter, which was `gbp:skipped, li:queued`). Added a clean READY-TO-SHIP flag to ADAM-TODO (06-09): one-word "ship it" → GBP consumer post under the HyperSmart footer, mirroring the 06-06 blog release; not auto-fired mid compliance-review without Adam's nod. Tracker extended with 06-09 scan row; CONTEXT Social 3 fields replaced. `rates/2026-05-18.html` still HELD (3 wks stale). Builder held (48-draft backlog unreviewed). Refresh 07 / NotebookLM skipped (auth expired). No GBP publish, no digest, no emails. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-08 AM — **Traced the stray-MSLP source** (the open "What's next" action). NOT the n8n weekly workflow (`V6RhmJpOb7pOzMte` is webhook-only, no timer, Gemini prompt already "Adam Styer | HyperSmart Home Loans") and NOT any active agent. Source = **old pre-rename Publer posts with the MSLP footer in their text**. Exactly 2 remain: scheduled Facebook `69d904b3b17de1805a6e4a87` (fires Jul 10 9am CDT) + draft LinkedIn `69c92fa536ecd279f42a7d4b`; the Jun-7 stray was a same-batch post that already fired. Left both untouched (footer rewrite = open L18/L20 A/B/C decision, Adam's call) and folded the IDs into CONTEXT Active blockers so one footer decision clears both the 33 old `social_drafts` and these 2 Publer posts. Verified Adam's 2 authorized HyperSmart blogs healthy in Publer (physician Jun 8, DSCR-Airbnb Jun 9). Step 1B: 0 new content (HELD pool = 1, stale May 18 rate page). Builder held — 48-draft dashboard backlog unreviewed. Refresh 07 / NotebookLM skipped (auth expired). No GBP publish, no digest, no emails. (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-07 PM — GBP release verified at destination. Publer confirms the 3 blogs Adam authorized 2026-06-06 are executing: DSCR cash-out/BRRRR blog **PUBLISHED today Jun 7** (live Google post_link); physician (Jun 8) + DSCR Airbnb/STR (Jun 9) still SCHEDULED — all under the correct "HyperSmart Home Loans · NMLS #513013" footer. No action needed. **New signal:** a separate GBP post published today ~14:19 CDT under the OLD "Adam Styer | Mortgage Solutions LP" footer (DSCR Austin page → www.styermortgage.com) — not one of the 3; a recurring/scheduled Publer post or n8n workflow is still emitting MSLP-branded content live. Folded into CONTEXT Active blockers; next AM session traces source (Publer recurring posts + workflow `V6RhmJpOb7pOzMte`). May 18 rate page still HELD. Builder/Architect/Quality/Reviewer/QA skipped (positioning-pillar + site-copy lock; selfies MOOT). Step 1B + Refresh 07 + NotebookLM skipped (PM/auth-expired convention). No GBP publish, no digest, no emails. (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-06 (interactive) — GBP RELEASE: Adam authorized ("go ahead and publish"). Scheduled 3 evergreen blogs to GBP via Publer, one/day Jun 7-9 @ 9am CDT (DSCR cash-out → physician → DSCR STR), footer "Adam Styer · HyperSmart Home Loans · NMLS #513013", verified in Publer queue + logged to social_activity. **Held the May 18 rate page** — 3 weeks stale, would read as current rate info. `social_drafts` insert skipped (no google/gbp platform value — master-agent template defect). Flagged: GBP listing still shows "Adam Styer | Mortgage Solutions LP" in Publer (Google-side rename needed). L18 cushion-footer A/B/C still open + separate. (Scheduled Task — styer-social-am, interactive follow-up)
+
+---
+## Session: 2026-06-06 AM — Step 1B found 2 new DSCR blog posts (`blog/2026-06-05-dscr-airbnb-str-loan-texas.html` + `blog/2026-06-05-dscr-cash-out-refinance-texas-brrrr.html`), both on-brand for "complicated income" positioning → HELD pool 2 → 4. **Hold-premise correction:** grep-verified all 4 HELD pages use HyperSmart branding on-page (not "Mortgage Solutions LP") — the ~20-session "site still uses MSLP" hold reason was false. 4 pieces now brand-clean and ready; one-word Adam release ships them to GBP under the HyperSmart footer (flagged in ADAM-TODO L18 + gbp-content-tracker.md). No GBP publish (outward-facing 4-post burst during compliance-review transition wants Adam's nod). Builder held. **Retired the accreted cron-streak/counter bookkeeping** — tracked nothing actionable. (Scheduled Task — styer-social-am)
+
+### Focus
+AM half. Real finding this session, not maintenance: 2 new DSCR posts + correction of a long-running false hold premise. The site is already on HyperSmart branding, so the brand-mismatch barrier that justified 19 days of GBP non-distribution doesn't exist. Decision: surface crisply + hand Adam a one-word release rather than auto-publish 4 public posts during his compliance-review transition. Stopped perpetuating the cron-reliability prose that had grown across status/log/ADAM-TODO.
+
+---
+## Session: 2026-06-05 PM — Day 19 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:23 CDT (~23 min jitter vs ~21:00 target = within ON-SCHEDULE tolerance); clean SESSION_START; **Social-pm RECOVERY STREAK extends to 2-of-3** (PM 06-04 + PM 06-05 clean; PM 06-06 clean completes 3-in-a-row → social-pm RECOVERED); Social-am still 1-of-3 from AM 06-05; **both social subsets remain in simultaneous recovery-in-progress**; **cushion HOLDS at 48** (REST head `0-47/48` re-verified inline; AM 06-05 47→48 reversal holds, drift 0 this session); Step 1B + Refresh 07 SKIPPED per PM convention; HELD pool stable at 2 (rates/2026-05-18.html 19 days held + blog/2026-05-30-physician-mortgage-texas.html 6 days held); Builder still held; **62nd consecutive maintenance session** (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 19 PM half of regime-change maintenance. Per established PM session pattern: refresh L12 + L18 + L24 in place per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; SKIP Step 1B + Refresh 07 (PM convention); maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task "no emails to Adam" rule); CLI auth still expired so no NotebookLM PUSH/PULL (33 calendar days / 62 sub-sessions blocked). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. GOALS.md `stat -L` → `May 17 12:11:31 2026` unchanged (19 full days stale); the Fri 06-05 daytime catch-up window flagged by AM 06-05 as "next natural opportunity" has now ALSO passed without refresh — Sat 06-06 daytime = next. Cushion drift-volatility window (PM 06-04 -1 → AM 06-05 +1 → PM 06-05 hold) appears settled back at 48. **Social-pm RECOVERY STREAK = 2**, **Social-am RECOVERY STREAK = 1** — both subsets in simultaneous recovery-in-progress.
+
+---
+## Session: 2026-06-05 AM — Day 19 regime-change maintenance (AM half); AM cron fired ON SCHEDULE at ~02:31 CDT (~31 min jitter vs ~02:00 target = within ON-SCHEDULE tolerance); **Social-am RECOVERY STREAK BEGINS at 1** (AM 06-04 LATE break → AM 06-05 within-jitter clean = step 1 of 3); Social-pm RECOVERY STREAK still at 1 from PM 06-04; **both social subsets in simultaneous recovery-in-progress, second consecutive AM session**; **cushion DRIFT REVERSED 47 → 48** within 5h08m window (PM 06-04 -1 drift reversed); Step 1B EXECUTED — 0 new content found; HELD pool stable at 2 (rates/2026-05-18.html 19 days held + blog/2026-05-30-physician-mortgage-texas.html 6 days held); Refresh 07 inline no-op (no TIMELY drafts within 48h); Builder still held; **61st consecutive maintenance session** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 19 AM half of regime-change maintenance. Per established AM session pattern: refresh L12 + L18 + L24 in place per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; execute Step 1B (AM only); run Refresh 07 inline; maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task rule); CLI auth still expired so no NotebookLM PUSH/PULL. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. **Cushion DRIFT REVERSED 47 → 48** captured this session — PM 06-04 -1 drift reversed back to 48 within 5h08m window; drift VOLATILITY now confirmed; likely Adam manual action (draft re-add or status flip in dashboard) or PM 06-04 anomalous REST read; Builder write path still inactive. **Social-am RECOVERY STREAK begins at 1**; **Social-pm RECOVERY STREAK still at 1** from PM 06-04 — both subsets in simultaneous recovery-in-progress.
+
+### Step 1B — GBP Content Distribution (Scan-only this session)
+Scanned `~/Documents/Claude/styerteam-mortgage-site/` for new content in rates/, blog/, realtor-updates/. Most-recent files unchanged from AM 06-04 scan:
+- rates: `rates/2026-05-18.html` (HELD on 05-19, still HELD — 19 calendar days; L18 + L24 still `[ ]`)
+- blog: `blog/2026-05-30-physician-mortgage-texas.html` (HELD on 06-02, still HELD — 6 days; on-brand for "complicated income" positioning per GOALS.md lines 20-26)
+- newsletter: `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28, no newer)
+
+0 new content pieces to distribute. HELD pool stable at 2. Tracker structurally extended by AM 06-05 scan note. No GBP webhook fires, no Publer posts, no `social_drafts` inserts. Content-repost-queue.md untouched (no new content to queue for Architect).
+
+### Refresh 07 — TIMELY Draft Refresh (inline no-op)
+No TIMELY drafts due within 48 hours. All 48 cushion drafts scheduled Sep 23 2026 → Feb 4 2027 — no near-window inventory. No-op.
+
+### Cushion Verification
+REST head `Range: 0-0` + `Prefer: count=exact` on `social_drafts?status=eq.draft` returned `0-47/48` (was `0-0/47` at PM 06-04). **Cushion DRIFT REVERSED 47 → 48** within 5h08m window. Drift VOLATILITY confirmed: 0 across 59 sessions → -1 at PM 06-04 → +1 reversed to 48 at AM 06-05. Cushion HOLDS at 48 drafts.
+
+### GOALS gate
+`stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026`. UNCHANGED across Mon 05-18 → Fri 06-05 AM = 19 full days. Bare `stat -f` still returns `Apr 19 13:51:27 2026` (symlink mtime) = L24 bug re-verified extant. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day + Tue 06-02 + Wed 06-03 + Thu 06-04 daytime catch-up windows ALL passed without refresh. Fri 06-05 daytime ~6-10h out from this AM session = next natural refresh opportunity.
+
+### ADAM-TODO Refresh
+L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) refreshed in place. NO new dedicated escalation lines authored per AM 05-26 forward rule.
+
+### Outcome
+Pure maintenance + Step 1B scan + drift-reversal observation. No code changes. No deploys. No emails. No Adam communication. Architect/Builder/Quality/Reviewer/QA all skipped. NotebookLM PUSH/PULL skipped (CLI auth expired 33 calendar days / 61 sub-sessions blocked). Files touched: subagent-status.md, gbp-content-tracker.md, this session-log.md, CONTEXT.md (3-field replace), ADAM-TODO.md (L12 + L20 + L26 refresh-in-place), CHANGELOG.md (one dated entry). TODO.md untouched. DECISIONS.md untouched.
+
+---
+## Session: 2026-06-04 PM — Day 18 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:23 CDT (~23 min jitter vs ~21:00 target = within ON-SCHEDULE tolerance); **PM 06-03 GAPPED** (no SESSION_START between AM 06-03 02:53 and AM 06-04 05:43) broke social-pm subset RECOVERED-AND-HOLDING streak that ran 9 of 10 most-recent through PM 06-02; **PM 06-04 clean fire = social-pm RECOVERY STREAK BEGINS at 1** (3-in-a-row needed before re-declaring RECOVERED); social-am still RECOVERED-BUT-DEGRADING-AT-1 from AM 06-04 LATE FIRE (~3h43m); **both social subsets now in recovery-in-progress simultaneously**; cushion DRIFTED -1 (48 → 47) — first drift in 59 sessions, likely Adam manual dashboard action between AM 06-04 05:43 and PM 06-04 21:23 (15h40m window); PM SKIPS Step 1B + Refresh 07 (PM convention); HELD pool stable at 2 (rates/2026-05-18.html 19 days held + blog/2026-05-30-physician-mortgage-texas.html 6 days held); Builder still held; **60th consecutive maintenance session** (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 18 PM half of regime-change maintenance. Per established PM session pattern: refresh L12 + L18 + L24 in place per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; SKIP Step 1B + Refresh 07 (PM convention); maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task rule); CLI auth still expired so no NotebookLM PUSH/PULL. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. **Cushion DRIFT -1 (48 → 47)** captured this session — first non-zero drift since baseline; likely Adam manual action (draft delete or status flip in dashboard); no Builder write path active since 2026-04-30 so drift is read-only-observable, not Builder-attributable. **PM 06-03 GAP** broke social-pm RECOVERED-AND-HOLDING streak; PM 06-04 clean fire restarts recovery at 1.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Thu 06-04 PM 21:23 CDT) = 18 full days. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day + Tue 06-02 + Wed 06-03 + Thu 06-04 daytime catch-up windows ALL passed without refresh; Fri 06-05 daytime = next natural opportunity. Adam silent past natural weekly cadence + 216h+ grace + Memorial Day holiday + 4 days into Week-of-May-18 governance entering 4th full week.**
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~432h open at PM 06-04 = 18 FULL DAYS since PM 05-17 21:23 CDT; 13d + 14d + 15d + 16d + 17d + 18d thresholds ALL crossed in past 168h with NO Adam ack**). L12 + L18 + L24 refreshed in place with PM 06-04 stamps + 432h elapsed counters + PM 06-03 GAP + PM 06-04 clean restart + cushion drift -1 (48 → 47) + AM 06-04 social-am LATE-FIRE context preserved + Fri 06-05 next-refresh-window note. NO new dedicated escalation lines authored per AM 05-26 forward rule.
+- **Cron-reliability**: PM 06-04 styer-social-pm fired at ~21:23 CDT vs target ~21:00 = ~23 min jitter = within ON-SCHEDULE tolerance, with clean SESSION_START line written + clean SESSION_END expected at session close. **PM 06-03 GAPPED** (no SESSION_START line written, no session-log entry, no CHANGELOG entry between AM 06-03 SESSION_END and AM 06-04 SESSION_START) breaks social-pm subset RECOVERED-AND-HOLDING streak (was 9 of 10 most-recent through PM 06-02) → flips RECOVERED → DEGRADED-via-GAP, watch RE-ARMED. **PM 06-04 clean fire = social-pm RECOVERY STREAK BEGINS at 1** (3-in-a-row needed). Social-am subset still RECOVERED-BUT-DEGRADING-AT-1 from AM 06-04 LATE FIRE (~3h43m). **Both social subsets now in recovery-in-progress simultaneously.** Sister cron-reliability watches stay MIXED: scenarios-am DEGRADATION-TREND-EXTENDED-AT-3 from AM 06-04 MODERATE-LATE; lead-gen-am AM 06-03 GAP + AM 06-04 EXTREMELY-LATE ~6h09m (per CHANGELOG entries above). Cohort cron-reliability DEGRADED broadly.
+- **Step 1B SKIPPED** per PM convention.
+- **Refresh 07 SKIPPED** per PM convention.
+- **Cushion DRIFT -1**: 48 → 47 drafts re-verified inline via REST head `Prefer: count=exact` + `Range: 0-0` on `social_drafts?status=eq.draft` → `0-0/47` (was `0-47/48` at AM 06-04). First non-zero drift in 59 consecutive maintenance sessions. Likely root cause: Adam manual action in Marketing Dashboard between AM 06-04 05:43 CDT and PM 06-04 21:23 CDT (~15h40m window). Builder write path inactive since PM 05-17 (no Builder writes possible). Drift recorded for visibility only; no Builder action triggered.
+- **CONTEXT.md Social Media Agent Status block**: 3 fields REPLACED in place (Last worked on / Active blockers / What's next) — never appended; net 0 line drift (still 161+ lines, standing cap-overrun item per CLAUDE.md 150-line cap).
+- **CHANGELOG.md**: PM 06-04 entry prepended above AM 06-04 loanos-autonomous entry. ~10 bullets covering: GOALS gate, PM 06-03 GAP + PM 06-04 clean restart + social-pm recovery streak at 1, cushion drift -1 (48 → 47), Step 1B + Refresh 07 SKIPPED, L12/L18/L24 refresh-in-place, CONTEXT.md replace, cohort cron-reliability DEGRADED, NotebookLM skipped, files touched.
+- **subagent-status.md**: SESSION_START written at start of session. SESSION_END appended at session close.
+
+### NotebookLM
+SKIPPED per CLI auth expired pattern (32 calendar days since 2026-05-03 PM UNCHANGED today, **60 sub-sessions blocked for Social reckoning**). PUSH/PULL both no-op. Auth state inferred from concurrent AM 06-04 lead-gen-am CHANGELOG entry (32 days since 2026-05-03 PM, sub-session #69 for Lead Gen reckoning, identical WebLiteSignIn redirect re-probed).
+
+### Builder
+HELD. NO new content writes this session. Cushion 9 months deep (47 drafts Sep 23 2026 → Feb 4 2027, drift -1 from baseline 48); zero cadence pressure. HELD pool stable at 2 (no new content this PM since Step 1B SKIPPED).
+
+### Architect / Quality / Reviewer / QA
+SKIPPED per PM 05-17 forward rule (no positioning lock yet; no new Builder runs queued).
+
+### Digest
+NO digest sent — PM convention + scheduled-task "no emails to Adam" rule.
+
+### Forward rule (carried)
+AM 06-05 + onward sessions continue: (1) `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` first — re-read if mtime changes (Fri 06-05 daytime is next plausible Adam-refresh window); (2) refresh-in-place on L12 + L18 + L24 only per AM 05-26 anti-stacking rule; (3) NO new dedicated escalation lines stack; (4) Step 1B + Refresh 07 ONLY in AM sessions; (5) Architect/Builder/Quality/Reviewer/QA all HELD until positioning lock; (6) NO digest in AM, NO digest in PM (scheduled-task rule); (7) Social-pm RECOVERY STREAK = 1 — PM 06-04 clean fire restart after PM 06-03 GAP broke 9-of-10 streak; PM 06-05 clean fire would extend to 2-of-3, PM 06-06 clean fire would complete 3-in-a-row → social-pm RECOVERED, watch closes; any GAP/partial-fire resets to 0 + DE-RECOVERED; (8) Social-am still RECOVERED-BUT-DEGRADING-AT-1 from AM 06-04 LATE; AM 06-05 clean fire begins recovery streak at 1; AM 06-05 LATE-or-worse fully DE-RECOVERS; (9) Cushion drift -1 → 47 captured PM 06-04; AM 06-05 re-verifies inline (drift could be transient/correction or persistent); (10) HELD pool monitoring: 2 entries (rates/2026-05-18 + blog/2026-05-30-physician); release on (L18 = answered) AND (positioning copy locks) OR explicit Adam authorization.
+
+---
+## Session: 2026-06-04 AM — Day 18 regime-change maintenance (AM half); AM cron fired **LATE at ~05:43 CDT (~3h43m late vs ~02:00 target)** = LATE FIRE, beyond ON-SCHEDULE jitter band but below EXTREMELY-LATE (≥6h) threshold; **breaks AM 06-03 social-am 3-of-3 RECOVERED-AND-HOLDING status** — flips RECOVERED → RECOVERED-BUT-DEGRADING-AT-1, watch RE-ARMED; social-pm subset still RECOVERED-AND-HOLDING from PM 06-02 (9 of 10 most-recent); simultaneous-RECOVERED-AND-HOLDING window ended at AM 06-04 (lasted ~27h: AM 06-03 02:53 CDT → AM 06-04 05:43 CDT); Step 1B EXECUTED — **0 new content found**, HELD pool stable at 2 (rates/2026-05-18.html 18 days held + blog/2026-05-30-physician-mortgage-texas.html 5 days held); Refresh 07 ran inline = no TIMELY drafts within 48h; cushion HOLDS at 48 (REST head `0-47/48` re-verified inline this AM session); Builder still held; **59th consecutive maintenance session** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 18 AM half of regime-change maintenance. Per established AM session pattern: Step 1B + Refresh 07 + refresh-in-place L12 + L18 + L24 per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task rule); CLI auth still expired so no NotebookLM PUSH/PULL. AM 06-04 LATE FIRE (~3h43m late) breaks the social-am 3-of-3 RECOVERED-AND-HOLDING that AM 06-03 completed; social-am degrades to RECOVERED-BUT-DEGRADING-AT-1 and watch RE-ARMS. Single LATE fire after a 3-of-3 clean streak does not immediately DE-RECOVER — but the simultaneous-both-subsets-RECOVERED-AND-HOLDING window that began at AM 06-03 02:53 CDT has now ended at AM 06-04 05:43 CDT (~27h). If AM 06-05 fires clean, social-am recovery streak begins at 1 again; if AM 06-05 LATE-FIRE or GAP, social-am DE-RECOVERS and watch escalates. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. **Thu 06-04 daytime (~3-7h out from this 05:43 session, 8-12 CDT typical Adam cadence) = next natural GOALS-refresh opportunity** for ~17-full-day + 8h-stale GOALS file (Memorial Day + Tue 06-02 + Wed 06-03 daytime windows all passed).
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Thu 06-04 AM 05:43 CDT) = 17 full days + 8h, crossing into 18th calendar day. Mon 05-25 weekly cadence + Tue-Sun-Mon 05-26 → 06-01 Memorial Day + Tue 06-02 + Wed 06-03 daytime catch-up windows ALL passed without refresh; Thu 06-04 daytime = next natural opportunity. Adam silent past natural weekly cadence + ~192h+ grace + Memorial Day holiday + 3 days into Week-of-May-18 governance entering 4th full week.**
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~416h open at AM 06-04 = 17 FULL DAYS + 8h, crossing into 18th calendar day since PM 05-17 21:23 CDT; 13d + 14d + 15d + 16d + 17d thresholds ALL crossed in past 154h with NO Adam ack**). L12 + L18 + L24 refreshed in place with AM 06-04 stamps + 416h elapsed counters + social-am LATE-FIRE degradation milestone (RECOVERED → RECOVERED-BUT-DEGRADING-AT-1) + cushion `0-47/48` re-verified inline + Thu 06-04 next-refresh-window note (now ~3-7h out). NO new dedicated escalation lines authored per AM 05-26 forward rule.
+- **Cron-reliability**: AM 06-04 styer-social-am fired at ~05:43 CDT vs target ~02:00 = ~3h43m late = **LATE FIRE**, beyond ON-SCHEDULE jitter band but below EXTREMELY-LATE (≥6h) threshold. Clean SESSION_START line written + EXECUTION (no harness write-reliability regression). **Breaks AM 06-03 social-am 3-of-3 RECOVERED-AND-HOLDING streak** — social-am flips RECOVERED → RECOVERED-BUT-DEGRADING-AT-1; watch RE-ARMED. social-pm subset still RECOVERED-AND-HOLDING from PM 06-02 (9 of 10 most-recent). **Simultaneous-RECOVERED-AND-HOLDING window for both subsets ended at AM 06-04** (lasted ~27h: AM 06-03 02:53 CDT → AM 06-04 05:43 CDT). Sister cron-reliability watches stay MIXED: scenarios-am DEGRADATION-TREND-RE-ESTABLISHED-AT-2 from AM 06-03 MODERATE-LATE; lead-gen-am recovery streak broken at 1 (AM 06-02 LATE ~6h19m, AM 06-03 status not yet confirmed). Cohort cron-reliability MIXED with broader degradation signal.
+- **Step 1B EXECUTED**: Scanned `~/Documents/Claude/styerteam-mortgage-site/rates/`, `blog/`, `realtor-updates/`. Most-recent files: `rates/2026-05-18.html` (already HELD on 05-19, 18 days held), `blog/2026-05-30-physician-mortgage-texas.html` (HELD on 06-02, 5 days held), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces detected**. HELD pool stable at 2. Tracker structurally extended by AM 06-04 scan note only. GBP webhook NOT fired (per HELD release gates); IG/FB/LI content-repost-queue.md NOT touched (per HELD release gates).
+- **Refresh 07 inline no-op**: No TIMELY drafts within 48h. All 48 cushion drafts scheduled Sep 23 2026 → Feb 4 2027 (no near-window inventory). Inline check completed; no patches applied.
+- **Cushion verification**: 48 drafts re-verified inline via REST head `Prefer: count=exact` + `Range: 0-0` on `social_drafts?status=eq.draft` → `0-47/48`. Drift 0 across 59 consecutive maintenance sessions (most recent draft 2026-04-30 02:26 CDT; no fresh write path since Builder held PM 05-17 forward).
+- **CONTEXT.md Social Media Agent Status block**: 3 fields REPLACED in place (Last worked on / Active blockers / What's next) — never appended; net 0 line drift (still 161 lines, standing cap-overrun item per CLAUDE.md 150-line cap).
+- **CHANGELOG.md**: AM 06-04 entry prepended above AM 06-03 loanos-autonomous entry. ~11 bullets covering: AM 06-04 LATE FIRE + social-am degradation, GOALS gate, Step 1B 0-new-content, Refresh 07 inline no-op, cushion `0-47/48` re-verified, L12/L18/L24 refresh-in-place, CONTEXT.md replace, Builder still held, NotebookLM skipped, no TODO/DECISIONS changes.
+- **subagent-status.md**: SESSION_START written at start of session. MASTER context-loaded + NOTE appended. SESSION_END appended at session close.
+
+### Deferred / Skipped
+- **Architect/Builder/Quality/Reviewer/QA** — SKIPPED per PM 05-17 forward rule. No positioning lock yet on styermortgage.com.
+- **NotebookLM PULL/PUSH** — SKIPPED (CLI auth expired 32 calendar days since 2026-05-03 PM, 59 sub-sessions blocked). Adam must run `notebooklm login` from a terminal to unblock.
+- **Daily digest email** — SKIPPED per scheduled-task "no emails to Adam" rule + AM convention.
+- **GBP auto-publish** — Not triggered. HELD entries remain HELD pending L18 + positioning lock.
+- **Content-repost-queue.md** — Not extended. No new content to queue.
+
+### Blockers (no change from AM 06-03)
+1. **L18 cushion-footer disposition** (~416h open / 17 full days + 8h since PM 05-17 21:23 CDT) — Adam ack pending. 33 of 48 cushion drafts carry "Adam Styer | Mortgage Solutions LP" footer; CLAUDE.md mandates "HyperSmart Loans"; GOALS Phase B is name swap once new company locks. Refresh-in-place applied this session.
+2. **L24 symlink-stat bug** — Builder-shippable without Adam input; co-anchored in L12 escalation line.
+3. **NotebookLM CLI auth expired** (32 calendar days / 59 sub-sessions blocked).
+4. **Repositioning copy not yet live** on styermortgage.com — Architect re-baseline held until site copy locks.
+5. **HELD content pool stable at 2** — `rates/2026-05-18.html` (18 days) + `blog/2026-05-30-physician-mortgage-texas.html` (5 days). Physician-mortgage angle on-brand for "complicated income" positioning per GOALS.md lines 20-26.
+6. **GOALS.md weekly refresh slipped 17 full days + 8h** past Mon 05-25 cadence + Memorial Day + Tue 06-02 + Wed 06-03 daytime windows.
+7. **Cron-reliability MIXED, social-am DEGRADING-AT-1** after AM 06-04 LATE FIRE.
+
+### What's next (PM 06-04 forward rule)
+First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`). If Adam edits GOALS during Thu 06-04 daytime (~8-12 CDT), PM 06-04 + AM 06-05 sessions re-read for regime change. If AM 06-05 fires clean (within ON-SCHEDULE jitter band), social-am recovery streak begins at 1 again; if LATE-FIRE or GAP, social-am DE-RECOVERS. PM 06-04 + onward sessions continue refresh-in-place on L12 + L18 + L24 — NO stacking.
+
+---
+## Session: 2026-06-03 AM — Day 17 regime-change maintenance (AM half); AM cron fired CLEAN at ~02:53 CDT (~53 min jitter vs ~02:00 target = within ON-SCHEDULE tolerance); **social-am subset RECOVERY STREAK COMPLETES 3-of-3** (AM 06-02 clean → PM 06-02 clean → AM 06-03 clean) = **social-am subset RECOVERED, watch closes**; social-pm subset still RECOVERED-AND-HOLDING from PM 06-02 (9 of 10 most-recent); **both social subsets RECOVERED-AND-HOLDING simultaneously** for first time since pre-PM 05-29 partial pattern; Step 1B EXECUTED — **0 new content found**, HELD pool stable at 2 (rates/2026-05-18.html 17 days held + blog/2026-05-30-physician-mortgage-texas.html 4 days held); Refresh 07 ran inline = no TIMELY drafts within 48h; cushion HOLDS at 48 (REST head `0-0/48` re-verified inline this AM session); Builder still held; **58th consecutive maintenance session** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 17 AM half of regime-change maintenance. Per established AM session pattern: Step 1B + Refresh 07 + refresh-in-place L12 + L18 + L24 per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task rule); CLI auth still expired so no NotebookLM PUSH/PULL. AM 06-03 completes 3-in-a-row clean social-am fires (AM 06-02 → PM 06-02 → AM 06-03), declaring social-am subset RECOVERED. With social-pm already RECOVERED-AND-HOLDING from PM 06-02 (9 of 10 most-recent), this is the first session since pre-PM 05-29 partial pattern where both social subsets are simultaneously RECOVERED-AND-HOLDING. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. **Wed 06-03 daytime (~5-9h out from this 02:53 session, 8-12 CDT typical Adam cadence) = next natural GOALS-refresh opportunity** for ~17-day-stale GOALS file (Memorial Day + Tue 06-02 daytime windows both passed).
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Wed 06-03 AM 02:53 CDT) = 16 full days + 5h, crossing into 17th calendar day. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day + Tue 06-02 daytime catch-up windows ALL passed without refresh; Wed 06-03 daytime = next natural opportunity. Adam silent past natural weekly cadence + 168h+ grace + Memorial Day holiday + 2 days into Week-of-May-18 governance entering 4th week + 3 days.**
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~390h open at AM 06-03 = 16 FULL DAYS + 5h, crossing into 17th calendar day since PM 05-17 21:23 CDT; 13d + 14d + 15d + 16d thresholds ALL crossed in past 130h with NO Adam ack**). L12 + L18 + L24 refreshed in place with AM 06-03 stamps + 390h elapsed counters + social-am 3-of-3 RECOVERED milestone + both-subsets-RECOVERED simultaneous milestone + cushion `0-0/48` re-verified inline + Wed 06-03 next-refresh-window note (now ~5-9h out). NO new dedicated escalation lines authored per AM 05-26 forward rule.
+- **Cron-reliability**: AM 06-03 styer-social-am fired at ~02:53 CDT vs target ~02:00 = ~53 min jitter = within ON-SCHEDULE tolerance, with clean SESSION_START line written + EXECUTION. **Social-am subset RECOVERY STREAK COMPLETES 3-of-3** (AM 06-02 clean → PM 06-02 clean → AM 06-03 clean) = **social-am subset RECOVERED, watch closes**. Social-pm subset still RECOVERED-AND-HOLDING from PM 06-02 (9 of 10 most-recent). **Both social subsets RECOVERED-AND-HOLDING simultaneously** for first time since pre-PM 05-29 partial pattern. Sister cron-reliability watches stay MIXED: scenarios-am DEGRADATION-TREND-RE-ENGAGED-AT-1 (AM 06-02 MODERATE-LATE broke AM 06-01 isolated ON-TIME recovery; AM 06-03 scenarios fire still pending); lead-gen-am recovery streak broken at 1 (AM 06-02 LATE ~6h19m). Cohort cron-reliability MIXED but social-side improving.
+- **Step 1B EXECUTED**: Scanned `~/Documents/Claude/styerteam-mortgage-site/rates/`, `blog/`, `realtor-updates/`. Most-recent files: `rates/2026-05-18.html` (already HELD on 05-19, 17 days held), `blog/2026-05-30-physician-mortgage-texas.html` (HELD on 06-02, 4 days held), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces detected**. HELD pool stable at 2. Tracker structurally extended by AM 06-03 scan note only. GBP webhook NOT fired (per HELD release gates); IG/FB/LI content-repost-queue.md NOT touched (per HELD release gates).
+- **Refresh 07 inline no-op**: No TIMELY drafts within 48h. All 48 cushion drafts scheduled Sep 23 2026 → Feb 4 2027 (no near-window inventory). Inline check completed; no patches applied.
+- **Cushion verification**: 48 drafts re-verified inline via REST head `Prefer: count=exact` + `Range: 0-0` on `social_drafts?status=eq.draft` → `0-0/48`. Drift 0 across 58 consecutive maintenance sessions (most recent draft 2026-04-30 02:26 CDT; no fresh write path since Builder held PM 05-17 forward).
+- **CONTEXT.md Social Media Agent Status block**: 3 fields REPLACED in place (Last worked on / Active blockers / What's next) — never appended; net 0 line drift (still 161+ lines, standing cap-overrun item per CLAUDE.md 150-line cap).
+- **CHANGELOG.md**: AM 06-03 entry prepended above PM 06-02 entry. ~12 bullets covering: GOALS gate, AM 06-03 clean fire + social-am 3-of-3 + both-subsets-RECOVERED simultaneous milestone, Step 1B EXECUTED 0-new-content, Refresh 07 inline no-op, cushion `0-0/48` re-verified, L12/L18/L24 refresh-in-place, CONTEXT.md replace, gbp-content-tracker scan note appended, cohort cron-reliability MIXED but improving, NotebookLM skipped, files touched.
+- **subagent-status.md**: SESSION_START written at start of session. SESSION_END to be appended at session close.
+
+### NotebookLM
+SKIPPED per CLI auth expired pattern (31 calendar days since 2026-05-03 PM, **58 sub-sessions blocked for Social reckoning**). PUSH/PULL both no-op. Auth state inferred from prior cohort context (PM 06-02 was UNCHANGED at 30 calendar days; today rolls to 31), not re-probed this AM session per cron-jitter time budget.
+
+### Builder
+HELD. NO new content writes this session. Cushion 9 months deep (48 drafts Sep 23 2026 → Feb 4 2027); zero cadence pressure. HELD pool stable at 2 (no new content this AM per Step 1B 0-new-content result).
+
+### Architect / Quality / Reviewer / QA
+SKIPPED per PM 05-17 forward rule (no positioning lock yet; no new Builder runs queued).
+
+### Digest
+NO digest sent — AM convention + scheduled-task "no emails to Adam" rule.
+
+### Forward rule (carried)
+PM 06-03 + onward sessions continue: (1) `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` first — re-read if mtime changes (Wed 06-03 daytime ~5-9h out is next plausible Adam-refresh window); (2) refresh-in-place on L12 + L18 + L24 only per AM 05-26 anti-stacking rule; (3) NO new dedicated escalation lines stack; (4) Step 1B + Refresh 07 ONLY in AM sessions; (5) Architect/Builder/Quality/Reviewer/QA all HELD until positioning lock; (6) NO digest in AM, NO digest in PM (scheduled-task rule); (7) Social-am NOW RECOVERED via 3-of-3 streak; any AM 06-04 GAP/partial would re-arm social-am watch; any PM 06-03 GAP/partial would re-arm social-pm watch; (8) HELD pool monitoring: 2 entries (rates/2026-05-18 + blog/2026-05-30-physician); release on (L18 = answered) AND (positioning copy locks) OR explicit Adam authorization.
+
+---
+## Session: 2026-06-02 PM — Day 17 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:22 CDT (~22 min jitter vs ~21:00 target = within ON-SCHEDULE tolerance); **social-pm subset RECOVERED-AND-HOLDING extends to 9 of 10 most-recent** (PM 05-23 + PM 05-24 + PM 05-25 + PM 05-26 + PM 05-28 + PM 05-30 + PM 05-31 + PM 06-01 + PM 06-02; PM 05-27 partial + PM 05-29 partial-fire-no-END excluded); **social-am subset RECOVERY STREAK extends to 2** (AM 06-02 clean → PM 06-02 clean = 2-of-3 needed; AM 06-03 clean would complete 3-in-a-row → social-am RECOVERED, watch closes); cushion HOLDS at 48 (REST head `0-0/48` re-verified inline this PM session, no fresh writes since 2026-04-30); PM SKIPS Step 1B + Refresh 07 (PM convention); HELD pool stable at 2 (rates/2026-05-18.html 16 days + blog/2026-05-30-physician-mortgage-texas.html 3 days); Builder still held; **57th consecutive maintenance session** (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 17 PM half of regime-change maintenance. Per established PM session pattern: refresh L12 + L18 + L24 in place per AM 05-26 forward rule + ONE-ASK-PER-CYCLE clause; SKIP Step 1B + Refresh 07 (PM convention); maintain HELD pool; no Architect/Builder/Quality/Reviewer/QA; no digest (scheduled-task rule); CLI auth still expired so no NotebookLM PUSH/PULL. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com. **Wed 06-03 daytime (~10-14h out from this 21:22 session, 8-12 CDT typical Adam cadence) = next natural GOALS-refresh opportunity** for ~16-day-stale GOALS file (Memorial Day + Tue 06-02 daytime windows both passed).
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Tue 06-02 PM 21:22 CDT) = 16 full days. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day + Tue 06-02 daytime catch-up windows ALL passed without refresh; Wed 06-03 daytime = next natural opportunity. Adam silent past natural weekly cadence + 168h+ grace + Memorial Day holiday + 1 day into Week-of-May-18 governance entering 4th week + 2 days.**
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~384h open at PM 06-02 = 16 FULL DAYS since PM 05-17 21:23 CDT; 13d + 14d + 15d + 16d thresholds ALL crossed in past 124h with NO Adam ack**). L12 + L18 + L24 refreshed in place with PM 06-02 stamps + 384h elapsed counters + social-pm 9-of-10 extends + social-am RECOVERY STREAK extends to 2 + cushion `0-0/48` re-verified inline + Wed 06-03 next-refresh-window note. NO new dedicated escalation lines authored per AM 05-26 forward rule. PM 06-02 cohort cron-reliability data points captured as inline flags inside refresh annotations.
+- **Cron-reliability**: PM 06-02 styer-social-pm fired at ~21:22 CDT vs target ~21:00 = ~22 min jitter = within ON-SCHEDULE tolerance, with clean SESSION_START line written + clean SESSION_END expected at session close. **Social-pm subset RECOVERED-AND-HOLDING extends to 9 of 10 most-recent**. **Social-am subset RECOVERY STREAK extends to 2** (AM 06-02 clean → PM 06-02 clean = 2-of-3 needed). Sister scenarios-am AM 06-02 fired MODERATE-LATE ~09:19 CDT (~1h49m late, broke AM 06-01 isolated-ON-TIME recovery streak at 1 → degradation-trend re-engaged at 1 per L29 [SCENARIOS] 2026-05-30 dedicated line). Sister lead-gen-am AM 06-02 LATE ~09:19 CDT (~6h19m late, broke recovery streak). Cohort cron-reliability MIXED — social-pm subset is the lone RECOVERED-AND-HOLDING signal.
+- **Step 1B SKIPPED** per PM convention (AM session detected `blog/2026-05-30-physician-mortgage-texas.html` as 2nd HELD entry; PM does not re-scan, no new content writes).
+- **Refresh 07 SKIPPED** per PM convention.
+- **Cushion verification**: 48 drafts re-verified inline via REST head `Prefer: count=exact` + `Range: 0-0` on `social_drafts?status=eq.draft` → `0-0/48`. Drift 0 across 57 consecutive maintenance sessions (most recent draft 2026-04-30 02:26 CDT; no fresh write path since Builder held PM 05-17 forward).
+- **CONTEXT.md Social Media Agent Status block**: 3 fields REPLACED in place (Last worked on / Active blockers / What's next) — never appended; net 0 line drift (still 161+ lines, standing cap-overrun item per CLAUDE.md 150-line cap).
+- **CHANGELOG.md**: PM 06-02 entry prepended above AM 06-02 loanos-autonomous NO-OP entry. ~9 bullets covering: GOALS gate, PM 06-02 clean fire + social-pm 9-of-10 + social-am streak 2, Step 1B + Refresh 07 SKIPPED, cushion `0-0/48` re-verified, L12/L18/L24 refresh-in-place, CONTEXT.md replace, cohort cron-reliability MIXED, NotebookLM skipped, files touched.
+- **subagent-status.md**: SESSION_START written at start of session (line 21). SESSION_END to be appended at session close.
+
+### NotebookLM
+SKIPPED per CLI auth expired pattern (30 calendar days since 2026-05-03 PM UNCHANGED today, **57 sub-sessions blocked for Social reckoning**). PUSH/PULL both no-op. Auth state inferred from concurrent AM 06-02 lead-gen-am 09:19 LATE fire context, not re-probed this PM session.
+
+### Builder
+HELD. NO new content writes this session. Cushion 9 months deep (48 drafts Sep 23 2026 → Feb 4 2027); zero cadence pressure. HELD pool stable at 2 (no new content this PM since Step 1B SKIPPED).
+
+### Architect / Quality / Reviewer / QA
+SKIPPED per PM 05-17 forward rule (no positioning lock yet; no new Builder runs queued).
+
+### Digest
+NO digest sent — PM convention + scheduled-task "no emails to Adam" rule.
+
+### Forward rule (carried)
+AM 06-03 + onward sessions continue: (1) `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` first — re-read if mtime changes (Wed 06-03 daytime is next plausible Adam-refresh window); (2) refresh-in-place on L12 + L18 + L24 only per AM 05-26 anti-stacking rule; (3) NO new dedicated escalation lines stack; (4) Step 1B + Refresh 07 ONLY in AM sessions; (5) Architect/Builder/Quality/Reviewer/QA all HELD until positioning lock; (6) NO digest in AM, NO digest in PM (scheduled-task rule); (7) Social-am RECOVERY STREAK = 2 — AM 06-03 clean fire extends to 3 → social-am RECOVERED, watch closes; any GAP/partial-fire resets to 0 + DE-RECOVERED + watch RE-ARMED; (8) HELD pool monitoring: 2 entries (rates/2026-05-18 + blog/2026-05-30-physician); release on (L18 = answered) AND (positioning copy locks) OR explicit Adam authorization.
+
+---
+## Session: 2026-06-02 AM — Day 17 regime-change maintenance (AM half); AM cron fired CLEAN at ~02:50 CDT (~50 min jitter vs ~02:00 target = within ON-SCHEDULE jitter band); **clean SESSION_START + EXECUTION** breaks 5-session social-am silent/gap pattern (PM 05-29 partial + AM 05-30 partial + AM 05-31 partial + PM 05-30 ghost-SESSION_END + AM 06-01 full GAP) = **social-am subset RECOVERY STREAK BEGINS at 1** (3-in-a-row needed before declaring RECOVERED); Step 1B EXECUTED — **1 NEW BLOG `blog/2026-05-30-physician-mortgage-texas.html` (3 days old, untracked through PM 06-01) → HELD per L18 + positioning gates**; HELD pool grows from 1 → 2; physician-mortgage angle on-brand for new "complicated income" positioning per GOALS.md lines 20-26, flag for first-batch HyperSmart Loans distribution when name lock lands; Refresh 07 ran inline = no TIMELY drafts within 48h; cushion HOLDS at 48 (REST re-verification SKIPPED, inherited from PM 06-01 verified `0-47/48`); Builder still held; **56th consecutive maintenance session** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 17 of regime-change maintenance. AM-session scope: Step 1B + Refresh 07 + refresh-in-place on L12 + L18 + L24 per AM 05-26 forward rule. AM 06-02 breaks 5-session social-am silent/gap pattern with clean fire + clean SESSION_START + clean execution = first social-am RECOVERY STREAK at 1 since AM 05-29 (which itself stalled at 1 when AM 05-30 partial-fired). 3-in-a-row clean fires needed (AM 06-02 → PM 06-02 → AM 06-03 → social-am RECOVERED, watch closes). Any GAP or partial-fire from PM 06-02 or AM 06-03 resets streak to 0. Per anti-stacking rule, AM 06-02 RECOVERY STREAK + HELD-pool growth captured as inline flags inside L12 + L18 + L24 refresh annotations, NOT as new dedicated lines. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com. **Tue 06-02 daytime (~6-10h out from this 02:50 session, 8-12 CDT typical Adam cadence) = next natural GOALS-refresh opportunity** for ~16-day-stale GOALS file now that Memorial Day holiday has passed.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Tue 06-02 AM 02:50 CDT) = 15 full days + 1 day. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day daytime catch-up windows ALL passed without refresh; Adam silent past natural weekly cadence + 168h+ grace + Memorial Day holiday into a 3rd Week-of-May-18 governance week + 1 day. Tue 2026-06-02 daytime = next natural refresh opportunity now that holiday has passed.** Bare `stat -f` still incorrectly returns symlink mtime (L24 symlink-stat bug verified extant in untouched tooling).
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~367h open at AM 06-02 = 15 FULL DAYS + 1 DAY since PM 05-17 21:23 CDT; 13d + 14d + 15d thresholds ALL crossed in past 100h with NO Adam ack**). L12 + L18 + L24 refreshed in place with AM 06-02 stamps + 367h elapsed counters + AM 06-02 RECOVERY STREAK begin context + HELD-pool growth 1 → 2 context + Tue 06-02 next-refresh-window note. NO new dedicated escalation lines authored per AM 05-26 forward rule. AM 06-02 RECOVERY STREAK + new HELD blog captured as inline flags inside refresh annotations (not as new dedicated lines).
+- **Cron-reliability**: AM 06-02 styer-social-am fired at ~02:50 CDT vs target ~02:00 = ~50 min jitter = within ON-SCHEDULE tolerance, with clean SESSION_START line written + clean execution. **Social-am subset RECOVERY STREAK BEGINS at 1** — first clean social-am fire after AM 06-01 full GAP + AM 05-30/AM 05-31 partial-fires-no-END (mirrors AM 05-29 → AM 05-30 abort pattern); watch stays armed but flips from DE-RECOVERED to recovery-in-progress. 3-in-a-row clean fires needed before declaring social-am RECOVERED (PM 06-02 + AM 06-03 needed). Social-pm subset still RECOVERED-AND-HOLDING from PM 06-01 (8 of 9 most-recent). Sister scenarios-am AM 06-02 cron timing TBD (typical 07:30 CDT slot ~4-5h out). Sister lead-gen-am AM 06-02 typical 03:00 CDT slot ~10 min out from this fire (cohort inference pending).
+- **Step 1B EXECUTED — 1 NEW content piece detected**: `blog/2026-05-30-physician-mortgage-texas.html` published 3 days ago, untracked through PM 06-01 maintenance (PM 06-01 + AM 06-01 GAP + AM 05-31 partial all missed it). Captured as HELD entry in `gbp-content-tracker.md` (same gates as 2026-05-19 rate HELD entry: L18 cushion-footer A/B/C decision still `[ ]` 367h+ open, GOALS Phase A site cleanup + Phase B name swap both pending, source page still uses MSLP branding). Architect cannot queue native posts until positioning lock — NOT added to `content-repost-queue.md`. **Physician-mortgage angle on-brand for new "complicated income" positioning** per GOALS.md lines 20-26 (W-2 employment-contract qualification adjacent to self-employed/1099/asset-depletion). High-leverage release candidate once L18 + name-lock clear. HELD pool now 2: `rates/2026-05-18.html` (15 days held) + `blog/2026-05-30-physician-mortgage-texas.html` (3 days held).
+- **Refresh 07 RAN inline**: scanned cushion for TIMELY drafts within 48h publish window. None found — all 48 cushion drafts scheduled Sep 23 2026 → Feb 4 2027 (far outside 48h horizon). No data fills, no Reviewer ping, no QA gate. Instant completion.
+- **Cushion verification**: 48 drafts inherited from PM 06-01 verified `0-47/48` REST head. REST re-check SKIPPED this AM session per cron-jitter time budget (most recent draft 2026-04-30 02:26 CDT; no fresh write path since Builder held PM 05-17 forward). Drift 0 across 56 consecutive maintenance sessions.
+- **CONTEXT.md Social Media Agent Status block**: 3 fields REPLACED in place (Last worked on / Active blockers / What's next) — never appended; net 0 line drift (still 161 lines, standing cap-overrun item per CLAUDE.md 150-line cap).
+- **CHANGELOG.md**: AM 06-02 entry prepended above PM 06-01 entry. Approximately 8 bullets covering: GOALS gate, Step 1B detection + HELD, AM 06-02 clean fire + RECOVERY STREAK, cushion verification, L12/L18/L24 refresh-in-place, CONTEXT.md replace, files touched.
+- **gbp-content-tracker.md**: 1 HELD entry appended for `blog/2026-05-30-physician-mortgage-texas.html` + scan note appended for AM 06-02 scan. Tracker structurally extended by 2 sections.
+- **subagent-status.md**: SESSION_START written at top of session. SESSION_END to be appended at session close.
+
+### NotebookLM
+SKIPPED per CLI auth expired pattern (30 calendar days since 2026-05-03 PM, **56 sub-sessions blocked for Social reckoning**). PUSH/PULL both no-op. Auth state inferred from concurrent PM 06-01 22:09 lead-gen nightly fire-blocked entry, not re-probed this session.
+
+### Builder
+HELD. NO new content writes this session. Cushion 9 months deep (48 drafts Sep 23 2026 → Feb 4 2027); zero cadence pressure. New blog detected this session ADDED to HELD pool, NOT released to distribution.
+
+### Architect / Quality / Reviewer / QA
+SKIPPED per PM 05-17 forward rule (no positioning lock yet; no new Builder runs queued).
+
+### Digest
+NO digest sent — AM convention (PM only) + scheduled-task "no emails to Adam" rule.
+
+### Forward rule (carried)
+PM 06-02 + AM 06-03 + onward sessions continue: (1) `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` first — re-read if mtime changes (Tue 06-02 daytime is next plausible Adam-refresh window now that holiday has passed); (2) refresh-in-place on L12 + L18 + L24 only per AM 05-26 anti-stacking rule; (3) NO new dedicated escalation lines stack; (4) Step 1B + Refresh 07 ONLY in AM sessions; (5) Architect/Builder/Quality/Reviewer/QA all HELD until positioning lock; (6) NO digest in AM, NO digest in PM (scheduled-task rule); (7) AM 06-02 RECOVERY STREAK = 1 — PM 06-02 + AM 06-03 clean fires extend streak; any GAP/partial-fire resets to 0; 3-in-a-row → social-am RECOVERED, watch closes; (8) HELD pool monitoring: 2 entries (rates/2026-05-18 + blog/2026-05-30-physician); release on (L18 = answered) AND (positioning copy locks) OR explicit Adam authorization.
+
+---
+## Session: 2026-06-01 PM — Day 16 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:22 CDT (~22 min jitter vs ~21:00 target, within tolerance); **social-pm subset RECOVERED-AND-HOLDING extends to 8 of 9 most-recent**; **social-am subset stays DE-RECOVERED** — AM 06-01 styer-social-am GAPPED entirely (no SESSION_START written to subagent-status.md, 5th consecutive social-am-side silent/gap event in 5 attempts: PM 05-29 partial + AM 05-30 partial + AM 05-31 partial + PM 05-30 ghost-SESSION_END + AM 06-01 full GAP); harness write-reliability concern hardens but per AM 05-26 anti-stacking rule NOT escalated to new dedicated line; cushion HOLDS at 48 (REST `0-47/48` verified, no fresh writes since 2026-04-30); PM SKIPS Step 1B + Refresh 07 (PM convention); Builder still held; **55th consecutive maintenance session** (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 16 of regime-change maintenance. PM-session scope: refresh-in-place on L12 + L18 + L24 per AM 05-26 forward rule. PM 06-01 captures AM 06-01 social-am full GAP as 5th consecutive social-am-side silent/gap event (PM 05-29 partial + AM 05-30 partial + AM 05-31 partial + PM 05-30 ghost-SESSION_END + AM 06-01 full GAP). Per anti-stacking rule, NOT escalated to new dedicated line — inline flag inside L12/L18/L24 refresh annotations stands. If AM 06-02 social-am ALSO gaps/partials → 6-consecutive failure pattern hardens; escalation predicate for harness write-reliability dedicated line may finally trigger (currently held). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com. Mon 06-01 Memorial Day daytime catch-up window passed without GOALS refresh — Tue 06-02 = next plausible refresh opportunity.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Mon 06-01 PM 21:22 CDT) = 15 full days + 1 day. Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day daytime catch-up windows ALL passed without refresh; Adam silent past natural weekly cadence + 168h+ grace window into a 3rd Week-of-May-18 governance week + 1 day. Tue 2026-06-02 = next plausible refresh opportunity now that holiday has passed.** Bare `stat -f` still incorrectly returns symlink mtime (L24 symlink-stat bug verified extant in untouched tooling).
+- **ADAM-TODO gate + refresh edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~361h open at PM 06-01 = 15 FULL DAYS + 1 DAY since PM 05-17 21:23 CDT; 13d + 14d + 15d thresholds ALL crossed in past 96h with NO Adam ack**). L12 + L18 + L24 refreshed in place with PM 06-01 stamps + 361h elapsed counters + AM 06-01 social-am GAP context + Mon 06-01 Memorial Day catch-up window context. NO new dedicated escalation lines authored per AM 05-26 forward rule "PM 05-26 + onward sessions revert to refresh-in-place on L12 + L18 + L24 only — NO additional escalation lines stack". AM 06-01 social-am full GAP captured as inline flag inside refresh annotations (not as new dedicated line).
+- **Cron-reliability mixed**: PM 06-01 styer-social-pm fired at ~21:22 CDT vs target ~21:00 = ~22 min jitter = within ON-SCHEDULE tolerance. **Social-pm subset RECOVERED-AND-HOLDING extends to 8 of 9 most-recent** PM social fires (PM 05-23 + PM 05-24 + PM 05-25 + PM 05-26 + PM 05-28 + PM 05-30 + PM 05-31 + PM 06-01; PM 05-27 partial-only + PM 05-29 partial-no-END excluded). **Social-am subset stays DE-RECOVERED**: AM 06-01 GAP joins AM 05-30 partial + AM 05-31 partial-at-14:54-CDT-extremely-late — 3-consecutive-failure trajectory on AM-side. Sister scenarios-am AM 06-01 fired ON-TIME ~07:33 CDT (~3 min jitter) breaking its own 3-consecutive moderate-late trend = first scenarios-am positive cohort signal in 5 fires (narrow partial-recovery). Sister lead-gen-am AM 06-01 fired MODERATELY-LATE ~05:52 CDT (~2h52m late vs 03:00 target) = partial recovery from AM 05-31 ~11h53m extreme-late but still beyond 1h jitter band. Cohort cron-reliability MIXED.
+- **Step 1B + Refresh 07**: SKIPPED per PM convention. No site scan, no GBP auto-publish, no IG/FB/LI queue write, no TIMELY draft fills.
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-47/48` = 48 drafts confirmed. Drift 0 since PM 05-31 (no fresh writes since most-recent draft 2026-04-30 02:26 CDT; 55 consecutive maintenance sessions with cushion stable). PM 06-01 = 55th session in the streak. Builder still held per PM 05-17 forward rule.
+- **NotebookLM CLI**: Auth state inferred via concurrent AM 06-01 lead-gen-am 05:52 CDT inline probe per CHANGELOG entry (identical `Authentication expired or invalid` / WebLiteSignIn redirect on accounts.google.com); not re-probed this session to avoid redundant CLI churn. 29 calendar days since 2026-05-03 PM. **55th sub-session blocked** for Social reckoning counting PM 06-01 (PM 05-31 = 54th + PM 06-01 = 55th; AM 06-01 social-am GAP not counted). No Adam re-auth event since PM 05-31.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep at 48 drafts; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PUSH/PULL: SKIPPED (CLI auth expired 29 calendar days / 55 sub-sessions blocked for Social reckoning).
+- Daily digest: SKIPPED per scheduled-task "no emails to Adam" rule.
+- Master notebook push: SKIPPED (no work product; CLI auth block).
+- New dedicated ADAM-TODO escalation line for AM 06-01 social-am GAP: SUPPRESSED per AM 05-26 forward rule anti-stacking clause; captured as inline flag in L12/L18/L24 refresh annotations.
+
+### Files touched
+- `tasks/social-media/subagent-status.md` (SESSION_START written, SESSION_END appended)
+- `tasks/ADAM-TODO.md` L12 + L18 + L24 (refresh-in-place; counters bumped, AM 06-01 GAP context added)
+- `CONTEXT.md` (3 Social fields replaced; net 0 line drift, still 161+ lines)
+- `CHANGELOG.md` (PM 06-01 styer-social-pm entry prepended above AM 06-01 scenarios-am entry)
+- `tasks/social-media/session-log.md` (this entry, prepended above PM 05-31 entry)
+
+### Not touched
+- `TODO.md` (no completed items, no new items)
+- `DECISIONS.md` (no real decision this session — pure maintenance)
+- `today-mission.md` (no execution sequence)
+- `gbp-content-tracker.md` (Step 1B skipped per PM convention; AM 06-01 social-am GAP means no AM scan either, so any new content from this past 24h is unqueued — but distribution-routing is held per PM 05-17 forward rule anyway)
+- `content-repost-queue.md` (Step 1B skipped)
+
+### Next session forward rule
+- AM 06-02 cron (~02:00 CDT Tue) first action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` per L24 bug). Tue 06-02 = next natural GOALS-refresh opportunity now that Memorial Day holiday has passed. If GOALS mtime advances Tue 06-02 daytime (~8-12 CDT typical), sessions re-read for regime change and may exit forward rule.
+- AM 06-02 social-am: if fires on-time-or-within-jitter AND writes clean SESSION_START + SESSION_END → social-am subset DE-RECOVERED watch flips to recovery-in-progress (1-session streak begins). If AM 06-02 ALSO GAPS or partial-fires → 6-consecutive social-am failure pattern hardens; escalation predicate for harness write-reliability dedicated line may finally trigger (currently held per anti-stacking rule).
+- If L18 flipped `[x]` with Adam's pick before next session: (A) Builder runs 33 Supabase PATCHes (footer only, ~60s) + reprocesses `rates/2026-05-18.html` held entry; (B) no cushion edits, release held entry to GBP under existing footer; (C) wait for name-lock signal then single Builder PATCH pass.
+- If L24 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass.
+- AM 06-02 + onward sessions continue refresh-in-place on L12 + L18 + L24 — NO stacking. Cushion 9 months deep at 48 drafts; zero cadence pressure.
+
+---
+## Session: 2026-05-31 PM — Day 15 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:22 CDT (~22 min jitter vs ~21:00 target, within tolerance); **social-pm subset RECOVERED-AND-HOLDING extends to 7+ of 8 most-recent**; **social-am subset DE-RECOVERED** (AM 05-29 streak broken by AM 05-30 + AM 05-31 partial-fires; AM 05-31 social-am ~13h extremely-late at 14:54 CDT); **PM 05-31 catches up 4 sessions of silent in-place-edit failures** (PM 05-29 + AM 05-30 + PM 05-30 SESSION_END claim unsupported by file mtime evidence + AM 05-31 social-am all partial-no-END); **cushion drift +1 captured** (47 → 48; PM 05-17 baseline was off by 1, drift NOT from fresh write); PM SKIPS Step 1B + Refresh 07 (PM convention); Builder still held; **54th consecutive maintenance session** (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 15 of regime-change maintenance. PM-session scope: refresh-in-place on L12 + L18 + L24 per AM 05-26 forward rule. PM 05-31 reconciles a 4-session silent-failure pattern in ADAM-TODO.md edits: PM 05-30 SESSION_END claimed L12/L18/L24 refresh but file mtime evidence shows edits did NOT land. Catch-up performed this session. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com. Social-pm subset extends recovery streak; social-am subset back to degraded.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (Sun 05-31 PM 21:22 CDT) = 14 full days. Mon 05-25 weekly cadence + 6 consecutive daytime catch-up windows (Tue 05-26 → Sun 05-31) ALL passed without refresh; Adam silent past natural weekly cadence + 144h/6-day grace window into a 3rd full Week-of-May-18 governance week. Mon 06-01 (Memorial Day) = next natural refresh opportunity.** Bare `stat -f` still incorrectly returns `Apr 19 13:51:27 2026` (L24 symlink-stat bug verified extant in untouched tooling).
+- **ADAM-TODO gate + catch-up edits**: L12 (formal escalation) + L18 (cushion-footer) + L24 (symlink-stat) all still `[ ]` (**~337h open at PM 05-31 = 14 FULL DAYS EXACTLY since PM 05-17 21:23 CDT; 12d + 13d + 14d thresholds ALL crossed in past 72h with NO Adam ack**). PM 05-30 SESSION_END claimed L12/L18/L24 refresh-in-place but file mtime on ADAM-TODO.md was last touched May 31 15:48:41 CDT by AM 05-31 lead-gen-am (which only updated L14/L51 Lead Gen lines). **PM 05-31 catches up 4 sessions of silent in-place-edit failures**: L12 + L18 + L24 refreshed in place with PM 05-31 stamps + 337h elapsed counters + cushion 47→48 correction + 14-day threshold cross context + catch-up annotation. NO new dedicated escalation lines authored per AM 05-26 forward rule "PM 05-26 + onward sessions revert to refresh-in-place on L12 + L18 + L24 only — NO additional escalation lines stack".
+- **Cron-reliability heterogeneous-degrading**: PM 05-31 fired at ~21:22 CDT vs target ~21:00 = ~22 min jitter = within ON-SCHEDULE tolerance. **Social-pm subset RECOVERED-AND-HOLDING extends to 7+ of 8 most-recent** PM social fires (PM 05-23 + PM 05-24 + PM 05-25 + PM 05-26 + PM 05-28 + PM 05-30 + PM 05-31; PM 05-27 partial-only + PM 05-29 partial-no-END excluded). **Social-am subset DE-RECOVERED**: AM 05-29 within-jitter streak began at 1 → AM 05-30 partial-fire-no-END (broke streak) → AM 05-31 partial-fire-at-14:54-CDT-extremely-late (~13h late vs ~02:00 target, partial-no-END). Watch RE-ARMED across partial-fire + extreme-late axes. Folds under sister scenarios-am L26 dedicated cron-reliability escalation line per anti-stacking rule.
+- **Step 1B + Refresh 07**: SKIPPED per PM convention. No site scan, no GBP auto-publish, no IG/FB/LI queue write, no TIMELY draft fills.
+- **Cushion verification + drift correction**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-0/48` = 48 drafts. **Drift +1 captured this session** (prior session logs claimed 47 baseline). Most recent draft created 2026-04-30 02:26 CDT (Post 198) — drift NOT from a fresh write event; PM 05-17 baseline was likely off by 1 originally. PM 05-30 SESSION_END mentioned 47→48 in its claim but file edits never landed. Correction propagated to L12 + L18 entries + CONTEXT.md Social block + L18 option text ("33 of 47" → "33 of 48"; 33 verified via REST head `content=ilike.*Mortgage Solutions LP*` → `0-32/33`). Informational only — not a builder action signal.
+- **NotebookLM CLI**: Auth state inferred via concurrent AM 05-31 lead-gen-am 14:53 CDT inline probe per CHANGELOG entry (identical `Authentication expired or invalid` / WebLiteSignIn redirect on accounts.google.com); not re-probed this session to avoid redundant CLI churn. 28 calendar days since 2026-05-03 PM. **54th sub-session blocked** for Social reckoning counting PM 05-31 (+2 since AM 05-29: PM 05-30 = 53rd + PM 05-31 = 54th; PM 05-29 + AM 05-30 + AM 05-31 social-am partial-fires not counted). No Adam re-auth event since PM 05-30.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep at 48 drafts; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (28 days, 54 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 54 sessions deep).
+- Daily digest: SKIPPED per scheduled-task "no emails to Adam" rule.
+- ADAM-TODO new escalation line: NOT authored — per AM 05-26 forward rule, L12 + L18 + L24 refreshed-in-place only; no stacking.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- Step 1B Supabase voice guide + voice feedback fetch: SKIPPED per PM convention + maintenance-only.
+- TODO.md line 23 (Social posts policy): NOT touched (matches established maintenance pattern — refresh constrained to ADAM-TODO L12/L18/L24 + CONTEXT.md Social block + CHANGELOG + session-log + subagent-status).
+
+### Active Blockers
+1. Cushion-footer disposition (L18 ADAM-TODO) — A/B/C decision still open (**~337h open at PM 05-31 = 14 FULL DAYS EXACTLY since PM 05-17 21:23 CDT; 12+13+14-day thresholds ALL crossed in past 72h with NO Adam ack**).
+2. Symlink-stat bug across all 5 scheduled agents (L24 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~337h). Co-anchored in the AM 05-26 escalation line at L12.
+3. NotebookLM CLI auth expired — 28 calendar days, 54 sub-sessions blocked for Social reckoning.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 58 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161+ lines vs 150-line cap (23+ days over) — needs Adam-driven trim.
+7. **GOALS.md Mon 05-25 weekly cadence + 6 consecutive daytime refresh windows ALL passed (Tue 05-26 → Sun 05-31)** — Adam silent past natural weekly cadence + 144h/6-day grace. Week-of-May-18 governs into 3rd full week. Mon 06-01 = next natural opportunity.
+8. Cron-reliability heterogeneous-degrading — social-pm RECOVERED-AND-HOLDING (7+ of 8); social-am DE-RECOVERED (3-session partial-fire pattern, AM 05-31 ~13h extremely-late).
+9. **4-session silent in-place-edit failure pattern** (PM 05-29 + AM 05-30 + PM 05-30 + AM 05-31 social-am) — PM 05-31 catches up; if AM 06-01 social-am also fails silently → escalate as Claude harness write-reliability concern.
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for AM 06-01
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- **Mon 06-01 (Memorial Day) = 3rd consecutive Mon refresh opportunity for 2-week-stale GOALS file.** If GOALS.md mtime advances during Mon daytime (natural cadence window ~8-12 CDT), AM 06-01 + PM 06-01 sessions re-read for regime change and exit forward rule. Cohort-pause planning signal stays armed for 3rd-consecutive-Mon-skip if GOALS does not advance.
+- AM session: Step 1B + Refresh 07 EXECUTED per master-agent.md (AM-only). If 0 new content found, HELD entry on `rates/2026-05-18.html` remains unchanged.
+- AM 06-01 = 55th consecutive maintenance session if fires on-schedule.
+- If AM 06-01 social-am fires on-time-or-within-jitter → social-am DE-RECOVERED watch flips to recovery-in-progress (1-session streak begins). 3-in-a-row needed before declaring RECOVERED.
+- If AM 06-01 social-am also partial-fires-no-END → 4-consecutive silent-failure pattern hardens; escalate as separate Claude harness write-reliability concern.
+- If L18 flipped `[x]` with Adam's pick before AM 06-01: execute corresponding Builder action (A: 33 PATCHes + reprocess held entry / B: release held entry / C: wait for name-lock signal). Denominator now 48 not 47.
+- If L24 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass.
+- If none flipped + GOALS unchanged: maintenance-only exit, 55th session, refresh L12 + L18 + L24 in place again.
+
+---
+## Session: 2026-05-29 AM — Day 13 regime-change maintenance (AM half); AM cron fired ON SCHEDULE at ~02:34 CDT (~34 min jitter vs ~02:00 target, within ON-SCHEDULE tolerance); **social-am subset RECOVERY STREAK BEGINS at 1** — first on-time-or-within-jitter social-am fire after AM 05-27 SESSION_START-then-abort + AM 05-28 presumed GAP; AM 05-29 SKIPS the formal-escalation-stacking path per AM 05-26 forward rule (PM 05-26 + onward revert to refresh-in-place on L12 + L18 + L24 only); Step 1B EXECUTED (0 new content, HELD entry unchanged); Refresh 07 SKIPPED (no TIMELY drafts due within 48h); cushion drift 0 across 52 sessions; Builder still held; **52nd consecutive maintenance session** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 13 of the regime-change maintenance window. AM-session scope includes Step 1B (GBP content scan + distribution) and the refresh-in-place pattern for L12 + L18 + L24 per AM 05-26 forward rule. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com. Sister styer-social-am subset recovers via this fire (AM 05-29 within-jitter); 2 more on-time-or-within-jitter fires (AM 05-30 + PM 05-30 or sister cohort signals) needed before declaring social-am RECOVERED.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (AM 05-29 02:34 CDT) = 11 full days + ~5h into Day 12, including Mon 05-25 daytime refresh window + Tue 05-26 + Wed 05-27 + Thu 05-28 + overnight Fri 05-29 daytime catch-up windows ALL passed**. Adam silent past natural weekly cadence + 96h grace. Bare `stat -f` still incorrectly returns `Apr 19 13:51:27 2026` (L24 symlink-stat bug verified extant in the tooling that hasn't been patched).
+- **ADAM-TODO gate**: L18 (CUSHION-FOOTER) still `[ ]` (**~269h open at AM 05-29 = 11 full days + ~5h since PM 05-17 21:23 CDT, tracking toward 12-day threshold ~16h away**). L24 (SYMLINK-STAT) still `[ ]` (same eligibility). AM 05-29 IS ~5h past PM 05-28 21:30 CDT → past 24h re-eligibility boundary per ONE-ASK-PER-CYCLE; **L12 (formal escalation) + L18 + L24 all refreshed-in-place with AM 05-29 stamps + 269h elapsed counters + AM 05-29 cron jitter data point + Wed/Thu/Fri-overnight daytime-passed context; NO new dedicated escalation lines authored** per AM 05-26 forward rule "PM 05-26 + onward sessions revert to refresh-in-place on L12 + L18 + L24 only — NO additional escalation lines stack".
+- **Cron-reliability heterogeneous-improving**: AM 05-29 fired at ~02:34 CDT vs target ~02:00 = ~34 min jitter = within ON-SCHEDULE tolerance. **Social-am subset RECOVERY STREAK BEGINS at 1** — first on-time-or-within-jitter social-am fire after AM 05-27 SESSION_START-then-abort + AM 05-28 presumed GAP. Social-pm subset still RECOVERED-AND-HOLDING (PM 05-23 + PM 05-24 + PM 05-25 + PM 05-26 + PM 05-28 all on-time-or-within-jitter, PM 05-27 partial-only = 5 of 6 most-recent). 3-in-a-row needed before declaring social-am RECOVERED. Folds under sister scenarios-am cron-reliability watch still ARMED for AM 05-29 cohort confirmation.
+- **Step 1B EXECUTED**: Voice guide + voice feedback fetch SKIPPED (maintenance-only — no content drafted). Tracker read current through "Scanned 2026-05-26 AM Session". Site scan via `ls -1t` against rates/, blog/, realtor-updates/ — most-recent files unchanged from AM 05-26: `rates/2026-05-18.html` (HELD on 05-19, still HELD), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces detected.** Tracker append: "Scanned 2026-05-29 AM Session — no new content found." HELD entry on `rates/2026-05-18.html` unchanged (release gates still unmet). GBP auto-publish SKIPPED (nothing to distribute). IG/FB/LI content-repost-queue.md SKIPPED (nothing to queue + Architect blocked anyway).
+- **Refresh 07**: SKIPPED — no TIMELY drafts due within 48h (cushion drafts are Sep 23 2026 → Feb 4 2027; all EVERGREEN with no `~[LIVE DATA NEEDED]` placeholders; subagent would no-op).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-0/47` = 47 drafts. **Drift = 0 across 52 maintenance sessions** (AM 05-29 = 52nd).
+- **NotebookLM CLI**: Re-verified at 02:34 CDT via `notebooklm list --json` — identical `Authentication expired or invalid` / WebLiteSignIn redirect on accounts.google.com. 26th calendar day. **52nd sub-session blocked** counting tonight (+1 since PM 05-28). No Adam re-auth event since PM 05-28 21:30 CDT.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (26 days, 52 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 52 sessions deep).
+- Daily digest: N/A (AM session — daily digest is a PM artifact).
+- ADAM-TODO new escalation line: NOT authored — per AM 05-26 forward rule, L12 + L18 + L24 refreshed-in-place only; no stacking.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- Voice guide + voice feedback Supabase fetch in Step 1B § 0: SKIPPED per AM 05-19 forward rule (maintenance-only — fetching adds zero value when no posts will be written).
+- TODO.md line 23 (Social posts policy): NOT touched (matches PM 05-28 + earlier maintenance pattern — refresh constrained to ADAM-TODO L12/L18/L24 + CONTEXT.md Social block + CHANGELOG + tracker + session-log + subagent-status).
+
+### Active Blockers
+1. Cushion-footer disposition (L18 ADAM-TODO) — A/B/C decision still open (**~269h open at AM 05-29 = 11 FULL DAYS + ~5h, tracking toward 12-day threshold ~16h away**).
+2. Symlink-stat bug across all 5 scheduled agents (L24 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~269h). Co-anchored in the AM 05-26 escalation line at L12.
+3. NotebookLM CLI auth expired — 26 calendar days, 52 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 56 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (23+ days over) — needs Adam-driven trim.
+7. **GOALS.md Mon 05-25 + Tue 05-26 + Wed 05-27 + Thu 05-28 + overnight Fri 05-29 daytime refresh windows ALL passed without refresh** — Adam silent past natural weekly cadence + 96h grace. Week-of-May-18 now governs deep into 2nd full week.
+8. Cron-reliability heterogeneous-improving — social-pm RECOVERED-AND-HOLDING; social-am RECOVERY STREAK BEGINS at 1. 3-in-a-row needed before social-am subset RECOVERED.
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for PM 05-29
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- PM session: Step 1B + Refresh 07 SKIPPED (AM-only by design).
+- PM 05-29 = 53rd consecutive maintenance session if fires on-schedule.
+- If PM 05-29 fires on-schedule → social-pm subset RECOVERED-AND-HOLDING extends to 6 of 7.
+- If AM 05-30 social-am also fires on-time-or-within-jitter → social-am RECOVERY STREAK extends to 2 (3-in-a-row needed before declaring social-am RECOVERED).
+- If GOALS.md mtime advances before PM 05-29 (Fri daytime Adam edit), immediately re-read GOALS for any regime change to social-media direction
+- If L18 flipped `[x]` with Adam's pick before PM 05-29: execute corresponding Builder action (A: 33 PATCHes + reprocess held entry / B: release held entry / C: wait for name-lock signal)
+- If L24 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass
+- If neither flipped + GOALS unchanged: maintenance-only exit, 53rd session, refresh L12 + L18 + L24 in place again
+
+---
+## Session: 2026-05-26 PM — Day 10 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:22 CDT (~22 min jitter, **6th consecutive on-time-or-near-on-time social cron signal** across PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25 + AM 05-26 + PM 05-26 = cron-reliability subset RECOVERED-AND-HOLDING [watch already dissolved AM 05-26 at 5-in-a-row threshold; PM 05-26 extends]); PM SKIPS Step 1B + Refresh 07 (AM-only); cushion drift 0 across 50 sessions; **PM 05-26 REVERTS TO REFRESH-IN-PLACE on L12 + L18 + L24 per AM 05-26 forward rule — no new escalation lines stacked**; Builder still held; Tue 05-26 daytime GOALS-refresh catch-up window also passed without refresh; 50th consecutive maintenance session (Scheduled Task — styer-social-pm)
+
+### Focus
+Day 10 regime-change maintenance (PM half). PM-session scope excludes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window) — both AM-only per master-agent.md. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com. **PM 05-26 + onward sessions revert to refresh-in-place on L12 + L18 + L24 only per AM 05-26 forward rule.**
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (PM 05-26 21:22 CDT) = 9 full days + Tue 05-26 daytime now also passed.** Adam did NOT refresh during Mon 05-25 normal cadence NOR during Tue 05-26 daytime catch-up window. Bare `stat -f` still incorrectly returns `Apr 19 13:51:27 2026` (L24 symlink-stat bug verified extant in tooling that hasn't been patched).
+- **ADAM-TODO gate**: L18 (CUSHION-FOOTER) still `[ ]` (**~240h open at PM 05-26 = exactly 10×24h since PM 05-17 21:23 CDT — 10 FULL DAYS**). L24 (SYMLINK-STAT) still `[ ]` (same eligibility). PM 05-26 IS ~19h past AM 05-26 02:29 CDT → within 24h re-eligibility boundary per ONE-ASK-PER-CYCLE; **AM 05-26 formal escalation line on line 12 is the entire formal escalation surface**. Per AM 05-26 forward rule "PM 05-26 + onward sessions revert to refresh-in-place on L18 + L24 only", **L12 + L18 + L24 all refreshed-in-place with PM 05-26 stamps + +24h elapsed counters + 6th-on-time-fire data point; NO new dedicated escalation lines authored**.
+- **Cron-reliability subset RECOVERED-AND-HOLDING**: PM 05-26 fired at ~21:22 CDT vs target ~21:00 = ~22 min jitter = within ON-SCHEDULE tolerance. **6th consecutive on-time-or-near-on-time social cron signal across cohort** (PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25 + AM 05-26 + PM 05-26). Watch already dissolved AM 05-26 at 5-in-a-row threshold; PM 05-26 extends. Re-arms only if AM 05-27 reverts.
+- **Step 1B**: SKIPPED (PM session — AM-only per master-agent.md).
+- **Refresh 07**: SKIPPED (PM session — AM-only per master-agent.md Step 6).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-46/47` = 47 drafts. **Drift = 0 across 50 maintenance sessions** (PM 05-26 = 50th).
+- **NotebookLM CLI**: Re-verified at 21:22 CDT via `notebooklm list --json` — identical `Authentication expired or invalid` / WebLiteSignIn redirect on accounts.google.com. 24th wall-clock day +19h. **50th sub-session blocked** counting tonight (+1 since AM 05-26). No Adam re-auth event since AM 05-26 02:29 CDT.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (24+ days, 50 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 50 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO new escalation line: NOT authored — per AM 05-26 forward rule, L12 + L18 + L24 refreshed-in-place only; no stacking.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- `gbp-content-tracker.md`: NOT touched (PM skips Step 1B).
+
+### Active Blockers
+1. Cushion-footer disposition (L18 ADAM-TODO) — A/B/C decision still open (~240h, exactly 10×24h = 10 full days).
+2. Symlink-stat bug across all 5 scheduled agents (L24 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~240h).
+3. NotebookLM CLI auth expired — 24+ wall-clock days, 50 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 53 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (20+ days over) — needs Adam-driven trim.
+7. **GOALS.md Mon 05-25 daytime + Tue 05-26 daytime refresh windows both passed without refresh** — Adam silent past natural weekly cadence + Tue catch-up window.
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for AM 05-27
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- **AM 05-26 formal escalation line at top of ADAM-TODO (L12) is the entire formal escalation surface — refresh-in-place on L12 + L18 + L24 only; do NOT author new escalation lines.**
+- AM 05-27 = 51st consecutive maintenance session; AM 05-27 also runs Step 1B + Refresh 07 (AM-only).
+- If GOALS.md mtime advances before AM 05-27 (Tue 05-26 evening or overnight Adam edit), immediately re-read GOALS for any regime change to social-media direction
+- If L18 flipped `[x]` with Adam's pick before AM 05-27: execute corresponding Builder action (A: 33 PATCHes + reprocess held entry / B: release held entry / C: wait for name-lock signal)
+- If L24 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass
+- If neither flipped + GOALS unchanged: maintenance-only exit, 51st session, refresh L12 + L18 + L24 in place again
+- Cron-reliability watch DISSOLVED-AND-HOLDING per 6-consecutive-on-time signals; re-arms only if AM 05-27 reverts to late/gap
+
+---
+## Session: 2026-05-26 AM — Day 10 regime-change maintenance (AM half); AM cron fired ON SCHEDULE at ~02:29 CDT (~29 min jitter, **5th consecutive on-time-or-near-on-time social cron signal** across PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25 + AM 05-26 = **cron-reliability subset RECOVERED**); **AM 05-26 FORMAL ESCALATION TRIGGER FIRED** — single dedicated [SOCIAL] 2026-05-26 escalation line authored at top of ADAM-TODO.md (line 12) co-anchoring L18 cushion-footer + L24 symlink-stat; Step 1B GBP scan EXECUTED (0 new content, HELD entry unchanged); Refresh 07 SKIPPED (no TIMELY drafts due within 48h); cushion drift 0 across 49 sessions; Builder still held; **PM 05-26 + onward revert to refresh-in-place — no additional escalation lines stack** (Scheduled Task — styer-social-am)
+
+### Focus
+Day 10 of the regime-change maintenance window. AM-session scope includes Step 1B (GBP content scan + distribution) and the AM 05-26 formal escalation trigger that armed PM 05-17 → PM 05-25 forward rule chain. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. **Unchanged across Mon 05-18 → today (AM 05-26 02:29 CDT) = 9 full days, including the full Mon 05-25 daytime refresh window now passed.** Adam did NOT refresh during normal weekly cadence. Bare `stat -f` still incorrectly returns `Apr 19 13:51:27 2026` (L24 symlink-stat bug verified extant in the tooling that hasn't been patched).
+- **ADAM-TODO gate**: L18 (CUSHION-FOOTER, was L16 pre-escalation insertion) still `[ ]` (**~216h open at AM 05-26 = exactly 9×24h since PM 05-17 21:23 CDT — 9 FULL DAYS**). L24 (SYMLINK-STAT, was L22) still `[ ]` (same eligibility). AM 05-26 IS exactly 24h past AM 05-25 02:29 CDT → AT the 24h re-eligibility boundary per ONE-ASK-PER-CYCLE.
+- **AM 05-26 FORMAL ESCALATION TRIGGER FIRED THIS SESSION.** All three armed predicates met: (1) AM 05-26 cron fired ✓ (2) L18/L24 still `[ ]` ✓ (3) Mon 05-25 daytime window passed + no Adam signal between AM 05-25 02:29 CDT and AM 05-26 02:29 CDT ✓ (GOALS.md mtime unchanged; no `[x]` flips observed). **Action taken**: Single dedicated `[SOCIAL] 2026-05-26 AM 🚨 FORMAL ESCALATION` line authored at TOP of ADAM-TODO.md (line 12) co-anchoring L18 + L24, with 3 specific Adam paths (A/B/C for cushion-footer; ship-or-not for symlink-fix; `touch GOALS.md` to clear stale flag). L18 + L24 themselves ALSO refreshed-in-place with AM 05-26 stamps + cross-references to the new top-of-file escalation line.
+- **Cron-reliability subset RECOVERED**: AM 05-26 fired at ~02:29 CDT vs target ~02:00 = ~29 min jitter = within ON-SCHEDULE tolerance. **5th consecutive on-time-or-near-on-time social cron signal** (PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25 + AM 05-26). Per AM 05-25 forward rule, 5-in-a-row = subset RECOVERED. Separate cron-reliability watch dissolves; re-arms only if AM 05-27 reverts to late/gap.
+- **Step 1B EXECUTED**: Voice guide + voice feedback fetch SKIPPED (maintenance-only — no content drafted). Tracker read current through "Scanned 2026-05-25 AM Session". Site scan via `ls -1t` against rates/, blog/, realtor-updates/ — most-recent files are `rates/2026-05-18.html` (HELD on 05-19, still HELD), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces detected.** Tracker append: "Scanned 2026-05-26 AM Session — no new content found." HELD entry on `rates/2026-05-18.html` unchanged (release gates still unmet). GBP auto-publish SKIPPED (nothing to distribute). IG/FB/LI content-repost-queue.md SKIPPED (nothing to queue + Architect blocked anyway).
+- **Refresh 07**: SKIPPED — no TIMELY drafts due within 48h (cushion drafts are Sep 23 2026 → Feb 4 2027; all EVERGREEN with no `~[LIVE DATA NEEDED]` placeholders; subagent would no-op).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-46/47` = 47 drafts. **Drift = 0 across 49 maintenance sessions** (AM 05-26 = 49th).
+- **NotebookLM CLI**: still expired (24th wall-clock day +12.5h, **49 sub-sessions blocked** counting this one; no Adam re-auth event since PM 05-25 21:23 CDT). No probe this AM — same result expected.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (24+ days, 49 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 49 sessions deep).
+- Daily digest: N/A (AM session — daily digest is a PM artifact).
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- Voice guide + voice feedback Supabase fetch in Step 1B § 0: SKIPPED per AM 05-19 forward rule (maintenance-only — fetching adds zero value when no posts will be written).
+
+### Active Blockers
+1. Cushion-footer disposition (L18 ADAM-TODO, was L16) — A/B/C decision still open (**~216h open at AM 05-26 = exactly 9×24h = 9 full days**). **AM 05-26 formal escalation line now authored at top of ADAM-TODO.**
+2. Symlink-stat bug across all 5 scheduled agents (L24 ADAM-TODO, was L22) — Builder-shippable, filed for Adam visibility (~216h). Co-anchored in the AM 05-26 escalation line.
+3. NotebookLM CLI auth expired — 24+ wall-clock days, 49 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 53 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (20+ days over) — needs Adam-driven trim.
+7. **GOALS.md Mon 05-25 daytime refresh window passed without refresh + Adam's weekly cadence has now slipped one full week beyond normal Mon cadence.**
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for PM 05-26
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- **AM 05-26 formal escalation line is now authored — do NOT stack additional escalation lines.** PM 05-26 + onward sessions revert to refresh-in-place on L18 + L24 only (per stale-flags rule).
+- If GOALS.md mtime advances before PM 05-26 (Tue daytime Adam edit), immediately re-read GOALS for any regime change to social-media direction
+- If L18 flipped `[x]` with Adam's pick (A/B/C) before PM 05-26: execute corresponding Builder action (A: 33 PATCHes + reprocess held entry / B: release held entry / C: wait for name-lock signal)
+- If L24 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass
+- If both flipped: process both + reprocess `rates/2026-05-18.html` held GBP entry in same session
+- If neither flipped + GOALS unchanged at PM 05-26: maintenance-only exit, refresh L18 + L24 in place per ONE-ASK-PER-CYCLE, 50th consecutive session, **no new escalation lines stack** (single dedicated escalation line at top of file is the entire formal escalation surface — refresh it in place if needed on subsequent sessions)
+- Cron-reliability watch DISSOLVED per 5-consecutive-on-time threshold; re-arms only if PM 05-26 reverts to late/gap
+
+---
+## Session: 2026-05-25 PM — Day 9 regime-change maintenance (PM half); PM cron fired ON SCHEDULE at ~21:23 CDT (~23 min jitter, **4th consecutive on-time-or-near-on-time social cron signal** across PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25; cron-reliability concern remains materially de-escalated); PM SKIPS Step 1B + Refresh 07 (AM-only); cushion drift 0 across 48 sessions; **GOALS.md Mon 05-25 daytime refresh window passed without refresh — first half of AM 05-26 escalation predicate satisfied**; L16/L22 ADAM-TODO refreshed in place per ONE-ASK-PER-CYCLE (no new escalation per AM 05-25 forward rule); Builder still held (Scheduled Task — styer-social-pm)
+
+### Focus
+Maintenance pass on PM cron. PM-session scope excludes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window) — both AM-only per master-agent.md. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged across Mon 05-18 → today (PM 05-25 21:23 CDT) = 8 full days + Mon 05-25 daytime window. **Adam did NOT refresh GOALS during today's normal weekly cadence window (~8-12 CDT)** — Mon 05-25 daytime now passed, **first half of AM 05-26 escalation predicate satisfied**. Bare `stat -f` still incorrectly returns `Apr 19 13:51:27 2026` (L22 symlink-stat bug verified extant).
+- **ADAM-TODO gate**: L16 (CUSHION-FOOTER) still `[ ]` (**~192h open at PM 05-25 = exactly 8×24h since PM 05-17 21:23 CDT**). L22 (SYMLINK-STAT) still `[ ]` (same eligibility). PM 05-25 IS ~18h54m past AM 05-25 02:29 CDT → within 24h re-eligibility boundary per AM 05-22 PM forward rule. Per AM 05-25 forward rule "If neither flipped + GOALS unchanged at PM 05-25: maintenance-only exit, refresh L16/L22 in place again per ONE-ASK-PER-CYCLE, 48th consecutive session, no new escalation" — **refresh-in-place applied to both lines, no new dedicated escalation line authored**.
+- **Cron-reliability subset RECOVERY continues**: PM 05-25 fired at ~21:23 CDT vs target ~21:00 = ~23 min jitter = within ON-SCHEDULE tolerance. **4th consecutive on-time-or-near-on-time social cron signal** (PM 05-23 + PM 05-24 + AM 05-25 + PM 05-25). Per AM 05-25 forward rule clause (f), trigger DID NOT FIRE this session. If AM 05-26 also fires on time, 5 consecutive on-time signals = subset RECOVERED.
+- **Step 1B**: SKIPPED (PM session — AM-only per master-agent.md).
+- **Refresh 07**: SKIPPED (PM session — AM-only per master-agent.md Step 6).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.status=draft` → `0-46/47` = 47 drafts. **Drift = 0 across 48 maintenance sessions** (PM 05-25 = 48th).
+- **NotebookLM CLI**: still expired (24th wall-clock day, 48 sub-sessions blocked counting tonight; no Adam re-auth event since AM 05-25 02:29 CDT). No probe this PM — same result expected.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (24th wall-clock day, 48 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 48 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L16/L22 dedicated [SOCIAL] escalation line: NOT authored this cycle — formal escalation trigger ARMED for AM 05-26 (first half of predicate now satisfied; second half needs AM 05-26 cron fire + L16/L22 still `[ ]` + no Adam signal).
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- `gbp-content-tracker.md`: NOT touched (PM skips Step 1B).
+
+### Active Blockers
+1. Cushion-footer disposition (L16 ADAM-TODO) — A/B/C decision still open (~192h, exactly 8×24h).
+2. Symlink-stat bug across all 5 scheduled agents (L22 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~192h).
+3. NotebookLM CLI auth expired — 24th wall-clock day, 48 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 52 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (19+ days over) — needs Adam-driven trim.
+7. **GOALS.md Mon 05-25 daytime refresh window passed without refresh** — first half of AM 05-26 escalation predicate satisfied.
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for AM 05-26
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- **Mon 05-25 daytime GOALS-refresh window passed without refresh — first half of AM 05-26 escalation predicate satisfied**
+- If GOALS.md mtime advances by AM 05-26 (Mon 05-25 evening or overnight Adam edit), immediately re-read GOALS for any regime change to social-media direction
+- **If AM 05-26 fires AND L16/L22 still `[ ]` AND no Adam signal between now and then**: AM 05-26 authors single dedicated [SOCIAL] 2026-05-26 escalation-language line at top of ADAM-TODO.md co-anchoring L16 + L22
+- If L16 flipped `[x]` with Adam's pick before AM 05-26: execute corresponding Builder action (A: 33 PATCHes / B: release held entry / C: wait for name-lock signal)
+- If L22 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass
+- NO new Builder runs until positioning lock
+- **Cron-reliability watch:** if AM 05-26 fires on time, 5 consecutive on-time signals = subset RECOVERED; if AM 05-26 reverts to late/gap, watch re-arms
+
+---
+## Session: 2026-05-25 AM — Day 9 regime-change maintenance; AM cron fired at 02:29 CDT (~29 min late = within ON-SCHEDULE tolerance, **first on-time AM social-am fire in 7 days** after run of AM 05-20 ~8h late → AM 05-21 ~10h+ late → AM 05-22 ~3h11m late → AM 05-23 ~17h35m late → AM 05-24 GAPPED → AM 05-25 ON-TIME); Step 1B ran (0 new content); Refresh 07 ran (0 TIMELY drafts due in 48h); cushion drift 0 → 47 sessions; Builder still held; cron-reliability concern materially de-escalated (3 consecutive on-time-or-near-on-time fires: PM 05-23 + PM 05-24 + AM 05-25); L16/L22 ADAM-TODO refreshed in place; Mon 05-25 GOALS-refresh window ~6-10h out = Adam's natural weekly decision point; AM 05-26 formal escalation trigger preserved (Scheduled Task — styer-social-am)
+
+### Focus
+Day 9 regime-change maintenance. Forward rule from PM 05-24 still in effect (no new Builder runs until pillar architecture aligns to "complicated income" + wholesale-broker positioning AND repositioning copy locks on styermortgage.com).
+
+### Cron Status
+- AM 05-25 fired 02:29 CDT vs target ~02:00 CDT = ~29 min late = WITHIN ON-SCHEDULE TOLERANCE
+- **First on-time AM social-am fire in 7 days**
+- 6-day late-fire/gap streak broken
+- Combined with PM 05-23 + PM 05-24 on-time PM fires = 3 consecutive on-time-or-near-on-time cron signals
+- AM-side subset for social-am: RECOVERY SIGNAL confirmed
+- Cron-reliability concern materially de-escalated (was contributing escalation pressure on AM 05-23/PM 05-24)
+
+### GOALS Gate
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026`
+- Unchanged across Mon 05-18 → Sun 05-24 = 8 consecutive days
+- **Today is Mon 05-25 — Adam's normal weekly GOALS-refresh cadence**
+- ~6-10h until business hours = natural decision point for L16/L22 + Lead Gen [SYSTEM] L12
+- Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning)
+- L22 symlink-stat bug re-verified: bare `stat -f` returns `Apr 19 13:51:27 2026` (symlink mtime); `stat -L -f` returns target mtime correctly
+
+### Completed
+- SESSION_START written to subagent-status.md (full Day 9 detail + AM 05-25 on-time data point + Mon 05-25 GOALS-refresh window framing)
+- Step 1B GBP scan: ran. 0 new content. `rates/2026-05-18.html` still HELD (L16 + L12 + positioning lock all unresolved). Tracker AM 05-25 scan note appended.
+- Refresh 07: ran. Query against social_drafts WHERE classification=timely AND status=draft → empty array. 0 TIMELY drafts due within 48h. No data fills needed.
+- Cushion verification: REST head `Prefer: count=exact` on social_drafts.status=draft → `0-46/47` = 47 drafts. **Drift 0 across 47 consecutive maintenance sessions.**
+- ADAM-TODO L16 (CUSHION-FOOTER) refreshed in place: 192h+ open / 8×24h ago, AM 05-25 on-time-fire data point, Mon 05-25 GOALS-refresh window ~6-10h out framing, AM 05-26 formal escalation trigger preserved
+- ADAM-TODO L22 (SYMLINK-STAT BUG) refreshed in place: 192h+ open / 8×24h ago, AM 05-25 on-time-fire context, AM 05-26 formal escalation trigger preserved
+- gbp-content-tracker.md AM 05-25 scan note appended (also notes AM 05-24 cron gap for continuity)
+- CONTEXT.md "Social Media Agent Status" block: 3 fields replaced (Last worked on / Active blockers / What's next)
+
+### Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per PM 05-17 forward rule (forward rule extended one more cycle)
+- NotebookLM PULL: SKIPPED (CLI auth expired, 24th day, 47 sub-sessions blocked)
+- NotebookLM PUSH: SKIPPED (same)
+- Master notebook update: SKIPPED (same)
+- Daily digest email: SKIPPED per scheduled-task SKILL.md (no emails this AM)
+- New dedicated [SOCIAL] escalation line for L16/L22: SKIPPED per ONE-ASK-PER-CYCLE + 48h-window-saturation rule (AM 05-25 within 24h re-eligibility boundary from PM 05-24 refresh; Mon 05-25 GOALS-refresh window absorbs the natural decision; AM 05-25 on-time fire removed primary cron-reliability escalation pressure)
+
+### Active Blockers
+- L16 cushion-footer A/B/C (~192h+ open, 8×24h)
+- L22 symlink-stat bug (~192h+ open, Builder-shippable but waiting for visibility)
+- NotebookLM CLI auth (24th day, 47 sub-sessions blocked)
+- Positioning copy not yet live on styermortgage.com (Architect re-baseline gated)
+- BLOCKER-LOANOS-001 selfies (52 days, MOOT per GOALS — LoanOS marketing paused)
+- CONTEXT.md still 161 lines (19+ days over 150-line cap, content-judgment standing item)
+- `rates/2026-05-18.html` HELD pending L16 + positioning lock
+
+### Compliance Summary
+N/A — no new drafts written.
+
+### Quality Ratings
+N/A — maintenance-only session.
+
+### Forward Rule for PM 05-25
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`
+- **Mon 05-25 daytime is Adam's normal weekly GOALS-refresh window** — if mtime advances by PM session, immediately re-read GOALS for any regime change
+- If L16 flipped `[x]` with Adam's pick: execute corresponding Builder action (A: 33 PATCHes / B: release held entry / C: wait for name-lock signal)
+- If L22 flipped `[x]` with authorization: Builder ships `stat -L` fix across 5 agents in one pass
+- If neither flipped + GOALS unchanged: maintenance-only exit, 48th consecutive session, refresh L16/L22 in place again
+- If AM 05-26 also passes with zero Adam signal AND L16/L22 still `[ ]`: AM 05-26 authors single dedicated [SOCIAL] 2026-05-26 escalation-language line at top of ADAM-TODO.md co-anchoring L16 + L22 [do not author earlier]
+- NO new Builder runs until positioning lock
+- Cron-reliability watch UPDATED: AM 05-25 on-time fire materially de-escalates concern; if AM 05-26 also fires on time, Lead Gen [SYSTEM] L12 sub-note can flip from "AM-side DEGRADING" to "AM-side RECOVERING" (Lead Gen's call, not social-am's)
+
+---
+## Session: 2026-05-24 PM — Day 8 regime-change maintenance; PM cron fired ON SCHEDULE at 21:23 CDT (second consecutive on-time PM fire after PM 05-23); AM 05-24 styer-social-am GAPPED entirely (first social-am gap of run); PM SKIPS Step 1B + Refresh 07 (AM-only); cushion drift 0 → 46 sessions; Builder still held; L16/L22 ADAM-TODO refreshed in place (PAST 24h re-eligibility boundary at ~25h48m but formal escalation deferred one cycle to allow Mon 05-25 GOALS-refresh window) (Scheduled Task — styer-social-pm)
+
+### Focus
+Maintenance pass on PM cron. PM-session scope excludes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window) — both AM-only per master-agent.md. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged across Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 + Fri 05-22 + Sat 05-23 + Sun 05-24 — 8 consecutive days. Week-of-May-18 still governs. **Next refresh window = Mon 2026-05-25 (~17h out) — Adam's natural weekly decision point.**
+- **ADAM-TODO gate**: L16 (CUSHION-FOOTER, was L12 by old numbering) still `[ ]` (~168h+ open since PM 05-17 21:23 CDT, exactly 7×24h ago). L22 (SYMLINK-STAT, was L18) still `[ ]` (same eligibility). PM 05-24 fired at 21:23 CDT, ~25h48m past AM 05-23 19:35 CDT → **IS past 24h re-eligibility boundary** per AM 05-22 PM forward rule. Per AM 05-23 forward rule, conditions met for authoring single dedicated [SOCIAL] escalation-language line BUT **deferred one more cycle** because: (1) Mon 05-25 GOALS-refresh window only ~17h out = natural Adam decision point likely to close both L16/L22 + sister Lead Gen [SYSTEM] L12 in one Mon morning sweep; (2) Lead Gen [SYSTEM] L12 pile-saturation dedicated line is itself <48h old + unactioned, stacking now compounds pile pressure without new signal; (3) existing L16/L22 refresh-in-place language already escalation-grade. **Formal escalation trigger set: if Mon 05-25 daytime + AM 05-26 both pass with zero Adam signal AND L16/L22 still `[ ]`, author single dedicated [SOCIAL] 2026-05-26 escalation line at top of file co-anchoring both.**
+- **AM 05-24 styer-social-am GAPPED entirely.** No session-log entry, no CHANGELOG entry, no subagent-status carry. First social-am gap of run. Sister AM 05-24 scenarios-am fired ~3h32m late at 11:02 CDT per its own CONTEXT.md update — improvement from AM 05-23 ~12h late but heterogeneous across cohort. PM/nightly subset recovering (PM 05-23 + PM 05-24 both on-time); AM-side subset still degrading for social-am specifically.
+- **Step 1B**: SKIPPED (PM session — AM-only per master-agent.md).
+- **Refresh 07**: SKIPPED (PM session — AM-only per master-agent.md Step 6).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 46 maintenance sessions** (PM 05-24 = 46th).
+- **NotebookLM CLI**: Re-verified at 21:24 CDT via `notebooklm list --json` — identical `Authentication expired or invalid` / WebLiteSignIn redirect on accounts.google.com. 23rd wall-clock day. 46th sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (23rd wall-clock day, 46 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 46 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L16/L22 dedicated [SOCIAL] escalation line: NOT authored this cycle — deferred to AM 05-26 trigger per logic above.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- `gbp-content-tracker.md`: NOT touched (PM skips Step 1B).
+
+### Active Blockers
+1. Cushion-footer disposition (L16 ADAM-TODO) — A/B/C decision still open (~168h+).
+2. Symlink-stat bug across all 5 scheduled agents (L22 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~168h+).
+3. NotebookLM CLI auth expired — 23rd wall-clock day, 46 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 51 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (18+ days over) — needs Adam-driven trim.
+7. `rates/2026-05-18.html` HELD in tracker — released only when L16 + positioning lock both clear.
+8. **Cron-reliability heterogeneous** — PM subset recovering (2 consecutive on-time PM fires); AM-side subset mixed (AM 05-24 social-am GAPPED, AM 05-24 scenarios-am ~3h32m late = partial recovery). Folded into Lead Gen [SYSTEM] L12 sub-note; no separate cron-reliability ADAM-TODO line authored.
+
+### Files touched this session
+- `tasks/social-media/subagent-status.md` — SESSION START + SESSION END blocks replaced
+- `tasks/social-media/session-log.md` — this PM 05-24 entry prepended above AM 05-23
+- `CONTEXT.md` — Social Media Agent Status 3 fields refreshed in place
+- `CHANGELOG.md` — PM 05-24 entry prepended at top
+- `TODO.md` — NEEDS ADAM social line refreshed in place for next forward rule
+- `ADAM-TODO.md` — L16 + L22 refreshed in place with PM 05-24 stamp + AM 05-24 gap note + AM 05-26 formal escalation trigger
+- `DECISIONS.md` — NOT touched (no new decision)
+- `gbp-content-tracker.md` — NOT touched (PM skips Step 1B)
+- `content-repost-queue.md` — NOT touched (Architect still blocked)
+
+### Forward rule for next session (AM 05-25, ~02:00 CDT, Mon)
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`).
+- **Mon 05-25 is Adam's normal weekly GOALS-refresh cadence** — if mtime advances, immediately re-read GOALS for regime change to social-media direction. If GOALS refreshes with footer/positioning direction → exit forward rule, run Phase A or Phase B accordingly.
+- AM session RUNS Step 1B + Refresh 07.
+- If L16 or L22 flipped `[x]` → execute corresponding Builder action.
+- If neither flipped + GOALS unchanged → maintenance-only exit, 47th consecutive session, refresh L16/L22 in place again per ONE-ASK-PER-CYCLE.
+- If AM 05-26 also passes with zero Adam signal (Mon 05-25 daytime + AM 05-26 both unactioned + L16/L22 still `[ ]`): **author single dedicated [SOCIAL] 2026-05-26 escalation-language line at top of ADAM-TODO.md co-anchoring L16 + L22** [do not author earlier].
+- NO new Builder runs until positioning lock + L16 resolution.
+- Cron-reliability watch: if AM 05-25 social-am also gaps or fires extremely late, fold into Lead Gen [SYSTEM] L12 sub-note (do not author separate cron-reliability line).
+
+---
+## Session: 2026-05-23 AM — Day 7 regime-change maintenance; AM cron fired EXTREMELY LATE (19:35 CDT vs ~02:00 target, ~17h35m late, **worst late-fire of social-am run**); Step 1B + Refresh 07 ran; no new content; cushion drift 0 → 44 sessions; Builder still held; L12/L18 ELIGIBLE for hard re-escalation but refreshed-in-place (no Adam visible-activity signal anywhere) (Scheduled Task — styer-social-am)
+
+### Focus
+Maintenance pass on AM cron. AM-session scope includes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged across Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 + Fri 05-22 + Sat 05-23 — Adam did NOT refresh ahead of normal Mon 05-25 cadence either (~2 days out). Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning; LoanOS paused; social-media-am/pm in Keep running).
+- **ADAM-TODO gate**: L12 cushion-footer A/B/C still `[ ]` (~145h+ open since PM 05-17 21:23 CDT). L18 symlink-stat bug still `[ ]` (same eligibility). AM 05-23 fired at 19:35 CDT, **~38h24m past AM 05-22 05:11 CDT — IS past 24h re-eligibility boundary, ELIGIBLE for hard re-escalation**. Per AM 05-22 PM forward rule, refresh-in-place applied this cycle (no Adam visible-activity signal: GOALS.md unrefreshed, NotebookLM CLI auth not restored 22 days, no ADAM-TODO checkbox flips since 05-17 PM, ADAM-TODO line 39 still `[x]`-from-05-17 with no fresh edits). Refreshed-in-place per ONE-ASK-PER-CYCLE; no new lines stacked. **If AM 05-24 also reports zero Adam signal, consider authoring single dedicated escalation-language line rather than infinite refresh-in-place.**
+- **Step 1B**: Read `gbp-content-tracker.md`; scanned `rates/`, `blog/2026-*` (grep-v temp-placeholder), `realtor-updates/`. Most-recent files unchanged from AM 05-22: `rates/2026-05-18.html` (HELD on 05-19), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces to distribute.** `rates/2026-05-18.html` HELD entry not released — L12 still unresolved + positioning copy not yet live. Tracker appended with AM 05-23 scan entry noting late-fire.
+- **Refresh 07**: REST GET on `social_drafts` filtered by `content=ilike.*[LIVE DATA NEEDED]*` AND `scheduled_for=lte.2026-05-25` returned `[]`. 0 TIMELY drafts due within 48h. Cushion is structurally evergreen.
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 44 maintenance sessions** (AM 05-23 = 44th).
+- **NotebookLM CLI**: Re-verified at 19:35 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 22nd wall-clock day. 44th sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+- **Cron-reliability watch**: AM 05-23 ~17h35m late = worst late-fire of social-am run; consistent with broader cron-degradation flagged across scenarios-am (3-day gap + ~12h late) + lead-gen-am (gapped entirely 05-23) + styer-notebooklm-nightly (PM 05-22 ~21h17m late). If AM 05-24 also fires extremely late or gaps, social-am should join the cron-reliability ADAM-TODO escalation line proposed by SEO/SEM agent.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (22nd wall-clock day, 44 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 44 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle even though 24h boundary crossed. Re-escalation logged here + CONTEXT.md only.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+
+### Active Blockers
+1. Cushion-footer disposition (L12 ADAM-TODO) — A/B/C decision still open (~145h+).
+2. Symlink-stat bug across all 5 scheduled agents (L18 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~145h+).
+3. NotebookLM CLI auth expired — 22nd wall-clock day, 44 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 50 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (17+ days over) — needs Adam-driven trim.
+7. `rates/2026-05-18.html` HELD in tracker — released only when L12 + positioning lock both clear.
+8. **NEW** Cron-reliability degradation joining social-am — AM 05-23 ~17h35m late, worst of run.
+
+### Files touched this session
+- `tasks/social-media/subagent-status.md` — SESSION START block replaced
+- `tasks/social-media/session-log.md` — this AM 05-23 entry prepended above PM 05-22
+- `CONTEXT.md` — Social Media Agent Status 3 fields refreshed in place
+- `CHANGELOG.md` — AM 05-23 entry prepended at top
+- `TODO.md` — NEEDS ADAM social-am line refreshed for next forward rule
+- `ADAM-TODO.md` — L12 + L18 refreshed in place per one-ask-per-cycle (no new lines stacked; 24h boundary crossed but no Adam visible-activity signal)
+- `DECISIONS.md` — NOT touched (no new decision)
+- `gbp-content-tracker.md` — AM 05-23 scan entry appended (no new content, late-fire noted)
+- `content-repost-queue.md` — NOT touched (Architect still blocked)
+
+### Forward rule for next session (PM 05-23, ~21:00 CDT)
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`).
+- PM session SKIPS Step 1B + Refresh 07 (both AM-only).
+- PM 05-23 < 24h past AM 05-23 19:35 CDT → L12/L18 refresh-in-place per ONE-ASK-PER-CYCLE.
+- NO new Builder runs until positioning lock + L12 resolution.
+- Cron-reliability watch: if PM 05-23 also fires extremely late or gaps, fold social-am into the broader cron-reliability ADAM-TODO escalation already proposed by SEO/SEM agent.
+
+---
+## Session: 2026-05-22 PM — Day 6 evening regime-change maintenance; PM cron fired late (2026-05-23 00:14 CDT vs 21:00 target, ~3h14m late, rolled past midnight); PM SKIPS Step 1B + Refresh 07 (AM-only); cushion drift 0 → 43 sessions; Builder still held; L12/L18 refreshed-in-place (NOT past 24h re-eligibility boundary from AM 05-22 05:11 CDT) (Scheduled Task — styer-social-pm)
+
+### Focus
+Maintenance pass on PM cron. PM-session scope excludes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window) — both AM-only per master-agent.md. Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged from AM 05-22 (cron-fire-to-cron-fire). Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning; LoanOS paused; social-media-am/pm in Keep running).
+- **ADAM-TODO gate**: L12 cushion-footer A/B/C still `[ ]` (~122h+ open since PM 05-17 21:23 CDT). L18 symlink-stat bug still `[ ]` (same eligibility). PM 05-22 fired at 2026-05-23 00:14 CDT, ~19h03m after AM 05-22 05:11 CDT — NOT past 24h re-eligibility boundary. Both refreshed-in-place per ONE-ASK-PER-CYCLE rule, no new lines stacked. Next eligible hard re-escalation window = AM 05-23 (any AM session firing >24h past AM 05-22 05:11 CDT, i.e., after 05-23 05:11 CDT).
+- **Step 1B**: SKIPPED (PM session — AM-only per master-agent.md).
+- **Refresh 07**: SKIPPED (PM session — AM-only per master-agent.md Step 6).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 43 maintenance sessions** (PM 05-22 = 43rd).
+- **NotebookLM CLI**: Re-verified at 00:15 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 21st wall-clock day. 43rd sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (21st wall-clock day, 43 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 43 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle. Re-escalation logged here + CONTEXT.md only.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- `gbp-content-tracker.md`: NOT touched (PM skips Step 1B).
+
+### Active Blockers
+1. Cushion-footer disposition (L12 ADAM-TODO) — A/B/C decision still open (~122h+).
+2. Symlink-stat bug across all 5 scheduled agents (L18 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~122h+).
+3. NotebookLM CLI auth expired — 21st wall-clock day, 43 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 49 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (16+ days over) — needs Adam-driven trim.
+7. `rates/2026-05-18.html` HELD in tracker — released only when L12 + positioning lock both clear.
+
+### Files touched this session
+- `tasks/social-media/subagent-status.md` — SESSION START block replaced
+- `tasks/social-media/session-log.md` — this PM 05-22 entry prepended above AM 05-22
+- `CONTEXT.md` — Social Media Agent Status 3 fields refreshed in place
+- `CHANGELOG.md` — PM 05-22 entry prepended at top
+- `TODO.md` — NEEDS ADAM social-pm line refreshed for next forward rule
+- `ADAM-TODO.md` — L12 + L18 refreshed in place per one-ask-per-cycle (no new lines stacked)
+- `DECISIONS.md` — NOT touched (no new decision)
+- `gbp-content-tracker.md` — NOT touched (PM skips Step 1B)
+- `content-repost-queue.md` — NOT touched (Architect still blocked)
+
+### Forward rule for next session (AM 05-23, ~02:00 CDT)
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`).
+- AM session RUNS Step 1B + Refresh 07.
+- AM 05-23 > 24h past AM 05-22 05:11 CDT → L12/L18 ARE eligible for hard re-escalation. If still `[ ]`, agent may consider escalation language (still defer to one-ask-per-cycle if Adam visibly active elsewhere; otherwise refresh-in-place is still safe default).
+- NO new Builder runs until positioning lock + L12 resolution.
+
+---
+## Session: 2026-05-22 AM — Day 6 regime-change maintenance; AM cron fired late (05:11 CDT vs 02:00 target, ~3h11m late); Step 1B + Refresh 07 ran; no new content; cushion drift 0 → 42 sessions; Builder still held; L12/L18 refreshed-in-place (NOT past 24h re-eligibility boundary from AM 05-21 12:34 CDT) (Scheduled Task — styer-social-am)
+
+### Focus
+Maintenance pass on AM cron. AM-session scope includes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged from AM 05-21 (cron-fire-to-cron-fire). Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning; LoanOS paused; social-media-am/pm in Keep running).
+- **ADAM-TODO gate**: L12 cushion-footer A/B/C still `[ ]` (~104h+ open since PM 05-17 21:23 CDT). L18 symlink-stat bug still `[ ]` (same eligibility). AM 05-22 fired at 05:11 CDT, ~16h37m after AM 05-21 12:34 CDT — NOT past 24h re-eligibility boundary. Both refreshed-in-place per ONE-ASK-PER-CYCLE rule, no new lines stacked. Next eligible hard re-escalation window = AM 05-23.
+- **Step 1B**: Read `gbp-content-tracker.md`; scanned `rates/`, `blog/2026-*` (grep-v temp-placeholder), `realtor-updates/`. Most-recent files unchanged from AM 05-21: `rates/2026-05-18.html` (HELD on 05-19), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces to distribute.** `rates/2026-05-18.html` HELD entry not released — L12 still unresolved + positioning copy not yet live. Tracker unchanged.
+- **Refresh 07**: REST GET on `social_drafts` filtered by `content=ilike.*[LIVE DATA NEEDED]*` AND `scheduled_for=lte.2026-05-24` returned `[]`. 0 TIMELY drafts due within 48h. Cushion is structurally evergreen.
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 42 maintenance sessions** (AM 05-22 = 42nd).
+- **NotebookLM CLI**: Re-verified at 05:11 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 21st wall-clock day. 42nd sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (21st wall-clock day, 42 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 42 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle. Re-escalation logged here + CONTEXT.md only.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+
+### Active Blockers
+1. Cushion-footer disposition (L12 ADAM-TODO) — A/B/C decision still open (~104h+).
+2. Symlink-stat bug across all 5 scheduled agents (L18 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~104h+).
+3. NotebookLM CLI auth expired — 21st wall-clock day, 42 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 49 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (16+ days over) — needs Adam-driven trim.
+7. `rates/2026-05-18.html` HELD in tracker — released only when L12 + positioning lock both clear.
+
+### Files touched this session
+- `tasks/social-media/subagent-status.md` — SESSION START block replaced
+- `tasks/social-media/session-log.md` — this AM 05-22 entry prepended above AM 05-21
+- `CONTEXT.md` — Social Media Agent Status 3 fields refreshed in place
+- `CHANGELOG.md` — AM 05-22 entry prepended at top
+- `TODO.md` — NEEDS ADAM social-am line refreshed for next forward rule
+- `ADAM-TODO.md` — L12 + L18 refreshed in place per one-ask-per-cycle (no new lines stacked)
+- `DECISIONS.md` — NOT touched (no new decision)
+- `gbp-content-tracker.md` — NOT touched (no new content detected)
+- `content-repost-queue.md` — NOT touched (Architect still blocked)
+
+### Forward rule for next session (PM 05-22, ~21:00 CDT)
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`).
+- PM session SKIPS Step 1B + Refresh 07 (both AM-only).
+- PM 05-22 < 24h past AM 05-22 → L12/L18 refresh-in-place per ONE-ASK-PER-CYCLE.
+- NO new Builder runs until positioning lock + L12 resolution.
+- Next eligible L12/L18 hard re-escalation window = AM 05-23 (>24h past AM 05-22 05:11 CDT).
+
+---
+## Session: 2026-05-21 AM — Day 5 regime-change maintenance; AM cron fired late (12:34 CDT vs 02:00 target); Step 1B + Refresh 07 ran; no new content; cushion drift 0 → 41 sessions; Builder still held; L12/L18 refreshed in eligible re-escalation window (Scheduled Task — styer-social-am)
+
+### Focus
+Maintenance pass on AM cron. AM-session scope includes Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged from AM 05-20 (cron-fire-to-cron-fire). Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning; LoanOS paused; social-media-am/pm in Keep running).
+- **ADAM-TODO gate**: L12 cushion-footer A/B/C still `[ ]` (~82h+ open since PM 05-17 21:23 CDT). L18 symlink-stat bug still `[ ]` (same eligibility). AM 05-21 is the next eligible re-escalation window for both (>24h past AM 05-20 cycle). Both refreshed-in-place per ONE-ASK-PER-CYCLE rule, no new lines stacked.
+- **Step 1B**: Read `gbp-content-tracker.md`; scanned `rates/`, `blog/2026-*` (grep-v temp-placeholder), `realtor-updates/`. Most-recent files: `rates/2026-05-18.html` (already tracked as HELD on AM 05-19), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces to distribute.** `rates/2026-05-18.html` HELD entry not released — L12 still unresolved + positioning copy not yet live. Tracker unchanged.
+- **Refresh 07**: REST GET on `social_drafts` filtered by `content=ilike.*[LIVE DATA NEEDED]*` AND `scheduled_for=lte.2026-05-23` returned `[]`. 0 TIMELY drafts due within 48h. Cushion is structurally evergreen.
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 41 maintenance sessions** (AM 05-21 = 41st).
+- **NotebookLM CLI**: Re-verified at 12:34 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 20th wall-clock day. 41st sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (20th wall-clock day, 41 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 41 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle. Re-escalation logged here + CONTEXT.md only.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+
+### Active Blockers
+1. Cushion-footer disposition (L12 ADAM-TODO) — A/B/C decision still open (~82h+).
+2. Symlink-stat bug across all 5 scheduled agents (L18 ADAM-TODO) — Builder-shippable, filed for Adam visibility (~82h+).
+3. NotebookLM CLI auth expired — 20th wall-clock day, 41 sub-sessions blocked.
+4. Repositioning copy not yet live on styermortgage.com — Architect re-baseline still pending.
+5. BLOCKER-LOANOS-001 selfies — 48 days; MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. CONTEXT.md 161 lines vs 150-line cap (15+ days over) — needs Adam-driven trim.
+7. `rates/2026-05-18.html` HELD in tracker — released only when L12 + positioning lock both clear.
+
+### Files touched this session
+- `tasks/social-media/subagent-status.md` — SESSION START block replaced
+- `tasks/social-media/session-log.md` — this AM 05-21 entry prepended above AM 05-20
+- `CONTEXT.md` — Social Media Agent Status 3 fields refreshed in place
+- `CHANGELOG.md` — AM 05-21 entry prepended at top
+- `TODO.md` — NEEDS ADAM social-am line refreshed for next forward rule
+- `ADAM-TODO.md` — L12 + L18 refreshed in place per one-ask-per-cycle (no new lines stacked)
+- `DECISIONS.md` — NOT touched (no new decision)
+- `gbp-content-tracker.md` — NOT touched (no new content detected)
+- `content-repost-queue.md` — NOT touched (Architect still blocked)
+
+### Forward rule for next session (PM 05-21, ~21:00 CDT)
+- First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`).
+- PM session SKIPS Step 1B + Refresh 07 (both AM-only).
+- PM 05-21 < 24h past AM 05-21 → L12/L18 refresh-in-place per ONE-ASK-PER-CYCLE.
+- NO new Builder runs until positioning lock + L12 resolution.
+- Next eligible L12/L18 hard re-escalation window = AM 05-22 (>24h past AM 05-21).
+
+---
+## Session: 2026-05-20 AM — Day 4 regime-change maintenance; AM cron fired late (10:02 CDT vs 02:00 target); Step 1B + Refresh 07 reactivated; no new content; cushion drift 0 → 40 sessions; Builder still held (Scheduled Task — styer-social-am)
+
+### Focus
+Maintenance pass on AM cron. AM-session scope reactivates Step 1B (GBP content scan + distribution) and Refresh 07 (TIMELY-draft 48h window). Forward rule from PM 05-17 still holds: no new Builder runs until pillar architecture aligns to new positioning AND repositioning copy locks on styermortgage.com.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged from PM 05-19 (cron-fire-to-cron-fire). Week-of-May-18 still governs ("complicated income" + wholesale-pricing repositioning; LoanOS paused; social-media-am/pm in Keep running).
+- **ADAM-TODO gate**: L12 cushion-footer A/B/C still `[ ]` (~58h+ open since PM 05-17 21:23 CDT). L18 symlink-stat bug still `[ ]` (same eligibility). AM 05-20 is the next eligible re-escalation window for both (>24h past PM 05-19 cycle) — but ONE-ASK-PER-CYCLE rule prevails over re-escalation cadence. Both refreshed-in-place only, no new lines stacked.
+- **Step 1B (REACTIVATED on AM)**: Read `gbp-content-tracker.md`; scanned `rates/`, `blog/2026-*` (grep-v temp-placeholder), `realtor-updates/`. Most-recent files: `rates/2026-05-18.html` (already tracked as HELD on AM 05-19), `blog/2026-04-17-should-i-refinance-austin-tx-2026.html` (tracked 04-19), `realtor-updates/2026-04-27-the-crash-that-isnt-coming-data-for-your-buyers.html` (tracked 04-28). **0 new content pieces to distribute.** `rates/2026-05-18.html` HELD entry not released — L12 still unresolved + positioning copy not yet live. Tracker unchanged.
+- **Refresh 07 (REACTIVATED on AM)**: REST GET on `social_drafts` filtered by `content=ilike.*[LIVE DATA NEEDED]*` AND `scheduled_for=lte.2026-05-22` returned `[]`. 0 TIMELY drafts due within 48h. Cushion is structurally evergreen (no `[LIVE DATA NEEDED]` placeholders in the 47-deep band) — refresh is a no-op until new TIMELY drafts get authored, which the forward rule prohibits.
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 40 maintenance sessions** (AM 05-20 = 40th).
+- **NotebookLM CLI**: Re-verified at 10:02 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 19th wall-clock day. 40th sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (19th wall-clock day, 40 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 40 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle. Re-escalation logged here + CONTEXT.md only.
+- `content-repost-queue.md`: NOT touched (Architect still blocked; no new content to queue).
+- Native-platform Architect picks: SKIPPED (no new content + Builder held).
+
+### Files Touched
+- `tasks/social-media/subagent-status.md` — replaced with AM 05-20 SESSION START block (will append SESSION FULLY COMPLETE at end).
+- `tasks/social-media/session-log.md` — this entry prepended above PM 05-19.
+- `loanos-clone/CONTEXT.md` — Social Media Agent Status block 3 fields (Last worked on / Active blockers / What's next) replaced in place.
+- `loanos-clone/CHANGELOG.md` — AM 05-20 entry prepended at top.
+- `loanos-clone/TODO.md` — social-am line refreshed for forward rule (no other changes).
+- `loanos-clone/tasks/ADAM-TODO.md` — L12 + L18 lines refreshed-in-place (one-ask-per-cycle; no new lines stacked).
+- `gbp-content-tracker.md`: NOT touched (no new content detected).
+- `content-repost-queue.md`: NOT touched (Architect still blocked by forward rule).
+- `DECISIONS.md`: NOT touched (no new decision).
+
+### Verification chain
+- [x] NotebookLM pull report exists — DEFERRED (CLI auth expired, 19th day)
+- [x] Research written — N/A (no Architect)
+- [x] Content strategy/calendar written — N/A (no Architect)
+- [x] Posts written to social_drafts — N/A (no Builder)
+- [x] Reviewer approved — N/A
+- [x] QA confirmed — N/A
+- [x] Session log updated — yes (this entry)
+- [x] NotebookLM push — SKIPPED (CLI auth expired)
+- [x] Daily digest sent — SKIPPED per scheduled-task SKILL.md
+- [x] Master notebook updated — SKIPPED (CLI auth expired)
+
+### Next session (PM 05-20)
+First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`). PM 05-20 SKIPS Step 1B + Refresh 07 (both AM-only). ONE-ASK-PER-CYCLE keeps L12/L18 refresh-in-place if still `[ ]` (PM 05-20 < 24h past AM 05-20). If L12 flipped `[x]` with A/B/C answer, execute selected option (A = 33 Supabase PATCHes for footer rewrites + reprocess `rates/2026-05-18.html` held entry; B = release held entry under existing footer; C = wait for name-lock signal). If L18 flipped `[x]` with authorization, Builder ships `stat -L` fix across 5 agents. NO new Builder runs until positioning copy locks. Next eligible L12/L18 re-escalation window = AM 05-21.
+
+---
+## Session: 2026-05-19 PM — Day 3 regime-change maintenance; PM session (Step 1B + Refresh 07 SKIPPED per master-agent.md); Builder still held; cushion drift 0 → 39 sessions (Scheduled Task — styer-social-pm, on-time fire 21:22 CDT)
+
+### Focus
+Maintenance pass on PM cron. AM 05-19 already executed Step 1B (held `rates/2026-05-18.html`) and Refresh 07 (0 timely drafts). PM scope per master-agent.md is the regular subagent sequence — which is held under the PM 05-17 forward rule. So this PM is verification + tracker-hygiene only.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Unchanged from AM 05-19. Week-of-May-18 still governs.
+- **ADAM-TODO gate**: L12 (cushion-footer A/B/C) and L18 (symlink-stat bug) both still `[ ]` (~33h open since PM 05-17 21:23 CDT). PM 05-19 is past the 24h boundary of AM 05-19's re-escalation window — but ONE-ASK-PER-CYCLE rule prevails over re-escalation cadence. No new lines stacked.
+- **Step 1B**: SKIPPED (PM session — AM-only per master-agent.md Step 1B header). Awareness-only check: `ls -1t` against `rates/`, `blog/2026-*`, `realtor-updates/` shows no new files since AM 05-19 02:29 CDT scan. `rates/2026-05-18.html` remains the most-recent rate page (still HELD in tracker).
+- **Refresh (07)**: SKIPPED (PM session — AM-only).
+- **Cushion verification**: REST head `Prefer: count=exact` on `social_drafts.scheduled_for` between 2026-09-23 and 2027-02-05 → `0-46/47` = 47 drafts. **Drift = 0 across 39 maintenance sessions** (PM 05-19 = 39th).
+- **NotebookLM CLI**: Re-verified at 21:22 CDT — identical `Authentication expired or invalid` / WebLiteSignIn redirect. 18th wall-clock day. 39th sub-session.
+- **Forward-rule status**: Unchanged. NO new Builder runs until (a) pillar architecture re-aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Step 1B + Refresh 07: SKIPPED structurally (AM-only).
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (18th wall-clock day, 39 sub-sessions blocked).
+- Master notebook update: SKIPPED (CLI block; backlog 39 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place per one-ask-per-cycle. Re-escalation logged here + CONTEXT.md only.
+
+### Files Touched
+- `tasks/social-media/subagent-status.md` — replaced with PM 05-19 SESSION START + SESSION FULLY COMPLETE block.
+- `tasks/social-media/session-log.md` — this entry prepended above AM 05-19.
+- `loanos-clone/CONTEXT.md` — Social Media Agent Status block 3 fields (Last worked on / Active blockers / What's next) replaced in place.
+- `loanos-clone/CHANGELOG.md` — PM 05-19 entry prepended at top.
+- `loanos-clone/TODO.md` — social-pm line refreshed for forward rule (no other changes).
+- `gbp-content-tracker.md`: NOT touched (Step 1B skipped on PM).
+- `content-repost-queue.md`: NOT touched (Architect still blocked by forward rule).
+- `ADAM-TODO.md`: NOT touched (refreshed-in-place; one-ask-per-cycle).
+- `DECISIONS.md`: NOT touched (no new decision).
+
+### Verification chain
+- [x] NotebookLM pull report exists — DEFERRED (CLI auth expired, 18th day)
+- [x] Research written — N/A (no Architect)
+- [x] Content strategy/calendar written — N/A (no Architect)
+- [x] Posts written to social_drafts — N/A (no Builder)
+- [x] Reviewer approved — N/A
+- [x] QA confirmed — N/A
+- [x] Session log updated — yes (this entry)
+- [x] NotebookLM push — SKIPPED (CLI auth expired)
+- [x] Daily digest sent — SKIPPED per scheduled-task SKILL.md
+- [x] Master notebook updated — SKIPPED (CLI auth expired)
+
+### Next session (AM 05-20)
+First action: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f`). AM 05-20 is the next eligible re-escalation window for L12/L18 (>24h past PM 05-19 cycle). Step 1B + Refresh 07 reactivated on AM. If L12 still `[ ]`, refresh-in-place again per one-ask-per-cycle. If L12 flipped `[x]` with A/B/C answer, execute selected option (A = 33 Supabase PATCHes for footer rewrites + reprocess `rates/2026-05-18.html` held entry; B = release held entry under existing footer; C = wait for name-lock signal). If L18 flipped `[x]` with authorization, Builder ships `stat -L` fix across 5 agents. NO new Builder runs until positioning copy locks.
+
+---
+## Session: 2026-05-19 AM — Day 3 regime-change maintenance; Step 1B + Refresh 07 reactivated; 1 new rate page detected, HELD; Builder still held (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
+
+### Focus
+Maintenance + first AM-session under new "complicated income" / wholesale-pricing GOALS direction. Per AM 05-19 forward rule: re-activate Step 1B and Refresh 07; re-check ADAM-TODO L12 + L18 at 24h boundary; no new Builder runs until positioning copy locks.
+
+### Completed
+- **GOALS gate** (`stat -L -f "%Sm"`): `May 17 12:11:31 2026`. Mon 2026-05-18 fully passed with no refresh; Week-of-May-18 still governs (cohort-pause averted via Sunday 12:11 refresh; no new freshness signal needed).
+- **ADAM-TODO gate**: L12 (cushion-footer A/B/C) and L18 (symlink-stat bug) both still `[ ]`. Filed PM 05-17 21:23 CDT; AM 05-19 02:29 CDT is the first session past the 24h-of-file boundary that the PM 05-17 forward rule allowed for re-escalation. Refreshed-in-place pattern preserved — no new ADAM-TODO lines stacked (one-ask-per-cycle).
+- **Step 1B (GBP Content Distribution)** — REACTIVATED. Scan results:
+  - Rate pages: `rates/2026-05-18.html` is NEW (not in tracker). All older rate pages already tracked.
+  - Blog: 0 new (latest tracked `2026-04-27`, no new 2026-* blog files since).
+  - Newsletter: 0 new (latest tracked `2026-04-27`, no new realtor-updates files since).
+  - Decision on `rates/2026-05-18.html`: **HELD**. Page source still uses "Adam Styer | Mortgage Solutions LP"; auto-publishing would extend the brand-mismatch state into Publer GBP post history while L12 is unresolved and Phase A/B haven't executed. Tracker updated with held entry. Native IG/FB/LI not queued in `content-repost-queue.md` because Architect cannot consume entries while positioning lock is unresolved.
+  - Voice-guide / voice-feedback Supabase fetches: SKIPPED. No new content actually being written this session; pulls would be wasted compute.
+- **Refresh (07)** — REACTIVATED. Window: 2026-05-19 07:30 UTC → 2026-05-21 07:30 UTC. Query: `social_drafts` where `status='draft'` AND `classification='timely'` AND `scheduled_for ≤ +48h` → empty. 0 placeholders to fill. Cushion still scheduled Sep 23 2026 → Feb 4 2027; nothing in May.
+- **Cushion verification**: REST head `Prefer: count=exact` → `0-46/47` = 47 drafts. **Drift = 0** across 38 maintenance sessions.
+- **Forward-rule status**: NO new Builder runs until (a) pillar architecture aligns to "complicated income" + wholesale-pricing positioning AND (b) repositioning copy locks on styermortgage.com. Cushion is 9 months deep; no cadence pressure.
+
+### Deferred / Skipped
+- Architect / Builder / Quality / Reviewer / QA: SKIPPED per PM 05-17 forward rule (still in effect).
+- NotebookLM PULL/PUSH: SKIPPED. CLI auth expired (18th wall-clock day, 38 sub-sessions blocked). No re-auth between PM 05-18 21:24 CDT and now.
+- Master notebook update: SKIPPED (CLI block; backlog 38 sessions deep).
+- Daily digest: SKIPPED per scheduled-task SKILL.md (no emails to Adam from this task).
+- ADAM-TODO L12 / L18 hard re-escalation: NOT done — refreshed-in-place pattern preserves one-ask-per-cycle. Re-escalation logged in session log + CONTEXT.md only.
+
+### Files Touched
+- `tasks/social-media/subagent-status.md` — overwritten with AM 05-19 session record.
+- `tasks/social-media/gbp-content-tracker.md` — appended AM 05-19 held-entry for `rates/2026-05-18.html`.
+- `tasks/social-media/session-log.md` — this entry prepended.
+- `CONTEXT.md` — 3 Social fields replaced in place.
+- `CHANGELOG.md` — AM 05-19 entry prepended.
+- `TODO.md` — social line refreshed for next forward rule.
+
+### Active Blockers (unchanged from PM 05-18 + 1 noted)
+1. **L12 cushion-footer disposition** — 29h open, eligible for fresh re-escalation but not re-stacked. 33/47 drafts carry MSLP footer; CLAUDE.md mandates HyperSmart. Agent recommendation remains (C).
+2. **L18 symlink-stat bug** — 29h open. Builder can ship without Adam input; filed for visibility.
+3. **NotebookLM CLI auth** — 18th day, 38 sub-sessions blocked.
+4. **Repositioning copy not yet live on styermortgage.com** — Architect re-baseline held until site copy locks (Phase A → Phase B).
+5. **BLOCKER-LOANOS-001 selfies** (46 days) — MOOT per GOALS (LoanOS marketing paused indefinitely).
+6. **CONTEXT.md still 161 lines** (13+ days over 150-line cap) — meta-issue tracked by standup agent.
+
+### Next Session Forward Rule (PM 05-19, ~9:00 PM CDT)
+First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md`. PM 05-19 will be ~19h since GOALS-mtime threshold; new threshold for Mon 2026-05-25. Step 1B + Refresh 07 = AM-only → SKIPPED for PM. Re-check ADAM-TODO L12 + L18; AM 05-20 will be the next eligible re-escalation window if still `[ ]`. Builder remains held. If `rates/2026-05-19.html` lands during the day, treat as second held entry in tracker — do not auto-publish.
+
+### Output Produced
+None (maintenance-only session; no Builder run).
+
+### Quality Ratings
+N/A — no Architect/Builder/Quality/Reviewer/QA stages this session.
+
+---
+## Session: 2026-05-18 PM — Day 2 of regime-change maintenance; 24h-boundary on L12/L18 (no re-escalation); Builder still held (Scheduled Task — styer-social-pm, on-time fire 21:23 CDT)
+
+**Fire time:** 2026-05-18 21:23 CDT (~23 min after 21:00 PM target — normal jitter, treated as on-time).
+
+**Gate 1 — GOALS.md mtime (`stat -L`):** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026`. **Unchanged from AM 05-18.** No Mon-daytime re-edit detected during the working-hours window (12:11 Sun → 21:23 Mon). Week-of-May-18 directive still in force.
+
+**Gate 2 — ADAM-TODO L12 + L18 (PM 05-17 items, exact 24h boundary):**
+- L12 `[SOCIAL] 2026-05-17 PM ❓ DECISION` cushion-footer A/B/C: still `[ ]`.
+- L18 `[SOCIAL] 2026-05-17 PM 🐞 BUG` symlink-stat fix: still `[ ]`.
+Both filed PM 05-17 21:23 CDT; this session fires PM 05-18 21:23 CDT = **at the exact 24h boundary** (within one second). Per the one-ask-per-cycle / 24h-of-file rule, do NOT re-escalate this session — AM 05-19 is the first eligible re-escalation window. No new ADAM-TODO lines appended.
+
+**Step 1B (GBP scan):** SKIPPED (AM-only per master-agent.md). PM session does not run.
+
+**Refresh (07):** SKIPPED (AM-only per master-agent.md). PM session does not run.
+
+**Cushion verification (Adam-org, status=draft):** REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&select=platform,pillar,scheduled_for` with `Prefer: count=exact` + `Range: 0-0` → content-range `0-46/47` = **47 drafts**. Identical to AM 05-18 and PM 05-17 readouts. Drift = 0 across 37 maintenance sessions. Cushion remains 9 months deep.
+
+**NotebookLM PULL — re-verified at 21:24 CDT:** `notebooklm list --json` → `Authentication expired or invalid` WebLiteSignIn redirect. **17th wall-clock day blocked; 37 sub-sessions counting this PM.** No Adam re-auth event between AM 05-18 social-am 02:29 CDT and now. PULL/PUSH structurally deferred.
+
+**Architect / Builder / Quality / Reviewer / QA:** SKIPPED. Per PM 05-17 forward rule (re-affirmed by AM 05-18): no Builder until (a) cushion-footer disposition answered AND (b) site repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+**NotebookLM PUSH:** SKIPPED (same CLI auth block).
+**Master notebook update:** SKIPPED (same CLI auth block).
+
+**BLOCKER-LOANOS-001:** No change. `tasks/social-media/assets/selfies/` directory still does not exist (46 days). MOOT per GOALS — LoanOS marketing paused indefinitely. Entry kept for historical traceability.
+
+**Files updated this session:**
+- `tasks/social-media/subagent-status.md` (SESSION_START + final block).
+- `tasks/social-media/today-mission.md` (overwritten — PM 05-18 maintenance brief).
+- `tasks/social-media/session-log.md` (this PM 05-18 entry prepended above AM 05-18).
+- `CONTEXT.md` (3 Social fields replaced in place — Last worked on / Active blockers / What's next; net 0 line drift, still 161 lines).
+- `CHANGELOG.md` (PM 05-18 entry prepended at top, above AM 05-18 scenarios-am).
+- `TODO.md` (social posts line refreshed for PM 05-18 forward rule).
+- `tasks/ADAM-TODO.md` NOT touched (exact 24h-of-file boundary; one-ask-per-cycle rule).
+- `DECISIONS.md` NOT touched (no new decision).
+- `gbp-content-tracker.md` + `content-repost-queue.md` NOT touched (PM doesn't scan).
+- Supabase `social_drafts` table: READ-ONLY (count verification only). No PATCH/POST/DELETE.
+
+**No emails sent to Adam. No daily digest sent.** Reporting limited to project files per scheduled-task SKILL.md.
+
+**Forward rule for AM 05-19 (Tue ~02:00 CDT, ~5h out):**
+1. **First action:** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (always `-L`). Weekly refresh window is Mon, so likely unchanged.
+2. Re-check ADAM-TODO L12 (cushion-footer) + L18 (symlink-stat). **24h boundary now passed** — if still `[ ]`, AM 05-19 may re-escalate per one-ask-per-cycle.
+   - If L12 is `[x]` with Adam's pick: **(A)** Builder runs Supabase PATCH on 33 drafts, footer-only, bodies untouched (~60s, ~33 calls); **(B)** no cushion edits; **(C)** no cushion edits, wait for "name locked = X" signal.
+   - If L18 is `[x]` with authorization → Builder ships `stat -L` fix across the 5 agents.
+3. AM session RE-ACTIVATES Step 1B (GBP content scan) + Refresh 07 (TIMELY cushion fill).
+4. **No new Builder runs** until pillar architecture aligns to new positioning AND site repositioning copy locks.
+5. NotebookLM PULL/PUSH still blocked structurally — defer.
+6. 38th-consecutive maintenance-pattern session if Adam doesn't respond before AM cron.
+
+---
+## Session: 2026-05-18 AM — First AM after regime change; maintenance-only; PM 05-17 ADAM-TODO items still pending (within 24h, no re-escalation) (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
+
+**Fire time:** 2026-05-18 02:29 CDT (~29 min after 02:00 AM target — normal jitter, treated as on-time).
+
+**Gate 1 — GOALS.md mtime (CORRECTED `stat -L`):** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026`. UNCHANGED in the ~14h since PM 05-17. Week-of-May-18 directive in force: close loans, build pipeline, land cleanly at new company; "complicated income" specialist + wholesale pricing; story-driven; NO "21-day close", NO performance-metric marketing; throttle 1-2/week at 9/10. `social-media-am/pm` confirmed in "Keep running" list.
+
+**Gate 2 — ADAM-TODO PM 05-17 items:**
+- L12 — `[SOCIAL] 2026-05-17 PM ❓ DECISION` cushion-footer A/B/C: still `[ ]`.
+- L18 — `[SOCIAL] 2026-05-17 PM 🐞 BUG` symlink-stat gate-check: still `[ ]`.
+Both filed ~5h ago. Within 24h-of-file window — do NOT re-escalate per one-ask-per-cycle rule. No new ADAM-TODO lines appended this session.
+
+**Step 1B — GBP scan (AM-only):** Scanned `~/Documents/Claude/styerteam-mortgage-site/{rates,blog,realtor-updates}/`. 5 rate files + 10 blog files + 2 newsletter files visible. All already in `gbp-content-tracker.md`. Most recent tracker entry: `blog/2026-04-27-why-home-prices-arent-crashing.html` posted 2026-04-28 (Publer job `69f062de8b17fc4ff5c6b9ea`). **0 new content for 20th consecutive AM scan** (Apr 29 → May 18). Nothing posted to GBP. Nothing queued to `content-repost-queue.md`. `gbp-content-tracker.md` NOT touched.
+
+**Refresh (07) — AM-only:** Cushion query returned 0 drafts inside the 48h horizon (2026-05-18 07:29 UTC → 2026-05-20 07:29 UTC). Earliest cushion draft `scheduled_for` = `2026-09-23T15:00:00+00:00`. No TIMELY templates to fill. No-op.
+
+**Cushion verification (Adam-org, `scheduled_for`):** REST `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&select=platform,pillar,scheduled_for` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Identical readout to PM 05-17. Drift = 0 across 36 maintenance sessions. Cushion is 9 months deep.
+
+**NotebookLM PULL — re-verified at 02:29 CDT:** `notebooklm list --json` → `Authentication expired or invalid` WebLiteSignIn redirect. **17th wall-clock day blocked, 36 sub-sessions counting this AM.** No Adam re-auth event between PM 05-17 22:10 CDT (SEO/SEM nightly check) and now. PULL/PUSH structurally deferred.
+
+**BLOCKER-LOANOS-001:** `tasks/social-media/assets/selfies/` directory still does not exist (45 days). Now **MOOT** per GOALS — "No LoanOS marketing work — paused indefinitely." Keeping the blocker entry for historical traceability but it no longer gates any active work.
+
+**Architect / Builder / Quality / Reviewer / QA:** SKIPPED. Per PM 05-17 forward rule, no Builder run until (a) cushion-footer disposition answered AND (b) site repositioning copy locks on styermortgage.com. Cushion 9 months deep; no cadence pressure.
+
+**Files updated this session:**
+- `tasks/social-media/subagent-status.md` (SESSION_START + final block).
+- `tasks/social-media/today-mission.md` (overwritten — AM 05-18 maintenance-only brief).
+- `tasks/social-media/session-log.md` (this AM 05-18 entry prepended above PM 05-17).
+- `CONTEXT.md` (3 Social fields replaced in place — Last worked on / Active blockers / What's next; net 0 line drift, still 161 lines, 12+ days over cap).
+- `CHANGELOG.md` (AM 05-18 entry prepended at top).
+- `TODO.md` (social posts line refreshed for AM 05-18 forward rule).
+- `tasks/ADAM-TODO.md` NOT touched (within 24h of PM 05-17 file; one-ask-per-cycle rule).
+- `DECISIONS.md` NOT touched (no new decision — PM 05-17 forward rule applied).
+- `gbp-content-tracker.md` + `content-repost-queue.md` NOT touched (zero new content).
+- Supabase `social_drafts` table: READ-ONLY (count verification, earliest scheduled_for). No PATCH/POST/DELETE.
+
+**No emails sent to Adam. No daily digest sent.** Reporting limited to project files per scheduled-task SKILL.md.
+
+**Forward rule for PM 05-18 (Mon evening, ~19h out):**
+1. **First action:** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (always `-L`). Refreshed today's directive is Mon-Mon — non-typical refresh window for daytime, but Adam might iterate; watch for any mtime change.
+2. Re-check ADAM-TODO L12 (cushion-footer) + L18 (symlink-stat bug). If L12 is `[x]` with Adam's pick:
+   - **(A) HyperSmart now** → Builder runs Supabase PATCH on 33 drafts, footer-only, bodies untouched.
+   - **(B) Hold for new name** → no cushion edits.
+   - **(C) Rewrite at name lock** → no cushion edits; wait for "name locked = X" signal.
+   If L18 is `[x]` with authorization → Builder ships `stat -L` fix across the 5 agents.
+3. PM session SKIPS Step 1B (AM-only) + SKIPS Refresh 07 (AM-only). Cushion verification only (same REST head query).
+4. **No new Builder runs** until pillar architecture aligns to new positioning AND site repositioning copy locks.
+5. NotebookLM PULL/PUSH still blocked structurally — defer.
+6. 37th-consecutive maintenance-pattern session if Adam doesn't respond before PM cron.
+
+---
+## Session: 2026-05-17 PM — REGIME CHANGE; GOALS refreshed today (symlink-stat bug exposed); cushion bodies clean, footer NEEDS ADAM (Scheduled Task — styer-social-pm, on-time fire 21:23 CDT)
+
+**Fire time:** 2026-05-17 21:23 CDT (~23 min after 21:00 PM target — normal jitter, treated as on-time).
+
+**Gate 1 — GOALS.md mtime (CORRECTED METHOD):** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026`. **Refreshed today.** Bare `stat -f "%Sm"` (used by AM 05-17 and 27 prior days) returns `Apr 19 13:51:27 2026` — the symlink's own mtime (`ls -la` shows `/Users/adamstyer/Documents/GOALS.md` is a 31-byte symlink to `Daily Operating System/GOALS.md`). Bug present in all 5 scheduled agents. Filed as new ADAM-TODO line for Builder to ship the `stat -L` fix.
+
+**Gate 2 — ADAM-TODO `[SOCIAL] 2026-05-04 PM` line:** marked `[x]` SUPERSEDED this session — GOALS refresh answered the cron-disposition question. Week-of-May-18 GOALS keeps `social-media-am/pm` in the "Keep running" list and redirects scope to "complicated income" + wholesale-pricing pillars. No cron pause; scope shifts.
+
+**New positioning (Week of May 18, 2026 — full text in GOALS.md):**
+- North Star: close loans, build pipeline, land cleanly at new company.
+- Specialist on "complicated income" — self-employed, 1099, bank statement, asset depletion, DSCR, jumbo, the deals banks decline.
+- Second leg: wholesale pricing — 40+ lenders, often beats bank quotes on conventional files too.
+- Story-driven. NO "21-day close" claim. NO performance-metric marketing.
+- Throttle still 1-2/week at 9/10 bar.
+- Phase A: pre-audit cleanup of styermortgage.com (testimonials, rate widget, superlatives, EHL/NMLS coverage, GLBA privacy).
+- Phase B: name swap once new company name locks.
+- Paused: LoanOS marketing (so BLOCKER-LOANOS-001 selfies is now moot regardless of selfies).
+
+**Step 1B (GBP scan):** SKIPPED (AM-only per master-agent.md). PM session does not run.
+
+**Refresh (07):** SKIPPED (AM-only per master-agent.md). PM session does not run.
+
+**Cushion audit vs new positioning (PM 05-17 work — first audit since GOALS shifted):**
+- REST GET `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&select=id,platform,pillar,title,content,scheduled_for&order=scheduled_for.asc` → 47 rows (51,673 bytes). Schedule range 2026-09-23 → 2027-02-04.
+- Pattern scan in Python (regex on each draft's `title` + `content`):
+  - Close-time / "21-day" / "fastest close" matches: **0**.
+  - Performance-metric matches (career loan count / "since 2017" / "track record"): **2** — Posts 164 + 173. Both contain "Nine years of doing this" as personal credibility woven into a lock-vs-float story and a "why I stopped predicting rates" story. **Verdict: keep both.** They fit the new story-driven specialist voice — these are credibility signals, not performance-metric marketing claims (which target close-speed / loan-volume / awards).
+  - Stale brand-footer matches ("Adam Styer \| Mortgage Solutions LP" or "styerteam.com"): **33/47**. Auto-appended by master-agent.md Step 1B rule. Now contradicted by CLAUDE.md "HyperSmart Loans (never Adam Styer | Mortgage Solutions LP)" mandate. GOALS Phase B is "name swap once new company name locks."
+  - Complicated-income content overlap (self-employed/1099/bank-stmt/DSCR/jumbo/W-2/non-QM/investor): **5/47** (Posts 173/180×2/182/184). Light coverage.
+  - Wholesale/broker positioning overlap (wholesale/40+ lenders/broker/correspondent/shop/lender network): **1/47** (Post 170).
+- **Verdict:** Cushion bodies survive the positioning shift cleanly — no archives, no body edits. Footer decision is a regime question for Adam (3 options filed in ADAM-TODO). Light coverage of the new pillars is fine — cushion is 9 months deep, plenty of slots for future Architect runs to weave in complicated-income + wholesale angles.
+
+**Architect / Builder / Quality / Reviewer / QA:** SKIPPED. Architect re-baseline (new pillar mix) deliberately held until Adam confirms (a) cushion-footer disposition AND (b) styermortgage.com repositioning copy is locked. Running Architect now risks publishing drafts that reference site pages (e.g., bank-statement loan page, wholesale page) that don't exist yet. Cushion is 9 months deep — no cadence pressure.
+
+**NotebookLM PULL/PUSH:** DEFERRED. CLI auth expired (16th wall-clock day; backlog now 35 sessions deep including this PM). Master notebook push: SKIPPED.
+
+**Files updated this session:**
+- `tasks/social-media/subagent-status.md` (SESSION_START + regime-change block).
+- `tasks/social-media/today-mission.md` (overwritten with PM 05-17 regime-change mission).
+- `CHANGELOG.md` (PM 05-17 entry prepended above AM 05-17 scenarios-am entry).
+- `CONTEXT.md` (Social Media Agent Status 3 fields replaced in place — Last worked on / Active blockers / What's next).
+- `TODO.md` (social posts line refreshed for regime change + new AM 05-18 forward rule).
+- `DECISIONS.md` (regime-change recognition + cushion-keep verdict prepended above 2026-04-21 n8n freeze).
+- `tasks/ADAM-TODO.md` (2026-05-04 social line marked `[x] SUPERSEDED`; 2 new lines appended — cushion-footer disposition + symlink-stat bug fix).
+- This session-log.md (PM 05-17 entry prepended above AM 05-17).
+
+**Files NOT touched (intentional):**
+- `tasks/social-media/gbp-content-tracker.md` — PM session skips Step 1B.
+- `tasks/social-media/content-repost-queue.md` — PM session skips Step 1B.
+- Supabase `social_drafts` table — read-only. No PATCH/POST/DELETE. Adam approves footer disposition first.
+- `tasks/social-media/loanos-pool*.md` — LoanOS marketing now paused per GOALS.
+
+**No emails sent to Adam. No daily digest sent.** Reporting limited to project files per scheduled-task SKILL.md.
+
+**Forward rule for AM 05-18 (Mon, ~5h out):**
+1. **First action:** `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NOT bare `stat -f`). If target mtime is newer than `May 17 12:11:31 2026`, re-read GOALS and re-plan from new directives.
+2. Re-check ADAM-TODO for the 2 new lines filed PM 05-17 — cushion-footer disposition + symlink-stat bug. If footer line is `[x]` with Adam's pick:
+   - **(A) HyperSmart now** → Builder runs Supabase PATCH on 33 drafts, footer-only, bodies untouched, ~60s total.
+   - **(B) Hold for new name** → no cushion edits; resume normal AM pattern.
+   - **(C) Rewrite at name lock** → no cushion edits this session; flag the Phase B trigger.
+3. If symlink-stat bug line is `[x]` with Adam authorization (or Builder ships it autonomously) → propagate the `stat -L` fix across the other 4 agents.
+4. **Step 1B AM scan** of `~/Documents/Claude/styerteam-mortgage-site/` — first opportunity to find the first new content in 19+ AM scans (likely the first repositioning rollout page; new positioning page count = 0 today). If found, queue to GBP-only auto-publish per master-agent.md Step 1B 3A; queue IG/FB/LI to `content-repost-queue.md` for Architect.
+5. **Architect re-baseline** held until Adam confirms repositioning copy is live on styermortgage.com. **No new Builder runs** for native social drafts until pillar architecture aligns to new positioning.
+6. NotebookLM PULL/PUSH still blocked structurally — defer.
+
+---
+## Session: 2026-05-17 AM — Maintenance only (35th consecutive); GOALS still unchanged (28 days); Step 1B + Refresh 07 RUN with zero work; cushion drift = 0 (Scheduled Task — styer-social-am, on-time fire 02:31 CDT)
+
+**Fire time:** 2026-05-17 02:31 CDT (~31 min after 02:00 AM target — normal jitter, treated as on-time).
+
+**Gate 1 — GOALS.md mtime:** `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. UNCHANGED (28 days, no overnight Sat→Sun refresh in the ~5h between PM 05-16 21:29 CDT and AM 05-17 02:31 CDT). 3rd consecutive Mon weekly skip + Tue 05-12 + Wed 05-13 + Thu 05-14 + Fri 05-15 (full day) + Sat 05-16 (full day, AM+PM) all passed without refresh. Week-of-Apr-20 directive still governs. **Mon 05-18 is the threshold refresh window (~1 day out).**
+
+**Gate 2 — ADAM-TODO `[SOCIAL] 2026-05-04 PM` line:** still `[ ]` open at L30. `stat -f "%Sm" tasks/ADAM-TODO.md` → `May 16 03:52:15 2026` (AM 05-16's own write; confirms PM 05-16 no-touch rule honored). 26 cycles open across (PM 05-04 → … → PM 05-16 → AM 05-17). Per PM 05-16 forward rule "do NOT re-escalate (one ask per cycle, still active)" — honored.
+
+**Step 1B (GBP scan) — RUN (AM-only):** Scanned `~/Documents/Claude/styerteam-mortgage-site/{rates,blog,realtor-updates}/`. 5 rate files, 10 blog files, 2 newsletter files visible. ALL already in `tasks/social-media/gbp-content-tracker.md`. Most recent tracker entry: `blog/2026-04-27-why-home-prices-arent-crashing.html` posted 2026-04-28 (Publer job `69f062de8b17fc4ff5c6b9ea`). Zero new content for 19th consecutive AM scan (Apr 29 → May 17). Nothing posted to GBP. Nothing queued to `content-repost-queue.md`. `gbp-content-tracker.md` NOT touched.
+
+**Refresh (07) — RUN (AM-only):** Cushion query (same Adam-org filter + `scheduled_for` column) returned 0 drafts inside the 48h horizon (2026-05-17 07:31 UTC → 2026-05-19 07:31 UTC). Earliest cushion draft = 2026-09-23. No TIMELY templates to fill.
+
+**Cushion verification (Adam-org, `scheduled_for`):** REST GET `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&select=platform,pillar,scheduled_for` with `Prefer: count=exact` → content-range `0-46/47` = **47 drafts**. Schedule range 2026-09-23 → 2027-02-04. Earliest = LinkedIn authority `2026-09-23T15:00:00+00:00`. Latest = Instagram personal `2027-02-04T15:00:00+00:00`. Pillar mix: authority×19 / education×15 / personal×13. Platform mix: linkedin×18 / instagram×16 / facebook×13. **Cushion drift = 0 across all 35 maintenance sessions.** Identical readout to PM 05-16 / AM 05-16 / PM 05-15.
+
+**Org-filter rule (carried):** always filter cushion queries by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on `scheduled_for`. Schema name = `scheduled_for` (NOT `scheduled_at`).
+
+**NotebookLM PULL/PUSH:** DEFERRED per pattern. PUSH backlog now 34 sessions deep — combines into next build session. Also blocked structurally by expired CLI auth (separate ADAM-TODO line, 16th day).
+
+**BLOCKER-LOANOS-001:** still active. `tasks/social-media/assets/selfies/` directory still does not exist (44 days; `ls` returned "No such file or directory"). Parent `assets/` also missing. LoanOS stream paused.
+
+**Mission:** MAINTENANCE only. Reasoning written in `today-mission.md`. Escalation HELD; no ADAM-TODO append. Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+
+**Forward rule for PM 05-17 (Sun evening):**
+- Re-check `tasks/ADAM-TODO.md` for `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance).
+- Re-check `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` — Sun afternoon/evening is non-typical refresh window; watch for any change between AM (02:31 CDT) and PM (~21:29 CDT) fire.
+- If GOALS still unchanged at PM 05-17 fire AND ADAM-TODO line still `[ ]`, hold maintenance — do NOT re-escalate. 36th consecutive maintenance session.
+- PM session: SKIP Step 1B (AM-only) + SKIP Refresh 07 (AM-only). Cushion check is identical query (Adam-org filter + `scheduled_for` column).
+- Mon-skip pressure: 3 consecutive Mon GOALS-day skips fully realized (04-27 / 05-04 / 05-11) + Tue 05-12 + Wed 05-13 + Thu 05-14 + Fri 05-15 (full day) + Sat 05-16 (full day, AM+PM) + Sun 05-17 AM ALL passed. **Mon 05-18 is THE refresh threshold (~1 day out).** If Mon 05-18 AM/PM both pass without GOALS refresh, 4th-consecutive-week threshold trips and cohort-pause planning signal (flagged PM 05-12) should re-fire to ADAM-TODO with explicit recommendation: pause both social crons until next GOALS shift.
+
+**Files updated:**
+- subagent-status.md (SESSION_START + final block at end of session)
+- today-mission.md (overwritten with AM 05-17 mission brief — MAINTENANCE only)
+- session-log.md (AM 05-17 entry prepended above PM 05-16)
+- CONTEXT.md (3 social fields replaced — Last worked on / Active blockers / What's next; net 0 line drift, still 161 lines)
+- CHANGELOG.md (AM 05-17 social entry prepended at top of file)
+- TODO.md (social posts line refreshed for 35-streak + PM 05-17 forward rule)
+- tasks/ADAM-TODO.md NOT touched (one-ask-per-cycle rule)
+- DECISIONS.md NOT touched (no new decision — same forward rule applied)
+- tasks/social-media/gbp-content-tracker.md NOT touched (zero new content found)
+- tasks/social-media/content-repost-queue.md NOT touched (zero new content found)
+
+No emails sent to Adam. No daily digest sent. Reporting limited to project files.
+
+**NEEDS ADAM (carried — not new):**
+- `[SOCIAL] 2026-05-04 PM ❓ DECISION` — social cron disposition: (A) redirect Wk49 with NEW non-LoanOS sourcing / (B) pause cron until next GOALS shift / (C) continue maintenance. Agent recommends (B). Awaiting Adam (now 26 cycles open).
+- Trim CONTEXT.md from 161 → ≤150 lines (TODO.md, content judgment).
+- Selfies upload (BLOCKER-LOANOS-001, 44 days).
+- NotebookLM CLI re-auth (`/Users/adamstyer/.local/bin/notebooklm login`) — blocks future PUSH; PUSH backlog now 34 sessions deep.
+- GOALS.md weekly refresh — 3rd consecutive Mon skip realized through Sun 05-17 AM. **Mon 05-18 is the threshold; if it also slips, 4th-consecutive-week cohort-pause signal trips.**
+
+---
+## Session: 2026-05-16 PM — Maintenance only (34th consecutive); GOALS still unchanged (27 days); Step 1B + Refresh 07 SKIPPED (PM); cushion drift = 0 (Scheduled Task — styer-social-pm, on-time fire 21:29 CDT)
+
+**Fire time:** 2026-05-16 21:29 CDT (~29 min after 21:00 PM target — normal jitter, treated as on-time).
+
+**Gate 1 — GOALS.md mtime:** `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Apr 19 13:51:27 2026`. UNCHANGED (27 days, no Sat afternoon/evening refresh between AM 05-16 02:29 CDT and PM 05-16 21:29 CDT — ~19h window). 3rd consecutive Mon weekly skip + Tue 05-12 + Wed 05-13 + Thu 05-14 + Fri 05-15 (full day) + Sat 05-16 (full day) all passed without refresh. Week-of-Apr-20 directive still governs. Next planned refresh window = Mon 05-18 (~1.5 days out).
+
+**Gate 2 — ADAM-TODO `[SOCIAL] 2026-05-04 PM` line:** still `[ ]` open at line 30. No inline Adam response between AM 05-16 (02:29 CDT) and PM 05-16 (21:29 CDT). 25 cycles open (PM 05-04 → AM 05-16 → **PM 05-16**). Per AM 05-16 forward rule "do NOT re-escalate (one ask per cycle, still active)" — honored.
+
+**Step 1B (GBP scan):** SKIPPED — AM-only per master-agent.md.
+
+**Refresh (07):** SKIPPED — AM-only per master-agent.md.
+
+**Cushion verification (Adam-org filtered, column = `scheduled_for`):**
+Query: `social_drafts?organization_id=eq.18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft&select=platform,pillar,scheduled_for&order=scheduled_for.asc` with `Prefer: count=exact`. Response: `content-range: 0-46/47` = **47 drafts**.
+- Earliest: `2026-09-23T15:00:00+00:00` (LinkedIn authority — Post 157).
+- Latest: `2027-02-04T15:00:00+00:00` (Instagram personal — Post 198).
+- Pillar mix: authority×19 / education×15 / personal×13.
+- Platform mix: linkedin×18 / instagram×16 / facebook×13.
+- **Drift = 0 across all 34 maintenance sessions.** Identical readout to AM 05-16 / PM 05-15 / AM 05-15.
+
+**Org-filter rule (carried):** always filter cushion queries by `organization_id=18613f82-fdd9-42dd-a09e-f3c577328258&status=eq.draft` on `scheduled_for` column.
+
+**NotebookLM PULL/PUSH:** DEFERRED per pattern. PUSH backlog now 33 sessions deep (+1 from AM 05-16). Also blocked structurally by expired CLI auth (15th day; no Sat re-auth observed).
+
+**BLOCKER-LOANOS-001:** still active. `tasks/social-media/assets/selfies/` directory still does not exist (43 days, verified via `ls` "No such file or directory"). Parent `assets/` also missing. LoanOS pillar stream paused.
+
+**Mission:** MAINTENANCE only. Reasoning in `today-mission.md`. Escalation HELD; no ADAM-TODO append. Architect / Builder / Quality / Reviewer / QA: SKIPPED (no build).
+
+**Forward rule for AM 05-17 (Sun morning):**
+- Re-check `tasks/ADAM-TODO.md` `[SOCIAL] 2026-05-04 PM` line — if `[x]` or has inline Adam response, follow chosen branch (pause / redirect / stay-maintenance).
+- Re-check `stat -f "%Sm" /Users/adamstyer/Documents/GOALS.md`. Sun is non-typical; watch for any change.
+- If both unchanged, hold maintenance — do NOT re-escalate. 35th consecutive maintenance session.
+- AM session: RUN Step 1B + RUN Refresh 07 per master-agent.md.
+- **Mon-skip pressure update:** 3 fully-realized consecutive Mon GOALS-day skips + Tue/Wed/Thu/Fri full days + Sat full day (AM+PM) all passed. **Mon 05-18 is the next refresh window (~1.5 days out).** If that also slips → 4th-consecutive-week threshold → cohort-pause planning signal flagged PM 05-12.
+
+**Files updated:**
+- subagent-status.md (SESSION_START + final block)
+- today-mission.md (overwritten with PM 05-16 mission brief — MAINTENANCE only)
+- session-log.md (this entry prepended above AM 05-16)
+- CONTEXT.md (3 social fields replaced — net 0 line drift, still 161 lines)
+- CHANGELOG.md (PM 05-16 social entry prepended at top)
+- TODO.md (social posts line refreshed for 34-streak + AM 05-17 forward rule)
+- tasks/ADAM-TODO.md NOT touched (one-ask-per-cycle rule)
+- DECISIONS.md NOT touched (no new decision)
+- tasks/social-media/gbp-content-tracker.md NOT touched (Step 1B SKIPPED — PM)
+
+**NEEDS ADAM (carried — not new):**
+- `[SOCIAL] 2026-05-04 PM ❓ DECISION` — social cron disposition: (A) redirect Wk49 with NEW non-LoanOS sourcing / (B) pause cron until next GOALS shift / (C) continue maintenance. Agent recommends (B). 25 cycles open.
+- Trim CONTEXT.md from 161 → ≤150 lines (TODO.md / content judgment).
+- Selfies upload (BLOCKER-LOANOS-001, 43 days).
+- NotebookLM CLI re-auth (`/Users/adamstyer/.local/bin/notebooklm login`) — blocks future PUSH; backlog now 33 sessions deep.
+- GOALS.md weekly refresh — 3rd consecutive Mon skip realized through Sat 05-16 full day. Mon 05-18 is the next refresh window before 4th-week threshold trips.
+
+No emails sent to Adam. No daily digest sent. Reporting limited to project files.
+
+---
 ## Session: 2026-05-16 AM — Maintenance only (33rd consecutive); GOALS still unchanged (27 days); Step 1B ran (0 new content); Refresh 07 ran (0 TIMELY in 48h); cushion drift = 0 (Scheduled Task — styer-social-am, on-time fire 02:29 CDT)
 
 **Fire time:** 2026-05-16 02:29 CDT (~29 min after 02:00 AM target — normal jitter, treated as on-time).
@@ -3855,3 +5140,231 @@ Research: 4/5 | Strategy: 4/5 | Execution: 4/5 | Review: 5/5 | QA: 5/5
 - Rolling pillar mix: authority correction overshot. After Wks 18-19 fell out of window, authority collapsed from 40% to ~15% across Wks 20-23. Wks 24-25 need heavy authority content to recover.
 - TIMELY CPI template (Post 131): BLS July CPI schedule date UNVERIFIED (403 from BLS site). Refresh subagent should attempt BLS fetch ~Aug 10 AM session and confirm date before scheduling.
 - Post 129 rewrite removed generic "People talk about financial partners" middle paragraph — correct call, voice tightened considerably.
+
+---
+## Session: 2026-06-14 AM — Content Scan + Pipeline Hold (Scheduled Task — styer-social-am)
+Type: Step 1B scan + Refresh check (no build — transition freeze)
+
+### Completed
+- SESSION_START written: 2026-06-14 02:33 CDT. GOALS.md confirms social-media-am stays running.
+- Step 1B (GBP Distribution): scanned rates/, blog/, realtor-updates/ — 0 new content (no slugs 06-09→06-14). Skipped.
+- BLOCKER gate: BLOCKER-LOANOS-001 still active (selfies/ — LoanOS stream stays paused, doesn't block 4-pillar).
+- Refresh (07): 0 TIMELY drafts due within 48h. Earliest draft 2026-09-23. No-op.
+- Cushion check: 47 drafts (REST head 0-46/47). Healthy, ~3-month runway. No urgency.
+- NotebookLM PULL/PUSH: skipped — CLI auth re-verified expired (browser re-login needed). Recurring; flagged.
+- Builder/Architect pipeline: HELD (MSLP→HyperSmart brand transition + new-company compliance period). No drafts written.
+
+### No-action rationale
+Consistent with 06-11/12/13 sessions. No new website content, no TIMELY drafts due, healthy draft cushion, Builder frozen pending company-name lock. Correct output = report, no writes to live platforms.
+
+### Standing items (no new ADAM-TODO — already flagged)
+- NotebookLM CLI auth expired — Adam must re-run `notebooklm login` (browser).
+- 2 stray old-brand MSLP Publer posts still scheduled (FB Jul 10 9am CDT; LinkedIn draft) — pending L18/L20 footer A/B/C decision. Left untouched (editing pre-empts Adam's call).
+- Rate page 2026-05-18.html HELD (4 wks stale) — needs fresh rate update or explicit OK to post as dated/historical.
+- Newsletter 2026-06-08 "When Other Lenders Say No" — READY-TO-SHIP, queued for Architect (best fit for GOALS complicated-income positioning); sits until Builder pipeline reopens.
+
+### Compliance
+No content published. No Publer calls. No emails. No fabricated data.
+
+### Next Session Instructions
+Priority 1: Step 1B scan for content 06-14→next. Priority 2: re-verify NotebookLM auth (skip if still expired). Priority 3: if MSLP→HyperSmart name lock lands, reopen Builder and process the 2026-06-08 newsletter from content-repost-queue.md first.
+
+---
+## Session: 2026-06-15 PM — Maintenance / Pipeline Hold (Scheduled Task — styer-social-pm)
+Type: PM maintenance (no build — MSLP→HyperSmart transition freeze). PM skips Step 1B + Refresh 07.
+
+### Completed
+- SESSION_START written 21:22 CDT. GOALS.md confirms social-media-pm stays in "Keep running."
+- NotebookLM PULL: attempted, auth re-verified EXPIRED (CLI `list` → Google sign-in redirect). PULL/PUSH blocked. No-op.
+- Cushion verified: 47 drafts (SQL-authoritative; REST head `0-47/48` = known off-by-one). ~3-month runway, healthy.
+- Builder/Architect/Quality/Reviewer/QA: pipeline HELD (positioning + site-copy lock). 0 drafts written.
+- BLOCKER gate: BLOCKER-LOANOS-001 still active (selfies/ empty — LoanOS stream paused; does not block 4-pillar).
+
+### New findings (re-verified, not parroted)
+- **GOALS.md refreshed Jun 6 16:34** (mtime + "Last updated: 2026-06-06"). The dominant "GOALS stale since May 17 / 19 days" escalation thread (ADAM-TODO L20 + L22) is now FACTUALLY OBSOLETE — flagging here for a future supervised prune (left ADAM-TODO untouched per anti-stacking + read-only convention).
+- **NotebookLM CLI was updated**: `--json` flag removed, `notebooks list` → `list`. MEMORY.md note "always use --json" is stale. Auth still genuinely expired regardless.
+- **New blog today**: `blog/2026-06-15-mortgage-rates-inflation-iran-peace-deal.html` (rate/market = TIMELY). Did NOT distribute (PM skips Step 1B). Flagged for AM 06-16 Step 1B — must pass compliance gate (rate content → NMLS #513013 + directional language, not specific rates) before any GBP post.
+
+### Standing items (already flagged — no new ADAM-TODO line)
+- 3 GBP-ready evergreen pieces awaiting one "ship it" (2 new 06-14 blogs + 06-08 "When Other Lenders Say No" newsletter) — ADAM-TODO 06-15 + 06-09.
+- HELD `rates/2026-05-18.html` (4 wks stale). Old MSLP-branded Publer posts (FB Jul 10 + LI draft) still scheduled. GBP listing name still MSLP (Google-side rename, Adam-only). Cushion-footer A/B/C. `stat -L` symlink fix (Builder-shippable, flip `[x]`). NotebookLM CLI auth.
+
+### Compliance
+No content published. No Publer calls. No social_drafts inserts. No emails. No fabricated data.
+
+### Next Session Instructions (AM 06-16)
+Priority 1: Step 1B scan — distribute today's new 06-15 rate/market blog to GBP (compliance gate: directional rate language + NMLS #513013, EHL on visuals). Priority 2: re-verify NotebookLM auth (skip if still expired). Priority 3: if MSLP→HyperSmart name lock lands, reopen Builder and process content-repost-queue (06-08 newsletter first).
+
+---
+
+## 2026-06-16 AM (styer-social-am) — Maintenance: 1 new rate/market blog → HELD (TIMELY)
+
+**Mode:** AM | **Type:** Maintenance (Sequence A variant — Builder/Architect/Quality/Reviewer/QA held). **Cron:** ~08:09 CDT.
+
+**Step 1B (GBP content distribution scan):**
+- 1 NEW piece: `blog/2026-06-15-mortgage-rates-inflation-iran-peace-deal.html` (rate/market, mtime Jun 15 10:25, 1 day old — PM 06-15 pre-flagged it for this AM Step 1B).
+- Characterized inline: on-brand (HyperSmart ×11, "Mortgage Solutions LP" ×0, NMLS #513013 ×6). **No specific rate figures** (uses "mid-6% range" — no APR-disclosure trigger). Title "Mortgage Rates, Inflation & the Iran Peace Deal."
+- **Decision: HELD, not auto-published.** Consistent nod-first posture during the compliance-review transition; Adam's 06-06 GBP authorization was batch-specific, not standing. Flagged TIMELY/decaying — most time-sensitive piece in the held bundle (evergreen 06-14 blogs don't decay; this rate/market commentary does, like the now-stale May 18 rate page).
+- Tracker updated (gbp-content-tracker.md: HELD-ready-TIMELY, release-soon flag). Native versions queued (content-repost-queue.md: LinkedIn/IG/FB, range-only to avoid APR trigger).
+- **HELD pool now 5:** May 18 rate page (hard-held, stale/compliance) + 06-08 newsletter (queued) + 2× 06-14 evergreen blogs (ready) + this 06-15 rate/market blog (ready, time-sensitive). 4 of 5 are one-word-GBP-ready.
+
+**Subagent sequence:** 00 NotebookLM PULL — skipped (CLI auth expired, PM 06-15 re-verified). 07 Refresh — inline no-op (earliest cushion draft 2026-09-23; nothing due within 48h). 02 Architect / 03 Builder / 03b Quality / 04 Reviewer / 05 QA — held (positioning/site-copy lock; queued native versions wait for Builder reopen). 00 PUSH — skipped (auth expired).
+
+**ADAM-TODO:** appended ONE concise `[SOCIAL] 2026-06-16` line folding the new piece into the standing ship-it bundle (now 4 GBP-ready pieces on one "ship it"), flagged as the highest-urgency social item due to decay. No escalation-line stacking.
+
+**Verification:** Cushion 47 (inherited SQL-authoritative from PM 06-15; not re-probed — non-actionable bookkeeping retired per 06-06). 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails. BLOCKER-LOANOS-001 (selfies) still active — LoanOS stream only, does not block 4-pillar.
+
+**Next session:** AM/PM maintenance. If Adam replies "ship it," schedule the 4 GBP-ready pieces one/day at 9 AM CT under "Adam Styer · HyperSmart Home Loans · NMLS #513013." First action each AM: `stat -L -f "%Sm" GOALS.md`.
+
+---
+
+## 2026-06-18 AM (styer-social-am) — Maintenance: 1 new evergreen DSCR blog → HELD
+
+**Mode:** AM | **Type:** Maintenance (Sequence A variant — Architect/Builder/Quality/Reviewer/QA held). **Cron:** ~10:44 CDT. GOALS.md (Last updated 2026-06-06) confirms social-media-am stays in "Keep running."
+
+**Step 1B (GBP content distribution scan):**
+- 1 NEW piece: `blog/2026-06-16-dscr-loan-requirements-texas.html` (mtime Jun 16 08:57 — created ~48 min after the 06-16 AM scan ran at 08:09, so genuinely missed then; not in tracker). Evergreen educational.
+- Characterized inline: "DSCR Loan Requirements Texas 2026." HyperSmart ×14, "Mortgage Solutions LP" ×0, "Styer Team" ×0, NMLS #513013 ×8. Only "3.5%" on page = FHA down-payment reference ("no 3.5% FHA"), NOT a rate quote → no APR-disclosure trigger. No "21-day"/performance-claim language. Dead-on for GOALS "complicated income / DSCR" positioning (third DSCR-lane piece in the held bundle).
+- **Decision: HELD, not auto-published.** Consistent nod-first posture during the MSLP→HyperSmart compliance-review transition; Adam's 06-06 GBP authorization was batch-specific, not standing. Evergreen (no decay pressure).
+- Tracker updated (gbp-content-tracker.md: HELD-ready). Native versions queued (content-repost-queue.md: LinkedIn carousel / IG checklist card / FB hook, rate-free to avoid APR trigger).
+- **HELD pool now 6:** May 18 rate page (hard-held, stale/compliance) + 06-08 newsletter (queued) + 2× 06-14 evergreen blogs (ready) + 06-15 rate/market blog (ready, TIMELY) + this 06-16 DSCR-requirements blog (ready, evergreen). 5 of 6 one-word-GBP-ready; 06-15 remains the lone decay-sensitive piece.
+
+**Subagent sequence:** 00 NotebookLM PULL — skipped (CLI auth expired; re-verified PM 06-15, not re-probed here). 07 Refresh — VERIFIED no-op via live Supabase query: 47 drafts, earliest 2026-09-23 15:00Z, 0 due within 48h, 0 TIMELY-with-placeholders. 02 Architect / 03 Builder / 03b Quality / 04 Reviewer / 05 QA — held (positioning/site-copy lock; queued native versions wait for Builder reopen). 00 PUSH — skipped (auth expired).
+
+**BLOCKER gate:** BLOCKER-LOANOS-001 still active — `tasks/social-media/assets/selfies/` does not exist (0 jpg). LoanOS stream stays paused; does not block the 4-pillar (all held anyway).
+
+**ADAM-TODO:** appended ONE concise `[SOCIAL] 2026-06-18 ✅ READY-TO-SHIP` rollup line — bundle now 5 GBP-ready pieces, supersedes the running count in the 06-16/06-15/06-09 lines. No escalation-line stacking; prior lines left intact.
+
+**Verification:** Cushion 47 drafts (live SQL, drift 0 vs. prior REST head). 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data.
+
+**Next session:** AM/PM maintenance. First action each AM: `stat -L -f "%Sm" GOALS.md` + Step 1B scan for content dated after 06-16. If Adam replies "ship it," schedule the 5 GBP-ready pieces one/day at 9 AM CT under "Adam Styer · HyperSmart Home Loans · NMLS #513013" (06-15 rate/market first — it decays). If MSLP→HyperSmart name lock lands, reopen Builder and process content-repost-queue (06-08 newsletter first).
+
+---
+## Session: 2026-06-18 PM — **Maintenance exit, HELD posture holds.** PM convention: skipped Step 1B (GBP scan) + Refresh 07 — both AM-only. No new content scanned; bundle stays at **5 GBP-ready pieces** awaiting one word ("ship it"): 2× 06-14 blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market blog (time-sensitive) + 06-16 DSCR-requirements blog. Cushion **live-verified at 48** via REST head (`content-range: 0-47/48`); drift 0, no writes since 2026-04-30 (AM's "47" via SQL = known ±1 baseline). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). NotebookLM PULL/PUSH skipped — CLI auth expired (re-confirmed by 06-17 nightly, ~46 days). BLOCKER-LOANOS-001 (selfies) still active, LoanOS-stream-only — doesn't block 4-pillar. No new blockers. No ADAM-TODO line added (anti-stacking — AM wrote today's rollup). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B scan. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under HyperSmart footer, one/day. (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-19 PM — **Maintenance hold, no change since 06-18.** PM convention: skipped Step 1B + Refresh 07 (both AM-only). Live-scanned website dirs for awareness — newest blog still `2026-06-16-dscr-loan-requirements-texas.html`, nothing new since the 06-18 AM detection; **bundle holds at 5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 blogs + 06-08 newsletter + 06-15 rate/market [decaying, ship first] + 06-16 DSCR-requirements). No Adam ack landed (06-18 ready-to-ship flag still `[ ]`). Cushion **live-verified at 47** via Supabase SQL (47 draft / 2 approved / 7 posted / 179 rejected); no writes since 2026-04-30 — the 06-18 PM "48" via REST head is the known ±1 vs SQL, not real drift. GOALS.md unchanged (`Jun 6 16:34`). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy lock). NotebookLM PULL/PUSH + master-notebook note skipped — CLI auth expired (~47 days). BLOCKER-LOANOS-001 (selfies dir absent) still active, LoanOS-stream-only — doesn't block 4-pillar. No new blockers; no new ADAM-TODO line (anti-stacking — the 06-18 bundle flag is current). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B scan for content dated after 06-16. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under HyperSmart footer, one/day at 9 AM CT (06-15 rate/market first — it decays). (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-20 PM — **Maintenance hold, no change since 06-19.** PM convention: skipped Step 1B + Refresh 07 (both AM-only). Live awareness scan (by-filename, since `ls -t` mtime-sort surfaces recently-touched March files): newest piece across blog/rates/realtor-updates is still `blog/2026-06-16-dscr-loan-requirements-texas.html` — **nothing dated after 06-16**; **bundle holds at 5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 blogs + 06-08 newsletter + 06-15 rate/market [decaying, ship first] + 06-16 DSCR-requirements). No Adam ack landed — ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]`. Cushion **live-verified at 47** via REST head (`content-range: 0-46/47`); drift 0 vs PM 06-19 SQL count; no writes since 2026-04-30. GOALS.md unchanged (`Jun 6 16:34`; `social-media-pm` confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). NotebookLM PULL/PUSH + master-notebook note skipped — CLI auth expired (~48 days). BLOCKER-LOANOS-001 (selfies dir absent — re-verified, no match) still active, LoanOS-stream-only — doesn't block 4-pillar. No new blockers; no new ADAM-TODO line (anti-stacking — the 06-18 bundle flag is current). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B scan for content dated after 06-16. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays). (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-21 AM — **Maintenance hold, no change since 06-16.** AM ran Step 1B (GBP content distribution scan) + Refresh 07. **Step 1B: 0 new content** — slug-date scan (not `ls -t` mtime) confirms no blog dated 06-17→06-21, no rate page dated 2026-06+, no newsletter after 06-08; newest piece across blog/rates/realtor-updates is still `blog/2026-06-16-dscr-loan-requirements-texas.html` (5 days unchanged). **Bundle holds at 5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 evergreen blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market [decaying — ship first] + 06-16 DSCR-requirements); HELD pool 6 incl. the hard-held May 18 rate page (~4½ wks stale, misleading-current-rate compliance risk — needs a fresh rate or explicit dated-OK). No Adam ack — ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]`. **Refresh 07:** inline no-op (earliest draft 2026-09-23; 0 TIMELY drafts due within 48h). **Cushion:** live-verified 48 via REST head (`content-range: 0-47/48`; = 47 SQL-authoritative, known ±1), drift 0, no writes since 2026-04-30. GOALS.md unchanged (`Jun 6`; social-media-am confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). **NotebookLM PULL/PUSH + master-notebook note skipped** — CLI auth re-verified expired this session (`notebooklm list` → WebLiteSignIn redirect, ~48 days). **BLOCKER-LOANOS-001** (selfies) still active — `tasks/social-media/assets/selfies/` does not exist (0 jpg); LoanOS-stream-only, doesn't block the held 4-pillar. No new blockers; no new ADAM-TODO line (anti-stacking — the 06-18 bundle flag is current). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B slug-date scan for content after 06-16. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays). (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-21 PM — **Maintenance hold, no change since 06-16.** PM convention: skipped Step 1B + Refresh 07 (both AM-only). **Bundle holds at 5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 evergreen blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market [decaying — ship first] + 06-16 DSCR-requirements); HELD pool 6 incl. hard-held May 18 rate page. No Adam ack — ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]`. **Cushion:** live-verified **48** via REST head (`content-range: 0-47/48` = 47 SQL-authoritative, known ±1), drift 0, no writes since 2026-04-30. GOALS.md unchanged (`Jun 6 16:34`; social-media-pm confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). **NotebookLM PULL/PUSH + master-note skipped** — CLI auth re-verified expired this session (`notebooklm list` → WebLiteSignIn redirect, ~49 days). **BLOCKER-LOANOS-001** (selfies) still active — `tasks/social-media/assets/selfies/` does not exist (0 jpg, re-verified); LoanOS-stream-only, doesn't block the held 4-pillar. No new blockers; no new ADAM-TODO line (anti-stacking — the 06-18 bundle flag is current). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B slug-date scan for content after 06-16. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays). (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-23 PM — **Maintenance hold, no change since 06-16.** PM convention: skipped Step 1B + Refresh 07 (both AM-only). Live awareness scan (slug-date, not `ls -t` mtime which surfaces recently-touched March files): newest piece across blog/rates/realtor-updates is still `blog/2026-06-16-dscr-loan-requirements-texas.html` — **nothing dated after 06-16** (7 days unchanged); **bundle holds at 5 GBP-ready pieces** awaiting one "ship it" (2× 06-14 blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market blog [decaying — ship first] + 06-16 DSCR-requirements). No Adam ack — ADAM-TODO 06-18 READY-TO-SHIP flag still `[ ]`. **Cushion:** live-verified **47** via REST head (`content-range: 0-46/47`, SQL-authoritative); drift 0, no writes since 2026-04-30. GOALS.md unchanged (`Jun 6 16:34`; social-media-pm confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). **NotebookLM PULL/PUSH + master-note skipped** — CLI auth expired (~51 days). **BLOCKER-LOANOS-001** (selfies) still active — `tasks/social-media/assets/selfies/` does not exist (0 jpg, re-verified); LoanOS-stream-only, doesn't block the held 4-pillar (stream paused per GOALS anyway). No new blockers; no new ADAM-TODO line (anti-stacking — the 06-18 bundle flag is current). **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session:** AM/PM maintenance; AM first action `stat -L -f "%Sm" GOALS.md` + Step 1B slug-date scan for content after 06-16. Highest-leverage open item unchanged: Adam "ship it" → schedules all 5 GBP-ready pieces under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays). (Scheduled Task — styer-social-pm)
+
+---
+## Session: 2026-06-24 PM — **Maintenance hold + 1 NEW evergreen DSCR blog detected → HELD.** PM convention: skipped formal Step 1B (GBP auto-publish + tracker write) + Refresh 07 (both AM-only). Live awareness scan (slug-date, not `ls -t` mtime) surfaced **1 new piece the 06-23 PM scan missed: `blog/2026-06-23-no-ratio-low-dscr-loans-texas.html`** (mtime Jun 23 09:37; untracked). **Characterized inline:** "No-Ratio & Low-DSCR Loans in Texas (2026) | Adam Styer | NMLS #513013" — HyperSmart ×13, "Mortgage Solutions LP" ×0, "Styer Team" ×0, NMLS #513013 ×7 (title-level too). Only percentages on page (100/85/75/35/25/15%) are DSCR/LTV ratios — **NOT a rate quote → no APR-disclosure trigger**; no "21-day"/guarantee language; evergreen DSCR product explainer (no decay). **4th DSCR-lane piece — dead-on for GOALS "complicated income / DSCR" positioning.** **Decision: HELD, not auto-published** (consistent nod-first posture during MSLP→HyperSmart compliance-review transition; Adam's 06-06 GBP authorization was batch-specific, not standing). PM does NOT write the gbp-content-tracker row or queue native versions — that's the AM formal-Step-1B job; **flagged for 06-25 AM** to track + queue (LinkedIn carousel / IG checklist card / FB hook, rate-free). **GBP-ready bundle grows 5 → 6:** 2× 06-14 blogs + 06-08 "When Other Lenders Say No" newsletter + 06-15 rate/market blog [decaying — ship first] + 06-16 DSCR-requirements + **06-23 no-ratio/low-DSCR (new)**; HELD pool total 7 incl. hard-held May 18 rate page. No new ADAM-TODO line this PM (anti-stacking — AM writes the rollup via formal Step 1B; the 06-18 `[ ]` bundle flag stands, AM will bump it to 6). **Cushion:** live-verified **48** via REST head (`content-range: 0-47/48` = 47 SQL-authoritative, known ±1), drift 0, no writes since 2026-04-30. GOALS.md unchanged (`Jun 6 16:34`; social-media-pm confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held. **NotebookLM PULL/PUSH + master-note skipped** — CLI auth expired (~52 days, since 2026-05-03). **BLOCKER-LOANOS-001** (selfies) still active — `tasks/social-media/assets/selfies/` does not exist (0 jpg, re-verified); LoanOS-stream-only, doesn't block the held 4-pillar (stream paused per GOALS anyway). No new blockers. **Verification:** 0 drafts, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. **Next session (06-25 AM):** run formal Step 1B slug-date scan — **the 06-23 no-ratio/low-DSCR blog is new and untracked: write its gbp-content-tracker row (HELD-ready), queue native versions, and append the ADAM-TODO rollup bumping the bundle to 6 GBP-ready pieces.** Then `stat -L -f "%Sm" GOALS.md`. Highest-leverage open item unchanged: Adam "ship it" → schedules the GBP-ready bundle under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays; rest evergreen). (Scheduled Task — styer-social-pm)
+
+---
+## 2026-06-27 AM (styer-social-am) — Step 1B: 2 NEW untracked pieces caught + tracked → HELD
+**Mode:** AM | **Type:** Maintenance (Sequence A variant — Architect/Builder/Quality/Reviewer/QA held). **Cron:** ~03:29 CDT. First action `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34 2026` (unchanged; social-media-am confirmed in "Keep running").
+
+**Step 1B (GBP content distribution — slug-date scan, not `ls -t` mtime):** 2 NEW untracked pieces (first multi-piece detection in weeks):
+- **`blog/2026-06-23-no-ratio-low-dscr-loans-texas.html`** (mtime Jun 23 09:37) — PM 06-24 detected inline + flagged for this AM's formal Step 1B; **now tracked + queued.** "No-Ratio & Low-DSCR Loans in Texas (2026)." HyperSmart ×13 / MSLP ×0 / Styer Team ×0 / NMLS #513013 ×7 (title-level). All %s on page (100/85/75/35/25/15) are DSCR/LTV ratios → no APR trigger; no 21-day/guarantee. Evergreen DSCR explainer. 4th DSCR-lane piece — squarely GOALS "complicated income / DSCR."
+- **`realtor-updates/2026-06-22-buyers-who-dont-fit-conventional-mortgage-austin.html`** (untracked — missed by 06-22/06-23/06-24 sessions, caught this AM). "When Strong Buyers Don't Fit Conventional: 6 Scenarios & the Loans That Solve Them." HyperSmart ×12 / MSLP ×0 / NMLS #513013 ×2. No %s, no compliance triggers. Realtor-facing B2B → LinkedIn-primary routing (same as 06-08 newsletter); GBP HELD-realtor-facing (consumer reframe available on OK). Best realtor-facing fit for GOALS "deals banks decline."
+
+**Decision: HELD, not auto-published.** Standing nod-first posture during the MSLP→HyperSmart compliance-review transition (GOALS "New Company Transition" still active, name/effective-date still a pending decision). Adam's 06-06 GBP authorization was batch-specific, not standing. Publishing public GBP posts mid-transition is outward-facing → needs his nod. Consistent with every session since 06-06.
+
+**Writes (internal bookkeeping only):** gbp-content-tracker.md — 06-27 section, both rows (HELD-ready / HELD-realtor-facing). content-repost-queue.md — 2 Pending entries (06-23 DSCR carousel/checklist/FB; 06-22 realtor 6-scenario cheat-sheet, LinkedIn-primary). ADAM-TODO L12 rollup **updated in place 5→7 GBP-ready** (no new line stacked — anti-stacking convention; supersedes 06-18/06-16/06-15/06-09 running counts).
+
+**GBP-ready bundle now 7** (was 6 per PM 06-24, which hadn't yet counted the 06-22 newsletter): 2× 06-14 blogs + 06-08 newsletter + 06-15 rate/market (TIMELY — ship first) + 06-16 DSCR-requirements + 06-23 no-ratio/low-DSCR + 06-22 buyers-who-don't-fit. HELD pool total 8 incl. hard-held May 18 rate page (~5½ wks stale, misleading-current-rate risk — needs fresh rate or dated-OK).
+
+**Subagent sequence:** 00 NotebookLM PULL — skipped (CLI auth expired ~55 days; re-confirmed expired by prior nightly, not re-probed). 07 Refresh — VERIFIED no-op via live Supabase: 48 drafts, earliest 2026-09-23T15:00Z, 0 due within 48h, 0 with `~[LIVE DATA NEEDED]` placeholder. 02 Architect / 03 Builder / 03b Quality / 04 Reviewer / 05 QA — held (positioning/site-copy lock; queued native versions wait for Builder reopen). 00 PUSH — skipped (auth expired). Master-notebook note — skipped (auth expired).
+
+**BLOCKER gate:** BLOCKER-LOANOS-001 (selfies) still active — `tasks/social-media/assets/selfies/` absent. LoanOS-stream-only; does not block the 4-pillar (held anyway, stream paused per GOALS).
+
+**Cushion:** 48 (REST head `0-47/48` = 47 SQL-authoritative known ±1), drift 0, no writes since 2026-04-30.
+
+**Verification:** 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. Only internal markdown bookkeeping touched (tracker, queue, ADAM-TODO L12 in place, this log).
+
+**Next session (AM):** `stat -L -f "%Sm" GOALS.md` + Step 1B slug-date scan for content dated after 06-23. Highest-leverage open item unchanged: Adam "ship it" → schedules the consumer-suitable GBP-ready pieces under the HyperSmart footer, one/day at 9 AM CT (06-15 rate/market first — it decays; realtor newsletters 06-08/06-22 go LinkedIn-primary, GBP reframe on OK). If MSLP→HyperSmart name lock lands, reopen Builder and process content-repost-queue (06-15 TIMELY + 06-08/06-22 realtor lane first). (Scheduled Task — styer-social-am)
+
+---
+## Session: 2026-06-27 PM — **Maintenance hold + NEW verified finding: parallel GBP pipeline auto-publishing OLD brand.** (Scheduled Task — styer-social-pm)
+PM convention: skipped Step 1B + Refresh 07 (both AM-only). GOALS.md unchanged (`Jun 6 16:34`; social-media-pm confirmed in "Keep running"). Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). NotebookLM PULL/PUSH + master-note skipped — CLI auth expired (~55 days). BLOCKER-LOANOS-001 (selfies absent) still active, LoanOS-stream-only — doesn't block the held 4-pillar.
+
+**Cushion (live SQL, authoritative):** draft **47** (matches every prior session), approved 2, posted **8**, rejected 179. Draft cushion drift 0; Builder write path still inactive (no agent draft inserts since 2026-04-30). Healthy ~3-month runway.
+
+**NEW FINDING (verified, not parroted) — `posted` went 7→8; investigated the delta:** The new `posted` record (`4eaa8a05…`, created 2026-06-21 16:38Z) is "GBP Weekly: HNW/Jumbo Playbook — Week 25", `platform=all`, `agent_notes` = "Auto-published to GBP via Publer … Week 25". It was written 06-21 11:38 AM CDT — *between* that day's AM and PM social sessions, so neither styer-social session wrote it. Traced the source: the **`styer-gbp-weekly`** scheduled task (enabled, cron `0 9 * * 0` Sundays, lastRun 2026-06-21T16:26Z — matches the post; nextRun **2026-06-28T14:08Z = tomorrow**) generates original weekly GBP content and POSTs it to the `gbp-social-post` webhook → n8n workflow **V6RhmJpOb7pOzMte** ("Weekly GBP + Social Post", active, GBP-only Publer node) → live GBP. This is a *separate* publishing lane the styer-social sessions don't coordinate with, which is why prior sessions (tracking only the draft cushion) never caught it.
+
+**Why it matters (compliance):** All 4 recent auto-published GBP posts (Weeks 19 05-10 / 20 05-17 / 21 05-24 / 25 06-21) end with the footer **"Adam Styer | Mortgage Solutions LP | NMLS #513013"** — the exact banned old-brand string (global CLAUDE.md: "never 'Adam Styer | Mortgage Solutions LP'"), published publicly during the MSLP→HyperSmart compliance freeze the social agent is holding for. Content itself is strong + on-strategy (asset depletion, 40+ lenders, complicated income). The n8n workflow's *own* Gemini prompt was updated to "HyperSmart Home Loans" on 06-08, but it passes the GBP text through verbatim from the caller, so the fix belongs in the `styer-gbp-weekly` SKILL.md, not the workflow. Inconsistency surfaced: social agent holds 7 GBP-ready pieces for "ship it" while this task auto-fires GBP weekly unprompted.
+
+**Action taken:** Flagged to Adam — ONE new concise ADAM-TODO line (top of file, above the L12 bundle rollup) with 3 options [(a) fix footer to HyperSmart — recommended; (b) pause styer-gbp-weekly for a true freeze; (c) leave as-is if MSLP is still the legal name]. Did NOT pause the task, did NOT edit/delete the live GBP post (outward-facing/irreversible — Adam's call). The 06-27 AM bundle rollup (7 GBP-ready) left intact — no stacking.
+
+**Verification:** 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. Only internal markdown touched (this log, subagent-status, ADAM-TODO 1 new line).
+
+**Next session (AM):** `stat -L -f "%Sm" GOALS.md` + Step 1B slug-date scan for content after 06-23. Watch whether `styer-gbp-weekly` fires Sun 06-28 ~9 AM and what footer it publishes (re-verify in social_drafts post-noon). Highest-leverage open items: (1) Adam's call on the styer-gbp-weekly old-brand footer (fires weekly); (2) "ship it" on the 7 GBP-ready held pieces.
+
+---
+
+## SESSION 2026-06-30 AM (styer-social-am) — maintenance hold
+
+**Result:** Maintenance hold holds. Step 1B: 0 new content (newest blog 06-23 + newsletter 06-22, both tracked/HELD 06-27). GBP-ready bundle stable at 7 + 1 hard-held May-18 rate page; no Adam ack (ADAM-TODO L13).
+
+**GBP Distribution:** 0 new pieces detected → nothing distributed, nothing queued. HELD bundle unchanged.
+
+**styer-gbp-weekly old-brand recurrence CONFIRMED** (the 06-27 PM prediction): "GBP Weekly: Self-Employed Reality Check — Week 26" posted live to GBP Sun 06-28 ~15:25 CDT under footer "Adam Styer | Mortgage Solutions LP | NMLS #513013" (posted 8→9, footer live-verified in social_drafts). On-strategy content, only footer wrong. Next fire Sun 07-05. Did NOT pause task or edit live post (Adam's call). ADAM-TODO L12 refreshed in place — no new line stacked.
+
+**Cushion:** 48 (REST head 0-47/48 = 47 SQL-authoritative), drift 0, no writes since 2026-04-30.
+**Refresh 07:** inline no-op (earliest draft 2026-09-23; 0 TIMELY due within 48h).
+**NotebookLM:** PULL/PUSH/master-note skipped — CLI auth expired (~58 days).
+**Builder/Architect/Quality/Reviewer/QA:** held (MSLP→HyperSmart positioning + site-copy lock).
+**Live writes:** 0 GBP publishes, 0 Publer calls, 0 social_drafts inserts, 0 emails, 0 fabricated data.
+**Next session:** first action `stat -L -f "%Sm" GOALS.md`; scan Step 1B; the cleanest single Adam decision remains ADAM-TODO L12 (stops the recurring Sunday old-brand leak + aligns the held-bundle footer).
+
+---
+
+## 2026-06-30 PM — Maintenance Hold (Sequence A variant)
+
+**Mode:** PM (Step 1B + Refresh 07 skipped per convention; AM 06-30 ran Step 1B today)
+**Regime:** GOALS.md week-of-May-18 unchanged. Builder pipeline held (MSLP→HyperSmart transition / new-company compliance review). Nod-first posture; no auto-publish.
+
+**Verified:**
+- Cushion SQL-authoritative: **47 draft** (drift 0), 2 approved, **9 posted**, 179 rejected. (`social_drafts`, org 18613f82.)
+- The 9 posted confirms styer-gbp-weekly's Sun 06-28 old-brand GBP publish (8→9) — already captured by AM 06-30 in ADAM-TODO L12. NOT re-stacked here (no-stale-flag rule).
+- Selfie blocker BLOCKER-LOANOS-001 still ACTIVE (`tasks/social-media/assets/selfies/` missing) — LoanOS stream stays gated.
+- No new website content since 06-23 blog + 06-22 newsletter (both tracked 06-27). GBP-ready bundle stable at 7 + 1 hard-held May-18 rate page.
+- content-repost-queue stable: 6 pending entries for Architect when Builder reopens.
+
+**Skipped:** NotebookLM PULL / PUSH / master-note (CLI auth expired ~58d).
+**Held:** Architect, Builder, Quality, Reviewer, QA — pipeline paused pending Adam (footer decision + name-lock + selfies).
+**Writes:** 0 drafts, 0 Publer calls, 0 live posts, 0 emails, 0 fabricated data.
+**Next PM:** Same maintenance pass. Watch Sun 07-05 ~9AM CT — styer-gbp-weekly fires again with old-brand footer unless Adam acts (ADAM-TODO L12). No new ADAM-TODO stacking until Adam acks an open item.
+
+---
+## Session: 2026-07-03 PM — **Maintenance hold + 1 NEW bank-statement blog detected → HELD (flag for AM).** PM convention: skipped formal Step 1B (GBP auto-publish + tracker write + queue) + Refresh 07 (both AM-only). Live awareness scan (slug-date, not `ls -t` mtime) surfaced **1 new piece missed by 06-30 PM: `blog/2026-06-30-bank-statement-loans-texas.html`** (untracked; 06-30 AM/PM both had newest = 06-23). Bank-statement = self-employed / complicated-income lane — **5th complicated-income piece, dead-on for GOALS "self-employed / bank statement / deals banks decline" positioning.** **Decision: HELD, not auto-published** (standing nod-first posture during MSLP→HyperSmart compliance-review transition; Adam's 06-06 GBP authorization was batch-specific, not standing). PM does NOT write the gbp-content-tracker row or queue native versions — that's the AM formal-Step-1B job; **flagged for next AM to track (HELD-ready) + queue (LinkedIn carousel / IG checklist / FB hook, rate-free) + bump the ADAM-TODO bundle rollup 7→8.** **GBP-ready bundle grows 7 → 8** (2× 06-14 blogs + 06-08 newsletter + 06-15 rate/market [TIMELY — ship first] + 06-16 DSCR-requirements + 06-23 no-ratio/low-DSCR + 06-22 buyers-who-don't-fit + **06-30 bank-statement [new]**); HELD pool 9 incl. hard-held May 18 rate page. **GOALS.md CHANGED — now `Jul 2 12:38` (prior sessions logged `Jun 6 16:34`):** it's the 2026-07-02 LoanOS-product-resumption update; social-media-pm remains in "Keep running" and LoanOS *marketing* stays paused → **no change to the social hold.** **Cushion (live REST head, authoritative):** draft **47** (`0-46/47`), approved 2, posted **9** (`0-8/9`), rejected 179 (`0-178/179`); drift 0, no agent draft writes since 2026-04-30. **posted 9** = the already-captured Sun 06-28 styer-gbp-weekly old-brand GBP publish (Week 26) — not re-stacked. Builder/Architect/Quality/Reviewer/QA all held (MSLP→HyperSmart positioning + site-copy compliance lock). **NotebookLM PULL/PUSH + master-note skipped** — CLI auth expired (~61 days since 2026-05-03). **BLOCKER-LOANOS-001** (selfies) still active — `tasks/social-media/assets/selfies/` absent (0 jpg, re-verified); LoanOS-stream-only, doesn't block the held 4-pillar (stream paused per GOALS anyway). **ADAM-TODO:** both social items still `[ ]` unacked — L14 (styer-gbp-weekly old-brand footer decision) + bundle rollup. No new line stacked (anti-stacking; items current & unacked). **`styer-gbp-weekly` fires again Sun 07-05 ~9 AM CT** and will publish another old-brand footer ("Adam Styer | Mortgage Solutions LP | NMLS #513013") unless Adam acts on L14 — did NOT pause the task or edit the live post (outward-facing/irreversible — Adam's call). No new blockers. **Verification:** 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts, 0 emails, 0 fabricated data. Only internal markdown touched (this log + subagent-status). **Next session (AM):** `stat -L -f "%Sm" GOALS.md` + formal Step 1B slug-date scan — **the 06-30 bank-statement blog is new and untracked: write its gbp-content-tracker row (HELD-ready), queue native versions, bump the ADAM-TODO bundle 7→8.** Watch whether styer-gbp-weekly fires Sun 07-05 and re-verify its footer in social_drafts post-noon. Highest-leverage open items unchanged: (1) Adam's L14 call on the recurring Sunday old-brand footer; (2) "ship it" on the held GBP-ready bundle under "Adam Styer · HyperSmart Home Loans · NMLS #513013," one/day at 9 AM CT (06-15 rate/market first — it decays; realtor pieces 06-08/06-22 go LinkedIn-primary). (Scheduled Task — styer-social-pm)
+
+## 2026-07-04 PM (styer-social-pm) — Maintenance hold
+
+**Mode:** PM | **Type:** Maintenance. Cron fired ~21:28 CDT. GOALS.md confirms social-media-pm stays in "Keep running."
+
+- **PM convention:** Step 1B (GBP content scan) + Refresh 07 skipped. No content generated.
+- **Cushion:** 48 drafts, drift 0 (live REST head `0-47/48` on `social_drafts?status=eq.draft`). Matches AM 07-04.
+- **Pipeline:** Builder/Architect/Quality/Reviewer/QA held (positioning lock — MSLP→HyperSmart compliance review). NotebookLM PULL/PUSH skipped (CLI auth expired ~62d).
+- **Brand-compliance re-verify (grounded, not trusted):** grepped `styer-gbp-weekly/SKILL.md` — still hard-codes old-brand "Adam Styer | Mortgage Solutions LP" footer. Fires again TOMORROW Sun 07-05 ~9 AM CT old-brand unless Adam acts on ADAM-TODO L14 (a fix footer / b pause / c leave). NOT paused/edited — outward-facing, Adam's call.
+- **HELD pool:** 8 GBP-ready pieces unchanged. No new ADAM-TODO stacked (L14 brand flag + L15 ready-to-ship bundle current from AM 07-04). 0 live writes, 0 Publer, 0 emails, 0 fabricated data.
+
+---
+
+## 2026-07-05 AM — Maintenance + Step 1B scan (styer-social-am)
+
+**Session type:** Maintenance. Full subagent sequence held (positioning/site-copy compliance lock, MSLP→HyperSmart). Step 1B GBP scan executed (AM only).
+
+**Step 1B — GBP content distribution:** 0 new website content. Slug-date scan of rates/, blog/, realtor-updates/ — newest across all three unchanged from AM 07-04: blog `2026-06-30-bank-statement-loans-texas.html` (HELD 07-04), newsletter `2026-06-22-buyers-who-dont-fit-conventional-mortgage-austin.html` (tracked 06-27), rate `2026-05-18.html` (hard-held, ~7 wks stale). Nothing dated after 06-30. HELD bundle stable: **8 GBP-ready + 1 hard-held**. No GBP publish, no Publer calls, no social_drafts writes.
+
+**styer-gbp-weekly Week-27 fired old-brand (ADAM-TODO L14 07-05 prediction CONFIRMED):** `social_drafts?status=eq.posted` → "GBP Weekly: Bank Statement Loan Spotlight — Week 27" posted live 2026-07-05 ~10:50 CDT (id `06d0e198`, posted 9→10). Footer live-verified old-brand "Adam Styer | Mortgage Solutions LP | NMLS #513013". 3rd consecutive weekly old-brand publish (Wk 25/26/27). Content on-strategy (bank-statement / complicated-income); only footer brand wrong. Next fire Sun 07-12 ~9 AM CT. NOT paused, live post NOT edited (outward-facing/irreversible — Adam's a/b/c call). L14 refreshed in place; no new escalation line stacked.
+
+**Subagent sequence:** 00 NotebookLM PULL/PUSH — skipped (CLI auth expired ~63d). 07 Refresh — inline no-op (earliest draft `scheduled_for` 2026-09-23; 0 TIMELY-with-placeholders due within 48h). 02 Architect / 03 Builder / 03b Quality / 04 Reviewer / 05 QA — held (positioning lock; queued native versions wait for Builder reopen).
+
+**BLOCKER gate:** BLOCKER-LOANOS-001 still active — `tasks/social-media/assets/selfies/` absent (0 jpg). LoanOS stream paused; does not block 4-pillar (all held anyway).
+
+**ADAM-TODO:** L14 refreshed in place (07-05 fire confirmed). L15 READY-TO-SHIP bundle unchanged (8 GBP-ready, no ack). No new lines stacked.
+
+**Verification:** Cushion 48 (REST head `0-47/48` = 47 SQL known ±1, drift 0). 0 drafts written, 0 Publer calls, 0 social_drafts inserts, 0 live posts by this session, 0 emails, 0 fabricated data.
+
+**Next session:** AM/PM maintenance. First AM action: Step 1B scan for content dated after 06-30 + re-verify styer-gbp-weekly (next old-brand fire Sun 07-12 unless Adam acts on L14 a/b/c). If Adam replies "ship it," schedule the 8 GBP-ready pieces one/day at 9 AM CT under "Adam Styer · HyperSmart Home Loans · NMLS #513013" (06-15 rate/market first — decays). If MSLP→HyperSmart name lock lands, reopen Builder and process content-repost-queue.

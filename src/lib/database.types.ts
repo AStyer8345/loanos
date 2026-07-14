@@ -655,7 +655,7 @@ export type Database = {
           scripture: string | null
           scripture_ref: string | null
           sub_prompt: string | null
-          title: string
+          title?: string
           type: string | null
         }
         Insert: {
@@ -3833,41 +3833,80 @@ export type Database = {
       }
       todo_items: {
         Row: {
+          assigned_to: string | null
           completed_at: string | null
           created_at: string
+          description: string | null
+          dismissed_at: string | null
+          due_at: string | null
+          follow_up_reason: string | null
           id: string
           is_complete: boolean
           is_urgent: boolean
           organization_id: string
+          priority: string
+          recurrence_rule: string | null
+          reminder_at: string | null
           related_contact_id: string | null
           related_loan_id: string | null
+          snoozed_until: string | null
+          source: string
+          source_key: string | null
+          status: string
           text: string
+          title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string
+          description?: string | null
+          dismissed_at?: string | null
+          due_at?: string | null
+          follow_up_reason?: string | null
           id?: string
           is_complete?: boolean
           is_urgent?: boolean
           organization_id: string
+          priority?: string
+          recurrence_rule?: string | null
+          reminder_at?: string | null
           related_contact_id?: string | null
           related_loan_id?: string | null
-          text: string
+          snoozed_until?: string | null
+          source?: string
+          source_key?: string | null
+          status?: string
+          text?: string
+          title?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           completed_at?: string | null
           created_at?: string
+          description?: string | null
+          dismissed_at?: string | null
+          due_at?: string | null
+          follow_up_reason?: string | null
           id?: string
           is_complete?: boolean
           is_urgent?: boolean
           organization_id?: string
+          priority?: string
+          recurrence_rule?: string | null
+          reminder_at?: string | null
           related_contact_id?: string | null
           related_loan_id?: string | null
+          snoozed_until?: string | null
+          source?: string
+          source_key?: string | null
+          status?: string
           text?: string
+          title?: string
           updated_at?: string
           user_id?: string
         }

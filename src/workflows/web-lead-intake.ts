@@ -11,6 +11,44 @@ import type { Database } from '@/lib/database.types'
 
 type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 
+interface WebLeadAcknowledgmentPayload {
+  org_id: string
+  contact_id: string
+  first_name: string | null
+  email: string | null
+  loan_goal?: string | null
+  source_page?: string | null
+  form_name?: string | null
+}
+
+/**
+ * Transactional receipt only. This intentionally does not make a marketing
+ * enrollment decision and is safe to call independently from lead intake.
+ */
+export async function webLeadAcknowledgmentWorkflow(payload: WebLeadAcknowledgmentPayload): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  "use step"
+  if (!payload.email) return
+
+  const firstName = payload.first_name?.trim() || 'there'
+  await sendViaResend({
+    to: payload.email,
+    subject: `Got your message, ${firstName} - Adam Styer`,
+    replyTo: 'adam@thestyerteam.com',
+    body: `
+      <p>Hi ${firstName},</p>
+      <p>I got your message and will be in touch within one business day.</p>
+      <p>You can <a href="https://calendly.com/adamstyer/15minutes">schedule a quick call</a>,
+      call <a href="tel:5129566010">(512) 956-6010</a>, or reply to
+      <a href="mailto:adam@thestyerteam.com">adam@thestyerteam.com</a>.</p>
+      <p>— Adam Styer | NMLS #513013<br>Kyber Mortgage Corporation dba HyperSmart Home Loans</p>
+      <p><small>This is an automated confirmation that your request was received. It is not a loan approval or commitment.</small></p>
+    `,
+    tags: { kind: 'lead_confirmation', source: 'web-lead-ack' },
+    log: { organizationId: payload.org_id, contactId: payload.contact_id, template: 'lead_confirmation' },
+  })
+}
+
 export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"
@@ -75,21 +113,16 @@ export async function webLeadIntakeWorkflow(payload: WebLeadPayload): Promise<vo
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"
-  // Send confirmation to lead (if email present)
-  if (contact.email) {
-    await sendViaResend({
-      to: contact.email,
-      subject: `Got your message, ${contact.first_name} — here's what happens next`,
-      body: `
-        <p>Hi ${contact.first_name},</p>
-        <p>I got your message and will be in touch within one business day.</p>
-        <p>In the meantime, you can schedule a quick call here: https://calendly.com/adamstyer/15minutes</p>
-        <p>— Adam Styer | NMLS #513013</p>
-      `,
-      tags: { kind: 'lead_confirmation', source: 'web-lead-intake' },
-      log: { organizationId: payload.org_id, contactId: contact.id, template: 'lead_confirmation' },
-    })
-  }
+  // Send a transactional acknowledgment (if email present).
+  await webLeadAcknowledgmentWorkflow({
+    org_id: payload.org_id,
+    contact_id: contact.id,
+    first_name: contact.first_name,
+    email: contact.email,
+    loan_goal: payload.loan_goal,
+    source_page: payload.source_page,
+    form_name: payload.form_name,
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   "use step"

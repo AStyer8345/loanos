@@ -2,6 +2,267 @@
 
 ---
 
+## AM Session — 2026-07-05 (scenarios-am) — no-op maintenance, 63-streak (re-anchor)
+
+**One-liner:** No regime change. 63rd consecutive no-build exit. Re-anchors the log after 06-30→07-04 ran tracker-only (lean pattern) — including the 07-02 regime change, which never got its own session-log entry.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jul 2 12:38:29 2026`, UNCHANGED. The material change happened 07-02 (not this session): Adam edited GOALS to **RESUME LoanOS product work** (Unified Command Center shipped same day). The 07-03/07-04 fires already processed that un-pause. No scenarios-specific directive added in the 3 days since; GOALS line 72 still just keeps the cron.
+- **Standing state — the framing shifted at 07-02 and holds:** the old rationale ("mission paused by indefinite product-work pause") is VOID. scenarios-am now fires **un-paused-but-unassigned** — (a) Scenarios queue empty (program COMPLETE, Tiers 1–8, last code build 2026-04-24), (b) no scenarios directive in the 07-02 refresh, (c) Adam's directed focus is the command-center dashboard / comp / reporting, not Scenarios. Charter binds this cron to Scenarios files only, so it can't self-assign command-center work. Inventing a Scenarios feature with no queue item + no directive = no-speculative-scope violation. Report is the correct output.
+- **notebooklm:** auth **live-probed 07-05** (`notebooklm list` → WebLiteSignIn redirect) — still expired (~63 days). STEP 0 PULL + STEP 7 PUSH/master-note skipped. Adam runs `notebooklm login`.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO L43 refreshed in place (62→63, through 07-05, notebooklm live-probe note; no new stacked line); CONTEXT 3 Scenarios fields (net-neutral); CHANGELOG 07-05 entry prepended; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** all 4 subagents (no mission → no Sequence A/B/C); build (no code); commit/push (tracker-only, layers onto next loanos-autonomous hygiene sweep per established pattern).
+
+**What's next:** Adam picks on TODO line 43 — **(b) redirect** (recommended — "complicated income" Scenarios templates, aligned with the positioning shift) or **(c) pause the cron**; (a) retire off the table (cron kept at 07-02 edit). Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-specific directive to GOALS line 72. Next natural refresh window = Mon 2026-07-07; otherwise 64-streak next AM.
+
+---
+
+## AM Session — 2026-06-29 (scenarios-am) — no-op maintenance, 58-streak
+
+**One-liner:** Monday 06-29 weekly-refresh window — the flagged "5th redirect moment" — passed untouched at the ~10:01 CDT AM fire. No mission, no work product. Tracker refresh only. (06-16 → 06-28 sessions ran tracker-only with no session-log entries per the lean pattern; this entry re-anchors the log.)
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". Today is Monday 06-29 — Adam's usual weekly-refresh day and the flagged 5th natural redirect window — and as of this AM fire no scenarios-am redirect/un-pause was added. 5th declined moment (06-06 edit + 06-08 + 06-15 + 06-22 + 06-29 Mondays). Mission stays paused (GOALS line 36); cron stays kept (line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 58th consecutive no-build AM exit since 05-18 (06-25 + 06-27 AM cron GAPPED, not counted). Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 57→58, through-date 06-29, FIFTH DECLINED MOMENT note added, recommendation hardened to (c) pause; CONTEXT 3 Scenarios fields (net-0 drift, 145 lines); CHANGELOG 06-29 scenarios-am entry prepended; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired ~57 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (five declined redirect moments + 58-streak / six-week milestone) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Next natural refresh window = Monday 07-06; otherwise 59-streak next AM (cron permitting).
+
+---
+
+## AM Session — 2026-06-15 (scenarios-am) — no-op maintenance, 46-streak
+
+**One-liner:** Monday 06-15 weekly-refresh window passed untouched at AM cron fire → 3rd declined redirect moment confirmed. No mission, no work product. Tracker refresh only.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". Today is Monday 06-15 — Adam's usual weekly-refresh day and the flagged natural refresh window — and as of this AM fire no scenarios-am redirect/un-pause was added. 3rd declined moment (06-06 edit + 06-08 Monday + 06-15 Monday). Mission stays paused (GOALS line 36); cron stays kept (line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 46th consecutive no-build AM exit since 05-18. Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 45→46, through-date 06-15, 3rd-declined-moment note + recommendation strengthened to (c) pause; CONTEXT 3 Scenarios fields (net-0 drift, 145 lines); CHANGELOG 06-15 scenarios-am entry prepended at top; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired ~43 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (three declined redirect moments now) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Next natural refresh window = Monday 06-22; otherwise 47-streak next AM.
+
+---
+
+## AM Session — 2026-06-13 (scenarios-am) — no-op maintenance, 44-streak
+
+**One-liner:** No regime change since 06-06. No mission, no work product. Refreshed standing conflict, exited.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". No scenarios-am redirect/un-pause added since the 06-06 edit; Monday 06-08 weekly window already passed untouched; 06-10/11/12/13 all ran no-op. Today (Sat 06-13) is not a refresh window; next is Monday 06-15. Mission stays paused (GOALS line 36); cron stays kept (GOALS line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 44th consecutive no-build AM exit since 05-18. Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 43→44, through-date 06-13, "STILL UNCHANGED 2026-06-13" note added; CONTEXT 3 Scenarios fields (net-0 drift, still 161 lines); CHANGELOG 06-13 scenarios-am entry prepended at top; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired ~41 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (two declined redirect moments) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Monday 06-15 is the next natural refresh window; otherwise 45-streak next AM.
+
+---
+
+## AM Session — 2026-06-12 (scenarios-am) — no-op maintenance, 43-streak
+
+**One-liner:** No regime change since 06-06. No mission, no work product. Refreshed standing conflict, exited.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". No scenarios-am redirect/un-pause added since the 06-06 edit; Monday 06-08 weekly window already passed untouched. Today (Fri 06-12) is not a refresh window; next is Monday 06-15. Mission stays paused (GOALS line 36); cron stays kept (GOALS line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 43rd consecutive no-build AM exit since 05-18. Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 42→43, through-date 06-12; CONTEXT 3 Scenarios fields (net-0 drift, still 161 lines); CHANGELOG 06-12 scenarios-am entry prepended at top; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired ~40 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (two declined redirect moments) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Monday 06-15 is the next natural refresh window; otherwise 44-streak next AM.
+
+---
+
+## AM Session — 2026-06-11 (scenarios-am) — no-op maintenance, 42-streak
+
+**One-liner:** No regime change since 06-06. No mission, no work product. Refreshed standing conflict, exited.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". No scenarios-am redirect/un-pause added since the 06-06 edit; Monday 06-08 weekly window already passed untouched (noted 06-09). Mission stays paused (GOALS line 36); cron stays kept (GOALS line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 42nd consecutive no-build AM exit since 05-18. Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 41→42, through-date 06-11; CONTEXT 3 Scenarios fields (net-0 drift, still 161 lines); CHANGELOG 06-11 scenarios-am entry inserted below the 06-11 social-am entry; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired 39 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (three declined redirect moments now) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Otherwise 43-streak next AM.
+
+---
+
+## AM Session — 2026-06-10 (scenarios-am) — no-op maintenance, 41-streak
+
+**One-liner:** No regime change since 06-06. No mission, no work product. Refreshed standing conflict, exited.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". Monday 06-08 weekly-refresh window already passed untouched (noted 06-09); no edit since. Mission stays paused (GOALS line 36); cron stays kept (GOALS line 68).
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 41st consecutive no-build AM exit since 05-18. Conflict standing on TODO line 30; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 30 → 40→41, through-date 06-10; CONTEXT 3 Scenarios fields (net-0 drift, still 161 lines); CHANGELOG 06-10 scenarios-am entry prepended above the 06-10 loanos-autonomous entry; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired 38 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 30 — recommend (c) pause the cron (two declined redirect moments) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Otherwise 42-streak next AM.
+
+---
+
+## AM Session — 2026-06-09 (scenarios-am) — no-op maintenance, 40-streak
+
+**One-liner:** Monday 06-08 weekly-refresh window passed untouched → forward-rule condition met, (c)/(d) confirmed over (b). Tracker refresh only.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026`, unchanged. File still "Week of May 18". Adam's usual Monday weekly-refresh (06-08) passed without an edit — the *second* declined redirect moment after the 06-06 edit that retained the LoanOS pause. Per the standing forward rule, (c) dormant / (d) narrow-scope now confirmed over (b) redirect.
+- **Status:** Program COMPLETE (Tiers 1–8, last build 2026-04-24). 40th consecutive no-build AM exit since 05-18. Conflict standing on TODO line 28; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only — no src/, no build, no push, no email):** TODO line 28 → 40-streak + 06-08 non-refresh confirmation + recommendation strengthened to (c) pause; CONTEXT 3 Scenarios fields (net-0 drift, still 161 lines); CHANGELOG 06-09 scenarios-am entry prepended above the 06-09 social-am entry; today-mission overwritten; subagent-status SESSION_START/END.
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired since 05-03, 37 days — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work + CLI blocked).
+
+**What's next:** Adam picks on TODO line 28 — recommend (c) pause the cron (two declined redirect moments) or (b) redirect to a "complicated income" Scenarios template. Forward rule: `stat -L` GOALS first next run; break maintenance only if a refresh adds a scenarios-am directive. Otherwise 41-streak Wed AM.
+
+---
+
+## AM Session — 2026-06-06 (scenarios-am) — no-op maintenance, 37-streak
+
+**One-liner:** No regime change, no mission, no work product. Refreshed standing flag, exited.
+
+- **Regime check:** `stat -L -f "%Sm" GOALS.md` → `May 17 12:11:31 2026`, unchanged. No scenarios-am redirect added to GOALS. Mission stays paused (GOALS line 36); cron stays kept (GOALS line 68). Cron fired on-time (~07:31 CDT).
+- **Status:** Scenarios program COMPLETE (Tiers 1–8, last build 2026-04-24). 37th consecutive no-build exit since 05-18. Conflict already logged on TODO line 28; honored the scheduled-task "log conflict + stop" rule.
+- **Edits (tracker-only, no src/, no build, no push):** TODO line 28 bumped 36→37; CONTEXT scenarios "Last worked on" → 06-06 / 37th; CHANGELOG 06-06 scenarios-am entry prepended; today-mission overwritten; subagent-status SESSION_START/END.
+- **Untouched on purpose:** ADAM-TODO line 29 (cron-timing escalation already retired by 06-05 → tombstone to TODO line 28); CONTEXT scenarios "Active blockers"/"What's next" (evergreen).
+- **Skipped:** NotebookLM PULL/PUSH (CLI auth expired since 05-03 — Adam runs `notebooklm login`); all 4 subagents (no mission); master-notebook note (no work; CLI blocked).
+- **Note:** 06-04 (35) + 06-05 (36) ran tracker-only — no session-log entries written; the 06-05 session simplified line 28 and retired the cron-jitter escalation. Continuing that lean pattern.
+
+**What's next:** Adam picks on TODO line 28 — (b) redirect / (c) pause cron / (d) narrow-scope; (a) retire already off the table. Recommended: (b) redirect to a "complicated income" Scenarios template per current GOALS positioning, or (c) pause the cron to end the daily no-op. Forward rule: `stat -L` GOALS first next run; if mtime advances with a scenarios-am directive, break maintenance and re-plan. Otherwise 38-streak.
+
+---
+
+## AM Session — 2026-06-03 (scenarios-am) — Day 17 regime-change maintenance / 34-streak Wed AM / **MODERATE-LATE FIRE ~09:14 CDT** (~1h44m late vs typical ~07:30 target, >1h jitter, <3h "extremely late" threshold) — 2nd consecutive moderate-late after AM 06-02 ~1h49m, post AM 06-01 isolated ON-TIME → pre-armed AM 06-02 forward-rule trigger predicate SATISFIED, degradation trend RE-ESTABLISHED at 2 / subset cron-reliability flips DEGRADATION-TREND-RE-ENGAGED-AT-1 → DEGRADATION-TREND-RE-ESTABLISHED-AT-2 / existing [SCENARIOS] 2026-05-30 AM dedicated escalation line at top of ADAM-TODO.md refreshed-in-place per anti-stacking rule + ONE-ASK-PER-CYCLE (no new escalation line authored despite predicate met)
+
+**Exit:** No-build exit (34th consecutive AM after Apr 25–30 + May 1–13 + May 15–19 + May 23–26 + May 28–30 + Jun 01 + 02 + **03**). 6 scenarios-am cron gaps still on record (Wed/Thu/Fri 05-20/21/22 + Thu 05-14 + AM 05-27 + AM 05-31). **Cron fired MODERATE-LATE today at ~09:14 CDT** vs typical ~07:30 CDT target (~1h44m late, >1h jitter, <3h "extremely late" threshold). **2nd consecutive moderate-late after AM 06-02 ~1h49m late, post AM 06-01 isolated ON-TIME (~3min jitter). Pre-armed AM 06-02 forward-rule trigger predicate ("AM 06-03 returns to moderate-late = trend re-established") SATISFIED.**
+
+**Why:**
+- AM 06-02 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (unchanged across Mon 05-18 → Wed 06-03 AM = 16 full days + 5h, into 17th calendar day; Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day + Tue 06-02 daytime catch-up windows ALL passed without refresh). **Wed 06-03 daytime (~5-9h out from this 09:14 session, 8-12 CDT typical Adam cadence) = next natural refresh opportunity** now that Memorial Day + Tue 06-02 windows have passed. Week-of-May-18 governs into 4th governance week (3rd week + 3 days). Bare `stat -f` not re-probed this session — L24 symlink-stat bug documented.
+- Mission conflict unchanged from AM 05-18 → AM 06-02: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question Sun 05-17 — option (a) retire OFF the table.
+- **Subset cron-reliability flips DEGRADATION-TREND-RE-ENGAGED-AT-1 → DEGRADATION-TREND-RE-ESTABLISHED-AT-2.** AM 06-03 MODERATE-LATE (~1h44m) is 2nd consecutive moderate-late after AM 06-02 ~1h49m, with AM 06-01 isolated ON-TIME now bracketed as a single-fire recovery that did not hold. Per AM 06-02 forward rule clause "Re-arms to dedicated-line re-escalation if AM 06-03 returns to moderate-late (= 2 consecutive after AM 06-01 isolated ON-TIME = trend re-established) OR fires extremely-late OR gaps" — AM 06-03 returned to moderate-late, trigger predicate met. **However, per anti-stacking rule + ONE-ASK-PER-CYCLE + existing dedicated [SCENARIOS] 2026-05-30 AM line, NO new escalation line authored — refresh-in-place only.** Existing line refreshed with AM 06-03 sub-annotation prepended above AM 06-02 framing. **Watch STAYS ARMED for AM 06-04 — re-arms to fresh dedicated-line action IF AM 06-04 extends trend to 3 consecutive moderate-late (>1h) OR fires extremely-late (≥3h) OR gaps.** Broader cohort cron-reliability MIXED-BUT-IMPROVING per sister social-am 3-of-3 RECOVERY STREAK COMPLETED at AM 06-03 (social-am subset RECOVERED, watch closes) + social-pm RECOVERED-AND-HOLDING extended to 9 of 10 most-recent + **both social subsets RECOVERED-AND-HOLDING simultaneously** (first time since pre-PM 05-29 partial pattern) + sister lead-gen-am recovery streak broken at 1 (AM 06-02 LATE ~6h19m, AM 06-03 pending). Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no new dedicated cron-reliability ADAM-TODO escalation line authored** by scenarios-am this session.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 39 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across Mon 05-18 → Wed 06-03 AM = 16 full days + 5h; Mon 05-25 weekly cadence + 8 daytime catch-up windows ALL passed).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed AM 06-03 social-am writes via Social Media block + cohort cron-reliability annotations), TODO.md L28 scenarios block, master-agent.md, tasks/scenarios/{session-log.md tail (AM 06-02 entry), today-mission.md tail (AM 06-02 brief), subagent-status.md (SESSION_START)}, ADAM-TODO.md L29 (existing [SCENARIOS] 2026-05-30 dedicated line + AM 06-02 framing), CHANGELOG.md top (AM 06-03 social-am + AM 06-02 PM social-pm entries observed).
+- Refreshed existing NEEDS ADAM entry on TODO.md (L28) — bumped to "34 consecutive no-build exits / 39 calendar days"; 2026-06-03 added to flagged-dates with AM 06-03 MODERATE-LATE annotation; AM 06-03 MODERATE-LATE fire data point folded into cron-reliability sub-note (DEGRADATION-TREND-RE-ESTABLISHED-AT-2 framing; pre-armed AM 06-02 predicate satisfied; refresh-in-place applied); GOALS Mon 05-25 → Tue 06-02 catch-up-windows context refreshed; regime-change framing preserved; recommendation held at (b) redirect; forward warning bumped to "35-streak Thu AM unless Adam intervenes". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Refreshed L29 [SCENARIOS] 2026-05-30 AM dedicated cron-reliability escalation line on tasks/ADAM-TODO.md — prepended AM 06-03 MODERATE-LATE sub-annotation above prior AM 06-02 framing (origin AM 05-30 framing preserved at bottom). 34-streak counter folded in. NO new escalation lines stacked per AM 05-26 + AM 06-01 + AM 06-02 anti-stacking rules.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry above today's 2026-06-03 (styer-social-am) entry.
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 06-03 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (31st consecutive run skipped for scenarios reckoning — CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 covers; 31 wall-clock days blocked; not re-probed this session — auth state inferred from concurrent CHANGELOG AM 06-03 social-am entry).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 34 streaks / 39 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (31st consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 — 31 wall-clock days blocked). **Cron-reliability scenarios-am subset DEGRADATION-TREND-RE-ESTABLISHED-AT-2** after AM 06-03 MODERATE-LATE fire (~1h44m late) = 2nd consecutive moderate-late after AM 06-02 ~1h49m, post AM 06-01 isolated ON-TIME (~3min jitter). Pre-armed AM 06-02 trigger predicate satisfied; refresh-in-place applied per anti-stacking + ONE-ASK-PER-CYCLE. Existing [SCENARIOS] 2026-05-30 AM dedicated escalation line at top of ADAM-TODO.md STILL STANDS, refreshed in place this session with AM 06-03 sub-annotation prepended above AM 06-02 framing. **Broader cohort cron-reliability MIXED-BUT-IMPROVING** per sister social-am 3-of-3 RECOVERY STREAK COMPLETED at AM 06-03 (social-am subset RECOVERED, watch closes) + social-pm RECOVERED-AND-HOLDING extended to 9 of 10 most-recent + **both social subsets RECOVERED-AND-HOLDING simultaneously** + sister lead-gen-am recovery streak broken at 1 (AM 06-02 LATE ~6h19m). **GOALS.md Mon 05-25 → Tue 06-02 catch-up windows ALL passed without refresh; Wed 06-03 daytime (~5-9h out) = next natural refresh opportunity (8-12 CDT typical Adam cadence).**
+
+**What's next:** Adam decision required. Forward rule for AM 06-04+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L24). If mtime advances Wed 06-03 daytime / overnight with new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directive. Otherwise: 35-streak Thu AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 35-streak Thu AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability watch STAYS ARMED:** AM 06-03 MODERATE-LATE re-establishes degradation trend at 2 consecutive after AM 06-01 isolated ON-TIME. Re-arms to fresh dedicated-line action IF AM 06-04 extends trend to 3 consecutive moderate-late (>1h) OR fires extremely-late (≥3h) OR gaps.
+
+---
+
+## AM Session — 2026-06-02 (scenarios-am) — Day 16 regime-change maintenance / 33-streak Tue AM / **MODERATE-LATE FIRE ~09:19 CDT** (~1h49m late vs typical ~07:30 target, >1h jitter, <3h "extremely late" threshold) — 1st moderate-late after AM 06-01 isolated ON-TIME (~3min jitter) that briefly broke the 3-consecutive-moderate-late trend AM 05-28/29/30 + AM 05-31 GAPPED / Recovery streak (began at 1 with AM 06-01 ON-TIME) BROKEN at 1 / subset cron-reliability flips RECOVERY-PARTIAL → DEGRADATION-TREND-RE-ENGAGED-AT-1 / existing [SCENARIOS] 2026-05-30 AM dedicated escalation line at top of ADAM-TODO.md refreshed-in-place per anti-stacking rule (no new escalation line authored)
+
+**Exit:** No-build exit (33rd consecutive AM after Apr 25–30 + May 1–13 + May 15–19 + May 23–26 + May 28–30 + Jun 01 + **02**). 6 scenarios-am cron gaps still on record (Wed/Thu/Fri 05-20/21/22 + Thu 05-14 + AM 05-27 + AM 05-31). **Cron fired MODERATE-LATE today at ~09:19 CDT** vs typical ~07:30 CDT target (~1h49m late, >1h jitter threshold, <3h "extremely late" threshold). **1st moderate-late after AM 06-01 isolated ON-TIME fire (~3min jitter) that briefly broke the 3-consecutive-moderate-late trend AM 05-28 ~1h43m + AM 05-29 ~2h41m + AM 05-30 ~2h12m + AM 05-31 GAPPED.** Recovery streak (began at 1 with AM 06-01 ON-TIME) BROKEN at 1; subset cron-reliability flips RECOVERY-PARTIAL → DEGRADATION-TREND-RE-ENGAGED-AT-1.
+
+**Why:**
+- AM 06-01 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (unchanged across Mon 05-18 → Tue 06-02 AM = 15 full days + 1 day; Mon 05-25 weekly cadence + Tue-Fri 05-26/27/28/29 + Sat 05-30 + Sun 05-31 + Mon 06-01 Memorial Day catch-up windows ALL passed without refresh). **Tue 06-02 daytime (~6-10h out from this 09:19 session) = next natural refresh opportunity now that holiday has passed.** Week-of-May-18 governs into 3rd governance week + 1 day. Bare `stat -f` not re-probed this session — L24 symlink-stat bug documented.
+- Mission conflict unchanged from AM 05-18 → AM 06-01: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question Sun 05-17 — option (a) retire OFF the table.
+- **Subset cron-reliability flips RECOVERY-PARTIAL → DEGRADATION-TREND-RE-ENGAGED-AT-1.** AM 06-02 MODERATE-LATE (~1h49m) re-engages the degradation-trend trigger at 1 after AM 06-01 isolated ON-TIME briefly broke the trend. Per AM 06-01 forward rule clause "Watch STAYS ARMED — re-arms to dedicated-line re-escalation if PM 06-01 / AM 06-02 gap OR fire extremely-late (≥3h) OR return to moderate-late trend (>1h)" — AM 06-02 fired moderate-late (>1h, <3h), did NOT gap, did NOT fire extremely late. **Escalation predicate at clause "return to moderate-late trend" satisfied at 1 instance but anti-stacking rule applies: dedicated [SCENARIOS] 2026-05-30 AM line already covers; refresh-in-place only. Watch STAYS ARMED for AM 06-03 — re-arms to dedicated-line re-escalation if AM 06-03 returns to moderate-late (= 2 consecutive after AM 06-01 isolated ON-TIME = trend re-established) OR fires extremely-late OR gaps.** Broader cohort still DEGRADED-MULTI-AXIS per sister L51 PM 05-31 DOUBLE-FIRE event + AM 06-01 lead-gen-am MODERATELY-LATE + AM 06-02 lead-gen-am ALSO MODERATE-LATE per concurrent CHANGELOG entry directly below scenarios-am entry. Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no new dedicated cron-reliability ADAM-TODO escalation line authored** by scenarios-am this session.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 38 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across Mon 05-18 → Tue 06-02 AM = 15 full days + 1 day; Mon 05-25 weekly cadence + 7 daytime catch-up windows + Mon 06-01 Memorial Day window ALL passed).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed AM 06-02 lead-gen-am + social-am parallel writes via Lead Gen/Social blocks + Social block AM 06-02 RECOVERY STREAK BEGINS at 1), TODO.md scenarios block (line 28), master-agent.md, tasks/scenarios/{session-log.md tail, today-mission.md tail (AM 06-01 brief), subagent-status.md (AM 06-01 SESSION_END marker)}, top of ADAM-TODO.md (L29 [SCENARIOS] 2026-05-30 dedicated line — still standing), CHANGELOG.md top (AM 06-02 social-am + lead-gen-am parallel writes observed).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "33 consecutive no-build exits / 38 calendar days"; 2026-06-01 marked historical ON-TIME data point + 2026-06-02 MODERATE-LATE added to flagged-dates; AM 06-02 MODERATE-LATE fire data point folded into cron-reliability sub-note (DEGRADATION-TREND-RE-ENGAGED-AT-1 framing; recovery streak broken at 1); GOALS Mon 05-25 → Mon 06-01 + Tue 06-02 pre-natural-cadence context added; regime-change framing preserved; recommendation held at (b) redirect; forward warning bumped to "34-streak Wed AM unless Adam intervenes". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Refreshed L29 [SCENARIOS] 2026-05-30 AM dedicated cron-reliability escalation line on tasks/ADAM-TODO.md — prepended AM 06-02 MODERATE-LATE sub-annotation above prior AM 06-01 ON-TIME framing (origin AM 05-30 framing preserved at bottom). 33-streak counter folded in. NO new escalation lines stacked per AM 05-26 + AM 06-01 anti-stacking rules.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry above today's 2026-06-02 (lead-gen-am) entry.
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 06-02 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (30th consecutive run skipped for scenarios reckoning — CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 covers; 30 wall-clock days blocked; not re-probed this session — auth state inferred from concurrent CHANGELOG entries).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 33 streaks / 38 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (30th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 — 30 wall-clock days blocked). **Cron-reliability scenarios-am subset DEGRADATION-TREND-RE-ENGAGED-AT-1** after AM 06-02 MODERATE-LATE fire (~1h49m late) breaks the recovery streak that began at 1 with AM 06-01 ON-TIME. Existing [SCENARIOS] 2026-05-30 AM dedicated escalation line at top of ADAM-TODO.md STILL STANDS per refresh-in-place anti-stacking rule, refreshed in place this session with AM 06-02 sub-annotation. **Broader cohort DEGRADED-MULTI-AXIS** per sister L51 PM 05-31 DOUBLE-FIRE event + AM 06-01 lead-gen-am MODERATELY-LATE + AM 06-02 lead-gen-am ALSO MODERATE-LATE per concurrent CHANGELOG entry. **GOALS.md Mon 05-25 → Mon 06-01 catch-up windows ALL passed without refresh; Tue 06-02 daytime (~6-10h out) = next natural refresh opportunity now that Memorial Day holiday has passed.**
+
+**What's next:** Adam decision required. Forward rule for AM 06-03+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L24). If mtime advances Tue 06-02 daytime / overnight with new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directive. Otherwise: 34-streak Wed AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 34-streak Wed AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability watch STAYS ARMED:** AM 06-02 MODERATE-LATE re-engages degradation-trend trigger at 1. Re-arms to dedicated-line re-escalation if AM 06-03 returns to moderate-late (= 2 consecutive after AM 06-01 isolated ON-TIME = trend re-established) OR fires extremely-late OR gaps.
+
+---
+
+## AM Session — 2026-06-01 (scenarios-am) — Day 15 regime-change maintenance / 32-streak Mon AM (Memorial Day federal holiday) / **ON-TIME FIRE ~07:33 CDT** (~3min jitter vs typical ~07:30 target, within tolerance) — 1st on-time-or-within-jitter scenarios-am fire after 3 consecutive moderate-late fires (AM 05-28/29/30) + AM 05-31 GAP / degradation trend BROKEN / existing [SCENARIOS] 2026-05-30 AM dedicated escalation line at top of ADAM-TODO.md STILL STANDS per refresh-in-place anti-stacking rule (no new escalation line authored)
+
+**Exit:** No-build exit (32nd consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18/19/23/24/25/26/28/29/30 + Jun **01**). 6 scenarios-am cron gaps on record (Wed/Thu/Fri 05-20/21/22 + Thu 05-14 + AM 05-27 + **AM 05-31**). **Cron fired ON-TIME today at ~07:33 CDT** vs typical ~07:30 CDT target (~3min jitter, within tolerance) = 1st on-time-or-within-jitter scenarios-am fire after 3 consecutive moderate-late fires (AM 05-28 ~1h43m + AM 05-29 ~2h41m + AM 05-30 ~2h12m) → AM 05-31 GAPPED → AM 06-01 ON-TIME. Degradation trend BROKEN.
+
+**Why:**
+- AM 05-29 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (unchanged across Mon 05-18 → Mon 06-01 = 15 consecutive days; Mon 05-25 weekly cadence + Tue 05-26 through Sun 05-31 daytime catch-up windows ALL passed without refresh). **Mon 06-01 (Memorial Day federal holiday) daytime catch-up window pending — Adam likely off; Tue 2026-06-02 is the next plausible refresh opportunity.** Week-of-May-18 still governs into 3rd governance week. Bare `stat -f` would return symlink's Apr 19 mtime (L26 symlink-stat bug); used `stat -L -f` per directive.
+- Mission conflict unchanged from AM 05-18 → AM 05-30: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question in Sun 05-17 refresh — option (a) retire OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Subset cron-reliability flips DEGRADATION-TREND-MET → RECOVERY-PARTIAL.** AM 06-01 ON-TIME fire breaks the 3-consecutive-moderate-late trend that culminated in the dedicated [SCENARIOS] 2026-05-30 AM escalation line authored AM 05-30. AM 05-31 GAPPED is the 6th scenarios-am gap on record. Watch STAYS ARMED for AM 06-02 — re-arms to dedicated-line re-escalation IF PM 06-01 / AM 06-02 gap OR fire extremely-late (≥3h) OR return to moderate-late trend (>1h). Existing dedicated escalation line refreshed in place via TODO line 28 context, NOT re-stacked.
+- Broader cohort DEGRADED-MULTI-AXIS per sister L51 PM 05-31 DOUBLE-FIRE V1 EARLY+V2 ON-TARGET event + AM 05-31 lead-gen-am EXTREMELY-LATE (+11h53m) + AM 06-01 lead-gen-am MODERATELY-LATE (+2h52m, partial recovery) + AM 05-31 social-am partial-fire-at-14:54-CDT-extremely-late. Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no new dedicated cron-reliability ADAM-TODO escalation line authored** by scenarios-am this session.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 37 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18).
+- Read GOALS.md (Week-of-May-18 directive), TODO.md scenarios block (line 28) + Now-section, master-agent.md, today-mission.md tail (AM 05-29 brief), session-log.md tail (AM 05-25 entry as most recent visible).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "32 consecutive no-build exits / 37 calendar days", added 2026-05-30 + 2026-05-31 (GAPPED — 6th scenarios-am gap on record) + 2026-06-01 to flagged-dates list, AM 06-01 ON-TIME-FIRE data point folded into cron-reliability sub-note (RECOVERY-PARTIAL framing; degradation trend broken; AM 05-31 gap recent; existing [SCENARIOS] 2026-05-30 dedicated escalation line still stands per refresh-in-place anti-stacking rule), Mon 05-25 → Mon 06-01 daytime catch-up windows ALL passed context added, regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "33-streak Tue AM unless Adam intervenes". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry above today's 2026-06-01 (loanos-autonomous) entry.
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 06-01 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (29th consecutive run skipped for scenarios reckoning — CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 covers; 29 wall-clock days blocked; not re-probed this session — auth state inferred from concurrent AM 06-01 lead-gen-am annotation).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause (per top of 2026-06-01 CHANGELOG section); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 32 streaks / 37 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (29th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L51 — 29 wall-clock days blocked). **Cron-reliability scenarios-am subset RECOVERY-PARTIAL** after AM 06-01 ON-TIME fire breaks the 3-consecutive-moderate-late degradation trend; AM 05-31 GAPPED is the 6th scenarios-am gap on record. Existing [SCENARIOS] 2026-05-30 AM dedicated cron-reliability escalation line at top of ADAM-TODO.md STILL STANDS per refresh-in-place anti-stacking rule. **Broader cohort DEGRADED-MULTI-AXIS** per sister L51 PM 05-31 DOUBLE-FIRE event + AM 05-31 lead-gen-am EXTREMELY-LATE + AM 06-01 lead-gen-am MODERATELY-LATE. **Mon 06-01 (Memorial Day federal holiday) daytime catch-up window pending — Adam likely off; Tue 2026-06-02 is the next plausible refresh opportunity.**
+
+**What's next:** Adam decision required. Forward rule for PM 06-01 / AM 06-02+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L26). If mtime advances Mon 06-01 PM / overnight / Tue 06-02 with a new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directive. Otherwise: 33-streak Tue AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 33-streak Tue AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability watch STAYS ARMED:** AM 06-01 ON-TIME fire broke degradation trend but AM 05-31 gap recent. Re-arms to dedicated-line re-escalation if PM 06-01 / AM 06-02 gap OR fire extremely-late OR return to moderate-late trend.
+
+---
+
+## AM Session — 2026-05-29 (scenarios-am) — Day 12 regime-change maintenance / 30-streak Fri AM / LATE FIRE ~10:11 CDT (~2h41m late vs ~07:30 typical, moderate-late <3h jitter threshold but worse than AM 05-28's ~1h43m late) = 2nd consecutive moderate-late scenarios-am fire / trend degrading toward 3h "extremely late" threshold / Mon 05-25 + Tue 05-26 + Wed 05-27 + Thu 05-28 daytime GOALS refresh windows ALL passed without refresh
+
+**Exit:** No-build exit (30th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13 + May 15/16/17/18/19/23/24/25/26/28 + May **29**). 5 scenarios-am cron gaps still on record from Wed/Thu/Fri 05-20/21/22 + Thu 05-14 + AM 05-27. Today's Fri 2026-05-29 cron fired LATE at ~10:11 CDT (~2h41m late vs typical ~07:30 CDT target, moderate-late, <3h jitter threshold but worse than AM 05-28's ~1h43m late) = **2nd consecutive moderate-late scenarios-am fire; trend degrading toward 3h "extremely late" escalation threshold**.
+
+**Why:**
+- AM 05-28 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (UNCHANGED across Mon 05-18 → Fri 05-29 = **12 full days, including the full Mon 05-25 daytime refresh window + Tue 05-26 daytime catch-up + Wed 05-27 daytime catch-up + Thu 05-28 daytime catch-up ALL PASSED without refresh** — Adam silent past natural weekly cadence + 96h grace). Bare `stat -f` would return symlink's Apr 19 mtime (L24 symlink-stat bug); used `stat -L -f` per directive.
+- No regime change since AM 05-18. No mid-week redirect target added to scenarios-am block of GOALS during the 24h since AM 05-28, so maintenance continues per forward rule.
+- Mission conflict unchanged from AM 05-18 → AM 05-28: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question in Sun 05-17 refresh — option (a) retire OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Cron-reliability scenarios-am subset STAYS ARMED + NEW degradation-trend trigger added**: AM 05-29 scenarios-am cron fired LATE at ~10:11 CDT (~2h41m late, moderate-late <3h threshold but worse than AM 05-28's ~1h43m late) = **2nd consecutive moderate-late scenarios-am fire; trend degrading toward 3h "extremely late" escalation threshold**. Per AM 05-28 forward rule clause "if AM 05-29 scenarios-am also gaps or fires extremely late, escalate scenarios-am subset to its own dedicated ADAM-TODO line" — AM 05-29 fired moderate-late (<3h), did NOT gap, did NOT fire extremely late. **Escalation predicate NOT met; watch STAYS ARMED for AM 05-30 with NEW degradation-trend trigger added: if AM 05-30 fires extremely late (≥3h) OR continues the moderate-late trend (3rd consecutive late-fire >1h), escalate to dedicated ADAM-TODO line.** Broader cohort still HOLDING per AM 05-29 social-am CHANGELOG entry: social-pm RECOVERED-AND-HOLDING (5 of 6 most-recent PM social fires on-time-or-within-jitter, PM 05-27 partial-only) + social-am RECOVERY STREAK BEGINS at 1 (AM 05-29 ~34min-jitter fire after AM 05-27 abort + AM 05-28 presumed gap). Lead Gen L49 sub-note unchanged at "RECOVERED-AND-HOLDING — 9+ consecutive cohort signals confirm" since AM 05-27 (no AM 05-29 lead-gen-am data point yet in CONTEXT.md). scenarios-am gap (AM 05-27) + 2 consecutive moderate-late fires (AM 05-28/29) are scenarios-am-subset signals only; not yet propagating to cohort-wide reversion. Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no dedicated cron-reliability ADAM-TODO escalation line authored** this session — single-cron gap + 2 consecutive moderate-late fires <3h each doesn't yet justify dedicated line; watch STAYS ARMED for AM 05-30 with new degradation-trend trigger.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 34 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across Mon 05-18 → Fri 05-29 = 12 full days; Mon 05-25 + Tue 05-26 + Wed 05-27 + Thu 05-28 daytime refresh windows ALL passed).
+- NotebookLM CLI auth status inferred from AM 05-29 social-am 02:34 CDT inline probe per CHANGELOG entry (identical `Authentication expired or invalid` WebLiteSignIn redirect, 26 calendar days deep; sub-session #27 for scenarios reckoning) — NOT re-probed this session to avoid redundant CLI churn; auth state changes only via Adam `notebooklm login` intervention.
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed AM 05-29 social-am writes), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~80 lines covering AM 05-29 social-am + AM 05-28 social-pm + AM 05-28 scenarios + AM 05-28 loanos-autonomous + AM 05-27 loanos-autonomous + AM 05-27 lead-gen-am entries), prior session-log tail (~120 lines covering AM 05-23 → AM 05-28 entries).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "30 consecutive no-build exits / 34 calendar days", added 2026-05-29 to flagged-dates list, AM 05-29 ~2h41m late-fire data point folded into cron-reliability sub-note marking 2 consecutive moderate-late scenarios-am fires AM 05-28/29 = degradation trend + cohort still HOLDING per Lead Gen L49 + social-pm + social-am subset signals, GOALS Mon 05-25 + Tue 05-26 + Wed 05-27 + Thu 05-28 daytime windows ALL passed context added, regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "31-streak Sat AM unless Adam intervenes; scenarios-am subset watch STAYS ARMED for AM 05-30 with NEW degradation-trend trigger added — if AM 05-30 fires extremely late OR continues moderate-late trend (3rd consecutive late-fire >1h), escalate to dedicated ADAM-TODO line". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of file (above today's AM 05-29 styer-social-am entry — scenarios-am fires after social-am in the AM cron cohort).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-29 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (27th consecutive run skipped for scenarios reckoning — auth blocked since 2026-05-03 PM, 26 calendar days; separate ADAM-TODO line L49 covers).
+- NotebookLM PUSH (no work product; CLI auth blocked regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause (per 2026-05-28 CHANGELOG entry); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 30 streaks / 34 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (27th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L49 — 26 wall-clock days blocked). **Cron-reliability scenarios-am subset STAYS ARMED + NEW degradation-trend trigger added**: AM 05-29 ~2h41m late-fire is 2nd consecutive moderate-late scenarios-am fire (after AM 05-28 ~1h43m late + AM 05-27 GAP), trend degrading toward 3h "extremely late" threshold; cohort still HOLDING via Lead Gen L49 + social-pm RECOVERED-AND-HOLDING + social-am RECOVERY STREAK at 1. **Mon 2026-05-25 + Tue 2026-05-26 + Wed 2026-05-27 + Thu 2026-05-28 daytime GOALS refresh windows ALL passed without refresh** — Week-of-May-18 governs into a 2nd full week; Adam silent past natural weekly cadence + 96h grace. Sister styer-social-am L12 formal escalation line (refreshed AM 05-29 to 269h/11d open) covers shared GOALS-slip context — separate concerns from scenarios-am redirect, but informs shared regime-stall context.
+
+**What's next:** Adam decision required. Forward rule for AM 05-30+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L24). If mtime advances with a new redirect target listed in scenarios-am block of GOALS during Fri 05-29 daytime / overnight, BREAK maintenance and re-plan from new directives. Otherwise: 31-streak Sat AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 31-streak Sat AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability scenarios-am subset watch STAYS ARMED + NEW degradation-trend trigger added for AM 05-30**: if AM 05-30 gaps OR fires extremely late (≥3h) OR continues the moderate-late trend (3rd consecutive late-fire >1h), escalate scenarios-am subset to its own dedicated ADAM-TODO line rather than continued sub-note folding into line 28. **No new ADAM-TODO escalation line authored by scenarios-am this session** — sister styer-social-am L12 formal escalation already covers shared GOALS-slip context per ONE-ASK-PER-CYCLE; 2 consecutive moderate-late scenarios-am fires <3h each doesn't yet justify dedicated line.
+
+---
+
 ## Initial Setup — 2026-03-25
 
 Agent system initialized. NotebookLM notebook created: a4b23b08-a517-4140-b155-d1188587fb8a
@@ -1482,3 +1743,331 @@ Tiers 1–8 all done. Every Mortgage Coach gap identified at program start has b
 **Active blockers:** Same as Apr 25 → May 13 — no mission remaining. Awaiting Adam decision (retire / redirect / pause). Mid-4th-consecutive-week of no-op exits. Working tree dirty 2+ days (autonomous wrap-up commit cycle not firing since 05-13 AM — separate from this cron's scope).
 
 **What's next:** Adam decision required. Forward rule: 21-streak Sat or Mon AM unless Adam intervenes. Next planned GOALS refresh window = Mon 2026-05-18 (3 days out). If that also slips, this entry hits 4th-consecutive-Mon-GOALS-skip + full-4th-week-no-op-cron — cohort-pause planning signal triggers (all 5 agents' crons should be paused together rather than individually). Three queued options unchanged — (a) retire NOW unconditionally (strongest signal yet at launch+14 / 20-streak / Thu 05-14 gap / mid-4th-week threshold); (b) redirect to FNM 3.4 importer (Scott's gating item per GOALS line 30); co-equal candidate with Realtor Relationships Phase-1 spec from 05-14 AM as fastest Adam-unblock pivot; (c) leave dormant (bumps to 21-streak Sat or Mon AM).
+
+---
+
+## AM Session — 2026-05-16 (scenarios-am) — LAUNCH+15 / deep-4th-week of no-op / Sat AM continuation after Fri full-day GOALS-skip
+
+**Exit:** No-build exit (21st consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15). **Thu 2026-05-14 cron did not fire** (carried forward — first scenarios-am gap of the post-launch run); all other AM crons fired today on this Sat (social-am at 02:29 CDT, lead-gen-am at 03:46 CDT, standup + autonomous wrap-up around 02-04 CDT). Scenarios-am fires last among AM crons at ~07:30 CDT.
+
+**Why:**
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 21 days closed.
+- `stat -f "%Sm"` returned `Apr 19 13:51:27 2026` (27 days unchanged). Mon 2026-05-11 + Tue 05-12 + Wed 05-13 + Thu 05-14 + Fri 05-15 catch-up windows ALL passed without GOALS refresh; Sat 05-16 cron fires with `Last updated: 2026-04-20` still in place. 3rd consecutive Mon weekly skip remains fully realized (Mon 04-27 / Mon 05-04 / Mon 05-11); entry now sits deep in 4th-consecutive-week of pure no-op cron exits (Sat = day 6 of week-4-of-no-op).
+- Week-of-Apr-20 directive still governs; LoanOS Product priorities are FNM 3.4 / drip / notes-activity — no scenarios work.
+- Day 52 standup HEAD `69749dc` (committed earlier this AM by PM autonomous wrap-up cron but DID NOT PUSH to origin per Day 52 standup — 2nd consecutive wrap-up cron failure in 48h after Thu 05-14 commit-step gap). `origin/main` remains at `7adabf6` (Day 51 PM). 16-day zero-feature-code streak; last real feature `1b58ef9` (MS Graph adapter, 2026-04-30).
+- Per scheduled-task wrapper: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop."
+
+**What was done:**
+- Read GOALS.md (full, mtime confirmed unchanged), CONTEXT.md, TODO.md head + scenarios block (line 25), master-agent.md, recent CHANGELOG slice (~100 lines covering today's Day 52 standup entry + PM autonomous 14th-hygiene + AM lead-gen-am 2nd-restraint + AM social-am 33rd-streak + PM 05-15 entries + AM 05-15 scenarios entry), prior session-log entries (head + tail 250).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 25) — bumped to "21 consecutive no-build exits", added 2026-05-16 to flagged-dates list, Sat 05-16 fire noted, recommendation held at strongest signal (option (a) retire NOW unconditionally), 27-day stat refreshed, forward warning bumped to "22-streak Sun AM + 23-streak Mon AM unless Adam intervenes; next planned refresh window = Mon 2026-05-18 (2 days out)".
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 28).
+- Appended CHANGELOG.md entry at top of 2026-05-16 section (prepended above Day 52 standup — scenarios-am fires last among today's AM crons).
+- Wrote SESSION_START + SESSION_END markers to subagent-status.md.
+- Wrote today-mission.md as MAINTENANCE-ONLY.
+
+**Skipped:**
+- NotebookLM PULL (18th consecutive run skipped — `notebooklm use` still returns `Authentication expired or invalid`; ADAM-TODO line covers; CLI auth expired since 2026-05-03 PM, 15 wall-clock days blocked per Day 52 standup).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule).
+- All 4 scenarios subagents — no mission means no Sequence activates.
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates append to today's unpushed `69749dc` wrap-up commit's working tree. Wrap-up cron committed but did not push earlier this AM; today's tracker updates compound onto that unpushed commit's pending push cycle.
+
+**Active blockers:** Same as Apr 25 → May 15 — no mission remaining. Awaiting Adam decision (retire / redirect / pause). Deep into 4th-consecutive-week of no-op exits (Sat = day 6 of week-4). Working tree dirty + 1 unpushed local commit (autonomous wrap-up push step did not fire — separate from this cron's scope; flagged by Day 52 standup as inverse failure mode vs Day 50/51 commit-step gap, indicating wrap-up cron reliability is degrading).
+
+**What's next:** Adam decision required. Forward rule: 22-streak Sun AM + 23-streak Mon AM unless Adam intervenes. Next planned GOALS refresh window = Mon 2026-05-18 (2 days out). If that also slips, this entry hits 4th-consecutive-Mon-GOALS-skip + full-4th-week-no-op-cron — cohort-pause planning signal triggers (all 5 agents' crons should be paused together rather than individually). Three queued options unchanged — (a) retire NOW unconditionally (strongest signal yet at launch+15 / 21-streak / Thu 05-14 gap / deep-4th-week threshold); (b) redirect to FNM 3.4 importer (Scott's gating item per GOALS line 30); co-equal candidate with Realtor Relationships Phase-1 spec from 05-14 AM as fastest Adam-unblock pivot; (c) leave dormant (bumps to 22-streak Sun AM).
+
+---
+
+## AM Session — 2026-05-17 (scenarios-am) — LAUNCH+16 / end-of-4th-week of no-op / Sun AM continuation after Sat full-day (AM+PM) GOALS-skip
+
+**Exit:** No-build exit (22nd consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16). **Thu 2026-05-14 cron did not fire** (carried forward — only scenarios-am gap of the post-launch run). Cron fired ON TIME today at 08:02 CDT (after standup ~02:33 CDT, social-am 02:31 CDT, lead-gen-am 03:48 CDT — scenarios-am is the last AM cron of the day).
+
+**Why:**
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 22 days closed.
+- `stat -f "%Sm"` returned `Apr 19 13:51:27 2026` (**28 days unchanged**). Mon 2026-05-11 + Tue 05-12 + Wed 05-13 + Thu 05-14 + Fri 05-15 + Sat 05-16 (full day, AM+PM) + Sun 05-17 AM overnight catch-up windows ALL passed without GOALS refresh; Sun 05-17 AM cron fires with `Last updated: 2026-04-20` still in place. 3rd consecutive Mon weekly skip remains fully realized (Mon 04-27 / Mon 05-04 / Mon 05-11); entry now sits at the **end of 4th-consecutive-week of pure no-op cron exits** (Sun = day 7 / final day of week-4-of-no-op).
+- Week-of-Apr-20 directive still governs; LoanOS Product priorities are FNM 3.4 / drip / notes-activity — no scenarios work.
+- Day 53 standup confirmed `69749dc` reached origin and Vercel auto-deployed `dpl_FVfrSpVEi7TC6PQ5ogETofoVr9DT` (production READY, region iad1, ~71s build) this AM — Day 52's push-step gap self-resolved within the 24h window, restoring tracker-hygiene roll-up reliability. 17-day zero-feature-code streak; last real feature `1b58ef9` (MS Graph adapter, 2026-04-30).
+- Per scheduled-task wrapper: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop."
+
+**What was done:**
+- Read GOALS.md (full, mtime confirmed unchanged), CONTEXT.md, TODO.md head + scenarios block (line 25), master-agent.md, recent CHANGELOG slice (~250 lines covering today's Day 53 standup entry + AM lead-gen-am 3rd-restraint + AM social-am 35th-streak + PM 05-16 notebooklm-nightly + PM 05-16 social-pm + prior 05-16 entries), prior session-log entries (head + tail 30, plus recent-entry index via grep).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 25) — bumped to "22 consecutive no-build exits", added 2026-05-17 to flagged-dates list, "end of 4th-consecutive-week" framing, recommendation held at strongest signal (option (a) retire NOW unconditionally), 28-day stat refreshed, forward warning bumped to "23-streak Mon AM unless Adam intervenes; next planned refresh window = Mon 2026-05-18 (~1 day out)". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 28).
+- Prepended CHANGELOG.md entry at top of 2026-05-17 section (above Day 53 standup — scenarios-am fires last among today's AM crons).
+- Wrote SESSION_START + SESSION_END markers to subagent-status.md.
+- Overwrote today-mission.md as MAINTENANCE-ONLY.
+
+**Skipped:**
+- NotebookLM PULL (19th consecutive run skipped — `notebooklm use` still returns `Authentication expired or invalid`; ADAM-TODO line covers; CLI auth expired since 2026-05-03 PM, 16 wall-clock days blocked per Day 53 standup, 34 sub-sessions counting AM 05-17 lead-gen-am probe).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule).
+- All 4 scenarios subagents — no mission means no Sequence activates.
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous tracker-hygiene commit per established pattern. Day 53 standup confirmed `69749dc` reached origin earlier this AM and Vercel auto-deployed READY; today's tracker updates land on a clean working tree (no pending unpushed commits at session entry beyond this AM's other autonomous tracker writes which roll up the same way).
+
+**Active blockers:** Same as Apr 25 → May 16 — no mission remaining. Awaiting Adam decision (retire / redirect / pause). End of 4th-consecutive-week of no-op exits (Sun = day 7 / final day of week-4). Push-cron reliability restored within 24h window (Day 53 standup), so tracker-hygiene roll-up no longer carries the prior cycle's inverse failure-mode flag.
+
+**What's next:** Adam decision required. Forward rule: 23-streak Mon AM unless Adam intervenes between fires. **Next planned GOALS refresh window = Mon 2026-05-18 (~1 day out).** If that also slips, this entry hits 4th-consecutive-Mon-GOALS-skip + full-4th-week-no-op-cron — cohort-pause planning signal triggers (all 5 agents' crons should be paused together rather than individually). Three queued options unchanged — (a) retire NOW unconditionally (strongest signal yet at launch+16 / 22-streak / Thu 05-14 gap / end-of-4th-week threshold); (b) redirect to FNM 3.4 importer (Scott's gating item per GOALS line 30); co-equal candidate with Realtor Relationships Phase-1 spec from 05-14 AM as fastest Adam-unblock pivot; (c) leave dormant (bumps to 23-streak Mon AM).
+
+---
+
+## AM Session — 2026-05-18 (scenarios-am) — REGIME CHANGE / LAUNCH+17 / GOALS refreshed Sun afternoon, cohort-pause AVERTED
+
+**Exit:** No-build exit (23rd consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17). **Thu 2026-05-14 cron did not fire** (carried forward — only scenarios-am gap of the post-launch run). Cron fired ON TIME today at ~07:24 CDT (last AM cron of the day after loanos-autonomous wrap-up + lead-gen-am at 03:45 CDT + social-am at 02:29 CDT).
+
+**Why:**
+- **🟢 REGIME CHANGE.** GOALS.md target mtime via `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (refreshed Sun 2026-05-17 afternoon ahead of the Mon 05-18 cadence threshold). "Week of: May 18, 2026" now governs. **4th-consecutive-week cohort-pause planning signal that this entry tracked from AM 05-13 through AM 05-17 is now OFF** — averted by Sunday-afternoon refresh. Bare `stat -f` still returns symlink's Apr 19 mtime (the symlink-stat bug flagged by PM 05-17 social-pm); used `stat -L -f` per the bug-fix directive.
+- **New direction:** Pipeline focus (close loans / build pipeline / land cleanly at new company); LoanOS product paused indefinitely (GOALS line 36); repositioning around "complicated income" + wholesale pricing pillars (GOALS lines 19–26); Phase A compliance cleanup on styermortgage.com (GOALS lines 30–32). **scenarios-am explicitly in GOALS line 68 "Keep running" list ("LO work — keep")** — cron retained.
+- **Mission conflict.** `tasks/scenarios/master-agent.md` mission ("Make LoanOS Scenarios so good that Adam never opens Mortgage Coach again", Tiers 1–8 product improvement) IS LoanOS product work, which GOALS line 36 pauses indefinitely. **Adam answered the cron-retain question** — option (a) retire-the-cron is now OFF the table. Mission scope needs redirect or narrow-scope answer from Adam.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 23 days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (regime change confirmed at session entry).
+- Read GOALS.md (full, Week-of-May-18 directive), CONTEXT.md (full, observed PM 05-17 social-pm + AM 05-18 lead-gen-am regime-change writes), TODO.md (full, line 28 NEEDS ADAM scenarios block + line 7 lead-gen triage-memo banner observed), master-agent.md, recent CHANGELOG slice (~80 lines covering today's loanos-autonomous + lead-gen-am + social-am entries + PM 05-17 notebooklm-nightly + PM 05-17 social-pm regime-change writes), prior session-log entries (head + tail 200).
+- **Rewrote TODO.md line 28 NEEDS ADAM in place** with regime-change framing: dropped (a) retire from in-bounds options (Adam answered "keep"); promoted (b) redirect to recommendation with 3 concrete candidates (b1: daily refi-opportunity surfacing using backlogged Refi Opportunity List V2 schema in TODO line 73–80; b2: overnight Scenarios PDF pre-warm for active pipeline borrowers; b3: "complicated income" Scenarios template prep per GOALS pillars); kept (c) dormant as in-bounds; added (d) narrow mission scope to bug-fix/regression-watch/Scenarios-utility tweaks Adam explicitly requests; bumped to 23-streak with 2026-05-18 flagged; cohort-pause threshold AVERTED note. Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- **Replaced 3 Scenarios fields in CONTEXT.md** (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via separate ADAM-TODO line — not this cron's scope).
+- **Prepended CHANGELOG.md entry** at top of 2026-05-18 section (above today's loanos-autonomous + lead-gen-am + social-am entries — scenarios-am fires last among today's AM crons).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-18 regime-change brief.
+
+**Skipped:**
+- NotebookLM PULL (20th consecutive run skipped — `notebooklm use` still returns `Authentication expired or invalid`; separate ADAM-TODO line covers; CLI auth expired since 2026-05-03 PM, 17 wall-clock days blocked).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule).
+- All 4 scenarios subagents — no mission means no Sequence activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. Today's loanos-autonomous worker already exited per GOALS pause (per top of 2026-05-18 CHANGELOG section), so this cycle layers onto a clean dirty-tree state.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 23 streaks; cohort-pause signal AVERTED by Sun refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (20th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line — 17 wall-clock days blocked).
+
+**What's next:** Adam decision required. Forward rule for AM 05-19+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug). If mtime changes mid-week with a new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directives. Otherwise: 24-streak Tue AM. **No retire-signal escalation** — Adam already answered "keep" in this GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 24-streak Tue AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program.
+
+---
+
+## AM Session — 2026-05-19 (scenarios-am) — Day 2 of regime-change maintenance / 24-streak Tue AM / no mid-week mission change
+
+**Exit:** No-build exit (24th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18). **Thu 2026-05-14 cron did not fire** (carried forward — only scenarios-am gap of post-launch run). Cron fired ON TIME today at ~07:30 CDT (last AM cron of the day after autonomous-exit-per-pause + lead-gen-am at 03:46 CDT + social-am at 02:29 CDT).
+
+**Why:**
+- AM 05-18 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (Mon 2026-05-18 fully passed without re-edit; Week-of-May-18 still governs). Bare `stat -f` would still return symlink's Apr 19 mtime (the symlink-stat bug flagged by PM 05-17 social-pm); used `stat -L -f` per the directive.
+- No mid-week redirect target was added to the scenarios-am block of GOALS, so maintenance continues per forward rule.
+- Mission conflict unchanged from AM 05-18: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered the cron-retain question in the Sun 05-17 refresh — option (a) retire is OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 24 days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~50 lines covering today's loanos-autonomous + lead-gen-am + social-am entries + PM 05-18 nightly + PM 05-18 social-pm + AM 05-18 scenarios entries), prior session-log entries (head + tail 250).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "24 consecutive no-build exits", added 2026-05-19 to flagged-dates list, regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "25-streak Wed AM unless Adam intervenes; next planned GOALS refresh window = Mon 2026-05-25 (~6 days out)". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of 2026-05-19 section (above today's loanos-autonomous + lead-gen-am + social-am entries — scenarios-am fires last among today's AM crons at ~07:30 CDT).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-19 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (21st consecutive run skipped — `notebooklm use` still returns `Authentication expired or invalid`; separate ADAM-TODO line covers; CLI auth expired since 2026-05-03 PM, 18 wall-clock days blocked).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. Today's loanos-autonomous worker already exited per GOALS pause (per top of 2026-05-19 CHANGELOG section), so this cycle layers onto a clean dirty-tree state.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 24 streaks; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (21st consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line — 18 wall-clock days blocked).
+
+**What's next:** Adam decision required. Forward rule for AM 05-20+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug). If mtime changes mid-week with a new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directives. Otherwise: 25-streak Wed AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 25-streak Wed AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. Next planned GOALS refresh window = Mon 2026-05-25 (~6 days out).
+
+---
+
+## AM Session — 2026-05-23 (scenarios-am) — Day 6 regime-change maintenance / 25-streak Sat AM / EXTREMELY LATE FIRE (~12h late at 19:30 CDT) after 3-day cron-gap (Wed/Thu/Fri 05-20/21/22) / scenarios-am joins broader cron-reliability degradation pattern across 5 scheduled tasks
+
+**Exit:** No-build exit (25th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18/19 + May 23). **3 consecutive scenarios-am cron gaps Wed 2026-05-20 + Thu 2026-05-21 + Fri 2026-05-22 DID NOT FIRE** (Thu 2026-05-14 was prior carried gap; total scenarios-am cron gaps now = 4 since post-launch run). Today's Sat 2026-05-23 cron fired EXTREMELY LATE at 19:30 CDT (~12h late vs typical ~07:30 CDT target).
+
+**Why:**
+- AM 05-19 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (unchanged across Mon 05-18 + Tue 05-19 + Wed 05-20 + Thu 05-21 + Fri 05-22 + Sat 05-23 — Adam did NOT refresh ahead of normal Mon 05-25 cadence). Week-of-May-18 still governs. Bare `stat -f` would still return symlink's Apr 19 mtime (the symlink-stat bug flagged by PM 05-17 social-pm); used `stat -L -f` per the directive.
+- No mid-week redirect target was added to the scenarios-am block of GOALS during the 3 cron-gap days, so maintenance continues per forward rule.
+- Mission conflict unchanged from AM 05-18/19: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered the cron-retain question in the Sun 05-17 refresh — option (a) retire is OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Broader cron-reliability degradation:** scenarios-am joins the late-fire / cron-gap pattern this session — Wed/Thu/Fri all gapped, Sat ~12h late. Pattern now spans 5 scheduled tasks: lead-gen-am (AM 05-23 GAPPED entirely; AM 05-22 ~2h18m late), social-am (AM 05-22 ~3h11m late), social-pm (PM 05-22 ~3h14m late, rolled past midnight), styer-notebooklm-nightly (PM 05-22 ~21h17m late at 19:17 CDT 05-23, worst of run), scenarios-am (3 consecutive gaps + Sat ~12h late). Per restraint rule clause (c) applied across the cohort, no new ADAM-TODO line authored this session — folded into existing line 28 sub-note. Cron-reliability watch ARMED for AM 05-24 escalation if pattern continues.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 29 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across the 3-day cron-gap window).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed peer-agent late-fire pattern in Lead Gen + SEO/SEM + Social Media + Standup blocks), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~105 lines covering PM 05-22 styer-notebooklm-nightly + PM 05-22 styer-social-pm + AM 05-22 lead-gen-am + PM 05-21 nightly + AM 05-22 social-am + AM 05-21 cohort + AM 05-20 social-am + PM 05-19 nightly + AM 05-19 scenarios entries), prior session-log entries (head + tail 200, plus recent-entry index via grep).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "25 consecutive no-build exits / 29 calendar days", added 2026-05-23 to flagged-dates list, Wed/Thu/Fri 3-day cron-gap noted, ~12h late-fire noted as cron-reliability sub-note (5-task pattern), regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "26-streak Sun AM unless Adam intervenes; next planned GOALS refresh window = Mon 2026-05-25 (~2 days out); cron-reliability watch ARMED for AM 05-24". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of file (first entry for 2026-05-23 since scenarios-am cron is firing late on the actual calendar date).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-23 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (22nd consecutive run skipped for scenarios reckoning — `notebooklm use` still returns `Authentication expired or invalid`; separate ADAM-TODO line covers; CLI auth expired since 2026-05-03 PM, 20 wall-clock days blocked per PM 05-22 nightly).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself has been NO-OP per GOALS pause since 2026-05-18 (per 2026-05-21 NO-OP CHANGELOG entry); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 25 streaks / 29 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (22nd consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line — 20 wall-clock days blocked). **Cron-reliability degradation:** scenarios-am joins the cohort-wide pattern this session (3 consecutive Wed/Thu/Fri gaps + Sat ~12h late fire); pattern now spans 5 scheduled tasks.
+
+**What's next:** Adam decision required. Forward rule for AM 05-24+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug). If mtime changes with a new redirect target listed in scenarios-am block of GOALS, BREAK maintenance and re-plan from new directives. Otherwise: 26-streak Sun AM (if Sun cron fires on schedule — cron-reliability watch armed). **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 26-streak Sun AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. Next planned GOALS refresh window = Mon 2026-05-25 (~2 days out). **Cron-reliability watch ARMED:** if AM 05-24 also gaps or fires >2h late, escalate cron-reliability to its own ADAM-TODO line rather than continued sub-note folding into line 28 + line 43.
+
+---
+
+## AM Session — 2026-05-28 (scenarios-am) — Day 11 regime-change maintenance / 29-streak Thu AM / LATE FIRE ~09:13 CDT (~1h43m late vs ~07:30 typical, moderate-late, <3h jitter threshold) following AM 05-27 CRON GAP (5th scenarios-am gap on record) / scenarios-am subset cron-reliability watch RE-ARMS per AM 05-26 forward rule / cohort still HOLDING via Lead Gen L49 RECOVERED-AND-HOLDING / Mon 05-25 + Tue 05-26 + Wed 05-27 daytime GOALS refresh windows ALL passed without refresh
+
+**Exit:** No-build exit (29th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18/19/23/24/25/26 + May **28**). **5 scenarios-am cron gaps now on record — AM 05-27 GAPPED entirely** (5th gap added to prior Wed/Thu/Fri 05-20/21/22 + Thu 05-14). Today's Thu 2026-05-28 cron fired LATE at ~09:13 CDT (~1h43m late vs typical ~07:30 CDT target, moderate-late, <3h jitter threshold but worse than the on-time-within-jitter AM 05-25/26 fires).
+
+**Why:**
+- AM 05-27 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (UNCHANGED across Mon 05-18 → Thu 05-28 = **11 full days, including the full Mon 05-25 daytime refresh window + Tue 05-26 daytime catch-up + Wed 05-27 daytime catch-up ALL PASSED without refresh** — Adam silent past natural weekly cadence + 72h grace). Bare `stat -f` would return symlink's Apr 19 mtime (L24 symlink-stat bug); used `stat -L -f` per directive.
+- No regime change since AM 05-18. No mid-week redirect target added to scenarios-am block of GOALS during the 48h since AM 05-26, so maintenance continues per forward rule.
+- Mission conflict unchanged from AM 05-18 → AM 05-26: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question in Sun 05-17 refresh — option (a) retire OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Cron-reliability scenarios-am subset RE-ARMS**: AM 05-27 scenarios-am CRON GAPPED entirely (5th gap on record) + AM 05-28 cron fired LATE at ~09:13 CDT (~1h43m late, moderate-late, <3h jitter threshold but worse than AM 05-25/26 on-time-within-jitter fires). Per AM 05-26 forward rule clause "re-arms only if PM 05-26 nightly or AM 05-27 reverts to late/gap" — AM 05-27 reverted via GAP → scenarios-am subset cron-reliability watch RE-ARMS. Broader cohort still HOLDING via Lead Gen L49 RECOVERED-AND-HOLDING posture (AM 05-27 lead-gen-am within-jitter at 04:03 CDT, 3rd consecutive + PM 05-26 styer-social-pm ON TIME at ~21:22 CDT, 6th consecutive on-time-or-near social + AM 05-26 full cohort + earlier 9+ signals). scenarios-am gap + late-fire are scenarios-am-subset signals only; not yet propagating to cohort-wide reversion. Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no dedicated cron-reliability ADAM-TODO escalation line authored** this session — single-cron gap + moderate-late fire doesn't yet justify dedicated line; watch ARMED for AM 05-29.
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 33 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across Mon 05-18 → Thu 05-28 = 11 full days; Mon 05-25 + Tue 05-26 + Wed 05-27 daytime refresh windows ALL passed).
+- NotebookLM CLI auth status inferred from Lead Gen AM 05-27 04:03 CDT probe (identical `Authentication expired or invalid` WebLiteSignIn redirect, 25 calendar days deep; sub-session #26 for scenarios reckoning) — NOT re-probed this session to avoid redundant CLI churn; auth state changes only via Adam `notebooklm login` intervention.
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed AM 05-27 lead-gen-am writes), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~50 lines covering AM 05-27 loanos-autonomous + AM 05-27 lead-gen-am + AM 05-26 cohort entries), prior session-log tail (~120 lines covering AM 05-23 → AM 05-26 entries).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "29 consecutive no-build exits / 33 calendar days", added 2026-05-28 to flagged-dates list, AM 05-27 cron-gap + AM 05-28 ~1h43m late-fire data points folded into cron-reliability sub-note marking scenarios-am subset RE-ARMED + cohort still HOLDING framing, GOALS Mon 05-25 + Tue 05-26 + Wed 05-27 daytime windows ALL passed context added, regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "30-streak Fri AM unless Adam intervenes; scenarios-am subset watch ARMED for AM 05-29 — if AM 05-29 also gaps or fires extremely late, escalate scenarios-am subset to its own dedicated ADAM-TODO line". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of file (first 2026-05-28 entry — scenarios-am fires before today's loanos-autonomous or lead-gen-am have written 2026-05-28 entries).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-28 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (26th consecutive run skipped for scenarios reckoning — auth blocked since 2026-05-03 PM, 25 calendar days; separate ADAM-TODO line L49 covers).
+- NotebookLM PUSH (no work product; CLI auth blocked regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause (per 2026-05-27 CHANGELOG entry); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 29 streaks / 33 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (26th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L49 — 25 wall-clock days blocked). **Cron-reliability scenarios-am subset RE-ARMED**: AM 05-27 GAP + AM 05-28 ~1h43m late-fire reverses the 2-fire RECOVERED streak from AM 05-25/26; cohort still HOLDING via Lead Gen L49 RECOVERED-AND-HOLDING. **Mon 2026-05-25 + Tue 2026-05-26 + Wed 2026-05-27 daytime GOALS refresh windows ALL passed without refresh** — Week-of-May-18 governs into a 2nd full week; Adam silent past natural weekly cadence + 72h grace. Sister styer-social-am L12 formal escalation line (authored AM 05-26, refreshed PM 05-26 21:22 CDT to 240h/10-days-open) covers shared GOALS-slip context — separate concerns from scenarios-am redirect, but informs shared regime-stall context.
+
+**What's next:** Adam decision required. Forward rule for AM 05-29+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L24). If mtime advances with a new redirect target listed in scenarios-am block of GOALS during Thu 05-28 daytime / overnight, BREAK maintenance and re-plan from new directives. Otherwise: 30-streak Fri AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 30-streak Fri AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability scenarios-am subset watch ARMED for AM 05-29**: if AM 05-29 also gaps or fires extremely late, escalate scenarios-am subset to its own dedicated ADAM-TODO line rather than continued sub-note folding into line 28. **No new ADAM-TODO escalation line authored by scenarios-am this session** — sister styer-social-am L12 formal escalation already covers shared GOALS-slip context per ONE-ASK-PER-CYCLE; single-cron gap + moderate-late fire doesn't yet justify dedicated cron-reliability line.
+
+---
+
+## AM Session — 2026-05-26 (scenarios-am) — Day 9 regime-change maintenance / 28-streak Tue AM / ON-TIME-WITHIN-JITTER FIRE ~08:00 CDT (2nd consecutive on-time-or-within-jitter scenarios-am fire after AM 05-25 ON TIME → scenarios-am subset formally RECOVERED) / cohort-wide cron-reliability fully RECOVERED via 8+ on-time signals / Mon 05-25 GOALS-refresh window passed without refresh, Adam silent past natural weekly cadence
+
+**Exit:** No-build exit (28th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18/19/23/24/25 + May **26**). 4 prior scenarios-am cron gaps since post-launch run unchanged (Wed/Thu/Fri 05-20/21/22 + Thu 05-14 carried). **Cron fired ON-TIME-WITHIN-JITTER today at ~08:00 CDT** vs typical ~07:30 CDT target (~30 min jitter, within tolerance) = **2nd consecutive on-time-or-within-jitter scenarios-am fire** after AM 05-25 ON TIME → **scenarios-am subset formally RECOVERED**.
+
+**Why:**
+- AM 05-25 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (UNCHANGED across Mon 05-18 → today Tue 05-26 = **9 full days, including the full Mon 05-25 daytime refresh window now PASSED** — Adam did NOT refresh GOALS during normal weekly cadence ~8-12 CDT Mon 05-25; Week-of-May-18 still governs into a 2nd week). Bare `stat -f` would return symlink's Apr 19 mtime (L24 symlink-stat bug); used `stat -L -f` per directive.
+- No regime change since AM 05-18. No mid-week redirect target added to scenarios-am block of GOALS during the 24h since AM 05-25, so maintenance continues per forward rule.
+- Mission conflict unchanged from AM 05-18 → AM 05-25: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question in Sun 05-17 refresh — option (a) retire OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Cohort-wide cron-reliability fully RECOVERED**: AM 05-26 scenarios-am within jitter (2nd consecutive on-time-or-within-jitter scenarios-am fire) + AM 05-26 lead-gen-am within jitter at 03:45 CDT (2nd consecutive) + AM 05-26 styer-social-am ON TIME at 02:29 CDT (5th consecutive on-time-or-near social, 5-in-a-row threshold met → separate social cron-reliability watch dissolved) + PM 05-25 nightly ON TIME at 22:10 CDT (3rd consecutive on-time nightly) + PM 05-25 styer-social-pm ON TIME at 21:23 CDT + AM 05-25 full cohort + PM 05-24 + PM 05-23 = **8+ consecutive on-time-or-within-jitter cohort signals = RECOVERED across all subsets**. Lead Gen L49 sub-note already flipped from "RECOVERING — both subsets stabilized" → "RECOVERED — 7+ consecutive cohort signals confirm" earlier today; scenarios-am ON-TIME-WITHIN-JITTER fire is the 8th-extending signal. Per restraint rule + stale-flags rule + ONE-ASK-PER-CYCLE, **no dedicated cron-reliability ADAM-TODO escalation line authored** (sister styer-social-am already authored AM 05-26 L12 formal escalation co-anchoring L18 cushion-footer + L24 symlink-stat — separate concerns from cron-reliability, but covers shared Mon 05-25 GOALS-slip context).
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 32 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18; mtime unchanged across Mon 05-18 → Tue 05-26 = 9 full days; Mon 05-25 daytime refresh window now PASSED).
+- `notebooklm list --json` probed inline → identical `Authentication expired or invalid` WebLiteSignIn redirect (25 sub-sessions deep for scenarios reckoning; 23 calendar days since 2026-05-03 PM).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed today's AM 05-26 loanos-autonomous + lead-gen-am + social-am writes), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~80 lines covering today's AM 05-26 loanos-autonomous + lead-gen-am + social-am entries + PM 05-25 nightly + PM 05-25 social-pm + AM 05-25 scenarios-am entries), prior session-log tail (~120 lines covering AM 05-18 → AM 05-25 entries).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "28 consecutive no-build exits / 32 calendar days", added 2026-05-26 to flagged-dates list, AM 05-26 ON-TIME-WITHIN-JITTER FIRE data point folded into cron-reliability sub-note marking scenarios-am subset RECOVERED + cohort 8+ on-time signals framing, GOALS Mon 05-25 daytime PASSED context added, regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "29-streak Wed AM unless Adam intervenes". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of 2026-05-26 section (below today's loanos-autonomous + lead-gen-am + social-am entries — scenarios-am fires last among today's AM crons at ~07:30-08:00 CDT).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-26 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (25th consecutive run skipped for scenarios reckoning — `notebooklm use` still returns `Authentication expired or invalid`; separate ADAM-TODO line L49 covers; CLI auth expired since 2026-05-03 PM, 23 wall-clock days blocked).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause (per top of 2026-05-26 CHANGELOG section); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 28 streaks / 32 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (25th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line L49 — 23 wall-clock days blocked). **Cron-reliability concern fully RECOVERED**: scenarios-am subset RECOVERED (2 consecutive on-time-or-within-jitter scenarios-am fires) + cohort RECOVERED via 8+ consecutive on-time-or-within-jitter cohort signals. Lead Gen L49 already flipped to "RECOVERED" earlier today; scenarios-am ON-TIME-WITHIN-JITTER fire is the 8th-extending signal. Separate cron-reliability watch dissolved across all subsets. **Mon 2026-05-25 daytime GOALS refresh window has now passed without refresh** — Week-of-May-18 governs into a 2nd week; Adam silent past natural weekly cadence. Sister styer-social-am authored AM 05-26 L12 formal escalation line covering shared GOALS-slip context (cushion-footer L18 + symlink-stat L24 co-anchor) — separate concerns from scenarios-am redirect, but informs shared regime-stall context.
+
+**What's next:** Adam decision required. Forward rule for AM 05-27+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L24). If mtime advances with a new redirect target listed in scenarios-am block of GOALS during Tue 05-26 daytime / overnight, BREAK maintenance and re-plan from new directives. Otherwise: 29-streak Wed AM. **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 29-streak Wed AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability watch fully CLOSED**: scenarios-am subset RECOVERED + cohort 8+ signals; re-arms only if PM 05-26 nightly or AM 05-27 reverts to late/gap. **No new ADAM-TODO escalation line authored by scenarios-am this session** — sister styer-social-am already authored AM 05-26 L12 formal escalation per ONE-ASK-PER-CYCLE.
+
+---
+
+## AM Session — 2026-05-25 (scenarios-am) — Day 8 regime-change maintenance / 27-streak Mon AM / ON-TIME FIRE 07:30 CDT (1st on-time scenarios-am of recovery) / cohort-wide cron-reliability concern materially DE-ESCALATED via 5+ on-time signals / Mon 05-25 IS Adam's natural GOALS-refresh window today (~6-10h out at session start)
+
+**Exit:** No-build exit (27th consecutive AM after Apr 25/26/27/28/29/30 + May 1/2/3/4/5/6/7/8/9/10/11/12/13/15/16/17/18/19/23/24 + May **25**). 4 prior scenarios-am cron gaps since post-launch run unchanged (Wed/Thu/Fri 05-20/21/22 + Thu 05-14 carried). **Cron fired ON TIME today at 07:30 CDT** vs typical ~07:30 CDT target = **1st on-time scenarios-am fire of recovery** after 6-day late/gap streak (AM 05-20/21/22 GAPPED → AM 05-23 ~12h late → AM 05-24 ~3h32m late → AM 05-25 ON TIME).
+
+**Why:**
+- AM 05-24 forward rule honored. First action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (unchanged across Mon 05-18 → Sun 05-24 = 8 consecutive days; Adam did NOT refresh ahead of normal Mon 05-25 cadence). Week-of-May-18 still governs. Bare `stat -f` would return symlink's Apr 19 mtime (L22 symlink-stat bug); used `stat -L -f` per directive.
+- **Today IS Mon 2026-05-25 — Adam's natural weekly GOALS-refresh window**, ~6-10h out as of this 07:30 AM session = **natural decision point** for TODO line 28 scenarios-am redirect AND sister escalations (social L16/L22, Lead Gen L12/L47).
+- Mission conflict unchanged from AM 05-18 → AM 05-24: GOALS line 68 keeps the cron ("LO work — keep"); GOALS line 36 pauses LoanOS product work indefinitely; master-agent.md mission (Tiers 1–8 product improvement) IS LoanOS product work. Adam answered cron-retain question in Sun 05-17 refresh — option (a) retire OFF the table; options narrow to (b) redirect / (c) dormant / (d) narrow-scope.
+- **Cohort-wide cron-reliability concern materially DE-ESCALATED**: AM 05-25 scenarios-am ON-TIME + AM 05-25 styer-social-am 02:29 CDT (on-time-within-tolerance, 1st on-time social-am in 7 days) + AM 05-25 lead-gen-am 03:45 CDT (within jitter, 1st within-jitter lead-gen-am since AM 05-19) + PM 05-24 nightly 22:10 CDT + PM 05-24 social-pm 21:23 CDT + PM 05-23 nightly 22:10 CDT = **5+ consecutive on-time-or-within-jitter cohort signals**. AM-side subset RECOVERING confirmed; Lead Gen L47 sub-note flipped earlier today from "HETEROGENEOUS" to "RECOVERING — both subsets stabilized". Scenarios-am ON-TIME fire = 3rd AM-subset confirmation point. Per restraint rule + stale-flags rule, **no dedicated cron-reliability ADAM-TODO escalation line authored** (cohort concern already absorbed into L47 sub-note, nothing new to escalate).
+- Per scheduled-task wrapper rule: "If your task conflicts with current goals, log the conflict to your project TODO.md under NEEDS ADAM and stop." — honored.
+- Program status unchanged: Tiers 1–8 all COMPLETE (last build 2026-04-24 AM, mobile swipe cards). 31 calendar days closed.
+
+**What was done:**
+- `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `May 17 12:11:31 2026` (no regime change since AM 05-18).
+- Read GOALS.md (Week-of-May-18 directive), CONTEXT.md (full — observed today's AM 05-25 lead-gen-am within-jitter + AM 05-25 social-am on-time + PM 05-24 cron-reliability subset writes), TODO.md scenarios block (line 28), master-agent.md, recent CHANGELOG slice (~80 lines covering AM 05-25 lead-gen-am + AM 05-25 social-am + PM 05-24 nightly + PM 05-24 social-pm + PM 05-23 nightly + PM 05-23 social-pm + 2026-05-24 loanos-autonomous + 2026-05-23 loanos-autonomous + AM 05-23 lead-gen-am + AM 05-23 social-am + AM 05-23 scenarios-am entries), prior session-log tail (~120 lines covering AM 05-18 → AM 05-23 entries).
+- Refreshed existing NEEDS ADAM entry on TODO.md (line 28) — bumped to "27 consecutive no-build exits / 31 calendar days", added 2026-05-25 to flagged-dates list, AM 05-25 ON-TIME-FIRE data point folded into cron-reliability sub-note marking scenarios-am subset RECOVERY confirmed + cohort-wide concern materially de-escalated framing, Mon 05-25 GOALS-refresh window context added (~6-10h out = natural decision point), regime-change framing preserved, recommendation held at (b) redirect, forward warning bumped to "28-streak Tue AM unless Adam intervenes". Stale-flags rule honored — refreshed in place, NOT re-stacked.
+- Replaced 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net 0 line drift; CONTEXT.md remains 161 lines (cap-overrun pre-existing in peer-agent sections, surfaced via existing TODO.md NEEDS ADAM line 31).
+- Prepended CHANGELOG.md entry at top of 2026-05-25 section (above 2026-05-24 PM notebooklm-nightly — scenarios-am fires last among today's AM crons at ~07:30 CDT).
+- Wrote SESSION_START marker to subagent-status.md at task entry; appending SESSION_END at session close.
+- Overwrote today-mission.md with AM 05-25 maintenance brief.
+
+**Skipped:**
+- NotebookLM PULL (24th consecutive run skipped for scenarios reckoning — `notebooklm use` still returns `Authentication expired or invalid`; separate ADAM-TODO line L47 covers; CLI auth expired since 2026-05-03 PM, 22 wall-clock days blocked).
+- NotebookLM PUSH (no work product; CLI auth expired regardless).
+- Master notebook note (no work to summarize; task SKILL.md "no emails to Adam" rule + CLI auth block).
+- All 4 scenarios subagents — no mission means no Sequence A/B/C activates (mission paused per GOALS line 36 pending Adam redirect / narrow-scope answer).
+- `npm run build` (zero code changes).
+- Git commit/push — tracker-only updates layer onto next loanos-autonomous hygiene commit per established pattern. loanos-autonomous itself remains NO-OP per GOALS pause (per top of 2026-05-25 CHANGELOG section); today's tracker updates compound onto the standing dirty-tree pattern.
+
+**Active blockers:** Cron retained per Adam's GOALS line 68 explicit keep, but mission paused per GOALS line 36 (TODO.md NEEDS ADAM line 28, 27 streaks / 31 calendar days; cohort-pause signal stays OFF since Sun 05-17 refresh, no longer escalating). Adam decision pending: (b) redirect target / (c) dormant / (d) narrow-scope-LO-utility — not (a) retire. NotebookLM PULL/PUSH also blocked structurally (24th consecutive skip + `notebooklm` CLI auth expired since 2026-05-03 PM, separate ADAM-TODO line — 22 wall-clock days blocked). **Cron-reliability concern materially DE-ESCALATED** (scenarios-am subset fully recovered + 5+ consecutive on-time-or-within-jitter cohort signals); Lead Gen L47 sub-note already flipped to "RECOVERING — both subsets stabilized".
+
+**What's next:** Adam decision required. Forward rule for AM 05-26+: first action `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` (NEVER bare `stat -f` — symlink-stat bug L22). **Today's Mon 2026-05-25 daytime GOALS refresh window IS the natural decision point** — if mtime advances by PM session, re-read GOALS for any redirect target added to scenarios-am block; if Mon 05-25 daytime passes without refresh AND no Adam decision → 28-streak Tue AM 05-26 (maintenance-only continues, refresh-in-place per stale-flags rule). **No retire-signal escalation** — Adam already answered "keep" in the 05-17 GOALS refresh; further escalation of (a) retire is moot. Three in-bounds options: **(b) redirect** (recommended — 3 concrete candidates in TODO line 28 aligned with new GOALS pillars); **(c) leave dormant** (bumps to 28-streak Tue AM); **(d) narrow mission scope** to bug-fix / regression-watch / Scenarios-utility tweaks Adam explicitly requests, no product-improvement program. **Cron-reliability watch CLOSED for now:** AM 05-25 ON-TIME fire confirms scenarios-am subset recovered; cohort-wide concern already materially de-escalated via 5+ on-time signals — no escalation line authoring required. Re-arms if AM 05-26 reverts to late-fire.
+
+---
+
+## 2026-06-14 AM (scenarios-am) — 45th consecutive no-build maintenance exit
+
+**What was done:**
+- First action per forward rule: `stat -L -f "%Sm" /Users/adamstyer/Documents/GOALS.md` → `Jun 6 16:34:23 2026` — unchanged since the 06-06 edit. No regime change; no scenarios-am redirect/un-pause added.
+- Read GOALS.md, master-agent.md, today-mission.md (06-13), domain-queue.md, CONTEXT.md (full), TODO.md (line 30), recent CHANGELOG slice. Subagents dir holds only 00-notebooklm.md (no research/builder/QA/reporter files).
+- Refreshed TODO line 30 in place: 44→45 streak, through-date 06-14, "STILL UNCHANGED 2026-06-14" + Monday 06-15 next refresh window. Stale-flags rule honored (refreshed, not re-stacked).
+- Swapped 3 Scenarios fields in CONTEXT.md (Last worked on / Active blockers / What's next). Net-0 line drift; CONTEXT.md 145 lines (under 150 cap).
+- Prepended CHANGELOG.md 06-14 scenarios-am entry. Overwrote today-mission.md with 06-14 maintenance brief. subagent-status SESSION_START/END.
+
+**Skipped:**
+- All 4 subagents — no mission activates (master-agent Mortgage-Coach-replacement mission IS LoanOS product work, paused by GOALS line 36; cron kept per line 68).
+- NotebookLM PULL/PUSH + master-notebook note — CLI auth expired ~42 days (live-confirmed by 06-14 AM lead-gen-am earlier today).
+- `npm run build` + git commit/push — zero code changes; tracker-only edits layer onto the wrap-up cron's batch (working tree already dirty with other agents' same-day tracker writes).
+
+**Active blockers:** Mission paused (GOALS L36) but cron kept (GOALS L68). Adam decision open on TODO line 30 since 05-18: (b) redirect / (c) dormant / (d) narrow-scope — not (a) retire. Two declined redirect moments (06-06 GOALS edit + 06-08 Monday window) tilt toward (c)/(d). NotebookLM CLI auth expired (~42d) — Adam runs `notebooklm login`.
+
+**What's next:** Adam picks on TODO line 30. Recommended: (c) pause the cron to end the daily no-op, or (b) redirect to a "complicated income" Scenarios template per current GOALS positioning. Forward rule for next AM: first action `stat -L -f "%Sm" GOALS.md` (never bare `stat -f`). Monday 06-15 (tomorrow) = next natural refresh window — break maintenance only if a refresh adds a scenarios-am directive. Otherwise 46-streak.
+
+---
+
+## 2026-06-17 AM (scenarios-am) — 48th consecutive no-build maintenance exit
+
+**What was done:**
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026` — unchanged since the 06-06 edit. No regime change; no scenarios-am redirect/un-pause added.
+- Read GOALS.md, master-agent.md, today-mission.md (06-16), session-log tail, TODO line 30, CONTEXT Scenarios block, CHANGELOG top. Subagents dir holds only 00-notebooklm.md.
+- Refreshed TODO line 30 in place: 47→48, through-date 06-17, 06-10→06-17 no-op stretch noted (stale-flags rule — refreshed, not re-stacked).
+- Swapped 3 CONTEXT Scenarios fields (net-0; CONTEXT stays 145 lines, under cap). Prepended 06-17 scenarios-am CHANGELOG entry. Overwrote today-mission.md. subagent-status SESSION_START/END.
+
+**Skipped:** all 4 subagents (no mission — master-agent Mortgage-Coach-replacement mission is LoanOS product work, paused by GOALS line 36; cron kept by line 68). `npm run build` + git push (zero code). NotebookLM PULL/PUSH + master-notebook note (CLI auth expired ~45 days; live-confirmed by the 06-17 notebooklm-nightly run earlier today).
+
+**Active blockers:** Mission paused (GOALS L36) / cron kept (GOALS L68). Adam decision open on TODO line 30 since 05-18: (b) redirect / (c) dormant / (d) narrow-scope — not (a) retire. Three declined redirect moments (06-06 + 06-08 + 06-15) tilt to (c)/(d). NotebookLM CLI auth expired — Adam runs `notebooklm login`.
+
+**What's next:** Adam picks on TODO line 30 (recommended (c) pause the cron, or (b) "complicated income" Scenarios template per GOALS positioning). Forward rule next AM: first action `stat -L -f "%Sm" GOALS.md` (never bare `stat -f`). Next natural refresh window = Mon 06-22; break maintenance only if a refresh adds a scenarios-am directive. Otherwise 49-streak.
+
+---
+
+## 2026-06-24 AM (scenarios-am) — 55th consecutive no-build maintenance exit
+
+**What was done:**
+- Forward-rule first action: `stat -L -f "%Sm" GOALS.md` → `Jun 6 16:34:23 2026` — unchanged since the 06-06 edit. No regime change; no scenarios-am redirect/un-pause added.
+- Read GOALS.md, master-agent.md, today-mission.md (06-22), session-log tail, TODO line 30, CONTEXT Scenarios block, CHANGELOG top. Subagents dir holds only 00-notebooklm.md (no research/builder/QA/reporter files).
+- Refreshed TODO line 30 in place: 54→55, through-date 06-24, "Wed 06-24 not a refresh window" note (stale-flags rule — refreshed, not re-stacked).
+- Swapped 3 CONTEXT Scenarios fields (net-0; CONTEXT stays 145 lines, under cap). Prepended 06-24 scenarios-am CHANGELOG entry. Overwrote today-mission.md. subagent-status SESSION_START/END.
+
+**Skipped:** all 4 subagents (no mission — master-agent Mortgage-Coach-replacement mission is LoanOS product work, paused by GOALS line 36; cron kept by line 68). `npm run build` + git push (zero code changes; tracker edits batch onto the next wrap-up cron — tree already dirty with other agents' same-day tracker writes). NotebookLM PULL/PUSH + master-notebook note (CLI auth expired ~52 days). No email to Adam (task rule).
+
+**Active blockers:** Mission paused (GOALS L36) / cron kept (GOALS L68). Adam decision open on TODO line 30 since 05-18: (b) redirect / (c) pause cron / (d) narrow-scope — not (a) retire. Four declined redirect moments (06-06 + 06-08 + 06-15 + 06-22) tilt to (c)/(d). NotebookLM CLI auth expired — Adam runs `notebooklm login`.
+
+**What's next:** Adam picks on TODO line 30 (recommended (c) pause the cron, or (b) "complicated income" Scenarios template per GOALS positioning). Forward rule next AM: first action `stat -L -f "%Sm" GOALS.md` (never bare `stat -f`). Next natural refresh window = Mon 06-29; break maintenance only if a refresh adds a scenarios-am directive. Otherwise 56-streak.

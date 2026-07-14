@@ -13,7 +13,7 @@ type LinkEmailBody = {
   dismiss?: boolean
 }
 
-const TERMINAL_STATUSES = '("Closed","Cancelled","Denied","Withdrawn","Funded","LOAN_FUNDED")'
+const TERMINAL_STATUSES = '("Closed","Cancelled","Denied","Withdrawn","Funded","LOAN_FUNDED","Commission Paid","COMMISSION_PAID")'
 
 export async function POST(request: NextRequest) {
   let organizationId: string

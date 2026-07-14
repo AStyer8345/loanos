@@ -1,2 +1,2 @@
-SESSION_START — Fri May 15 09:58:56 CDT 2026
-SESSION_END — Fri May 15 10:01 CDT 2026 — no-build exit (20-streak); Thu 05-14 cron gap noted; NotebookLM PULL skipped (17th consecutive, CLI auth expired 14 wall-clock days)
+SESSION_START — 2026-07-05 10:16 CDT (scenarios-am)
+SESSION_END — 2026-07-05 10:20 CDT — no-op maintenance, 63-streak, no regime change since 07-02, notebooklm auth live-probed still expired, no build/push/email

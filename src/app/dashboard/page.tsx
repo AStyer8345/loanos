@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
+import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, isFundedStatus, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
 import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
 import { getNeedsAttention } from '@/lib/needsAttention'
 import {
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
     }
 
     const closingDate = loan.closing_date || loan.funding_date
-    if (closingDate && (rawStatus.includes('closed') || rawStatus.includes('funded'))) {
+    if (closingDate && isFundedStatus(loan.status)) {
       const cd = new Date(closingDate)
       if (cd.getFullYear() === thisYear) {
         fundedYTD++
@@ -334,9 +334,8 @@ export default async function DashboardPage() {
   // Monthly funded data for performance charts
   const monthlyMap: Record<string, { loans: number; volume: number; commission: number }> = {}
   for (const loan of loans ?? []) {
-    const rawStatus = (loan.status ?? '').toLowerCase()
     const closingDate = loan.closing_date || loan.funding_date
-    if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+    if (!closingDate || !isFundedStatus(loan.status)) continue
     const cd = new Date(closingDate)
     if (cd.getFullYear() !== thisYear) continue
     const mk = cd.toLocaleString('en-US', { month: 'short' })
@@ -359,9 +358,8 @@ export default async function DashboardPage() {
       const mo = d.getMonth()
       let commission = 0, volume = 0, funded = 0
       for (const loan of loans ?? []) {
-        const rawStatus = (loan.status ?? '').toLowerCase()
         const closingDate = loan.closing_date || loan.funding_date
-        if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+        if (!closingDate || !isFundedStatus(loan.status)) continue
         const cd = new Date(closingDate)
         if (cd.getFullYear() === yr && cd.getMonth() === mo) {
           commission += loan.commission_amount ?? 0
@@ -379,7 +377,7 @@ export default async function DashboardPage() {
     const source = loan.referral_source
     if (!source) continue
     const rawStatus = (loan.status ?? '').toLowerCase()
-    const isFunded = rawStatus.includes('closed') || rawStatus.includes('funded')
+    const isFunded = isFundedStatus(loan.status)
     const isActive = !INACTIVE.has(rawStatus)
     if (!isFunded && !isActive) continue
 
@@ -434,9 +432,8 @@ export default async function DashboardPage() {
   const lastYearMap: Record<string, { loans: number; volume: number; commission: number }> = {}
   const lastYear = thisYear - 1
   for (const loan of loans ?? []) {
-    const rawStatus = (loan.status ?? '').toLowerCase()
     const closingDate = loan.closing_date || loan.funding_date
-    if (!closingDate || !(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+    if (!closingDate || !isFundedStatus(loan.status)) continue
     const cd = new Date(closingDate)
     if (cd.getFullYear() !== lastYear) continue
     const mk = cd.toLocaleString('en-US', { month: 'short' })
@@ -472,8 +469,7 @@ export default async function DashboardPage() {
   // ── Avg days-to-close by loan type (YTD funded loans) ────────────────────
   const dtcMap = new Map<string, { totalDays: number; count: number }>()
   for (const loan of loans ?? []) {
-    const rawStatus = (loan.status ?? '').toLowerCase()
-    if (!(rawStatus.includes('closed') || rawStatus.includes('funded'))) continue
+    if (!isFundedStatus(loan.status)) continue
     const closingDate = loan.closing_date || loan.funding_date
     if (!closingDate || !loan.created_at) continue
     const cd = new Date(closingDate)
@@ -607,8 +603,7 @@ export default async function DashboardPage() {
   // referred by them get auto-tagged as Past Client.
   const fundedBorrowerContactIds = new Set<string>()
   for (const l of loans ?? []) {
-    const rs = (l.status ?? '').toLowerCase()
-    if (l.contact_id && (rs.includes('closed') || rs.includes('funded'))) {
+    if (l.contact_id && isFundedStatus(l.status)) {
       fundedBorrowerContactIds.add(l.contact_id)
     }
   }
@@ -616,9 +611,8 @@ export default async function DashboardPage() {
   // Per-contact funded tally (count + volume) for source conversion table
   const fundedByContact = new Map<string, { count: number; volume: number }>()
   for (const l of loans ?? []) {
-    const rs = (l.status ?? '').toLowerCase()
     if (!l.contact_id) continue
-    if (!(rs.includes('closed') || rs.includes('funded'))) continue
+    if (!isFundedStatus(l.status)) continue
     const cur = fundedByContact.get(l.contact_id) ?? { count: 0, volume: 0 }
     cur.count += 1
     cur.volume += l.loan_amount ?? 0
@@ -650,8 +644,7 @@ export default async function DashboardPage() {
     const display = l.referring_agent_name || l.referring_agent_email || 'Unknown'
     const cur = realtorMap.get(key) ?? { realtor: display, loans: 0, funded: 0, volume: 0 }
     cur.loans += 1
-    const rs = (l.status ?? '').toLowerCase()
-    if (rs.includes('closed') || rs.includes('funded')) {
+    if (isFundedStatus(l.status)) {
       cur.funded += 1
       cur.volume += l.loan_amount ?? 0
     }

@@ -28,6 +28,7 @@ import type { LeadSourceCategory } from '@/lib/leadSources'
 import NotesScratchpad from './NotesScratchpad'
 import StalledWidget, { type StalledItem } from './StalledWidget'
 import UnknownSendersWidget from './UnknownSendersWidget'
+import TodoList from './TodoList'
 import CompensationPanel, { type CompPlan, type CompRow } from './CompensationPanel'
 import AeoVsSeoCard from '@/components/dashboard/analytics/AeoVsSeoCard'
 import SourceConversionTable, { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
@@ -190,8 +191,9 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* Mini Pipeline Table removed 2026-04-16 — duplicated the Pipeline tab one click away */}
 
-          {/* ── Command center row: Notes scratchpad + Unknown senders ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* ── Daily command center: durable tasks, notes, unmatched communication ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <TodoList />
             <NotesScratchpad />
             <UnknownSendersWidget />
           </div>

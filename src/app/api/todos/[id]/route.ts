@@ -1,13 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { NextResponse } from 'next/server'
+import { parseTaskMutation } from '@/lib/tasks'
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     const { organizationId } = await getOrganization()
     const supabase = createClient()
 
-    const body = await req.json()
+    const body = parseTaskMutation(await req.json(), 'update')
     const { data, error } = await supabase
       .from('todo_items')
       .update(body)
@@ -18,8 +19,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unauthorized'
+    return NextResponse.json({ error: message }, { status: message === 'Unauthorized' ? 401 : 400 })
   }
 }
 

@@ -15,6 +15,11 @@ import { createTestUserInOrg, createUserScopedTestClient, type TestUserContext }
 
 const ADAM_ORG = process.env.AUDIT_ADAM_ORG_ID ?? '18613f82-fdd9-42dd-a09e-f3c577328258'
 const SCOTT_ORG = '40377391-6b4c-4d1a-81d2-ffd743876f0b'
+const hasSupabaseCredentials = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 // Tables with get_my_organization_id() RLS policies (per 2026-04-21 audit).
 // Excludes `organizations`/`profiles` (membership-model, different scoping)
@@ -31,7 +36,7 @@ const ORG_SCOPED_TABLES = [
   'todo_items', 'user_settings',
 ] as const
 
-describe('tenant isolation — cross-tenant sweep', () => {
+describe.skipIf(!hasSupabaseCredentials)('tenant isolation — cross-tenant sweep', () => {
   let adamCtx: TestUserContext
   let scottCtx: TestUserContext
 

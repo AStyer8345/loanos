@@ -25,19 +25,17 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 describe('preApprovalEmailWorkflow', () => {
-  it('sends one Resend email and writes email.sent to activity_log', async () => {
+  it('sends one Resend email with activity-log context', async () => {
     const { sendViaResend } = await import('@/lib/resend/send')
-    const { createClient } = await import('@/lib/supabase/server')
-
     await preApprovalEmailWorkflow({ contact_id: 'contact-123', loan_id: 'loan-456', org_id: 'org-789' })
 
     expect(sendViaResend).toHaveBeenCalledOnce()
     expect(sendViaResend).toHaveBeenCalledWith(
-      expect.objectContaining({ to: 'jane@example.com', subject: expect.stringContaining('Pre-Approval') })
+      expect.objectContaining({
+        to: 'jane@example.com',
+        subject: expect.stringContaining('Pre-Approval'),
+        log: { organizationId: 'org-789', contactId: 'contact-123', template: 'pre_approval' },
+      })
     )
-
-    const client = createClient()
-    // activity_log insert should have been called with event_type 'email.sent'
-    expect(client.from).toHaveBeenCalledWith('activity_log')
   })
 })

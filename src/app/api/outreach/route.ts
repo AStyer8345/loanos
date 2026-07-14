@@ -28,7 +28,7 @@ async function buildSystemPrompt(
       .from('loans')
       .select('loan_name, borrower_name, borrower_first_name, borrower_last_name, status, loan_amount, closing_date, estimated_closing_date, property_city, property_state, loan_type')
       .eq('organization_id', organizationId)
-      .not('status', 'in', '("Closed","Funded","Cancelled","Withdrawn")')
+      .not('status', 'in', '("Closed","Funded","Commission Paid","COMMISSION_PAID","Cancelled","Withdrawn")')
       .order('closing_date', { ascending: true })
       .limit(20),
     supabase

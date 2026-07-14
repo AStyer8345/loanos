@@ -1,5 +1,12 @@
 # LoanOS Changelog
 
+## 2026-07-14 — Commission Paid counts as funded/closed
+
+- Added `Commission Paid`, `commission paid`, and `COMMISSION_PAID` to the canonical funded status family.
+- Closed-loan filters, funded KPIs, YTD volume/commission, source conversion, referral performance, contact loan summaries, and daily briefing queries now treat Commission Paid loans as closed.
+- Added a follow-up migration so `pipeline_stage_aging()` excludes Commission Paid loans from active/stalled reporting.
+- Regression coverage confirms all three status variants normalize to Funded and are inactive pipeline statuses.
+
 ## 2026-07-05 AM (lead-gen-am) — speed-to-lead verify, pipeline healthy, no writes
 
 - Scorer `nOCDV73m4M0jyL1B` HEALTHY: get_workflow_details confirms active=true, versionId==activeVersionId (d54c385e), responseMode=onReceived, updatedAt 2026-06-09 (the fix). Zero errored execs since the 06-09 two-bug fix holds.

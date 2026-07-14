@@ -27,7 +27,7 @@ import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { useOrg } from '@/components/OrgProvider'
 import AutomationPanel from '@/components/automations/AutomationPanel'
 import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
-import { statusHex } from '@/lib/constants/loan-stages'
+import { isFundedStatus, statusHex } from '@/lib/constants/loan-stages'
 import NoteInput, { type NoteRow } from '@/components/notes/NoteInput'
 import NoteCard from '@/components/notes/NoteCard'
 export type Contact = {
@@ -255,7 +255,7 @@ function LoanStageBadge({ status }: { status: string | null }) {
 function isActiveLoan(status: string | null) {
   if (!status) return false
   const s = status.toLowerCase()
-  return !['closed', 'funded', 'closed/funded', 'denied', 'withdrawn', 'cancelled', 'canceled', 'terminated'].some(v => s.includes(v))
+  return !isFundedStatus(status) && !['denied', 'withdrawn', 'cancelled', 'canceled', 'terminated'].some(v => s.includes(v))
 }
 
 const cardStyle: React.CSSProperties = {
@@ -1578,10 +1578,7 @@ export function ContactRecordView(props: Props) {
 
                 {/* ── Realtor Performance + Referred Borrowers ── */}
                 {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (() => {
-                  const closedLoans = referredLoans.filter(l => {
-                    const s = (l.status ?? '').toLowerCase()
-                    return s.includes('closed') || s.includes('funded')
-                  })
+                  const closedLoans = referredLoans.filter(l => isFundedStatus(l.status))
                   const totalReferred = referredLoans.length
                   const closedCount = closedLoans.length
                   const conversionRate = totalReferred > 0 ? Math.round((closedCount / totalReferred) * 100) : 0

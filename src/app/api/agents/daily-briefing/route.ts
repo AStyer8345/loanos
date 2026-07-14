@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       withOrg(supabase
         .from('loans')
         .select('id, loan_name, status, loan_amount, property_address, estimated_closing_date, arive_loan_id')
-        .not('status', 'in', '("funded","closed","withdrawn","denied")')
+        .not('status', 'in', '("funded","closed","Commission Paid","commission paid","COMMISSION_PAID","withdrawn","denied")')
         .order('estimated_closing_date', { ascending: true })
         .limit(20)),
 

@@ -7,7 +7,7 @@ import { useOrg } from '@/hooks/useOrg'
 import Link from 'next/link'
 import { useOutreachChat, type SelectedContact } from '@/components/outreach/OutreachChatContext'
 import Papa from 'papaparse'
-import { normalizeContactStage } from '@/lib/constants/loan-stages'
+import { isFundedStatus, normalizeContactStage } from '@/lib/constants/loan-stages'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import { fmtCurrency, fmtDate, fmtDateOnly } from '@/lib/formatters'
 import { GripVertical } from 'lucide-react'
@@ -166,9 +166,7 @@ function LastTouchCell({ date }: { date: string | null }) {
 }
 
 function isClosedLoan(status: string | null) {
-  if (!status) return false
-  const s = status.toLowerCase()
-  return ['closed', 'funded', 'closed/funded'].some(v => s.includes(v))
+  return isFundedStatus(status)
 }
 
 function stageToList(stage: string | null, contactType: string | null): string {
@@ -2211,4 +2209,3 @@ export default function ContactsPage() {
     </div>
   )
 }
-

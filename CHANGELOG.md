@@ -1,5 +1,12 @@
 # LoanOS Changelog
 
+## 2026-07-14 — Dashboard reset around leads and pre-approvals
+
+- Replaced the task/attention command center with a straightforward lead worklist showing source, referrer, latest note, and last update.
+- Removed Needs Your Attention, Stalled, Hot Leads, task, scratchpad, and unmatched-email widgets from the dashboard.
+- Removed email-automation panels from contact and loan records and hid social/marketing/email automation surfaces from primary navigation.
+- Preserved all underlying contact, note, loan, and automation data; this is a product-surface reset, not a data deletion.
+
 ## 2026-07-14 — Commission Paid counts as funded/closed
 
 - Added `Commission Paid`, `commission paid`, and `COMMISSION_PAID` to the canonical funded status family.

@@ -1,11 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { getOrganization } from '@/lib/getOrganization'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import { toDashboardStage, DASHBOARD_STAGES, INACTIVE_STATUSES, isInStageGroup, isFundedStatus, STAGE_GROUPS, normalizeToStageKey } from '@/lib/constants/loan-stages'
-import { type HotLead } from '@/components/dashboard/HotLeadsWidget'
-import { getNeedsAttention } from '@/lib/needsAttention'
 import {
   aggregateBySource,
   classifyLeadSource,
@@ -14,7 +11,6 @@ import {
 } from '@/lib/leadSources'
 import { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
 import { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
-import { type StalledItem } from '@/components/dashboard/StalledWidget'
 import { type CompPlan, type CompRow } from '@/components/dashboard/CompensationPanel'
 
 const NEW_LEADS_WINDOW_DAYS = 30
@@ -43,6 +39,7 @@ export default async function DashboardPage() {
     { data: loans = [] },
     { data: recentContacts = [] },
     { data: allContacts = [] },
+    { data: leadContacts = [] },
   ] = await Promise.all([
     supabase
       .from('org_settings')
@@ -63,6 +60,14 @@ export default async function DashboardPage() {
       .from('contacts')
       .select('id, lead_source, referrer, source_page, utm_params, referred_by_contact_id')
       .eq('organization_id', organizationId),
+    supabase
+      .from('contacts')
+      .select('id, first_name, last_name, lead_source, referrer, referred_by, created_at, updated_at')
+      .eq('organization_id', organizationId)
+      .eq('stage', 'Lead')
+      .or('contact_type.is.null,contact_type.eq.borrower')
+      .order('updated_at', { ascending: false })
+      .limit(50),
   ])
   const showSetupBanner = orgSettings ? !orgSettings.onboarding_completed : false
 
@@ -150,146 +155,44 @@ export default async function DashboardPage() {
 
   // recentLoans removed — pipeline tab no longer shows Active Loans table
 
-  // ── Smart Action Queue: last human touch per active loan ─────────────────
   const activeLoans = (loans ?? []).filter(l => !INACTIVE.has((l.status ?? '').toLowerCase()))
-  const activeLoanIds = activeLoans.map(l => l.id)
 
-  // Parallel fetch: activity_log + contacts are independent (both depend on loans, not each other)
-  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
-
-  const [activityResult, contactsResult] = await Promise.all([
-    activeLoanIds.length > 0
-      ? supabase
-          .from('activity_log')
-          .select('loan_id, occurred_at, action')
-          .in('loan_id', activeLoanIds)
-          .not('loan_id', 'is', null)
-          .not('action', 'ilike', 'arive.%')
-          .not('action', 'ilike', '%.webhook%')
-          .not('action', 'ilike', 'error_%')
-          .order('occurred_at', { ascending: false })
-          .limit(500)
-      : Promise.resolve({ data: [] as Array<{ loan_id: string | null; occurred_at: string | null; action: string | null }> }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase.from('contacts') as any)
-      .select('id, first_name, last_name, email, phone, referred_by, created_at')
-      .eq('organization_id', organizationId)
-      .eq('stage', 'Lead')
-      .neq('hot_lead_dismissed', true)
-      .or('contact_type.is.null,contact_type.eq.borrower')
-      .gte('created_at', fourteenDaysAgo.toISOString())
-      .order('created_at', { ascending: false }) as Promise<{ data: Array<{
-        id: string; first_name: string | null; last_name: string | null
-        email: string | null; phone: string | null; referred_by: string | null
-        created_at: string
-      }> | null }>,
-  ])
-
-  const activityRows = activityResult.data ?? []
-  const webLeadContacts = contactsResult.data ?? []
-
-  const lastActivityMap = new Map<string, string>() // loan_id → occurred_at ISO string
-  for (const row of activityRows) {
-    if (row.loan_id && row.occurred_at && !lastActivityMap.has(row.loan_id)) {
-      lastActivityMap.set(row.loan_id, row.occurred_at)
+  // The dashboard is a concise lead worklist, not an inferred priority queue.
+  const leadIds = (leadContacts ?? []).map(c => c.id)
+  const latestLeadNote = new Map<string, string>()
+  if (leadIds.length > 0) {
+    const [{ data: noteRows }, { data: activityRows }] = await Promise.all([
+      supabase
+        .from('notes')
+        .select('contact_id, content, created_at')
+        .eq('organization_id', organizationId)
+        .in('contact_id', leadIds)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(150),
+      supabase
+        .from('contact_activity')
+        .select('contact_id, notes, logged_at')
+        .in('contact_id', leadIds)
+        .not('notes', 'is', null)
+        .order('logged_at', { ascending: false })
+        .limit(150),
+    ])
+    for (const row of noteRows ?? []) {
+      if (row.contact_id && !latestLeadNote.has(row.contact_id)) latestLeadNote.set(row.contact_id, row.content)
+    }
+    for (const row of activityRows ?? []) {
+      if (row.contact_id && row.notes && !latestLeadNote.has(row.contact_id)) latestLeadNote.set(row.contact_id, row.notes)
     }
   }
-
-  // Get most recent contact_activity note per lead
-  const webLeadIds = (webLeadContacts ?? []).map(c => c.id)
-  const latestActivityNote = new Map<string, string>()
-  if (webLeadIds.length > 0) {
-    const { data: actRows = [] } = await supabase
-      .from('contact_activity')
-      .select('contact_id, notes')
-      .in('contact_id', webLeadIds)
-      .not('notes', 'is', null)
-      .order('logged_at', { ascending: false })
-      .limit(200)
-    for (const row of actRows ?? []) {
-      if (row.contact_id && !latestActivityNote.has(row.contact_id)) {
-        latestActivityNote.set(row.contact_id, row.notes ?? '')
-      }
-    }
-  }
-
-  const hotLeads: HotLead[] = (webLeadContacts ?? []).map(c => ({
-    id: c.id,
-    first_name: c.first_name ?? 'Unknown',
-    last_name: c.last_name ?? null,
-    email: c.email ?? null,
-    phone: c.phone ?? null,
-    referred_by: c.referred_by ?? null,
-    notes: latestActivityNote.get(c.id) ?? '',
-    daysAgo: Math.floor((now.getTime() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)),
-    score: 0,
+  const dashboardLeads = (leadContacts ?? []).map(contact => ({
+    id: contact.id,
+    name: [contact.first_name, contact.last_name].filter(Boolean).join(' ') || 'Unknown',
+    source: contact.lead_source ?? contact.referrer ?? null,
+    referredBy: contact.referred_by ?? null,
+    lastNote: latestLeadNote.get(contact.id)?.replace(/\s+/g, ' ').slice(0, 180) ?? null,
+    updatedAt: contact.updated_at ?? contact.created_at,
   }))
-
-  // "Needs Your Attention" — AI-classified inbound emails from the last 7 days.
-  // Service client: the fetcher decrypts activity_log_pii for surfaced items
-  // (sender/subject/body); org scoping is applied inside via organizationId.
-  const needsAttention = await getNeedsAttention(createServiceClient(), organizationId)
-
-  // ── Stalled: active loans with no touch past the org threshold ───────────
-  const stalledThresholdDays = orgSettings?.stalled_threshold_days ?? 7
-  const stalledLoanItems: StalledItem[] = activeLoans
-    .map(l => {
-      const activityTs = lastActivityMap.get(l.id)
-      const lastTouch = Math.max(
-        activityTs ? new Date(activityTs).getTime() : 0,
-        l.updated_at ? new Date(l.updated_at).getTime() : 0,
-        l.created_at ? new Date(l.created_at).getTime() : 0,
-      )
-      const daysSince = lastTouch > 0 ? Math.floor((now.getTime() - lastTouch) / 86400000) : 0
-      return {
-        id: l.id,
-        kind: 'loan' as const,
-        name: [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || l.loan_name || 'Unknown',
-        detail: `${l.status ?? ''}${l.loan_amount ? ` · ${Math.round(l.loan_amount / 1000)}k` : ''}`,
-        daysSince,
-        href: `/dashboard/loans/${l.id}`,
-      }
-    })
-    .filter(item => item.daysSince >= stalledThresholdDays)
-
-  // ── Never-contacted leads: zero outbound touches since intake ────────────
-  const OUTBOUND_ACTIONS = ['communication.logged', 'note_added', 'email_outbound', 'sms_sent', 'email.sent', 'drip_send']
-  const { data: openLeads = [] } = await supabase
-    .from('contacts')
-    .select('id, first_name, last_name, created_at')
-    .eq('organization_id', organizationId)
-    .eq('stage', 'Lead')
-    .neq('hot_lead_dismissed', true)
-    .or('contact_type.is.null,contact_type.eq.borrower')
-    .order('created_at', { ascending: false })
-    .limit(100)
-
-  const openLeadIds = (openLeads ?? []).map(c => c.id)
-  let neverContactedLeads: typeof openLeads = []
-  if (openLeadIds.length > 0) {
-    const [{ data: manualTouches }, { data: logTouches }] = await Promise.all([
-      supabase.from('contact_activity').select('contact_id').in('contact_id', openLeadIds),
-      supabase.from('activity_log').select('contact_id').in('contact_id', openLeadIds).in('action', OUTBOUND_ACTIONS),
-    ])
-    const touched = new Set([
-      ...(manualTouches ?? []).map(t => t.contact_id),
-      ...(logTouches ?? []).map(t => t.contact_id),
-    ])
-    neverContactedLeads = (openLeads ?? []).filter(c => !touched.has(c.id))
-  }
-
-  const stalledLeadItems: StalledItem[] = (neverContactedLeads ?? []).map(c => ({
-    id: c.id,
-    kind: 'lead' as const,
-    name: [c.first_name, c.last_name].filter(Boolean).join(' ') || 'Unknown',
-    detail: 'lead since intake',
-    daysSince: c.created_at ? Math.floor((now.getTime() - new Date(c.created_at).getTime()) / 86400000) : 0,
-    href: `/dashboard/contacts/${c.id}`,
-  }))
-
-  const stalledItems = [...stalledLeadItems, ...stalledLoanItems]
-    .sort((a, b) => b.daysSince - a.daysSince)
-    .slice(0, 20)
 
   // ── Compensation: plan + per-funded-loan rows (auto-created by DB trigger) ─
   const [{ data: compPlanRow }, { data: compRaw = [] }] = await Promise.all([
@@ -673,8 +576,7 @@ export default async function DashboardPage() {
         stageData={stageData}
         chartData={chartData}
         sparklineMonths={sparklineMonths}
-        hotLeads={hotLeads}
-        needsAttention={needsAttention}
+        leads={dashboardLeads}
         funnelData={funnelData}
         showSetupBanner={showSetupBanner}
         referralData={referralData}
@@ -691,9 +593,6 @@ export default async function DashboardPage() {
         aeoBucket={aeoBucket}
         seoBucket={seoBucket}
         realtorPerformanceRows={realtorPerformanceRows}
-        stalledItems={stalledItems}
-        neverContactedCount={(neverContactedLeads ?? []).length}
-        stalledThresholdDays={stalledThresholdDays}
         compPlan={(compPlanRow as CompPlan | null) ?? null}
         compRows={compRows}
       />

@@ -12,7 +12,6 @@ import {
   Mail, Phone, MessageSquare, StickyNote, Trash2,
 } from 'lucide-react'
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
-import AutomationPanel from '@/components/automations/AutomationPanel'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
 // No hardcoded fallback — a missing env var must fail closed rather than
@@ -2125,17 +2124,6 @@ function AutomationsTab({ loan, onActivityCreated, highlightId, onClearHighlight
         ))}
       </div>
 
-      {/* ── Email Automations ── */}
-      <div className="mt-8">
-        <AutomationPanel
-          recordType="loan"
-          recordId={loan.id}
-          contactId={loan.contact_id ?? ''}
-          loanId={loan.id}
-          currentStage={loan.status ?? ''}
-        />
-      </div>
-
       {activeModal && (
         <LoanTriggerModal
           workflow={activeModal}
@@ -2808,4 +2796,3 @@ function formatActivityAction(item: ActivityRow): { label: string; detail: strin
     .replace(/\b\w/g, c => c.toUpperCase())
   return { label: humanized, detail: null }
 }
-

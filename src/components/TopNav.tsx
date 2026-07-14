@@ -7,11 +7,7 @@ import {
   Workflow,
   Users,
   Calculator,
-  Megaphone,
   Building2,
-  Mail,
-  Inbox,
-  FileCode,
   Settings,
   Search,
   Menu,
@@ -36,7 +32,6 @@ type Section =
   | 'dashboard'
   | 'pipeline'
   | 'contacts'
-  | 'email'
   | 'more'
   | 'settings'
 
@@ -54,12 +49,11 @@ type MoreItem = {
   requires?: keyof OrgFeatures
 }
 
-// Primary nav — the four pillars a non-technical LO needs day one.
+// Primary nav — the three surfaces used to work leads and loans.
 const NAV_ITEMS_ALL: (NavItem & { requires?: keyof OrgFeatures })[] = [
   { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
   { label: 'Pipeline',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
   { label: 'Contacts',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
-  { label: 'Email',     section: 'email',     href: '/dashboard/drip-campaigns', icon: <Mail className="size-4" />, requires: 'drip_campaigns' },
 ]
 
 // Secondary nav — power-user surfaces tucked behind a More dropdown.
@@ -67,23 +61,15 @@ const NAV_ITEMS_ALL: (NavItem & { requires?: keyof OrgFeatures })[] = [
 const MORE_ITEMS_ALL: MoreItem[] = [
   { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" />, requires: 'scenarios' },
   { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" />, requires: 'lender_knowledge' },
-  { label: 'Marketing', href: '/dashboard/marketing', icon: <Megaphone className="size-4" />, requires: 'marketing' },
-  { label: 'Drafts',    href: '/dashboard/drafts',    icon: <Inbox className="size-4" />, requires: 'drip_campaigns' },
-  { label: 'Templates', href: '/dashboard/automations', icon: <FileCode className="size-4" />, requires: 'automations' },
 ]
 
 function sectionFromPath(pathname: string): Section | null {
   if (pathname === '/dashboard') return 'dashboard'
   if (pathname.startsWith('/dashboard/loans')) return 'pipeline'
   if (pathname.startsWith('/dashboard/contacts')) return 'contacts'
-  // Email pillar consolidates the three outbound-email surfaces
-  if (pathname.startsWith('/dashboard/drip-campaigns')) return 'email'
-  if (pathname.startsWith('/dashboard/drafts')) return 'email'
-  if (pathname.startsWith('/dashboard/automations')) return 'email'
   // Power-user surfaces hidden under More
   if (pathname.startsWith('/dashboard/scenarios')) return 'more'
   if (pathname.startsWith('/dashboard/lenders')) return 'more'
-  if (pathname.startsWith('/dashboard/marketing')) return 'more'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null
 }

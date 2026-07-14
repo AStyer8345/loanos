@@ -11,9 +11,6 @@ import {
 } from 'recharts'
 import { fmtCurrency, fmtK } from '@/lib/formatters'
 import { statusHex, getStageLabel } from '@/lib/constants/loan-stages'
-import HotLeadsWidget, { type HotLead } from '@/components/dashboard/HotLeadsWidget'
-import NeedsAttentionWidget from '@/components/dashboard/NeedsAttentionWidget'
-import type { NeedsAttentionItem } from '@/lib/needsAttention'
 import { Card } from '@/components/ui/card'
 import SparklineCard from './charts/SparklineCard'
 import ConversionFunnel from './charts/ConversionFunnel'
@@ -25,10 +22,6 @@ import DaysToCloseGauge from './charts/DaysToCloseGauge'
 import LeadSourceChart from './charts/LeadSourceChart'
 import NewLeadsChart from './charts/NewLeadsChart'
 import type { LeadSourceCategory } from '@/lib/leadSources'
-import NotesScratchpad from './NotesScratchpad'
-import StalledWidget, { type StalledItem } from './StalledWidget'
-import UnknownSendersWidget from './UnknownSendersWidget'
-import TodoList from './TodoList'
 import CompensationPanel, { type CompPlan, type CompRow } from './CompensationPanel'
 import AeoVsSeoCard from '@/components/dashboard/analytics/AeoVsSeoCard'
 import SourceConversionTable, { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
@@ -47,8 +40,7 @@ interface DashboardClientProps {
   volumeThisMonth: number; volumeYTD: number
   stageData: StageData[]
   chartData: ChartPoint[]
-  hotLeads: HotLead[]
-  needsAttention: NeedsAttentionItem[]
+  leads: Array<{ id: string; name: string; source: string | null; referredBy: string | null; lastNote: string | null; updatedAt: string | null }>
   funnelData: Array<{ stage: string; count: number }>
   showSetupBanner?: boolean
   sparklineMonths: Array<{ month: string; commission: number; volume: number; funded: number }>
@@ -66,9 +58,6 @@ interface DashboardClientProps {
   aeoBucket: { leads: number; funded: number; volume: number }
   seoBucket: { leads: number; funded: number; volume: number }
   realtorPerformanceRows: RealtorPerformanceRow[]
-  stalledItems: StalledItem[]
-  neverContactedCount: number
-  stalledThresholdDays: number
   compPlan: CompPlan | null
   compRows: CompRow[]
 }
@@ -117,7 +106,7 @@ export default function DashboardClient(props: DashboardClientProps) {
             </div>
             <div>
               <p className="text-sm font-semibold text-blue-200">Finish setting up your account</p>
-              <p className="text-xs text-blue-400/80">Connect your LOS, import contacts, and review automations</p>
+              <p className="text-xs text-blue-400/80">Connect your LOS and import your contacts</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform shrink-0" />
@@ -191,12 +180,41 @@ export default function DashboardClient(props: DashboardClientProps) {
 
           {/* Mini Pipeline Table removed 2026-04-16 — duplicated the Pipeline tab one click away */}
 
-          {/* ── Daily command center: durable tasks, notes, unmatched communication ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <TodoList />
-            <NotesScratchpad />
-            <UnknownSendersWidget />
-          </div>
+          {/* ── Leads: the primary daily worklist ── */}
+          <Card className="overflow-hidden">
+            <div className="px-4 py-3 border-b border-input flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Leads</span>
+              <Link href="/dashboard/contacts" className="text-xs font-mono text-[#C9A84C] hover:underline">View all</Link>
+            </div>
+            {props.leads.length > 0 ? (
+              <div className="max-h-[420px] overflow-y-auto">
+                <Table className="font-mono text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-left">Lead</TableHead>
+                      <TableHead>Where they came from</TableHead>
+                      <TableHead>Referred by</TableHead>
+                      <TableHead>Notes / where we left off</TableHead>
+                      <TableHead className="text-right">Updated</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {props.leads.map(lead => (
+                      <TableRow key={lead.id} className="hover:bg-muted/50 cursor-pointer" onClick={() => window.location.href = `/dashboard/contacts/${lead.id}`}>
+                        <TableCell className="font-medium text-foreground whitespace-nowrap">{lead.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{lead.source ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{lead.referredBy ?? '—'}</TableCell>
+                        <TableCell className="text-foreground/75 max-w-[420px] truncate" title={lead.lastNote ?? undefined}>{lead.lastNote ?? '—'}</TableCell>
+                        <TableCell className="text-right text-muted-foreground whitespace-nowrap">{fmtDateShort(lead.updatedAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="px-4 py-8 text-center text-xs font-mono text-muted-foreground">No active leads.</div>
+            )}
+          </Card>
 
           {/* ── New Applications & Pre-Approvals ── */}
           {props.newAppsAndPAs.length > 0 && (
@@ -235,23 +253,7 @@ export default function DashboardClient(props: DashboardClientProps) {
             </Card>
           )}
 
-          {/* ── Needs Your Attention (AI-classified inbound emails) ── */}
-          {props.needsAttention.length > 0 && (
-            <NeedsAttentionWidget items={props.needsAttention} />
-          )}
-
-          {/* ── Stalled: loans with no movement + never-contacted leads ── */}
-          <StalledWidget
-            items={props.stalledItems}
-            neverContactedCount={props.neverContactedCount}
-            thresholdDays={props.stalledThresholdDays}
-          />
-
-          {/* ── Two-column: Hot Leads (compact) + Rate Lock (compact) ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <HotLeadsWidget hotLeads={props.hotLeads.slice(0, 5)} />
-            <RateLockCountdown locks={props.rateLockLoans.slice(0, 5)} />
-          </div>
+          <RateLockCountdown locks={props.rateLockLoans.slice(0, 5)} />
 
           {/* ── Two-column: New Leads by Source (30d) + Closed Business by Source ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

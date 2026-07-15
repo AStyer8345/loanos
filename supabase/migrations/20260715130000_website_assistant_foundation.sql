@@ -224,7 +224,11 @@ begin
     );
   end if;
 
-  v_contact := coalesce(v_email_contact, v_phone_contact);
+  if v_email_contact.id is not null then
+    v_contact := v_email_contact;
+  elsif v_phone_contact.id is not null then
+    v_contact := v_phone_contact;
+  end if;
   if v_contact.id is not null then
     update public.contacts set
       last_touch_at = now(),

@@ -24,6 +24,21 @@ describe('website assistant contracts', () => {
     expect(serviceClient).toContain('process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL')
   })
 
+  it('creates a follow-up task and sends lead notifications after contact capture', () => {
+    const route = fs.readFileSync('src/app/api/v1/website-assistant/[operation]/route.ts', 'utf8')
+    expect(route).toContain('assistant-followup:')
+    expect(route).toContain('sendWebsiteAssistantLeadNotifications')
+    expect(route).toContain('followUpTaskId')
+  })
+
+  it('serves transcripts through an authenticated contact-scoped route', () => {
+    const route = fs.readFileSync('src/app/api/contacts/[id]/website-conversations/route.ts', 'utf8')
+    expect(route).toContain('getOrganization()')
+    expect(route).toContain(".eq('organization_id', organizationId)")
+    expect(route).toContain(".eq('contact_id', params.id)")
+    expect(route).toContain("'Cache-Control': 'no-store'")
+  })
+
   it('normalizes email without provider-specific rewriting', () => {
     expect(normalizeEmail(' Adam+Mortgage@Example.COM ')).toBe('adam+mortgage@example.com')
   })

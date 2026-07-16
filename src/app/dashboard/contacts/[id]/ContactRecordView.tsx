@@ -160,6 +160,24 @@ export type ContactEmailRow = {
   created_at: string
 }
 
+export type WebsiteConversationMessage = {
+  id: string
+  sequence_number: number
+  role: 'visitor' | 'assistant' | 'system'
+  redacted_text: string
+  source_refs: string[] | null
+  created_at: string
+}
+
+export type WebsiteConversation = {
+  id: string
+  status: string
+  summary: string | null
+  created_at: string
+  updated_at: string
+  messages: WebsiteConversationMessage[]
+}
+
 // fmtCurrency and fmtDate imported from @/lib/formatters
 
 function fullName(c: Contact) {
@@ -274,10 +292,11 @@ const labelStyle: React.CSSProperties = {
 
 const LEFT_TABS = [
   { id: 'overview' as const, label: 'Overview' },
+  { id: 'chat'     as const, label: 'Chat' },
   { id: 'emails'   as const, label: 'Emails' },
 ]
 
-type LeftTab = 'overview' | 'emails'
+type LeftTab = 'overview' | 'chat' | 'emails'
 
 type Props = {
   contact: Contact
@@ -306,6 +325,7 @@ type Props = {
   contactNotes?: NoteRow[]
   setContactNotes?: (notes: NoteRow[]) => void
   onRefreshNotes?: () => void
+  websiteConversations?: WebsiteConversation[]
 }
 
 // Typeahead for referred_by — searches existing contacts by name
@@ -1101,6 +1121,7 @@ export function ContactRecordView(props: Props) {
     contactNotes = [],
     setContactNotes,
     onRefreshNotes,
+    websiteConversations = [],
   } = props
 
   // Actions created by updateLastTouch that duplicate contact_activity entries
@@ -2112,6 +2133,46 @@ export function ContactRecordView(props: Props) {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {leftTab === 'chat' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {websiteConversations.length === 0 ? (
+                  <div style={{ ...cardStyle, color: 'var(--muted)', fontSize: 12 }}>
+                    No website chat transcripts are linked to this contact yet.
+                  </div>
+                ) : websiteConversations.map((conversation, conversationIndex) => (
+                  <details key={conversation.id} open={conversationIndex === 0} style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+                    <summary style={{ cursor: 'pointer', padding: '14px 18px', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#c9a84c', fontSize: 11, fontWeight: 700 }}>
+                        <MessageSquare size={13} /> Website chat
+                      </span>
+                      <span style={{ color: 'var(--muted)', fontSize: 10 }}>
+                        {new Date(conversation.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        {' · '}{conversation.messages.length} messages
+                      </span>
+                    </summary>
+                    <div style={{ borderTop: '1px solid var(--border)', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10, background: 'var(--bg)' }}>
+                      {conversation.messages.map(message => (
+                        <div key={message.id} style={{ display: 'flex', justifyContent: message.role === 'visitor' ? 'flex-end' : 'flex-start' }}>
+                          <div style={{
+                            maxWidth: '82%', padding: '9px 12px', borderRadius: 8,
+                            background: message.role === 'visitor' ? '#c9a84c' : 'var(--surface)',
+                            color: message.role === 'visitor' ? '#111' : 'var(--fg)',
+                            border: message.role === 'visitor' ? 'none' : '1px solid var(--border)',
+                            fontFamily: 'var(--font-mono)', fontSize: 11, lineHeight: 1.55, whiteSpace: 'pre-wrap',
+                          }}>
+                            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.65, marginBottom: 4 }}>
+                              {message.role === 'visitor' ? 'Visitor' : 'Assistant'}
+                            </div>
+                            {message.redacted_text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ))}
               </div>
             )}
 

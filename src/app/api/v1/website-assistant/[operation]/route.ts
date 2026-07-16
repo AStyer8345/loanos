@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { parseOperationInput, type OperationInput, type OperationResult, type WebsiteAssistantOperation } from '@/lib/website-assistant/contracts'
 import { assertFreshTimestamp, canonicalRequest, parseSignatureHeaders, verifySignature } from '@/lib/website-assistant/signature'
 import { redactObject, redactProhibited } from '@/lib/website-assistant/redaction'
+import { sendWebsiteAssistantLeadNotifications } from '@/lib/website-assistant/notifications'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -162,7 +163,36 @@ async function executeOperation(
           consented_at: consent.consentedAt ?? null,
         } as never, { onConflict: 'conversation_id,consent_type,policy_version' })
       }
-      return { ...base, status: result.status, data: { contactId: result.contact_id, duplicate: result.status === 'existing' } }
+      const task = await createTask(supabase, organizationId, ownerUserId, {
+        contactId: result.contact_id,
+        reason: `Contact ${input.firstName}${input.lastName ? ` ${input.lastName}` : ''} about their ${input.leadIntent} inquiry${input.timeline ? ` (${input.timeline.replace(/_/g, ' ')})` : ''}.`,
+        dueAt: new Date().toISOString(),
+        priority: 'high',
+        sourceKey: `assistant-followup:${input.conversationId}`,
+      })
+      const notifications = await sendWebsiteAssistantLeadNotifications({
+        organizationId,
+        contactId: result.contact_id!,
+        conversationId: input.conversationId,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phone: input.phone,
+        leadIntent: input.leadIntent,
+        timeline: input.timeline,
+        sourcePage: input.sourcePage,
+      })
+      return {
+        ...base,
+        status: result.status,
+        data: {
+          contactId: result.contact_id,
+          duplicate: result.status === 'existing',
+          followUpTaskId: task.id,
+          ownerNotified: notifications.ownerNotified,
+          visitorAcknowledged: notifications.visitorAcknowledged,
+        },
+      }
     }
     case 'create_follow_up_task': {
       const task = await createTask(supabase, organizationId, ownerUserId, {

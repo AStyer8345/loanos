@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { AlertCircle } from 'lucide-react'
 import { updateLastTouch } from '@/lib/updateLastTouch'
 import { useOrg } from '@/components/OrgProvider'
-import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow, type DripEnrollment } from './ContactRecordView'
+import { ContactRecordView, type Contact, type ContactLoan, type ActivityEntry, type ContactActivityRow, type EmailDraftRow, type InboundEmailRow, type ContactEmailRow, type DripEnrollment, type WebsiteConversation } from './ContactRecordView'
 import type { NoteRow } from '@/components/notes/NoteInput'
 
 export default function ContactRecordPage() {
@@ -31,6 +31,7 @@ export default function ContactRecordPage() {
   const [dripEnrollments, setDripEnrollments] = useState<DripEnrollment[]>([])
   const [campaigns, setCampaigns] = useState<Array<{ id: string; name: string }>>([])
   const [contactNotes, setContactNotes] = useState<NoteRow[]>([])
+  const [websiteConversations, setWebsiteConversations] = useState<WebsiteConversation[]>([])
 
   const supabase = createClient()
 
@@ -198,6 +199,13 @@ export default function ContactRecordPage() {
     }
   }, [id])
 
+  const fetchWebsiteConversations = useCallback(async () => {
+    const response = await fetch(`/api/contacts/${id}/website-conversations`, { cache: 'no-store' })
+    if (!response.ok) { setWebsiteConversations([]); return }
+    const data = await response.json() as { conversations?: WebsiteConversation[] }
+    setWebsiteConversations(data.conversations ?? [])
+  }, [id])
+
   const resolveReferrer = useCallback(async (referredBy: string | null) => {
     if (!referredBy?.trim()) { setReferrerContactId(null); return }
     if (!organizationId) return
@@ -222,7 +230,7 @@ export default function ContactRecordPage() {
       const c = await fetchContact()
       if (cancelled) return
       if (c) {
-        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(c.email), fetchContactActivity(), fetchNotes(), fetchDripEnrollments(), fetchCampaigns()])
+        await Promise.all([fetchLoans(), fetchReferredLoans(c.email), fetchCoBorrowerLoans(), fetchActivity(c.email), fetchContactActivity(), fetchNotes(), fetchWebsiteConversations(), fetchDripEnrollments(), fetchCampaigns()])
         await resolveReferrer(c.referred_by)
         const [{ data: drafts }, { data: inbound }, { data: ceRows }] = await Promise.all([
           supabase
@@ -253,7 +261,7 @@ export default function ContactRecordPage() {
     }
     load()
     return () => { cancelled = true }
-  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchNotes, fetchDripEnrollments, fetchCampaigns, resolveReferrer])
+  }, [id, supabase, organizationId, fetchContact, fetchLoans, fetchReferredLoans, fetchCoBorrowerLoans, fetchActivity, fetchContactActivity, fetchNotes, fetchWebsiteConversations, fetchDripEnrollments, fetchCampaigns, resolveReferrer])
 
   const handleAddNote = async () => {
     if (!contact || !newNote.trim()) return
@@ -400,6 +408,7 @@ export default function ContactRecordPage() {
       contactNotes={contactNotes}
       setContactNotes={setContactNotes}
       onRefreshNotes={fetchNotes}
+      websiteConversations={websiteConversations}
     />
   )
 }

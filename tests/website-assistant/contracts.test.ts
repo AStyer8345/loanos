@@ -19,6 +19,11 @@ describe('website assistant contracts', () => {
     expect(route).toContain("'security_store_unavailable'")
   })
 
+  it('prefers the server-only Supabase URL for isolated previews', () => {
+    const serviceClient = fs.readFileSync('src/lib/supabase/service.ts', 'utf8')
+    expect(serviceClient).toContain('process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL')
+  })
+
   it('normalizes email without provider-specific rewriting', () => {
     expect(normalizeEmail(' Adam+Mortgage@Example.COM ')).toBe('adam+mortgage@example.com')
   })

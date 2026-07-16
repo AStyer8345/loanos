@@ -13,6 +13,12 @@ describe('website assistant contracts', () => {
     expect(middleware).toContain('api/v1/website-assistant/.*')
   })
 
+  it('only reports a nonce collision as a replay', () => {
+    const route = fs.readFileSync('src/app/api/v1/website-assistant/[operation]/route.ts', 'utf8')
+    expect(route).toContain("nonceError.code === '23505'")
+    expect(route).toContain("'security_store_unavailable'")
+  })
+
   it('normalizes email without provider-specific rewriting', () => {
     expect(normalizeEmail(' Adam+Mortgage@Example.COM ')).toBe('adam+mortgage@example.com')
   })

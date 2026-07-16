@@ -62,7 +62,18 @@ export async function POST(request: NextRequest, context: { params: { operation:
       nonce: signatureHeaders.nonce,
       expires_at: expiresAt,
     } as never)
-    if (nonceError) return fail(operation, correlationId, 'replayed_request', 'Request was already processed or replayed.', 409)
+    if (nonceError) {
+      if (nonceError.code === '23505') {
+        return fail(operation, correlationId, 'replayed_request', 'Request was already processed or replayed.', 409)
+      }
+      console.error('[website-assistant] nonce persistence failed', {
+        operation,
+        correlationId,
+        code: nonceError.code,
+        message: nonceError.message,
+      })
+      return fail(operation, correlationId, 'security_store_unavailable', 'The request security check is temporarily unavailable.', 503, true)
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const auditQuery = (supabase.from('ai_action_audit' as never) as any)

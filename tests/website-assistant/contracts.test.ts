@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import fs from 'node:fs'
 import { normalizeEmail, normalizePhone, parseOperationInput } from '@/lib/website-assistant/contracts'
 
 const base = {
@@ -7,6 +8,11 @@ const base = {
 }
 
 describe('website assistant contracts', () => {
+  it('keeps the signed service API outside user-session middleware', () => {
+    const middleware = fs.readFileSync('src/middleware.ts', 'utf8')
+    expect(middleware).toContain('api/v1/website-assistant/.*')
+  })
+
   it('normalizes email without provider-specific rewriting', () => {
     expect(normalizeEmail(' Adam+Mortgage@Example.COM ')).toBe('adam+mortgage@example.com')
   })

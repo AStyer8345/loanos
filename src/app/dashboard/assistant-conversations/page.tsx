@@ -5,6 +5,7 @@ import { getOrganization } from '@/lib/getOrganization'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { evaluateWebsiteConversation } from '@/lib/website-assistant/conversation-quality'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,6 +88,11 @@ export default async function AssistantConversationsPage() {
     messagesByConversation.set(message.conversation_id, existing)
   }
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]))
+  const qualityByConversation = new Map(conversations.map((conversation) => [
+    conversation.id,
+    evaluateWebsiteConversation(messagesByConversation.get(conversation.id) ?? []),
+  ]))
+  const conversationsNeedingReview = [...qualityByConversation.values()].filter((quality) => quality.flags.length > 0).length
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
@@ -106,6 +112,13 @@ export default async function AssistantConversationsPage() {
         </Badge>
       </div>
 
+      {conversationsNeedingReview > 0 && (
+        <div className="mb-5 rounded-lg border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <span className="font-semibold">{conversationsNeedingReview} conversation{conversationsNeedingReview === 1 ? '' : 's'} worth reviewing.</span>{' '}
+          These chats contain repeated answers, crowded questions, weak next steps, or another sales-quality flag.
+        </div>
+      )}
+
       {conversations.length === 0 ? (
         <Card>
           <CardHeader>
@@ -118,6 +131,7 @@ export default async function AssistantConversationsPage() {
           {conversations.map((conversation) => {
             const transcript = messagesByConversation.get(conversation.id) ?? []
             const contact = conversation.contact_id ? contactsById.get(conversation.contact_id) : undefined
+            const quality = qualityByConversation.get(conversation.id) ?? { score: 100, flags: [] }
             const displayName = contact
               ? [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email || 'Known contact'
               : 'Anonymous visitor'
@@ -138,6 +152,7 @@ export default async function AssistantConversationsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Badge variant={quality.flags.length ? 'secondary' : 'outline'}>Sales quality {quality.score}</Badge>
                         {!contact && <Badge variant="secondary">Anonymous</Badge>}
                         <Badge variant="outline" className="capitalize">{conversation.status}</Badge>
                       </div>
@@ -148,6 +163,11 @@ export default async function AssistantConversationsPage() {
                       <Link href={`/dashboard/contacts/${contact.id}`} className="mb-5 inline-flex text-sm font-medium text-primary hover:underline">
                         Open contact record
                       </Link>
+                    )}
+                    {quality.flags.length > 0 && (
+                      <div className="mb-5 flex flex-wrap gap-2">
+                        {quality.flags.map((flag) => <Badge key={flag} variant="secondary">{flag}</Badge>)}
+                      </div>
                     )}
                     <div className="space-y-3">
                       {transcript.map((message) => (

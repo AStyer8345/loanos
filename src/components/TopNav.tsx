@@ -12,6 +12,7 @@ import {
   Search,
   Menu,
   ChevronDown,
+  MessageSquareText,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -59,6 +60,7 @@ const NAV_ITEMS_ALL: (NavItem & { requires?: keyof OrgFeatures })[] = [
 // Secondary nav — power-user surfaces tucked behind a More dropdown.
 // All map to section 'more' so the More button highlights when any are active.
 const MORE_ITEMS_ALL: MoreItem[] = [
+  { label: 'Chat transcripts', href: '/dashboard/assistant-conversations', icon: <MessageSquareText className="size-4" /> },
   { label: 'Scenarios', href: '/dashboard/scenarios', icon: <Calculator className="size-4" />, requires: 'scenarios' },
   { label: 'Lenders',   href: '/dashboard/lenders',   icon: <Building2 className="size-4" />, requires: 'lender_knowledge' },
 ]
@@ -70,6 +72,7 @@ function sectionFromPath(pathname: string): Section | null {
   // Power-user surfaces hidden under More
   if (pathname.startsWith('/dashboard/scenarios')) return 'more'
   if (pathname.startsWith('/dashboard/lenders')) return 'more'
+  if (pathname.startsWith('/dashboard/assistant-conversations')) return 'more'
   if (pathname.startsWith('/dashboard/settings')) return 'settings'
   return null
 }

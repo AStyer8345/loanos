@@ -336,6 +336,9 @@ async function createTask(
   const query = supabase.from('todo_items') as any
   const { data: existing } = await query.select('id').eq('organization_id', organizationId).eq('source_key', input.sourceKey).maybeSingle()
   if (existing) return { id: existing.id as string, created: false }
+  // The public contract accepts 'normal', but todo_items' priority check
+  // enumerates 'medium' for that tier.
+  const priority = input.priority === 'normal' ? 'medium' : input.priority
   const { data, error } = await query.insert({
     organization_id: organizationId,
     user_id: ownerUserId,
@@ -346,8 +349,8 @@ async function createTask(
     description: input.reason,
     follow_up_reason: input.reason,
     due_at: input.dueAt,
-    priority: input.priority,
-    is_urgent: input.priority === 'urgent',
+    priority,
+    is_urgent: priority === 'urgent',
     source: 'website_assistant',
     source_key: input.sourceKey,
     status: 'open',

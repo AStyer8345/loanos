@@ -265,20 +265,46 @@ async function executeOperation(
       const assistant = redactProhibited(input.assistantMessage)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const conversationTable = supabase.from('website_conversations' as never) as any
-      const { error: conversationError } = await conversationTable.upsert({
-        id: input.conversationId,
+      const conversationValues = {
         organization_id: organizationId,
         public_session_hash: input.sessionHash,
         knowledge_version: input.knowledgeVersion ?? null,
         retention_expires_at: new Date(Date.now() + 2 * 365 * 86_400_000).toISOString(),
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'organization_id,public_session_hash' })
+      }
+      // The browser can mint a new conversation id while the session cookie
+      // (and its hash) stays the same. Upserting a new primary key onto the
+      // unique (organization_id, public_session_hash) row fails once messages
+      // reference the old id, so resolve the session's existing conversation
+      // instead of rewriting its id.
+      const { data: existingConversation, error: lookupError } = await conversationTable
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('public_session_hash', input.sessionHash)
+        .maybeSingle()
+      if (lookupError) throw new Error('Conversation lookup failed')
+      const conversationId: string = existingConversation?.id ?? input.conversationId
+      const { error: conversationError } = existingConversation
+        ? await conversationTable.update(conversationValues).eq('id', conversationId)
+        : await conversationTable.insert({ id: conversationId, ...conversationValues })
       if (conversationError) throw new Error('Conversation persistence failed')
+      // Sequence numbers restart when a visitor opens a new tab in the same
+      // session; append after the current maximum instead of overwriting.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: lastMessage, error: sequenceError } = await (supabase.from('website_conversation_messages' as never) as any)
+        .select('sequence_number')
+        .eq('conversation_id', conversationId)
+        .order('sequence_number', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (sequenceError) throw new Error('Conversation sequence lookup failed')
+      const maxSequence: number = lastMessage?.sequence_number ?? 0
+      const sequenceStart = input.sequenceStart > maxSequence ? input.sequenceStart : maxSequence + 1
       const { error: messageError } = await supabase.from('website_conversation_messages' as never).upsert([
         {
           organization_id: organizationId,
-          conversation_id: input.conversationId,
-          sequence_number: input.sequenceStart,
+          conversation_id: conversationId,
+          sequence_number: sequenceStart,
           role: 'visitor',
           redacted_text: visitor.text,
           policy_outcome: { ...input.policyOutcome, sensitive_detected: visitor.blocked, detected_types: visitor.detected },
@@ -286,8 +312,8 @@ async function executeOperation(
         },
         {
           organization_id: organizationId,
-          conversation_id: input.conversationId,
-          sequence_number: input.sequenceStart + 1,
+          conversation_id: conversationId,
+          sequence_number: sequenceStart + 1,
           role: 'assistant',
           redacted_text: assistant.text,
           policy_outcome: input.policyOutcome,

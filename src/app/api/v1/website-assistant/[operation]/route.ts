@@ -165,7 +165,7 @@ async function executeOperation(
       }
       const task = await createTask(supabase, organizationId, ownerUserId, {
         contactId: result.contact_id,
-        reason: `Contact ${input.firstName}${input.lastName ? ` ${input.lastName}` : ''} about their ${input.leadIntent} inquiry${input.timeline ? ` (${input.timeline.replace(/_/g, ' ')})` : ''}.`,
+        reason: `Contact ${input.firstName}${input.lastName ? ` ${input.lastName}` : ''} about their ${input.leadIntent} inquiry${input.timeline ? ` (${input.timeline.replace(/_/g, ' ')})` : ''}.${input.conversationSummary ? ` Chat summary: ${input.conversationSummary}` : ''}`,
         dueAt: new Date().toISOString(),
         priority: 'high',
         sourceKey: `assistant-followup:${input.conversationId}`,
@@ -181,6 +181,7 @@ async function executeOperation(
         leadIntent: input.leadIntent,
         timeline: input.timeline,
         sourcePage: input.sourcePage,
+        conversationSummary: input.conversationSummary,
       })
       return {
         ...base,

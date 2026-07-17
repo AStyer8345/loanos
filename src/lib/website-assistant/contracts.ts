@@ -35,6 +35,7 @@ export type OperationInput =
       timeline?: 'within_30_days' | '31_to_90_days' | 'more_than_90_days' | 'unsure'
       preferredContact?: 'email' | 'phone' | 'text'
       sourcePage?: string
+      conversationSummary?: string
       consents: ConsentEvidence[]
     })
   | (BaseOperationInput & {
@@ -167,6 +168,7 @@ export function parseOperationInput(operationValue: string, body: unknown): Oper
         timeline: value.timeline == null ? undefined : oneOf(value.timeline, 'timeline', ['within_30_days', '31_to_90_days', 'more_than_90_days', 'unsure'] as const),
         preferredContact: value.preferredContact == null ? undefined : oneOf(value.preferredContact, 'preferredContact', ['email', 'phone', 'text'] as const),
         sourcePage: text(value.sourcePage, 'sourcePage', 500, false),
+        conversationSummary: text(value.conversationSummary, 'conversationSummary', 1000, false),
         consents,
       }
     }

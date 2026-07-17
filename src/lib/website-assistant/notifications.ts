@@ -11,6 +11,7 @@ type LeadNotificationInput = {
   leadIntent: string
   timeline?: string
   sourcePage?: string
+  conversationSummary?: string
 }
 
 export type LeadNotificationResult = {
@@ -39,6 +40,7 @@ export async function sendWebsiteAssistantLeadNotifications(input: LeadNotificat
           <li>Interest: ${html(label(input.leadIntent))}</li>
           ${input.timeline ? `<li>Timeline: ${html(label(input.timeline))}</li>` : ''}
           ${input.sourcePage ? `<li>Page: ${html(input.sourcePage)}</li>` : ''}
+          ${input.conversationSummary ? `<li>Conversation summary: ${html(input.conversationSummary)}</li>` : ''}
         </ul>
         <p><a href="${html(contactUrl)}" style="display:inline-block;background:#0a1f3f;color:#fff;text-decoration:none;padding:11px 16px;border-radius:6px">Open contact and chat transcript</a></p>
       </div>

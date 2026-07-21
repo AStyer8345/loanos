@@ -89,9 +89,9 @@
 - ~~[LOW_RISK] Add veteran-specific FAQ + eligibility detail to VA loan page~~ ✅ DONE 2026-04-05 — added "What credit score do I need?" + "How do I get a COE?" to accordion + FAQPage schema; dateModified + sitemap lastmod updated
 
 ### P2 — MEDIUM PRIORITY CONTENT GAPS
-- [LOW_RISK] Mortgage glossary / terms resource page — internal linking opportunity for every loan page
-- [LOW_RISK] Investment property ROI examples + calculator tie-in on DSCR page. Keyword: "investment property loan Austin"
-- [LOW_RISK] Mortgage document checklist blog post + downloadable PDF. High-intent keyword, easy to rank.
+- ~~[LOW_RISK] Mortgage glossary / terms resource page~~ ✅ DONE 2026-04-07 (duplicate of line ~117) — **stale entry struck 2026-07-20 by styer-site-daily Re-Verify Gate:** `/mortgage-glossary` live HTTP 200 + present in sitemap.xml
+- ~~[LOW_RISK] Investment property ROI examples + calculator tie-in on DSCR page~~ ✅ DONE 2026-04-07 (duplicate of line ~118) — **stale entry struck 2026-07-20 by styer-site-daily Re-Verify Gate**
+- ~~[LOW_RISK] Mortgage document checklist blog post + downloadable PDF~~ ✅ DONE 2026-04-06 (duplicate of line ~110) — **stale entry struck 2026-07-20 by styer-site-daily Re-Verify Gate:** `/blog/2026-04-06-mortgage-document-checklist-austin-tx` live HTTP 200
 - ~~[LOW_RISK] Add construction loan builder partner content + process walkthrough~~ ✅ DONE 2026-04-11 — commit 811028f, AEO paragraph + 6-step build process walkthrough with Austin builder examples, dateModified updated
 
 ### P3 — ONGOING MAINTENANCE (from audit)

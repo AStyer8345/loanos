@@ -27,6 +27,7 @@ import AeoVsSeoCard from '@/components/dashboard/analytics/AeoVsSeoCard'
 import SourceConversionTable, { type SourceConversionRow } from '@/components/dashboard/analytics/SourceConversionTable'
 import RealtorPerformanceTable, { type RealtorPerformanceRow } from '@/components/dashboard/analytics/RealtorPerformanceTable'
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell } from '@/components/ui/table'
+import FocusCommandCenter from './FocusCommandCenter'
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface StageData { stage: string; count: number; volume: number; commission: number }
@@ -88,8 +89,12 @@ function fmtDateShort(s: string | null): string {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function DashboardClient(props: DashboardClientProps) {
-  const [tab, setTab] = useState<'pipeline' | 'performance'>('pipeline')
+  const [tab, setTab] = useState<'command' | 'pipeline' | 'performance'>('command')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  const netCompThisMonth = props.compRows
+    .filter(row => row.fundedDate?.startsWith(currentMonth))
+    .reduce((sum, row) => sum + (row.net_comp ?? 0), 0)
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-4 lg:p-6 space-y-4">
@@ -122,6 +127,10 @@ export default function DashboardClient(props: DashboardClientProps) {
         <div className="flex items-center gap-3">
           <div className="flex bg-card border border-input rounded-lg p-1 gap-0.5">
             <button
+              onClick={() => setTab('command')}
+              className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'command' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
+            >Command</button>
+            <button
               onClick={() => setTab('pipeline')}
               className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'pipeline' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
             >Pipeline</button>
@@ -132,6 +141,15 @@ export default function DashboardClient(props: DashboardClientProps) {
           </div>
         </div>
       </div>
+
+      {tab === 'command' && (
+        <FocusCommandCenter
+          netIncomeMTD={netCompThisMonth || props.commissionThisMonth}
+          fundedVolumeMTD={props.volumeThisMonth}
+          fundedMTD={props.fundedThisMonth}
+          pipelineNet={props.projectedCommission}
+        />
+      )}
 
       {/* ═══ PIPELINE TAB ═══ */}
       {tab === 'pipeline' && (

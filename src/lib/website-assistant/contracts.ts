@@ -83,6 +83,7 @@ export type OperationInput =
       sourceRefs: string[]
       policyOutcome: Record<string, boolean | string | number>
       modelRequestId?: string
+      sourcePage?: string
     })
 
 export type OperationResult = {
@@ -234,6 +235,7 @@ export function parseOperationInput(operationValue: string, body: unknown): Oper
         sourceRefs: value.sourceRefs as string[],
         policyOutcome: value.policyOutcome as Record<string, boolean | string | number>,
         modelRequestId: text(value.modelRequestId, 'modelRequestId', 128, false),
+        sourcePage: text(value.sourcePage, 'sourcePage', 500, false),
       }
     }
   }

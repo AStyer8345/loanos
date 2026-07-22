@@ -31,6 +31,17 @@ describe('website assistant contracts', () => {
     expect(route).toContain('followUpTaskId')
   })
 
+  it('notifies Adam once when the first redacted conversation turn is recorded', () => {
+    const route = fs.readFileSync('src/app/api/v1/website-assistant/[operation]/route.ts', 'utf8')
+    const notifications = fs.readFileSync('src/lib/website-assistant/notifications.ts', 'utf8')
+    expect(route).toContain('maxSequence === 0')
+    expect(route).toContain('firstQuestion: visitor.text')
+    expect(route).toContain('sendWebsiteAssistantConversationStartedNotification')
+    expect(notifications).toContain('A visitor started a website chat')
+    expect(notifications).toContain('Open chat transcripts')
+    expect(notifications).toContain("template: 'website_assistant_chat_started'")
+  })
+
   it('serves transcripts through an authenticated contact-scoped route', () => {
     const route = fs.readFileSync('src/app/api/contacts/[id]/website-conversations/route.ts', 'utf8')
     expect(route).toContain('getOrganization()')
@@ -76,5 +87,22 @@ describe('website assistant contracts', () => {
     })
     expect(input.operation).toBe('create_or_update_website_lead')
     if (input.operation === 'create_or_update_website_lead') expect(input.email).toBe('alex@example.com')
+  })
+
+  it('accepts the source page when recording a conversation turn', () => {
+    const input = parseOperationInput('record_conversation_turn', {
+      ...base,
+      sessionHash: 'session-hash',
+      visitorMessage: 'What is a DSCR loan?',
+      assistantMessage: 'A DSCR loan is commonly evaluated using property cash flow.',
+      sequenceStart: 1,
+      sourceRefs: [],
+      policyOutcome: { allowed: true },
+      sourcePage: 'https://adamstyer.com/loan-programs/dscr.html',
+    })
+    expect(input.operation).toBe('record_conversation_turn')
+    if (input.operation === 'record_conversation_turn') {
+      expect(input.sourcePage).toBe('https://adamstyer.com/loan-programs/dscr.html')
+    }
   })
 })

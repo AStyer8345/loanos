@@ -4,7 +4,10 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { parseOperationInput, type OperationInput, type OperationResult, type WebsiteAssistantOperation } from '@/lib/website-assistant/contracts'
 import { assertFreshTimestamp, canonicalRequest, parseSignatureHeaders, verifySignature } from '@/lib/website-assistant/signature'
 import { redactObject, redactProhibited } from '@/lib/website-assistant/redaction'
-import { sendWebsiteAssistantLeadNotifications } from '@/lib/website-assistant/notifications'
+import {
+  sendWebsiteAssistantConversationStartedNotification,
+  sendWebsiteAssistantLeadNotifications,
+} from '@/lib/website-assistant/notifications'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -321,7 +324,22 @@ async function executeOperation(
         },
       ] as never, { onConflict: 'conversation_id,sequence_number' })
       if (messageError) throw new Error('Conversation message persistence failed')
-      return { ...base, status: 'recorded', data: { sensitiveInputDetected: visitor.blocked } }
+      const conversationStartedNotified = maxSequence === 0
+        ? await sendWebsiteAssistantConversationStartedNotification({
+            organizationId,
+            conversationId,
+            firstQuestion: visitor.text,
+            sourcePage: input.sourcePage,
+          })
+        : false
+      return {
+        ...base,
+        status: 'recorded',
+        data: {
+          sensitiveInputDetected: visitor.blocked,
+          conversationStartedNotified,
+        },
+      }
     }
   }
 }

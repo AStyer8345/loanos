@@ -19,6 +19,7 @@ export interface SendEmailParams {
   to: string
   subject: string
   body: string             // HTML
+  from?: string            // optional per-message From override
   tags?: Record<string, string>
   log?: ResendLogContext   // currently only used by Resend; Graph logs separately
 }
@@ -93,7 +94,7 @@ export async function sendEmail(
     to: params.to,
     subject: params.subject,
     body: params.body,
-    from: fromHeader,
+    from: params.from ?? fromHeader,
     replyTo,
     tags: params.tags,
     log: params.log,

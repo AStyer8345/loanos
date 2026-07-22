@@ -40,6 +40,7 @@ export async function sendWebsiteAssistantConversationStartedNotification(
     await sendEmail({
       orgId: input.organizationId,
       to: ownerEmail,
+      from: getInternalNotificationFrom(),
       subject: `New website chat: ${questionPreview}`,
       body: `
         <div style="font-family:Arial,sans-serif;line-height:1.55;color:#172033;max-width:620px">
@@ -71,6 +72,7 @@ export async function sendWebsiteAssistantLeadNotifications(input: LeadNotificat
   const ownerSend = sendEmail({
     orgId: input.organizationId,
     to: ownerEmail,
+    from: getInternalNotificationFrom(),
     subject: `Website assistant lead: ${name}`,
     body: `
       <div style="font-family:Arial,sans-serif;line-height:1.55;color:#172033;max-width:620px">
@@ -127,6 +129,11 @@ function getAppBase(): string {
 
 function getOwnerEmail(): string {
   return process.env.LOANOS_ADMIN_EMAIL?.trim() || 'styer.adam@gmail.com'
+}
+
+function getInternalNotificationFrom(): string {
+  return process.env.WEBSITE_ASSISTANT_NOTIFICATION_FROM?.trim()
+    || 'Adam Styer Website <notifications@adamstyer.com>'
 }
 
 function html(value: string): string {

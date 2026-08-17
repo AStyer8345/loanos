@@ -257,6 +257,30 @@ export async function POST(req: NextRequest) {
     .select('*')
     .single()
 
+  // Double-submit race: the § 4 dedup SELECT can miss a contact inserted between
+  // that read and this insert, so `contacts_email_org_unique` raises 23505 here.
+  // Treat it as the duplicate it is and return the existing row, matching the
+  // § 4 response shape — a 500 here surfaces as a failed form post and a second
+  // alert email for a lead we already have.
+  if (insertError?.code === '23505' && email) {
+    const { data: existing } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('organization_id', organization_id)
+      .ilike('email', email)
+      .limit(1)
+      .maybeSingle()
+
+    if (existing) {
+      const fullName = [first_name, last_name].filter(Boolean).join(' ')
+      return NextResponse.json({
+        contact:   existing,
+        duplicate: existing,
+        message:   `Contact already exists for ${fullName} — returned existing record.`,
+      })
+    }
+  }
+
   if (insertError || !newContact) {
     console.error('[web-lead] insert error:', insertError)
     return NextResponse.json(

@@ -1,23 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import type { DupeContact, DupeGroup, MatchType } from '@/lib/contacts/duplicateMatch'
 
-type DupeContact = {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  phone: string | null
-  contact_type: string | null
-  stage: string | null
-  created_at: string
-  updated_at: string
-}
-
-type DupeGroup = {
-  group_key: string
-  match_type: 'name' | 'email'
-  contacts: DupeContact[]
+const MATCH_LABELS: Record<MatchType, string> = {
+  name: 'Name match',
+  email: 'Email match',
+  phone: 'Phone match',
+  fuzzy_name: 'Similar name',
 }
 
 type Props = {
@@ -193,7 +183,7 @@ export default function DuplicateMergeModal({ open, onClose, onMerged }: Props) 
               }}>
                 <div style={{ fontSize: 11 }}>
                   <span style={{ color: '#c9a84c', fontWeight: 600 }}>
-                    {group.match_type === 'name' ? 'Name match' : 'Email match'}
+                    {MATCH_LABELS[group.match_type] ?? 'Match'}
                   </span>
                   <span style={{ color: 'var(--muted)', marginLeft: 8 }}>
                     &quot;{group.group_key}&quot; — {group.contacts.length} contacts

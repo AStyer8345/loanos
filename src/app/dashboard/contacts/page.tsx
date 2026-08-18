@@ -662,9 +662,26 @@ export default function ContactsPage() {
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
   const [editingListId, setEditingListId] = useState<string | null>(null)
   const [showDuplicates, setShowDuplicates] = useState(false)
+  const [dupeCount, setDupeCount] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
   const [kanbanContacts, setKanbanContacts] = useState<Record<string, Contact[]>>({})
   const [kanbanLoading, setKanbanLoading] = useState(false)
+
+  // Duplicate-candidate nudge on FIND DUPES. countOnly keeps this to a small
+  // payload; if it fails the badge just stays hidden, which is the right
+  // degradation for a decorative count.
+  const refreshDupeCount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/contacts/duplicates?countOnly=1')
+      if (!res.ok) return
+      const data = await res.json()
+      if (typeof data.count === 'number') setDupeCount(data.count)
+    } catch {
+      // no-op
+    }
+  }, [])
+
+  useEffect(() => { refreshDupeCount() }, [refreshDupeCount])
 
   // sidebar collapse: default collapsed when viewport < 1280px; toggle overrides
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -1145,9 +1162,15 @@ export default function ContactsPage() {
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setShowDuplicates(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: 'transparent', color: 'var(--muted)', padding: '8px 16px', borderRadius: 4,
-              border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 600,
-            }}>FIND DUPES</button>
+              background: 'transparent',
+              color: dupeCount ? '#c9a84c' : 'var(--muted)',
+              padding: '8px 16px', borderRadius: 4,
+              border: `1px solid ${dupeCount ? 'color-mix(in srgb, #c9a84c 40%, transparent)' : 'var(--border)'}`,
+              cursor: 'pointer', fontWeight: 600,
+            }}>
+              FIND DUPES
+              {dupeCount ? <span style={{ marginLeft: 6 }}>· {dupeCount}</span> : null}
+            </button>
             <button onClick={() => setShowImport(true)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
               background: 'transparent', color: 'var(--primary)', padding: '8px 16px', borderRadius: 4,
@@ -2194,7 +2217,7 @@ export default function ContactsPage() {
       <DuplicateMergeModal
         open={showDuplicates}
         onClose={() => setShowDuplicates(false)}
-        onMerged={() => fetchContacts()}
+        onMerged={() => { fetchContacts(); refreshDupeCount() }}
       />
 
       {/* ── Column picker backdrop (click outside to close) ── */}

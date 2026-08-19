@@ -346,6 +346,9 @@ var PHASES = [
    items:["Multi-tenant RLS architecture (full data isolation)","White-label theming engine (logo, colors, domain)","Stripe billing: Starter / Pro / Team subscriptions","Onboarding wizard for new LO tenants","Admin dashboard: manage subscribers, feature flags, usage","Go-to-market: beta with network LOs, LinkedIn build-in-public, LO forums"]},
 ];
 var DECISIONS = [
+  {date:"Aug 2026",title:"Log tables locked down — anon key could read borrower email content",color:"#c94c4c",
+   body:"rancho_chat_logs, n8n_run_logs and ai_node_logs sat in the public schema with RLS off and full read/write/truncate grants to anon — the key that ships in client-side JS. Verified live: anon read 137, 23 and 1,713 rows while activity_log and contacts correctly returned none. ai_node_logs was the worst: 1,713 rows of the inbound-email classifier's input preview and AI output, a plaintext copy of the content activity_log_pii encrypts under migration 083. Migration 20260819120000 enables RLS with no policies; all 60 n8n workflows were checked first and every writer uses a service_role JWT, which bypasses RLS, so nothing broke. Advisor ERROR count 3 to 0.",
+   tags:[{label:"Security",type:"confirmed"},{label:"Migration 20260819120000",type:"confirmed"}]},
   {date:"Mar 2026",title:"Build For Yourself First",color:"#c9a84c",
    body:"Scope confirmed: build LoanOS as a personal production tool first. Replace Jungo CRM, Mortgage Coach, and scattered Claude workflows. License to other LOs in Phase 4 after personal build is proven.",
    tags:[{label:"Strategy",type:"confirmed"}]},

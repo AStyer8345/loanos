@@ -154,7 +154,7 @@ export default function RefiTimingSection({ currentLoan, refiScenarios, refiResu
             {fmt(savings5yr)}
           </div>
           <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: "'IBM Plex Mono', monospace" }}>
-            cumulative net savings
+            gross, before closing costs
           </div>
         </div>
       </div>

@@ -263,8 +263,8 @@ function renderKeyMetricsGrid(data: DisplayData): string {
   const m = data.keyMetrics
   const cards = [
     { label: 'Monthly Savings', value: fmtCurrency(m.monthlySavings), sub: '/month', green: m.monthlySavings > 0 },
-    { label: 'Savings — 5 Years', value: fmtCurrency(m.savings5yr), sub: 'cumulative', green: m.savings5yr > 0 },
-    { label: 'Savings — 15 Years', value: fmtCurrency(m.savings15yr), sub: 'cumulative', green: m.savings15yr > 0 },
+    { label: 'Savings — 5 Years', value: fmtCurrency(m.savings5yr), sub: 'gross, before closing costs', green: m.savings5yr > 0 },
+    { label: 'Savings — 15 Years', value: fmtCurrency(m.savings15yr), sub: 'gross, before closing costs', green: m.savings15yr > 0 },
     { label: 'Interest at 15 Years', value: fmtCurrency(m.interestAt15yrBest), sub: 'best option, through yr 15', green: false },
   ]
 
@@ -413,7 +413,7 @@ function renderSummaryStatCards(data: DisplayData): string {
       {
         label: '5-Year Savings',
         value: m.savings5yr > 0 ? fmtCurrency(m.savings5yr) : '—',
-        sub: 'cumulative',
+        sub: 'gross, before closing costs',
         highlight: m.savings5yr > 0,
       },
       {

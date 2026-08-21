@@ -57,8 +57,8 @@ ${r?.yearsSaved ? `- Extra Payment Saves: ${r.yearsSaved} years, ${r.monthsSaved
 - New Loan Amount: $${Number(s.newLoanAmount).toLocaleString()} at ${s.interestRate}% for ${s.loanTerm} years
 - New Monthly Payment: $${Number(r?.newTotalMonthlyPayment ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
 - Monthly Savings: $${Number(r?.monthlySavings ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-- Break-Even: Month ${r?.breakEvenMonth ?? 0}
-- 5-Year Savings: $${Number(r?.totalSavings5Year ?? 0).toLocaleString()}
+- Break-Even: ${Number(r?.breakEvenMonth ?? 0) > 0 ? `Month ${r?.breakEvenMonth}` : 'never — this option does not lower the monthly payment, so closing costs are never recouped'}
+- 5-Year Savings (GROSS — monthly savings x 60; does NOT deduct closing costs): $${Number(r?.totalSavings5Year ?? 0).toLocaleString()}
 - Lifetime Interest Savings: $${Number(r?.lifetimeInterestSavings ?? 0).toLocaleString()}
 ${r?.cashOutReceived ? `- Cash Out: $${Number(r.cashOutReceived).toLocaleString()}` : ''}
 ${r?.debtsEliminated?.length ? `- Debts Eliminated: ${r.debtsEliminated.map((d: { description: string; monthlyPayment: number }) => `${d.description} ($${d.monthlyPayment}/mo)`).join(', ')}` : ''}`
@@ -86,7 +86,9 @@ Rules:
 - Be specific with exact dollar amounts and months from the scenario data
 - Never reference protected classes (race, religion, gender, national origin, familial status, disability, age)
 - Never make a lending decision — present trade-offs only
-- Never recommend one product over another — present what each option means for the borrower's situation`
+- Never recommend one product over another — present what each option means for the borrower's situation
+- Any figure labelled GROSS is before closing costs. Never describe it as money kept, netted, or "after costs", and never subtract costs yourself to invent a net figure. If you cite it, say it is before closing costs and point to the break-even month as the point where those costs are recouped
+- If Break-Even is "never", do not describe the refinance as paying for itself over any period`
 
     // Stream response using SSE
     const anthropic = await getAnthropicClient()

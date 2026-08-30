@@ -132,6 +132,22 @@ function n(val: unknown): string | number | null {
   return val === null || val === undefined || val === '' ? null : (val as string | number)
 }
 
+// Normalize a ratio/rate field that lands in a narrow numeric(p,s) column.
+// Arive derives these against monthly income, so a file keyed before income is
+// entered emits values like backEndDTI = 4666.4. Postgres answers a value wider
+// than the column with 22003 and rejects the WHOLE row, so one nonsense ratio
+// drops an entire loan (n8n execution 51478 lost a $300,000 file this way).
+// Out-of-range means "we don't know this ratio", so it becomes null rather than
+// being pinned to the ceiling — a stored 999.99 would read as a real figure.
+// maxAbs is the column's own limit: 10^(precision - scale) - 1.
+function nBounded(val: unknown, maxAbs: number): string | number | null {
+  const v = n(val)
+  if (v === null) return null
+  const num = typeof v === 'number' ? v : Number(v)
+  if (!Number.isFinite(num) || Math.abs(num) > maxAbs) return null
+  return v
+}
+
 // Parse a date string to just the date portion (YYYY-MM-DD) or null
 function nDate(val: unknown): string | null {
   const s = n(val)
@@ -285,13 +301,13 @@ export async function processAriveWebhook(
       loan_type: n(body.mortgageType) ?? n(body.loanType),
       loan_program: n(body.loanProgram) ?? n(body.lenderProductName),
       loan_term: n(body.loanTerm),
-      interest_rate: n(body.interestRate),
-      apr: n(body.apr),
-      points: n(body.points),
+      interest_rate: nBounded(body.interestRate, 99.9999),
+      apr: nBounded(body.apr, 999.99999),
+      points: nBounded(body.points, 999.99999),
       down_payment: n(body.downPayment),
-      down_payment_pct: n(body.downPaymentPercent),
-      ltv: n(body.ltv),
-      cltv: n(body.cltv),
+      down_payment_pct: nBounded(body.downPaymentPercent, 999.99),
+      ltv: nBounded(body.ltv, 999.99),
+      cltv: nBounded(body.cltv, 999.99999),
 
       property_address: n(body.propertyAddress),
       property_city: n(body.propertyCity),
@@ -332,8 +348,17 @@ export async function processAriveWebhook(
       credit_score: n(body.creditScore),
       middle_score: n(body.middleScore),
       monthly_income: n(body.monthlyIncome),
-      front_end_dti: n(body.frontEndDti),
-      back_end_dti: n(body.backEndDti),
+      // Arive sends frontEndDTI / backEndDTI (uppercase DTI) -- the camelCase
+      // spellings below were the only keys read until 2026-08-30, so this path
+      // wrote NULL DTI on every loan. Both spellings are accepted so the fix
+      // holds if Arive ever normalizes the casing.
+      // Bound is 999, not the column's 99999.99999: after the 2026-08-21 widen
+      // the column is roomy enough to STORE a garbage ratio as if it were a
+      // fact. 4666.4 is not a debt-to-income percentage, it is what Arive emits
+      // when monthlyIncome is 0. Matches the >999 -> null rule specified for
+      // the n8n "Upsert Loan" clamp so both intake paths agree.
+      front_end_dti: nBounded(body.frontEndDTI ?? body.frontEndDti, 999),
+      back_end_dti: nBounded(body.backEndDTI ?? body.backEndDti, 999),
       monthly_debts: n(body.monthlyDebts),
 
       referring_agent_name: n(body.referringAgentName) ?? n(body.referralContactSourceName),

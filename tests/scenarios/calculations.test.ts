@@ -171,12 +171,21 @@ describe('monthsElapsed', () => {
     expect(monthsElapsed('')).toBe(0)
   })
 
-  it('CHARACTERIZATION: returns a negative count for a future start date', () => {
-    // Not clamped. Feeds remainingBalance, which then reports a payoff ABOVE the
-    // original loan amount. See tests/scenarios findings memo 2026-08-20.
+  it('clamps a future start date to zero rather than counting backwards', () => {
+    // Was pinned as a CHARACTERIZATION on 2026-08-20 (returned -12). Fixed
+    // 2026-08-30: a loan that has not started has zero months elapsed.
     const now = new Date()
     const future = `${now.getFullYear() + 1}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    expect(monthsElapsed(future)).toBe(-12)
+    expect(monthsElapsed(future)).toBe(0)
+  })
+
+  it('reports the full principal as the payoff for a loan that has not started', () => {
+    // The defect this clamp closes: a negative elapsed count drove
+    // remainingBalance ABOVE the original loan amount. Reachable from the
+    // loan-start input and from the AI statement parse.
+    const now = new Date()
+    const future = `${now.getFullYear() + 1}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    expect(remainingBalance(400000, 6.5, 30, monthsElapsed(future))).toBe(400000)
   })
 })
 

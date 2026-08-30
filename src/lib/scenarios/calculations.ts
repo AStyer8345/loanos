@@ -87,12 +87,13 @@ export function remainingBalance(
   return principal * factor - monthlyPayment(principal, annualRate, termYears) * ((factor - 1) / r)
 }
 
-/** Months elapsed from YYYY-MM start date to today */
+/** Months elapsed from YYYY-MM start date to today. Never negative — a loan that
+ *  has not started yet has zero months elapsed, so its balance is the full principal. */
 export function monthsElapsed(startDate: string): number {
   if (!startDate) return 0
   const [year, month] = startDate.split('-').map(Number)
   const now = new Date()
-  return (now.getFullYear() - year) * 12 + (now.getMonth() + 1 - month)
+  return Math.max(0, (now.getFullYear() - year) * 12 + (now.getMonth() + 1 - month))
 }
 
 // ─── APR Estimate ───────────────────────────────────────────────────

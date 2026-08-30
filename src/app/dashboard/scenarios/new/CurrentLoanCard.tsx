@@ -28,6 +28,13 @@ export default function CurrentLoanCard({ currentLoan, onUpdate }: {
 
   const elapsed = useMemo(() => monthsElapsed(currentLoan.loanStartDate), [currentLoan.loanStartDate])
 
+  // An existing loan cannot start in the future — catch the typo at the keyboard.
+  // The engine clamps regardless, since the statement parse also writes this field.
+  const currentMonth = useMemo(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  }, [])
+
   const calcBalance = useMemo(() =>
     remainingBalance(currentLoan.originalLoanAmount, currentLoan.interestRate, currentLoan.originalLoanTerm, elapsed),
     [currentLoan.originalLoanAmount, currentLoan.interestRate, currentLoan.originalLoanTerm, elapsed]
@@ -69,6 +76,7 @@ export default function CurrentLoanCard({ currentLoan, onUpdate }: {
           <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--sc-muted)' }}>Loan Start Date</label>
           <input
             type="month"
+            max={currentMonth}
             value={currentLoan.loanStartDate}
             onChange={e => onUpdate({ loanStartDate: e.target.value })}
             className="w-full px-3 py-2 rounded-md text-sm border outline-none"

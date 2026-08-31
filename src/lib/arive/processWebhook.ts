@@ -257,7 +257,7 @@ export async function processAriveWebhook(
       user_id: resolvedUserId,
       organization_id: organizationId,
       updated_at: now,
-    }) as { id: string } | null
+    }) as { id: string; lead_source: string | null } | null
 
     if (!contact?.id) throw new Error('Contact upsert returned no record')
 
@@ -365,7 +365,14 @@ export async function processAriveWebhook(
       referring_agent_email: n(body.referringAgentEmail) ?? n(body.referralContactSourceEmail),
       referring_agent_phone: n(body.referringAgentPhone),
       lender_name: n(body.lenderName),
-      lead_source: n(body.leadSource) ?? n(body.leadSource),
+      // Fall back to the linked contact's lead_source. Arive carries a
+      // leadSource key on only 89 of 1,346 stored loans and a non-empty value
+      // on 45, so the payload alone leaves loan-level source almost entirely
+      // null -- 73 of 1,346 populated, against 735 of the 1,206 null-source
+      // loans whose contact already knows the answer. Same rule the MISMO
+      // importer got on 2026-07-03. (The second operand used to repeat
+      // body.leadSource, so the ?? was a no-op.)
+      lead_source: n(body.leadSource) ?? contact.lead_source ?? null,
 
       // Buyer's agent flat fields
       ...(n(body['REAL_ESTATE_AGENT_BUYERS_AGENT_firstName']) ? {

@@ -81,6 +81,11 @@ const DEFAULT_REFI: () => RefiScenarioInput = () => ({
   extraMonthlyPayment: 0,
 })
 
+// Monthly escrow-type costs that a refinance does not, by itself, remove.
+function escrowTotal(x: { propertyTaxes: number; insurance: number; hoa: number; pmi: number }): number {
+  return x.propertyTaxes + x.insurance + x.hoa + x.pmi
+}
+
 const DEFAULT_CURRENT_LOAN: CurrentLoanInput = {
   originalLoanAmount: 0,
   loanStartDate: '',
@@ -432,6 +437,23 @@ export default function ScenarioBuilder({ initialState }: { initialState?: Parti
                     onUpdate={(updates) => setCurrentLoan(prev => ({ ...prev, ...updates }))}
                   />
                 </div>
+                {(() => {
+                  const currentEscrow = escrowTotal(currentLoan)
+                  const gaps = refiScenarios
+                    .map((s, i) => ({ label: s.label || `Option ${i + 1}`, escrow: escrowTotal(s) }))
+                    .filter(x => x.escrow <= 0)
+                  if (currentEscrow <= 0 || gaps.length === 0) return null
+                  const names = gaps.map(g => g.label).join(', ')
+                  return (
+                    <div className="flex items-start gap-3 px-4 py-3 rounded-[10px] text-xs" style={{ background: 'rgba(230,126,34,0.1)', border: '1px solid rgba(230,126,34,0.4)', color: 'var(--sc-muted)' }}>
+                      <span style={{ color: '#E67E22', flexShrink: 0 }}>!</span>
+                      <span>
+                        <span style={{ color: '#E67E22', fontWeight: 600 }}>Mixed comparison basis.</span>
+                        {' '}The current loan carries <span style={{ color: 'var(--sc-text)' }}>${Math.round(currentEscrow).toLocaleString()}/mo</span> in taxes, insurance, HOA and PMI. {gaps.length === 1 ? `${names} carries` : `${names} carry`} none, so monthly savings, break-even and multi-year savings currently credit that amount to the refinance. A refinance does not remove escrow — enter the same amounts on each option, or confirm they genuinely go away.
+                      </span>
+                    </div>
+                  )
+                })()}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                   {refiScenarios.map((s, i) => (
                     <ScenarioCard

@@ -4,14 +4,14 @@ export const INTERNAL_EMAILS = new Set(['adam@thestyerteam.com', 'adam.styer@hyp
 const value = (v: unknown, max = 1000) => typeof v === 'string' || typeof v === 'number' ? String(v).trim().slice(0, max) : ''
 export function normalizeInquiry(raw: Record<string, unknown>) {
   const data = (raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data) ? raw.data : raw) as Record<string, unknown>
-  const email = value(data.email || raw.email, 254).toLowerCase()
-  const phone = value(data.phone, 40)
+  const email = value(data.email || data.original_email || raw.email, 254).toLowerCase()
+  const phone = value(data.phone || data.original_phone, 40)
   if ((!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) && phone.replace(/\D/g, '').length < 10) throw new Error('A valid email or complete phone number is required')
   const key = value(data.inquiry_id || raw.inquiry_id || (raw.id ? `netlify:${raw.id}` : ''), 201)
   if (!/^[A-Za-z0-9:_-]{8,200}$/.test(key)) throw new Error('A stable inquiry_id is required')
   const isTest = data.test_mode === true || data.test_mode === 'true' || raw.test_mode === true
   if (isTest && !INTERNAL_EMAILS.has(email)) throw new Error('Test mode requires a verified internal mailbox')
-  const names = value(data.name || raw.name, 180).split(/\s+/)
+  const names = value(data.name || data.original_name || raw.name, 180).split(/\s+/)
   const first_name = value(data.first_name || data['first-name'] || data.fname || raw.first_name || names[0], 100)
   const last_name = value(data.last_name || data['last-name'] || data.lname || raw.last_name || names.slice(1).join(' '), 100)
   const firstTouch = Object.fromEntries(Object.entries(data).filter(([k]) => k.startsWith('first_touch_')).map(([k,v]) => [k,value(v)]))

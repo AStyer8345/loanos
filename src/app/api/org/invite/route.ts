@@ -10,12 +10,16 @@ export async function POST(req: Request) {
     }
 
     const { email, role = 'member' } = await req.json()
-    if (!email?.trim()) return NextResponse.json({ error: 'Email required' }, { status: 400 })
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return NextResponse.json({ error: 'Email required' }, { status: 400 })
     if (!['admin', 'member'].includes(role)) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
     const service = createServiceClient()
+
+    const { data: existing, error: lookupError } = await service.from('profiles').select('id,organization_id').ilike('email', email.trim()).limit(1)
+    if (lookupError) throw lookupError
+    if (existing?.length) return NextResponse.json({ error: 'This account already has a team membership. No invitation or membership change was made.' }, { status: 409 })
 
     // Invite user via Supabase Auth admin (sends magic link email).
     // redirectTo chains through /auth/callback (code exchange) and lands them
@@ -29,12 +33,10 @@ export async function POST(req: Request) {
     if (error) throw error
 
     // Pre-create profile so middleware doesn't redirect them to onboarding
-    await service.from('profiles').upsert({
-      id: data.user.id,
-      organization_id: organizationId,
-      role,
-      email: email.trim(),
+    const { error: profileError } = await service.rpc('attach_invited_profile', {
+      p_user: data.user.id, p_email: email.trim(), p_org: organizationId, p_role: role,
     })
+    if (profileError) throw profileError
 
     return NextResponse.json({ success: true, userId: data.user.id })
   } catch (err: unknown) {

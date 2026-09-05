@@ -1,3 +1,11 @@
+## 2026-09-05 — Shared live operational home
+
+Replaced static dashboard counts with Today, Leads, Pipeline and Metrics using authenticated, organization-scoped records. Owner, source, stage, date and search filters drive selected-result totals and drill-downs. Saved Lead Desk edits remain distinct from source fields; ambiguous matches remain held for review. Cohort rates follow source-dated milestones and reviewed inquiry-to-loan links, with explicit coverage gaps and no assumed close probability or 2% actual commission.
+
+Added task handoff, waiting, escalation, completion, working notes and ownership updates, plus linked communication history. Protected profile roles/membership and added atomic trusted onboarding/invitation functions. Inquiry identities are decrypted only after an RLS-authorized ID lookup. Explicit uncached database reads prevent stale results after a successful save.
+
+Validation: 26 focused tests and production builds passed. Authenticated HTTP checks verified complete snapshots, internal task lifecycle and ownership, immediate refresh, preserved preferences, timeline access, anonymous/invalid-token rejection, foreign assignee rejection and protected financial-field rejection. Rolled-back SQL checks covered two organizations, onboarding retries and milestone correction history. Both controlled inquiry alerts have one verified received copy despite retries. Deployment and recovery details remain in the private overnight handoff.
+
 ## 2026-09-05 — Single durable inquiry delivery
 
 Website assistant contact requests now use the same encrypted inquiry, contact matching, task and outbox transaction as website forms. Removed the fully replaced assistant direct notification module, including its obsolete forwarding fallback. Questionnaire continuations link to their original inquiry without another owner alert or acquisition milestone. Received-message receipts require a matching provider Internet ID and actual source timestamp.

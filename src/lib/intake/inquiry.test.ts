@@ -14,6 +14,10 @@ describe('inquiry identity and protected capture',()=>{
   expect(()=>normalizeInquiry({...base,email:'customer@example.com',test_mode:true})).toThrow()
   expect(normalizeInquiry({...base,form_name:'qualification-followup'}).input.suppress_confirmation).toBe(true)
  })
+ it('normalizes the follow-up form original contact fields and retains its parent',()=>{
+  const follow=normalizeInquiry({id:'netlify-followup-123',form_name:'qualification-followup',data:{inquiry_id:'followup-inquiry-123',parent_inquiry_id:base.inquiry_id,original_email:base.email,original_name:'Adam Styer',original_phone:base.phone}})
+  expect(follow.input.email).toBe('adam@thestyerteam.com');expect(follow.input.first_name).toBe('Adam');expect(follow.input.last_name).toBe('Styer');expect(follow.input.parent_inquiry_id).toBe(base.inquiry_id)
+ })
  it('encrypts captured free text and rejects tampering',()=>{
   const p={situation:'Private original inquiry',email:base.email};const encrypted=encryptInquiry(p)
   expect(JSON.stringify(encrypted)).not.toContain(p.situation);expect(decryptInquiry(encrypted)).toEqual(p)

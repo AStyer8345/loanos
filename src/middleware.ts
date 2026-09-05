@@ -37,6 +37,12 @@ function isProfessionalUi(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  // The shared Lead Desk uses a normal Supabase user bearer token. These
+  // routes validate that token (or a LoanOS cookie) and organization membership
+  // themselves, and must return JSON 401s instead of the page-login redirect.
+  if (/^\/api\/operations(?:\/|$)/.test(request.nextUrl.pathname)) {
+    return NextResponse.next({ request })
+  }
   const response = await updateSession(request)
   const { pathname } = request.nextUrl
 

@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import type { SupabaseClient } from '@supabase/supabase-js'
-export const intakeDb = () => createServiceClient() as SupabaseClient
+export const intakeDb = () => createServiceClient({ noStore: true }) as SupabaseClient
 export async function intakeOrganization(slug: unknown) {
   if (typeof slug !== 'string' || !slug) throw new Error('org_slug is required')
   const db = intakeDb()

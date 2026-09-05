@@ -1,5 +1,7 @@
 # LoanOS — AI Context File
 
+**2026-09-05 shared operations:** Today, Leads, Pipeline and Metrics now share org-scoped live data with Lead Desk; source-dated history and reviewed attribution replace static totals. Operational edits refresh immediately. Trusted onboarding protects roles and membership. See `docs/COMMAND_CENTER_OPERATIONS.md`.
+
 **2026-09-05 production intake:** Profile membership writes are server-only; website and assistant inquiries share durable capture and tracked delivery. See `docs/COMMAND_CENTER_INTAKE.md`. Production was verified on `codex/website-ai-assistant`; preserve that deployed base when merging PR #9.
 
 > Read this at the start of every session before doing anything. Keep this file under 150 lines. Session history → [CHANGELOG.md](http://CHANGELOG.md). Why decisions → [DECISIONS.md](http://DECISIONS.md). Open work → [TODO.md](http://TODO.md).

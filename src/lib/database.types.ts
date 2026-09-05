@@ -4099,6 +4099,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_new_organization: {
+        Args: { p_user: string; p_email: string | undefined; p_name: string; p_full_name: string; p_plan: string; p_profile: Json }
+        Returns: string
+      }
+      attach_invited_profile: {
+        Args: { p_user: string; p_email: string; p_org: string; p_role: string }
+        Returns: undefined
+      }
       fill_contact_blanks: {
         Args: {
           p_birthdate?: string

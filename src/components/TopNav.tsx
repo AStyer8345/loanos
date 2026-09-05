@@ -52,9 +52,9 @@ type MoreItem = {
 
 // Primary nav — the three surfaces used to work leads and loans.
 const NAV_ITEMS_ALL: (NavItem & { requires?: keyof OrgFeatures })[] = [
-  { label: 'Dashboard', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
-  { label: 'Pipeline',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
-  { label: 'Contacts',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
+  { label: 'Today', section: 'dashboard', href: '/dashboard', icon: <LayoutDashboard className="size-4" /> },
+  { label: 'Loan records',  section: 'pipeline',  href: '/dashboard/loans', icon: <Workflow className="size-4" /> },
+  { label: 'Contact records',  section: 'contacts',  href: '/dashboard/contacts', icon: <Users className="size-4" /> },
 ]
 
 // Secondary nav — power-user surfaces tucked behind a More dropdown.

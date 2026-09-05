@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/lib/database.types'
 
-export function createClient() {
+export function createClient({ noStore = false }: { noStore?: boolean } = {}) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !anonKey) {
@@ -17,6 +17,7 @@ export function createClient() {
     url,
     anonKey,
     {
+      global: noStore ? { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } : undefined,
       cookies: {
         getAll() {
           return cookieStore.getAll()

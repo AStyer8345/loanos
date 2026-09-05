@@ -1,3 +1,5 @@
+import { operationalContext } from '@/lib/operations/server'
+import { registerReview } from '@/lib/documents/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganization } from '@/lib/getOrganization'
 import { checkRateLimit } from '@/lib/rateLimit'
@@ -54,6 +56,19 @@ export async function POST(req: NextRequest) {
   const path = url.searchParams.get('path') || ''
   if (!ALLOWED_PATHS.has(path)) {
     return NextResponse.json({ error: `Webhook path not allowed: ${path}` }, { status: 400 })
+  }
+
+  // Legacy contract uploads now capture a version and review task. They cannot
+  // invoke the old extraction path that wrote loan fields before review.
+  if (path === 'loanos-contract-received') {
+    try {
+      const ctx = await operationalContext(req)
+      const body = await req.json()
+      const saved = await registerReview(ctx, { ...body, kind: 'contract' })
+      return NextResponse.json({ ...saved, review_required: true, financial_fields_changed: false }, { status: 202 })
+    } catch {
+      return NextResponse.json({ error: 'Choose an authorized contract PDF on this loan. Source data was not changed.' }, { status: 400 })
+    }
   }
 
   const target = `${N8N_BASE}/${path}`

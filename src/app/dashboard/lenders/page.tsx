@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getOrganization } from '@/lib/getOrganization'
 import { createClient } from '@/lib/supabase/server'
 import LendersClient from './LendersClient'
+import AuthoritativeResources from '@/components/lenders/AuthoritativeResources'
 import type { Lender } from '@/components/lenders/LenderCard'
 
 export const metadata = { title: 'Lenders | LoanOS' }
@@ -45,6 +46,7 @@ export default async function LendersPage() {
           Wholesale and correspondent lender contacts, products, and notes.
         </p>
       </div>
+      <AuthoritativeResources />
       <LendersClient lenders={lenders} />
     </div>
   )

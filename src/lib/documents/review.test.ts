@@ -1,0 +1,10 @@
+import { describe, it, expect } from 'vitest';
+import { normalizeProposal, parseConditionTasks } from './review';
+describe('document proposals are evidence, not source-record mutations', () => {
+    it('retains citation gaps and unknown confidence without inventing certainty', () => { const p = normalizeProposal({ fields: [{ field: 'loan_amount', value: 123, confidence: 10, source: {} }], conditions: [] }); expect(p.fields[0]).toMatchObject({ value: 123, confidence: null, source: { page: null, quote: '' } }); });
+    it('rejects an extraction that proposes status/approval writes or duplicate fields', () => { expect(() => normalizeProposal({ fields: [{ field: 'status', value: 'approved' }], conditions: [] })).toThrow(); expect(() => normalizeProposal({ fields: [{ field: 'loan_amount', value: 1 }, { field: 'loan_amount', value: 2 }], conditions: [] })).toThrow(); });
+    it('retains proposed conditions with conservative routing and page evidence', () => { const p = normalizeProposal({ fields: [], conditions: [{ text: 'Confirm insurance binder', route: 'unknown', confidence: .7, source: { page: 3, quote: 'Provide evidence of insurance' } }] }); expect(p.conditions[0]).toMatchObject({ route: 'team', confidence: .7, source: { page: 3 } }); });
+    it('requires reviewable task instructions and citations', () => { expect(() => parseConditionTasks([{ title: 'Collect insurance', route: 'insurance', citation: '' }])).toThrow(); expect(parseConditionTasks([{ title: 'Confirm insurance binder', route: 'insurance', citation: 'Approval letter page 3', owner_id: null }])[0]).toMatchObject({ route: 'insurance', owner_id: null, due_at: null }); });
+    it('rejects identity numbers, invented routes, malformed owners and invalid dates', () => { for (const change of [{ title: 'Review 123-45-6789' }, { route: 'send_email' }, { owner_id: 'unknown' }, { due_at: 'next week' }])
+        expect(() => parseConditionTasks([{ title: 'Confirm source document', citation: 'Contract page 2', route: 'team', ...change }])).toThrow(); });
+});

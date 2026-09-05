@@ -1,3 +1,9 @@
+## 2026-09-05 — Versioned document review and authoritative resources
+
+Added contract and conditional-approval source versions, encrypted proposals/baselines, read-only diffs, source hashes/citations/confidence, explicit human review history and selected condition tasks with real ownership. Legacy contract uploads now capture a review task; replaced two overlapping database webhooks, one of which rejected contract inserts. No financial, underwriting, ARIVE or outgoing-message writes are part of this review flow.
+
+Added publisher-verified guideline source observations under existing Lender Resources, with publication/observation dates, citations and unknown edition dates kept distinct. Validation covers review parsing, rolled-back version/retry/task/tenant/permission tests and unchanged source loan rows. See docs/DOCUMENT_REVIEWS.md for workflow recovery and limitations.
+
 ## 2026-09-05 — Focus active exceptions and expand metric drill-downs
 
 Added computed closing/lock exceptions across active loans, an Adam-needed filter, overdue follow-up and evidence-based current-stage age. Existing loan tasks absorb deadline risk without duplicate rows; general unlinked marketing/development tasks remain in a secondary list. Metrics now include funded-period volume/gross and acquisition comparisons by source, page, referral partner, owner and product, with record drill-downs and unknown coverage.

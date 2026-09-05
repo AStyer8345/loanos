@@ -1,13 +1,37 @@
+import { normalizeToStageKey } from '@/lib/constants/loan-stages';
 import type { Snapshot, Filters, Row, Task, Loan, Milestone } from './types';
 export const LABELS: Record<string, string> = { inquiry_received: 'New inquiries', contact_attempt: 'Contact attempts', engaged: 'Two-way engagement', application_started: 'Applications started', application_submitted: 'Applications submitted', preapproval_issued: 'Preapproval issued', conditional_approval: 'Conditional approval', lender_approved: 'Lender approval', clear_to_close: 'Clear to close', closing_completed: 'Closing completed', funded: 'Funding completed', lost: 'Lost', withdrawn: 'Withdrawn', denied: 'Denied', inactive: 'Inactive' };
 const dayFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' });
 export const day = (date: string) => dayFormatter.format(new Date(date));
 export const inRange = (date: string | null, filter: Pick<Filters, 'from' | 'to'>) => !filter.from && !filter.to ? true : !!date && (!filter.from || day(date) >= filter.from) && (!filter.to || day(date) <= filter.to);
 export const complete = (t: Task) => t.is_complete || ['completed', 'dismissed'].includes(t.status || '');
-export const activeLoan = (l: Loan) => !/(^closed$|funded|commission_paid|cancel|dead|denied|withdrawn|^lost$|adverse)/i.test(l.status || '');
+export const activeLoan = (l: Loan) => normalizeToStageKey(l.status) !== 'funded' && !/(cancel|dead|denied|withdrawn|^lost$|adverse)/i.test(l.status || '');
 export const recordedGross = (s: Snapshot, loanId: string) => { const c = s.compensation.find(x => x.loan_id === loanId); return c && ['arive', 'manual'].includes(c.gross_source) && c.gross_comp !== null ? Number(c.gross_comp) : null; };
 const totalKnown = (values: (number | null)[]) => values.some(x => x !== null) ? values.reduce<number>((sum, x) => sum + (x ?? 0), 0) : null;
 export const meaningful = (a: Snapshot['activity'][number]) => !!a.occurred_at && (['email.received', 'communication.logged', 'sms.received', 'sms.sent', 'teams.message'].includes(a.action || '') || ['email_inbound', 'email_outbound', 'sms_inbound', 'sms_outbound'].includes(a.type || '')) && !['web_lead_created', 'inquiry_captured'].includes(a.action || '');
+
+const PROCESS_STAGES = new Set(['setup', 'disclosed', 'processing', 'submitted', 'underwriting', 'approved', 'resubmit', 'clear_to_close']);
+export function loanSignals(s: Snapshot, l: Loan) {
+    const stage = normalizeToStageKey(l.status), raw = (l.status || '').toLowerCase().replace(/[ -]/g, '_'), today = day(s.asOf);
+    const dateOnly = (v: string | null) => v && /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) ? v : null;
+    const closing = dateOnly(l.estimated_closing_date) || dateOnly(l.closing_date), lock = dateOnly(l.rate_lock_expiration), reasons: string[] = [];
+    const until = (d: string) => (Date.parse(d) - Date.parse(today)) / 86400000;
+    let deadlineRisk = false;
+    if (activeLoan(l) && PROCESS_STAGES.has(stage)) {
+        if (lock && until(lock) <= 7) { reasons.push(lock < today ? 'Recorded lock date has passed; verify extension or current status' : 'Recorded lock expires within 7 days'); deadlineRisk = true; }
+        if (closing && closing < today) { reasons.push('Recorded closing date has passed; verify completion or revised date'); deadlineRisk = true; }
+        else if (closing && until(closing) <= 7 && stage !== 'clear_to_close') { reasons.push('Closing within 7 days; clear to close is not evidenced'); deadlineRisk = true; }
+        if (!closing) reasons.push('Closing date not recorded; team verification needed');
+        if (stage === 'approved' && !s.tasks.some(t => t.related_loan_id === l.id && !complete(t))) reasons.push('Conditional approval has no open loan task; verify condition ownership');
+    }
+    // Current stage age needs evidence for that exact stage, not import time or a preceding milestone.
+    const kind = /^(preapproved|pre_approved|pre_approval)$/.test(raw) ? 'preapproval_issued'
+        : /^(application|application_intake|app_intake|new_application|started|started_app)$/.test(raw) ? 'application_started'
+        : stage === 'approved' ? 'conditional_approval' : stage === 'clear_to_close' ? 'clear_to_close' : stage === 'funded' ? 'funded' : null;
+    const first = kind ? s.milestones.filter(m => m.loan_id === l.id && !m.voided_at && m.milestone === kind && m.occurred_at <= s.asOf).sort((a,b) => a.occurred_at.localeCompare(b.occurred_at))[0] : null;
+    return { stageSince: first?.occurred_at || null, stageDays: first ? Math.max(0, Math.floor((Date.parse(today) - Date.parse(day(first.occurred_at))) / 86400000)) : null, deadlineRisk, exceptionReasons: reasons, deadline: [lock, closing].filter((x): x is string => !!x).sort()[0] || null };
+}
+
 export function buildRows(s: Snapshot) {
     const contacts = new Map(s.contacts.map(c => [c.id, c])), loans = new Map(s.loans.map(l => [l.id, l])), members = new Map(s.members.map(m => [m.id, m.full_name || m.email || 'Team member'])), tasks = new Map(s.tasks.map(t => [t.id, t]));
     const preferences = new Map(s.preferences.filter(p => p.contact_id).map(p => [p.contact_id!, p]));
@@ -31,21 +55,27 @@ export function buildRows(s: Snapshot) {
         const r = base(l.id, l.contact_id, [l.id], task, l.operational_owner_id);
         const link = s.links.find(x => x.loan_id === l.id), inquiry = link ? s.inquiries.find(i => i.id === link.inquiry_id) : null;
         const m = s.milestones.filter(m => m.loan_id === l.id && !m.voided_at).sort((a, b) => a.occurred_at.localeCompare(b.occurred_at));
-        return { ...r, kind: 'loan' as const, stage: l.status || 'Unknown', name: l.loan_name || [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || r.name, source: inquiry?.source || r.source, sourcePage: inquiry?.source_page || r.sourcePage, referral: inquiry?.referral_partner || null, receivedAt: m[0]?.occurred_at || null };
+        const signals = loanSignals(s, l);
+        return { ...r, ...signals, loNeeded: r.loNeeded || signals.deadlineRisk, kind: 'loan' as const, stage: l.status || 'Unknown', name: l.loan_name || [l.borrower_first_name, l.borrower_last_name].filter(Boolean).join(' ') || r.name, source: inquiry?.source || r.source, sourcePage: inquiry?.source_page || r.sourcePage, referral: inquiry?.referral_partner || null, receivedAt: m[0]?.occurred_at || null };
     });
     const seen = new Set(inquiryRows.map(r => r.contactId).filter(Boolean));
     const savedRows = s.preferences.filter(p => !p.contact_id || !seen.has(p.contact_id)).map(p => { const c = p.contact_id ? contacts.get(p.contact_id) : undefined; return { ...base(p.id, p.contact_id, [], undefined, c?.operational_owner_id || null), kind: 'saved' as const, name: c ? [c.first_name, c.last_name].filter(Boolean).join(' ') : p.provenance?.display_name || p.legacy_key || 'Saved lead', stage: p.status || c?.stage || 'Unknown', preference: p, hidden: p.hidden, review: p.match_state === 'review', issue: p.match_state === 'review' ? 'Saved edits retained; identity link requires review' : '', email: c?.email || p.provenance?.email || null }; });
-    const taskRows = s.tasks.filter(t => !complete(t) && (!t.snoozed_until || t.snoozed_until <= s.asOf) && !s.inquiries.some(i => i.is_test && i.task_id === t.id)).map(t => {
+    const allTaskRows = s.tasks.filter(t => !complete(t) && (!t.snoozed_until || t.snoozed_until <= s.asOf) && !s.inquiries.some(i => i.is_test && i.task_id === t.id)).map(t => {
         const i = s.inquiries.find(i => (i.task_id === t.id || t.source === 'inquiry' && t.source_key === 'inquiry:' + i.id) && !i.is_test), r = base(t.id, t.related_contact_id, t.related_loan_id ? [t.related_loan_id] : [], t, t.assigned_to);
         return { ...r, kind: 'task' as const, inquiryId: i?.id || null, source: i?.source || r.source, sourcePage: i?.source_page || r.sourcePage, referral: i?.referral_partner || null, receivedAt: i?.received_at || t.created_at, name: r.name === 'Identity needs review' ? (i?.displayName || t.title || 'Operational task') : r.name };
     });
-    // No mass follow-up creation from historical contacts. Only explicit tasks or saved priorities appear here.
-    const todayRows = [...taskRows, ...[...inquiryRows, ...savedRows].filter(r => r.preference?.priority_follow_up && !r.hidden && !taskRows.some(t => t.contactId && t.contactId === r.contactId))];
-    return { inquiryRows, pipelineRows: allLoanRows.filter(r => activeLoan(loans.get(r.id)!)), allLoanRows, savedRows, leadRows: [...inquiryRows, ...savedRows], todayRows };
+    const taskRows = allTaskRows.filter(r => r.contactId || r.loanIds.length || r.inquiryId);
+    const generalRows = allTaskRows.filter(r => !r.contactId && !r.loanIds.length && !r.inquiryId);
+    const pipelineRows = allLoanRows.filter(r => activeLoan(loans.get(r.id)!));
+    const exceptionRows = pipelineRows.filter(r => r.exceptionReasons.length).map(r => ({ ...r, issue: r.exceptionReasons.join(' · '), loNeeded: r.loNeeded || r.deadlineRisk, nextAction: r.taskId ? r.nextAction : r.deadlineRisk ? 'Verify deadline and agree on a recovery plan' : 'Assign and verify the next milestone' }));
+    // Computed exceptions never create historical tasks. Existing loan tasks carry the risk without duplicate rows.
+    const currentTasks = taskRows.map(r => { const e = exceptionRows.find(e => r.loanIds.includes(e.id)); return e ? { ...r, deadlineRisk: e.deadlineRisk, exceptionReasons: e.exceptionReasons, issue: [r.issue, e.issue].filter(Boolean).join(' · '), loNeeded: r.loNeeded || e.deadlineRisk, stageSince: e.stageSince, stageDays: e.stageDays } : r; });
+    const todayRows = [...currentTasks, ...exceptionRows.filter(r => !currentTasks.some(t => t.loanIds.includes(r.id))), ...[...inquiryRows, ...savedRows].filter(r => r.preference?.priority_follow_up && !r.hidden && !taskRows.some(t => t.contactId && t.contactId === r.contactId))];
+    return { inquiryRows, pipelineRows, allLoanRows, savedRows, leadRows: [...inquiryRows, ...savedRows], todayRows, exceptionRows, generalRows };
 }
 export function filterRows(rows: Row[], f: Filters, { dates = true }: {
     dates?: boolean;
-} = {}) { const q = f.query.trim().toLowerCase(); return rows.filter(r => (f.includeHidden || !r.hidden) && (f.owner === 'all' || (f.owner === 'unassigned' ? !r.ownerId : r.ownerId === f.owner)) && (f.source === 'all' || r.source === f.source) && (f.stage === 'all' || r.stage === f.stage) && (!q || [r.name, r.email, r.phone, r.source, r.sourcePage, r.referral, r.product, r.stage, r.nextAction, r.issue, r.preference?.notes].join(' ').toLowerCase().includes(q)) && (!dates || inRange(r.receivedAt, f))); }
+} = {}) { const q = f.query.trim().toLowerCase(); return rows.filter(r => (f.includeHidden || !r.hidden) && (!f.attention || f.attention === 'all' || (f.attention === 'lo' ? r.loNeeded : f.attention === 'team' ? !r.loNeeded : f.attention === 'waiting' ? !!r.waiting : f.attention === 'risk' ? !!r.deadlineRisk : true)) && (f.owner === 'all' || (f.owner === 'unassigned' ? !r.ownerId : r.ownerId === f.owner)) && (f.source === 'all' || r.source === f.source) && (f.stage === 'all' || r.stage === f.stage) && (!q || [r.name, r.email, r.phone, r.source, r.sourcePage, r.referral, r.product, r.stage, r.nextAction, r.issue, r.preference?.notes].join(' ').toLowerCase().includes(q)) && (!dates || inRange(r.receivedAt, f))); }
 export function rowTotals(s: Snapshot, rows: Row[]) { const ids = [...new Set(rows.flatMap(r => r.loanIds))], amounts = ids.map(id => s.loans.find(l => l.id === id)?.loan_amount ?? null), gross = ids.map(id => recordedGross(s, id)); return { count: rows.length, people: new Set(rows.map(r => r.contactId).filter(Boolean)).size, loans: ids.length, amount: totalKnown(amounts.map(x => x === null ? null : Number(x))), amountKnown: amounts.filter(x => x !== null).length, gross: totalKnown(gross), grossKnown: gross.filter(x => x !== null).length, unknownOpportunityAmount: rows.filter(r => !r.loanIds.length).length }; }
 export function milestonesFor(s: Snapshot, inquiryId: string) {
     const i = s.inquiries.find(i => i.id === inquiryId);
@@ -93,3 +123,23 @@ export function previousRange(f: Filters) {
     return { ...f, from: new Date(start - span).toISOString().slice(0, 10), to: new Date(start - 86400000).toISOString().slice(0, 10) };
 }
 export function evidenceDate(m: Milestone) { return `${day(m.occurred_at)}${m.evidence.date_precision === 'day' ? ' · date only' : ''}`; }
+
+export function operationalMetrics(s: Snapshot, rows: Row[]) {
+    const overdue = rows.filter(r => r.taskId && r.dueAt && Date.parse(r.dueAt) < Date.parse(s.asOf));
+    const atRisk = rows.filter(r => r.deadlineRisk);
+    const stageDated = rows.filter(r => r.stageDays !== null && r.stageDays !== undefined);
+    return { overdue, atRisk, riskTotals: rowTotals(s, atRisk), stageDated, averageStageDays: average(stageDated.map(r => r.stageDays!)), owners: [...new Set(rows.map(r => r.owner))].map(owner => ({ owner, rows: rows.filter(r => r.owner === owner), lo: rows.filter(r => r.owner === owner && r.loNeeded).length })) };
+}
+export function cohortGroups(s: Snapshot, filters: Filters, dimension: 'source' | 'sourcePage' | 'referral' | 'owner' | 'product') {
+    const c = cohortMetrics(s, filters), ids = new Set(c.leads), rows = buildRows(s).inquiryRows.filter(r => r.inquiryId && ids.has(r.inquiryId));
+    return [...new Set(rows.map(r => r[dimension] || 'Not recorded'))].map(label => {
+        const group = rows.filter(r => (r[dimension] || 'Not recorded') === label), groupIds = group.map(r => r.id);
+        const fundedIds = groupIds.filter(id => c.funded.includes(id));
+        const loanIds = [...new Set(groupIds.flatMap(id => milestonesFor(s, id).filter(m => m.milestone === 'funded' && m.loan_id).map(m => m.loan_id!)))];
+        return { label, ids: groupIds, leads: group.length, engaged: groupIds.filter(id => c.engaged.includes(id)).length, applications: groupIds.filter(id => c.applications.includes(id)).length, funded: fundedIds.length, gross: totalKnown(loanIds.map(id => recordedGross(s, id))), linked: groupIds.filter(id => s.links.some(l => l.inquiry_id === id)).length };
+    }).sort((a,b) => b.leads-a.leads || a.label.localeCompare(b.label));
+}
+export function fundedPeriodTotals(s: Snapshot, f: Filters) {
+    const ids = new Set(periodEvents(s, f).filter(m => m.milestone === 'funded' && m.loan_id).map(m => m.loan_id));
+    return { ids: [...ids] as string[], ...rowTotals(s, buildRows(s).allLoanRows.filter(r => ids.has(r.id))) };
+}

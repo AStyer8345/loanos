@@ -1,3 +1,9 @@
+## 2026-09-05 — Focus active exceptions and expand metric drill-downs
+
+Added computed closing/lock exceptions across active loans, an Adam-needed filter, overdue follow-up and evidence-based current-stage age. Existing loan tasks absorb deadline risk without duplicate rows; general unlinked marketing/development tasks remain in a secondary list. Metrics now include funded-period volume/gross and acquisition comparisons by source, page, referral partner, owner and product, with record drill-downs and unknown coverage.
+
+Validation: 18 calculation/routing cases and production build passed. Lead Desk runs the same model against the live organization-scoped API; production proxy verification confirmed normal LoanOS authentication, tenant scope, 22 preserved edits, and retired anonymous data endpoints. No loan amounts, rates or underwriting decisions were written.
+
 ## 2026-09-05 — Shared live operational home
 
 Replaced static dashboard counts with Today, Leads, Pipeline and Metrics using authenticated, organization-scoped records. Owner, source, stage, date and search filters drive selected-result totals and drill-downs. Saved Lead Desk edits remain distinct from source fields; ambiguous matches remain held for review. Cohort rates follow source-dated milestones and reviewed inquiry-to-loan links, with explicit coverage gaps and no assumed close probability or 2% actual commission.

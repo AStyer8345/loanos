@@ -14,6 +14,7 @@ import {
 import { useOutreachChat } from '@/components/outreach/OutreachChatContext'
 import { normalizeToStageKey, statusHex } from '@/lib/constants/loan-stages'
 import type { StageKey } from '@/lib/constants/loan-stages'
+import '../../record-detail.css'
 // No hardcoded fallback — a missing env var must fail closed rather than
 // route every tenant's manual automation triggers through Adam's n8n instance.
 
@@ -519,14 +520,14 @@ export default function LoanDetailPage() {
 
   return (
     <>
-    <div className="flex flex-col h-full">
+    <div className="record-detail loan-detail">
       {/* ── Header — slim, consolidated ── */}
-      <div className="border-b border-input/60 shrink-0 bg-[var(--bg)]">
-        <div className="px-6 pt-3 pb-0">
+      <div className="record-detail-header">
+        <div>
           {/* Row 1: Breadcrumb + Actions */}
           <div className="flex items-center justify-between mb-2">
             <Link href="/dashboard/loans" className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground/80 font-mono transition-colors">
-              <ArrowLeft size={11} /> Loans
+              <ArrowLeft size={13} /> Loan Records
             </Link>
             <div className="flex items-center gap-2">
               <InlineStatusSelect
@@ -608,11 +609,12 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
+          <div className="record-detail-eyebrow">Loan record</div>
           {/* Row 2: Name + Days to Close */}
-          <div className="flex items-baseline justify-between gap-4 mb-3">
+          <div className="record-detail-identity">
             <div className="min-w-0">
               <h1 className="font-mono font-bold text-foreground text-lg leading-tight truncate">
-                {loan.loan_name || displayName}
+                {displayName}
               </h1>
               <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
                 {loan.contact_id ? (
@@ -625,6 +627,7 @@ export default function LoanDetailPage() {
               </p>
             </div>
             {(() => {
+              if (normalizeToStageKey(loan.status) === 'funded') return null
               const target = loan.estimated_closing_date || loan.closing_date
               const dtc = target ? Math.ceil((new Date(target + 'T00:00:00').getTime() - Date.now()) / 86400000) : null
               const isUrgent = dtc != null && (dtc < 0 || dtc <= 7)
@@ -643,8 +646,8 @@ export default function LoanDetailPage() {
           </div>
 
           {/* Row 3: Vital Signs — compact, all items visible */}
-          <div className="rounded-lg border border-input bg-card px-5 py-3.5 mb-2 shadow-sm">
-            <div className="flex items-center gap-8 flex-wrap text-sm font-mono">
+          <div className="record-detail-stats">
+            <div className="record-detail-stats-grid">
               {loan.loan_amount != null && (
                 <VitalStat label="Amount" value={fmtCurrency(loan.loan_amount)} color="#60A5FA" />
               )}
@@ -682,7 +685,7 @@ export default function LoanDetailPage() {
               />
               {loan.referring_agent_name && (
                 <div className="shrink-0">
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Realtor</p>
+                  <p className="record-detail-stat-label text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Realtor</p>
                   <Link
                     href={
                       loan.referral_contact_id
@@ -695,19 +698,7 @@ export default function LoanDetailPage() {
                   </Link>
                 </div>
               )}
-              <VitalStatEditable
-                label="Commission"
-                value={loan.commission_amount != null ? fmtCurrency(loan.commission_amount) : '—'}
-                field="commission_amount"
-                rawValue={loan.commission_amount}
-                editingHeader={editingHeader}
-                headerInput={headerInput}
-                setEditingHeader={setEditingHeader}
-                setHeaderInput={setHeaderInput}
-                saveHeaderField={saveHeaderField}
-                inputType="number"
-                color="#C9A84C"
-              />
+              <VitalStat label="2% planning estimate" value={loan.loan_amount != null ? fmtCurrency(loan.loan_amount * 0.02) : '—'} />
               {loan.lender_name && (
                 <div className="ml-auto shrink-0">
                   <VitalStat label="Lender" value={loan.lender_name} color="#F472B6" />
@@ -717,7 +708,7 @@ export default function LoanDetailPage() {
           </div>
 
           {/* Row 4: Milestones (left) + Property address (right, same height) */}
-          <div className="flex items-stretch gap-3 pt-2 pb-1">
+          <div className="record-detail-milestones">
             <div className="flex-1 min-w-0 rounded-lg border border-input bg-card px-4 py-3 shadow-sm">
               <MilestoneTimeline loan={loan} activity={activity} />
             </div>
@@ -728,7 +719,7 @@ export default function LoanDetailPage() {
                 )}_rb/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 flex flex-col justify-center items-start rounded-lg border border-blue-400/30 bg-blue-50 dark:bg-gradient-to-br dark:from-blue-950/60 dark:to-indigo-950/60 hover:border-blue-400/50 hover:bg-blue-100 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60 transition-colors px-5 py-3 shadow-sm"
+                className="record-detail-property"
                 title="View on Zillow"
               >
                 <span className="text-[9px] font-mono text-blue-500 dark:text-blue-400/80 uppercase tracking-wider leading-none mb-1">Property</span>
@@ -742,9 +733,9 @@ export default function LoanDetailPage() {
         </div>
 
         {/* Tab bar — active tab uses loan status color */}
-        <div className="px-6 flex gap-0 border-t border-input/40">
+        <nav className="record-detail-tabs" aria-label="Loan record sections">
           {([
-            { id: 'dashboard',   label: 'Dashboard' },
+            { id: 'dashboard',   label: 'Overview' },
             { id: 'automations', label: 'Automations' },
             { id: 'activity',    label: `Activity (${activity.length})` },
             { id: 'emails',      label: `Emails (${emailDrafts.length + inboundEmails.length})` },
@@ -753,6 +744,7 @@ export default function LoanDetailPage() {
             return (
               <button
                 key={tab.id}
+                aria-pressed={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 text-[11px] font-mono font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
@@ -765,11 +757,11 @@ export default function LoanDetailPage() {
               </button>
             )
           })}
-        </div>
+        </nav>
       </div>
 
       {/* ── Content ── */}
-      <div className="flex-1 overflow-auto">
+      <div className="record-detail-content">
         {activeTab === 'dashboard' && (
           <DashboardTab loan={loan} setLoan={l => setLoan(l)} loanId={loanId} docs={docs} activity={activity} setActivity={setActivity} contact={contact} onRefresh={fetchAll} />
         )}
@@ -829,9 +821,9 @@ export default function LoanDetailPage() {
 function VitalStat({ label, value, highlight, color }: { label: string; value: string; highlight?: boolean; color?: string }) {
   return (
     <div className="shrink-0">
-      <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="record-detail-stat-label text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <p
-        className="text-sm font-mono font-semibold leading-none"
+        className="record-detail-stat-value text-sm font-mono font-semibold leading-none"
         style={color ? { color } : undefined}
       >
         {!color && <span className={highlight ? 'text-foreground' : 'text-foreground/80'}>{value}</span>}
@@ -857,7 +849,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
 }) {
   return (
     <div className="shrink-0">
-      <p className="text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className="record-detail-stat-label text-[11px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
       <div className="flex items-center gap-1.5">
         {editingHeader === field ? (
           <input
@@ -872,7 +864,7 @@ function VitalStatEditable({ label, value, field, rawValue, editingHeader, heade
           />
         ) : (
           <p
-            className="text-sm font-mono font-semibold cursor-pointer hover:text-foreground transition-colors leading-none"
+            className="record-detail-stat-value text-sm font-mono font-semibold cursor-pointer hover:text-foreground transition-colors leading-none"
             style={color ? { color } : undefined}
             onClick={() => { setHeaderInput(rawValue != null ? String(rawValue) : ''); setEditingHeader(field) }}
           >
@@ -930,8 +922,12 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
   }, [loanId, onRefresh, organizationId])
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="record-detail-overview space-y-6">
 
+      <section className="record-detail-note" aria-label="Loan notes">
+        <h2>Loan notes</h2>
+        <p>{loan.notes?.trim() || 'No loan notes recorded yet.'}</p>
+      </section>
       {/* ── Section 1: Parties (full width) ── */}
       <CommunicationHub loan={loan} activity={activity} contact={contact} />
 
@@ -947,7 +943,9 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
       <div className="border-t border-input/40 my-6" />
 
       {/* ── Section 4: Loan Details — horizontal grid to reduce scrolling ── */}
-      <div className="space-y-6">
+      <details className="record-detail-full-details">
+        <summary>Full loan details <span>Borrower, property, terms, financials, and referral information</span></summary>
+        <div className="space-y-6">
         {/* Row 1: Borrower (1/2) + Co-Borrower (1/2) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <EditableSectionCard title="Borrower" onSave={handleSaveField} fields={[
@@ -1055,7 +1053,8 @@ function DashboardTab({ loan, setLoan, loanId, docs, activity, setActivity, cont
           )}
           <LinkedContactCard loan={loan} contact={contact} onReassignContact={handleReassignContact} />
         </div>
-      </div>
+        </div>
+      </details>
 
     </div>
   )
@@ -1175,10 +1174,10 @@ function CommunicationHub({ loan, activity, contact }: { loan: Loan; activity: A
   ]
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
+    <div className="record-detail-parties">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
         <h2 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Parties</h2>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center flex-wrap gap-1.5">
           {groupButtons.map(btn => btn.href && (
             <a
               key={btn.label}
@@ -1736,7 +1735,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
   return (
     <div>
       <h2 className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-3">Milestones</h2>
-      <div className="flex flex-nowrap items-start gap-0 overflow-x-auto">
+      <div className="record-detail-milestone-track flex flex-nowrap items-start gap-0 overflow-x-auto">
         {milestones.map((m, i) => {
           const isComplete = m.date != null || hasReachedStage(loan.status, m.reachedAt)
           const isActive = !isComplete && (currentKey === m.activeAt || hasReachedStage(loan.status, m.activeAt))
@@ -1806,7 +1805,7 @@ function MilestoneTimeline({ loan, activity }: { loan: Loan; activity?: Activity
               </div>
               {i < milestones.length - 1 && (
                 <div
-                  className="shrink-0 self-start mt-[9px] h-px w-2 sm:w-3"
+                  className="record-detail-milestone-connector shrink-0 self-start mt-[9px] h-px w-2 sm:w-3"
                   style={{ background: isComplete ? `${m.hex}66` : 'var(--input)' }}
                 />
               )}
@@ -1937,7 +1936,7 @@ function EditableRow({ label, displayValue, field, rawValue, type = 'text', opti
   }, [draft, searchContacts, editing])
 
   return (
-    <div className={`flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-input/60' : ''}`}>
+    <div className={`record-detail-field flex items-start px-4 py-2 text-sm group ${index > 0 ? 'border-t border-input/60' : ''}`}>
       <span className={`w-40 shrink-0 text-xs font-mono leading-5 mt-0.5 ${labelColor ?? 'text-muted-foreground'}`}>{label}</span>
       <div className="flex-1 min-w-0">
         {editing && searchContacts ? (
@@ -2049,7 +2048,7 @@ function EditableSectionCard({ title, fields, onSave, onSaveMultiple }: {
   onSaveMultiple?: (fields: Record<string, string | null>) => Promise<void>
 }) {
   return (
-    <div className="bg-card/80 border border-input rounded-lg overflow-hidden">
+    <div className="record-detail-field-card bg-card/80 border border-input rounded-lg overflow-hidden">
       <div className="px-4 py-2.5 bg-muted/80 border-b border-input">
         <h2 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">{title}</h2>
       </div>

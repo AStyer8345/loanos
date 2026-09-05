@@ -29,6 +29,7 @@ import { fmtCurrency, fmtDate, fmtPhone } from '@/lib/formatters'
 import { isFundedStatus, statusHex } from '@/lib/constants/loan-stages'
 import NoteInput, { type NoteRow } from '@/components/notes/NoteInput'
 import NoteCard from '@/components/notes/NoteCard'
+import '../../record-detail.css'
 export type Contact = {
   id: string
   first_name: string | null
@@ -233,8 +234,8 @@ const LEAD_SOURCE_OPTIONS: Array<{ group: string; options: string[] }> = [
 // Stage badge for contacts (uses contact stage labels)
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
   const map: Record<string, string> = {
-    Lead: 'rgba(201,168,76,0.15)',
-    'Pre-App': 'rgba(201,168,76,0.20)',
+    Lead: 'rgba(38,112,90,0.15)',
+    'Pre-App': 'rgba(38,112,90,0.20)',
     Application: 'rgba(100,160,255,0.15)',
     'Pre-Approved': 'rgba(80,200,120,0.15)',
     'In Process': 'rgba(80,160,200,0.15)',
@@ -246,20 +247,20 @@ function getStageBadgeStyle(stage: string | null): React.CSSProperties {
     padding: '2px 8px',
     borderRadius: 3,
     fontFamily: 'var(--font-mono)',
-    fontSize: 11,
+    fontSize: 13,
     background: stage ? (map[stage] ?? 'rgba(255,255,255,0.06)') : 'transparent',
   }
 }
 
 // Loan status badge — uses global statusHex map to match Loans table + dashboard
 function LoanStageBadge({ status }: { status: string | null }) {
-  if (!status) return <span style={{ color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>—</span>
+  if (!status) return <span style={{ color: 'var(--muted)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>—</span>
   const hex = statusHex(status)
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
       padding: '2px 8px', borderRadius: 12,
-      fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600,
+      fontSize: 12, fontFamily: 'var(--font-mono)', fontWeight: 600,
       background: `${hex}22`,
       color: hex,
       border: `1px solid ${hex}44`,
@@ -284,7 +285,7 @@ const cardStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   fontFamily: 'var(--font-mono)',
-  fontSize: 9,
+  fontSize: 11,
   color: 'var(--muted)',
   letterSpacing: '0.1em',
   marginBottom: 4,
@@ -344,7 +345,7 @@ function ReferredByTypeahead({ value, onSave }: {
   const [saved, setSaved]     = useState(false)
   const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14 }
 
   function runSearch(term: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -411,7 +412,7 @@ function ReferredByTypeahead({ value, onSave }: {
 
   if (editing) return (
     <div ref={containerRef} style={{ position: 'relative' }}>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>REFERRED BY</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>Referred by</div>
       <input
         autoFocus
         value={draft}
@@ -422,7 +423,7 @@ function ReferredByTypeahead({ value, onSave }: {
         style={{
           ...baseStyle,
           color: 'var(--fg)', background: 'var(--bg)',
-          border: '1px solid rgba(201,168,76,0.6)', borderRadius: 3,
+          border: '1px solid rgba(38,112,90,0.6)', borderRadius: 3,
           padding: '3px 8px', width: '100%', outline: 'none', boxSizing: 'border-box',
         }}
       />
@@ -439,13 +440,13 @@ function ReferredByTypeahead({ value, onSave }: {
               style={{
                 padding: '7px 10px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: i === highlighted ? 'rgba(201,168,76,0.12)' : 'transparent',
-                fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)',
+                background: i === highlighted ? 'rgba(38,112,90,0.12)' : 'transparent',
+                fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)',
               }}
             >
               <span>{`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim()}</span>
               {c.contact_type && (
-                <span style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   {c.contact_type}
                 </span>
               )}
@@ -458,11 +459,11 @@ function ReferredByTypeahead({ value, onSave }: {
 
   return (
     <div onClick={() => { setEditing(true); setDraft(value ?? '') }} title="Click to edit referred by" style={{ cursor: 'pointer' }}>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>REFERRED BY</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>Referred by</div>
       <div style={{
         ...baseStyle,
         color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
-        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        borderBottom: '1px dashed rgba(38,112,90,0.25)',
         paddingBottom: 1, display: 'inline-block', minWidth: 80,
       }}>
         {saved ? '✓ Saved' : (value || '—')}
@@ -488,7 +489,7 @@ function ContactTypeSelect({ value, onSave }: {
 }) {
   const [editing, setEditing] = useState(false)
   const [saved, setSaved] = useState(false)
-  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14 }
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value || null
@@ -500,7 +501,7 @@ function ContactTypeSelect({ value, onSave }: {
 
   if (editing) return (
     <div>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>TYPE</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>Type</div>
       <select
         autoFocus
         defaultValue={value ?? ''}
@@ -510,7 +511,7 @@ function ContactTypeSelect({ value, onSave }: {
           ...baseStyle,
           color: 'var(--fg)',
           background: 'var(--bg)',
-          border: '1px solid rgba(201,168,76,0.6)',
+          border: '1px solid rgba(38,112,90,0.6)',
           borderRadius: 3,
           padding: '3px 8px',
           width: '100%',
@@ -527,11 +528,11 @@ function ContactTypeSelect({ value, onSave }: {
 
   return (
     <div onClick={() => setEditing(true)} title="Click to change type" style={{ cursor: 'pointer' }}>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>TYPE</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>Type</div>
       <div style={{
         ...baseStyle,
         color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
-        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        borderBottom: '1px dashed rgba(38,112,90,0.25)',
         paddingBottom: 1,
         display: 'inline-block',
         minWidth: 80,
@@ -549,7 +550,7 @@ function ReferralTypeSelect({ value, onSave }: {
 }) {
   const [editing, setEditing] = useState(false)
   const [saved, setSaved] = useState(false)
-  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14 }
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value || null
@@ -561,7 +562,7 @@ function ReferralTypeSelect({ value, onSave }: {
 
   if (editing) return (
     <div>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>REFERRAL TYPE</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>Referral type</div>
       <select
         autoFocus
         defaultValue={value ?? ''}
@@ -571,7 +572,7 @@ function ReferralTypeSelect({ value, onSave }: {
           ...baseStyle,
           color: 'var(--fg)',
           background: 'var(--bg)',
-          border: '1px solid rgba(201,168,76,0.6)',
+          border: '1px solid rgba(38,112,90,0.6)',
           borderRadius: 3,
           padding: '3px 8px',
           width: '100%',
@@ -588,11 +589,11 @@ function ReferralTypeSelect({ value, onSave }: {
 
   return (
     <div onClick={() => setEditing(true)} title="Click to change referral type" style={{ cursor: 'pointer' }}>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>REFERRAL TYPE</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>Referral type</div>
       <div style={{
         ...baseStyle,
         color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
-        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        borderBottom: '1px dashed rgba(38,112,90,0.25)',
         paddingBottom: 1,
         display: 'inline-block',
         minWidth: 80,
@@ -613,7 +614,7 @@ function LeadSourceSelect({ value, onSave }: {
   const [saved, setSaved] = useState(false)
   const [customMode, setCustomMode] = useState(false)
   const [customText, setCustomText] = useState(value ?? '')
-  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14 }
 
   const isInPresetList = (v: string | null): boolean => {
     if (!v) return true
@@ -641,7 +642,7 @@ function LeadSourceSelect({ value, onSave }: {
   if (editing && customMode) {
     return (
       <div>
-        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>LEAD SOURCE (CUSTOM)</div>
+        <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>LEAD SOURCE (CUSTOM)</div>
         <input
           autoFocus
           value={customText}
@@ -655,7 +656,7 @@ function LeadSourceSelect({ value, onSave }: {
             ...baseStyle,
             color: 'var(--fg)',
             background: 'var(--bg)',
-            border: '1px solid rgba(201,168,76,0.6)',
+            border: '1px solid rgba(38,112,90,0.6)',
             borderRadius: 3,
             padding: '3px 8px',
             width: '100%',
@@ -672,7 +673,7 @@ function LeadSourceSelect({ value, onSave }: {
     const currentIsCustom = value && !isInPresetList(value)
     return (
       <div>
-        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>LEAD SOURCE</div>
+        <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>Lead source</div>
         <select
           autoFocus
           defaultValue={value ?? ''}
@@ -682,7 +683,7 @@ function LeadSourceSelect({ value, onSave }: {
             ...baseStyle,
             color: 'var(--fg)',
             background: 'var(--bg)',
-            border: '1px solid rgba(201,168,76,0.6)',
+            border: '1px solid rgba(38,112,90,0.6)',
             borderRadius: 3,
             padding: '3px 8px',
             width: '100%',
@@ -706,11 +707,11 @@ function LeadSourceSelect({ value, onSave }: {
 
   return (
     <div onClick={() => setEditing(true)} title="Click to change lead source" style={{ cursor: 'pointer' }}>
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>LEAD SOURCE</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>Lead source</div>
       <div style={{
         ...baseStyle,
         color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
-        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        borderBottom: '1px dashed rgba(38,112,90,0.25)',
         paddingBottom: 1,
         display: 'inline-block',
         minWidth: 80,
@@ -741,12 +742,12 @@ function EditableContactField({ label, value, field, onSave, display }: {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 13 }
+  const baseStyle: React.CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14 }
 
   if (editing) {
     return (
       <div>
-        <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>{label.toUpperCase()}</div>
+        <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 4 }}>{label}</div>
         <input
           autoFocus
           value={draft}
@@ -757,7 +758,7 @@ function EditableContactField({ label, value, field, onSave, display }: {
             ...baseStyle,
             color: 'var(--fg)',
             background: 'var(--bg)',
-            border: '1px solid rgba(201,168,76,0.6)',
+            border: '1px solid rgba(38,112,90,0.6)',
             borderRadius: 3,
             padding: '3px 8px',
             outline: 'none',
@@ -775,11 +776,11 @@ function EditableContactField({ label, value, field, onSave, display }: {
       title="Click to edit"
       style={{ cursor: 'text' }}
     >
-      <div style={{ ...baseStyle, fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label.toUpperCase()}</div>
+      <div style={{ ...baseStyle, fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label}</div>
       <div style={{
         ...baseStyle,
         color: saved ? '#6ee7b7' : (value ? 'var(--fg)' : 'var(--muted)'),
-        borderBottom: '1px dashed rgba(201,168,76,0.25)',
+        borderBottom: '1px dashed rgba(38,112,90,0.25)',
         paddingBottom: 1,
         display: 'inline-block',
         minWidth: 80,
@@ -805,7 +806,7 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
       <div style={{
         background: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderLeft: '3px solid #c9a84c',
+        borderLeft: '3px solid #26705a',
         borderRadius: 6,
         padding: '14px 18px',
         cursor: 'pointer',
@@ -815,7 +816,7 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 9,
+              fontSize: 11,
               letterSpacing: '0.12em',
               color: 'var(--muted)',
               textTransform: 'uppercase',
@@ -828,9 +829,9 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
         </div>
         <div style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 600,
-          color: '#c9a84c',
+          color: '#26705a',
           marginBottom: 10,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -848,8 +849,8 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
             ...(loan.monthly_income ? [{ label: 'Income', value: fmtCurrency(loan.monthly_income) + '/mo' }] : []),
           ].map(({ label, value }) => (
             <div key={label}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)' }}>{value}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{label}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)' }}>{value}</div>
             </div>
           ))}
         </div>
@@ -860,14 +861,14 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
               onClick={e => e.stopPropagation()}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
-                fontFamily: 'var(--font-mono)', fontSize: 10,
+                fontFamily: 'var(--font-mono)', fontSize: 12,
                 color: 'var(--muted)',
                 textDecoration: 'none',
               }}
             >
               <span style={{ color: 'var(--muted)', opacity: 0.6 }}>Co-borrower</span>
-              <span style={{ color: '#7dd3fc' }}>{loan.co_borrower_name}</span>
-              <ExternalLink size={9} style={{ color: '#7dd3fc', opacity: 0.7 }} />
+              <span style={{ color: '#276b86' }}>{loan.co_borrower_name}</span>
+              <ExternalLink size={9} style={{ color: '#276b86', opacity: 0.7 }} />
             </Link>
           </div>
         )}
@@ -878,15 +879,15 @@ function LoanCard({ loan }: { loan: ContactLoan }) {
 
 // ── Activity type config ─────────────────────────────────────────────────────
 const ACTIVITY_TYPE_CONFIG: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
-  call:  { icon: Phone,          color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
-  text:  { icon: MessageSquare,  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
+  call:  { icon: Phone,          color: '#6c5098', bg: 'rgba(167,139,250,0.12)', label: 'Call' },
+  text:  { icon: MessageSquare,  color: '#276b86', bg: 'rgba(96,165,250,0.12)',  label: 'Text' },
   email: { icon: Mail,           color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'Email' },
   note:  { icon: StickyNote,     color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  label: 'Note' },
 }
 
 // ── System activity styling by action type ──────────────────────────────────
 function getSystemActivityStyle(action: string): { icon: typeof Phone; color: string; bg: string; label: string } {
-  if (action === 'imessage.received') return { icon: MessageSquare, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', label: 'iMessage' }
+  if (action === 'imessage.received') return { icon: MessageSquare, color: '#276b86', bg: 'rgba(96,165,250,0.12)', label: 'iMessage' }
   if (action === 'email.received') return { icon: Inbox, color: '#34d399', bg: 'rgba(52,211,153,0.12)', label: 'Inbound' }
   return { icon: Clock, color: 'var(--muted)', bg: 'rgba(255,255,255,0.04)', label: '' }
 }
@@ -963,11 +964,11 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: style.label ? style.color : 'var(--muted)', fontWeight: style.label ? 600 : 400 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: style.label ? style.color : 'var(--muted)', fontWeight: style.label ? 600 : 400 }}>
               {description}{sourceLabel}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap', opacity: 0.6 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap', opacity: 0.6 }}>
                 {timeLabel}
               </span>
               {isExpandable && (
@@ -976,7 +977,7 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
             </div>
           </div>
           {snippet && !expanded && (
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {snippet}
             </div>
           )}
@@ -984,7 +985,7 @@ function SystemActivityItem({ entry }: { entry: ActivityEntry }) {
       </div>
       {expanded && fullText && (
         <div style={{ padding: '0 0 10px 38px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
             {fullText}
           </div>
         </div>
@@ -1046,18 +1047,18 @@ function ActivityFeedItem({ item, onDelete }: { item: ContactActivityRow; onDele
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: cfg.color }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: cfg.color }}>
               {cfg.label}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
                 {timeLabel}
               </span>
               <ChevronDown size={11} style={{ color: 'var(--muted)', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }} />
             </div>
           </div>
           {!expanded && preview && (
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {preview}
             </div>
           )}
@@ -1066,7 +1067,7 @@ function ActivityFeedItem({ item, onDelete }: { item: ContactActivityRow; onDele
       {expanded && (
         <div style={{ paddingLeft: 38, paddingBottom: 10 }}>
           {item.notes && (
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 8 }}>
               {item.notes}
             </div>
           )}
@@ -1076,7 +1077,7 @@ function ActivityFeedItem({ item, onDelete }: { item: ContactActivityRow; onDele
               disabled={deleting}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
-                fontFamily: 'var(--font-mono)', fontSize: 10, color: '#ef4444',
+                fontFamily: 'var(--font-mono)', fontSize: 12, color: '#ef4444',
                 background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
                 borderRadius: 4, padding: '3px 8px', cursor: deleting ? 'default' : 'pointer',
                 opacity: deleting ? 0.5 : 1,
@@ -1114,10 +1115,6 @@ export function ContactRecordView(props: Props) {
     onCancelDrip,
     campaigns = [],
     onEnrollInCampaign,
-    newNote,
-    setNewNote,
-    savingNote,
-    onAddNote,
     contactNotes = [],
     setContactNotes,
     onRefreshNotes,
@@ -1148,7 +1145,7 @@ export function ContactRecordView(props: Props) {
   }, [contact.id, contact.first_name, contact.last_name, setActiveRecord])
 
   const [leftTab, setLeftTab] = useState<LeftTab>('overview')
-  const [rightTab, setRightTab] = useState<'notes' | 'activity'>('activity')
+  const [rightTab, setRightTab] = useState<'notes' | 'activity'>('notes')
 
   // Activity form state
   const [activityFormType, setActivityFormType] = useState<ContactActivityRow['activity_type'] | null>(null)
@@ -1249,7 +1246,7 @@ export function ContactRecordView(props: Props) {
     alignItems: 'center',
     gap: 7,
     fontFamily: 'var(--font-mono)',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 600,
     letterSpacing: '0.06em',
     padding: '9px 22px',
@@ -1260,27 +1257,28 @@ export function ContactRecordView(props: Props) {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-mono)', overflow: 'hidden' }}>
+    <div className="record-detail contact-detail">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, padding: '20px 28px 16px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <header className="record-detail-header">
 
         <Link
           href="/dashboard/contacts"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--muted)', textDecoration: 'none', marginBottom: 16 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'var(--muted)', textDecoration: 'none', marginBottom: 16 }}
         >
           <ArrowLeft size={12} />
-          Back to Contacts
+          Contact Records
         </Link>
 
+        <div className="record-detail-eyebrow">Contact record</div>
         {/* Avatar + Name + Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 16 }}>
-          <div style={{
+        <div className="record-detail-identity">
+          <div className="record-detail-avatar" style={{
             width: 52, height: 52, borderRadius: '50%',
-            background: 'rgba(201,168,76,0.18)', color: '#c9a84c',
+            background: 'rgba(38,112,90,0.18)', color: '#26705a',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700,
-            flexShrink: 0, border: '1px solid rgba(201,168,76,0.3)',
+            flexShrink: 0, border: '1px solid rgba(38,112,90,0.3)',
           }}>
             {initials(contact)}
           </div>
@@ -1299,20 +1297,20 @@ export function ContactRecordView(props: Props) {
                 {contact.contact_type ?? '-'}
               </span>
               {contact.group_tag && (
-                <span style={{ ...getStageBadgeStyle(null), background: 'rgba(201,168,76,0.12)', color: '#c9a84c' }}>
+                <span style={{ ...getStageBadgeStyle(null), background: 'rgba(38,112,90,0.12)', color: '#26705a' }}>
                   {contact.group_tag}
                 </span>
               )}
               {contact.referral_type && (
-                <span style={{ ...getStageBadgeStyle(null), background: 'rgba(59,130,246,0.12)', color: '#60a5fa', textTransform: 'none' }}>
+                <span style={{ ...getStageBadgeStyle(null), background: 'rgba(59,130,246,0.12)', color: '#276b86', textTransform: 'none' }}>
                   {REFERRAL_TYPE_LABELS[contact.referral_type] ?? contact.referral_type}
                 </span>
               )}
               {contact.referred_by && (
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)' }}>
                   via{' '}
                   {referrerContactId ? (
-                    <Link href={`/dashboard/contacts/${referrerContactId}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                    <Link href={`/dashboard/contacts/${referrerContactId}`} style={{ color: '#26705a', textDecoration: 'none' }}>
                       {contact.referred_by}
                     </Link>
                   ) : contact.referred_by}
@@ -1320,13 +1318,13 @@ export function ContactRecordView(props: Props) {
               )}
               {contact.lead_tier && contact.lead_tier !== 'new' && (() => {
                 const tierStyles: Record<string, { bg: string; color: string }> = {
-                  hot:  { bg: 'rgba(239,68,68,0.15)',   color: '#f87171' },
-                  warm: { bg: 'rgba(234,179,8,0.15)',   color: '#facc15' },
+                  hot:  { bg: 'rgba(239,68,68,0.15)',   color: '#a6372f' },
+                  warm: { bg: 'rgba(234,179,8,0.15)',   color: '#946017' },
                   cold: { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
                 }
                 const s = tierStyles[contact.lead_tier] ?? tierStyles.cold
                 return (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 8px', borderRadius: 4, background: s.bg, color: s.color, fontWeight: 600 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, padding: '2px 8px', borderRadius: 4, background: s.bg, color: s.color, fontWeight: 600 }}>
                     {contact.lead_tier.charAt(0).toUpperCase() + contact.lead_tier.slice(1)} {contact.lead_score ?? 0}
                   </span>
                 )
@@ -1341,7 +1339,7 @@ export function ContactRecordView(props: Props) {
             <a
               href={`tel:${phone.replace(/\D/g, '')}`}
               onClick={() => handleActionClick('call')}
-              style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)' }}
+              style={{ ...actionBtnBase, background: 'transparent', color: '#26705a', border: '1.5px solid rgba(38,112,90,0.5)' }}
             >
               <Phone size={13} />
               Call
@@ -1351,7 +1349,7 @@ export function ContactRecordView(props: Props) {
             <a
               href={`sms:${phone.replace(/\D/g, '')}`}
               onClick={() => handleActionClick('text')}
-              style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)' }}
+              style={{ ...actionBtnBase, background: 'transparent', color: '#26705a', border: '1.5px solid rgba(38,112,90,0.5)' }}
             >
               <MessageSquare size={13} />
               Text
@@ -1361,7 +1359,7 @@ export function ContactRecordView(props: Props) {
             <a
               href={`mailto:${contact.email}`}
               onClick={() => handleActionClick('email')}
-              style={{ ...actionBtnBase, background: '#c9a84c', color: '#000', border: 'none' }}
+              style={{ ...actionBtnBase, background: '#26705a', color: '#fff', border: 'none' }}
             >
               <Mail size={13} />
               Email
@@ -1378,7 +1376,7 @@ export function ContactRecordView(props: Props) {
           {features.scenarios && (
             <Link
               href={`/dashboard/scenarios/new?contact_id=${contact.id}`}
-              style={{ ...actionBtnBase, background: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.5)', textDecoration: 'none' }}
+              style={{ ...actionBtnBase, background: 'transparent', color: '#26705a', border: '1.5px solid rgba(38,112,90,0.5)', textDecoration: 'none' }}
               title="Create scenario pre-filled with this contact"
             >
               <BarChart2 size={13} />
@@ -1394,14 +1392,14 @@ export function ContactRecordView(props: Props) {
             background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 6,
             display: 'flex', alignItems: 'center', gap: 12,
           }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)' }}>
               Log this {logPromptType}?
             </span>
             <button
               onClick={handleLogPromptAccept}
               style={{
-                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-                background: '#c9a84c', color: '#000', border: 'none',
+                fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
+                background: '#26705a', color: '#fff', border: 'none',
                 padding: '4px 12px', borderRadius: 4, cursor: 'pointer',
               }}
             >
@@ -1410,7 +1408,7 @@ export function ContactRecordView(props: Props) {
             <button
               onClick={() => setLogPromptType(null)}
               style={{
-                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                 background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
                 padding: '4px 12px', borderRadius: 4, cursor: 'pointer',
               }}
@@ -1419,7 +1417,7 @@ export function ContactRecordView(props: Props) {
             </button>
           </div>
         )}
-      </div>
+      </header>
 
       {/* ── Merge panel ─────────────────────────────────────────────────────── */}
       {mergeOpen && (
@@ -1429,7 +1427,7 @@ export function ContactRecordView(props: Props) {
           borderRadius: 8,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               Merge Duplicate Contact
             </span>
             <button onClick={() => setMergeOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}>
@@ -1439,7 +1437,7 @@ export function ContactRecordView(props: Props) {
 
           {!mergeTarget ? (
             <>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
                 Search for the duplicate contact to merge into this one.
               </p>
               <div style={{ position: 'relative', marginBottom: 8 }}>
@@ -1452,7 +1450,7 @@ export function ContactRecordView(props: Props) {
                   style={{
                     width: '100%', boxSizing: 'border-box',
                     paddingLeft: 28, paddingRight: 10, paddingTop: 7, paddingBottom: 7,
-                    fontFamily: 'var(--font-mono)', fontSize: 12,
+                    fontFamily: 'var(--font-mono)', fontSize: 14,
                     background: 'var(--bg-secondary, #111)', color: 'var(--fg)',
                     border: '1px solid var(--border)', borderRadius: 6, outline: 'none',
                   }}
@@ -1472,9 +1470,9 @@ export function ContactRecordView(props: Props) {
                           borderRadius: 6, padding: '7px 10px', cursor: 'pointer', textAlign: 'left',
                         }}
                       >
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', fontWeight: 600 }}>{name}</span>
-                        {r.email && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>{r.email}</span>}
-                        {r.contact_type && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6b7280', marginLeft: 'auto' }}>{r.contact_type}</span>}
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)', fontWeight: 600 }}>{name}</span>
+                        {r.email && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)' }}>{r.email}</span>}
+                        {r.contact_type && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#6b7280', marginLeft: 'auto' }}>{r.contact_type}</span>}
                       </button>
                     )
                   })}
@@ -1483,7 +1481,7 @@ export function ContactRecordView(props: Props) {
             </>
           ) : (
             <>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
                 Choose which contact record to <strong style={{ color: 'var(--fg)' }}>keep</strong>. The other will be deleted and all loans/history transferred.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
@@ -1498,24 +1496,24 @@ export function ContactRecordView(props: Props) {
                       value={opt.id}
                       checked={mergeKeepId === opt.id}
                       onChange={() => setMergeKeepId(opt.id)}
-                      style={{ accentColor: '#c9a84c' }}
+                      style={{ accentColor: '#26705a' }}
                     />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14 }}>
                       <span style={{ color: 'var(--fg)', fontWeight: 600 }}>{opt.name || '—'}</span>
                       {opt.email && <span style={{ color: 'var(--muted)', marginLeft: 8 }}>{opt.email}</span>}
-                      <span style={{ color: '#6b7280', marginLeft: 8, fontSize: 10 }}>{opt.label}</span>
+                      <span style={{ color: '#6b7280', marginLeft: 8, fontSize: 12 }}>{opt.label}</span>
                     </span>
                   </label>
                 ))}
               </div>
-              {mergeError && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#f87171', marginBottom: 10 }}>{mergeError}</p>}
+              {mergeError && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#a6372f', marginBottom: 10 }}>{mergeError}</p>}
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   onClick={executeMerge}
                   disabled={merging}
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                    background: merging ? '#374151' : '#c9a84c', color: merging ? '#9ca3af' : '#000',
+                    fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700,
+                    background: merging ? '#374151' : '#26705a', color: merging ? '#9ca3af' : '#fff',
                     border: 'none', padding: '7px 18px', borderRadius: 6, cursor: merging ? 'not-allowed' : 'pointer',
                   }}
                 >
@@ -1524,7 +1522,7 @@ export function ContactRecordView(props: Props) {
                 <button
                   onClick={() => { setMergeTarget(null); setMergeQuery(''); setMergeResults([]) }}
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 11,
+                    fontFamily: 'var(--font-mono)', fontSize: 13,
                     background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
                     padding: '7px 14px', borderRadius: 6, cursor: 'pointer',
                   }}
@@ -1538,208 +1536,41 @@ export function ContactRecordView(props: Props) {
       )}
 
       {/* ── Two-column body ──────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', marginTop: 0 }}>
+      <div className="record-detail-columns">
 
         {/* ── Left column: tabs + content ── */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        <div className="record-detail-main">
 
           {/* Tab bar */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', paddingLeft: 28, flexShrink: 0 }}>
+          <nav className="record-detail-tabs" aria-label="Contact record sections">
             {LEFT_TABS.map(t => (
               <button
                 key={t.id}
+                aria-pressed={leftTab === t.id}
                 onClick={() => setLeftTab(t.id)}
                 style={{
-                  padding: '8px 16px', fontSize: 11,
+                  padding: '8px 16px', fontSize: 13,
                   fontFamily: 'var(--font-mono)', fontWeight: 600,
                   letterSpacing: '0.08em', background: 'none', border: 'none',
-                  borderBottom: leftTab === t.id ? '2px solid #c9a84c' : '2px solid transparent',
-                  color: leftTab === t.id ? '#c9a84c' : 'var(--muted)',
+                  borderBottom: leftTab === t.id ? '2px solid #26705a' : '2px solid transparent',
+                  color: leftTab === t.id ? '#26705a' : 'var(--muted)',
                   cursor: 'pointer', textTransform: 'uppercase', marginBottom: -1,
                 }}
               >
                 {t.label}
               </button>
             ))}
-          </div>
+          </nav>
 
           {/* Scrollable tab content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px 40px' }}>
+          <div className="record-detail-tab-content">
 
             {leftTab === 'overview' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                {/* ── Active Loans section (moved from separate tab) ── */}
-                <div style={cardStyle}>
-                  <div style={labelStyle}>ACTIVE LOAN(S)</div>
-                  {loans.length === 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 0', color: 'var(--muted)' }}>
-                      <AlertCircle size={16} />
-                      <span style={{ fontSize: 12 }}>No active loans</span>
-                      <Link
-                        href="/dashboard/loans"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 4,
-                          fontFamily: 'var(--font-mono)', fontSize: 11, color: '#c9a84c',
-                          textDecoration: 'none', marginLeft: 8,
-                        }}
-                      >
-                        <Plus size={12} /> New Loan
-                      </Link>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {loans.map(loan => (
-                        <LoanCard key={loan.id} loan={loan} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── Realtor Performance + Referred Borrowers ── */}
-                {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (() => {
-                  const closedLoans = referredLoans.filter(l => isFundedStatus(l.status))
-                  const totalReferred = referredLoans.length
-                  const closedCount = closedLoans.length
-                  const conversionRate = totalReferred > 0 ? Math.round((closedCount / totalReferred) * 100) : 0
-                  const totalVolume = closedLoans.reduce((sum, l) => sum + (l.loan_amount ?? 0), 0)
-                  return (
-                  <>
-                  {/* Realtor metrics summary */}
-                  {contact.contact_type?.toLowerCase().includes('realtor') && (
-                    <div style={cardStyle}>
-                      <div style={labelStyle}>REALTOR PERFORMANCE</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 8 }}>
-                        {[
-                          { label: 'Referred', value: String(totalReferred), color: '#c9a84c' },
-                          { label: 'Closed', value: String(closedCount), color: '#10b981' },
-                          { label: 'Conv Rate', value: `${conversionRate}%`, color: '#60a5fa' },
-                          { label: 'Volume', value: fmtCurrency(totalVolume || null), color: '#a78bfa' },
-                        ].map(({ label, value, color }) => (
-                          <div key={label} style={{ textAlign: 'center' }}>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, color, lineHeight: 1.2 }}>{value}</div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.08em', marginTop: 4 }}>{label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={cardStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <div style={labelStyle}>REFERRED BORROWERS</div>
-                      <span style={{
-                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                        background: referredLoans.length > 0 ? '#c9a84c22' : 'transparent',
-                        color: referredLoans.length > 0 ? '#c9a84c' : 'var(--muted)',
-                        border: `1px solid ${referredLoans.length > 0 ? '#c9a84c44' : 'transparent'}`,
-                        borderRadius: 4, padding: '2px 6px',
-                      }}>
-                        {referredLoans.length} loan{referredLoans.length !== 1 ? 's' : ''} referred
-                      </span>
-                    </div>
-                    {referredLoans.length === 0 ? (
-                      <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '8px 0' }}>
-                        No referrals yet
-                      </div>
-                    ) : (
-                      <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                          <thead>
-                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                              {['Borrower', 'Loan Amount', 'Status', 'Close Date'].map(h => (
-                                <th key={h} style={{ textAlign: 'left', padding: '4px 8px 8px 0', fontSize: 9, color: '#c9a84c', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {referredLoans.map(loan => {
-                              const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
-                                || loan.borrower_name || loan.loan_name || '—'
-                              const closeDate = (loan as { estimated_closing_date?: string | null }).estimated_closing_date || loan.closing_date
-                              return (
-                                <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, var(--input))' }}>
-                                  <td style={{ padding: '8px 8px 8px 0' }}>
-                                    <Link href={`/dashboard/loans/${loan.id}`} style={{ color: '#c9a84c', textDecoration: 'none' }}>
-                                      {borrowerName}
-                                    </Link>
-                                  </td>
-                                  <td style={{ padding: '8px 8px 8px 0', color: 'var(--fg)' }}>
-                                    {loan.loan_amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(loan.loan_amount) : '—'}
-                                  </td>
-                                  <td style={{ padding: '8px 8px 8px 0' }}>
-                                    <span style={{
-                                      fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                                      background: loan.status?.toLowerCase().includes('fund') ? '#10b98122' : loan.status?.toLowerCase().includes('clear') ? '#3b82f622' : '#ffffff11',
-                                      color: loan.status?.toLowerCase().includes('fund') ? '#10b981' : loan.status?.toLowerCase().includes('clear') ? '#60a5fa' : 'var(--muted)',
-                                      border: '1px solid currentColor',
-                                    }}>{loan.status || '—'}</span>
-                                  </td>
-                                  <td style={{ padding: '8px 0', color: 'var(--muted)' }}>
-                                    {closeDate ? new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                  </>
-                  )
-                })()}
-
-                {/* ── Co-borrower on loans (shown when this contact is a co-borrower) ── */}
-                {coBorrowerLoans.length > 0 && (
-                  <div style={cardStyle}>
-                    <div style={labelStyle}>CO-BORROWER ON</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {coBorrowerLoans.map(loan => {
-                        const display = loan.property_address
-                          || [loan.property_city, loan.property_state].filter(Boolean).join(', ')
-                          || loan.loan_name
-                          || 'Untitled Loan'
-                        return (
-                          <Link
-                            key={loan.id}
-                            href={`/dashboard/loans/${loan.id}`}
-                            style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              background: 'var(--surface)', border: '1px solid var(--border)',
-                              borderLeft: '3px solid #7dd3fc', borderRadius: 6,
-                              padding: '10px 14px', textDecoration: 'none',
-                            }}
-                          >
-                            <div>
-                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: '#7dd3fc', marginBottom: 4 }}>
-                                {display}
-                              </div>
-                              <div style={{ display: 'flex', gap: 16 }}>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
-                                  {`${loan.borrower_first_name ?? ''} ${loan.borrower_last_name ?? ''}`.trim() || loan.borrower_name || '—'}
-                                </span>
-                                {loan.loan_amount && (
-                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
-                                    {fmtCurrency(loan.loan_amount)}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <LoanStageBadge status={loan.status} />
-                              <ExternalLink size={11} style={{ color: 'var(--muted)' }} />
-                            </div>
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
                 {/* Contact info */}
                 <div style={cardStyle}>
-                  <div style={labelStyle}>CONTACT INFO</div>
+                  <div style={labelStyle}>Contact info</div>
                   {onSaveField ? (
                     <>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12 }}>
@@ -1780,9 +1611,9 @@ export function ContactRecordView(props: Props) {
                             }}
                             aria-label="Toggle Do Not Call"
                           >
-                            {contact.do_not_call && <span style={{ color: '#ef4444', fontSize: 11, fontWeight: 700 }}>✕</span>}
+                            {contact.do_not_call && <span style={{ color: '#ef4444', fontSize: 13, fontWeight: 700 }}>✕</span>}
                           </button>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: contact.do_not_call ? '#ef4444' : 'var(--muted)' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: contact.do_not_call ? '#ef4444' : 'var(--muted)' }}>
                             DO NOT CALL (TCPA)
                           </span>
                         </div>
@@ -1793,22 +1624,190 @@ export function ContactRecordView(props: Props) {
                       {contact.email && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <Mail size={14} style={{ color: 'var(--muted)' }} />
-                          <a href={`mailto:${contact.email}`} style={{ color: '#c9a84c', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{contact.email}</a>
+                          <a href={`mailto:${contact.email}`} style={{ color: '#26705a', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: 14 }}>{contact.email}</a>
                         </div>
                       )}
                       {phone && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <Phone size={14} style={{ color: 'var(--muted)' }} />
-                          <a href={`tel:${phone.replace(/\D/g, '')}`} style={{ color: '#c9a84c', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{fmtPhone(phone) ?? phone}</a>
+                          <a href={`tel:${phone.replace(/\D/g, '')}`} style={{ color: '#26705a', textDecoration: 'none', fontFamily: 'var(--font-mono)', fontSize: 14 }}>{fmtPhone(phone) ?? phone}</a>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
+                {/* ── Active Loans section (moved from separate tab) ── */}
+                <div style={cardStyle}>
+                  <div style={labelStyle}>Linked loans</div>
+                  {loans.length === 0 ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 0', color: 'var(--muted)' }}>
+                      <AlertCircle size={16} />
+                      <span style={{ fontSize: 14 }}>No linked loans</span>
+                      <Link
+                        href="/dashboard/loans"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          fontFamily: 'var(--font-mono)', fontSize: 13, color: '#26705a',
+                          textDecoration: 'none', marginLeft: 8,
+                        }}
+                      >
+                        <Plus size={12} /> New Loan
+                      </Link>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {loans.map(loan => (
+                        <LoanCard key={loan.id} loan={loan} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Realtor Performance + Referred Borrowers ── */}
+                {(contact.contact_type?.toLowerCase().includes('realtor') || referredLoans.length > 0) && (() => {
+                  const closedLoans = referredLoans.filter(l => isFundedStatus(l.status))
+                  const totalReferred = referredLoans.length
+                  const closedCount = closedLoans.length
+                  const conversionRate = totalReferred > 0 ? Math.round((closedCount / totalReferred) * 100) : 0
+                  const totalVolume = closedLoans.reduce((sum, l) => sum + (l.loan_amount ?? 0), 0)
+                  return (
+                  <>
+                  {/* Realtor metrics summary */}
+                  {contact.contact_type?.toLowerCase().includes('realtor') && (
+                    <div style={cardStyle}>
+                      <div style={labelStyle}>Realtor performance</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 8 }}>
+                        {[
+                          { label: 'Referred', value: String(totalReferred), color: '#26705a' },
+                          { label: 'Closed', value: String(closedCount), color: '#26705a' },
+                          { label: 'Conv Rate', value: `${conversionRate}%`, color: '#276b86' },
+                          { label: 'Volume', value: fmtCurrency(totalVolume || null), color: '#6c5098' },
+                        ].map(({ label, value, color }) => (
+                          <div key={label} style={{ textAlign: 'center' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, color, lineHeight: 1.2 }}>{value}</div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.08em', marginTop: 4 }}>{label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={cardStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div style={labelStyle}>Referred borrowers</div>
+                      <span style={{
+                        fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700,
+                        background: referredLoans.length > 0 ? '#26705a22' : 'transparent',
+                        color: referredLoans.length > 0 ? '#26705a' : 'var(--muted)',
+                        border: `1px solid ${referredLoans.length > 0 ? '#26705a44' : 'transparent'}`,
+                        borderRadius: 4, padding: '2px 6px',
+                      }}>
+                        {referredLoans.length} loan{referredLoans.length !== 1 ? 's' : ''} referred
+                      </span>
+                    </div>
+                    {referredLoans.length === 0 ? (
+                      <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 14, padding: '8px 0' }}>
+                        No referrals yet
+                      </div>
+                    ) : (
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 14 }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                              {['Borrower', 'Loan Amount', 'Status', 'Close Date'].map(h => (
+                                <th key={h} style={{ textAlign: 'left', padding: '4px 8px 8px 0', fontSize: 11, color: '#26705a', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {referredLoans.map(loan => {
+                              const borrowerName = [loan.borrower_first_name, loan.borrower_last_name].filter(Boolean).join(' ')
+                                || loan.borrower_name || loan.loan_name || '—'
+                              const closeDate = (loan as { estimated_closing_date?: string | null }).estimated_closing_date || loan.closing_date
+                              return (
+                                <tr key={loan.id} style={{ borderBottom: '1px solid var(--border-subtle, var(--input))' }}>
+                                  <td style={{ padding: '8px 8px 8px 0' }}>
+                                    <Link href={`/dashboard/loans/${loan.id}`} style={{ color: '#26705a', textDecoration: 'none' }}>
+                                      {borrowerName}
+                                    </Link>
+                                  </td>
+                                  <td style={{ padding: '8px 8px 8px 0', color: 'var(--fg)' }}>
+                                    {loan.loan_amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(loan.loan_amount) : '—'}
+                                  </td>
+                                  <td style={{ padding: '8px 8px 8px 0' }}>
+                                    <span style={{
+                                      fontSize: 12, padding: '2px 6px', borderRadius: 4,
+                                      background: loan.status?.toLowerCase().includes('fund') ? '#26705a22' : loan.status?.toLowerCase().includes('clear') ? '#3b82f622' : '#ffffff11',
+                                      color: loan.status?.toLowerCase().includes('fund') ? '#26705a' : loan.status?.toLowerCase().includes('clear') ? '#276b86' : 'var(--muted)',
+                                      border: '1px solid currentColor',
+                                    }}>{loan.status || '—'}</span>
+                                  </td>
+                                  <td style={{ padding: '8px 0', color: 'var(--muted)' }}>
+                                    {closeDate ? new Date(closeDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                  </>
+                  )
+                })()}
+
+                {/* ── Co-borrower on loans (shown when this contact is a co-borrower) ── */}
+                {coBorrowerLoans.length > 0 && (
+                  <div style={cardStyle}>
+                    <div style={labelStyle}>CO-BORROWER ON</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {coBorrowerLoans.map(loan => {
+                        const display = loan.property_address
+                          || [loan.property_city, loan.property_state].filter(Boolean).join(', ')
+                          || loan.loan_name
+                          || 'Untitled Loan'
+                        return (
+                          <Link
+                            key={loan.id}
+                            href={`/dashboard/loans/${loan.id}`}
+                            style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              background: 'var(--surface)', border: '1px solid var(--border)',
+                              borderLeft: '3px solid #276b86', borderRadius: 6,
+                              padding: '10px 14px', textDecoration: 'none',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600, color: '#276b86', marginBottom: 4 }}>
+                                {display}
+                              </div>
+                              <div style={{ display: 'flex', gap: 16 }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                                  {`${loan.borrower_first_name ?? ''} ${loan.borrower_last_name ?? ''}`.trim() || loan.borrower_name || '—'}
+                                </span>
+                                {loan.loan_amount && (
+                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                                    {fmtCurrency(loan.loan_amount)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <LoanStageBadge status={loan.status} />
+                              <ExternalLink size={11} style={{ color: 'var(--muted)' }} />
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Address */}
                 <div style={cardStyle}>
-                  <div style={labelStyle}>ADDRESS</div>
+                  <div style={labelStyle}>Address</div>
                   {onSaveField ? (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <EditableContactField label="Street" value={contact.mailing_street} field="mailing_street" onSave={onSaveField} />
@@ -1817,7 +1816,7 @@ export function ContactRecordView(props: Props) {
                       <EditableContactField label="Zip"    value={contact.mailing_zip}    field="mailing_zip"    onSave={onSaveField} />
                     </div>
                   ) : (
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)' }}>
                       {mailingAddress || <span style={{ color: 'var(--muted)' }}>No address on file</span>}
                     </div>
                   )}
@@ -1831,7 +1830,7 @@ export function ContactRecordView(props: Props) {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                       <div style={labelStyle}>CO-BORROWER</div>
                       {!hasCoBorrower && onSaveField && (
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', cursor: 'default' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', cursor: 'default' }}>
                           click any field below to add
                         </span>
                       )}
@@ -1845,7 +1844,7 @@ export function ContactRecordView(props: Props) {
                         <EditableContactField label="Email"     value={contact.co_borrower_email ?? null}  field="co_borrower_email"  onSave={onSaveField} />
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 14 }}>
                         {(contact.co_borrower_first || contact.co_borrower_last) && (
                           <div style={{ color: 'var(--fg)' }}>
                             {`${contact.co_borrower_first ?? ''} ${contact.co_borrower_last ?? ''}`.trim()}
@@ -1857,7 +1856,7 @@ export function ContactRecordView(props: Props) {
                         {contact.co_borrower_mobile && (
                           <div>
                             <a href={`tel:${contact.co_borrower_mobile.replace(/\D/g, '')}`}
-                              style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                              style={{ color: '#26705a', textDecoration: 'none' }}>
                               {fmtPhone(contact.co_borrower_mobile) ?? contact.co_borrower_mobile}
                             </a>
                           </div>
@@ -1865,7 +1864,7 @@ export function ContactRecordView(props: Props) {
                         {contact.co_borrower_email && (
                           <div>
                             <a href={`mailto:${contact.co_borrower_email}`}
-                              style={{ color: '#c9a84c', textDecoration: 'none' }}>
+                              style={{ color: '#26705a', textDecoration: 'none' }}>
                               {contact.co_borrower_email}
                             </a>
                           </div>
@@ -1878,64 +1877,21 @@ export function ContactRecordView(props: Props) {
 
                 {/* Relationship */}
                 <div style={cardStyle}>
-                  <div style={labelStyle}>RELATIONSHIP</div>
+                  <div style={labelStyle}>Relationship</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14 }}>
                       <span style={{ color: 'var(--muted)' }}>Added </span>
                       {fmtDate(contact.created_at)}
                     </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14 }}>
                       <span style={{ color: 'var(--muted)' }}>Last activity </span>
                       {contact.last_activity_date ? fmtDate(contact.last_activity_date) : (contact.last_touch ? fmtDate(contact.last_touch) : '-')}
                     </div>
                     {contact.do_not_call && (
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#ef4444', letterSpacing: '0.05em' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#ef4444', letterSpacing: '0.05em' }}>
                         ✕ DO NOT CALL
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* Notes */}
-                <div style={cardStyle}>
-                  <div style={labelStyle}>NOTES</div>
-                  {contact.notes && (
-                    <div style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)',
-                      lineHeight: 1.7, whiteSpace: 'pre-wrap', marginBottom: 12,
-                      maxHeight: 200, overflowY: 'auto',
-                      padding: '8px 0',
-                    }}>
-                      {contact.notes}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <textarea
-                      value={newNote}
-                      onChange={e => setNewNote(e.target.value)}
-                      placeholder="Add a note..."
-                      rows={2}
-                      style={{
-                        flex: 1, background: 'var(--bg)', color: 'var(--fg)',
-                        border: '1px solid var(--border)', borderRadius: 4,
-                        padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11,
-                        resize: 'vertical', boxSizing: 'border-box',
-                      }}
-                    />
-                    <button
-                      onClick={onAddNote}
-                      disabled={savingNote || !newNote.trim()}
-                      style={{
-                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-                        background: savingNote || !newNote.trim() ? 'var(--surface)' : '#c9a84c',
-                        color: savingNote || !newNote.trim() ? 'var(--muted)' : '#000',
-                        border: 'none', padding: '6px 14px', borderRadius: 4,
-                        cursor: savingNote || !newNote.trim() ? 'default' : 'pointer',
-                        alignSelf: 'flex-end',
-                      }}
-                    >
-                      {savingNote ? 'Saving…' : 'Add'}
-                    </button>
                   </div>
                 </div>
 
@@ -1943,16 +1899,16 @@ export function ContactRecordView(props: Props) {
                 {features.drip_campaigns && (
                 <div style={cardStyle}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: dripEnrollments.length > 0 ? 12 : 0 }}>
-                    <div style={labelStyle}>DRIP CAMPAIGNS</div>
+                    <div style={labelStyle}>Drip campaigns</div>
                     {onEnrollInCampaign && campaigns.length > 0 && !enrollPickerOpen && (
                       <button
                         type="button"
                         onClick={() => { setEnrollPickerOpen(true); setEnrollCampaignId(campaigns[0]?.id ?? ''); setEnrollError(null) }}
                         style={{
-                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                          fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                           padding: '3px 8px', borderRadius: 3, cursor: 'pointer',
-                          background: 'transparent', color: '#c9a84c',
-                          border: '1px solid #c9a84c66', letterSpacing: '0.04em',
+                          background: 'transparent', color: '#26705a',
+                          border: '1px solid #26705a66', letterSpacing: '0.04em',
                         }}
                       >
                         + ENROLL
@@ -1966,7 +1922,7 @@ export function ContactRecordView(props: Props) {
                         value={enrollCampaignId}
                         onChange={e => setEnrollCampaignId(e.target.value)}
                         style={{
-                          fontFamily: 'var(--font-mono)', fontSize: 11, padding: '5px 8px',
+                          fontFamily: 'var(--font-mono)', fontSize: 13, padding: '5px 8px',
                           borderRadius: 3, border: '1px solid var(--border)',
                           background: 'var(--bg)', color: 'var(--fg)', cursor: 'pointer',
                         }}
@@ -1976,7 +1932,7 @@ export function ContactRecordView(props: Props) {
                         ))}
                       </select>
                       {enrollError && (
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#ef4444' }}>{enrollError}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#ef4444' }}>{enrollError}</span>
                       )}
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button
@@ -1996,10 +1952,10 @@ export function ContactRecordView(props: Props) {
                             }
                           }}
                           style={{
-                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                            fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                             padding: '4px 12px', borderRadius: 3, cursor: enrolling ? 'default' : 'pointer',
-                            background: '#10b98122', color: '#10b981',
-                            border: '1px solid #10b981', letterSpacing: '0.04em',
+                            background: '#26705a22', color: '#26705a',
+                            border: '1px solid #26705a', letterSpacing: '0.04em',
                             opacity: enrolling ? 0.6 : 1,
                           }}
                         >
@@ -2009,7 +1965,7 @@ export function ContactRecordView(props: Props) {
                           type="button"
                           onClick={() => setEnrollPickerOpen(false)}
                           style={{
-                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                            fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                             padding: '4px 12px', borderRadius: 3, cursor: 'pointer',
                             background: 'transparent', color: 'var(--muted)',
                             border: '1px solid var(--border)', letterSpacing: '0.04em',
@@ -2022,7 +1978,7 @@ export function ContactRecordView(props: Props) {
                   )}
 
                   {dripEnrollments.length === 0 && !enrollPickerOpen && (
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', paddingTop: 4 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', paddingTop: 4 }}>
                       Not enrolled in any campaigns.
                     </div>
                   )}
@@ -2033,19 +1989,19 @@ export function ContactRecordView(props: Props) {
                         const isActive = enrollment.status === 'active'
                         const isPaused = enrollment.status === 'paused'
                         const isCompleted = enrollment.status === 'completed'
-                        const statusColor = isActive ? '#10b981' : isPaused ? '#f59e0b' : isCompleted ? '#60a5fa' : '#ef4444'
-                        const statusBg = isActive ? '#10b98122' : isPaused ? '#f59e0b22' : isCompleted ? '#60a5fa22' : '#ef444422'
+                        const statusColor = isActive ? '#26705a' : isPaused ? '#f59e0b' : isCompleted ? '#276b86' : '#ef4444'
+                        const statusBg = isActive ? '#26705a22' : isPaused ? '#f59e0b22' : isCompleted ? '#276b8622' : '#ef444422'
                         const stepLabel = isCompleted
                           ? `${enrollment.total_steps} of ${enrollment.total_steps}`
                           : `${enrollment.current_step + 1} of ${enrollment.total_steps}`
                         return (
                           <div key={enrollment.id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)' }}>
                                 {enrollment.campaign_name}
                               </span>
                               <span style={{
-                                fontSize: 9, padding: '2px 6px', borderRadius: 4, fontFamily: 'var(--font-mono)',
+                                fontSize: 11, padding: '2px 6px', borderRadius: 4, fontFamily: 'var(--font-mono)',
                                 background: statusBg, color: statusColor, border: `1px solid ${statusColor}`,
                                 textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600,
                               }}>
@@ -2060,12 +2016,12 @@ export function ContactRecordView(props: Props) {
                                   transition: 'width 0.3s ease',
                                 }} />
                               </div>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
                                 Step {stepLabel}
                               </span>
                             </div>
                             {enrollment.next_send_at && (isActive || isPaused) && (
-                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
                                 Next email: {new Date(enrollment.next_send_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 {isPaused && ' (paused)'}
                               </div>
@@ -2077,11 +2033,11 @@ export function ContactRecordView(props: Props) {
                                     type="button"
                                     onClick={() => onToggleDrip(enrollment.id, isActive ? 'paused' : 'active')}
                                     style={{
-                                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                                       padding: '4px 10px', borderRadius: 3, cursor: 'pointer',
-                                      background: isActive ? '#f59e0b22' : '#10b98122',
-                                      color: isActive ? '#f59e0b' : '#10b981',
-                                      border: `1px solid ${isActive ? '#f59e0b' : '#10b981'}`,
+                                      background: isActive ? '#f59e0b22' : '#26705a22',
+                                      color: isActive ? '#f59e0b' : '#26705a',
+                                      border: `1px solid ${isActive ? '#f59e0b' : '#26705a'}`,
                                       letterSpacing: '0.04em',
                                     }}
                                   >
@@ -2097,7 +2053,7 @@ export function ContactRecordView(props: Props) {
                                       }
                                     }}
                                     style={{
-                                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                                       padding: '4px 10px', borderRadius: 3, cursor: 'pointer',
                                       background: 'transparent', color: '#ef4444',
                                       border: '1px solid #ef444466', letterSpacing: '0.04em',
@@ -2125,7 +2081,7 @@ export function ContactRecordView(props: Props) {
                 <ContactEmailHistory drafts={emailDrafts} />
                 {contactEmails.length > 0 && (
                   <div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 10, textTransform: 'uppercase' }}>Email Log</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 10, textTransform: 'uppercase' }}>Email Log</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {contactEmails.map(ce => (
                         <ContactEmailLogRow key={ce.id} email={ce} />
@@ -2139,16 +2095,16 @@ export function ContactRecordView(props: Props) {
             {leftTab === 'chat' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {websiteConversations.length === 0 ? (
-                  <div style={{ ...cardStyle, color: 'var(--muted)', fontSize: 12 }}>
+                  <div style={{ ...cardStyle, color: 'var(--muted)', fontSize: 14 }}>
                     No website chat transcripts are linked to this contact yet.
                   </div>
                 ) : websiteConversations.map((conversation, conversationIndex) => (
                   <details key={conversation.id} open={conversationIndex === 0} style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
                     <summary style={{ cursor: 'pointer', padding: '14px 18px', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#c9a84c', fontSize: 11, fontWeight: 700 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#26705a', fontSize: 13, fontWeight: 700 }}>
                         <MessageSquare size={13} /> Website chat
                       </span>
-                      <span style={{ color: 'var(--muted)', fontSize: 10 }}>
+                      <span style={{ color: 'var(--muted)', fontSize: 12 }}>
                         {new Date(conversation.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         {' · '}{conversation.messages.length} messages
                       </span>
@@ -2158,12 +2114,12 @@ export function ContactRecordView(props: Props) {
                         <div key={message.id} style={{ display: 'flex', justifyContent: message.role === 'visitor' ? 'flex-end' : 'flex-start' }}>
                           <div style={{
                             maxWidth: '82%', padding: '9px 12px', borderRadius: 8,
-                            background: message.role === 'visitor' ? '#c9a84c' : 'var(--surface)',
-                            color: message.role === 'visitor' ? '#111' : 'var(--fg)',
+                            background: message.role === 'visitor' ? '#26705a' : 'var(--surface)',
+                            color: message.role === 'visitor' ? '#fff' : 'var(--fg)',
                             border: message.role === 'visitor' ? 'none' : '1px solid var(--border)',
-                            fontFamily: 'var(--font-mono)', fontSize: 11, lineHeight: 1.55, whiteSpace: 'pre-wrap',
+                            fontFamily: 'var(--font-mono)', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-wrap',
                           }}>
-                            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.65, marginBottom: 4 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.65, marginBottom: 4 }}>
                               {message.role === 'visitor' ? 'Visitor' : 'Assistant'}
                             </div>
                             {message.redacted_text}
@@ -2180,7 +2136,7 @@ export function ContactRecordView(props: Props) {
         </div>
 
         {/* ── Right column: activity feed ── */}
-        <div style={{
+        <aside className="record-detail-sidebar" aria-label="Notes and activity" style={{
           width: 360, flexShrink: 0,
           borderLeft: '1px solid var(--border)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
@@ -2192,18 +2148,19 @@ export function ContactRecordView(props: Props) {
             borderBottom: '1px solid var(--border)', background: 'var(--bg)',
           }}>
             <div style={{ display: 'flex', gap: 0, marginBottom: rightTab === 'activity' ? 8 : 0 }}>
-              {([['notes', `Notes (${contactNotes.length})`], ['activity', `Activity (${unifiedFeed.length})`]] as const).map(([key, label]) => (
+              {([['notes', `Notes (${contactNotes.length + (contact.notes ? 1 : 0)})`], ['activity', `Activity (${unifiedFeed.length})`]] as const).map(([key, label]) => (
                 <button
                   key={key}
+                  aria-pressed={rightTab === key}
                   onClick={() => setRightTab(key as 'notes' | 'activity')}
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                    fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                     letterSpacing: '0.04em', padding: '6px 14px',
                     cursor: 'pointer',
                     borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-                    borderBottom: rightTab === key ? '2px solid #c9a84c' : '2px solid transparent',
+                    borderBottom: rightTab === key ? '2px solid #26705a' : '2px solid transparent',
                     background: 'transparent',
-                    color: rightTab === key ? '#c9a84c' : 'var(--muted)',
+                    color: rightTab === key ? '#26705a' : 'var(--muted)',
                     transition: 'all 0.15s',
                   }}
                 >
@@ -2218,11 +2175,11 @@ export function ContactRecordView(props: Props) {
                   key={key}
                   onClick={() => setFeedFilter(key)}
                   style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                    fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
                     letterSpacing: '0.06em', padding: '3px 7px', borderRadius: 3,
                     cursor: 'pointer', border: 'none',
-                    background: feedFilter === key ? 'rgba(201,168,76,0.15)' : 'transparent',
-                    color: feedFilter === key ? '#c9a84c' : 'var(--muted)',
+                    background: feedFilter === key ? 'rgba(38,112,90,0.15)' : 'transparent',
+                    color: feedFilter === key ? '#26705a' : 'var(--muted)',
                   }}
                 >
                   {label}
@@ -2244,8 +2201,12 @@ export function ContactRecordView(props: Props) {
                   }}
                 />
               </div>
-              {contactNotes.length === 0 ? (
-                <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+              {contact.notes && <section className="record-detail-note" aria-label="Existing contact notes">
+                <h2>Earlier notes</h2>
+                <p>{contact.notes}</p>
+              </section>}
+              {contactNotes.length === 0 && !contact.notes ? (
+                <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--muted)' }}>
                   No notes yet — add one above.
                 </div>
               ) : (
@@ -2286,7 +2247,7 @@ export function ContactRecordView(props: Props) {
                     }}
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 5,
-                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                       letterSpacing: '0.06em',
                       padding: '6px 12px', borderRadius: 4, cursor: 'pointer',
                       background: isActive ? cfg.bg : 'var(--bg)',
@@ -2314,12 +2275,12 @@ export function ContactRecordView(props: Props) {
                   style={{
                     width: '100%', background: 'var(--bg)', color: 'var(--fg)',
                     border: '1px solid var(--border)', borderRadius: 4,
-                    padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11,
+                    padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 13,
                     resize: 'none', boxSizing: 'border-box', marginBottom: 8,
                   }}
                 />
                 {activityError && (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#fca5a5', marginBottom: 6 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#fca5a5', marginBottom: 6 }}>
                     {activityError}
                   </div>
                 )}
@@ -2328,9 +2289,9 @@ export function ContactRecordView(props: Props) {
                     onClick={handleLogActivity}
                     disabled={activitySaving}
                     style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-                      background: activitySaving ? 'var(--surface)' : '#c9a84c',
-                      color: activitySaving ? 'var(--muted)' : '#000',
+                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
+                      background: activitySaving ? 'var(--surface)' : '#26705a',
+                      color: activitySaving ? 'var(--muted)' : '#fff',
                       border: 'none', padding: '5px 14px', borderRadius: 4,
                       cursor: activitySaving ? 'default' : 'pointer',
                     }}
@@ -2340,7 +2301,7 @@ export function ContactRecordView(props: Props) {
                   <button
                     onClick={() => { setActivityFormType(null); setActivityNotes(''); setActivityError(null) }}
                     style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
                       background: 'transparent', color: 'var(--muted)',
                       border: '1px solid var(--border)', padding: '5px 14px', borderRadius: 4,
                       cursor: 'pointer',
@@ -2383,7 +2344,7 @@ export function ContactRecordView(props: Props) {
               })
               if (filtered.length === 0) {
                 return (
-                  <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
+                  <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--muted)' }}>
                     {feedFilter === 'correspondence' ? 'No correspondence yet — log a call, text, or email above.' : feedFilter === 'all' ? 'No activity yet.' : `No ${feedFilter} activity.`}
                   </div>
                 )
@@ -2398,7 +2359,7 @@ export function ContactRecordView(props: Props) {
           </>
           )}
 
-        </div>
+        </aside>
       </div>
 
     </div>
@@ -2422,7 +2383,7 @@ const DRAFT_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  pending: '#c9a84c', sent: '#6ee7b7', discarded: '#71717a',
+  pending: '#26705a', sent: '#6ee7b7', discarded: '#71717a',
 }
 
 function timeAgo(dateStr: string): string {
@@ -2453,7 +2414,7 @@ function InboundEmailFeed({ emails }: { emails: InboundEmailRow[] }) {
 
   return (
     <div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 8 }}>
         INBOUND EMAILS ({emails.length})
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -2483,24 +2444,24 @@ function InboundEmailFeed({ emails }: { emails: InboundEmailRow[] }) {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span style={{
-                    background: 'rgba(201,168,76,0.15)', color: '#C9A84C',
-                    fontSize: 10, fontFamily: 'var(--font-mono)', padding: '2px 8px',
+                    background: 'rgba(38,112,90,0.15)', color: '#26705a',
+                    fontSize: 12, fontFamily: 'var(--font-mono)', padding: '2px 8px',
                     borderRadius: 12, fontWeight: 600, letterSpacing: '0.05em',
                   }}>
                     INBOUND
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)' }}>
                     {ts}
                   </span>
                 </div>
                 <div style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)',
+                  fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2,
                 }}>
                   {email.subject || '\u2014'}
                 </div>
                 <div style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)',
+                  fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   From: {fromName ? `${fromName} <${email.from_address}>` : (email.from_address || '\u2014')}
@@ -2509,7 +2470,7 @@ function InboundEmailFeed({ emails }: { emails: InboundEmailRow[] }) {
               {isOpen && email.body_snippet && (
                 <div style={{
                   borderTop: '1px solid var(--border)', padding: '12px 16px',
-                  fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)',
+                  fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--muted)',
                   lineHeight: 1.6, whiteSpace: 'pre-wrap',
                 }}>
                   {email.body_snippet}
@@ -2539,16 +2500,16 @@ function ContactEmailLogRow({ email }: { email: ContactEmailRow }) {
         }}
       >
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.08em',
           padding: '2px 8px', borderRadius: 10,
-          background: 'rgba(201,168,76,0.12)', color: '#c9a84c',
-          border: '1px solid rgba(201,168,76,0.3)', flexShrink: 0,
+          background: 'rgba(38,112,90,0.12)', color: '#26705a',
+          border: '1px solid rgba(38,112,90,0.3)', flexShrink: 0,
         }}>{label}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {email.subject}
         </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', flexShrink: 0 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', flexShrink: 0 }}>
           {new Date(email.sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
       </button>
@@ -2556,7 +2517,7 @@ function ContactEmailLogRow({ email }: { email: ContactEmailRow }) {
         <div style={{
           borderTop: '1px solid var(--border)',
           padding: '12px 14px',
-          fontFamily: 'var(--font-mono)', fontSize: 12,
+          fontFamily: 'var(--font-mono)', fontSize: 14,
           color: 'var(--fg)', lineHeight: 1.6,
           whiteSpace: 'pre-wrap', maxHeight: 240, overflowY: 'auto',
           background: 'var(--bg)',
@@ -2599,7 +2560,7 @@ function ContactEmailHistory({ drafts }: { drafts: EmailDraftRow[] }) {
     return (
       <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '32px 0' }}>
         <Inbox size={20} style={{ color: 'var(--muted)' }} />
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)' }}>No emails logged for this contact</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--muted)' }}>No emails logged for this contact</span>
       </div>
     )
   }
@@ -2618,20 +2579,20 @@ function ContactEmailHistory({ drafts }: { drafts: EmailDraftRow[] }) {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ background: bgColor, color: '#fff', fontSize: 10, fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 12, fontWeight: 600, letterSpacing: '0.05em' }}>{label}</span>
-                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: STATUS_COLOR[draft.status] ?? '#c9a84c', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{draft.status}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                  <span style={{ background: bgColor, color: '#fff', fontSize: 12, fontFamily: 'var(--font-mono)', padding: '2px 8px', borderRadius: 12, fontWeight: 600, letterSpacing: '0.05em' }}>{label}</span>
+                  <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: STATUS_COLOR[draft.status] ?? '#26705a', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{draft.status}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
                     <Clock size={11} />{timeAgo(draft.created_at)}
                   </span>
                 </div>
                 <ChevronRight size={14} style={{ color: 'var(--muted)', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }} />
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{draft.subject}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--fg)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{draft.subject}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 To: {draft.recipient_name ? `${draft.recipient_name} <${draft.recipient_email}>` : draft.recipient_email}
               </div>
               {!isOpen && draft.body_preview && (
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginTop: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{draft.body_preview}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--muted)', marginTop: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{draft.body_preview}</div>
               )}
             </button>
             {isOpen && (
@@ -2646,13 +2607,13 @@ function ContactEmailHistory({ drafts }: { drafts: EmailDraftRow[] }) {
                   <div style={{ display: 'flex', gap: 8, padding: '10px 14px', borderTop: '1px solid var(--border)' }}>
                     <button
                       onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'sent') }}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontFamily: 'var(--font-mono)', background: 'rgba(52,211,153,0.1)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: 'var(--font-mono)', background: 'rgba(52,211,153,0.1)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
                     >
                       <Check size={12} /> Mark Sent
                     </button>
                     <button
                       onClick={e => { e.stopPropagation(); updateStatus(draft.id, 'discarded') }}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontFamily: 'var(--font-mono)', background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: 'var(--font-mono)', background: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 600 }}
                     >
                       <X size={12} /> Discard
                     </button>

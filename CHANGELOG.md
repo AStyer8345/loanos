@@ -1,3 +1,9 @@
+## 2026-09-05 — Individual loan and contact record layout
+
+Redesigned the pages opened by clicking a record with cream and green styling, larger headings, readable labels, normal page scrolling and responsive sections. Loan notes lead the overview; Full loan details retains the existing field editors. Contact information leads its overview and the notes sidebar opens by default, showing both saved notes and legacy imported notes. Linked loan cards include history. The loan header uses a 2% planning estimate while stored commission remains editable in Financials; funded records no longer display a closing countdown.
+
+Validation uses the actual detail components with synthetic records on desktop and mobile, including notes, tabs and the full-details disclosure. No borrower record writes, external communications or authentication changes are included.
+
 ## 2026-09-05 — Contact Records matches Loan Records
 
 Contact Records now uses the same cream and green desk layout as Loan Records: clear heading, quick views, readable names and notes, referral links, a compact search toolbar, and optional saved-view navigation. Existing column choices remain saved, with a desk-column preset available. Both record lists link to each other and Jungo history.

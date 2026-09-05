@@ -1,3 +1,7 @@
+## 2026-09-05 — Individual loan and contact records
+
+The pages opened by clicking a loan or contact now match the Lead Desk: cream/green styling, clear identity and referral information, readable sections and normal page scrolling. Loan notes appear before the overview, with full editable fields in a disclosure. Contact notes open by default and include legacy imported notes. The loan header shows the requested 2% planning estimate; stored commission stays in Financials. This is a UI change, with no automatic record writes or messaging.
+
 ## 2026-09-05 — Contact Records matches Loan Records
 
 Contact Records now uses the same cream and green desk layout as Loan Records: clear heading, quick views, readable names and notes, referral links, a compact search toolbar, and optional saved-view navigation. Existing column choices remain saved, with a desk-column preset available. Both record lists link to each other and Jungo history.

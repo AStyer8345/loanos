@@ -4,9 +4,9 @@ Use this doc to describe how the app should look. When you want changes, **edit 
 
 ---
 
-## Record lists — September 2026 user-directed exception
+## Records — September 2026 user-directed exception
 
-Loan Records and Contact Records follow the cream and green Lead Desk design requested by Adam. Styles are scoped to these record lists (and Jungo history); other screens retain their existing theme. Use readable serif headings, normal-case labels, restrained green accents, simple views, and visible notes and referral names.
+Loan Records and Contact Records, including the individual pages opened by clicking a record, follow the cream and green Lead Desk design requested by Adam. Styles are scoped to these records and Jungo history; other screens retain their existing theme. Use readable serif headings, normal-case labels, restrained green accents, simple views, and visible notes and referral names. Detail pages use normal page scrolling, prominent notes and related records, with longer loan field groups under Full loan details. Retain existing field editors and communication actions.
 
 ## Global
 

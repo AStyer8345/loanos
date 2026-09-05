@@ -297,7 +297,7 @@ const WORKFLOWS = [
   {
     id: 'contract-received',
     name: 'Contract Received',
-    description: 'Upload an executed purchase contract — Claude extracts all key fields, drafts reply-all to transaction parties.',
+    description: 'Save the executed contract as a source version and create a review task before any source changes.',
     triggerLabel: 'Upload Contract PDF',
     triggerType: 'pdf' as const,
     webhookPath: 'loanos-contract-received',
@@ -1684,6 +1684,7 @@ function DocumentsSidebarPanel({ loanId, docs, onRefresh }: { loanId: string; do
           ))}
         </div>
       )}
+      <div className="p-3 border-t border-input"><a className="text-xs underline" href={`/dashboard/loans/${loanId}/document-review`}>Contract and conditional-approval reviews →</a></div>
     </div>
   )
 }
@@ -2274,8 +2275,8 @@ function LoanTriggerModal({ workflow, loan, onClose, onSuccess }: {
           {done ? (
             <div className="flex flex-col items-center py-4 gap-2 text-[#4ADE80]">
               <Check size={28} />
-              <p className="font-medium">Sent to n8n</p>
-              <p className="text-xs text-muted-foreground font-mono">Check Outlook for draft</p>
+              <p className="font-medium">{workflow.id === 'contract-received' ? 'Contract review saved' : 'Request accepted'}</p>
+              <p className="text-xs text-muted-foreground font-mono">{workflow.id === 'contract-received' ? 'Open Document review to inspect the source and assign work.' : 'Check the workflow result before taking the next action.'}</p>
             </div>
           ) : (
             <>

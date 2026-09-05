@@ -42,3 +42,15 @@ Ordinary profile editing cannot change organization or role. Service-only functi
 Validation covers synthetic cohort cases, task parsing/routing, inquiry normalization/idempotency, rolled-back two-organization SQL checks, trusted onboarding and invitation retries, and authenticated HTTP reads and controlled internal task mutations. Production delivery proof separately records provider acceptance and matching received message headers.
 
 Keep the preceding deployment available for application rollback. Applied additive migrations preserve records and history. External workflow and schedule recovery snapshots are maintained privately outside the source repository; do not commit credentials, mailbox headers or borrower snapshots.
+
+## Incremental sent-mail metadata capture
+
+The sent-mail extension is a separate four-node branch of existing Outlook workflow qgb99Eh2ziy0INMk, not a replacement for inbound handling. Restore its preceding version 1a3a4b49-2356-4a1c-89a1-c0a3defa887b if needed. The branch reads one bounded Graph page every 30 minutes, follows the publisher-provided next-page URL and commits the page plus checkpoint together. Five minutes of overlap and a stable Internet Message-ID hash prevent lost or duplicate events. Initial coverage is the previous 14 days, then incremental windows; large windows continue from a saved page.
+
+Only the verified business sender and source metadata are captured. No bodies or attachments are requested. Subject and source references are encrypted; sensitive subjects are held. Exact unique recipient/contact matches link the contact timeline; multiple/no matches remain in the existing Unmatched Emails review area. No loan association, human authorship, engagement milestone, approval, financial value, new task or outgoing message is inferred. Completed capture updates source health automatically, separately from the source message date.
+
+Microsoft reference: https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0 — use $select, bounded filtering and the full @odata.nextLink for paging. This is incremental reconciliation, not a claim of Graph push-subscription authorization.
+
+The new reconciliation branch contains no write to a communication provider. Graph requests select metadata only and use the existing Outlook OAuth credential. New checkpoint/page API requests use the existing scoped agent credential. Its read and idempotent commit steps retry at most three times; a failed page leaves its cursor intact. Publisher API authorization does not imply Teams, SMS or another mailbox access.
+
+Production verification captured 53 unique sent-mail references (19 matched, 34 unmatched) for the initial 14-day window; repeat reconciliation added no duplicate. A separate read-only provider check exposed Graph's parenthesized mailFolders('sentitems') next-page URL. The URL guard accepts that exact publisher form and preserves the complete query while still rejecting other folders and origins. The temporary worker draft was restored without changing its published capture path.

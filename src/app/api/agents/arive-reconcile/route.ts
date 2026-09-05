@@ -7,7 +7,7 @@ export const maxDuration=60;
 const org='18613f82-fdd9-42dd-a09e-f3c577328258';
 const headers={'Cache-Control':'private, no-store'};
 export async function POST(req:Request){
- const secret=process.env.ARIVE_WEBHOOK_SECRET||'',provided=req.headers.get('x-webhook-secret')||'';
+ const secret=process.env.ARIVE_RECONCILIATION_SECRET||'',provided=req.headers.get('x-webhook-secret')||'';
  if(secret.length<20||provided.length!==secret.length||!timingSafeEqual(Buffer.from(secret),Buffer.from(provided)))return NextResponse.json({error:'Unauthorized'},{status:401,headers});
  const db=intakeDb();
  try{

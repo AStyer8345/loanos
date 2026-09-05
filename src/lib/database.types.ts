@@ -1863,6 +1863,7 @@ export type Database = {
       }
       loans: {
         Row: {
+          imported_history: boolean
           adverse_reason: string | null
           amortization_type: string | null
           application_date: string | null
@@ -2094,6 +2095,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          imported_history?: boolean
           adverse_reason?: string | null
           amortization_type?: string | null
           application_date?: string | null
@@ -2325,6 +2327,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          imported_history?: boolean
           adverse_reason?: string | null
           amortization_type?: string | null
           application_date?: string | null

@@ -1,3 +1,11 @@
+## 2026-09-05 — Loan Records layout and Jungo history
+
+Loan Records now follows the simple Lead Desk cream/green layout: clear status tabs, readable names, full-view search and 2% planning totals, saved views, and 100 visible table rows per page. All records are read in stable pages before totals appear; missing pages fail visibly. Application intake is separate from verified preapproval. Imported historical loans keep their source stage but are excluded from active-stage tabs.
+
+Reconciled the September 2 Jungo workbook against LoanOS: added 240 contacts and 149 loans; filled blanks on 631 contacts and 585 loans. Preserved all 2,634 source entries in an encrypted organization-scoped archive. The Jungo history page shows 1,673 matched, 389 added, 408 needing identity/transaction review, and 164 non-loan/test/duplicate source-only entries. Existing notes, loan facts, preferences and communication state were preserved. See docs/JUNGO_HISTORY_IMPORT.md for evidence and remaining gaps.
+
+Validation: rolled-back rehearsal and repeat-import no-op; database preservation assertions; complete owner API and anonymous rejection; focused pagination/history/Lead Desk tests; browser search, totals, history and responsive layout checks. Release state is recorded in the task handoff.
+
 ## 2026-09-05 — Reconcile Lead Desk with ARIVE
 
 Verified loan facts take precedence over imported planning overrides. Application intake has its own view and no longer appears as preapproval. Added source links, last-check and overdue/failure information, preserved notes and referrals, stable reviewed ARIVE IDs, tenant-scoped facts, full timestamps and late-event rejection. The existing n8n status relay now retains modification time and stops old events before downstream writes. A complete-list recovery receiver is ready for scheduling.

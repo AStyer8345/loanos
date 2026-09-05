@@ -29,6 +29,8 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import '../loans/loan-records.css'
+import './contact-records.css'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Contact = {
@@ -150,9 +152,9 @@ function LastTouchCell({ date }: { date: string | null }) {
 
   // Color coding by recency
   let color = 'rgba(113,113,122,0.6)'
-  if (diffDays <= 3) color = '#4ade80'
-  else if (diffDays <= 7) color = '#facc15'
-  else color = '#f87171'
+  if (diffDays <= 3) color = '#26705a'
+  else if (diffDays <= 7) color = '#946017'
+  else color = '#a6372f'
 
   const mo = String(ts.getMonth() + 1).padStart(2, '0')
   const da = String(ts.getDate()).padStart(2, '0')
@@ -180,7 +182,7 @@ const SMART_LISTS: SmartListDef[] = [
   { id: 'followup-new-leads',    label: 'New Leads (30d)',              section: 'FOLLOW-UP' },
   { id: 'followup-stale',        label: 'Going Quiet (7\u201330d)' },
   { id: 'followup-pa-shopping',  label: 'Pre-Approved \u2014 Still Shopping' },
-  { id: 'active',         label: 'Hot List / Pre-Approved' },
+  { id: 'active',         label: 'Pre-Approved' },
   { id: 'all',            label: 'All Contacts' },
   { id: 'all-borrowers',  label: 'All Borrowers',          section: 'BORROWERS' },
   { id: 'new-apps',       label: 'New Applications' },
@@ -192,16 +194,19 @@ const SMART_LISTS: SmartListDef[] = [
   { id: 'top_producers',        label: 'Top Producers (YTD ≥ 2)' },
   { id: 'due_for_outreach',     label: 'Due for Outreach (60+ days)' },
   { id: 'tier_a_not_this_month', label: 'Tier A — Not This Month' },
-  { id: 'unassigned',           label: 'Unassigned / Other',          section: 'OTHER' },
+  { id: 'all-advisors',         label: 'Financial Advisors',           section: 'PARTNERS' },
+  { id: 'unassigned',           label: 'Other Contacts',          section: 'OTHER' },
 ]
 
 // ── Quick filter dropdown options (maps to smart list IDs) ────────────────────
-const QUICK_FILTERS = [
-  { id: 'active',        label: 'Hot List / Pre-Approved' },
-  { id: 'all',           label: 'All Contacts' },
+const CONTACT_VIEWS = [
+  { id: 'all', label: 'All contacts' },
   { id: 'all-borrowers', label: 'Borrowers' },
-  { id: 'all-realtors',  label: 'Realtors' },
-  { id: 'unassigned',    label: 'Others' },
+  { id: 'active', label: 'Pre-approved' },
+  { id: 'in-process', label: 'In process' },
+  { id: 'closed', label: 'Past clients' },
+  { id: 'all-realtors', label: 'Realtors' },
+  { id: 'all-advisors', label: 'Financial advisors' },
 ] as const
 
 // ── Custom lists (filter builder) ─────────────────────────────────────────────
@@ -256,9 +261,12 @@ const REFERRAL_TYPE_LABELS: Record<string, string> = {
 // ── Column Definitions ────────────────────────────────────────────────────────
 const ALL_COLUMNS: ColumnDef[] = [
   { id: 'name',         label: 'Name',             minWidth: 200, render: c => (
-      <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
-        {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || '—'}
-      </Link>
+      <div className="contact-records-person">
+        <Link href={`/dashboard/contacts/${c.id}`} onClick={e => e.stopPropagation()}>
+          {`${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || 'Unnamed contact'}
+        </Link>
+        <span>{c.contact_type ? c.contact_type.replace(/_/g, ' ') : 'Type not recorded'}</span>
+      </div>
     ) },
   { id: 'created_at',   label: 'Created Date',     minWidth: 140, render: c => fmtDateOnly(c.created_at) },
   { id: 'type',         label: 'Type',             minWidth: 100, render: c => c.contact_type ?? '—' },
@@ -267,7 +275,7 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'stage',        label: 'Stage',            minWidth: 120, render: c => c.stage ?? '—' },
   { id: 'lead_source',  label: 'Lead Source',      minWidth: 140, render: c => c.lead_source ?? '—' },
   { id: 'referral_type', label: 'Referral Type',    minWidth: 140, render: c => c.referral_type
-      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 7px', borderRadius: 4, background: 'rgba(59,130,246,0.12)', color: '#60a5fa', whiteSpace: 'nowrap' }}>{REFERRAL_TYPE_LABELS[c.referral_type] ?? c.referral_type}</span>
+      ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, padding: '2px 7px', borderRadius: 4, background: 'rgba(59,130,246,0.12)', color: '#276b86', whiteSpace: 'nowrap' }}>{REFERRAL_TYPE_LABELS[c.referral_type] ?? c.referral_type}</span>
       : <span style={{ color: 'var(--muted)' }}>—</span> },
   { id: 'referred_by',  label: 'Referred By',      minWidth: 160, render: c => c.referred_by
       ? <Link href={`/dashboard/contacts/by-name/${encodeURIComponent(c.referred_by)}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{c.referred_by}</Link>
@@ -278,13 +286,13 @@ const ALL_COLUMNS: ColumnDef[] = [
   { id: 'co_bday',      label: 'Co-Bday',          minWidth: 120, render: c => c.co_borrower_birthdate ?? '—' },
   { id: 'notes',        label: 'Notes',            minWidth: 200, render: c => {
       const v = c.notes
-      if (!v) return '—'
+      if (!v) return <span className="contact-records-empty-note">No notes yet</span>
       // If the notes value looks like an ISO date/timestamp, display as MM/DD/YYYY only
       if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
         const formatted = fmtDateOnly(v)
         if (formatted !== '—') return formatted
       }
-      return v
+      return <span className="contact-records-note" title={v}>{v}</span>
     } },
   { id: 'last_touch',      label: 'Last Touch',       minWidth: 180, render: c => <LastTouchCell date={c.last_touch_at ?? c.last_activity_date} /> },
   { id: 'production_tier', label: 'Tier',             minWidth: 80,  render: c => c.production_tier
@@ -311,11 +319,20 @@ const ALL_COLUMNS: ColumnDef[] = [
     } },
 ]
 
-const DEFAULT_COLUMNS = ['name', 'type', 'phone', 'email', 'stage', 'referred_by', 'last_touch']
+const DEFAULT_COLUMNS = ['name', 'stage', 'phone', 'email', 'referred_by', 'notes', 'last_touch']
 const LS_COLUMNS_KEY  = 'loanos_contacts_columns_v1'
 const LS_COL_ORDER_KEY = 'loanos_contacts_col_order_v1'
 // IDs of non-name (draggable) columns in their default order
-const DRAGGABLE_COL_IDS = ALL_COLUMNS.filter(c => c.id !== 'name').map(c => c.id)
+const DRAGGABLE_COL_IDS = [
+  ...DEFAULT_COLUMNS.filter(id => id !== 'name'),
+  ...ALL_COLUMNS.filter(c => !DEFAULT_COLUMNS.includes(c.id)).map(c => c.id),
+]
+const COLUMN_SORT_KEYS: Partial<Record<string, keyof Contact>> = {
+  type: 'contact_type', company: 'company_name', birthday: 'birthdate',
+  co_name: 'co_borrower_first', co_bday: 'co_borrower_birthdate',
+  referral_lifetime: 'referral_lifetime_count', last_referral: 'last_referral_date',
+  last_deal: 'last_deal_closed_date', last_touch: 'last_touch_at',
+}
 
 // ── Stage badge styles ────────────────────────────────────────────────────────
 function getStageBadgeStyle(stage: string | null): React.CSSProperties {
@@ -380,6 +397,8 @@ function applySmartList(query: any, listId: string): any { // eslint-disable-lin
       return query.eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing'])
     case 'closed':
       return query.eq('contact_type', 'borrower').in('stage', ['Closed'])
+    case 'all-advisors':
+      return query.eq('contact_type', 'advisor')
     case 'all-realtors':
       return query.eq('contact_type', 'realtor')
     case 'top-realtors':
@@ -587,8 +606,8 @@ function SortableColumnHeader({
         >
           <GripVertical size={12} />
         </span>
-        {col.label.toUpperCase()}
-        {sortKey === col.id ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+        {col.label}
+        {sortKey === (COLUMN_SORT_KEYS[col.id] ?? col.id) ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
       </div>
     </th>
   )
@@ -603,7 +622,7 @@ export default function ContactsPage() {
   // list state
   const [contacts, setContacts]     = useState<Contact[]>([])
   const [loading, setLoading]       = useState(true)
-  const [activeList, setActiveList] = useState('active')
+  const [activeList, setActiveList] = useState('all')
   const [search, setSearch]         = useState('')
   const [sort, setSort]             = useState<SortConfig>({ key: 'last_name', dir: 'asc' })
   const [total, setTotal]           = useState(0)
@@ -611,6 +630,8 @@ export default function ContactsPage() {
   const [hasMore, setHasMore]       = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const offsetRef                   = useRef(0)
+  const fetchVersion = useRef(0)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   // slide-out
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -666,17 +687,7 @@ export default function ContactsPage() {
   const [kanbanContacts, setKanbanContacts] = useState<Record<string, Contact[]>>({})
   const [kanbanLoading, setKanbanLoading] = useState(false)
 
-  // sidebar collapse: default collapsed when viewport < 1280px; toggle overrides
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 1279px)')
-    const sync = () => setSidebarCollapsed(sidebarCollapsedUser ?? mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [sidebarCollapsedUser])
-
+  const [showViews, setShowViews] = useState(false)
 
   // init columns + column order from localStorage
   useEffect(() => {
@@ -685,10 +696,9 @@ export default function ContactsPage() {
       if (stored) {
         const parsed: string[] = JSON.parse(stored)
         const renamed = parsed.map(id => id === 'created' ? 'created_at' : id)
-        if (!renamed.includes('created_at')) renamed.push('created_at')
         setVisibleColumns(renamed)
       } else {
-        setVisibleColumns([...DEFAULT_COLUMNS, 'created_at'])
+        setVisibleColumns(DEFAULT_COLUMNS)
       }
     } catch {}
     try {
@@ -696,12 +706,8 @@ export default function ContactsPage() {
       if (storedOrder) {
         const parsed: string[] = JSON.parse(storedOrder)
         const renamed = parsed.map(id => id === 'created' ? 'created_at' : id)
-        const withoutCreated = renamed.filter(id => id !== 'created_at' && DRAGGABLE_COL_IDS.includes(id))
-        const merged = [
-          'created_at',
-          ...withoutCreated,
-          ...DRAGGABLE_COL_IDS.filter(id => id !== 'created_at' && !withoutCreated.includes(id)),
-        ]
+        const valid = renamed.filter(id => DRAGGABLE_COL_IDS.includes(id))
+        const merged = [...valid, ...DRAGGABLE_COL_IDS.filter(id => !valid.includes(id))]
         setColumnOrder(merged)
       }
     } catch {}
@@ -740,38 +746,20 @@ export default function ContactsPage() {
   const fetchCounts = useCallback(async () => {
     if (!organizationId) return
     const h = { count: 'exact', head: true } as const
-    const base = [
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Pre-Approved']),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower'),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Lead', 'Pre-App', 'Application']),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['In Process', 'Closing']),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').in('stage', ['Closed']),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor'),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').not('production_tier', 'is', null),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).or(
-        'contact_type.eq.other,contact_type.eq.advisor,contact_type.eq.title,contact_type.eq.insurance,' +
-        'contact_type.is.null,and(contact_type.eq.borrower,stage.is.null)'
-      ),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').gte('deals_ytd_count', 1),
-      supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').gte('referral_ytd_count', 2),
-      (() => { const c = new Date(Date.now() - 60*24*60*60*1000).toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').or(`last_outreach_date.is.null,last_outreach_date.lt.${c}`) })(),
-      (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); const s = d.toISOString().split('T')[0]; return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'realtor').eq('production_tier', 'A').or(`last_outreach_date.is.null,last_outreach_date.lt.${s}`) })(),
-      // Follow-Up segments (Phase 3) — must stay in sync with applySmartList above
-      (() => { const c30 = new Date(Date.now() - 30*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').gte('created_at', c30).or('stage.is.null,stage.in.(Lead,Pre-App,Application)') })(),
-      (() => { const c30 = new Date(Date.now() - 30*24*60*60*1000).toISOString(); const c7 = new Date(Date.now() - 7*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').gte('last_activity_date', c30).lte('last_activity_date', c7).not('stage', 'in', '(Closed,Dead,Withdrawn,Cancelled)') })(),
-      (() => { const c90 = new Date(Date.now() - 90*24*60*60*1000).toISOString(); return supabase.from('contacts').select('*', h).eq('organization_id', organizationId).eq('contact_type', 'borrower').eq('stage', 'Pre-Approved').or(`last_activity_date.gte.${c90},created_at.gte.${c90}`) })(),
-    ]
-    const builtInIds = ['all', 'active', 'all-borrowers', 'new-apps', 'in-process', 'closed', 'all-realtors', 'top-realtors', 'unassigned', 'active_deal_partners', 'top_producers', 'due_for_outreach', 'tier_a_not_this_month', 'followup-new-leads', 'followup-stale', 'followup-pa-shopping']
-    const results = await Promise.all(base)
+    const results = await Promise.all(SMART_LISTS.map(async list => {
+      const query = supabase.from('contacts').select('id', h).eq('organization_id', organizationId)
+      return { id: list.id, ...(await applySmartList(query, list.id)) }
+    }))
     const next: Record<string, number> = {}
-    builtInIds.forEach((id, i) => { next[id] = results[i].count ?? 0 })
-    for (const list of customLists) {
-      let q = supabase.from('contacts').select('*', h).eq('organization_id', organizationId)
-      if (list.rules?.length) q = applyCustomListRulesContact(q, list.rules)
-      const { count } = await q
-      next[list.id] = count ?? 0
+    for (const result of results) {
+      if (!result.error && result.count !== null) next[result.id] = result.count
     }
+    await Promise.all(customLists.map(async list => {
+      let q = supabase.from('contacts').select('id', h).eq('organization_id', organizationId)
+      if (list.rules?.length) q = applyCustomListRulesContact(q, list.rules)
+      const { count, error } = await q
+      if (!error && count !== null) next[list.id] = count
+    }))
     setCounts(next)
   }, [supabase, customLists, organizationId])
 
@@ -792,37 +780,53 @@ export default function ContactsPage() {
 
   const fetchContacts = useCallback(async () => {
     if (!organizationId) return
+    const version = ++fetchVersion.current
     setLoading(true)
+    setLoadError(null)
+    setLoadingMore(false)
     offsetRef.current = 0
-    let q = buildContactQuery(supabase.from('contacts').select('*').eq('organization_id', organizationId))
-    q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
-         .range(0, CONTACTS_PAGE_SIZE - 1)
-    const { data, error } = await q
-    if (!error) {
+    let q = buildContactQuery(supabase.from('contacts').select('*', { count: 'exact' }).eq('organization_id', organizationId))
+    q = q.order(sort.key, { ascending: sort.dir === 'asc', nullsFirst: false })
+         .order('id').range(0, CONTACTS_PAGE_SIZE - 1)
+    const { data, count, error } = await q
+    if (version !== fetchVersion.current) return
+    if (error || count === null) {
+      setContacts([])
+      setTotal(0)
+      setHasMore(false)
+      setLoadError('Could not load contacts. Please try again.')
+    } else {
       setContacts(data ?? [])
-      setTotal(data?.length ?? 0)
-      setHasMore((data?.length ?? 0) === CONTACTS_PAGE_SIZE)
+      setTotal(count)
+      setHasMore((data?.length ?? 0) < count)
     }
     setLoading(false)
     setSelectedIds(new Set())
   }, [supabase, buildContactQuery, sort, organizationId])
 
   const loadMoreContacts = useCallback(async () => {
-    if (!organizationId) return
+    if (!organizationId || loadingMore) return
+    const version = fetchVersion.current
     setLoadingMore(true)
+    setLoadError(null)
     const nextOffset = offsetRef.current + CONTACTS_PAGE_SIZE
-    let q = buildContactQuery(supabase.from('contacts').select('*').eq('organization_id', organizationId))
-    q = q.order(sort.key as string, { ascending: sort.dir === 'asc' })
-         .range(nextOffset, nextOffset + CONTACTS_PAGE_SIZE - 1)
-    const { data, error } = await q
-    if (!error && data) {
+    let q = buildContactQuery(supabase.from('contacts').select('*', { count: 'exact' }).eq('organization_id', organizationId))
+    q = q.order(sort.key, { ascending: sort.dir === 'asc', nullsFirst: false })
+         .order('id').range(nextOffset, nextOffset + CONTACTS_PAGE_SIZE - 1)
+    const { data, count, error } = await q
+    if (version !== fetchVersion.current) return
+    if (error || count === null) {
+      setLoadError('Could not load more contacts. Please try again.')
+    } else if (count !== total || data?.some((row: Contact) => contacts.some(c => c.id === row.id))) {
+      // The list changed between pages. Reload rather than append conflicting rows.
+      await fetchContacts()
+    } else if (data) {
       offsetRef.current = nextOffset
       setContacts(prev => [...prev, ...data])
-      setTotal(prev => prev + data.length)
-      setHasMore(data.length === CONTACTS_PAGE_SIZE)
+      setHasMore(nextOffset + data.length < count)
     }
     setLoadingMore(false)
-  }, [supabase, buildContactQuery, sort, organizationId])
+  }, [supabase, buildContactQuery, sort, organizationId, loadingMore, total, contacts, fetchContacts])
 
   useEffect(() => { fetchContacts() }, [fetchContacts])
   useEffect(() => { fetchCounts()   }, [fetchCounts])
@@ -1108,90 +1112,62 @@ export default function ContactsPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
-
-      {/* ── Sidebar ───── */}
-      <ContactsSidebar
-        smartLists={SMART_LISTS}
-        customLists={customLists}
-        activeList={activeList}
-        counts={counts}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-        onSelectList={(id) => { setActiveList(id); setSelectedContact(null); setSelectedIds(new Set()) }}
-        onNewList={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
-        onEditList={(list) => openEditModal(customLists.find(cl => cl.id === list.id)!)}
-        onDeleteList={(id) => setDeleteListId(id)}
-      />
+    <div className="loan-records-desk contact-records-desk">
+      {showViews && <div className="contact-records-sidebar">
+        <ContactsSidebar
+          smartLists={SMART_LISTS}
+          customLists={customLists}
+          activeList={activeList}
+          counts={counts}
+          collapsed={false}
+          onToggleCollapse={() => setShowViews(false)}
+          onSelectList={(id) => { setActiveList(id); setSelectedContact(null); setSelectedIds(new Set()); setShowViews(false) }}
+          onNewList={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'stage', operator: 'is', value: '' }]); setEditingListId(null) }}
+          onEditList={(list) => openEditModal(customLists.find(cl => cl.id === list.id)!)}
+          onDeleteList={(id) => setDeleteListId(id)}
+        />
+      </div>}
 
       {/* ── Main ────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0"
-             style={{ borderColor: 'var(--border)' }}>
+        <header className="loan-records-header">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: '0.05em', lineHeight: 1 }}>
-              {activeListLabel.toUpperCase()}
-            </h1>
-            <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 11, marginTop: 2 }}>
-              {counts[activeList] && counts[activeList] > total
-                ? <>{total.toLocaleString()} of {counts[activeList].toLocaleString()} {counts[activeList] === 1 ? 'contact' : 'contacts'}</>
-                : <>{total.toLocaleString()} {total === 1 ? 'contact' : 'contacts'}</>
-              }
-              {someSelected && <span style={{ marginLeft: 8, color: 'var(--primary)' }}>· {selectedIds.size} selected</span>}
-            </div>
+            <div className="loan-records-eyebrow">LOAN DESK</div>
+            <h1>Contact Records</h1>
+            <p>Clients, referral partners, and their history in one place.</p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setShowDuplicates(true)} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: 'transparent', color: 'var(--muted)', padding: '8px 16px', borderRadius: 4,
-              border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 600,
-            }}>FIND DUPES</button>
-            <button onClick={() => setShowImport(true)} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: 'transparent', color: 'var(--primary)', padding: '8px 16px', borderRadius: 4,
-              border: '1px solid color-mix(in srgb, var(--primary) 40%, transparent)', cursor: 'pointer', fontWeight: 600,
-            }}>↑ IMPORT</button>
-            <button onClick={() => setShowNewContact(true)} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
-              background: 'var(--primary)', color: '#000', padding: '8px 16px', borderRadius: 4,
-              border: 'none', cursor: 'pointer', fontWeight: 600,
-            }}>+ NEW CONTACT</button>
+          <div className="loan-records-header-actions">
+            <Link href="/dashboard">Lead Desk</Link>
+            <Link href="/dashboard/loans">Loan Records</Link>
+            <Link href="/dashboard/loans/history">Jungo history</Link>
+            <button className="contact-records-primary" onClick={() => setShowNewContact(true)}>+ New contact</button>
           </div>
-        </div>
+        </header>
 
-        {/* Filter bar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b flex-shrink-0"
-             style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-          {/* Quick filter dropdown */}
-          <select
-            value={QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
-            onChange={e => { setActiveList(e.target.value); setSelectedContact(null); setSelectedIds(new Set()) }}
-            style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em',
-              background: 'var(--bg)', color: 'var(--primary)', border: '1px solid color-mix(in srgb, var(--primary) 40%, transparent)',
-              borderRadius: 4, padding: '6px 10px', cursor: 'pointer', outline: 'none', flexShrink: 0,
-            }}
-          >
-            {QUICK_FILTERS.map(f => (
-              <option key={f.id} value={f.id}>{f.label}</option>
-            ))}
+        <nav className="loan-records-views" aria-label="Contact views">
+          {CONTACT_VIEWS.map(view => <button key={view.id}
+            aria-pressed={activeList === view.id}
+            onClick={() => { setActiveList(view.id); setSelectedContact(null); setSelectedIds(new Set()) }}>
+            {view.label}<span>{counts[view.id]?.toLocaleString() ?? '—'}</span>
+          </button>)}
+          <button aria-expanded={showViews} onClick={() => setShowViews(v => !v)}>More views</button>
+        </nav>
+
+        <div className="contact-records-tools">
+          <input aria-label="Search contacts" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search name, email, or phone…" />
+          <select aria-label="Contact list" value={activeList}
+            onChange={e => { setActiveList(e.target.value); setSelectedContact(null); setSelectedIds(new Set()) }}>
+            {SMART_LISTS.map(list => <option key={list.id} value={list.id}>{list.label}</option>)}
+            {customLists.map(list => <option key={list.id} value={list.id}>{list.name}</option>)}
           </select>
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search contacts…"
-            style={{
-              flex: 1, background: 'var(--bg)', color: 'var(--fg)', border: '1px solid var(--border)',
-              borderRadius: 4, padding: '6px 10px', fontFamily: 'var(--font-mono)', fontSize: 12, outline: 'none',
-            }}
-          />
           <div style={{ position: 'relative' }}>
             <button onClick={() => setShowColPicker(p => !p)} style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em',
               background: 'transparent', color: 'var(--muted)', padding: '6px 12px',
               border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer',
-            }}>COLUMNS ▾</button>
+            }}>Columns ▾</button>
             {showColPicker && (
               <div
                 role="listbox"
@@ -1201,6 +1177,11 @@ export default function ContactsPage() {
                   padding: '8px 0', minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
                 }}
               >
+                <button className="contact-records-reset" onClick={() => {
+                  setVisibleColumns(DEFAULT_COLUMNS); setColumnOrder(DRAGGABLE_COL_IDS)
+                  localStorage.setItem(LS_COLUMNS_KEY, JSON.stringify(DEFAULT_COLUMNS))
+                  localStorage.setItem(LS_COL_ORDER_KEY, JSON.stringify(DRAGGABLE_COL_IDS))
+                }}>Use desk columns</button>
                 {ALL_COLUMNS.map(col => (
                   <label key={col.id} style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '5px 14px',
@@ -1232,9 +1213,9 @@ export default function ContactsPage() {
                 padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
                 cursor: 'pointer', border: 'none',
                 background: viewMode === 'table' ? 'var(--primary)' : 'transparent',
-                color: viewMode === 'table' ? '#000' : 'var(--muted)', fontWeight: 600,
+                color: viewMode === 'table' ? 'var(--primary-foreground)' : 'var(--muted)', fontWeight: 600,
               }}>
-              TABLE
+              List
             </button>
             <button
               onClick={() => setViewMode('kanban')}
@@ -1242,12 +1223,21 @@ export default function ContactsPage() {
                 padding: '5px 14px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em',
                 cursor: 'pointer', border: 'none',
                 background: viewMode === 'kanban' ? 'var(--primary)' : 'transparent',
-                color: viewMode === 'kanban' ? '#000' : 'var(--muted)', fontWeight: 600,
+                color: viewMode === 'kanban' ? 'var(--primary-foreground)' : 'var(--muted)', fontWeight: 600,
               }}>
-              KANBAN
+              Board
             </button>
           </div>
         </div>
+
+        <div className="contact-records-summary" aria-live="polite">
+          <div><strong>{activeListLabel}</strong><span>{loading ? 'Loading contacts…' : loadError && contacts.length === 0 ? 'Count unavailable' : `${total.toLocaleString()} matching contact${total === 1 ? '' : 's'} · ${viewMode === 'kanban' ? 'up to 50 per stage on board' : `${contacts.length.toLocaleString()} loaded`}`}</span></div>
+          <div className="contact-records-secondary-actions">
+            <button onClick={() => setShowDuplicates(true)}>Find duplicates</button>
+            <button onClick={() => setShowImport(true)}>Import contacts</button>
+          </div>
+        </div>
+        {loadError && <div className="loan-records-error" role="alert">{loadError} <button onClick={() => fetchContacts()}>Retry</button></div>}
 
         {/* Kanban board */}
         {viewMode === 'kanban' && (
@@ -1331,7 +1321,7 @@ export default function ContactsPage() {
 
         {/* Table */}
         <div
-          className="flex-1"
+          className="flex-1 loan-records-table contact-records-table"
           style={{
             display: viewMode === 'kanban' ? 'none' : 'flex',
             flexDirection: 'column',
@@ -1395,7 +1385,7 @@ export default function ContactsPage() {
                               borderRight: '1px solid var(--border)',
                             }}
                           >
-                            {nameColDef.label.toUpperCase()}
+                            {nameColDef.label}
                           </th>
                           {/* Draggable column headers */}
                           {draggableColDefs.map(col => (
@@ -1404,7 +1394,7 @@ export default function ContactsPage() {
                               col={col}
                               sortKey={sort.key as string}
                               sortDir={sort.dir}
-                              onSort={() => handleSort(col.id as keyof Contact)}
+                              onSort={() => handleSort(COLUMN_SORT_KEYS[col.id] ?? col.id as keyof Contact)}
                             />
                           ))}
                         </tr>
@@ -1463,7 +1453,7 @@ export default function ContactsPage() {
 
                           {/* Data cells */}
                           {draggableColDefs.map(col => (
-                            <td key={col.id} style={{ padding: '9px 16px', color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: col.minWidth }}>
+                            <td key={col.id} className={`contact-records-cell-${col.id}`} style={{ padding: '9px 16px', color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: col.minWidth }}>
                               {col.id === 'stage' ? (
                                 editingStageId === contact.id ? (
                                   <select
@@ -1500,7 +1490,7 @@ export default function ContactsPage() {
                     disabled={loadingMore}
                     className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-input rounded text-muted-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {loadingMore ? 'Loading…' : `Load more (showing ${contacts.length}${counts[activeList] ? ` of ${counts[activeList]}` : ''})`}
+                    {loadingMore ? 'Loading…' : `Load more (${contacts.length.toLocaleString()} of ${total.toLocaleString()})`}
                   </button>
                 </div>
               )}
@@ -1512,7 +1502,7 @@ export default function ContactsPage() {
 
       {/* ── Slide-out panel ──────────────────────────────────────────────── */}
       {selectedContact && (
-        <aside style={{
+        <aside className="contact-records-detail" aria-label="Contact details" style={{
           width: 360, borderLeft: '1px solid var(--border)', background: 'var(--surface)',
           overflowY: 'auto', flexShrink: 0, display: 'flex', flexDirection: 'column',
         }}>
@@ -1572,7 +1562,7 @@ export default function ContactsPage() {
                 ))}
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                   <button onClick={handleSaveEdit} disabled={saving} style={{
-                    flex: 1, background: 'var(--primary)', color: '#000', border: 'none', borderRadius: 4,
+                    flex: 1, background: 'var(--primary)', color: 'var(--primary-foreground)', border: 'none', borderRadius: 4,
                     padding: '8px 0', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
                     cursor: saving ? 'default' : 'pointer', letterSpacing: '0.08em',
                   }}>{saving ? 'SAVING…' : 'SAVE CHANGES'}</button>
@@ -1754,7 +1744,7 @@ export default function ContactsPage() {
                 CANCEL
               </button>
               <button onClick={handleBulkUpdate} disabled={!bulkValue || bulkProcessing}
-                style={{ background: 'var(--accent)', border: 'none', color: '#000',
+                style={{ background: 'var(--accent)', border: 'none', color: 'var(--primary-foreground)',
                          borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11,
                          opacity: (!bulkValue || bulkProcessing) ? 0.5 : 1 }}>
                 {bulkProcessing ? 'APPLYING...' : 'APPLY'}
@@ -1953,7 +1943,7 @@ export default function ContactsPage() {
                     fetchContacts()
                   }}
                   style={{
-                    background: 'var(--accent)', border: 'none', color: '#000',
+                    background: 'var(--accent)', border: 'none', color: 'var(--primary-foreground)',
                     borderRadius: 4, padding: '6px 14px', fontFamily: 'var(--font-mono)', fontSize: 11,
                     cursor: csvImporting ? 'not-allowed' : 'pointer', opacity: csvImporting ? 0.5 : 1,
                   }}>
@@ -2070,7 +2060,7 @@ export default function ContactsPage() {
                 CANCEL
               </button>
               <button onClick={handleCreate} disabled={creating}
-                style={{ background: 'var(--accent)', border: 'none', color: '#000',
+                style={{ background: 'var(--accent)', border: 'none', color: 'var(--primary-foreground)',
                          borderRadius: 4, padding: '6px 14px', cursor: creating ? 'not-allowed' : 'pointer',
                          opacity: creating ? 0.6 : 1,
                          fontFamily: 'var(--font-mono)', fontSize: 11 }}>
@@ -2143,7 +2133,7 @@ export default function ContactsPage() {
                 CANCEL
               </button>
               <button onClick={handleSaveNewList} disabled={!newListName.trim()}
-                style={{ background: 'var(--primary)', border: 'none', color: '#000', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
+                style={{ background: 'var(--primary)', border: 'none', color: 'var(--primary-foreground)', borderRadius: 4, padding: '6px 14px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, opacity: newListName.trim() ? 1 : 0.5 }}>
                 {editingListId ? 'Update List' : 'Save List'}
               </button>
             </div>

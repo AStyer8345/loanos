@@ -1,3 +1,9 @@
+## 2026-09-05 — Contact Records matches Loan Records
+
+Contact Records now uses the same cream and green desk layout as Loan Records: clear heading, quick views, readable names and notes, referral links, a compact search toolbar, and optional saved-view navigation. Existing column choices remain saved, with a desk-column preset available. Both record lists link to each other and Jungo history.
+
+The contact list reads the exact filtered count, uses stable ordering when loading more, rejects responses from superseded views, and reports read failures. Column sorting maps display labels to stored fields. This release changes presentation and reads only; it does not import, merge, or update client records.
+
 ## 2026-09-05 — Loan Records layout and Jungo history
 
 Loan Records now follows the simple Lead Desk cream/green layout: clear status tabs, readable names, full-view search and 2% planning totals, saved views, and 100 visible table rows per page. All records are read in stable pages before totals appear; missing pages fail visibly. Application intake is separate from verified preapproval. Imported historical loans keep their source stage but are excluded from active-stage tabs.

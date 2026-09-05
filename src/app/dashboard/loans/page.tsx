@@ -954,7 +954,7 @@ export default function LoansPage() {
       <div className="min-w-0 flex flex-col">
         <header className="loan-records-header">
           <div><div className="loan-records-eyebrow">LOAN DESK</div><h1>Loan Records</h1><p>Current files and past loans, all in one place.</p></div>
-          <div className="loan-records-header-actions"><Link href="/dashboard">Lead Desk</Link><Link href="/dashboard/loans/history">Jungo history</Link><ImportMismoButton /></div>
+          <div className="loan-records-header-actions"><Link href="/dashboard">Lead Desk</Link><Link href="/dashboard/contacts">Contact Records</Link><Link href="/dashboard/loans/history">Jungo history</Link><ImportMismoButton /></div>
         </header>
         <nav className="loan-records-views" aria-label="Loan views">
           {SMART_LISTS.map(list=><button key={list.id} aria-pressed={activeList===list.id} onClick={()=>handleListChange(list.id)}>{list.label}<span>{counts[list.id]??'—'}</span></button>)}

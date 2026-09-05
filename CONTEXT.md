@@ -1,3 +1,7 @@
+## September 5: simple Lead Desk restoration
+
+Adam is the sole operator. Restore the familiar editable lead list, stage views, notes, named referral partners and filtered 2% planning totals. Website acquisition is grouped as AI for his reporting; original source evidence stays intact. All 35 original leads and 22 saved-edit records are retained in Supabase. Private Lead Desk uses its ChatGPT identity mapped to a normal owner session; no separate LoanOS password. Previous detailed operations remain at /dashboard/operations.
+
 # LoanOS — AI Context File
 
 **2026-09-05 shared operations:** Today, Leads, Pipeline and Metrics now share org-scoped live data with Lead Desk; source-dated history and reviewed attribution replace static totals. Operational edits refresh immediately. Trusted onboarding protects roles and membership. See `docs/COMMAND_CENTER_OPERATIONS.md`.

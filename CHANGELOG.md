@@ -1,3 +1,9 @@
+## 2026-09-05 — Restore simple Lead Desk
+
+Restored status tabs, editable planning amounts, 2% estimated compensation, saved notes, priority, columns and named referral partners. Added AI, Realtor Referral and Financial Advisor Referral reporting groups while retaining original acquisition evidence. Historical active-status loan inventory no longer defines the working lead list. Preserved 22 existing edits and restored all 35 original lead descriptions. Adam is the sole operational assignee while his organization has one member. Private Sites identity is mapped server-side to his existing normal Supabase session, preserving organization RLS. No password change or sign-in email required.
+
+Validation: seven focused model/signature cases, six Site access/rendering cases, and rolled-back owner/default and organization-isolation checks. Loan financial fields remain outside the editable planning endpoint.
+
 ## 2026-09-05 — Incremental outbound communication metadata
 
 Added a private, transactionally deduplicated Sent Items window/page checkpoint and encrypted event metadata. Existing Outlook workflow gains a separate bounded reconciliation branch; source health updates only from completed page transactions. Exact recipient matches join contact communication history, while ambiguous/no matches remain source references in Inbox Review. Bodies and attachments are excluded, sensitive subjects held, and message authorship/engagement/loan terms are never inferred. Source lag over 90 minutes is shown explicitly.

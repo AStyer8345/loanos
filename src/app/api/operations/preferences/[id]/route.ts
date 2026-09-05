@@ -14,8 +14,11 @@ export async function PATCH(req: Request, { params }: {
     }
     try {
         const body = await req.json();
-        if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !['status', 'notes', 'priority_follow_up', 'hidden'].includes(k)))
-            throw Error('Only working status, notes and flags can be edited');
+        if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !['status', 'notes', 'priority_follow_up', 'hidden','amount_note','product_note','reporting_source','referral_name','next_action'].includes(k)))
+            throw Error('Only Lead Desk planning details, notes and flags can be edited');
+        for(const [key,limit] of Object.entries({amount_note:200,product_note:500,referral_name:300,next_action:2000}))
+            if(key in body && (typeof body[key]!=='string'||body[key].length>limit))throw Error('Invalid '+key);
+        if('reporting_source' in body && !['AI','Realtor Referral','Financial Advisor Referral','Other'].includes(body.reporting_source))throw Error('Invalid reporting source');
         if ('notes' in body && (typeof body.notes !== 'string' || body.notes.length > 10000))
             throw Error('Notes are too long');
         if ('status' in body && (typeof body.status !== 'string' || body.status.length > 100))

@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, AlertCircle, Trash2, X, Phone, Mail, MessageSquare, GripVertical } from 'lucide-react'
-import PipelineSidebar from '@/components/ui/pipeline-sidebar'
+import {readAllPages} from '@/lib/read-all-pages'
+import './loan-records.css'
 import ImportMismoButton from '@/components/pipeline/ImportMismoButton'
 import {
   DndContext,
@@ -39,12 +40,14 @@ interface Loan {
   id: string
   loan_name: string | null
   loan_number: string | null
+  arive_loan_id: string | null
   borrower_name: string | null
   borrower_first_name: string | null
   borrower_last_name: string | null
   borrower_email: string | null
   borrower_phone: string | null
   status: string | null
+  imported_history: boolean
   loan_amount: number | null
   loan_purpose: string | null
   loan_program: string | null
@@ -74,22 +77,18 @@ interface SmartList {
 
 // ── Smart lists (powered by loan-stages constants) ───────────────────────────
 
+const VERIFIED_PREAPPROVAL_STATUSES = PRE_APPROVAL_STATUSES.filter(s => ['pre_approval','pre_approved','pre-approved','pre-approval','preapproved'].includes(s.toLowerCase()))
+const APPLICATION_STATUSES = [...NEW_APP_STATUSES,...PRE_APPROVAL_STATUSES.filter(s=>!VERIFIED_PREAPPROVAL_STATUSES.includes(s))]
 const SMART_LISTS: SmartList[] = [
   { id: 'all',          label: 'All Loans',       statuses: null },
   { id: 'inprocess',    label: 'Loans in Process', statuses: IN_PROCESS_STATUSES },
   { id: 'closed',       label: 'Closed',          statuses: FUNDED_STATUSES },
-  { id: 'preapproval',  label: 'Pre-Approval',    statuses: [...PRE_APPROVAL_STATUSES, ...LEAD_STATUSES, ...NEW_APP_STATUSES] },
-  { id: 'cancelled',    label: 'Other',           statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead'] },
+  { id: 'preapproval',  label: 'Pre-approved',    statuses: VERIFIED_PREAPPROVAL_STATUSES },
+  { id: 'application',  label: 'Applications',    statuses: APPLICATION_STATUSES },
+  { id: 'leads',        label: 'Leads',           statuses: LEAD_STATUSES },
+  { id: 'history', label: 'Imported history', statuses: null },
+  { id: 'cancelled',    label: 'Other',           statuses: ['Cancelled', 'Denied', 'Withdrawn', 'Suspended', 'On Hold', 'Dead', 'ADVERSE', 'Archived/not qualified'] },
 ]
-
-// ── Quick filter options (maps to smart list IDs) ──────────────────────────────
-const LOAN_QUICK_FILTERS = [
-  { id: 'inprocess',   label: 'Loans in Process' },
-  { id: 'all',         label: 'All Loans' },
-  { id: 'closed',      label: 'Closed' },
-  { id: 'preapproval', label: 'Pre-Approval' },
-  { id: 'cancelled',   label: 'Other' },
-] as const
 
 // Status options from constants (used for inline edit + bulk update dropdowns)
 const LOAN_STATUS_OPTIONS = STAGE_OPTIONS
@@ -276,7 +275,7 @@ function applyCustomListRulesLoan(query: any, rules: CustomListRule[]): any { //
 }
 
 // ── Pagination + helpers (module-level to avoid re-creation) ─────────────────
-const LOANS_PAGE_SIZE = 100
+const LOANS_PAGE_SIZE = 500
 
 function flattenLoans(data: Record<string, unknown>[]): Loan[] {
   return data.map((row) => {
@@ -367,6 +366,7 @@ export default function LoansPage() {
   const urlPeriod = searchParams.get('period')
 
   const [loans, setLoans] = useState<Loan[]>([])
+  const [tablePage,setTablePage]=useState(0)
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [activeList, setActiveList] = useState('inprocess')
@@ -377,8 +377,6 @@ export default function LoansPage() {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_LOAN_COLUMNS)
   const [columnOrder, setColumnOrder] = useState<string[]>(DRAGGABLE_LOAN_COL_IDS)
   const [showColPicker, setShowColPicker] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [sidebarCollapsedUser, setSidebarCollapsedUser] = useState<boolean | null>(null)
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
   const [customLists, setCustomLists] = useState<CustomList[]>([])
   const [showNewListModal, setShowNewListModal] = useState(false)
@@ -387,7 +385,8 @@ export default function LoansPage() {
   const [deleteListId, setDeleteListId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkStatus, setBulkStatus] = useState('')
-  const [hasMore, setHasMore] = useState(false)
+  const [loadError, setLoadError] = useState('')
+  const fetchVersion = useRef(0)
   // Advanced filters
   const [filterStatuses, setFilterStatuses] = useState<string[]>([])
   const [filterPurpose, setFilterPurpose] = useState<string>('')   // Purchase, Refinance, HELOC
@@ -403,8 +402,6 @@ export default function LoansPage() {
   const [deletingLoanId, setDeletingLoanId] = useState<string | null>(null)
   const [distinctLenders, setDistinctLenders] = useState<string[]>([])
   const [distinctStatuses, setDistinctStatuses] = useState<string[]>([])
-  const [loadingMore, setLoadingMore] = useState(false)
-  const loansOffsetRef = useRef(0)
   const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null)
   const [editingCommissionValue, setEditingCommissionValue] = useState<string>('')
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
@@ -413,20 +410,11 @@ export default function LoansPage() {
   // Fetch distinct status + lender values for filter dropdowns
   useEffect(() => {
     if (!organizationId) return
-    supabase.from('loans').select('status').eq('organization_id', organizationId).then(({ data }) => {
-      if (data) {
-        const vals = [...new Set(data.map(r => r.status).filter(Boolean) as string[])].sort()
-        setDistinctStatuses(vals)
-      }
-    })
-    supabase.from('loans').select('lender, lender_name').eq('organization_id', organizationId).then(({ data }) => {
-      if (data) {
-        const vals = [...new Set(
-          data.flatMap(r => [r.lender, r.lender_name]).filter(Boolean) as string[]
-        )].sort()
-        setDistinctLenders(vals)
-      }
-    })
+    let alive=true
+    readAllPages((from,to)=>supabase.from('loans').select('id,status,lender,lender_name',{count:'exact'}).eq('organization_id',organizationId).order('id').range(from,to))
+      .then(data=>{if(alive){setDistinctStatuses([...new Set(data.map(r=>r.status).filter(Boolean) as string[])].sort());setDistinctLenders([...new Set(data.flatMap(r=>[r.lender,r.lender_name]).filter(Boolean) as string[])].sort())}})
+      .catch(()=>{if(alive){setDistinctStatuses([]);setDistinctLenders([])}})
+    return()=>{alive=false}
   }, [supabase, organizationId])
 
   // Restore column visibility + order from localStorage
@@ -460,15 +448,6 @@ export default function LoansPage() {
       if (stored === 'kanban' || stored === 'table') setViewMode(stored)
     } catch {}
   }, [])
-
-  // Sidebar collapse: under 1280px default collapsed; toggle overrides
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 1279px)')
-    const sync = () => setSidebarCollapsed(sidebarCollapsedUser ?? mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [sidebarCollapsedUser])
 
   // Load custom lists from localStorage (loans only)
   useEffect(() => {
@@ -507,29 +486,31 @@ export default function LoansPage() {
   // ── Fetch counts ───────────────────────────────────────────────────────
   const fetchCounts = useCallback(async () => {
     if (!organizationId) return
-    const map: Record<string, number> = {}
-    for (const list of SMART_LISTS) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('organization_id', organizationId)
-      if (list.statuses) q = q.in('status', list.statuses)
-      const { count } = await q
-      map[list.id] = count ?? 0
-    }
-    for (const list of customLists) {
-      let q = supabase.from('loans').select('id', { count: 'exact', head: true }).eq('organization_id', organizationId)
-      if (list.rules?.length) q = applyCustomListRulesLoan(q, list.rules)
-      const { count } = await q
-      map[list.id] = count ?? 0
-    }
-    setCounts(map)
+    try {
+      const pairs = await Promise.all([...SMART_LISTS, ...customLists].map(async list => {
+        let q = supabase.from('loans').select('id', {count:'exact',head:true}).eq('organization_id',organizationId)
+        if (list.id==='history')q=q.eq('imported_history',true)
+        if (['inprocess','preapproval','application','leads'].includes(list.id))q=q.eq('imported_history',false)
+        if ('statuses' in list && list.statuses) q=q.in('status',list.statuses)
+        if ('rules' in list && list.rules?.length) q=applyCustomListRulesLoan(q,list.rules)
+        const {count,error}=await q
+        if(error||count===null)throw new Error('View counts unavailable')
+        return [list.id,count] as const
+      }))
+      setCounts(Object.fromEntries(pairs))
+    } catch { setCounts({}) }
   }, [customLists, supabase, organizationId])
 
   // ── Fetch loans (with contact email/phone via join) ──────────────────────
   const buildLoansQuery = useCallback((listId: string) => {
     let q = supabase
       .from('loans')
-      .select('id, loan_name, loan_number, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, estimated_closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)')
+      .select('id, loan_name, loan_number, arive_loan_id, borrower_name, borrower_first_name, borrower_last_name, borrower_email, borrower_phone, status, imported_history, loan_amount, purchase_price, loan_purpose, loan_program, interest_rate, lender, lender_name, closing_date, estimated_closing_date, rate_lock_expiration, property_address, property_city, property_state, contact_id, commission_amount, contacts!contact_id(email, phone)', {count:'exact'})
       .eq('organization_id', organizationId!)
       .order('closing_date', { ascending: false, nullsFirst: false })
+      .order('id')
+    if (listId==='history')q=q.eq('imported_history',true)
+    if (['inprocess','preapproval','application','leads'].includes(listId))q=q.eq('imported_history',false)
     if (listId.startsWith('custom-')) {
       const custom = customLists.find(l => l.id === listId)
       if (custom?.rules?.length) q = applyCustomListRulesLoan(q, custom.rules)
@@ -542,30 +523,15 @@ export default function LoansPage() {
 
   const fetchLoans = useCallback(async (listId: string) => {
     if (!organizationId) return
-    setLoading(true)
-    loansOffsetRef.current = 0
-    const { data, error } = await buildLoansQuery(listId).range(0, LOANS_PAGE_SIZE - 1)
-    if (!error && data) {
-      setLoans(flattenLoans(data as Record<string, unknown>[]))
-      setHasMore(data.length === LOANS_PAGE_SIZE)
-    } else if (!error) {
-      setLoans([])
-      setHasMore(false)
-    }
-    setLoading(false)
+    const version=++fetchVersion.current
+    setLoading(true);setLoadError('')
+    try {
+      const rows=await readAllPages((from,to)=>buildLoansQuery(listId).range(from,to),LOANS_PAGE_SIZE)
+      if(version===fetchVersion.current)setLoans(flattenLoans(rows as Record<string, unknown>[]))
+    } catch(error) {
+      if(version===fetchVersion.current){setLoans([]);setLoadError(error instanceof Error?error.message:'Loan records could not be loaded.')}
+    } finally {if(version===fetchVersion.current)setLoading(false)}
   }, [buildLoansQuery, organizationId])
-
-  const loadMoreLoans = useCallback(async () => {
-    setLoadingMore(true)
-    const nextOffset = loansOffsetRef.current + LOANS_PAGE_SIZE
-    const { data, error } = await buildLoansQuery(activeList).range(nextOffset, nextOffset + LOANS_PAGE_SIZE - 1)
-    if (!error && data) {
-      loansOffsetRef.current = nextOffset
-      setLoans(prev => [...prev, ...flattenLoans(data as Record<string, unknown>[])])
-      setHasMore(data.length === LOANS_PAGE_SIZE)
-    }
-    setLoadingMore(false)
-  }, [buildLoansQuery, activeList])
 
   const handleCommissionChange = useCallback(async (loanId: string, rawValue: string) => {
     if (!organizationId) return
@@ -653,8 +619,7 @@ export default function LoansPage() {
   })
 
   const toggleSelectAll = () => {
-    if (selected.size === filtered.length) setSelected(new Set())
-    else setSelected(new Set(filtered.map(l => l.id)))
+    setSelected(previous=>{const next=new Set(previous);const all=displayedLoans.every(l=>next.has(l.id));for(const loan of displayedLoans){if(all)next.delete(loan.id);else next.add(loan.id)}return next})
   }
 
   const handleBulkStatusUpdate = useCallback(async (newStatus: string) => {
@@ -718,7 +683,7 @@ export default function LoansPage() {
       const stageName = urlFilterActive.stage
       // Stage-specific status sets from constants
       const STAGE_STATUSES: Record<string, string[]> = {
-        'Pre-Approval': [...PRE_APPROVAL_STATUSES, ...LEAD_STATUSES],
+        'Pre-Approval': VERIFIED_PREAPPROVAL_STATUSES,
         'Processing': rawStatusesForGroup(['setup', 'disclosed', 'processing']),
         'Underwriting': rawStatusesForGroup(['submitted', 'underwriting', 'approved', 'resubmit']),
         'Clear to Close': rawStatusesForGroup(['clear_to_close']),
@@ -727,7 +692,7 @@ export default function LoansPage() {
       }
       const validStatuses = STAGE_STATUSES[stageName]
       if (validStatuses) {
-        list = list.filter(l => validStatuses.some(s => s.toLowerCase() === (l.status ?? '').toLowerCase()))
+        list = list.filter(l => ((stageName.toLowerCase()==='funded')||!l.imported_history)&&validStatuses.some(s => s.toLowerCase() === (l.status ?? '').toLowerCase()))
       }
     }
 
@@ -794,6 +759,9 @@ export default function LoansPage() {
         (l.property_address || '').toLowerCase().includes(q) ||
         (l.property_city || '').toLowerCase().includes(q) ||
         (l.contact_email || '').toLowerCase().includes(q) ||
+        (l.borrower_email || '').toLowerCase().includes(q) ||
+        (l.loan_number || '').toLowerCase().includes(q) ||
+        (l.arive_loan_id || '').toLowerCase().includes(q) ||
         (l.status || '').toLowerCase().includes(q)
       )
     }
@@ -814,6 +782,8 @@ export default function LoansPage() {
       if (sortKey === 'closing_date') {
         const av = effectiveClosingDate(a) ?? ''
         const bv = effectiveClosingDate(b) ?? ''
+        if (!av && bv) return 1
+        if (av && !bv) return -1
         return mul * (av < bv ? -1 : av > bv ? 1 : 0)
       }
       if (sortKey === 'borrower_name') {
@@ -826,6 +796,9 @@ export default function LoansPage() {
       return mul * (av < bv ? -1 : av > bv ? 1 : 0)
     })
   }, [loans, search, sortKey, sortDir, urlFilterActive, filterStatuses, filterPurpose, filterProgram, filterLender, filterState, filterRateMin, filterDateFrom, filterDateTo])
+
+  useEffect(()=>setTablePage(0),[filtered])
+  const displayedLoans=filtered.slice(tablePage*100,tablePage*100+100)
 
   // ── Kanban columns (view mode = 'kanban') ─────────────────────────────
   const kanbanColumns = useMemo(() => {
@@ -977,62 +950,25 @@ export default function LoansPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg)]">
-      {/* Sidebar */}
-      <PipelineSidebar
-        smartLists={SMART_LISTS}
-        customLists={customLists}
-        activeList={activeList}
-        counts={counts}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsedUser(prev => (prev === null ? !sidebarCollapsed : !prev))}
-        onSelectList={handleListChange}
-        onNewList={() => { setShowNewListModal(true); setNewListName(''); setNewListRules([{ field: 'status', operator: 'is', value: '' }]) }}
-        onDeleteList={(id) => setDeleteListId(id)}
-      />
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--input)]">
-          <div>
-            <h1 className="text-lg font-mono font-semibold text-foreground">
-              {activeListLabel}
-            </h1>
-            <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              {filtered.length} {filtered.length === 1 ? 'loan' : 'loans'}
-              {search && ` matching "${search}"`}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <ImportMismoButton />
-            {/* Search */}
-            <div className="relative w-64">
-              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search loans…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-sm font-mono border border-[var(--input)] rounded-lg bg-[var(--card)] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-          </div>
+    <div className="loan-records-desk">
+      <div className="min-w-0 flex flex-col">
+        <header className="loan-records-header">
+          <div><div className="loan-records-eyebrow">LOAN DESK</div><h1>Loan Records</h1><p>Current files and past loans, all in one place.</p></div>
+          <div className="loan-records-header-actions"><Link href="/dashboard">Lead Desk</Link><Link href="/dashboard/loans/history">Jungo history</Link><ImportMismoButton /></div>
+        </header>
+        <nav className="loan-records-views" aria-label="Loan views">
+          {SMART_LISTS.map(list=><button key={list.id} aria-pressed={activeList===list.id} onClick={()=>handleListChange(list.id)}>{list.label}<span>{counts[list.id]??'—'}</span></button>)}
+        </nav>
+        <div className="loan-records-saved">
+          {customLists.length>0&&<label>Saved views <select aria-label="Saved views" value={activeList.startsWith('custom-')?activeList:''} onChange={e=>e.target.value&&handleListChange(e.target.value)}><option value="">Choose a saved view</option>{customLists.map(list=><option key={list.id} value={list.id}>{list.name}</option>)}</select></label>}
+          <button onClick={()=>{setShowNewListModal(true);setNewListName('');setNewListRules([{field:'status',operator:'is',value:''}])}}>+ Save a view</button>
+          {activeList.startsWith('custom-')&&<button onClick={()=>setDeleteListId(activeList)}>Delete saved view</button>}
         </div>
-
+        {loadError&&<div role="alert" className="loan-records-error">{loadError} <button onClick={()=>fetchLoans(activeList)}>Retry</button></div>}
         {/* Unified control + stats bar */}
-        <div className="px-4 py-2 border-b border-input bg-card">
+        <div className="loan-records-tools px-4 py-2 border-b border-input bg-card">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <select
-                value={LOAN_QUICK_FILTERS.some(f => f.id === activeList) ? activeList : 'all'}
-                onChange={e => handleListChange(e.target.value)}
-                className="text-xs font-mono px-2.5 py-1.5 border border-primary/40 rounded bg-[var(--secondary)] text-primary cursor-pointer outline-none"
-              >
-                {LOAN_QUICK_FILTERS.map(f => (
-                  <option key={f.id} value={f.id}>{f.label}</option>
-                ))}
-              </select>
               <button
                 type="button"
                 onClick={() => setShowFilters(p => !p)}
@@ -1046,27 +982,7 @@ export default function LoansPage() {
               </button>
             </div>
 
-            <div className="flex-1 min-w-0 flex items-center justify-center">
-              {!loading && filtered.length > 0 && (() => {
-                const totalVolume = filtered.reduce((s, l) => s + (l.loan_amount ?? 0), 0)
-                const totalCommission = filtered.reduce((s, l) => s + (l.commission_amount ?? 0), 0)
-                const closingThisWeek = filtered.filter(l => {
-                  const d = daysUntilClose(effectiveClosingDate(l))
-                  return d !== null && d >= 0 && d <= 7
-                }).length
-                return (
-                  <div className="flex items-center gap-3 text-xs font-mono whitespace-nowrap">
-                    <span className="text-muted-foreground">Total Loans <span className="text-foreground font-semibold">{filtered.length}</span></span>
-                    <span className="text-muted-foreground/30">|</span>
-                    <span className="text-muted-foreground">Total Volume <span className="text-blue-400 font-semibold">{fmtCurrency(totalVolume)}</span></span>
-                    <span className="text-muted-foreground/30">|</span>
-                    <span className="text-muted-foreground">Gross Commission <span className="text-primary font-semibold">{totalCommission > 0 ? fmtCurrency(totalCommission) : '—'}</span></span>
-                    <span className="text-muted-foreground/30">|</span>
-                    <span className="text-muted-foreground">Closing This Week <span className={`font-semibold ${closingThisWeek > 0 ? 'text-amber-400' : 'text-foreground'}`}>{closingThisWeek}</span></span>
-                  </div>
-                )
-              })()}
-            </div>
+            <div className="loan-records-search"><Search size={15}/><input aria-label="Search loan records" placeholder="Search name, loan number, address or email…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
 
             {/* View toggle: Table | Kanban */}
             <div className="flex items-center border border-[var(--input)] rounded overflow-hidden shrink-0">
@@ -1344,47 +1260,12 @@ export default function LoansPage() {
           </div>
         )}
 
-        {/* Pipeline dashboard — shown only on Loans in Process tab */}
-        {activeList === 'inprocess' && !loading && loans.length > 0 && (() => {
-          const stageLoans = PIPELINE_STAGES.map(stage => ({
-            ...stage,
-            count: loans.filter(l => stage.statuses.includes(l.status ?? '')).length,
-          }))
-          const total = stageLoans.reduce((sum, s) => sum + s.count, 0)
-          return (
-            <div className="px-4 pt-3 pb-2 border-b border-[var(--input)] bg-[var(--bg)]">
-              {/* Stage cards */}
-              <div className="flex gap-2 mb-2">
-                {stageLoans.map(stage => (
-                  <div
-                    key={stage.label}
-                    className="flex-1 rounded-md px-3 py-2 border"
-                    style={{ borderColor: `${stage.hex}40`, background: `${stage.hex}12` }}
-                  >
-                    <p className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: stage.hex }}>
-                      {stage.short}
-                    </p>
-                    <p className="text-lg font-bold text-foreground leading-tight">{stage.count}</p>
-                    <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">{stage.label}</p>
-                  </div>
-                ))}
-              </div>
-              {/* Progress bar */}
-              {total > 0 && (
-                <div className="flex h-1 rounded-full overflow-hidden gap-px">
-                  {stageLoans.filter(s => s.count > 0).map(stage => (
-                    <div
-                      key={stage.label}
-                      style={{ flex: stage.count, background: stage.hex, opacity: 0.7 }}
-                      title={`${stage.label}: ${stage.count}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })()}
-
+        <section className="loan-records-totals" aria-label="Totals for selected loans">
+          <div><small>LOANS IN THIS VIEW</small><strong>{loading||loadError?'—':filtered.length.toLocaleString()}</strong><span>{activeListLabel}{search?' · matching your search':''}</span></div>
+          <div><small>LOAN VOLUME</small><strong>{loading||loadError?'—':fmtCurrency(filtered.reduce((n,l)=>n+(l.loan_amount??0),0))}</strong><span>{filtered.filter(l=>l.loan_amount!==null).length} known · {filtered.filter(l=>l.loan_amount===null).length} amount unknown</span></div>
+          <div><small>ESTIMATED COMPENSATION</small><strong>{loading||loadError?'—':fmtCurrency(filtered.reduce((n,l)=>n+(l.loan_amount??0),0)*.02)}</strong><span>2% of the loan volume shown</span></div>
+          <div><small>AVERAGE LOAN</small><strong>{loading||loadError||!filtered.some(l=>l.loan_amount!==null)?'—':fmtCurrency(filtered.reduce((n,l)=>n+(l.loan_amount??0),0)/filtered.filter(l=>l.loan_amount!==null).length)}</strong><span>Based on known loan amounts</span></div>
+        </section>
         {/* Table */}
         <style>{`
           .loans-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -1464,7 +1345,7 @@ export default function LoansPage() {
         <style>{`th:hover .col-drag-handle { opacity: 1 !important; }`}</style>
         <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleColDragEnd}>
         <div
-          className={`loans-scroll flex-1 w-0 min-w-full overflow-auto${viewMode === 'kanban' ? ' hidden' : ''}`}
+          className={`loan-records-table loans-scroll flex-1 w-0 min-w-full overflow-auto${viewMode === 'kanban' ? ' hidden' : ''}`}
           style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--primary) transparent' }}
         >
           {loading ? (
@@ -1482,7 +1363,8 @@ export default function LoansPage() {
                   <th className="w-8 px-2 py-2.5 bg-[var(--surface2)] sticky top-0 z-10">
                     <input
                       type="checkbox"
-                      checked={filtered.length > 0 && selected.size === filtered.length}
+                      aria-label="Select loans on this page"
+                      checked={displayedLoans.length>0&&displayedLoans.every(l=>selected.has(l.id))}
                       onChange={toggleSelectAll}
                       className="rounded border-[var(--input)] accent-[var(--primary)] focus:ring-primary"
                     />
@@ -1515,7 +1397,7 @@ export default function LoansPage() {
                 </SortableContext>
               </thead>
               <tbody>
-                {filtered.map(loan => {
+                {displayedLoans.map(loan => {
                   const ecd = effectiveClosingDate(loan)
                   const urgencyStyle = closingUrgencyStyle(ecd, activeList === 'inprocess')
                   const days = activeList === 'inprocess' ? daysUntilClose(ecd) : null
@@ -1527,6 +1409,7 @@ export default function LoansPage() {
                     <td className="w-8 px-2 py-3" onClick={e => e.stopPropagation()}>
                       <input
                         type="checkbox"
+                        aria-label={`Select ${borrowerDisplayName(loan)}`}
                         checked={selected.has(loan.id)}
                         onChange={() => toggleSelect(loan.id)}
                         className="rounded border-[var(--input)] accent-[var(--primary)] focus:ring-primary"
@@ -1535,13 +1418,13 @@ export default function LoansPage() {
                     {colDefs.map(col => {
                       if (col.id === 'borrower_name') {
                         return (
-                          <td key={col.id} className="px-4 py-3 font-medium" onClick={e => e.stopPropagation()}>
+                          <td key={col.id} className="loan-records-borrower px-4 py-3 font-medium" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center gap-2">
                               {/* Borrower name → contact */}
                               {loan.contact_id ? (
                                 <Link
                                   href={`/dashboard/contacts/${loan.contact_id}`}
-                                  className="text-foreground hover:text-primary font-sans text-sm"
+                                  className="borrower-label text-foreground hover:text-primary font-sans text-sm"
                                   style={{ textDecoration: 'none' }}
                                   onMouseEnter={e => (e.currentTarget.style.textDecorationColor = 'var(--primary)', e.currentTarget.style.textDecoration = 'underline')}
                                   onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
@@ -1549,7 +1432,7 @@ export default function LoansPage() {
                                   {borrowerDisplayName(loan)}
                                 </Link>
                               ) : (
-                                <span className="text-foreground font-sans text-sm">{borrowerDisplayName(loan)}</span>
+                                <span className="borrower-label text-foreground font-sans text-sm">{borrowerDisplayName(loan)}</span>
                               )}
                               {/* Delete button */}
                               <button
@@ -1560,6 +1443,7 @@ export default function LoansPage() {
                                 <Trash2 size={12} />
                               </button>
                             </div>
+                            {loan.imported_history&&<span className="loan-records-status" style={{fontSize:12}}>Historical record</span>}
                             {/* Loan name → loan detail */}
                             {loan.loan_name && (
                               <Link
@@ -1757,20 +1641,10 @@ export default function LoansPage() {
               </tbody>
             </table>
           )}
-          {/* Load More */}
-          {hasMore && !loading && (
-            <div className="flex justify-center py-4 border-t border-[var(--input)]">
-              <button
-                onClick={loadMoreLoans}
-                disabled={loadingMore}
-                className="px-5 py-2 text-xs font-mono tracking-widest uppercase border border-[var(--input)] rounded text-muted-foreground hover:bg-[var(--card)] hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loadingMore ? 'Loading…' : `Load more (showing ${loans.length})`}
-              </button>
-            </div>
-          )}
         </div>
         </DndContext>
+        {viewMode==='table'&&!loading&&!loadError&&filtered.length>0&&<div className="loan-records-saved" style={{marginTop:18}}><button disabled={tablePage===0} onClick={()=>setTablePage(v=>v-1)}>Previous</button><span>{tablePage*100+1}–{Math.min((tablePage+1)*100,filtered.length)} of {filtered.length.toLocaleString()} loans</span><button disabled={(tablePage+1)*100>=filtered.length} onClick={()=>setTablePage(v=>v+1)}>Next</button></div>}
+        <p className="loan-records-footnote">Search and totals include every loan in the selected view. Imported history retains its recorded stage and is excluded from active-stage tabs. The 2% estimate is for planning; recorded commission remains available in Columns.</p>
       </div>
 
       {/* New List (custom filter) modal */}
@@ -1904,7 +1778,7 @@ function StatusBadge({ status }: { status: string | null }) {
   const hex = statusHex(status)
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium whitespace-nowrap"
+      className="loan-records-status inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium whitespace-nowrap"
       style={{ background: `${hex}22`, color: hex, border: `1px solid ${hex}44` }}
     >
       {status}

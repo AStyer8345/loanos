@@ -14,7 +14,9 @@ export async function POST(req: Request, { params }: {
     catch {
         return Response.json({ error: 'Sign in required' }, { status: 401 });
     }
+    if (process.env.DOCUMENT_EXTRACTION_ENABLED !== 'true') return Response.json({error:'External extraction is disabled. Review the retained source manually.'},{status:409});
     try {
+        const intent=await req.json();if(intent.explicit_request!==true)return Response.json({error:'Explicit extraction request required for this document version.'},{status:400});
         const v = await authorizedVersion(ctx, params.id), db = intakeDb();
         const doc = await verifiedSource(ctx, v);
         const base = process.env.N8N_WEBHOOK_BASE || process.env.N8N_WEBHOOK_BASE_URL || process.env.NEXT_PUBLIC_N8N_WEBHOOK_BASE;

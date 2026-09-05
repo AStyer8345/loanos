@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import OutboundReferences from '@/components/communications/OutboundReferences'
 import { Search, Link2, X, Inbox, FileText, Sparkles, User, UserPlus } from 'lucide-react'
 
 type UnmatchedEmail = {
@@ -424,6 +425,7 @@ export default function UnmatchedEmailsPage() {
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 1100 }}>
+      <OutboundReferences />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{
           fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700,

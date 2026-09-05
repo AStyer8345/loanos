@@ -41,6 +41,7 @@ const display = (value: unknown) => value === null || value === undefined ? 'Not
 export default function DocumentReviewHome({ loanId }: {
     loanId: string;
 }) {
+    const [extractionEnabled,setExtractionEnabled]=useState(false);
     const [versions, setVersions] = useState<Version[]>([]), [documents, setDocuments] = useState<{
         id: string;
         file_name: string;
@@ -57,7 +58,7 @@ export default function DocumentReviewHome({ loanId }: {
             throw Error(d.error);
         setVersions(d.versions);
         setDocuments(d.documents);
-        setMembers(d.members);
+        setMembers(d.members); setExtractionEnabled(d.extractionEnabled === true);
         if (d.limited)
             setNotice('Showing the most recent document records. Older sources remain in the full loan record.');
     }
@@ -76,7 +77,7 @@ export default function DocumentReviewHome({ loanId }: {
         setNotice(e instanceof Error ? e.message : 'Review unavailable');
     } };
     const extract = async (id: string) => { setBusy(true); try {
-        const result = await request(`/api/operations/documents/${id}/extract`, { method: 'POST' });
+        const result = await request(`/api/operations/documents/${id}/extract`, { method: 'POST', body: JSON.stringify({explicit_request:true}) });
         setNotice(result.message || 'Extraction queued. Your source and review task are saved.');
         await load();
     }
@@ -128,7 +129,7 @@ export default function DocumentReviewHome({ loanId }: {
         catch {
             setNotice('Source document unavailable');
         } }}>Open source PDF</button></div></div>
- {(detail.status === 'pending' || detail.status === 'failed') && <button disabled={busy} onClick={() => void extract(detail.id)}>Prepare extraction draft</button>}{detail.status === 'processing' && <p>Extraction is processing. The source and review task remain saved.</p>}{detail.last_error && <p>{detail.last_error}</p>}
+ {extractionEnabled && (detail.status === 'pending' || detail.status === 'failed') && <button disabled={busy} onClick={() => void extract(detail.id)}>Prepare extraction draft</button>}{detail.status === 'processing' && <p>Extraction is processing. The source and review task remain saved.</p>}{detail.last_error && <p>{detail.last_error}</p>}
  <h3>Proposed source changes · read only</h3>{detail.proposal?.fields.length ? <div className="ops-table-scroll"><table><thead><tr><th>Field</th><th>At upload</th><th>Current loan value</th><th>Extracted proposal</th><th>Source / confidence</th></tr></thead><tbody>{detail.proposal.fields.map(f => <tr key={f.field}><td>{label(f.field)}</td><td>{display(detail.baseline[f.field])}</td><td>{display(detail.current[f.field])}</td><td>{display(f.value)}</td><td>{f.source.page ? `Page ${f.source.page}` : 'Page not identified'} · {f.confidence === null ? 'Confidence unknown' : `${Math.round(f.confidence * 100)}% extractor confidence`}<p>{f.source.quote || 'Verify directly against the source PDF.'}</p></td></tr>)}</tbody></table></div> : <p>No field extraction recorded. A manual review can still be recorded after checking the source.</p>}
  {detail.proposal?.conditions.map((c, i) => <p key={i}><strong>Proposed condition {i + 1}:</strong> {c.text} · {c.source.page ? `page ${c.source.page}` : 'page unknown'} · {c.confidence === null ? 'confidence unknown' : `${Math.round(c.confidence * 100)}% extractor confidence`}</p>)}
  {!['reviewed', 'rejected'].includes(detail.status) && <form onSubmit={async (e) => { e.preventDefault(); setBusy(true); try {

@@ -13,7 +13,7 @@ catch {
     const [v, d, m] = await Promise.all([ctx.db.from('document_review_versions').select(VERSION_COLUMNS).eq('organization_id', ctx.organizationId).eq('loan_id', loan).order('version', { ascending: false }).limit(200), ctx.db.from('documents').select('id,file_name,created_at').eq('organization_id', ctx.organizationId).eq('loan_id', loan).order('created_at', { ascending: false }).limit(500), ctx.db.from('profiles').select('id,full_name,email').eq('organization_id', ctx.organizationId)]);
     if (v.error || d.error || m.error)
         throw Error('Document review data unavailable');
-    return Response.json({ versions: v.data, documents: d.data, members: m.data, limited: v.data.length === 200 || d.data.length === 500 }, { headers });
+    return Response.json({ versions: v.data, documents: d.data, members: m.data, extractionEnabled: process.env.DOCUMENT_EXTRACTION_ENABLED === 'true', limited: v.data.length === 200 || d.data.length === 500 }, { headers });
 }
 catch (e) {
     return Response.json({ error: e instanceof Error ? e.message : 'Document reviews unavailable' }, { status: 400, headers });

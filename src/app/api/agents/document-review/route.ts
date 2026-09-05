@@ -7,8 +7,8 @@ export async function POST(req: Request) { const denied = validateAgentSecret(re
     return denied; try {
     const body = await req.json();
     const proposal = normalizeProposal(body.proposal);
-    const { data: v, error: lookup } = await intakeDb().from('document_review_versions').select('id,organization_id').eq('id', body.review_id).eq('organization_id', body.organization_id).single();
-    if (lookup || !v)
+    const { data: v, error: lookup } = await intakeDb().from('document_review_versions').select('id,organization_id,processing_started_at,extraction_attempts').eq('id', body.review_id).eq('organization_id', body.organization_id).single();
+    if (lookup || !v || !v.processing_started_at || v.extraction_attempts<1)
         throw Error('Review version not found');
     const { data, error } = await intakeDb().rpc('record_document_extraction', { p_org: v.organization_id, p_version: v.id, p_cipher: encryptInquiry(proposal), p_hash: digest(proposal), p_model: String(body.model || 'source extraction; model not recorded') });
     if (error)

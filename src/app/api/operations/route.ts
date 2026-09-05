@@ -26,6 +26,7 @@ export async function GET(req: Request) {
         compensation: ['loan_compensation', 'loan_id,gross_source,gross_comp,net_comp,payout_status', 'loan_id'],
         preferences: ['lead_desk_preferences', 'id,legacy_key,contact_id,inquiry_id,status,notes,priority_follow_up,amount_note,product_note,hidden,source_updated_at,updated_at,match_state,provenance'],
         activity: ['activity_log', 'id,contact_id,loan_id,type,action,occurred_at,summary,external_id'],
+        outbound: ['communication_events', 'id,contact_id,occurred_at,event_key,source,match_state'],
         health: ['communication_source_health', 'source,status,last_success_at,last_event_at,last_attempt_at,detail,inbound,outbound', 'source'],
         delivery: ['inquiry_outbox', 'id,inquiry_id,kind,status,attempts,created_at,accepted_at,delivered_at,last_error'],
         links: ['inquiry_loan_links', 'id,inquiry_id,loan_id,reviewed_at,evidence'],
@@ -33,6 +34,13 @@ export async function GET(req: Request) {
     try {
         const pairs = await Promise.all(Object.entries(fields).map(async ([key, [table, columns, order]]) => [key, await collectPages(async (from, to) => { const r = await ctx.db.from(table).select(columns).eq('organization_id', ctx.organizationId).order(order || 'id').range(from, to); return { data: r.data, error: r.error }; })]));
         const snapshot = Object.fromEntries(pairs);
+        snapshot.activity = [...snapshot.activity, ...snapshot.outbound.filter((r: {contact_id:string|null}) => r.contact_id).map((r: {id:string;contact_id:string;occurred_at:string;event_key:string}) => ({id:r.id,contact_id:r.contact_id,loan_id:null,type:'email_outbound_metadata',action:'Outbound email recorded; authorship unverified',occurred_at:r.occurred_at,summary:null,external_id:r.event_key}))];
+        delete snapshot.outbound;
+        snapshot.health = snapshot.health.map((h: {source:string;status:string;last_success_at:string|null;last_attempt_at:string|null;detail:string|null}) => {
+            if(h.source !== 'thestyerteam_outbound' || !h.last_attempt_at) return h;
+            const lag = Date.now() - Date.parse(h.last_success_at || h.last_attempt_at);
+            return lag > 90*60*1000 ? {...h,status:'partial',detail:'Sent-mail reconciliation has no verified completed window within 90 minutes. Its saved cursor remains available for recovery. '+(h.detail||'')} : h;
+        });
         // Ciphertext is intentionally not selectable by browser roles. First
         // establish the authorized inquiry IDs through RLS, then read only
         // those payloads on the server with an explicit organization filter.

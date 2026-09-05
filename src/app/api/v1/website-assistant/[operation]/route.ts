@@ -4,10 +4,8 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { parseOperationInput, type OperationInput, type OperationResult, type WebsiteAssistantOperation } from '@/lib/website-assistant/contracts'
 import { assertFreshTimestamp, canonicalRequest, parseSignatureHeaders, verifySignature } from '@/lib/website-assistant/signature'
 import { redactObject, redactProhibited } from '@/lib/website-assistant/redaction'
-import {
-  sendWebsiteAssistantConversationStartedNotification,
-  sendWebsiteAssistantLeadNotifications,
-} from '@/lib/website-assistant/notifications'
+import { normalizeInquiry, encryptInquiry } from '@/lib/intake/inquiry'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -124,78 +122,41 @@ async function executeOperation(
 
   switch (input.operation) {
     case 'create_or_update_website_lead': {
-      const email = input.email?.trim().toLowerCase() ?? null
-      const phone = input.phone ?? null
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)('upsert_website_assistant_lead', {
-        p_organization_id: organizationId,
-        p_user_id: ownerUserId,
-        p_first_name: input.firstName,
-        p_last_name: input.lastName ?? null,
-        p_email: email,
-        p_email_normalized: email,
-        p_phone: phone,
-        p_phone_e164: phone,
-        p_lead_intent: input.leadIntent,
-        p_timeline: input.timeline ?? null,
-        p_source_page: input.sourcePage ?? null,
-        p_conversation_id: input.conversationId,
+      const normalized = normalizeInquiry({
+        inquiry_id: `assistant:${input.conversationId}`, first_name: input.firstName,
+        last_name: input.lastName, email: input.email, phone: input.phone,
+        form_name: 'website_assistant', source: 'Website assistant',
+        source_page: input.sourcePage, loan_goal: input.leadIntent,
+        conversation_id: input.conversationId, conversation_summary: input.conversationSummary,
       })
-      if (error) throw new Error('Lead persistence failed')
-      const result = data as { status: string; contact_id?: string; email_contact_id?: string; phone_contact_id?: string }
-      if (result.status === 'conflict') {
-        await createTask(supabase, organizationId, ownerUserId, {
-          contactId: result.email_contact_id ?? result.phone_contact_id,
-          reason: 'Website assistant duplicate conflict: normalized email and phone match different contacts.',
-          dueAt: new Date().toISOString(),
-          priority: 'urgent',
-          sourceKey: `assistant-duplicate:${input.conversationId}`,
-        })
-        return { ...base, ok: false, status: 'conflict_review_required', data: { requiresHumanReview: true } }
-      }
+      const intakeDb = supabase as unknown as SupabaseClient
+      const {data: saved, error} = await intakeDb.rpc('capture_inquiry', {
+        p_org: organizationId, p_actor: ownerUserId, p_key: normalized.key,
+        p_input: normalized.input, p_cipher: encryptInquiry({...normalized.original,...normalized.input}),
+        p_hash: normalized.hash, p_test: normalized.isTest,
+      })
+      if(error || saved?.payload_conflict)throw new Error('Lead persistence requires review')
       for (const consent of input.consents) {
-        await supabase.from('website_consents' as never).upsert({
-          organization_id: organizationId,
-          conversation_id: input.conversationId,
-          contact_id: result.contact_id ?? null,
-          consent_type: consent.type,
-          status: consent.status,
-          wording_hash: consent.wordingHash ?? null,
-          policy_version: consent.policyVersion,
-          source: 'website_chat',
+        const {error: consentError}=await supabase.from('website_consents' as never).upsert({
+          organization_id: organizationId, conversation_id: input.conversationId,
+          contact_id: saved.contact_id ?? null, consent_type: consent.type,
+          status: consent.status, wording_hash: consent.wordingHash ?? null,
+          policy_version: consent.policyVersion, source: 'website_chat',
           consented_at: consent.consentedAt ?? null,
         } as never, { onConflict: 'conversation_id,consent_type,policy_version' })
+        if(consentError)throw new Error('Consent persistence failed; inquiry retained')
       }
-      const task = await createTask(supabase, organizationId, ownerUserId, {
-        contactId: result.contact_id,
-        reason: `Contact ${input.firstName}${input.lastName ? ` ${input.lastName}` : ''} about their ${input.leadIntent} inquiry${input.timeline ? ` (${input.timeline.replace(/_/g, ' ')})` : ''}.${input.conversationSummary ? ` Chat summary: ${input.conversationSummary}` : ''}`,
-        dueAt: new Date().toISOString(),
-        priority: 'high',
-        sourceKey: `assistant-followup:${input.conversationId}`,
-      })
-      const notifications = await sendWebsiteAssistantLeadNotifications({
-        organizationId,
-        contactId: result.contact_id!,
-        conversationId: input.conversationId,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        email: input.email,
-        phone: input.phone,
-        leadIntent: input.leadIntent,
-        timeline: input.timeline,
-        sourcePage: input.sourcePage,
-        conversationSummary: input.conversationSummary,
-      })
-      return {
-        ...base,
-        status: result.status,
-        data: {
-          contactId: result.contact_id,
-          duplicate: result.status === 'existing',
-          followUpTaskId: task.id,
-          ownerNotified: notifications.ownerNotified,
-          visitorAcknowledged: notifications.visitorAcknowledged,
-        },
+      if(saved.contact_id)await intakeDb.from('website_conversations').update({contact_id:saved.contact_id}).eq('id',input.conversationId).eq('organization_id',organizationId)
+      // Dispatch is optional once saved: the durable pending worker can recover it.
+      try { await fetch(process.env.N8N_WEB_LEAD_URL || 'https://styer.app.n8n.cloud/webhook/web-lead', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({dispatch_inquiry_id:saved.id}), signal:AbortSignal.timeout(4000),
+      }) } catch { /* Pending outbox is retained for recovery. */ }
+      return {...base, ok:saved.match_state!=='needs_review',
+        status:saved.match_state==='needs_review'?'conflict_review_required':saved.match_state==='matched'?'existing':'created',
+        data:{contactId:saved.contact_id,inquiryId:saved.id,duplicate:saved.duplicate,
+          followUpTaskId:saved.task_id,notificationsQueued:true,ownerNotified:null,visitorAcknowledged:null,
+          requiresHumanReview:saved.match_state==='needs_review'},
       }
     }
     case 'create_follow_up_task': {
@@ -324,14 +285,8 @@ async function executeOperation(
         },
       ] as never, { onConflict: 'conversation_id,sequence_number' })
       if (messageError) throw new Error('Conversation message persistence failed')
-      const conversationStartedNotified = maxSequence === 0
-        ? await sendWebsiteAssistantConversationStartedNotification({
-            organizationId,
-            conversationId,
-            firstQuestion: visitor.text,
-            sourcePage: input.sourcePage,
-          })
-        : false
+      // Anonymous chat activity stays in the transcript; inquiry capture owns alerts.
+      const conversationStartedNotified = false
       return {
         ...base,
         status: 'recorded',

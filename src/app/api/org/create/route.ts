@@ -24,38 +24,14 @@ export async function POST(req: Request) {
     if (!fullName?.trim()) return NextResponse.json({ error: 'Full name required' }, { status: 400 })
 
     const validPlan = plan === 'professional' ? 'professional' : 'starter'
-    const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     const service = createServiceClient()
+    const { data: organizationId, error } = await service.rpc('claim_new_organization', {
+      p_user: user.id, p_email: user.email, p_name: orgName.trim(), p_full_name: fullName.trim(),
+      p_plan: validPlan, p_profile: { nmls_individual: nmlsIndividual || null, phone: phone || null, states_licensed: Array.isArray(statesLicensed) ? statesLicensed : [] },
+    })
+    if (error) throw error
 
-    // Create organization
-    const { data: org, error: orgError } = await service
-      .from('organizations')
-      .insert({ name: orgName.trim(), slug, plan: validPlan })
-      .select('id')
-      .single()
-
-    if (orgError) throw orgError
-
-    // Create profile linked to org
-    const { error: profileError } = await service
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        organization_id: org.id,
-        role: 'owner',
-        full_name: fullName.trim(),
-        email: user.email,
-        nmls_individual: nmlsIndividual || null,
-        phone: phone || null,
-        states_licensed: statesLicensed?.length ? statesLicensed : [],
-      })
-
-    if (profileError) throw profileError
-
-    // Create default org_settings row (best-effort — table exists after migration 039)
-    await service.from('org_settings').insert({ organization_id: org.id }).then(() => null, () => null)
-
-    return NextResponse.json({ organizationId: org.id })
+    return NextResponse.json({ organizationId })
   } catch (err) {
     console.error('[org/create]', err)
     return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 })

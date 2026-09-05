@@ -1,19 +1,21 @@
 import type {Snapshot,Preference,Contact} from './types';
-export const STAGES = ['Lead','Lead Contacted','Pre-approved','Loan in Process','Funded','Cold','Archived/not qualified'] as const;
+import {matchAriveLead,type AriveMatch} from './arive-sync';
+export const STAGES = ['Lead','Lead Contacted','Application Started','Pre-approved','Loan in Process','Funded','Cold','Archived/not qualified'] as const;
 export const SOURCES = ['AI','Realtor Referral','Financial Advisor Referral','Other'] as const;
 export type ReportingSource = typeof SOURCES[number];
 export type WorkingStage = typeof STAGES[number];
 export type SavedLead = {name?:string;added?:string;source?:string;action?:string;note?:string;tag?:string;amount?:string;product?:string;loan?:string;contact?:string;email?:string;planning_volume?:number};
-export type DeskPreference = Preference & {reporting_source?:ReportingSource|null;referral_name?:string|null;next_action?:string|null;provenance?:Preference['provenance'] & {restored_lead?:SavedLead}};
+export type DeskPreference = Preference & {reporting_source?:ReportingSource|null;referral_name?:string|null;next_action?:string|null;provenance?:Preference['provenance'] & {restored_lead?:SavedLead;arive_match?:AriveMatch}};
 type DeskContact = Contact & {notes?:string|null;referred_by?:string|null;referral_type?:string|null;referred_by_contact_id?:string|null;referral_source_notes?:string|null};
-export type DeskRow = {id:string;contactId:string|null;inquiryId:string|null;preference:DeskPreference|null;name:string;email:string;phone:string;stage:WorkingStage;source:ReportingSource;originalSource:string;referral:string;amount:number|null;amountText:string;product:string;notes:string;context:string;nextAction:string;priority:boolean;hidden:boolean;receivedAt:string|null;owner:string;inquiryCount:number};
+export type DeskRow = {ariveIds:string[];ariveCheckedAt:string|null;ariveReview:string;ariveOwned:boolean;id:string;contactId:string|null;inquiryId:string|null;preference:DeskPreference|null;name:string;email:string;phone:string;stage:WorkingStage;source:ReportingSource;originalSource:string;referral:string;amount:number|null;amountText:string;product:string;notes:string;context:string;nextAction:string;priority:boolean;hidden:boolean;receivedAt:string|null;owner:string;inquiryCount:number};
 export function workingStage(value:string|null|undefined):WorkingStage {
  const s=(value||'').toLowerCase().replace(/[-_]/g,' ');
  if(/funded|closed/.test(s))return 'Funded';
- if(/archive|not qualified|denied|withdrawn|cancel|lost|dead/.test(s))return 'Archived/not qualified';
+ if(/adverse|archive|not qualified|denied|withdrawn|cancel|lost|dead/.test(s))return 'Archived/not qualified';
  if(/cold|inactive/.test(s))return 'Cold';
- if(/pre.?approv|prequal|pre qual/.test(s))return 'Pre-approved';
- if(/process|underwrit|conditional|clear to close|closing|approved/.test(s))return 'Loan in Process';
+ if(/pre.?approv/.test(s))return 'Pre-approved';
+ if(/process|underwrit|conditional|clear to close|closing|approved|loan setup|disclosure|re submittal/.test(s))return 'Loan in Process';
+ if(/application|prequal|pre qual/.test(s))return 'Application Started';
  if(/contacted|engaged/.test(s))return 'Lead Contacted';
  return 'Lead';
 }
@@ -45,9 +47,12 @@ export function deskRows(s:Snapshot):DeskRow[] {
   const latest=i||related[0];
   const linkedIds=new Set(s.links.filter(x=>related.some(j=>j.id===x.inquiry_id)).map(x=>x.loan_id));
   const explicitLoans=s.loans.filter(l=>linkedIds.has(l.id)||!!original.loan&&(l.arive_loan_id===original.loan||l.loan_number===original.loan));
+  const ariveMatch=p?.provenance?.arive_match||(s.ariveFacts?matchAriveLead({name:original.name||name(c)||latest?.displayName||p?.provenance?.display_name||'',email:c?.email||original.email||latest?.email,phone:c?.phone||latest?.phone,originalLoan:original.loan,note:original.note,previous:p?.provenance?.arive_match},s.ariveFacts,s.health.find(h=>h.source==='arive_loans')?.last_success_at||s.asOf):null);
+  const facts=ariveMatch?.state==='matched'?(s.ariveFacts||[]).filter(f=>ariveMatch.ids.includes(f.arive_loan_id)):[];
+  const ariveOwned=facts.length>0,ariveReview=ariveMatch?.state==='review'?ariveMatch.reason:ariveMatch?.state==='matched'&&facts.length!==ariveMatch.ids.length?'Linked ARIVE loan is unavailable':'';
   const amountText=p?.amount_note?.trim()||original.amount||'';
   const known=explicitLoans.map(l=>l.loan_amount).filter((n):n is number=>n!==null);
-  const amount=p?.amount_note?.trim()?planningAmount(p.amount_note):original.planning_volume||planningAmount(original.amount)||(known.length?known.reduce((a,b)=>a+Number(b),0):null);
+  const amount=ariveReview?null:ariveOwned?(facts.every(f=>f.loan_amount!==null)?facts.reduce((v,f)=>v+f.loan_amount!,0):null):p?.amount_note?.trim()?planningAmount(p.amount_note):original.planning_volume||planningAmount(original.amount)||(known.length?known.reduce((a,b)=>a+Number(b),0):null);
   const rawSource=original.source||latest?.source||c?.lead_source||'Not recorded';
   const partner=c?.referred_by_contact_id?contacts.get(c.referred_by_contact_id):undefined;
   const namedSource=rawSource.includes('·')?rawSource.split('·')[0].trim():'';
@@ -55,7 +60,7 @@ export function deskRows(s:Snapshot):DeskRow[] {
   const source=p?.reporting_source||reportingSource(rawSource,c?.referral_type||'',!!latest?.form_name||!!latest?.source_page);
   const task=s.tasks.find(t=>!(t.is_complete||['completed','done','cancelled'].includes(t.status||''))&&(t.id===latest?.task_id||!!cid&&t.related_contact_id===cid));
   const dated=original.added&&!/tbd/i.test(original.added)?new Date(original.added+', 2026'):null;
-  return {id:p?.id||latest!.id,contactId:cid,inquiryId:latest?.id||null,preference:p,name:original.name||name(c)||latest?.displayName||p?.provenance?.display_name||'Lead to review',email:c?.email||original.email||latest?.email||'',phone:c?.phone||original.contact||latest?.phone||'',stage:workingStage(p?.status||c?.stage),source,originalSource:rawSource,referral,amount,amountText,product:p?.product_note||original.product||explicitLoans.map(l=>l.loan_program||l.loan_type).filter(Boolean).join(', ')||'',notes:p?.notes||'',context:[original.note,c?.notes,c?.referral_source_notes].filter((v,ix,all)=>v&&all.indexOf(v)===ix).join('\n\n'),nextAction:p?.next_action??task?.title??task?.text??original.action??'',priority:!!p?.priority_follow_up,hidden:!!p?.hidden,receivedAt:latest?.received_at||(dated&&!isNaN(dated.valueOf())?dated.toISOString():null),owner:s.members.find(m=>m.id===s.viewerId)?.full_name||'Adam Styer',inquiryCount:related.length};
+  return {ariveOwned,ariveIds:ariveMatch?.ids||[],ariveCheckedAt:facts.length?facts.map(f=>f.checked_at||'').sort()[0]||null:null,ariveReview,id:p?.id||latest!.id,contactId:cid,inquiryId:latest?.id||null,preference:p,name:original.name||name(c)||latest?.displayName||p?.provenance?.display_name||'Lead to review',email:c?.email||original.email||latest?.email||'',phone:c?.phone||original.contact||latest?.phone||'',stage:workingStage(ariveOwned?(facts[0].archived?'archived':facts[0].status):p?.status||c?.stage),source,originalSource:rawSource,referral,amount,amountText,product:ariveOwned?facts.map(f=>f.product).filter(Boolean).join(', '):p?.product_note||original.product||explicitLoans.map(l=>l.loan_program||l.loan_type).filter(Boolean).join(', ')||'',notes:p?.notes||'',context:[original.note,c?.notes,c?.referral_source_notes].filter((v,ix,all)=>v&&all.indexOf(v)===ix).join('\n\n'),nextAction:p?.next_action??task?.title??task?.text??original.action??'',priority:!!p?.priority_follow_up,hidden:!!p?.hidden,receivedAt:latest?.received_at||(dated&&!isNaN(dated.valueOf())?dated.toISOString():null),owner:s.members.find(m=>m.id===s.viewerId)?.full_name||'Adam Styer',inquiryCount:related.length};
  };
  for(const p of preferences){if(p.contact_id)seen.add(p.contact_id);rows.push(build(p,undefined));}
  for(const i of inquiries){const key=i.contact_id||i.id;if(seen.has(key))continue;seen.add(key);rows.push(build(null,i));}

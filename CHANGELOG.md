@@ -1,3 +1,9 @@
+## 2026-09-05 — Reconcile Lead Desk with ARIVE
+
+Verified loan facts take precedence over imported planning overrides. Application intake has its own view and no longer appears as preapproval. Added source links, last-check and overdue/failure information, preserved notes and referrals, stable reviewed ARIVE IDs, tenant-scoped facts, full timestamps and late-event rejection. The existing n8n status relay now retains modification time and stops old events before downstream writes. A complete-list recovery receiver is ready for scheduling.
+
+Validation: 12 focused model/auth/matching/normalization cases; production rollback check rejected an older source payload; anonymous fact access, browser writes and browser recovery execution denied. Initial reconciliation: 73 relevant ARIVE loans, 64 stored loan copies corrected, 26 saved leads matched, two needing scenario review, seven without a verified current-loan match. No borrower messages sent.
+
 ## 2026-09-05 — Restore simple Lead Desk
 
 Restored status tabs, editable planning amounts, 2% estimated compensation, saved notes, priority, columns and named referral partners. Added AI, Realtor Referral and Financial Advisor Referral reporting groups while retaining original acquisition evidence. Historical active-status loan inventory no longer defines the working lead list. Preserved 22 existing edits and restored all 35 original lead descriptions. Adam is the sole operational assignee while his organization has one member. Private Sites identity is mapped server-side to his existing normal Supabase session, preserving organization RLS. No password change or sign-in email required.

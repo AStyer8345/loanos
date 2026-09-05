@@ -18,6 +18,7 @@ export async function GET(req: Request) {
         string,
         string?
     ]> = {
+        ariveFacts: ['arive_loan_facts', 'arive_loan_id,source_updated_at,checked_at,status,status_date,loan_amount,base_loan_amount,financed_fees,product,purpose,archived,borrower_name,borrower_email,borrower_phone,co_borrower_name,co_borrower_email','arive_loan_id'],
         members: ['profiles', 'id,full_name,email,role'], contacts: ['contacts', 'id,first_name,last_name,email,phone,stage,lead_source,source_page,operational_owner_id,notes,referred_by,referral_type,referred_by_contact_id,referral_source_notes'],
         loans: ['loans', 'id,contact_id,borrower_first_name,borrower_last_name,loan_name,loan_number,arive_loan_id,status,loan_amount,loan_type,loan_purpose,loan_program,estimated_closing_date,closing_date,rate_lock_expiration,operational_owner_id,processor_name,processor_email,synced_at'],
         inquiries: ['inquiries', 'id,contact_id,owner_id,task_id,received_at,source,source_page,referral_partner,purpose,form_name,legitimacy,is_test,match_state,review_reason,parent_inquiry_id,provenance,first_touch'],

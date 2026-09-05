@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import CommandCenterPanel from './CommandCenterPanel'
 import Link from 'next/link'
 import {
   ListChecks, ArrowRight,
@@ -88,7 +89,7 @@ function fmtDateShort(s: string | null): string {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function DashboardClient(props: DashboardClientProps) {
-  const [tab, setTab] = useState<'pipeline' | 'performance'>('pipeline')
+  const [tab, setTab] = useState<'command' | 'pipeline' | 'performance'>('command')
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   return (
@@ -116,11 +117,12 @@ export default function DashboardClient(props: DashboardClientProps) {
       {/* ── Header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-mono font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-xl font-mono font-bold text-foreground">Command Center</h1>
           <p className="text-xs font-mono text-muted-foreground mt-0.5">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-card border border-input rounded-lg p-1 gap-0.5">
+            <button onClick={() => setTab('command')} className={`px-3 py-1.5 rounded text-xs font-mono font-medium ${tab === 'command' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground'}`}>Needs attention</button>
             <button
               onClick={() => setTab('pipeline')}
               className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${tab === 'pipeline' ? 'bg-[#C9A84C] text-black' : 'text-muted-foreground hover:text-foreground'}`}
@@ -132,6 +134,8 @@ export default function DashboardClient(props: DashboardClientProps) {
           </div>
         </div>
       </div>
+
+      {tab === 'command' && <CommandCenterPanel />}
 
       {/* ═══ PIPELINE TAB ═══ */}
       {tab === 'pipeline' && (

@@ -1,3 +1,7 @@
+## September 5: ARIVE reconciliation
+
+ARIVE facts now control matched Lead Desk amounts, product and stage. A minimal org-scoped facts table retains full source timestamps; stale event writes are rejected. Notes/referrals remain editable. Recovery receiver: POST /api/agents/arive-reconcile using the existing ARIVE webhook secret, complete paginated loan list only. Cloud recovery schedule is not yet activated; see docs/ARIVE_RECONCILIATION.md.
+
 ## September 5: simple Lead Desk restoration
 
 Adam is the sole operator. Restore the familiar editable lead list, stage views, notes, named referral partners and filtered 2% planning totals. Website acquisition is grouped as AI for his reporting; original source evidence stays intact. All 35 original leads and 22 saved-edit records are retained in Supabase. Private Lead Desk uses its ChatGPT identity mapped to a normal owner session; no separate LoanOS password. Previous detailed operations remain at /dashboard/operations.

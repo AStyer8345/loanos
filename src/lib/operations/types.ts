@@ -158,6 +158,7 @@ export type LoanLink = {
     evidence: string;
 };
 export type Snapshot = {
+    ariveFacts?: import('./arive-sync').AriveFact[];
     asOf: string;
     viewerId: string;
     organizationId: string;

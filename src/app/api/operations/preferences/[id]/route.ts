@@ -33,6 +33,11 @@ export async function PATCH(req: Request, { params }: {
                 throw Error('Contact not found');
             id = r.data;
         }
+        if(['status','amount_note','product_note'].some(k=>k in body)){
+            const {data:current,error:readError}=await ctx.db.from('lead_desk_preferences').select('provenance').eq('id',id).eq('organization_id',ctx.organizationId).maybeSingle();
+            if(readError||!current)throw Error('Saved lead unavailable');
+            if((current.provenance as {arive_match?:{state:string}}|null)?.arive_match?.state==='matched')throw Error('This loan’s amount and status come from ARIVE. Update them in ARIVE.');
+        }
         const { data, error } = await ctx.db.from('lead_desk_preferences').update({ ...body, updated_at: new Date().toISOString() }).eq('id', id).eq('organization_id', ctx.organizationId).select('id').maybeSingle();
         if (error || !data)
             throw Error('Saved lead changes unavailable');

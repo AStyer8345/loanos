@@ -1,3 +1,9 @@
+## 2026-09-05 — Single durable inquiry delivery
+
+Website assistant contact requests now use the same encrypted inquiry, contact matching, task and outbox transaction as website forms. Removed the fully replaced assistant direct notification module, including its obsolete forwarding fallback. Questionnaire continuations link to their original inquiry without another owner alert or acquisition milestone. Received-message receipts require a matching provider Internet ID and actual source timestamp.
+
+Validation: 35 focused tests and production build passed. Transactional continuation/retry/distinct-inquiry checks passed with rollback. Production internal inquiry delivered one owner email; replay claimed zero notifications. Browser inspection is pending because the Mac is locked. Recovery: preceding commit de3ce1f and private workflow/hook snapshots.
+
 # LoanOS Changelog
 
 ## 2026-07-14 — Dashboard reset around leads and pre-approvals

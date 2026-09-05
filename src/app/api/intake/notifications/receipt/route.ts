@@ -14,7 +14,12 @@ export async function POST(req:NextRequest) {
   const patch:Record<string,unknown>={status:b.status,execution_id:typeof b.execution_id==='string'?b.execution_id:old.execution_id}
   if(b.status==='draft_created'){patch.provider_message_id=String(b.provider_message_id);patch.provider_internet_id=typeof b.provider_internet_id==='string'?b.provider_internet_id:null}
   if(b.status==='provider_accepted')patch.accepted_at=new Date().toISOString()
-  if(b.status==='delivered')patch.delivered_at=new Date().toISOString()
+  if(b.status==='delivered') {
+   const receivedAt=typeof b.received_at==='string'?Date.parse(b.received_at):NaN
+   if(!['provider_accepted','delivered'].includes(old.status)||!old.provider_internet_id||b.provider_internet_id!==old.provider_internet_id||!Number.isFinite(receivedAt)||receivedAt>Date.now()+60000)
+    return NextResponse.json({error:'A matching received message and source timestamp are required'},{status:409})
+   patch.delivered_at=new Date(receivedAt).toISOString()
+  }
   if(b.status==='needs_review')patch.last_error='Delivery outcome requires reconciliation; do not resend blindly'
   const {data:changed,error}=await db.from('inquiry_outbox').update(patch).eq('id',old.id).eq('organization_id',organizationId).eq('status',old.status).select('id').maybeSingle()
   if(error)throw error

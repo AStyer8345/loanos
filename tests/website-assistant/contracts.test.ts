@@ -24,22 +24,18 @@ describe('website assistant contracts', () => {
     expect(serviceClient).toContain('process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL')
   })
 
-  it('creates a follow-up task and sends lead notifications after contact capture', () => {
+  it('persists chat inquiries through the shared transactional outbox', () => {
     const route = fs.readFileSync('src/app/api/v1/website-assistant/[operation]/route.ts', 'utf8')
-    expect(route).toContain('assistant-followup:')
-    expect(route).toContain('sendWebsiteAssistantLeadNotifications')
-    expect(route).toContain('followUpTaskId')
+    expect(route).toContain("rpc('capture_inquiry'")
+    expect(route).toContain('notificationsQueued:true')
+    expect(route).toContain('followUpTaskId:saved.task_id')
+    expect(route).not.toContain('sendWebsiteAssistantLeadNotifications')
   })
 
-  it('notifies Adam once when the first redacted conversation turn is recorded', () => {
+  it('keeps anonymous conversations in the transcript without another owner email', () => {
     const route = fs.readFileSync('src/app/api/v1/website-assistant/[operation]/route.ts', 'utf8')
-    const notifications = fs.readFileSync('src/lib/website-assistant/notifications.ts', 'utf8')
-    expect(route).toContain('maxSequence === 0')
-    expect(route).toContain('firstQuestion: visitor.text')
-    expect(route).toContain('sendWebsiteAssistantConversationStartedNotification')
-    expect(notifications).toContain('A visitor started a website chat')
-    expect(notifications).toContain('Open chat transcripts')
-    expect(notifications).toContain("template: 'website_assistant_chat_started'")
+    expect(route).toContain('const conversationStartedNotified = false')
+    expect(route).not.toContain('sendWebsiteAssistantConversationStartedNotification')
   })
 
   it('serves transcripts through an authenticated contact-scoped route', () => {

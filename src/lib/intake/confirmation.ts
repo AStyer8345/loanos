@@ -12,3 +12,13 @@ export function confirmationHtml(firstName: string) {
  '<p>Talk soon,<br><strong>Adam Styer</strong><br>Kyber Mortgage Corporation dba HyperSmart Home Loans<br>NMLS #513013<br>(512) 956-6010<br>adam.styer@hypersmart.loan</p>'+
  '<p style="font-size: 11px; color: #888;">Kyber Mortgage Corporation dba HyperSmart Home Loans | NMLS #2653540 | Adam Styer NMLS #513013 | Licensed Mortgage Broker in Texas | 9050 N. Capital of Texas Hwy, Ste 390, Austin, Texas 78759</p></div>'
 }
+
+// Existing approved assistant acknowledgement, retained for chat inquiries.
+export function assistantConfirmationHtml(firstName: string) {
+ return `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#172033;max-width:620px">
+ <p>Hi ${escapeHtml(firstName)},</p>
+ <p>Thanks for reaching out. Adam or someone on his team will contact you as soon as possible.</p>
+ <p>If you’d like, you can also text Adam at <a href="sms:15129566010">(512) 956-6010</a>.</p>
+ <p>— Adam Styer<br>NMLS #513013</p>
+ <p style="font-size:12px;color:#687386">This confirms that your contact request was received. It is not a loan approval or commitment.</p></div>`
+}

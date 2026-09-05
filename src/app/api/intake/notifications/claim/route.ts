@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateAgentSecret } from '@/lib/auth/validateAgentSecret'
 import { decryptInquiry, type CipherPayload } from '@/lib/intake/inquiry'
 import { intakeOrganization } from '@/lib/intake/server'
-import { confirmationHtml } from '@/lib/intake/confirmation'
+import { confirmationHtml, assistantConfirmationHtml } from '@/lib/intake/confirmation'
 export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
  const authError=validateAgentSecret(req); if(authError)return authError
@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
     const link=i.contact_id?`${url}/dashboard/contacts/${i.contact_id}`:`${url}/dashboard?inquiry=${i.id}`
     const content=[`New inquiry: ${name}`,`Email: ${p.email||'Not provided'}`,`Phone: ${p.phone||'Not provided'}`,`Source: ${i.source}`,`Page: ${i.source_page||'Not recorded'}`,`Referral: ${i.referral_partner||'Not recorded'}`,`Purpose: ${i.purpose||'Not specified'}`,`Owner: ${owner.full_name||owner.email}`,`Next action: ${i.match_state==='needs_review'?'Review identity match before contacting':'Review inquiry, contact the person and record next action'}`,`LoanOS: ${link}`,`Inquiry: ${i.id}`].join('\n')
     messages.push({outbox_id:row.id,inquiry_id:i.id,kind:row.kind,
-     message:{subject:row.kind==='owner_alert'?`${i.is_test?'[INTERNAL TEST] ':''}New inquiry — ${name} [${i.id.slice(0,8)}]`:'Got your info — Adam Styer Mortgage',
-      body:{contentType:row.kind==='owner_alert'?'Text':'HTML',content:row.kind==='owner_alert'?content:confirmationHtml(String(p.first_name||''))},
+     message:{subject:row.kind==='owner_alert'?`${i.is_test?'[INTERNAL TEST] ':''}New inquiry — ${name} [${i.id.slice(0,8)}]`:i.form_name==='website_assistant'?`We received your message, ${String(p.first_name||'')}`:'Got your info — Adam Styer Mortgage',
+      body:{contentType:row.kind==='owner_alert'?'Text':'HTML',content:row.kind==='owner_alert'?content:i.form_name==='website_assistant'?assistantConfirmationHtml(String(p.first_name||'')):confirmationHtml(String(p.first_name||''))},
       toRecipients:[{emailAddress:{address:row.kind==='owner_alert'?owner.email:String(p.email)}}],
       internetMessageHeaders:[{name:'X-LoanOS-Inquiry-ID',value:i.id},{name:'X-LoanOS-Outbox-ID',value:row.id},{name:'X-LoanOS-Message-Class',value:row.kind}]}})
    } catch {

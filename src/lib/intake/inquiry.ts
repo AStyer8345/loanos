@@ -21,12 +21,13 @@ export function normalizeInquiry(raw: Record<string, unknown>) {
   const occurred = value(raw.created_at || raw.received_at)
   const received_at = occurred && Number.isFinite(Date.parse(occurred)) && Date.parse(occurred) <= Date.now() + 60_000 ? new Date(occurred).toISOString() : new Date().toISOString()
   const input = { email, phone, first_name, last_name, source_page, form_name,
+    parent_inquiry_id: value(data.parent_inquiry_id || raw.parent_inquiry_id, 200) || null,
     purpose: value(data.loan_goal || data.loanGoal || data.loan_type || data.loan_purpose, 200),
     source: value(data.first_touch_source || data.lead_source || data.source, 200) || 'Website',
     referral_partner: value(data.referred_by || data.referral_partner || data.partner_name, 200) || null,
     received_at, first_touch: firstTouch,
     provenance: { transport: raw.id ? 'netlify_form' : 'website_function', source_id: value(raw.id,200) || key },
-    suppress_confirmation: form_name === 'qualification-followup' || form_name === 'notification-backup',
+    suppress_confirmation: ['qualification-followup','quick-quote-followup','notification-backup'].includes(form_name),
   }
   // Stable identity fields are common to both transports; additional source data
   // remains in the encrypted original. Reusing an ID for another person is held.

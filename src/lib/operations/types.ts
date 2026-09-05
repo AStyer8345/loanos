@@ -182,6 +182,7 @@ export type Filters = {
     from: string;
     to: string;
     includeHidden?: boolean;
+    attention?: string;
 };
 export const ALL_FILTERS: Filters = { owner: 'all', source: 'all', stage: 'all', query: '', from: '', to: '' };
 export type Row = {
@@ -214,4 +215,8 @@ export type Row = {
     hidden: boolean;
     preference: Preference | null;
     review: boolean;
+    stageSince?: string | null;
+    stageDays?: number | null;
+    deadlineRisk?: boolean;
+    exceptionReasons?: string[];
 };

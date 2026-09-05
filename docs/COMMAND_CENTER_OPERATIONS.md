@@ -8,7 +8,7 @@ The dashboard and the existing Lead Desk use the same organization-scoped operat
 
 The snapshot loads complete paged results and fails closed if any required source is unavailable. All data queries include the organization filter. Inquiry ciphertext remains inaccessible to browser database roles: the server first obtains authorized IDs through RLS, then reads only those encrypted payloads within the same organization and returns minimal identity and attribution fields. Message details are loaded on demand after checking the linked contact or loan. Neither raw financial questionnaires nor document bodies are included in the snapshot.
 
-The Lead Desk requires sign-in and forwards the user's bearer token to the fixed LoanOS origin. It holds no service credential. Its former anonymous D1 read/write endpoints are retired; saved D1 records remain preserved.
+The Lead Desk uses the existing LoanOS account sign-in and forwards the user's bearer token to the fixed LoanOS origin. It holds no service credential. Its former anonymous D1 read/write endpoints are retired; saved D1 records remain preserved.
 
 ## Editing and ownership
 
@@ -26,6 +26,12 @@ The historical Lead Desk migration preserved every saved edit and retained ambig
 - ARIVE evidence backfill reads explicit event dates, preserves date-only precision and does not mutate loan terms or financial fields. Scheduled closing dates are not closing or funding evidence.
 
 All selected-result totals follow owner, source, stage, search and applicable date filters. Source health distinguishes page load time from successful source synchronization.
+
+## Operational exceptions and comparisons
+
+Today contains borrower/loan-linked tasks, saved priorities and computed exceptions across active in-process loans. Past/near lock or closing dates are verification prompts; they never change loan status or create thousands of tasks. Existing loan tasks carry the exception without duplicating the row. General unlinked tasks remain accessible in a secondary expandable list. Attention filters distinguish explicit LO escalation/deadline risk, routine work and waiting states.
+
+Stage age requires a dated event for the exact current stage. Underwriting has no fabricated start date from preapproval/import timestamps. Funded-period volume and gross use distinct loans with source-dated funding events. Cohort comparisons support source, originating page, referral partner, owner and product; unknown attribution remains visible. Revenue exposed to a recorded deadline is not a modeled loss or close probability.
 
 ## Onboarding boundary
 

@@ -18,13 +18,13 @@ export async function GET(req: Request) {
         string,
         string?
     ]> = {
-        members: ['profiles', 'id,full_name,email,role'], contacts: ['contacts', 'id,first_name,last_name,email,phone,stage,lead_source,source_page,operational_owner_id'],
+        members: ['profiles', 'id,full_name,email,role'], contacts: ['contacts', 'id,first_name,last_name,email,phone,stage,lead_source,source_page,operational_owner_id,notes,referred_by,referral_type,referred_by_contact_id,referral_source_notes'],
         loans: ['loans', 'id,contact_id,borrower_first_name,borrower_last_name,loan_name,loan_number,arive_loan_id,status,loan_amount,loan_type,loan_purpose,loan_program,estimated_closing_date,closing_date,rate_lock_expiration,operational_owner_id,processor_name,processor_email,synced_at'],
         inquiries: ['inquiries', 'id,contact_id,owner_id,task_id,received_at,source,source_page,referral_partner,purpose,form_name,legitimacy,is_test,match_state,review_reason,parent_inquiry_id,provenance,first_touch'],
         tasks: ['todo_items', 'id,title,text,description,status,is_complete,assigned_to,related_contact_id,related_loan_id,priority,due_at,snoozed_until,follow_up_reason,source,source_key,created_at'],
         milestones: ['opportunity_milestones', 'id,inquiry_id,contact_id,loan_id,milestone,occurred_at,recorded_at,source,source_event_id,source_url,evidence,voided_at,supersedes_id,outcome_reason'],
         compensation: ['loan_compensation', 'loan_id,gross_source,gross_comp,net_comp,payout_status', 'loan_id'],
-        preferences: ['lead_desk_preferences', 'id,legacy_key,contact_id,inquiry_id,status,notes,priority_follow_up,amount_note,product_note,hidden,source_updated_at,updated_at,match_state,provenance'],
+        preferences: ['lead_desk_preferences', 'id,legacy_key,contact_id,inquiry_id,status,notes,priority_follow_up,amount_note,product_note,hidden,source_updated_at,updated_at,match_state,provenance,reporting_source,referral_name,next_action'],
         activity: ['activity_log', 'id,contact_id,loan_id,type,action,occurred_at,summary,external_id'],
         outbound: ['communication_events', 'id,contact_id,occurred_at,event_key,source,match_state'],
         health: ['communication_source_health', 'source,status,last_success_at,last_event_at,last_attempt_at,detail,inbound,outbound', 'source'],

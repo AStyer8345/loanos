@@ -1,3 +1,7 @@
+## 2026-09-06 — Team compensation privacy
+
+Added a restricted team workspace with per-user compensation estimates, shared operational records/notes, safe exports, and controlled contact/lead edits. Added private membership reservations bound to auth IDs, a database request gate, restrictive table/Storage policies, and a complete application route boundary. Preserved owner financial records and historical notes. Added invitation fragment handling and privacy regression tests. See docs/TEAM_COMPENSATION_PRIVACY.md for verification and administration.
+
 ## 2026-09-05 — Individual loan and contact record layout
 
 Redesigned the pages opened by clicking a record with cream and green styling, larger headings, readable labels, normal page scrolling and responsive sections. Loan notes lead the overview; Full loan details retains the existing field editors. Contact information leads its overview and the notes sidebar opens by default, showing both saved notes and legacy imported notes. Linked loan cards include history. The loan header uses a 2% planning estimate while stored commission remains editable in Financials; funded records no longer display a closing countdown.

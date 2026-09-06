@@ -1,3 +1,7 @@
+## 2026-09-06 — Private team compensation
+
+Restricted staff access now has a dedicated `/team` workspace and private per-user compensation rates. Raw tables, owner reports, historical private notes, source documents and the owner assistant are denied at application and database boundaries. Team notes are explicitly shared; Adam can open them from More → Team workspace. Tiffany is configured for 25 bps after release validation; the invitation state is recorded in the task handoff. See `docs/TEAM_COMPENSATION_PRIVACY.md`. Existing owner compensation remains unchanged.
+
 ## 2026-09-06 — ARIVE / Lead Desk parity
 
 Production database repair enrolls active ARIVE applications in both Lead Desk clients through the existing facts table, recovers missing local loan copies, and normalizes amount totals for incoming new-loan/status events. Backfill added 31 active applications and seven loan copies; refreshed 73 relevant ARIVE records. All 11 preapprovals are represented, with ten usable amounts; Satish's two-file exception remains. Original saved notes/preferences and contacts were preserved. Verified zero loan/fact amount or stage mismatches. Full-list scheduled recovery and a native ARIVE Lead event relay remain unfinished because Zapier editor access was denied by the browser's admin-policy verification. See `docs/ARIVE_DESK_PARITY.md` for evidence and scope.

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 import { OutreachChatProvider } from '@/components/outreach/OutreachChatContext'
-import LoanOSChat from '@/components/crm/LoanOSChat'
+import WorkspaceChat from '@/components/WorkspaceChat'
 import { getBranding } from '@/lib/branding/getBranding'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
@@ -37,7 +37,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <OutreachChatProvider>
             {children}
-            <LoanOSChat />
+            <WorkspaceChat />
           </OutreachChatProvider>
         </ThemeProvider>
       </body>

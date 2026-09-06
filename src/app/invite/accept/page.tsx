@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { readStaffAccess } from '@/lib/staff-access'
 import { Loader2, Lock, CheckCircle, AlertCircle } from 'lucide-react'
 
 /**
@@ -18,7 +19,7 @@ import { Loader2, Lock, CheckCircle, AlertCircle } from 'lucide-react'
  */
 export default function InviteAcceptPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [email, setEmail] = useState<string | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
   const [password, setPassword] = useState('')
@@ -29,15 +30,22 @@ export default function InviteAcceptPage() {
 
   useEffect(() => {
     let cancelled = false
-    supabase.auth.getUser().then(({ data }) => {
-      if (cancelled) return
-      if (!data.user) {
-        router.replace('/login?error=invite_expired')
-        return
+    async function initialize() {
+      // Admin invitations can return an implicit token fragment without a PKCE code.
+      const fragment = new URLSearchParams(window.location.hash.slice(1))
+      const access_token = fragment.get('access_token'), refresh_token = fragment.get('refresh_token')
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+        window.history.replaceState(null, '', window.location.pathname)
+        if (error) throw error
       }
+      const { data } = await supabase.auth.getUser()
+      if (cancelled) return
+      if (!data.user) { router.replace('/?error=invite_expired'); return }
       setEmail(data.user.email ?? null)
       setCheckingSession(false)
-    })
+    }
+    void initialize().catch(() => { if (!cancelled) { setError('This invitation could not be verified. Please request a new link.'); setCheckingSession(false) } })
     return () => { cancelled = true }
   }, [router, supabase])
 
@@ -61,7 +69,7 @@ export default function InviteAcceptPage() {
       setDone(true)
       // Short pause so user sees the success state, then wizard
       setTimeout(() => {
-        router.push('/dashboard/getting-started')
+        void readStaffAccess(supabase).then(access => { router.push(access ? '/team' : '/dashboard/getting-started'); router.refresh() }).catch(() => router.push('/team'))
         router.refresh()
       }, 800)
     } catch (err) {
@@ -100,7 +108,7 @@ export default function InviteAcceptPage() {
         {done ? (
           <div className="flex items-center gap-2 text-sm text-green-400 bg-green-900/20 border border-green-800/40 rounded-lg px-4 py-3">
             <CheckCircle className="w-5 h-5 shrink-0" />
-            Password set — redirecting to setup...
+            Password set — opening your workspace...
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

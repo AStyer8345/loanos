@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { staffBoundary } from '@/lib/staff-boundary'
 import { updateSession } from '@/lib/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceRoleClient } from '@supabase/supabase-js'
@@ -37,6 +38,14 @@ function isProfessionalUi(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const restricted = await staffBoundary(request)
+  if (restricted) return restricted
+  // Keep the established anonymous/webhook behavior after the staff gate.
+  const staffPath = request.nextUrl.pathname
+  if (/\.(?:svg|png|jpg|jpeg|gif|webp)$/.test(staffPath)) return NextResponse.next({ request })
+  if (staffPath === '/api/team' || staffPath === '/invite/accept' || /^\/(?:api\/(?:agents\/|intake\/|activity$|contacts\/web-lead$|marketing\/log-social-post$|drip\/run$|v1\/website-assistant\/|share\/)|onboarding(?:\/|$)|share\/)/.test(staffPath)) {
+    return NextResponse.next({ request })
+  }
   // The shared Lead Desk uses a normal Supabase user bearer token. These
   // routes validate that token (or a LoanOS cookie) and organization membership
   // themselves, and must return JSON 401s instead of the page-login redirect.
@@ -166,7 +175,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/agents/.*|api/intake/.*|api/activity|api/contacts/web-lead|api/marketing/log-social-post|api/drip/run|api/v1/website-assistant/.*|onboarding|share/.*|api/share/.*).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

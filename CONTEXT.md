@@ -1,3 +1,7 @@
+## 2026-09-06 — ARIVE / Lead Desk parity
+
+Production database repair enrolls active ARIVE applications in both Lead Desk clients through the existing facts table, recovers missing local loan copies, and normalizes amount totals for incoming new-loan/status events. Backfill added 31 active applications and seven loan copies; refreshed 73 relevant ARIVE records. All 11 preapprovals are represented, with ten usable amounts; Satish's two-file exception remains. Original saved notes/preferences and contacts were preserved. Verified zero loan/fact amount or stage mismatches. Full-list scheduled recovery and a native ARIVE Lead event relay remain unfinished because Zapier editor access was denied by the browser's admin-policy verification. See `docs/ARIVE_DESK_PARITY.md` for evidence and scope.
+
 ## 2026-09-05 — Individual loan and contact records
 
 The pages opened by clicking a loan or contact now match the Lead Desk: cream/green styling, clear identity and referral information, readable sections and normal page scrolling. Loan notes appear before the overview, with full editable fields in a disclosure. Contact notes open by default and include legacy imported notes. The loan header shows the requested 2% planning estimate; stored commission stays in Financials. This is a UI change, with no automatic record writes or messaging.

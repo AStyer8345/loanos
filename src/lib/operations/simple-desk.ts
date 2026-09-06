@@ -30,6 +30,7 @@ export function planningAmount(value:string|null|undefined):number|null {
 }
 export function reportingSource(source:string,referralType='',isWebsite=false):ReportingSource {
  const text=source+' '+referralType;
+ if(/^Direct email$/i.test(source))return 'Other';
  if(/financial|advisor|adviser|wealth/i.test(text))return 'Financial Advisor Referral';
  if(/realtor|real estate|real-estate|agent referral/i.test(text))return 'Realtor Referral';
  if(isWebsite || /chatgpt|openai|\bai\b|website|web lead|google|bing|organic|search|online/i.test(text))return 'AI';
